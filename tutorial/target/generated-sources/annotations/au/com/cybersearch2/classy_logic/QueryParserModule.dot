@@ -1,0 +1,16 @@
+digraph G1 {
+  concentrate = true;
+  DatabaseAdminImpl -> ResourceEnvironment;
+  n2 [label="au.com.cybersearch2.classyjpa.persist.PersistenceFactory"];
+  EntityTransactionImpl -> n2;
+  InWords -> ProviderManager;
+  NativeScriptDatabaseWork -> ResourceEnvironment;
+  n3 [label="ParserAssembler$ExternalAxiomSource"];
+  n3 -> ProviderManager;
+  ParserResources -> ResourceEnvironment;
+  PersistenceContainer -> n2;
+  RegexGroups -> ProviderManager;
+  WorkerRunnable -> ThreadHelper;
+  n4 [label="members/au.com.cybersearch2.classyjpa.persist.PersistenceFactory"];
+  n4 -> ResourceEnvironment;
+}

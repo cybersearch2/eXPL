@@ -1,0 +1,1346 @@
+options 
+{
+  LOOKAHEAD = 1;
+  CHOICE_AMBIGUITY_CHECK = 2;
+  OTHER_AMBIGUITY_CHECK = 1;
+  STATIC = false;
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  ERROR_REPORTING = true;
+  JAVA_UNICODE_ESCAPE = false;
+  UNICODE_INPUT = false;
+  IGNORE_CASE = false;
+  USER_TOKEN_MANAGER = false;
+  USER_CHAR_STREAM = false;
+  BUILD_PARSER = true;
+  BUILD_TOKEN_MANAGER = true;
+  SANITY_CHECK = true;
+  FORCE_LA_CHECK = false;
+}
+
+PARSER_BEGIN(QueryParser)
+import java.io.InputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.pattern.KeyName;
+import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.query.QuerySpec;
+import au.com.cybersearch2.classy_logic.query.QueryType;
+import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
+import au.com.cybersearch2.classy_logic.compile.Group;
+import au.com.cybersearch2.classy_logic.compile.OperandMap;
+import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.compile.VariableType;
+import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
+import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
+import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
+import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.expression.NullOperand;
+import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.RegExOperand;
+import au.com.cybersearch2.classy_logic.expression.Evaluator;
+import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
+import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
+import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
+import au.com.cybersearch2.classy_logic.list.ArrayItemList;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.ListLength;
+import au.com.cybersearch2.classy_logic.terms.StringTerm;
+import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
+import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
+import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
+import au.com.cybersearch2.classy_logic.helper.Null;
+
+
+
+/** main */
+public class QueryParser 
+{
+  
+  /** 
+   * Main entry point. 
+   * @throws ParseException
+   * @throws LogicEngineException 
+   */
+  public static void main(String args[]) throws ParseException
+  {
+    QueryParser parser = new QueryParser(System.in);
+    QueryProgram queryProgram = new QueryProgram();
+    parser.input(queryProgram);
+  }
+
+
+  /** 
+   * Parses a query input stream.
+   *  @param inputStream  InputStream
+   *  @throws ParseException if the parsing fails
+   */
+  public QueryProgram parse(InputStream inputStream) throws ParseException
+  {
+    ReInit(inputStream);
+    QueryProgram queryProgram = new QueryProgram();
+    input(queryProgram);
+    return queryProgram;
+   }
+
+
+  public void includeResource(String resourceName, QueryProgram queryProgram) throws ParseException
+  {
+     if (resourceName.length() < 3)
+        throw new ParseException("Include resourceName \"\" is invalid");
+     ParserResources parserResources = new ParserResources(queryProgram);
+     try
+     {
+         parserResources.includeResource(resourceName.substring(1, resourceName.length() - 1));
+     }
+     catch (IOException e)
+     {
+         throw new ParseException(e.getMessage());
+     }
+  } 
+  
+}
+
+PARSER_END(QueryParser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| < "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+}
+
+TOKEN :
+{
+  < INTEGER: "integer" >
+| < DOUBLE: "double" >
+| < BOOLEAN: "boolean" >
+| < STRING: "string" >
+| < TEMPLATE: "template" >
+| < AXIOM: "axiom" >
+| < REGEX: "regex" >
+| < BIGDECIMAL: "decimal" >
+| < INCLUDE: "include" >
+| < SCOPE: "scope" >
+| < QUERY: "query" >
+| < CALC: "calc" >
+| < LIST: "list" >
+| < LENGTH: "length" >
+| < TERM: "term" >
+| < RESOURCE: "resource" >
+| < CURRENCY: "currency" >
+| < FORMAT: "format" >
+| < LOCAL: "local" >
+| < CHOICE: "choice" >
+| < PARAMETER: "parameter" >
+}
+
+/* LITERALS */
+
+TOKEN :
+{
+  < INTEGER_LITERAL:
+        <DECIMAL_LITERAL> (["l","L"])?
+      | <HEX_LITERAL> (["l","L"])?
+      | "0"
+  >
+|
+  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+|
+  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|
+  < FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+  >
+|
+  < FORMATED_FLOATING_POINT_LITERAL:
+        ((["0"-"9"])+ (","))+ (["0"-"9"])+ "." (["0"-"9"])*
+  >
+|
+  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+|
+  < STRING_LITERAL:
+      "\""
+      (     
+        (~["\"","\\","\n","\r"])
+        | 
+        ("\\" ( ["n","t","b","r","f","\\","'","\"","."] ) )
+      )*
+      "\""
+  >
+|
+  < TRUE: "true" >
+|
+  < FALSE: "false" >
+|
+   <NULL: "null" >
+|
+   <NAN: "NaN" >
+}
+
+/* IDENTIFIERS */
+
+TOKEN :
+{
+  < IDENTIFIER: ["a"-"z","A"-"Z"] (["_","a"-"z","A"-"Z","0"-"9"])* >
+}
+
+
+/* SEPARATORS */
+
+TOKEN :
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+}
+
+/* OPERATORS */
+
+TOKEN :
+{
+  < ASSIGN: "=" >
+| < GT: ">" >
+| < LT: "<" >
+| < BANG: "!" >
+| < COLON: ":" >
+| < EQ: "==" >
+| < LE: "<=" >
+| < GE: ">=" >
+| < NE: "!=" >
+| < SC_OR: "||" >
+| < SC_AND: "&&" >
+| < INCR: "++" >
+| < DECR: "--" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < STAR: "*" >
+| < SLASH: "/" >
+| < BIT_AND: "&" >
+| < BIT_OR: "|" >
+| < XOR: "^" >
+| < REM: "%" >
+| < PLUSASSIGN: "+=" >
+| < MINUSASSIGN: "-=" >
+| < STARASSIGN: "*=" >
+| < SLASHASSIGN: "/=" >
+| < ANDASSIGN: "&=" >
+| < ORASSIGN: "|=" >
+| < XORASSIGN: "^=" >
+| < REMASSIGN: "%=" >
+}
+
+/** Root production. */
+void input(QueryProgram queryProgram) :
+{
+}
+{
+  ( Statement(queryProgram, queryProgram.getGlobalScope()) )+
+  ( Queries(queryProgram.getGlobalScope()) | ScopeDeclaration(queryProgram) )* 
+  <EOF>
+}
+
+void ScopeDeclaration(QueryProgram queryProgram) :
+{
+  Scope scope;
+}
+{
+  <SCOPE> scope=Scope(queryProgram.getGlobalScope()) 
+  "{" 
+     ( Statement(queryProgram, scope) )* ( Queries(scope) )+
+  "}" 
+  {
+    queryProgram.addScope(scope);  
+  }
+}
+
+Scope Scope(Scope globalScope) :
+{
+  Token scopeToken;
+  Map<String, Object> properties = new HashMap<String, Object>();
+}
+{
+   scopeToken = <IDENTIFIER>  [ "(" InitialiserList(properties) ")" ]
+   {
+      return new Scope(globalScope, scopeToken.image , properties);
+   }
+}
+
+void Queries(Scope scope) :
+{
+    QuerySpec querySpec;
+}
+{  
+  <QUERY> querySpec=Query() QueryDeclaration(querySpec) ( ">>" QueryDeclaration(querySpec.chain()) )* ";"
+  {
+      scope.addQuerySpec(querySpec);
+  }  
+}
+
+void QueryDeclaration(QuerySpec querySpec) :
+{
+}
+{
+   "(" 
+      ( 
+        KeyName(querySpec)
+      )
+      (
+        "," 
+        (
+          KeyName(querySpec)
+        )
+      )* ")" 
+    {
+    }
+    |
+    CalculatorDeclaration(querySpec)
+}
+
+void CalculatorDeclaration(QuerySpec querySpec) :
+{
+   String axiomKey = null;
+   String templateName;
+   Map<String, Object> properties = new HashMap<String, Object>();
+}
+{
+   <CALC> "(" 
+      ( 
+        (LOOKAHEAD(2) axiomKey=Name() ":" )? templateName=Name() 
+      )
+   ")" ( "(" InitialiserList(properties) ")" )?
+  {
+    querySpec.addCalculator(new KeyName(axiomKey == null ? "" : axiomKey, templateName), properties);
+  }
+}
+
+
+QuerySpec Query() :
+{
+    Token queryToken;
+}
+{
+  queryToken=<IDENTIFIER>
+  {
+    return new QuerySpec(queryToken.image);
+  }    
+}
+
+void Statement(QueryProgram queryProgram, Scope scope):
+{
+  Operand var;
+  ParserAssembler parserAssembler = scope.getParserAssembler();
+}
+{
+    var=VariableDeclaration(parserAssembler) ";" 
+    {
+      parserAssembler.getOperandMap().addOperand(var);
+    }
+  | TemplateDeclaration(parserAssembler) ";" 
+  | CalculatorTemplate(parserAssembler) ";"   
+  | AxiomDeclaration(parserAssembler) ";" 
+  | ChoiceDeclaration(parserAssembler) ";"
+  | ListDeclaration(parserAssembler) ";"
+  | Include(queryProgram) ";"
+}
+
+void Include(QueryProgram queryProgram) :
+{
+  Token includeToken = null;
+}
+{
+  <INCLUDE> includeToken=<STRING_LITERAL>
+  {
+    includeResource(includeToken.image, queryProgram);
+  }
+}
+
+
+void ListDeclaration(ParserAssembler parserAssembler) :
+{
+    Token keywordToken;
+    Token nameToken;
+    VariableType varType = null;
+    String axiomKey = null;
+    AxiomProvider axiomProvider = null;
+}
+{
+  ( keywordToken=<LIST> | keywordToken=<LOCAL> ) 
+  [ "<" varType=Type(parserAssembler.getOperandMap()) ">" ] 
+  nameToken=<IDENTIFIER> 
+  [ "(" axiomKey=Name()  ( ":" axiomProvider=ResourceDeclaration(axiomKey, parserAssembler) )? ")" ]
+  {
+    String listName = nameToken.image;
+    if ((varType == null) && (axiomKey == null))
+        throw new ParseException("Invalid declaration for list \"" + listName + "\". Missing type or axiom name.");
+    if ((varType != null) && (keywordToken.kind == QueryParserConstants.LOCAL))
+        throw new ParseException("Invalid declaration for local \"" + listName + "\". Type in declaration not allowed.");
+    if (varType == null)
+        varType = keywordToken.kind == QueryParserConstants.LIST ? new VariableType(OperandType.AXIOM) : new VariableType(OperandType.LOCAL);
+    if (axiomKey != null)
+        varType.setProperty(VariableType.AXIOM_KEY, axiomKey);
+    ItemList<?> ItemList = varType.getItemListInstance(parserAssembler, listName);
+    parserAssembler.getOperandMap().addItemList(listName, ItemList);
+    if (axiomProvider != null)
+        parserAssembler.registerAxiomListener(axiomKey, axiomProvider.getAxiomListener());
+  }
+}
+
+VariableType Type(OperandMap operandMap) :
+{
+    Token qualifierLit = null;
+    Token qualifierId = null;
+}
+{
+    <INTEGER>
+    { 
+      return new VariableType(OperandType.INTEGER); 
+    }
+|   <BOOLEAN>
+    { 
+      return new VariableType(OperandType.BOOLEAN); 
+    }
+|   <DOUBLE>
+    { 
+      return new VariableType(OperandType.DOUBLE); 
+    }
+|   <STRING>
+    { 
+      return new VariableType(OperandType.STRING); 
+    }
+|   <BIGDECIMAL>
+    { 
+      return new VariableType(OperandType.DECIMAL); 
+    }
+|   <TERM>
+    { 
+      return new VariableType(OperandType.TERM); 
+    }
+|   <CURRENCY> ( "(" ( qualifierLit=<STRING_LITERAL> | qualifierId=<IDENTIFIER> ) ")" )?
+    { 
+      VariableType varType = new VariableType(OperandType.CURRENCY);
+      if (qualifierLit != null)
+         varType.setProperty(VariableType.QUALIFIER_STRING, qualifierLit.image.substring(1, qualifierLit.image.length() - 1));
+      else if (qualifierId != null)
+         varType.setProperty(VariableType.QUALIFIER_OPERAND, operandMap.addOperand(qualifierId.image, null));
+      return varType; 
+    }
+
+}
+
+void TemplateDeclaration(ParserAssembler parserAssembler) :
+{
+    String templateName;
+}
+{  
+    <TEMPLATE> templateName=Template(parserAssembler) "(" 
+      ( 
+        TemplateExpression(templateName, parserAssembler)
+      )
+      (
+        "," 
+        (
+          TemplateExpression(templateName, parserAssembler)
+        )
+      )* ")" 
+    {
+    }
+}
+
+String Template(ParserAssembler parserAssembler) :
+{
+    Token templateToken;
+}
+{
+  templateToken=<IDENTIFIER>
+  { 
+    parserAssembler.createTemplate(templateToken.image);
+    return templateToken.image; 
+  }
+}
+
+void CalculatorTemplate(ParserAssembler parserAssembler) :
+{
+    String templateName;
+    Map<String, Object> properties = new HashMap<String, Object>();
+    int loopNumber = 0;
+}
+{  
+    <CALC> templateName=Template(parserAssembler) "(" 
+      ( 
+        CalculatorExpression(loopNumber, templateName, templateName, parserAssembler)
+      )
+      (
+        "," 
+        (
+          CalculatorExpression(loopNumber, templateName, templateName, parserAssembler)
+        )
+      )* ")" [ "(" InitialiserList(properties) ")" ]
+    {
+      if (properties.size() > 0)
+          parserAssembler.addTemplate(templateName, properties);
+    }
+}
+
+void InitialiserList(Map<String, Object> properties) :
+{
+}
+{
+    InitialiserDeclaration(properties)
+    ("," InitialiserDeclaration(properties) )* 
+}
+
+void InitialiserDeclaration(Map<String, Object> properties) :
+{
+    String name;
+    Parameter param;
+}
+{
+  name=Name() "=" param=LiteralTerm()
+  {
+     properties.put(name, param.getValue());
+  }
+}
+
+Operand VariableDeclaration(ParserAssembler parserAssembler) :
+{
+    Token nameToken;
+    VariableType varType = null;
+    Operand index = null;
+    Operand expression = null;
+    OperandMap operandMap = parserAssembler.getOperandMap();
+}
+{
+  ( varType=Type(operandMap) )? nameToken=<IDENTIFIER> ( index=IndexExpression(parserAssembler) )? ( "=" expression=Expression(parserAssembler) )?
+  {
+     if (index !=null)
+         return operandMap.setListVariable(nameToken.image, index, expression);
+     if (varType == null)
+         varType = new VariableType(OperandType.NULL);
+     if (expression != null) 
+         varType.setProperty(VariableType.EXPRESSION, expression);
+     Operand operand = varType.getInstance(parserAssembler, nameToken.image);
+     operandMap.addOperand(operand);
+     return operand;
+  }
+}
+
+
+void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
+{
+    String name;
+    VariableType varType = null;
+    Operand index = null;
+    Operand var = null;
+    Token scToken = null;
+    Token assignToken = null;
+    Token regexLit = null;
+    Token regexId = null;
+    Operand expression = null;
+    Group group = null;
+    OperandMap operandMap = parserAssembler.getOperandMap();
+}
+{
+   ( varType=Type(operandMap) )? name=Name() ( index=IndexExpression(parserAssembler) )? 
+   (     
+      ( 
+        scToken=":" | scToken="?" | "=" |
+        ( assignToken=<PLUSASSIGN>
+        | assignToken=<MINUSASSIGN>
+        | assignToken=<STARASSIGN>
+        | assignToken=<SLASHASSIGN>
+        | assignToken=<ANDASSIGN>
+        | assignToken=<ORASSIGN>
+        | assignToken=<XORASSIGN>
+        | assignToken=<REMASSIGN>)
+        ) 
+      expression=Expression(parserAssembler)
+      |
+      <REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(templateName, name, parserAssembler) )? ")"
+    )?
+  {
+     if (varType == null)
+         varType = new VariableType(OperandType.NULL);
+     Operand assignExpression = (assignToken != null) ? expression : null;
+     Operand regexOp = null;
+     if (regexLit != null)
+         regexOp = new StringOperand(Term.ANONYMOUS, regexLit.image.substring(1, regexLit.image.length() - 1));
+     else if (regexId != null)
+         regexOp = operandMap.addOperand(regexId.image, null);
+     if (assignToken != null)
+         expression = null;
+     if (expression != null)
+         varType.setProperty(VariableType.EXPRESSION, expression);
+     if (index !=null)
+       var = operandMap.setListVariable(name, index, expression);
+     else if (regexOp != null)
+       var = new RegExOperand(name, regexOp, 0, group);
+     else if (scToken != null) 
+       var = new Evaluator(name, expression, (scToken.image == "?" ? "&&" : "||"));
+     else if (!operandMap.hasOperand(name))
+       var = varType.getInstance(parserAssembler, name);
+     else
+       var = operandMap.addOperand(name, expression);
+     if ((index ==null) && (!operandMap.hasOperand(name)))
+        operandMap.addOperand(var);
+     if (assignToken != null) 
+        var = new Evaluator(name, var, assignToken.image, assignExpression);
+     parserAssembler.addTemplate(templateName, var);
+  }
+}
+
+void CalculatorExpression(int loop_number, String loopName, String templateName, ParserAssembler parserAssembler) :
+{
+  Token scToken = null;
+  Operand expression = null;
+  Operand innerLoop = null;
+}
+{
+  TemplateExpression(loopName, parserAssembler)
+  |
+  ( scToken=":" | scToken="?" )? expression=Expression(parserAssembler) 
+    ( innerLoop=InnerCalculator(loop_number + 1, templateName, parserAssembler, scToken != null) )?  
+  {
+    if (scToken != null)
+      expression = new Evaluator(expression, (scToken.image == "?" ? "&&" : "||"), innerLoop);
+    parserAssembler.addTemplate(loopName, expression);
+  }
+  |
+  innerLoop=InnerCalculator(loop_number + 1, templateName, parserAssembler, false)
+  {
+    parserAssembler.addTemplate(loopName, innerLoop);
+  }
+}
+
+Operand InnerCalculator(int loop_number, String templateName, ParserAssembler parserAssembler, boolean runOnce) :
+{
+  Operand calcExpression;
+  String loopName = templateName + "." + loop_number;
+  parserAssembler.chainTemplate(templateName, loopName);
+}
+{
+  "{" 
+    CalculatorExpression(loop_number, loopName, templateName, parserAssembler)
+    ("," 
+        CalculatorExpression(loop_number, loopName, templateName, parserAssembler)
+    )* 
+  "}"
+  {
+    return new LoopEvaluator(parserAssembler.getTemplate(loopName), runOnce);
+  }
+}
+
+
+
+Group GroupDeclaration(String template, String name, ParserAssembler parserAssembler) :
+{
+  Group group = new Group(name);
+}
+{
+  "{" Group(group, template, name, parserAssembler) ("," Group(group, template, name, parserAssembler) )* "}"
+  {
+    return group;
+  }
+}
+
+ 
+void Group(Group group, String template, String name, ParserAssembler parserAssembler) :
+{
+  Token groupToken;
+}
+{
+  groupToken=<IDENTIFIER> 
+  {
+    Operand var = parserAssembler.getOperandMap().addOperand(groupToken.image, null);   
+    parserAssembler.addTemplate(template, var);
+    group.addGroup(var);
+  }
+}
+
+void AxiomDeclaration(ParserAssembler parserAssembler) :
+{
+    String axiomName;
+}
+{
+  <AXIOM> axiomName=Axiom(parserAssembler) [ "(" TermName(axiomName, parserAssembler) ("," TermName(axiomName, parserAssembler) )*  ")" ] 
+                                           ":"  
+                                           ( ( AxiomItem(axiomName, parserAssembler) ( "," AxiomItem(axiomName, parserAssembler) )* ) 
+                                             |
+                                             ResourceDeclaration(axiomName, parserAssembler)
+                                             |
+                                             ParameterDeclaration(axiomName, parserAssembler) )
+} 
+
+void ChoiceDeclaration(ParserAssembler parserAssembler) :
+{
+    String axiomName;
+    int selection = 0;
+}
+{
+  <CHOICE> axiomName=Choice(parserAssembler) "(" TermName(axiomName, parserAssembler) ("," TermName(axiomName, parserAssembler) )*  ")" 
+                                             ":"  
+                                             ChoiceItem(selection, axiomName, parserAssembler) ( "," ChoiceItem(++selection, axiomName, parserAssembler) )*  
+  {
+    List<String> termNameList = parserAssembler.getAxiomTermNameList(axiomName);
+    for (String termName: termNameList)
+        parserAssembler.getOperandMap().addOperand(termName, null);
+  }
+} 
+
+String Axiom(ParserAssembler parserAssembler) :
+{
+    Token axiomToken;
+}
+{
+  axiomToken=<IDENTIFIER>
+  { 
+    parserAssembler.createAxiom(axiomToken.image);
+    return axiomToken.image; 
+  }
+}
+
+String Choice(ParserAssembler parserAssembler) :
+{
+    Token choiceToken;
+}
+{
+  choiceToken=<IDENTIFIER>
+  { 
+    String name = choiceToken.image;
+    parserAssembler.createAxiom(name);
+    Template template = parserAssembler.createTemplate(name);
+    template.setChoice(true);
+    return name; 
+  }
+}
+ 
+void TermName(String axiomName, ParserAssembler parserAssembler) :
+{
+    Token nameToken;
+}
+{
+    nameToken=<IDENTIFIER>
+    {
+      parserAssembler.addAxiomTermName(axiomName, nameToken.image);
+    }
+}
+
+void AxiomItem(String axiomName, ParserAssembler parserAssembler) :
+{
+}
+{
+   "(" Fact(axiomName, parserAssembler) ("," Fact(axiomName, parserAssembler) )* ")" 
+    {
+      parserAssembler.saveAxiom(axiomName);
+    }
+}
+
+void ChoiceItem(int selection, String axiomName, ParserAssembler parserAssembler) :
+{
+    Operand expression;
+    Parameter param = null;
+    parserAssembler.addAxiom(axiomName, new Parameter(Term.ANONYMOUS, new Null()));
+}
+{
+   "(" expression=Expression(parserAssembler) ("," Fact(axiomName, parserAssembler) )* ")" 
+    {
+      parserAssembler.saveAxiom(axiomName);
+      Template template = parserAssembler.getTemplate(axiomName);
+      Operand operand = new Evaluator(parserAssembler.getAxiomTermName(axiomName, 0), expression, "&&" ); 
+      parserAssembler.addTemplate(axiomName, operand);
+    }
+}
+
+AxiomProvider ResourceDeclaration(String axiomName, ParserAssembler parserAssembler) :
+{
+  Token nameToken;
+  Map<String, Object> properties = new HashMap<String, Object>();
+}
+{
+  <RESOURCE> nameToken=<STRING_LITERAL> ( "(" InitialiserList(properties) ")" )?
+  {
+    return parserAssembler.setResourceProperties(nameToken.image.substring(1, nameToken.image.length() - 1), axiomName, properties);
+  }
+}
+
+void ParameterDeclaration(String axiomName, ParserAssembler parserAssembler) :
+{
+}
+{
+  <PARAMETER>
+  {
+    parserAssembler.setParameter(axiomName);
+  }
+}
+
+void Fact(String axiomName, ParserAssembler parserAssembler) :
+{
+  Parameter param = null;
+}
+{
+  param=LiteralTerm()
+  {
+    parserAssembler.addAxiom(axiomName, param);
+  }
+  |
+  <NAN>
+  {
+    parserAssembler.addAxiom(axiomName, new DoubleTerm("NaN"));
+  }
+}
+
+String Name() :
+{
+  String name;
+  Token partToken;
+}
+{
+  partToken=<IDENTIFIER> 
+  {
+    name = partToken.image;
+  }
+  ( 
+    "." 
+    partToken=<IDENTIFIER>
+    {
+      name += ("." + partToken.image);
+    } 
+  )*
+  {
+    return name;
+  }
+}
+
+void KeyName(QuerySpec querySpec) :
+{
+  String axiomKey;
+  String templateName;
+}
+{
+  axiomKey=Name() ":" templateName=Name()
+  {
+    querySpec.addKeyName(new KeyName(axiomKey, templateName));
+  }
+}
+
+
+Operand Expression(ParserAssembler parserAssembler) :
+{
+  Operand param;
+  Token assignToken = null;
+  Operand assignOperand = null;
+}
+{
+  param=ConditionalOrExpression(parserAssembler) 
+    ( ( assignToken=<ASSIGN>
+        | assignToken=<PLUSASSIGN>
+        | assignToken=<MINUSASSIGN>
+        | assignToken=<STARASSIGN>
+        | assignToken=<SLASHASSIGN>
+        | assignToken=<ANDASSIGN>
+        | assignToken=<ORASSIGN>
+        | assignToken=<XORASSIGN>
+        | assignToken=<REMASSIGN>
+      )
+      assignOperand=Expression(parserAssembler) )?
+  {
+    if (assignOperand == null)
+      return param;
+    return new Evaluator(param, assignToken.image, assignOperand);
+  }
+}
+
+Operand ConditionalOrExpression(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0]=ConditionalAndExpression(parserAssembler)
+  ( 
+    op="||" 
+    params[1]=ConditionalAndExpression(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  } 
+}
+
+Operand ConditionalAndExpression(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0]=InclusiveOrExpression(parserAssembler)
+  ( 
+    op="&&" 
+    params[1]=InclusiveOrExpression(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
+Operand InclusiveOrExpression(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0]=ExclusiveOrExpression(parserAssembler)
+  ( 
+    op="|" 
+    params[1]=ExclusiveOrExpression(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
+Operand ExclusiveOrExpression(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0]=AndExpression(parserAssembler)
+  ( 
+    op="^" 
+    params[1]=AndExpression(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
+Operand AndExpression(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0]=EqualityExpression(parserAssembler)
+  ( 
+    op="&" 
+    params[1]=EqualityExpression(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
+Operand EqualityExpression(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0]=RelationalExpression(parserAssembler)
+  ( 
+    ( 
+    op="==" 
+    | 
+    op="!=" 
+    ) 
+    params[1]=RelationalExpression(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
+Operand RelationalExpression(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0]=AdditiveExpression(parserAssembler)
+  ( 
+    ( 
+    op="<" 
+    | 
+    op=">" 
+    |
+    op="<=" 
+    | 
+    op=">=" 
+    ) 
+    params[1]=AdditiveExpression(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
+Operand AdditiveExpression(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0]=MultiplicativeExpression(parserAssembler)
+  ( 
+    ( 
+    op="+" 
+    | 
+    op="-" 
+    ) 
+    params[1]=MultiplicativeExpression(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
+Operand MultiplicativeExpression(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0]=UnaryExpression(parserAssembler)
+  ( 
+    ( 
+    op="*" 
+    | 
+    op="/" 
+    | 
+    op="%" 
+    ) 
+    params[1]=UnaryExpression(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  } 
+}
+
+Operand UnaryExpression(ParserAssembler parserAssembler) :
+{
+  Operand param;
+  boolean plus = false;
+  boolean minus = false;
+  boolean tilde = false;
+}
+{
+  ( 
+    "+"
+  {
+    plus = true;
+  }
+  | 
+    "-"
+  {
+    minus = true;
+  }
+  |
+    "~"
+  {
+    tilde = true;
+  }
+  ) 
+  param=UnaryExpression(parserAssembler)
+  {
+    if (plus)
+      return new Evaluator("+", param);
+    else if (minus)
+      return new Evaluator("-", param);
+    else if (tilde)
+      return new Evaluator("~", param);
+    return param;
+  }
+  |
+  param=PreIncrementExpression(parserAssembler)
+  {
+    return param;
+  }
+  |
+  param=PreDecrementExpression(parserAssembler)
+  {
+    return param;
+  }
+  |
+  param=UnaryExpressionNotPlusMinus(parserAssembler)
+  {
+    return param;
+  }
+}
+
+Operand PreIncrementExpression(ParserAssembler parserAssembler) :
+{
+  Operand param;
+}
+{
+  "++" param=PrimaryExpression(parserAssembler)
+  {
+    return new Evaluator("++", param);
+  }
+}
+
+Operand PreDecrementExpression(ParserAssembler parserAssembler) :
+{
+  Operand param;
+}
+{
+  "--" param=PrimaryExpression(parserAssembler)
+  {
+    return new Evaluator("--", param);
+  }
+}
+
+Operand UnaryExpressionNotPlusMinus(ParserAssembler parserAssembler) :
+{
+  Operand param;
+}
+{
+  "!" param=UnaryExpression(parserAssembler)
+  {
+    return new Evaluator("!", param);
+  }
+  |
+  param=PostfixExpression(parserAssembler)  
+  {
+    return param;
+  }
+}
+
+Operand PostfixExpression(ParserAssembler parserAssembler) :
+{
+  Operand param;
+  boolean incr = false;
+  boolean decr = false;
+}
+{
+  param=PrimaryExpression(parserAssembler)
+  [ 
+    "++"
+  {
+    incr = true;
+  }
+  | 
+    "--"
+  {
+    decr = true; 
+  }
+  ]
+  {
+    if (incr)
+       return new Evaluator(param, "++");
+    else if (decr)
+       return new Evaluator(param, "--");
+    return param;
+  } 
+}
+
+Operand PrimaryExpression(ParserAssembler parserAssembler) :
+{
+  Operand param1 = null;
+  Operand param2 = null;
+  String index1 = null;
+  String index2 = null;
+  String name;
+  Token numberToken = null;
+  OperandMap operandMap = parserAssembler.getOperandMap();
+}
+{
+  param1=Literal()
+  {
+    return param1;
+  }
+  |
+  "(" param1=Expression(parserAssembler) ")"
+  {
+    return param1;
+  }
+  |
+  name=Name() ( LOOKAHEAD(2) param1=IndexExpression(parserAssembler) ( LOOKAHEAD(2) param2=IndexExpression(parserAssembler) )? )?
+  {
+    if (param1 == null)
+        return operandMap.addOperand(name, null);
+    if (param2 == null)
+        return operandMap.newListVariableInstance(name, param1);
+    if (param1 instanceof StringOperand)
+        throw new ParseException("List \"" + name + "\" cannot be indexed by name");
+    return operandMap.newListVariableInstance(name, param1, param2);
+  }
+  |
+  <LENGTH> "("  name=Name() ")"
+  {
+    return new ListLength(name, operandMap.getItemList(name));
+  }
+  |
+  <FORMAT> "("  name=Name() ")"
+  {
+    Operand operand = operandMap.getOperand(name);
+    if (operand == null)
+        throw new ParseException("Variable \"" + name + "\" not found");
+    Scope scope = parserAssembler.getScope();
+    FormatterOperand formatter = new FormatterOperand(name, operand, parserAssembler.getScopeLocale());
+    if (scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
+        parserAssembler.registerLocaleListener(formatter);
+    return formatter;
+  }
+}
+
+
+Operand IndexExpression(ParserAssembler parserAssembler) :
+{
+  Operand param = null;
+  String index = null;
+}
+{
+  <LBRACKET> 
+  (
+    ( 
+    param=Expression(parserAssembler)
+    )
+   )
+  <RBRACKET> 
+  {
+    return param;
+  }
+}
+
+Operand Literal() :
+{
+  Token lit;
+  boolean flag;
+}
+{
+  lit=<INTEGER_LITERAL>
+  {
+    return new IntegerOperand(Term.ANONYMOUS, Integer.parseInt(lit.image));
+  }
+|
+  lit=<FLOATING_POINT_LITERAL>
+  {
+    return new DoubleOperand(Term.ANONYMOUS, Double.parseDouble(lit.image));
+  }
+|
+  lit=<STRING_LITERAL>
+  {
+    return new StringOperand(Term.ANONYMOUS, lit.image.substring(1, lit.image.length() - 1));
+  }
+|
+  flag=BooleanLiteral()
+  {
+    return new BooleanOperand(Term.ANONYMOUS, flag);
+  }
+|
+  NullLiteral()
+  {
+    return new NullOperand();
+  }
+}
+
+Parameter LiteralTerm() :
+{
+  Token lit;
+  boolean flag;
+}
+{
+  lit=<INTEGER_LITERAL>
+  {
+    return new IntegerTerm(lit.image);
+  }
+|
+  lit=<FLOATING_POINT_LITERAL>
+  {
+    return new DoubleTerm(lit.image);
+  }
+|
+  lit=<FORMATED_FLOATING_POINT_LITERAL>
+  {
+    return new DoubleTerm(lit.image.replace(",", ""));
+  }
+|
+  lit=<STRING_LITERAL>
+  {
+    return new StringTerm(lit.image.substring(1, lit.image.length() - 1));
+  }
+|
+  flag=BooleanLiteral()
+  {
+    return new BooleanTerm(flag);
+  }
+|
+  NullLiteral()
+  {
+    return new Parameter(Term.ANONYMOUS, new Null());
+  }
+}
+
+boolean BooleanLiteral() :
+{}
+{
+  <TRUE> 
+  { 
+    return true; 
+  }
+|
+  <FALSE> 
+  { 
+    return false; 
+  }
+}
+
+void NullLiteral() :
+{}
+{
+  <NULL>
+}

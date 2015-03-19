@@ -1,0 +1,17 @@
+digraph G1 {
+  concentrate = true;
+  n2 [label="au.com.cybersearch2.classyjpa.persist.PersistenceFactory"];
+  Agri10YearCollector -> n2;
+  AgriPercentCollector -> n2;
+  DatabaseAdminImpl -> ResourceEnvironment;
+  EntityTransactionImpl -> n2;
+  IncreasedAgriculture -> ProviderManager;
+  NativeScriptDatabaseWork -> ResourceEnvironment;
+  n3 [label="ParserAssembler$ExternalAxiomSource"];
+  n3 -> ProviderManager;
+  ParserResources -> ResourceEnvironment;
+  PersistenceContainer -> n2;
+  WorkerRunnable -> ThreadHelper;
+  n4 [label="members/au.com.cybersearch2.classyjpa.persist.PersistenceFactory"];
+  n4 -> ResourceEnvironment;
+}

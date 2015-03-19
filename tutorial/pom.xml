@@ -1,0 +1,72 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>au.com.cybersearch2</groupId>
+    <artifactId>xpl</artifactId>
+    <version>1.0.1</version>
+  </parent>
+  <artifactId>tutorial</artifactId>
+  <packaging>jar</packaging>
+  <name>XPL tutorial</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <profiles>
+  </profiles>
+  <build>
+    <finalName>${project.artifactId}</finalName>
+    <pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <source>1.6</source>
+                <target>1.6</target>
+            </configuration>
+          </plugin>
+        </plugins>
+    </pluginManagement>
+    <plugins>
+    </plugins>
+  </build>
+
+  <dependencies>
+     <dependency>
+      <groupId>au.com.cybersearch2</groupId>
+      <artifactId>parser</artifactId>
+      <version>1.0.1</version>
+     </dependency>
+     <dependency>
+      <groupId>au.com.cybersearch2</groupId>
+      <artifactId>classyjava</artifactId>
+      <version>1.0.2</version>
+     </dependency>
+    <dependency>
+      <groupId>au.com.cybersearch2</groupId>
+      <artifactId>classyjava</artifactId>
+      <version>1.0.2</version>
+      <type>test-jar</type>
+     </dependency>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.8.5-pre1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bsc.maven</groupId>
+      <artifactId>maven-processor-plugin</artifactId>
+      <version>3.1.0-beta1</version>
+      <optional>true</optional>
+    </dependency>    
+    <dependency>
+      <groupId>com.squareup.dagger</groupId>
+      <artifactId>dagger-compiler</artifactId>
+      <version>1.2.2</version>
+     <optional>true</optional>
+    </dependency>
+  </dependencies>
+</project>

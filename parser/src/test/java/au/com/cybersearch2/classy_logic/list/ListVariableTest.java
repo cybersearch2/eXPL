@@ -1,0 +1,290 @@
+/**
+    Copyright (C) 2014  www.cybersearch2.com.au
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/> */
+package au.com.cybersearch2.classy_logic.list;
+
+import java.math.BigDecimal;
+
+import org.junit.Test;
+
+import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
+import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
+import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
+import au.com.cybersearch2.classy_logic.expression.Evaluator;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.list.ItemListVariable;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.mockito.Mockito.*;
+
+/**
+ * ListVariableTest
+ * @author Andrew Bowley
+ * 19 Jan 2015
+ */
+public class ListVariableTest 
+{
+	private static final String NAME = "ListOperandName";
+
+	@Test
+	public void test_fixed_index_unify_evaluate_backup()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(5)).thenReturn(false, true);
+		when(itemList.getItem(5)).thenReturn(Integer.valueOf(13));
+		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperand(NAME), 5, "5");
+		Parameter otherTerm = new Parameter(NAME, Integer.valueOf(13));
+		assertThat(variable.unifyTerm(otherTerm, 1)).isEqualTo(1);
+		//variable.unifyTerm(otherTerm, 1);
+		variable.evaluate(1);
+		assertThat(variable.index).isEqualTo(5);
+		assertThat(variable.getValue()).isEqualTo(13);
+		variable.backup(1);
+		assertThat(variable.isEmpty()).isTrue();
+	    verify(itemList).assignItem(5, Integer.valueOf(13));
+	}
+
+	@Test
+	public void test_expression_index_unify_evaluate_backup()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(5)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(5)).thenReturn(Integer.valueOf(13));
+		IntegerOperand x = new IntegerOperand("x", Integer.valueOf(5));
+		Operand indexExpression = new Evaluator("y ", x, "++", null);
+		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperand(NAME), indexExpression, "y");
+		Parameter otherTerm = new Parameter(NAME, Integer.valueOf(13));
+		// No unification possible
+		assertThat(variable.unifyTerm(otherTerm, 1)).isEqualTo(0);
+		assertThat(variable.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
+		assertThat(variable.index).isEqualTo(5);
+		assertThat(variable.getValue()).isEqualTo(13);
+		assertThat(indexExpression.getValue()).isEqualTo(5);
+		assertThat(x.getValue()).isEqualTo(6);
+		assertThat(variable.backup(1)).isTrue();
+		assertThat(variable.indexExpression.isEmpty()).isTrue();
+		assertThat(variable.isEmpty()).isTrue();
+	}
+
+	@Test
+	public void test_expression_index_empty()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(5)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(5)).thenReturn(Integer.valueOf(13));
+		Operand indexExpression = new IntegerOperand("x");
+		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperand(NAME), indexExpression, "x");
+		try
+		{
+			variable.evaluate(1);
+			failBecauseExceptionWasNotThrown(ExpressionException.class);
+		}
+		catch(ExpressionException e)
+		{
+			assertThat(e.getMessage()).isEqualTo("Index for list \"" + NAME + "\" is empty");
+		}
+	}
+
+	@Test
+	public void test_expression_index_invalid_type()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(5)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(5)).thenReturn(Integer.valueOf(13));
+		Operand indexExpression = new BooleanOperand("x", Boolean.TRUE);
+		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperand(NAME), indexExpression, "x");
+		try
+		{
+			variable.evaluate(1);
+			failBecauseExceptionWasNotThrown(ExpressionException.class);
+		}
+		catch(ExpressionException e)
+		{
+			assertThat(e.getMessage()).isEqualTo("\"" + NAME + "[true]\" is not a valid value");
+		}
+	}
+
+
+	@Test
+	public void test_assign()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(0)).thenReturn(false);
+		when(itemList.getLength()).thenReturn(10);
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperand(NAME), 0, "0");
+		variable.assign(BigDecimal.ONE);
+	    verify(itemList).assignItem(0, BigDecimal.ONE);
+	}
+	
+    @Test
+	public void test_assign_update()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(0)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(0)).thenReturn(BigDecimal.TEN);
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperand(NAME), 0, "0");
+		variable.assign(BigDecimal.ONE);
+	    verify(itemList).assignItem(0, BigDecimal.ONE);
+	}
+    
+    @Test
+	public void test_get_value_update()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(0)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(0)).thenReturn(BigDecimal.TEN, BigDecimal.ZERO);
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperand(NAME), 0, "0");
+		assertThat(variable.toString()).isEqualTo("ListOperandName.0 = 10");
+		Parameter param = new Parameter(NAME);
+		assertThat(variable.unifyTerm(param, 1)).isEqualTo(1);
+		assertThat(param.getValue()).isEqualTo(BigDecimal.ZERO);
+		assertThat(variable.toString()).isEqualTo("ListOperandName.0 = 0");
+	}
+    
+    @Test
+	public void test_get_value_unitialised()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		Operand expression = new IntegerOperand("x", Integer.valueOf(5));
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperand(NAME), expression, "x");
+		assertThat(variable.toString()).isEqualTo("ListOperandName.x = <empty>");
+		assertThat(variable.getValue()).isNull();
+		verify(itemList).hasItem(-1);
+	}
+    
+	@Test
+	public void test_big_decimal_operand_ops()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(0)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(0)).thenReturn(BigDecimal.TEN);
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperand(NAME), 0, "0");
+		Parameter otherTerm = new Parameter("x");
+		variable.unifyTerm(otherTerm, 1);
+		assertThat(otherTerm.getValue()).isEqualTo(BigDecimal.TEN);
+		assertThat(variable.getLeftOperandOps()).isEqualTo(new BigDecimalOperand("*").getLeftOperandOps());
+		assertThat(variable.getRightOperandOps()).isEqualTo(new BigDecimalOperand("*").getRightOperandOps());
+		assertThat(variable.booleanEvaluation(new BigDecimalOperand("L", BigDecimal.ZERO), OperatorEnum.LT, new BigDecimalOperand("R", BigDecimal.TEN))).isTrue();
+		assertThat(variable.numberEvaluation(new BigDecimalOperand("L", BigDecimal.ONE), OperatorEnum.PLUS, new BigDecimalOperand("R", BigDecimal.TEN))).isEqualTo(new BigDecimal("11"));
+		assertThat(variable.numberEvaluation(OperatorEnum.MINUS, new BigDecimalOperand("R", BigDecimal.TEN))).isEqualTo(new BigDecimal("-10"));
+	}
+
+	@Test
+	public void test_boolean_operand_ops()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(0)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(0)).thenReturn(Boolean.TRUE);
+		ItemListVariable<Boolean> variable = new ItemListVariable<Boolean>(itemList, new BooleanOperand(NAME), 0, "0");
+		Parameter otherTerm = new Parameter("x");
+		variable.unifyTerm(otherTerm, 1);
+		assertThat(otherTerm.getValue()).isEqualTo(Boolean.TRUE);
+		assertThat(variable.getLeftOperandOps()).isEqualTo(new BooleanOperand("*").getLeftOperandOps());
+		assertThat(variable.getRightOperandOps()).isEqualTo(new BooleanOperand("*").getRightOperandOps());
+		assertThat(variable.booleanEvaluation(new BooleanOperand("L", Boolean.FALSE), OperatorEnum.NE, new BooleanOperand("R", Boolean.TRUE))).isTrue();
+	}
+	
+	@Test
+	public void test_integer_operand_ops()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(0)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(0)).thenReturn(Integer.valueOf(13));
+		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperand(NAME), 0, "0");
+		Parameter otherTerm = new Parameter("x");
+		variable.unifyTerm(otherTerm, 1);
+		assertThat(otherTerm.getValue()).isEqualTo(13);
+		assertThat(variable.getLeftOperandOps()).isEqualTo(new IntegerOperand("*").getLeftOperandOps());
+		assertThat(variable.getRightOperandOps()).isEqualTo(new IntegerOperand("*").getRightOperandOps());
+		assertThat(variable.booleanEvaluation(new IntegerOperand("L", Integer.valueOf(2)), OperatorEnum.GE, new IntegerOperand("R", Integer.valueOf(2)))).isTrue();
+		assertThat(variable.numberEvaluation(new IntegerOperand("L", Integer.valueOf(7)), OperatorEnum.XOR, new IntegerOperand("R", Integer.valueOf(5)))).isEqualTo(new Integer(2));
+		assertThat(variable.numberEvaluation(OperatorEnum.INCR, new IntegerOperand("R", Integer.valueOf(8)))).isEqualTo(new Integer(9));
+	}
+
+	@Test
+	public void test_double_operand_ops()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(0)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(0)).thenReturn(Double.valueOf(55.98d));
+		ItemListVariable<Double> variable = new ItemListVariable<Double>(itemList, new DoubleOperand(NAME), 0, "0");
+		Parameter otherTerm = new Parameter("x");
+		variable.unifyTerm(otherTerm, 1);
+		assertThat(otherTerm.getValue()).isEqualTo(55.98d);
+		assertThat(variable.getLeftOperandOps()).isEqualTo(new DoubleOperand("*").getLeftOperandOps());
+		assertThat(variable.getRightOperandOps()).isEqualTo(new DoubleOperand("*").getRightOperandOps());
+		assertThat(variable.booleanEvaluation(new DoubleOperand("L", Double.valueOf(1.0)), OperatorEnum.LT, new DoubleOperand("R", Double.valueOf(0.5)))).isFalse();
+		assertThat(variable.numberEvaluation(new DoubleOperand("L", Double.valueOf(2.0)), OperatorEnum.STAR, new DoubleOperand("R", Double.valueOf(3.0)))).isEqualTo(new Double("6.0"));
+		assertThat(variable.numberEvaluation(OperatorEnum.MINUS, new DoubleOperand("R", Double.valueOf(99.9)))).isEqualTo(new Double(-99.9));
+	}
+	
+	@Test
+	public void test_string_operand_ops()
+	{
+		@SuppressWarnings("rawtypes")
+		ItemList itemList = mock(ItemList.class);
+		when(itemList.getName()).thenReturn(NAME);
+		when(itemList.hasItem(0)).thenReturn(true);
+		when(itemList.getLength()).thenReturn(10);
+		when(itemList.getItem(0)).thenReturn("1.0f");
+		ItemListVariable<String> variable = new ItemListVariable<String>(itemList, new StringOperand(NAME), 0, "0");
+		Parameter otherTerm = new Parameter("x");
+		variable.unifyTerm(otherTerm, 1);
+		assertThat(otherTerm.getValue()).isEqualTo("1.0f");
+		assertThat(variable.getLeftOperandOps()).isEqualTo(new StringOperand("*").getLeftOperandOps());
+		assertThat(variable.getRightOperandOps()).isEqualTo(new StringOperand("*").getRightOperandOps());
+		assertThat(variable.booleanEvaluation(new StringOperand("L", "hello"), OperatorEnum.NE, new StringOperand("R", "world"))).isTrue();
+	}
+}

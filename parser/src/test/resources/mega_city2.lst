@@ -1,0 +1,5 @@
+america_megacities(Rank = 6, Megacity = Mexico City, Country = Mexico, Population = 22200000)
+america_megacities(Rank = 10, Megacity = New York City, Country = United,States, Population = 20300000)
+america_megacities(Rank = 16, Megacity = Los Angeles, Country = United,States, Population = 17900000)
+america_megacities(Rank = 18, Megacity = Buenos Aires, Country = Argentina, Population = 16500000)
+america_megacities(Rank = 24, Megacity = Rio de Janeiro, Country = Brazil, Population = 14500000)
