@@ -71,32 +71,4 @@ public class Agri10YearCollector extends JpaEntityCollector
         persistenceAdmin.addNamedQuery(Agri10Year.class, ALL_AGRI_10_YEAR, allEntitiesQuery);
 	}
 
-    /**
-     * Get data using JPA entity manager
-     * @see au.com.cybersearch2.classyjpa.entity.PersistenceWork#doInBackground(au.com.cybersearch2.classyjpa.EntityManagerLite)
-     */
-	@SuppressWarnings("unchecked")
-	@Override
-	public void doInBackground(EntityManagerLite entityManager) 
-	{
-        Query query = entityManager.createNamedQuery(namedJpaQuery);
-        if (maxResults > 0)
-        {   // Paging enabled
-        	query.setMaxResults(maxResults);
-        	query.setFirstResult(startPosition);
-        }
-        data = (Collection<Object>) query.getResultList();
-        if (maxResults > 0)
-        {   // Advance start position or 
-        	// clear "moreExpected" flag if no more results avaliable
-        	if (data.size() > 0)
-        	{
-        		startPosition += data.size();
-        		moreExpected = true;
-        	}
-        	else
-        		moreExpected = false;
-        }
-	}
-
 }

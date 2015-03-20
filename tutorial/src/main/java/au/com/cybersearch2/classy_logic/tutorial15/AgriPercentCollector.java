@@ -50,6 +50,7 @@ public class AgriPercentCollector extends JpaEntityCollector
     protected Data fact;
     protected BeanMap beanMap;
     protected String currentCountry = "";
+    protected Collection<YearPercent> yearPercentList;
     
     /** Factory object to create "agriculture" Persistence Unit implementation */
     @Inject PersistenceFactory persistenceFactory;
@@ -60,12 +61,16 @@ public class AgriPercentCollector extends JpaEntityCollector
 	public AgriPercentCollector(String persistenceUnit) 
 	{
 		super(persistenceUnit);
+		setUserTransactionMode(true);
+    	setMaxResults(50);
+    	batchMode = true;
 		this.namedJpaQuery = ALL_YEAR_PERCENTS;
         // Inject persistenceFactory
         DI.inject(this); 
 		setUp(persistenceUnit);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void doInBackground(EntityManagerLite entityManager) 
 	{
@@ -76,14 +81,19 @@ public class AgriPercentCollector extends JpaEntityCollector
         	query.setMaxResults(maxResults);
         	query.setFirstResult(startPosition);
         }
-        @SuppressWarnings({"unchecked"})
-		Collection<YearPercent> yearPercentList = (Collection<YearPercent>) query.getResultList();
+        yearPercentList = (Collection<YearPercent>) query.getResultList();
+	}
+	
+	@Override
+	protected void processBatch()
+	{
         startPosition += yearPercentList.size();
 		//System.out.println("Size = " + yearPercentList.size() + ", Position = " + startPosition);
         // Collate into country list
         Iterator<YearPercent> iterator = yearPercentList.iterator();
         if (!iterator.hasNext())
         {
+        	yearPercentList.clear();
         	if (moreExpected)
         	{
         		moreExpected = false;
@@ -111,8 +121,11 @@ public class AgriPercentCollector extends JpaEntityCollector
         		fact.setCountry(country);
         		beanMap = new BeanMap(fact);
         	}
+        	if (Double.valueOf(0.0).equals(yearPercent.getPercent()))
+        		yearPercent.setPercent(Double.NaN);
         	beanMap.put(year, yearPercent.getPercent());
         }
+        yearPercentList.clear();
     	moreExpected = true;
 	}
 

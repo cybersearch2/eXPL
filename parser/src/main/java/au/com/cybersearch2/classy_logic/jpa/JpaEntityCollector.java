@@ -51,6 +51,7 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
     protected int startPosition;
     /** flag set true if a call to getData() may deliver more results */
     protected boolean moreExpected;
+    protected boolean batchMode;
 
     /**
      * Construct a JpaEntityCollector object
@@ -61,6 +62,15 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
         container = new PersistenceContainer(persistenceUnit);
     }
     
+    /**
+     * Set user transaction mode. The transaction is accessed by calling EntityManager getTransaction() method.
+     * @param value boolean
+     */
+    public void setUserTransactionMode(boolean value)
+    {
+        container.setUserTransactionMode(value);
+    }
+ 
 	/**
 	 * Returns flag set true if a call to getData() may deliver more results.
 	 * @return boolean
@@ -136,7 +146,20 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
 		{
 			throw new QueryExecutionException("Work for query \"" + namedJpaQuery + "\" interrupted", e);
 		}
-		return data == null ? Collections.emptyList() : data;
+		if (batchMode)
+			processBatch();
+		if (data == null)
+			return Collections.emptyList();
+		else
+		{
+			Collection<Object> result = data;
+			data = null;
+			return result;
+		}
+	}
+
+	protected void processBatch() 
+	{
 	}
 
 	/**

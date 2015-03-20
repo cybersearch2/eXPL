@@ -28,6 +28,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classyinject.DI;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
 
 /**
  * IncreasedAgriculture
@@ -38,27 +39,30 @@ import au.com.cybersearch2.classyinject.DI;
 public class IncreasedAgriculture 
 {
 	static final String AGRICULTURAL_LAND = 
-		"include \"agriculture-land.xpl\";\n" +
+		"axiom Data : resource \"agriculture\";\n" +
 		"include \"surface-land.xpl\";\n" +
-	    "template agri_10y (country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);\n" +
-		"template surface_area_increase (agri_10y.country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);\n" +
+	    "template agri_10y (country ? y2010 - y1990 > 1.0, double y1990, double y2010);\n" +
+		"template surface_area_increase (agri_10y.country, double surface_area = (y2010 - y1990)/100 * surface_area_Km2);\n" +
 		"list<term> surface_area_axiom(surface_area_increase : resource \"agriculture\");\n" +
 	    "query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);"; 
 
 	static final String AGRI_10_YEAR =
-		"axiom surface_area_increase (country, surface_area) : resource \"agriculture\";\n" +
-	    "template increased(country, surface_area);\n" +
+		"axiom surface_area_increase (country, surface_area, id) : resource \"agriculture\";\n" +
+	    "template increased(country, surface_area, id);\n" +
 		"list increased_list(increased);\n" +
 		"query increased_query(surface_area_increase : increased);";
 	
 	@Inject
 	ProviderManager providerManager;
+	@Inject
+	PersistenceFactory persistenceFactory;
 
 	public IncreasedAgriculture()
 	{
 		// Configure dependency injection to get resource "cities"
 		new DI(new AgriModule()).validate();
 		DI.inject(this);
+		persistenceFactory.initializeAllDatabases();
 		providerManager.putAxiomProvider(new AgriAxiomProvider());
 	}
 	/**

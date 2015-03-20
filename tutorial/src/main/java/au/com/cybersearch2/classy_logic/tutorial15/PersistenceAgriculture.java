@@ -73,7 +73,6 @@ public class PersistenceAgriculture
     		System.out.println(axiomIterator.next().toString());
     	/*
     	AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME);
-    	agriPercentCollector.setMaxResults(1000);
     	List<String> termNameList = new ArrayList<String>();
     	termNameList.add("country");
 		for (int year = 1962; year < 2012; ++year)

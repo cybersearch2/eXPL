@@ -61,7 +61,7 @@ public class AgriAxiomProvider implements AxiomProvider
 	    @Override
 	    public void doInBackground(EntityManagerLite entityManager)
 	    {
-	    	// Use OrmLite query to get 
+	    	// Use OrmLite query to get Country object from database 
             EntityManagerDelegate delegate = (EntityManagerDelegate)entityManager.getDelegate();
             @SuppressWarnings("unchecked")
             PersistenceDao<Country, Integer> countryDao = 
@@ -82,10 +82,17 @@ public class AgriAxiomProvider implements AxiomProvider
             // now we can set the select arg (?) and run the query
             selectArg.setValue(agri10Year.getCountryName());
             List<Country> results = countryDao.query(preparedQuery);
-            Country country = results.get(0);
-            entityManager.merge(country);
-            agri10Year.setCountry(country);
-	    	entityManager.persist(agri10Year);
+            if (results.size() == 0)
+            {
+            	System.err.println("Cannot find country \"" + agri10Year.getCountryName() + "\"");
+            }
+            else
+            {
+	            Country country = results.get(0);
+	            entityManager.merge(country);
+	            agri10Year.setCountry(country);
+		    	entityManager.persist(agri10Year);
+            }
 	    }
 		
 	    @Override
@@ -111,6 +118,8 @@ public class AgriAxiomProvider implements AxiomProvider
 
     static int agri10YearId;
     
+    protected boolean databaseCreated;
+    
 	/**
 	 * 
 	 */
@@ -128,12 +137,16 @@ public class AgriAxiomProvider implements AxiomProvider
 	public void setResourceProperties(String axiomName,
 			Map<String, Object> properties) 
 	{
+		// Create Agriculture database, if not already done so.
+		if (databaseCreated)
+			return;
         PersistenceWork setUpWork = new AgriDatabase();
         // Execute work and wait synchronously for completion
         PersistenceContainer container = new PersistenceContainer(PU_NAME);
         try 
         {
 			waitForTask(container.executeTask(setUpWork));
+			databaseCreated = true;
 		} 
         catch (InterruptedException e) 
         {
@@ -145,28 +158,34 @@ public class AgriAxiomProvider implements AxiomProvider
 	public AxiomSource getAxiomSource(String axiomName,
 			List<String> axiomTermNameList) 
 	{
-		List<NameMap> nameMapList = new ArrayList<NameMap>();
+		List<NameMap> nameMapList = null;
+		if (axiomTermNameList != null)
+			nameMapList = new ArrayList<NameMap>();
 		JpaEntityCollector collector = null;
 		if (PERCENT_AXIOM.equals(axiomName))
 		{
-			for (String termName: axiomTermNameList)
-			{
-				nameMapList.add(new NameMap(termName, termName));
-			}
+			if (axiomTermNameList != null)
+				for (String termName: axiomTermNameList)
+				{
+					nameMapList.add(new NameMap(termName, termName));
+				}
 	    	collector = new AgriPercentCollector(PU_NAME);
 		}
 		else if (TEN_YEAR_AXIOM.equals(axiomName))
 		{
-			for (String termName: axiomTermNameList)
+			if (axiomTermNameList != null)
 			{
-				NameMap nameMap = null;
-				if (termName.equals("country"))
-		    	    nameMap = new NameMap("country", "countryName");
-				else if (termName.equals("surface_area"))
-	    	        nameMap = new NameMap("surface_area", "surfaceArea");
-				else
-					nameMap = new NameMap(termName, termName);
-				nameMapList.add(nameMap);
+				for (String termName: axiomTermNameList)
+				{
+					NameMap nameMap = null;
+					if (termName.equals("country"))
+			    	    nameMap = new NameMap("country", "countryName");
+					else if (termName.equals("surface_area"))
+		    	        nameMap = new NameMap("surface_area", "surfaceArea");
+					else
+						nameMap = new NameMap(termName, termName);
+					nameMapList.add(nameMap);
+				}
 			}
 	    	collector = new Agri10YearCollector(PU_NAME);
 		}
@@ -201,6 +220,15 @@ public class AgriAxiomProvider implements AxiomProvider
 				PersistAgri10Year persistAgri10Year = new PersistAgri10Year(agri10Year);
 		        PersistenceContainer container = new PersistenceContainer(PU_NAME);
 		        container.executeTask(persistAgri10Year);
+		        // For synchronous execution of persistence work, comment above line and uncomment below
+		        //try 
+		        //{
+				//	waitForTask(container.executeTask(persistAgri10Year));
+				//} 
+		        //catch (InterruptedException e) 
+		        //{
+				//	e.printStackTrace();
+				//}
 			}
 		};
 	}
