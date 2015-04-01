@@ -19,18 +19,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classytask.Executable;
 
 /**
  * PersistenceHighCities demonstrates how to source axioms from a database using
- * Classy Tools JPA implementation. Two test cases contrast default names taken
- * from the entity class with names defined by the client.
+ * Classy Tools JPA implementation. 
  * @author Andrew Bowley
  * 17 Mar 2015
  */
@@ -52,7 +51,7 @@ public class PersistenceAgriculture
         PersistenceWork setUpWork = new AgriDatabase();
         // Execute work and wait synchronously for completion
         PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        waitForTask(container.executeTask(setUpWork));
+        container.executeTask(setUpWork).waitForTask();
 	}
 
 	/**
@@ -63,25 +62,16 @@ public class PersistenceAgriculture
 	 */
     public void testDataQuery()
     {
-    	Agri10YearCollector Agri10YearCollector = new Agri10YearCollector(PU_NAME);
     	List<NameMap> termNameList = new ArrayList<NameMap>();
-    	termNameList.add(new NameMap("country", "countryName"));
-    	termNameList.add(new NameMap("surface_area", "surfaceArea"));
-    	JpaSource jpaSource = new JpaSource(Agri10YearCollector, "surface_area_increase", termNameList); 
-    	Iterator<Axiom> axiomIterator = jpaSource.iterator();
-    	while (axiomIterator.hasNext())
-    		System.out.println(axiomIterator.next().toString());
-    	/*
-    	AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME);
-    	List<String> termNameList = new ArrayList<String>();
-    	termNameList.add("country");
+     	AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME, new ProviderManager());
+    	termNameList.clear();
+    	termNameList.add(new NameMap("country", "country"));
 		for (int year = 1962; year < 2012; ++year)
-			termNameList.add("Y" + year);
-    	JpaSource jpaSource = new JpaSource(agriPercentCollector, "Data", termNameList); 
-    	Iterator<Axiom> axiomIterator = jpaSource.iterator();
+			termNameList.add(new NameMap("y" + year, "Y" + year));
+    	JpaSource perCentSource = new JpaSource(agriPercentCollector, "Data", termNameList); 
+    	Iterator<Axiom> axiomIterator = perCentSource.iterator();
     	while (axiomIterator.hasNext())
     		System.out.println(axiomIterator.next().toString());
-    		*/
     	System.out.println("Done!");
     }
 
@@ -100,18 +90,5 @@ public class PersistenceAgriculture
 		}
 		System.exit(0);
 	}
-
-    /**
-     * Wait sychronously for task completion
-     * @param exe Executable object returned upon starting task
-     * @throws InterruptedException Should not happen
-     */
-    protected void waitForTask(Executable exe) throws InterruptedException
-    {
-        synchronized (exe)
-        {
-            exe.wait();
-        }
-    }
 
 }

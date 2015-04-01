@@ -15,14 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial14;
 
-import javax.inject.Inject;
-
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.QueryForAllGenerator;
-import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.persist.Persistence;
 import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * CityCollector extends JpaEntityCollector to create an external axiom source
@@ -37,19 +35,19 @@ public class CityCollector extends JpaEntityCollector
     static public final String ALL_CITIES = "all_cities";
 
     /** Factory object to create "cities" Persistence Unit implementation */
-    @Inject PersistenceFactory persistenceFactory;
+    protected PersistenceContext persistenceContext;
 
     /**
      * Construct a CityCollector object
      * @param persistenceUnit
      */
-	public CityCollector(String persistenceUnit) 
+	public CityCollector(String persistenceUnit, ProviderManager providerManager) 
 	{
-		super(persistenceUnit);
+		super(persistenceUnit, providerManager);
 		// JpaEntityCollector needs the name of the query to fetch all cities 
 		this.namedJpaQuery = ALL_CITIES;
-        // Inject persistenceFactory
-        DI.inject(this); 
+        // Inject persistenceContext
+        persistenceContext = new PersistenceContext();
 		setUp(persistenceUnit);
 	}
 
@@ -59,7 +57,7 @@ public class CityCollector extends JpaEntityCollector
 	 */
 	protected void setUp(String persistenceUnit)
 	{
-        Persistence persistence = persistenceFactory.getPersistenceUnit(persistenceUnit);
+        Persistence persistence = persistenceContext.getPersistenceUnit(persistenceUnit);
         // Get Interface for JPA Support, required to create named queries
         PersistenceAdmin persistenceAdmin = persistence.getPersistenceAdmin();
         QueryForAllGenerator allEntitiesQuery = 

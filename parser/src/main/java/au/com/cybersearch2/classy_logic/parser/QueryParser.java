@@ -956,7 +956,7 @@ public class QueryParser implements QueryParserConstants
   final public Operand InnerCalculator(int loop_number, String templateName, ParserAssembler parserAssembler, boolean runOnce) throws ParseException
   {
   Operand calcExpression;
-  String loopName = templateName + "." + loop_number;
+  String loopName = templateName + loop_number;
   parserAssembler.chainTemplate(templateName, loopName);
     jj_consume_token(LBRACE);
     CalculatorExpression(loop_number, loopName, templateName, parserAssembler);

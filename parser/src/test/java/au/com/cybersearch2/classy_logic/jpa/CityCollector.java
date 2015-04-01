@@ -15,12 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.jpa;
 
-import javax.inject.Inject;
-
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.persist.Persistence;
 import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * CityCollector
@@ -32,12 +30,9 @@ public class CityCollector extends JpaEntityCollector
     /** Named query to find all cities */
     static public final String ALL_CITIES = "all_cities";
 
-    /** Factory object to create "cities" Persistence Unit implementation */
-    @Inject PersistenceFactory persistenceFactory;
-
-	public CityCollector(String persistenceUnit) 
+	public CityCollector(String persistenceUnit, ProviderManager providerManager) 
 	{
-		super(persistenceUnit);
+		super(persistenceUnit, providerManager);
 		this.namedJpaQuery = ALL_CITIES;
         // Inject persistenceFactory
         DI.inject(this); 
@@ -46,9 +41,9 @@ public class CityCollector extends JpaEntityCollector
 
 	protected void setUp(String persistenceUnit)
 	{
-        Persistence persistence = persistenceFactory.getPersistenceUnit(persistenceUnit);
+		PersistenceContext persistenceContext = new PersistenceContext();
         // Get Interface for JPA Support, required to create named queries
-        PersistenceAdmin persistenceAdmin = persistence.getPersistenceAdmin();
+        PersistenceAdmin persistenceAdmin = persistenceContext.getPersistenceAdmin(persistenceUnit);
         QueryForAllGenerator allEntitiesQuery = 
                 new QueryForAllGenerator(persistenceAdmin);
         persistenceAdmin.addNamedQuery(City.class, ALL_CITIES, allEntitiesQuery);

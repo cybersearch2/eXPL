@@ -19,15 +19,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.inject.Inject;
 import javax.persistence.Query;
 
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classybean.BeanMap;
-import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.persist.Persistence;
 import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * AgriPercentCollector
@@ -407,17 +405,16 @@ public class AgriPercentCollector extends JpaEntityCollector
     protected String currentCountry = "";
     
     /** Factory object to create "agriculture" Persistence Unit implementation */
-    @Inject PersistenceFactory persistenceFactory;
+    protected PersistenceContext persistenceContext;
 
 	/**
 	 * 
 	 */
-	public AgriPercentCollector(String persistenceUnit) 
+	public AgriPercentCollector(String persistenceUnit, ProviderManager providerManager) 
 	{
-		super(persistenceUnit);
+		super(persistenceUnit, providerManager);
 		this.namedJpaQuery = ALL_YEAR_PERCENTS;
-        // Inject persistenceFactory
-        DI.inject(this); 
+        persistenceContext = new PersistenceContext();
 		setUp(persistenceUnit);
 	}
 
@@ -473,11 +470,10 @@ public class AgriPercentCollector extends JpaEntityCollector
 
 	protected void setUp(String persistenceUnit)
 	{
-        Persistence persistence = persistenceFactory.getPersistenceUnit(persistenceUnit);
         // Get Interface for JPA Support, required to create named queries
-        PersistenceAdmin persistenceAdmin = persistence.getPersistenceAdmin();
+        PersistenceAdmin persistenceAdmin = persistenceContext.getPersistenceAdmin(persistenceUnit);
         QueryForAllGenerator allEntitiesQuery = 
-                new QueryForAllGenerator(persistenceAdmin);
+            new QueryForAllGenerator(persistenceAdmin);
         persistenceAdmin.addNamedQuery(YearPercent.class, ALL_YEAR_PERCENTS, allEntitiesQuery);
 	}
 }

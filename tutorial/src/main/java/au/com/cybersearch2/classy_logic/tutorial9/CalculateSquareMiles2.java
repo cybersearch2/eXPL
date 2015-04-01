@@ -18,14 +18,24 @@ package au.com.cybersearch2.classy_logic.tutorial9;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import javax.inject.Inject;
+
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.TestAxiomProvider;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -52,14 +62,55 @@ public class CalculateSquareMiles2
 		    "query surface_area_mi2(surface_area : surface_area)\n" + 
 		    "  >> calc(locale : km2_to_mi2);";
 
+	protected String localeCountry;
+	
+	@Inject
+	ProviderManager providerManager;
+
 	public CalculateSquareMiles2()
 	{
 		new DI(new QueryParserModule()).validate();
+		DI.inject(this);
+		AxiomProvider axiomProvider = new AxiomProvider(){
+
+			@Override
+			public String getName() {
+				return "locale";
+			}
+
+			@Override
+			public void setResourceProperties(String axiomName,
+					Map<String, Object> properties) {
+			}
+
+			@Override
+			public AxiomSource getAxiomSource(String axiomName,
+					List<String> axiomTermNameList) {
+				AxiomSource axiomSource = null;
+				Axiom localeAxiom = new Axiom("locale", new Parameter("locale", localeCountry));
+				axiomSource = new SingleAxiomSource(localeAxiom);
+				return axiomSource;
+			}
+
+			@Override
+			public AxiomListener getAxiomListener() {
+				return new AxiomListener(){
+
+					@Override
+					public void onNextAxiom(Axiom axiom) {
+					}};
+			}
+
+			@Override
+			public boolean isEmpty() {
+				return false;
+			}};
+		providerManager.putAxiomProvider(axiomProvider );
 	}
 	
 	public void displaySurfaceAreaOutsideUsa() throws ParseException
 	{
-		TestAxiomProvider.setlocaleCountry("AU");
+		localeCountry = "AU";
 		QueryProgram queryProgram = compileScript(COUNTRY_SURFACE_AREA);
 		Result result = queryProgram.executeQuery("surface_area_mi2");
 		@SuppressWarnings("unchecked")
@@ -70,7 +121,7 @@ public class CalculateSquareMiles2
 
 	public void displaySurfaceAreaInUsa() throws ParseException
 	{
-		TestAxiomProvider.setlocaleCountry("US");
+		localeCountry = "US";
 		QueryProgram queryProgram = compileScript(COUNTRY_SURFACE_AREA);
 		Result result = queryProgram.executeQuery("surface_area_mi2");
 		@SuppressWarnings("unchecked")

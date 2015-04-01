@@ -29,6 +29,7 @@ import dagger.Module;
 {
 		HighCitiesSorted.class,
 		CityCollector.class, 
+		CitiesAxiomProvider.class,
 		PersistenceCities.class
 },
 includes=TestModule.class)

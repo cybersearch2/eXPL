@@ -287,7 +287,7 @@ public class ScopeQueryParserTest
 			public boolean onSolution(Solution solution) {
 				//System.out.println(solution);
 				//System.out.println(solution.getAxiom("factorial").toString());
-				assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i = 5, n = 4, factorial = 24, factorial.1 = true)");
+				assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i = 5, n = 4, factorial = 24, factorial1 = true)");
 				return true;
 			}};
 		queryProgram.executeQuery("factorial_example", "factorial", solutionHandler);
@@ -305,7 +305,7 @@ public class ScopeQueryParserTest
 			@Override
 			public boolean onSolution(Solution solution) {
 				//System.out.println(solution.getAxiom("insert_sort").toString());
-				assertThat(solution.getAxiom("insert_sort").toString()).isEqualTo("insert_sort(i = 5, insert_sort.1 = true)");
+				assertThat(solution.getAxiom("insert_sort").toString()).isEqualTo("insert_sort(i = 5, insert_sort1 = true)");
 				return true;
 			}};
 		queryProgram.executeQuery("sort_example", "insert_sort", solutionHandler);
@@ -379,7 +379,7 @@ public class ScopeQueryParserTest
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
- 	    		assertThat(solution.getString("surface_area_increase", "agri_10y.country") + " " + solution.getString("km2_to_mi2", "mi2") + " mi2").isEqualTo(line);
+ 	    		assertThat(solution.getString("surface_area_increase", "country") + " " + solution.getString("km2_to_mi2", "mi2") + " mi2").isEqualTo(line);
 				return true;
 			}};
 		queryProgram.executeQuery("countries", "more_agriculture_mi2", solutionHandler);

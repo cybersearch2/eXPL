@@ -32,7 +32,6 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classytask.Executable;
 
 /**
  * TestAxiomProvider
@@ -62,7 +61,7 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
         	data.add(new City("richmond",19));
         	data.add(new City("spokane", 1909));
         	data.add(new City("wichita", 1305));
-			waitForTask(container.executeTask(setUpWork(data)));
+			container.executeTask(setUpWork(data)).waitForTask();
 		} 
 		catch (InterruptedException e) 
 		{
@@ -80,15 +79,9 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 			List<NameMap> nameMapList = new ArrayList<NameMap>();
 			for (String termName: axiomTermNameList)
 				nameMapList.add(new NameMap(termName, termName));
-			axiomSource = new JpaSource(new CityCollector("cities"), axiomName, nameMapList);
+			axiomSource = new JpaSource(new CityCollector("cities", this), axiomName, nameMapList);
 		}
 		return axiomSource;
-	}
-
-	@Override
-	public AxiomProvider getAxiomProvider(String name)
-	{
-		return this;
 	}
 
 	@Override
@@ -109,6 +102,12 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 		};
 	}
 	
+	@Override
+	public AxiomProvider getAxiomProvider(String name)
+	{
+		return this;
+	}
+
     protected PersistenceWork setUpWork(final List<Object> data) 
     {
         return new PersistenceWork()
@@ -133,19 +132,6 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 	            throw new IllegalStateException("Database set up failed. Check console for stack trace.", rollbackException);
 	        }
         };
-    }
-
-    /**
-     * Wait sychronously for task completion
-     * @param exe Executable object returned upon starting task
-     * @throws InterruptedException Should not happen
-     */
-    protected void waitForTask(Executable exe) throws InterruptedException
-    {
-        synchronized (exe)
-        {
-            exe.wait();
-        }
     }
 
 	@Override

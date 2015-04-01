@@ -23,13 +23,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classytask.Executable;
 
 /**
  * HighCitiesJpaTest
@@ -112,13 +112,13 @@ public class HighCitiesJpaTest
         };
         // Execute work and wait synchronously for completion
         PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        waitForTask(container.executeTask(setUpWork));
+        container.executeTask(setUpWork).waitForTask();
     }
 
     @Test
     public void test_query() throws Exception
     {
-    	CityCollector cityCollector = new CityCollector(PU_NAME);
+    	CityCollector cityCollector = new CityCollector(PU_NAME, new ProviderManager());
     	JpaSource jpaSource = new JpaSource(cityCollector, "city");
     	Iterator<Axiom> axiomIterator = jpaSource.iterator();
     	int next = 0;
@@ -130,7 +130,7 @@ public class HighCitiesJpaTest
     @Test
     public void test_query_term_names() throws Exception
     {
-    	CityCollector cityCollector = new CityCollector(PU_NAME);
+    	CityCollector cityCollector = new CityCollector(PU_NAME, new ProviderManager());
     	List<NameMap> termNameList = new ArrayList<NameMap>();
     	termNameList.add(new NameMap("Name", "name"));
     	termNameList.add(new NameMap("Altitude", "altitude"));
@@ -142,17 +142,4 @@ public class HighCitiesJpaTest
     		assertThat(CITY_AXIOMS2[next++]).isEqualTo(axiomIterator.next().toString());
     }
     
-    /**
-     * Wait sychronously for task completion
-     * @param exe Executable object returned upon starting task
-     * @throws InterruptedException Should not happen
-     */
-    protected void waitForTask(Executable exe) throws InterruptedException
-    {
-        synchronized (exe)
-        {
-            exe.wait();
-        }
-    }
-
 }

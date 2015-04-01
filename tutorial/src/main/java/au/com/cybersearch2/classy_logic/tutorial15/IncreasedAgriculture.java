@@ -28,7 +28,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * IncreasedAgriculture
@@ -52,17 +52,18 @@ public class IncreasedAgriculture
 		"list increased_list(increased);\n" +
 		"query increased_query(surface_area_increase : increased);";
 	
+	protected PersistenceContext persistenceContext;
+	
 	@Inject
 	ProviderManager providerManager;
-	@Inject
-	PersistenceFactory persistenceFactory;
 
 	public IncreasedAgriculture()
 	{
 		// Configure dependency injection to get resource "cities"
 		new DI(new AgriModule()).validate();
 		DI.inject(this);
-		persistenceFactory.initializeAllDatabases();
+		PersistenceContext persistenceContext = new PersistenceContext();
+		persistenceContext.initializeAllDatabases();
 		providerManager.putAxiomProvider(new AgriAxiomProvider());
 	}
 	/**
@@ -74,6 +75,13 @@ public class IncreasedAgriculture
 	{
 		QueryProgram queryProgram1 = compileScript(AGRICULTURAL_LAND);
 		queryProgram1.executeQuery("more_agriculture");
+		/*, new SolutionHandler(){
+			@Override
+			public boolean onSolution(Solution solution) {
+				System.out.println(solution.getAxiom("surface_area_increase").toString());
+				return true;
+			}});
+         */
 		QueryProgram queryProgram2 = compileScript(AGRI_10_YEAR);
 		Result result = queryProgram2.executeQuery("increased_query");
 		@SuppressWarnings("unchecked")

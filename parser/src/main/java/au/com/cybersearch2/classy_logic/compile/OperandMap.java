@@ -162,14 +162,18 @@ public class OperandMap
 			{
 				AxiomTermList axiomTermList = (AxiomTermList)itemList;
 				List<String> axiomTermNameList = axiomTermList.getAxiomTermNameList();
-				if (axiomTermNameList == null)
-					throw new ExpressionException("List \"" + name + "\" cannot be referenced by name");
-				suffix = expression.getName();
-				index = getIndexForName(name, suffix, axiomTermNameList);
+				if (axiomTermNameList != null)
+				{
+					suffix = expression.getName();
+					index = getIndexForName(name, suffix, axiomTermNameList);
+				}
+				else
+					suffix = expression.toString();
+
 			}
 			else // Interpret identifier as a variable name for any primitive list
 			{
-				expression = new Variable(expression.getValue().toString());
+				expression = new Variable(expression.getName());
 				suffix = expression.getName();
 			}
 		}
@@ -223,10 +227,13 @@ public class OperandMap
 		else if (expression2.isEmpty() && (expression2 instanceof Variable))
 		{
 			List<String> axiomTermNameList = axiomList.getAxiomTermNameList();
-			if (axiomTermNameList == null)
-				throw new ExpressionException("List \"" + name + "\" cannot be referenced by name");
-			suffix = expression2.getName();
-			termIndex = getIndexForName(name, suffix, axiomTermNameList);
+			if (axiomTermNameList != null)
+			{
+			    suffix = expression2.getName();
+			    termIndex = getIndexForName(name, suffix, axiomTermNameList);
+			}
+			else
+				suffix = expression2.toString();
 		}
 		else
 			suffix = expression2.toString();

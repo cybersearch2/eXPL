@@ -19,13 +19,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classytask.Executable;
 
 /**
  * PersistenceHighCities demonstrates how to source axioms from a database using
@@ -52,7 +52,7 @@ public class PersistenceCities
         PersistenceWork setUpWork = new CitiesDatabase();
         // Execute work and wait synchronously for completion
         PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        waitForTask(container.executeTask(setUpWork));
+        container.executeTask(setUpWork).waitForTask();
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class PersistenceCities
 	 */
     public void testEntityNamesQuery()
     {
-    	CityCollector cityCollector = new CityCollector(PU_NAME);
+    	CityCollector cityCollector = new CityCollector(PU_NAME, new ProviderManager());
     	JpaSource jpaSource = new JpaSource(cityCollector, "city");
     	Iterator<Axiom> axiomIterator = jpaSource.iterator();
     	while (axiomIterator.hasNext())
@@ -99,7 +99,7 @@ public class PersistenceCities
 	  */
     public void testSpecifiedNamesQuery()
     {
-    	CityCollector cityCollector = new CityCollector(PU_NAME);
+    	CityCollector cityCollector = new CityCollector(PU_NAME, new ProviderManager());
     	List<NameMap> termNameList = new ArrayList<NameMap>();
     	termNameList.add(new NameMap("Name", "name"));
     	termNameList.add(new NameMap("Altitude", "altitude"));
@@ -127,18 +127,5 @@ public class PersistenceCities
 		}
 		System.exit(0);
 	}
-
-    /**
-     * Wait sychronously for task completion
-     * @param exe Executable object returned upon starting task
-     * @throws InterruptedException Should not happen
-     */
-    protected void waitForTask(Executable exe) throws InterruptedException
-    {
-        synchronized (exe)
-        {
-            exe.wait();
-        }
-    }
 
 }

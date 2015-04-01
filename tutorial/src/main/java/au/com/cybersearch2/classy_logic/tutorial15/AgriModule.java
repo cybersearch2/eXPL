@@ -30,6 +30,7 @@ import dagger.Module;
 		IncreasedAgriculture.class,
 		AgriPercentCollector.class, 
 		Agri10YearCollector.class,
+		AgriAxiomProvider.class,
 		PersistenceAgriculture.class
 },
 includes=TestModule.class)

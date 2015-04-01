@@ -58,7 +58,10 @@ public class JpaSourceIterator implements Iterator<Axiom>
 		this.termNameList = termNameList;
     }
 
-
+    /**
+     * 
+     * @see java.util.Iterator#hasNext()
+     */
 	@Override
 	public boolean hasNext() 
 	{
@@ -67,6 +70,10 @@ public class JpaSourceIterator implements Iterator<Axiom>
 		return entityIterator.hasNext();
 	}
 
+	/**
+	 * 
+	 * @see java.util.Iterator#next()
+	 */
 	@Override
 	public Axiom next() 
 	{   // Don't assume hasNext() has been called prior
@@ -74,8 +81,22 @@ public class JpaSourceIterator implements Iterator<Axiom>
 			return null;
 		// next() starts here
 		Object entity = entityIterator.next();
+		return getAxiomFromEntity(entity);
+	}
+
+	/**
+	 * Returns Axiom marshalled from entity object.
+	 * Normally, termNameList is provided to specify which terms to include
+	 * and how to order them. Field names are matched to term names case insensitive.
+	 * If no termNameList provided, terms are added for fields of type known to XPL.
+	 * This may suffice for simple cases.
+	 * @param entity Object
+	 * @return Axiom object
+	 */
+	protected Axiom getAxiomFromEntity(Object entity)
+	{
 		// Create new axiom
-		Axiom axiom = new Axiom(axiomName == null ? entity.getClass().getSimpleName() : axiomName);
+		Axiom axiom = new Axiom(axiomName);
 		// Use Bean utilities to access entity object fields
 		PropertyDescriptor[] descriptors = BeanUtil.getBeanInfo(entity).getPropertyDescriptors();
 		// Special case for identity column, assuming name is "id" by convention
@@ -106,7 +127,7 @@ public class JpaSourceIterator implements Iterator<Axiom>
 				assignItem(paramList, termIndex, new Parameter(termName, value == null ? new Null() : value));
 			else if ((value != null) && (DelegateParameter.isDelegateClass(value.getClass())))
 			{
-               // By default, all fields of expression-capable type are added as terms to the axiom
+                // By default, all fields of expression-capable type are added as terms to the axiom
 				if ("id".equals(key))
 					id = new Parameter(key, value);
 				else 
@@ -138,7 +159,7 @@ public class JpaSourceIterator implements Iterator<Axiom>
 
     /**
      * Invoke getter
-     *@param property PropertyDescriptor
+     *@param property Bean PropertyDescriptor
      *@return Object returned by getter
      */
     protected Object invoke(Object bean, PropertyDescriptor property) 
@@ -149,6 +170,12 @@ public class JpaSourceIterator implements Iterator<Axiom>
         return BeanUtil.invoke(method, bean, BeanUtil.NO_ARGS);
     }
 
+    /**
+     * Add parameter to list in specified position
+     * @param paramList Parameter list
+     * @param index Position
+     * @param value The parameter
+     */
 	public void assignItem(ArrayList<Parameter> paramList, int index, Parameter value) 
 	{
 		if (index < paramList.size())

@@ -19,15 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classytask.Executable;
 
 /**
  * CitiesAxiomProvider
@@ -40,12 +43,15 @@ public class CitiesAxiomProvider implements AxiomProvider
     static public final String ALL_CITIES = "all_cities";
     /** Persistence Unit name to look up configuration details in persistence.xml */
     static public final String PU_NAME = "cities";
+    @Inject
+    ProviderManager providerManager;
 
 	/**
 	 * 
 	 */
 	public CitiesAxiomProvider() 
 	{
+		DI.inject(this);
 	}
 
 	@Override
@@ -63,7 +69,7 @@ public class CitiesAxiomProvider implements AxiomProvider
         PersistenceContainer container = new PersistenceContainer(PU_NAME);
         try 
         {
-			waitForTask(container.executeTask(setUpWork));
+			container.executeTask(setUpWork).waitForTask();
 		} 
         catch (InterruptedException e) 
         {
@@ -75,7 +81,7 @@ public class CitiesAxiomProvider implements AxiomProvider
 	public AxiomSource getAxiomSource(String axiomName,
 			List<String> axiomTermNameList) 
 	{
-    	CityCollector cityCollector = new CityCollector(PU_NAME);
+    	CityCollector cityCollector = new CityCollector(PU_NAME, providerManager);
 		List<NameMap> nameMapList = new ArrayList<NameMap>();
 		for (String termName: axiomTermNameList)
 		{
@@ -102,17 +108,4 @@ public class CitiesAxiomProvider implements AxiomProvider
 		};
 	}
 	
-    /**
-     * Wait sychronously for task completion
-     * @param exe Executable object returned upon starting task
-     * @throws InterruptedException Should not happen
-     */
-    protected void waitForTask(Executable exe) throws InterruptedException
-    {
-        synchronized (exe)
-        {
-            exe.wait();
-        }
-    }
-
 }

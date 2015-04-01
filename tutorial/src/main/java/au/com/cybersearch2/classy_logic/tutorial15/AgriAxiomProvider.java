@@ -20,12 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
 
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
@@ -34,13 +36,16 @@ import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.EntityManagerDelegate;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceDao;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
 import au.com.cybersearch2.classytask.Executable;
+import au.com.cybersearch2.classytask.WorkStatus;
 
 /**
  * AgriAxiomProvider
@@ -49,6 +54,7 @@ import au.com.cybersearch2.classytask.Executable;
  */
 public class AgriAxiomProvider implements AxiomProvider 
 {
+	
 	class PersistAgri10Year implements PersistenceWork
 	{
 		protected Agri10Year agri10Year;
@@ -58,7 +64,6 @@ public class AgriAxiomProvider implements AxiomProvider
 			this.agri10Year =agri10Year;
 		}
 		
-	    @Override
 	    public void doInBackground(EntityManagerLite entityManager)
 	    {
 	    	// Use OrmLite query to get Country object from database 
@@ -82,32 +87,31 @@ public class AgriAxiomProvider implements AxiomProvider
             // now we can set the select arg (?) and run the query
             selectArg.setValue(agri10Year.getCountryName());
             List<Country> results = countryDao.query(preparedQuery);
-            if (results.size() == 0)
-            {
-            	System.err.println("Cannot find country \"" + agri10Year.getCountryName() + "\"");
-            }
-            else
+            if (results.size() > 0)
             {
 	            Country country = results.get(0);
 	            entityManager.merge(country);
 	            agri10Year.setCountry(country);
 		    	entityManager.persist(agri10Year);
             }
+            else
+            	System.err.println("Cannot find country \"" + agri10Year.getCountryName() + "\"");
 	    }
-		
+
 	    @Override
 	    public void onPostExecute(boolean success)
 	    {
 	        if (!success)
-	            throw new IllegalStateException("Database set up failed. Check console for error details.");
+	            throw new IllegalStateException("Database error.");
 	    }
 
 	    @Override
 	    public void onRollback(Throwable rollbackException)
 	    {
-	        throw new IllegalStateException("Database set up failed. Check console for stack trace.", rollbackException);
+	    	//throw new IllegalStateException("Database error.", rollbackException);
+	    	System.err.println(rollbackException.toString());
 	    }
-	}
+    }
 	
     /** Named query to find the percent change in agriculture land for all years */
     static public final String ALL_YEAR_PERCENTS = "all_year_percents";
@@ -120,11 +124,15 @@ public class AgriAxiomProvider implements AxiomProvider
     
     protected boolean databaseCreated;
     
+    @Inject
+    ProviderManager providerManager;
+    
 	/**
 	 * 
 	 */
 	public AgriAxiomProvider() 
 	{
+		DI.inject(this);
 	}
 
 	@Override
@@ -169,7 +177,7 @@ public class AgriAxiomProvider implements AxiomProvider
 				{
 					nameMapList.add(new NameMap(termName, termName));
 				}
-	    	collector = new AgriPercentCollector(PU_NAME);
+	    	collector = new AgriPercentCollector(PU_NAME, providerManager);
 		}
 		else if (TEN_YEAR_AXIOM.equals(axiomName))
 		{
@@ -187,7 +195,7 @@ public class AgriAxiomProvider implements AxiomProvider
 					nameMapList.add(nameMap);
 				}
 			}
-	    	collector = new Agri10YearCollector(PU_NAME);
+	    	collector = new Agri10YearCollector(PU_NAME, providerManager);
 		}
 		else
 			throw new IllegalArgumentException("Axiom name \"" + axiomName + "\" not valid for Axiom Provider \"" + getName() + "\"");
@@ -215,20 +223,12 @@ public class AgriAxiomProvider implements AxiomProvider
 				if (countryParam == null)
 					throw new ExpressionException("Axiom \"" + axiom.getName() + "\" does not have a term named \"country\"");
 		    	agri10Year.setCountry(new Country(countryParam.getValue().toString()));
+				//System.out.println(agri10Year.getCountryName() + " " + ++agri10YearCount);
 		    	agri10Year.setId(agri10YearId++);
 		    	agri10Year.setSurfaceArea((Double)axiom.getTermByName("surface_area").getValue());
-				PersistAgri10Year persistAgri10Year = new PersistAgri10Year(agri10Year);
-		        PersistenceContainer container = new PersistenceContainer(PU_NAME);
-		        container.executeTask(persistAgri10Year);
-		        // For synchronous execution of persistence work, comment above line and uncomment below
-		        //try 
-		        //{
-				//	waitForTask(container.executeTask(persistAgri10Year));
-				//} 
-		        //catch (InterruptedException e) 
-		        //{
-				//	e.printStackTrace();
-				//}
+		    	providerManager.doWorkAsync(PU_NAME, new PersistAgri10Year(agri10Year), false);
+				//if (providerManager.doWork(PU_NAME, new PersistAgri10Year(agri10Year)) != WorkStatus.FINISHED)
+			    //	throw new QueryExecutionException("Error persisting resource " + getName() + " axiom: " + axiom.toString());
 			}
 		};
 	}
@@ -238,12 +238,16 @@ public class AgriAxiomProvider implements AxiomProvider
      * @param exe Executable object returned upon starting task
      * @throws InterruptedException Should not happen
      */
-    protected void waitForTask(Executable exe) throws InterruptedException
+    protected WorkStatus waitForTask(Executable exe) throws InterruptedException
     {
-        synchronized (exe)
+    	WorkStatus status = exe.getStatus();
+    	if ((status == WorkStatus.FINISHED) || (status == WorkStatus.FAILED))
+    		return status;
+       synchronized (exe)
         {
             exe.wait();
         }
+        return exe.getStatus();
     }
 
 }

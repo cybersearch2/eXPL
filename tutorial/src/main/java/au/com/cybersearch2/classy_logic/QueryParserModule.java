@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic;
 
 import au.com.cybersearch2.classy_logic.tutorial11.RegexGroups;
 import au.com.cybersearch2.classy_logic.tutorial4.InWords;
+import au.com.cybersearch2.classy_logic.tutorial9.CalculateSquareMiles2;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import dagger.Module;
 
@@ -28,7 +29,8 @@ import dagger.Module;
 @Module(injects= 
 {
 		InWords.class, 
-		RegexGroups.class
+		RegexGroups.class,
+		CalculateSquareMiles2.class
 },
 includes=TestModule.class)
 public class QueryParserModule implements ApplicationModule 

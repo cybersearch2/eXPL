@@ -43,7 +43,7 @@ public class JpaSource implements AxiomSource
 	 */
 	public JpaSource(DataCollector dataCollector, String axiomName) 
 	{
-		this(dataCollector, null, null);
+		this(dataCollector, axiomName, null);
 	}
 
 	/**

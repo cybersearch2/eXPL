@@ -276,7 +276,7 @@ public class QueryProgramTest
 			public boolean onSolution(Solution solution) 
 			{
 				assertThat(solution.getString(TEMPLATE_NAME, VARIABLE_NAME)).isEqualTo("eureka!");
-				assertThat(solution.getString(TEMPLATE_NAME2, TEMPLATE_NAME + "." + VARIABLE_NAME)).isEqualTo("eureka!");
+				assertThat(solution.getString(TEMPLATE_NAME2, VARIABLE_NAME)).isEqualTo("eureka!");
 				return true;
 			}};
 		queryProgram.executeQuery(SCOPE_NAME, QUERY_SPEC_NAME, solutionHandler);

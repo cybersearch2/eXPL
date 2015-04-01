@@ -20,12 +20,12 @@ import java.util.Collections;
 
 import javax.persistence.Query;
 
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.interfaces.DataCollector;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classytask.Executable;
+import au.com.cybersearch2.classytask.WorkStatus;
 
 /**
  * JpaEntityCollector
@@ -44,22 +44,28 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
     /** List of objects to be translated into an axiom source */
     protected Collection<Object> data;
     /** JPA container to execute named query */
-    protected PersistenceContainer container;
+    protected String persistenceUnit;
     /** Maximum number of objects to return from a single query */
     protected int maxResults;
     /** The start position of the first result, numbered from 0 */
     protected int startPosition;
     /** flag set true if a call to getData() may deliver more results */
     protected boolean moreExpected;
+    /** Flag set true if processBatch() to be called after persistence work performed */
     protected boolean batchMode;
+    /** Provider Manager to perform persistence work */
+    protected ProviderManager providerManager;
+    /** Flag set true if user-controlled transactions */
+    protected boolean userTransactionMode;
 
     /**
      * Construct a JpaEntityCollector object
      * @param persistenceUnit Name of persistence unit defined in persistence.xml configuration file
      */
-    public JpaEntityCollector(String persistenceUnit)
+    public JpaEntityCollector(String persistenceUnit, ProviderManager providerManager)
     {
-        container = new PersistenceContainer(persistenceUnit);
+        this.persistenceUnit = persistenceUnit;
+        this.providerManager = providerManager;
     }
     
     /**
@@ -68,7 +74,7 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
      */
     public void setUserTransactionMode(boolean value)
     {
-        container.setUserTransactionMode(value);
+    	userTransactionMode = value;
     }
  
 	/**
@@ -82,7 +88,8 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
 	}
 
     /**
-     * Get data using JPA entity manager
+     * Get data using JPA entity manager. Number of results can be limited by controlled by setting maxResults
+     * @see #setMaxResults(int)
      * @see au.com.cybersearch2.classyjpa.entity.PersistenceWork#doInBackground(au.com.cybersearch2.classyjpa.EntityManagerLite)
      */
 	@SuppressWarnings("unchecked")
@@ -117,7 +124,10 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
 	public void onPostExecute(boolean success) 
 	{
         if (!success)
-            throw new IllegalStateException("Database set up failed. Check console for error details.");
+        {
+        	moreExpected = false;
+        	data.clear();
+        }
 	}
 
 	/**
@@ -127,7 +137,8 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
 	@Override
 	public void onRollback(Throwable rollbackException) 
 	{
-        throw new IllegalStateException("Database set up failed. Check console for stack trace.", rollbackException);
+    	moreExpected = false;
+    	data.clear();
 	}
 
 	/**
@@ -138,14 +149,9 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
 	@Override
 	public Collection<Object> getData() 
 	{
-		try 
-		{
-			waitForTask(container.executeTask(this));
-		} 
-		catch (InterruptedException e) 
-		{
-			throw new QueryExecutionException("Work for query \"" + namedJpaQuery + "\" interrupted", e);
-		}
+		WorkStatus status = providerManager.doWork(persistenceUnit, this, userTransactionMode);
+		if (status != WorkStatus.FINISHED)
+			throw new QueryExecutionException("Error fetching axioms from persistence unit " + persistenceUnit);
 		if (batchMode)
 			processBatch();
 		if (data == null)
@@ -158,6 +164,9 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
 		}
 	}
 
+	/**
+	 * Override and set batchMode true if processBatch() to be called after persistence work performed
+	 */
 	protected void processBatch() 
 	{
 	}
@@ -179,18 +188,5 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
 	{
 		this.maxResults = maxResults;
 	}
-
-    /**
-     * Wait sychronously for task completion
-     * @param exe Executable object returned upon starting task
-     * @throws InterruptedException Should not happen
-     */
-    protected void waitForTask(Executable exe) throws InterruptedException
-    {
-        synchronized (exe)
-        {
-            exe.wait();
-        }
-    }
 
 }

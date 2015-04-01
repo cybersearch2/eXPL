@@ -24,6 +24,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
@@ -33,7 +34,6 @@ import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classytask.Executable;
 
 /**
  * AgricultureJpaTest
@@ -118,17 +118,17 @@ public class AgricultureJpaTest
         };
         // Execute work and wait synchronously for completion
         PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        waitForTask(container.executeTask(setUpWork));
+        container.executeTask(setUpWork).waitForTask();
     }
 
     @Test
     public void test_query_term_names() throws Exception
     {
-    	AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME);
+    	AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME, new ProviderManager());
     	agriPercentCollector.setMaxResults(1000);
     	List<NameMap> termNameList = new ArrayList<NameMap>();
     	termNameList.add(new NameMap("country", "country"));
-		for (int year = 1962; year < 2012; ++year)
+		for (int year = 1962; year < 2011; ++year)
 		{
 			String key = "Y" + year;
 			termNameList.add(new NameMap(key, key));
@@ -148,20 +148,6 @@ public class AgricultureJpaTest
     		axiomIterator.next();
     	}
     	//System.out.println(count);
-    	assertThat(count).isEqualTo(218);
-    }
-    
-
-    /**
-     * Wait sychronously for task completion
-     * @param exe Executable object returned upon starting task
-     * @throws InterruptedException Should not happen
-     */
-    protected void waitForTask(Executable exe) throws InterruptedException
-    {
-        synchronized (exe)
-        {
-            exe.wait();
-        }
+    	assertThat(count).isEqualTo(208);
     }
 }

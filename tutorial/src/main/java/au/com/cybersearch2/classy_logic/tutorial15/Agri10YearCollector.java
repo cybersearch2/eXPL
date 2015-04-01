@@ -15,18 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial15;
 
-import java.util.Collection;
-
-import javax.inject.Inject;
-import javax.persistence.Query;
-
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.QueryForAllGenerator;
-import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.persist.Persistence;
 import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * Agri10YearCollector extends JpaEntityCollector to create an external axiom source
@@ -41,19 +34,18 @@ public class Agri10YearCollector extends JpaEntityCollector
     static public final String ALL_AGRI_10_YEAR = "all_agri_10_year";
 
     /** Factory object to create "cities" Persistence Unit implementation */
-    @Inject PersistenceFactory persistenceFactory;
+    protected PersistenceContext persistenceContext;
 
     /**
      * Construct a Agri10YearCollector object
      * @param persistenceUnit
      */
-	public Agri10YearCollector(String persistenceUnit) 
+	public Agri10YearCollector(String persistenceUnit, ProviderManager providerManager) 
 	{
-		super(persistenceUnit);
+		super(persistenceUnit, providerManager);
 		// JpaEntityCollector needs the name of the query to fetch all cities 
 		this.namedJpaQuery = ALL_AGRI_10_YEAR;
-        // Inject persistenceFactory
-        DI.inject(this); 
+        persistenceContext = new PersistenceContext();
 		setUp(persistenceUnit);
 	}
 
@@ -63,9 +55,8 @@ public class Agri10YearCollector extends JpaEntityCollector
 	 */
 	protected void setUp(String persistenceUnit)
 	{
-        Persistence persistence = persistenceFactory.getPersistenceUnit(persistenceUnit);
         // Get Interface for JPA Support, required to create named queries
-        PersistenceAdmin persistenceAdmin = persistence.getPersistenceAdmin();
+        PersistenceAdmin persistenceAdmin = persistenceContext.getPersistenceAdmin(persistenceUnit);
         QueryForAllGenerator allEntitiesQuery = 
                 new QueryForAllGenerator(persistenceAdmin);
         persistenceAdmin.addNamedQuery(Agri10Year.class, ALL_AGRI_10_YEAR, allEntitiesQuery);

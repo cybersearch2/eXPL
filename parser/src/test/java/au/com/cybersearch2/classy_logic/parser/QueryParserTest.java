@@ -548,13 +548,13 @@ public class QueryParserTest
     public void test_simple_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(SIMPLE_CALCULATE);
-		assertThat(parserAssembler.getTemplate("increment_n").toString()).isEqualTo("increment_n(n, limit, increment_n.1(?++n<limit))");
+		assertThat(parserAssembler.getTemplate("increment_n").toString()).isEqualTo("increment_n(n, limit, increment_n1(?++n<limit))");
 		//System.out.println(parserAssembler.getTemplate("increment_n"));
         Template calcTemplate = parserAssembler.getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
-        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 3, limit = 3, increment_n.1 = true)");
+        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 3, limit = 3, increment_n1 = true)");
     }
     
     @Test
@@ -563,28 +563,28 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(SIMPLE_LIST_CALCULATE);
 		assertThat(parserAssembler.getTemplate("increment_n")
 			.toString()).isEqualTo(
-				"increment_n(n, limit, increment_n.1(number_list.0=n++, number_list.1=n++, number_list.2=n++, ?number_list.2<limit))");
+				"increment_n(n, limit, increment_n1(number_list.0=n++, number_list.1=n++, number_list.2=n++, ?number_list.2<limit))");
 		//System.out.println(parserAssembler.getTemplate("increment_n"));
         Template calcTemplate = parserAssembler.getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
         //System.out.println(solution.getAxiom("increment_n").toString());
-        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, limit = 3, increment_n.1 = true)");
+        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, limit = 3, increment_n1 = true)");
     }
     
     @Test
     public void test_simple_variable_index_list_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(SIMPLE_VARIABLE_INDEX_LIST_CALCULATE);
-		assertThat(parserAssembler.getTemplate("increment_n").toString()).isEqualTo("increment_n(n, i, limit, increment_n.1(number_list.i++=n++, ?i<limit))");
+		assertThat(parserAssembler.getTemplate("increment_n").toString()).isEqualTo("increment_n(n, i, limit, increment_n1(number_list.i++=n++, ?i<limit))");
 		//System.out.println(parserAssembler.getTemplate("increment_n"));
         Template calcTemplate = parserAssembler.getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
         //System.out.println(solution.getAxiom("increment_n").toString());
-        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, i = 3, limit = 3, increment_n.1 = true)");
+        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, i = 3, limit = 3, increment_n1 = true)");
     }
         
     @Test
@@ -593,28 +593,28 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(SIMPLE_LIST_LENGTH_CALCULATE);
 		assertThat(parserAssembler.getTemplate("increment_n")
 				.toString()).isEqualTo(
-						"increment_n(n, i, limit, increment_n.1(number_list.i++=n++, ?number_list.length<limit))");
+						"increment_n(n, i, limit, increment_n1(number_list.i++=n++, ?number_list.length<limit))");
 		//System.out.println(parserAssembler.getTemplate("increment_n"));
         Template calcTemplate = parserAssembler.getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
         //System.out.println(solution.getAxiom("increment_n").toString());
-        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, i = 3, limit = 3, increment_n.1 = true)");
+        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, i = 3, limit = 3, increment_n1 = true)");
     }
     
     @Test
     public void test_factorial_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(FACTORIAL_CALCULATE);
-		assertThat(parserAssembler.getTemplate("factorial").toString()).isEqualTo("factorial(i, n, factorial, factorial.1(factorial*=i, ?i++<n))");
+		assertThat(parserAssembler.getTemplate("factorial").toString()).isEqualTo("factorial(i, n, factorial, factorial1(factorial*=i, ?i++<n))");
 		//System.out.println(parserAssembler.getTemplate("factorial").toString());
         Template calcTemplate = parserAssembler.getTemplate("factorial");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
         //System.out.println(solution.getAxiom("factorial").toString());
-        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i = 5, n = 4, factorial = 24, factorial.1 = true)");
+        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i = 5, n = 4, factorial = 24, factorial1 = true)");
     }
     
     @Test
@@ -843,20 +843,35 @@ public class QueryParserTest
  	    reader.close();
  	    
         QueryExecuterAdapter adapter2 = new QueryExecuterAdapter(agriSource, Collections.singletonList(more_agriculture_y1990_y2010));
- 	    agriculturalQuery = new QueryExecuter(new QueryParams(adapter2.getScope(), adapter2.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter2.getScope(), adapter2.getQuerySpec());
+ 	    File surfaceAreaList = new File("src/test/resources", "surface-area.lst");
+  	    final LineNumberReader reader2 = new LineNumberReader(new FileReader(surfaceAreaList));
+  	    SolutionHandler solutionHandler = new SolutionHandler(){
+
+			@Override
+			public boolean onSolution(Solution solution) {
+	 	    	String line = null;
+				try {
+					line = reader2.readLine();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+	 	    	//System.out.println(solution.getAxiom("surface_area_increase").toString());
+	  	    	assertThat(solution.getAxiom("surface_area_increase").toString()).isEqualTo(line);
+				return true;
+			}};
+
+ 	    agriculturalQuery = new QueryExecuter(queryParams);
 	    more_agriculture_y1990_y2010.backup(false);
 	    Template surface_area = parserAssembler.getTemplate("surface_area_increase");
 	    surface_area.setKey("surface_area");
 	    agriculturalQuery.chain(QueryExecuterAdapter.ensembleFromSource(parserAssembler.getAxiomSource("surface_area")), Collections.singletonList(surface_area));
- 	    File surfaceAreaList = new File("src/test/resources", "surface-area.lst");
-  	    reader = new LineNumberReader(new FileReader(surfaceAreaList));
- 	    while (agriculturalQuery.execute())
- 	    {
- 	    	//System.out.println(more_agriculture_yes.toString());
- 	    	String line = reader.readLine();
-    		assertThat(surface_area.toString()).isEqualTo(line);
- 	    }
-	    reader.close();
+		while (agriculturalQuery.execute())
+		{
+			if (!solutionHandler.onSolution(agriculturalQuery.getSolution()))
+				break;
+		}
+	    reader2.close();
  	    Parameter[] dataParms = new Parameter[] 
  	    { 
  	    	new Parameter("country", "Kosovo"), 

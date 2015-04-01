@@ -59,7 +59,7 @@ public class LexiconSource implements AxiomSource
 	@Override
 	public Iterator<Axiom> iterator() 
 	{
-		File dictionaryFile = new File("src/test/resources", "definitions.txt");
+		File dictionaryFile = new File("src/main/resources", "definitions.txt");
         try 
         {
 			reader = new BufferedReader(new FileReader(dictionaryFile));

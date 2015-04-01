@@ -642,7 +642,7 @@ void CalculatorExpression(int loop_number, String loopName, String templateName,
 Operand InnerCalculator(int loop_number, String templateName, ParserAssembler parserAssembler, boolean runOnce) :
 {
   Operand calcExpression;
-  String loopName = templateName + "." + loop_number;
+  String loopName = templateName + loop_number;
   parserAssembler.chainTemplate(templateName, loopName);
 }
 {
