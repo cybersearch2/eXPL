@@ -4,7 +4,7 @@
   <parent>
     <groupId>au.com.cybersearch2</groupId>
     <artifactId>xpl</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
   </parent>
   <artifactId>tutorial</artifactId>
   <packaging>jar</packaging>
@@ -38,17 +38,17 @@
      <dependency>
       <groupId>au.com.cybersearch2</groupId>
       <artifactId>parser</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.2</version>
      </dependency>
      <dependency>
       <groupId>au.com.cybersearch2</groupId>
       <artifactId>classyjava</artifactId>
-      <version>1.0.3</version>
+      <version>1.0.4</version>
      </dependency>
     <dependency>
       <groupId>au.com.cybersearch2</groupId>
       <artifactId>classyjava</artifactId>
-      <version>1.0.3</version>
+      <version>1.0.4</version>
       <type>test-jar</type>
      </dependency>
     <dependency>
