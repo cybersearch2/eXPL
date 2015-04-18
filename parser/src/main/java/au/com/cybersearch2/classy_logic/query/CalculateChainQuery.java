@@ -53,7 +53,7 @@ public class CalculateChainQuery extends ChainQuery
 
 	/**
 	 * Set Choice
-	 * @param Choice the choice to set
+	 * @param choice the choice to set
 	 */
 	public void setChoice(Choice choice) 
 	{
