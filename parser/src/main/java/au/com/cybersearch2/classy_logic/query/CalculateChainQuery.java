@@ -52,7 +52,8 @@ public class CalculateChainQuery extends ChainQuery
 	}
 
 	/**
-	 * @param axiomListenerList the axiomListenerList to set
+	 * Set Choice
+	 * @param Choice the choice to set
 	 */
 	public void setChoice(Choice choice) 
 	{

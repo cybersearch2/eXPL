@@ -297,7 +297,7 @@ public class ParserAssembler implements LocaleListener
 
 	/**
 	 * Set resource properties for axiom and remove internal reference
-	 * @param name Resource name
+	 * @param resourceName Resource name
 	 * @param axiomName Name of axiom to which properties apply
 	 * @param properties Properties specific to the resource. May be empty.
 	 */
@@ -409,7 +409,6 @@ public class ParserAssembler implements LocaleListener
 	
 	/**
 	 * Register axiom list by adding it's axiom listener to this ParserAssembler object
-	 * @param axiomKey The name of the axioms inserted into the list
 	 * @param axiomList The axiom list
 	 */
 	public void registerAxiomList(AxiomList axiomList) 
@@ -442,7 +441,7 @@ public class ParserAssembler implements LocaleListener
 	/**
 	 * Register axiom list by adding it's axiom listener to this ParserAssembler object
 	 * @param axiomKey The name of the axioms inserted into the list
-	 * @param axiomList The axiom list
+	 * @param axiomListener The axiom listener
 	 */
 	public void registerAxiomListener(String axiomKey, AxiomListener axiomListener) 
 	{

@@ -87,7 +87,7 @@ public class ProviderManager
 	 * @param name Axiom Provider name
 	 * @param axiomName Axiom name
 	 * @param axiomTermNameList List of term names constrains which terms are included and their order
-	 * @return
+	 * @return AxiomSource implementation
 	 */
 	public AxiomSource getAxiomSource(String name, String axiomName,
 			List<String> axiomTermNameList) 
@@ -117,7 +117,7 @@ public class ProviderManager
 	/**
 	 * Returns Axiom Provider specified by name
 	 * @param name Axiom Provider name
-	 * @return
+	 * @return AxiomProvider implementation
 	 */
 	public AxiomProvider getAxiomProvider(String name)
 	{

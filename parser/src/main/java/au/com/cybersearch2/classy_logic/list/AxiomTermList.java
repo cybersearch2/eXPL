@@ -159,7 +159,7 @@ public class AxiomTermList implements ItemList<Object>
 
 	/**
 	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int)
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String)
 	 */
 	@Override
 	public ItemListVariable<Object> newVariableInstance(int index, String suffix) 
@@ -176,7 +176,7 @@ public class AxiomTermList implements ItemList<Object>
 
 	/**
 	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand)
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String)
 	 */
 	@Override
 	public ItemListVariable<Object> newVariableInstance(Operand expression, String suffix) 

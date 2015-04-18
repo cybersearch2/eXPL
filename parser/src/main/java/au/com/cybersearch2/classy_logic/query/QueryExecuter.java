@@ -77,8 +77,7 @@ public class QueryExecuter extends ChainQueryExecuter
 
 	/**
 	 * Construct a QueryExecuter object 
-	 * @param querySpec Query specification
-	 * @param scope Query context
+	 * @param queryParams The query parameters
 	 */
 	public QueryExecuter(QueryParams queryParams) 
 	{

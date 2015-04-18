@@ -64,7 +64,7 @@ public class RegExOperand extends StringOperand
 
 	/**
 	 * @param name Term name
-	 * @param regex Regular expression operand
+	 * @param regexOp Regular expression operand
 	 * @param flags Optional flags to modify regular expression behavior
 	 * @param group Group object or null if grouping not used
 	 */

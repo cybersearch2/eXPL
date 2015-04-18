@@ -35,7 +35,7 @@ public interface AxiomProvider
 	
 	/**
 	 * Establish resource for specified axiom name and properties
-	 * @param name 
+	 * @param axiomName 
 	 * @param axiomName Axiom key
 	 * @param properties Optional properties specific to the provider implementation
 	 */
