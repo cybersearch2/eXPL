@@ -127,6 +127,76 @@
 	            </plugins>
 	        </build>
 	    </profile>
+	    <profile>
+	        <id>java</id>
+	        <build>
+	            <plugins>
+          <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-install-plugin</artifactId>
+           <version>2.5.1</version>
+           <executions>
+              <execution>
+                 <id>persistence-api</id>
+                 <goals>
+                    <goal>install-file</goal>
+                 </goals>
+                 <phase>initialize</phase>
+                 <configuration>
+                   <groupId>javax.persistence</groupId>
+                   <artifactId>persistence-api</artifactId>
+                   <version>2.0</version>
+                   <packaging>jar</packaging>
+                   <file>${basedir}/persistence-api-2.0.jar</file>
+                   <generatePom>true</generatePom>
+                 </configuration>
+              </execution>
+              <execution>
+                 <id>openbeans</id>
+                 <goals>
+                    <goal>install-file</goal>
+                 </goals>
+                 <phase>initialize</phase>
+                 <configuration>
+                   <groupId>com.googlecode.openbeans</groupId>
+                   <artifactId>openbeans</artifactId>
+                   <version>1.0</version>
+                   <packaging>jar</packaging>
+                   <file>${basedir}/openbeans-1.0.jar</file>
+                   <generatePom>true</generatePom>
+                 </configuration>
+              </execution>
+              <execution>
+                 <id>ormlite-core</id>
+                 <goals>
+                    <goal>install-file</goal>
+                 </goals>
+                 <phase>initialize</phase>
+                 <configuration>
+                   <packaging>jar</packaging>
+                   <file>${basedir}/ormlite-core/ormlite-core.jar</file>
+                   <generatePom>false</generatePom>
+                   <pomFile>${basedir}/ormlite-core/pom.xml</pomFile>
+                 </configuration>
+              </execution>
+              <execution>
+                 <id>ormlite-jdbc</id>
+                 <goals>
+                    <goal>install-file</goal>
+                 </goals>
+                 <phase>initialize</phase>
+                 <configuration>
+                   <packaging>jar</packaging>
+                   <file>${basedir}/ormlite-jdbc/ormlite-jdbc.jar</file>
+                   <generatePom>false</generatePom>
+                   <pomFile>${basedir}/ormlite-jdbc/pom.xml</pomFile>
+                 </configuration>
+              </execution>
+           </executions>
+          </plugin>      
+	            </plugins>
+	        </build>
+	    </profile>
         <profile>
             <id>tools</id>
             <build>
