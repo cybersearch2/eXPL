@@ -39,7 +39,7 @@
   </properties>
 	<profiles>
 	    <profile>
-	        <id>java</id>
+	        <id>javacc</id>
 	        <build>
 	            <plugins>
             <plugin>
@@ -127,6 +127,34 @@
 	            </plugins>
 	        </build>
 	    </profile>
+        <profile>
+            <id>tools</id>
+            <build>
+                <plugins>
+          <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-install-plugin</artifactId>
+           <version>2.5.1</version>
+           <executions>
+              <execution>
+                 <id>classyjava</id>
+                 <goals>
+                    <goal>install-file</goal>
+                 </goals>
+                 <phase>initialize</phase>
+                 <configuration>
+                   <packaging>jar</packaging>
+                   <file>${basedir}/classyjava-1.0.4.jar</file>
+                   <generatePom>false</generatePom>
+                   <pomFile>${basedir}/classyjava-1.0.4.pom</pomFile>
+                   <javaDoc>${basedir}/classyjava-1.0.4-javadoc.jar</javaDoc>
+                 </configuration>
+              </execution>
+           </executions>
+          </plugin>      
+                </plugins>
+            </build>
+        </profile>
 	</profiles>
     <build>
       <plugins>
