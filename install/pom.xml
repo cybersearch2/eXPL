@@ -215,9 +215,9 @@
                  <configuration>
                    <groupId>au.com.cybersearch2</groupId>
                    <artifactId>classy_tools</artifactId>
-                   <version>1.0.4</version>
+                   <version>1.0.5</version>
                    <packaging>pom</packaging>
-                   <file>${basedir}/classy_tools-1.0.4.pom</file>
+                   <file>${basedir}/classy_tools-1.0.5.pom</file>
                  </configuration>
               </execution>
               <execution>
@@ -228,10 +228,10 @@
                  <phase>initialize</phase>
                  <configuration>
                    <packaging>jar</packaging>
-                   <file>${basedir}/classyjava-1.0.4.jar</file>
+                   <file>${basedir}/classyjava-1.0.5.jar</file>
                    <generatePom>false</generatePom>
-                   <pomFile>${basedir}/classyjava-1.0.4.pom</pomFile>
-                   <javaDoc>${basedir}/classyjava-1.0.4-javadoc.jar</javaDoc>
+                   <pomFile>${basedir}/classyjava-1.0.5.pom</pomFile>
+                   <javaDoc>${basedir}/classyjava-1.0.5-javadoc.jar</javaDoc>
                  </configuration>
               </execution>
            </executions>

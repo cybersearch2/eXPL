@@ -46,10 +46,12 @@
            </execution>
         </executions>
         <configuration>
-          <doctitle><![CDATA[<h1>XPL Compiler/Engine API - Java Library</h1>]]></doctitle>
-          <windowtitle>XPL Compiler/Engine API - Java Library</windowtitle> 
+          <doctitle>eXPL Compiler/Engine API</doctitle>
+          <windowtitle>eXPL Compiler/Engine API</windowtitle> 
           <links>
            <link>https://square.github.io/dagger/javadoc/</link>
+           <link>http://cybersearch2.com.au/apidocs/</link>
+           <link>http://docs.oracle.com/javase/7/docs/api/</link>
           </links>
          </configuration>
        </plugin>
