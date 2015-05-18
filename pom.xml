@@ -11,7 +11,7 @@
    <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <dagger.version>1.2.2</dagger.version>
-    <classy_tools.version>1.0.6</classy_tools.version>
+    <classy_tools.version>1.0.7</classy_tools.version>
  </properties>
  <url>http://cybersearch2.com.au</url>
  <licenses>
