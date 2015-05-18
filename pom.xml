@@ -126,7 +126,6 @@
           <groupId>au.com.cybersearch2</groupId>
           <artifactId>classyutils</artifactId>
           <version>${classy_tools.version}</version>
-          <type>test-jar</type>
          </dependency>
         <dependency>
           <groupId>junit</groupId>
