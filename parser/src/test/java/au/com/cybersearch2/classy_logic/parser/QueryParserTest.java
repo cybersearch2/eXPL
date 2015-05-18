@@ -459,44 +459,6 @@ public class QueryParserTest
     }
     
 	@Test
-	public void test_high_cities_jpa() throws Exception
-	{
-		InputStream stream = new ByteArrayInputStream(HIGH_CITIES_JPA_XPL.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-	    ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
-	    Template highCities = parserAssembler.getTemplate("high_city");
-	    highCities.setKey("city");
-        QuerySpec querySpec = new QuerySpec("TEST");
-		KeyName keyName = new KeyName("city", "high_city");
-		querySpec.addKeyName(keyName);
-	    QueryExecuter highCitiesQuery = new QueryExecuter(new QueryParams(queryProgram.getGlobalScope(), querySpec));
-	    int count = 0;
- 	    if (highCitiesQuery.execute())
- 	    {
-  	    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name = addis ababa, altitude = 8000)");
-  	    	++count;
- 	    }
- 	    if (highCitiesQuery.execute())
- 	    {
-  	    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name = denver, altitude = 5280)");
-  	    	++count;
- 	    }
- 	    if (highCitiesQuery.execute())
- 	    {
-  	    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name = flagstaff, altitude = 6970)");
-  	    	++count;
- 	    }
- 	    if (highCitiesQuery.execute())
- 	    {
-  	    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name = leadville, altitude = 10200)");
-  	    	++count;
- 	    }
- 	    assertThat(count).isEqualTo(4);
-	}
-	
-	@Test
 	public void test_high_cities_sorted() throws Exception
 	{
 		InputStream stream = new ByteArrayInputStream(CITY_EVELATIONS_SORTED.getBytes());

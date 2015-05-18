@@ -9,7 +9,7 @@
   <artifactId>parser</artifactId>
   <packaging>jar</packaging>
   <name>XPL parser/engine</name>
-  <url>http://maven.apache.org</url>
+  <url>http://cybersearch2.com.au</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -59,7 +59,7 @@
   <dependencies>
      <dependency>
       <groupId>au.com.cybersearch2</groupId>
-      <artifactId>classyjava</artifactId>
+      <artifactId>classyutils</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

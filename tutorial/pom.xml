@@ -9,7 +9,7 @@
   <artifactId>tutorial</artifactId>
   <packaging>jar</packaging>
   <name>XPL tutorial</name>
-  <url>http://maven.apache.org</url>
+  <url>http://cybersearch2.com.au</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,7 +42,7 @@
      </dependency>
      <dependency>
       <groupId>au.com.cybersearch2</groupId>
-      <artifactId>classyjava</artifactId>
+      <artifactId>classyutils</artifactId>
      </dependency>
     <dependency>
       <groupId>org.xerial</groupId>

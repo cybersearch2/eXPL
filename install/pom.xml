@@ -8,6 +8,7 @@
   <artifactId>install</artifactId>
   <packaging>pom</packaging>
   <name>Install Artifacts Unavailable Online</name>
+  <url>http://cybersearch2.com.au</url>
   <licenses>
      <license>
        <name>GPLv3</name>
@@ -51,9 +52,9 @@
                         <phase>initialize</phase>
                         <goals><goal>install-file</goal></goals>
                         <configuration>
-                            <file>${basedir}/javacc-4.2.jar</file>
+                            <file>${basedir}/javacc/javacc-4.2.jar</file>
                             <generatePom>false</generatePom>
-                            <pomFile>${basedir}/javacc-4.2.pom</pomFile>
+                            <pomFile>${basedir}/javacc/javacc-4.2.pom</pomFile>
                         </configuration>
                     </execution>
                  </executions>
@@ -75,7 +76,7 @@
                 <fileset>
                   <directory>${parser.dir}/src/main/java/au/com/cybersearch2/classy_logic/parser</directory>
                   <includes><include>**/*</include></includes>
-                  <followSymlinks>false</followSymlinks>
+                </fileset>
                 </fileset>
              </filesets>
            </configuration>
@@ -88,7 +89,7 @@
               <execution>
                  <phase>initialize</phase>
                  <goals>
-                  <goal>java</goal>
+                  <goal>javacc</goal>
                 </goals>
               </execution>
             </executions>
@@ -147,7 +148,7 @@
                    <artifactId>persistence-api</artifactId>
                    <version>2.0</version>
                    <packaging>jar</packaging>
-                   <file>${basedir}/persistence-api-2.0.jar</file>
+                   <file>${basedir}/jars/persistence-api-2.0.jar</file>
                    <generatePom>true</generatePom>
                  </configuration>
               </execution>
@@ -162,34 +163,8 @@
                    <artifactId>openbeans</artifactId>
                    <version>1.0</version>
                    <packaging>jar</packaging>
-                   <file>${basedir}/openbeans-1.0.jar</file>
+                   <file>${basedir}/jars/openbeans-1.0.jar</file>
                    <generatePom>true</generatePom>
-                 </configuration>
-              </execution>
-              <execution>
-                 <id>ormlite-core</id>
-                 <goals>
-                    <goal>install-file</goal>
-                 </goals>
-                 <phase>initialize</phase>
-                 <configuration>
-                   <packaging>jar</packaging>
-                   <file>${basedir}/ormlite-core/ormlite-core.jar</file>
-                   <generatePom>false</generatePom>
-                   <pomFile>${basedir}/ormlite-core/pom.xml</pomFile>
-                 </configuration>
-              </execution>
-              <execution>
-                 <id>ormlite-jdbc</id>
-                 <goals>
-                    <goal>install-file</goal>
-                 </goals>
-                 <phase>initialize</phase>
-                 <configuration>
-                   <packaging>jar</packaging>
-                   <file>${basedir}/ormlite-jdbc/ormlite-jdbc.jar</file>
-                   <generatePom>false</generatePom>
-                   <pomFile>${basedir}/ormlite-jdbc/pom.xml</pomFile>
                  </configuration>
               </execution>
            </executions>
@@ -217,21 +192,22 @@
                    <artifactId>classy_tools</artifactId>
                    <version>1.0.4</version>
                    <packaging>pom</packaging>
-                   <file>${basedir}/classy_tools-1.0.4.pom</file>
+                   <file>${basedir}/classyutils/classy_tools-1.0.6.pom</file>
                  </configuration>
               </execution>
               <execution>
-                 <id>classyjava</id>
+                 <id>classyutils</id>
                  <goals>
                     <goal>install-file</goal>
                  </goals>
                  <phase>initialize</phase>
                  <configuration>
                    <packaging>jar</packaging>
-                   <file>${basedir}/classyjava-1.0.4.jar</file>
+                   <file>${basedir}/classyutils/classyjava-1.0.6.jar</file>
                    <generatePom>false</generatePom>
-                   <pomFile>${basedir}/classyjava-1.0.4.pom</pomFile>
-                   <javaDoc>${basedir}/classyjava-1.0.4-javadoc.jar</javaDoc>
+                   <pomFile>${basedir}/classyutils/classyjava-1.0.6.pom</pomFile>
+                   <sources>${basedir}/classyutils/classyjava-1.0.6-javadoc.jar</sources>
+                   <javaDoc>${basedir}/classyutils/classyjava-1.0.6-javadoc.jar</javaDoc>
                  </configuration>
               </execution>
            </executions>
@@ -249,6 +225,14 @@
             	<skip>true</skip>
             </configuration>
 		</plugin>
+        <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>2.6.1</version>
+            <configuration>
+           <skip>true</skip> 	
+           <!-- <excludeDefaultDirectories>true</excludeDefaultDirectories>-->
+           </configuration>
+         </plugin>
       </plugins>
       <pluginManagement>
       	<plugins>

@@ -22,12 +22,6 @@ import dagger.Provides;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classydb.SQLiteDatabaseSupport;
-import au.com.cybersearch2.classydb.DatabaseSupport.ConnectionType;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
 import au.com.cybersearch2.classytask.ThreadHelper;
 import au.com.cybersearch2.classytask.WorkerRunnable;
 
@@ -39,11 +33,7 @@ import au.com.cybersearch2.classytask.WorkerRunnable;
 @Module(injects= {
 		ParserResources.class,
 		ParserAssembler.ExternalAxiomSource.class,
-		WorkerRunnable.class,
-		PersistenceFactory.class,
-		NativeScriptDatabaseWork.class,
-		PersistenceContext.class,
-		DatabaseAdminImpl.class })
+		WorkerRunnable.class })
 public class TestModule 
 {
     @Provides @Singleton ThreadHelper provideSystemEnvironment()
@@ -56,11 +46,6 @@ public class TestModule
         return new JavaTestResourceEnvironment("src/main/resources");
     }
 
-    @Provides @Singleton PersistenceFactory providePersistenceModule()
-    {
-        return new PersistenceFactory(new SQLiteDatabaseSupport(ConnectionType.memory));
-    }
-    
     @Provides @Singleton ProviderManager provideProviderManager()
     {
     	return new ProviderManager();
