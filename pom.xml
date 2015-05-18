@@ -44,6 +44,7 @@
     <module>parser</module>
     <module>tutorial</module>
     <module>xpl-extensions</module>
+    <module>tutorial-extensions</module>
   <module></module></modules>
   <build>
 		<finalName>${project.artifactId}</finalName>
