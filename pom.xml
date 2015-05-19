@@ -114,6 +114,7 @@
       <dependencies>
          <dependency>
           <groupId>au.com.cybersearch2</groupId>
+<<<<<<< HEAD
           <artifactId>classyutils</artifactId>
           <version>${classy_tools.version}</version>
         </dependency>
@@ -122,6 +123,18 @@
           <artifactId>classyjava</artifactId>
           <version>${classy_tools.version}</version>
         </dependency>
+=======
+          <artifactId>classyjava</artifactId>
+          <version>1.0.5</version>
+         </dependency>
+        <dependency>
+          <groupId>au.com.cybersearch2</groupId>
+          <artifactId>classyjava</artifactId>
+          <version>1.0.5</version>
+          <type>test-jar</type>
+          <scope>test</scope>
+         </dependency>
+>>>>>>> 667435c73543f9af4d81286528fb9150c776858f
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
@@ -131,6 +144,10 @@
           <groupId>org.mockito</groupId>
           <artifactId>mockito-core</artifactId>
           <version>1.10.19</version>
+<<<<<<< HEAD
+=======
+          <scope>test</scope>
+>>>>>>> 667435c73543f9af4d81286528fb9150c776858f
         </dependency>
         <dependency>
           <groupId>org.easytesting</groupId>
