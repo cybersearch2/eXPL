@@ -45,7 +45,7 @@
     <module>tutorial</module>
     <module>xpl-extensions</module>
     <module>tutorial-extensions</module>
-  <module></module></modules>
+  <module>
   <build>
 		<finalName>${project.artifactId}</finalName>
         <plugins>
@@ -122,11 +122,6 @@
           <artifactId>classyjava</artifactId>
           <version>${classy_tools.version}</version>
         </dependency>
-        <dependency>
-          <groupId>au.com.cybersearch2</groupId>
-          <artifactId>classyutils</artifactId>
-          <version>${classy_tools.version}</version>
-         </dependency>
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
