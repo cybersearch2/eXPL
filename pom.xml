@@ -45,7 +45,7 @@
     <module>tutorial</module>
     <module>xpl-extensions</module>
     <module>tutorial-extensions</module>
-  <module>
+  </modules>
   <build>
 		<finalName>${project.artifactId}</finalName>
         <plugins>
