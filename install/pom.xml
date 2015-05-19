@@ -194,11 +194,11 @@
                  <phase>initialize</phase>
                  <configuration>
                    <packaging>jar</packaging>
-                   <file>${basedir}/classyutils/classyjava-1.0.7.jar</file>
+                   <file>${basedir}/classyutils/classyutils-1.0.7.jar</file>
                    <generatePom>false</generatePom>
-                   <pomFile>${basedir}/classyutils/classyjava-1.0.7.pom</pomFile>
-                   <sources>${basedir}/classyutils/classyjava-1.0.7-sources.jar</sources>
-                   <javaDoc>${basedir}/classyutils/classyjava-1.0.7-javadoc.jar</javaDoc>
+                   <pomFile>${basedir}/classyutils/classyutils-1.0.7.pom</pomFile>
+                   <sources>${basedir}/classyutils/classyutils-1.0.7-sources.jar</sources>
+                   <javaDoc>${basedir}/classyutils/classyutils-1.0.7-javadoc.jar</javaDoc>
                  </configuration>
               </execution>
            </executions>
