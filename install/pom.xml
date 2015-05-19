@@ -77,8 +77,7 @@
                   <directory>${parser.dir}/src/main/java/au/com/cybersearch2/classy_logic/parser</directory>
                   <includes><include>**/*</include></includes>
                 </fileset>
-                </fileset>
-             </filesets>
+              </filesets>
            </configuration>
          </plugin>
          <plugin>
