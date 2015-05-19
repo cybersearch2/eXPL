@@ -1,3 +1,9 @@
 eXPL v1.0.2
 
 1. Update to Classy Tools v1.0.4
+
+eXPL v1.0.3
+
+Refactor modules so dependency on OrmLite is optional. This means additional 2 "extensions" modules.
+Core package now only depends on classyutils module, introduced in Classy Tools v1.0.7.
+Also refactored ProviderManager so persistence component is in new JpaProviderHelper class.
