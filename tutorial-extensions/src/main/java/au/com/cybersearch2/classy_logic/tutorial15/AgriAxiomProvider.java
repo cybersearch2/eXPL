@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.tutorial15;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
@@ -30,8 +29,8 @@ import com.j256.ormlite.stmt.SelectArg;
 import au.com.cybersearch2.classy_logic.JpaProviderHelper;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider;
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
@@ -40,29 +39,47 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.EntityManagerDelegate;
-import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceDao;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classytask.Executable;
-import au.com.cybersearch2.classytask.WorkStatus;
 
 /**
  * AgriAxiomProvider
+ * An example of an Axiom Provider for more than one Axiom source.
+ * The "surface_area_increase" Axiom source has a simple entity collector,
+ * but the "Data" axiom source has a custom collector which fetches data in batch mode
+ * for scalability and assembles axiom terms from two tables.
+ * 
  * @author Andrew Bowley
  * 18 Mar 2015
  */
-public class AgriAxiomProvider implements AxiomProvider 
+public class AgriAxiomProvider extends EntityAxiomProvider 
 {
-	
+	/**
+	 * PersistAgri10Year
+	 * Set up task to create Agri10Year table in test database. 
+	 * This requires fetching Country objects to insert in Agri10Year items.
+	 * See AgriDatabase for construction of test database.
+	 * @author Andrew Bowley
+	 * 23 May 2015
+	 */
 	class PersistAgri10Year implements PersistenceWork
 	{
 		protected Agri10Year agri10Year;
-		
+
+		/**
+		 * Construct PersistAgri10Year object
+		 * @param agri10Year The object to persist
+		 */
 		public PersistAgri10Year(Agri10Year agri10Year)
 		{
 			this.agri10Year =agri10Year;
 		}
-		
+
+		/**
+		 * Use OrmLite to run query to fetch Country object referenced by name in supplied Agri10Year object
+		 * @see au.com.cybersearch2.classyjpa.entity.PersistenceWork#doInBackground(au.com.cybersearch2.classyjpa.EntityManagerLite)
+		 */
+        @Override
 	    public void doInBackground(EntityManagerLite entityManager)
 	    {
 	    	// Use OrmLite query to get Country object from database 
@@ -83,7 +100,7 @@ public class AgriAxiomProvider implements AxiomProvider
             {
             	throw new PersistenceException("Database error", e);
             }
-            // now we can set the select arg (?) and run the query
+            // Now we can set the select arg (?) and run the query
             selectArg.setValue(agri10Year.getCountryName());
             List<Country> results = countryDao.query(preparedQuery);
             if (results.size() > 0)
@@ -112,55 +129,43 @@ public class AgriAxiomProvider implements AxiomProvider
 	    }
     }
 	
-    /** Named query to find the percent change in agriculture land for all years */
-    static public final String ALL_YEAR_PERCENTS = "all_year_percents";
     /** Persistence Unit name to look up configuration details in persistence.xml */
     static public final String PU_NAME = "agriculture";
+    /** Axiom source name for percentage surface area over 50 year interval */
     static public final String PERCENT_AXIOM = "Data";
+    /** Axiom source name for countries which increased agricultural surface area over 10 year interval */
     static public final String TEN_YEAR_AXIOM = "surface_area_increase";
-
+    /** Identity value for next Agri10YearId object to be created */
     static int agri10YearId;
     
-    protected boolean databaseCreated;
     
     @Inject
     JpaProviderHelper providerHelper;
     
 	/**
-	 * 
+	 * Construct AgriAxiomProvider object
 	 */
 	public AgriAxiomProvider() 
 	{
+	    // Super class will construct TEN_YEAR_AXIOM collector
+		super(PU_NAME, Agri10Year.class, new AgriDatabase());
 		DI.inject(this);
 	}
 
+	/**
+	 * Returns Axiom Provider identity
+	 * @see au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider#getName()
+	 */
 	@Override
 	public String getName() 
 	{
 		return "agriculture";
 	}
 
-	@Override
-	public void setResourceProperties(String axiomName,
-			Map<String, Object> properties) 
-	{
-		// Create Agriculture database, if not already done so.
-		if (databaseCreated)
-			return;
-        PersistenceWork setUpWork = new AgriDatabase();
-        // Execute work and wait synchronously for completion
-        PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        try 
-        {
-			waitForTask(container.executeTask(setUpWork));
-			databaseCreated = true;
-		} 
-        catch (InterruptedException e) 
-        {
-			e.printStackTrace();
-		}
-	}
-
+	/**
+	 * 
+	 * @see au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider#getAxiomSource(java.lang.String, java.util.List)
+	 */
 	@Override
 	public AxiomSource getAxiomSource(String axiomName,
 			List<String> axiomTermNameList) 
@@ -168,14 +173,14 @@ public class AgriAxiomProvider implements AxiomProvider
 		List<NameMap> nameMapList = null;
 		if (axiomTermNameList != null)
 			nameMapList = new ArrayList<NameMap>();
-		JpaEntityCollector collector = null;
+		// Assume TEN_YEAR_AXIOM
+		JpaEntityCollector collector = jpaEntityCollector;
 		if (PERCENT_AXIOM.equals(axiomName))
 		{
 			if (axiomTermNameList != null)
 				for (String termName: axiomTermNameList)
-				{
 					nameMapList.add(new NameMap(termName, termName));
-				}
+			// Use PERCENT_AXIOM collector
 	    	collector = new AgriPercentCollector(PU_NAME);
 		}
 		else if (TEN_YEAR_AXIOM.equals(axiomName))
@@ -194,22 +199,19 @@ public class AgriAxiomProvider implements AxiomProvider
 					nameMapList.add(nameMap);
 				}
 			}
-	    	collector = new Agri10YearCollector(PU_NAME);
 		}
 		else
 			throw new IllegalArgumentException("Axiom name \"" + axiomName + "\" not valid for Axiom Provider \"" + getName() + "\"");
      	return new JpaSource(collector, axiomName, nameMapList);
 	}
 
-	@Override
-	public boolean isEmpty() 
-	{
-		return false;
-	}
-
+	/**
+	 * 
+	 * @see au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider#getAxiomListener()
+	 */
 	@Override
 	public AxiomListener getAxiomListener() 
-	{   // Do-nothing listener for read-only provider
+	{   
 		return new AxiomListener()
 		{
 			@Override
@@ -225,28 +227,13 @@ public class AgriAxiomProvider implements AxiomProvider
 				//System.out.println(agri10Year.getCountryName() + " " + ++agri10YearCount);
 		    	agri10Year.setId(agri10YearId++);
 		    	agri10Year.setSurfaceArea((Double)axiom.getTermByName("surface_area").getValue());
+		    	// Do task of persisting Agri10Year asychronously. (Subject to using multi-connection ConnectionSource).
 		    	providerHelper.doWorkAsync(PU_NAME, new PersistAgri10Year(agri10Year), false);
+		    	// Change above line for next two to do task synchronously
 				//if (providerManager.doWork(PU_NAME, new PersistAgri10Year(agri10Year)) != WorkStatus.FINISHED)
 			    //	throw new QueryExecutionException("Error persisting resource " + getName() + " axiom: " + axiom.toString());
 			}
 		};
 	}
 	
-    /**
-     * Wait sychronously for task completion
-     * @param exe Executable object returned upon starting task
-     * @throws InterruptedException Should not happen
-     */
-    protected WorkStatus waitForTask(Executable exe) throws InterruptedException
-    {
-    	WorkStatus status = exe.getStatus();
-    	if ((status == WorkStatus.FINISHED) || (status == WorkStatus.FAILED))
-    		return status;
-       synchronized (exe)
-        {
-            exe.wait();
-        }
-        return exe.getStatus();
-    }
-
 }

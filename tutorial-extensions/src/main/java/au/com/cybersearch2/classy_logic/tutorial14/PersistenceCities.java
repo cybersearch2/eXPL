@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -72,7 +73,7 @@ public class PersistenceCities
 	 */
     public Iterator<Axiom> testEntityNamesQuery()
     {
-    	CityCollector cityCollector = new CityCollector(PU_NAME);
+    	JpaEntityCollector cityCollector = new JpaEntityCollector(PU_NAME, City.class);
     	JpaSource jpaSource = new JpaSource(cityCollector, "city");
     	return jpaSource.iterator();
     }
@@ -96,7 +97,7 @@ public class PersistenceCities
 	  */
     public Iterator<Axiom> testSpecifiedNamesQuery()
     {
-    	CityCollector cityCollector = new CityCollector(PU_NAME);
+        JpaEntityCollector cityCollector = new JpaEntityCollector(PU_NAME, City.class);
     	List<NameMap> termNameList = new ArrayList<NameMap>();
     	termNameList.add(new NameMap("Name", "name"));
     	termNameList.add(new NameMap("Altitude", "altitude"));

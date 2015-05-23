@@ -1,14 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>au.com.cybersearch2</groupId>
-    <artifactId>xpl</artifactId>
+    <artifactId>example</artifactId>
     <version>1.0.3</version>
   </parent>
-  <artifactId>tutorial</artifactId>
-  <packaging>jar</packaging>
-  <name>XPL tutorial</name>
+  <artifactId>tele-genious</artifactId>
+  <name>tele-genious</name>
+  <description>Television Trouble-shooting engine</description>
   <url>http://cybersearch2.com.au</url>
 
   <properties>
@@ -42,8 +41,38 @@
      </dependency>
      <dependency>
       <groupId>au.com.cybersearch2</groupId>
-      <artifactId>classyutils</artifactId>
+      <artifactId>xpl-extensions</artifactId>
+      <version>${project.version}</version>
      </dependency>
+     <dependency>
+      <groupId>au.com.cybersearch2</groupId>
+      <artifactId>classyjava</artifactId>
+     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-assert-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-util</artifactId>
+       <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.bsc.maven</groupId>
       <artifactId>maven-processor-plugin</artifactId>

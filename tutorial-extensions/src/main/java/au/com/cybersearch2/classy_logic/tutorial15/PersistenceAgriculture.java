@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -62,7 +63,7 @@ public class PersistenceAgriculture
     public void testDataQuery()
     {
     	List<NameMap> termNameList = new ArrayList<NameMap>();
-     	AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME);
+     	JpaEntityCollector agriPercentCollector = new JpaEntityCollector(PU_NAME, Agri10Year.class);
     	termNameList.clear();
     	termNameList.add(new NameMap("country", "country"));
 		for (int year = 1962; year < 2012; ++year)

@@ -23,12 +23,8 @@ import java.util.Iterator;
 import javax.persistence.Query;
 
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
-import au.com.cybersearch2.classy_logic.jpa.QueryForAllGenerator;
 import au.com.cybersearch2.classybean.BeanMap;
-import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * AgriPercentCollector extends JpaEntityCollector to create an external axiom source
@@ -40,10 +36,6 @@ import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
  */
 public class AgriPercentCollector extends JpaEntityCollector 
 {
-	
-    /** Named query to find the percent change in agriculture land for all years */
-    static public final String ALL_YEAR_PERCENTS = "all_year_percents";
-
     protected YearPercent yearPercent;
     protected Data fact;
     protected BeanMap beanMap;
@@ -55,14 +47,10 @@ public class AgriPercentCollector extends JpaEntityCollector
 	 */
 	public AgriPercentCollector(String persistenceUnit) 
 	{
-		super(persistenceUnit);
+		super(persistenceUnit, YearPercent.class);
 		setUserTransactionMode(true);
     	setMaxResults(50);
     	batchMode = true;
-		this.namedJpaQuery = ALL_YEAR_PERCENTS;
-        // Inject persistenceContext
-        DI.inject(this); 
-		setUp(persistenceUnit);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -124,13 +112,4 @@ public class AgriPercentCollector extends JpaEntityCollector
     	moreExpected = true;
 	}
 
-	protected void setUp(String persistenceUnit)
-	{
-		PersistenceContext persistenceContext = new PersistenceContext();
-        // Get Interface for JPA Support, required to create named queries
-        PersistenceAdmin persistenceAdmin = persistenceContext.getPersistenceAdmin(persistenceUnit);
-        QueryForAllGenerator allEntitiesQuery = 
-                new QueryForAllGenerator(persistenceAdmin);
-        persistenceAdmin.addNamedQuery(YearPercent.class, ALL_YEAR_PERCENTS, allEntitiesQuery);
-	}
 }

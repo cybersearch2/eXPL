@@ -28,7 +28,7 @@ import java.util.Map;
 public interface AxiomProvider 
 {
 	/**
-	 * Returns Resource name
+	 * Returns Axiom Provider identity
 	 * @return String
 	 */
 	String getName();
@@ -47,11 +47,13 @@ public interface AxiomProvider
 	 */
 	AxiomSource getAxiomSource(String axiomName, List<String> axiomTermNameList);
 	/** 
-	 * Returns flag set true if no resources have been established by calls to setResourceProperties()
+	 * Returns listener to notify when an axiom is passed to this provider 
+	 * @return AxiomListener object
+	 */
+	AxiomListener getAxiomListener();
+	/** 
+	 * Returns flag to indicate if no axioms are available from the provider 
 	 * @return boolean
 	 */
-	
-	AxiomListener getAxiomListener();
-	
 	boolean isEmpty();
 }

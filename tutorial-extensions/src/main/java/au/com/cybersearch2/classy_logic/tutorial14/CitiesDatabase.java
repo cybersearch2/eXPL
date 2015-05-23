@@ -19,7 +19,9 @@ import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
 
 /**
- * CitiesDatabase persists City enity objects.
+ * CitiesDatabase persists City enity objects. 
+ * Note This is an option provided to facilitate testing and an actual implementation
+ * would have some other arrangement for creating and populating a database.
  * @author Andrew Bowley
  * 18 Mar 2015
  */

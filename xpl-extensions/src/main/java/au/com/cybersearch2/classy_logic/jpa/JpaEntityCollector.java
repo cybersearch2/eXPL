@@ -27,6 +27,8 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 import au.com.cybersearch2.classytask.WorkStatus;
 
 /**
@@ -39,7 +41,7 @@ import au.com.cybersearch2.classytask.WorkStatus;
  * @author Andrew Bowley
  * 10 Feb 2015
  */
-public abstract class JpaEntityCollector implements DataCollector, PersistenceWork 
+public class JpaEntityCollector implements DataCollector, PersistenceWork 
 {
 	/** Named query to be performed if doInBackground() is not overriden */
     protected String namedJpaQuery;
@@ -66,10 +68,27 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
      * Construct a JpaEntityCollector object
      * @param persistenceUnit Name of persistence unit defined in persistence.xml configuration file
      */
-    public JpaEntityCollector(String persistenceUnit)
+    protected JpaEntityCollector(String persistenceUnit)
     {
         this.persistenceUnit = persistenceUnit;
         DI.inject(this);
+    }
+    
+    /**
+     * Construct a JpaEntityCollector object for a specific entity class.
+     * This maps all the class fields with a supported type to axiom terms
+     * @param persistenceUnit Name of persistence unit defined in persistence.xml configuration file
+     * @param entityClass Class of entity to be collected
+     */
+    public JpaEntityCollector(String persistenceUnit, Class<?> entityClass)
+    {
+        this(persistenceUnit);
+        namedJpaQuery = "all_" + entityClass.getName();
+        PersistenceContext persistenceContext = new PersistenceContext();
+        PersistenceAdmin persistenceAdmin = persistenceContext.getPersistenceAdmin(persistenceUnit);
+        QueryForAllGenerator allEntitiesQuery = 
+                new QueryForAllGenerator(persistenceAdmin);
+        persistenceAdmin.addNamedQuery(entityClass, namedJpaQuery, allEntitiesQuery);
     }
     
     /**
@@ -193,4 +212,12 @@ public abstract class JpaEntityCollector implements DataCollector, PersistenceWo
 		this.maxResults = maxResults;
 	}
 
+	/**
+	 * Returns peristence unit
+	 * @return
+	 */
+	public String getPersistenceUnit()
+	{
+	    return persistenceUnit;
+	}
 }
