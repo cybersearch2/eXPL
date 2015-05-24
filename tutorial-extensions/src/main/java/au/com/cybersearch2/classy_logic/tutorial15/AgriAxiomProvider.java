@@ -148,7 +148,9 @@ public class AgriAxiomProvider extends EntityAxiomProvider
 	public AgriAxiomProvider() 
 	{
 	    // Super class will construct TEN_YEAR_AXIOM collector
-		super(PU_NAME, Agri10Year.class, new AgriDatabase());
+		super(PU_NAME, new AgriDatabase());
+		addEntity(TEN_YEAR_AXIOM, Agri10Year.class);
+		addCollector(PERCENT_AXIOM, new AgriPercentCollector(PU_NAME));
 		DI.inject(this);
 	}
 
@@ -173,15 +175,12 @@ public class AgriAxiomProvider extends EntityAxiomProvider
 		List<NameMap> nameMapList = null;
 		if (axiomTermNameList != null)
 			nameMapList = new ArrayList<NameMap>();
-		// Assume TEN_YEAR_AXIOM
-		JpaEntityCollector collector = jpaEntityCollector;
+		JpaEntityCollector collector = collectorMap.get(axiomName);
 		if (PERCENT_AXIOM.equals(axiomName))
 		{
 			if (axiomTermNameList != null)
 				for (String termName: axiomTermNameList)
 					nameMapList.add(new NameMap(termName, termName));
-			// Use PERCENT_AXIOM collector
-	    	collector = new AgriPercentCollector(PU_NAME);
 		}
 		else if (TEN_YEAR_AXIOM.equals(axiomName))
 		{

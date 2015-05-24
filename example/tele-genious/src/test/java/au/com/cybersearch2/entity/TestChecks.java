@@ -41,7 +41,8 @@ public class TestChecks
             { "Batteries", "Replace the remote control batteries with the poles (+/-) in the right direction" },
             { "Sensor", "Clean the sensor's transmission window on the remote" },
             { "Pointing", "Try pointing the remote directly at the TV from 5-6 feet away" },
-            { "Programme", "Programme the Cable/Set remote control to operate the TV. Refer to the Cable/Set user manual for the SAMSUNG TV code" }
+            { "Programme", "Programme the Cable/Set remote control to operate the TV. Refer to the Cable/Set user manual for the SAMSUNG TV code" },
+            { "Support", "Contact Support" }
             
 	};
 	

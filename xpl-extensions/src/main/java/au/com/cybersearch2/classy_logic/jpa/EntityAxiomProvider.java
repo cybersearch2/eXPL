@@ -16,13 +16,17 @@
 package au.com.cybersearch2.classy_logic.jpa;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
@@ -34,47 +38,70 @@ import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
  */
 public class EntityAxiomProvider implements AxiomProvider
 {
-    /** The Collector to fetch all rows in the database entity table */
-    protected JpaEntityCollector jpaEntityCollector;
-    /** The AxiomProvider identity */
-    protected String name;
+    /** Collection of Collectors which each fetch all rows in one database entity table */
+    protected Map<String, JpaEntityCollector> collectorMap;
     /** The optional task to set up the entity table. Intended for testing use only */
     protected PersistenceWork setUpTask;
+    protected String persistenceUnit;
     protected boolean databaseCreated;
 
     /**
      * EntityAxiomProvider
      * @param persistenceUnit Name of persistence unit defined in persistence.xml configuration file
-     * @param entityClass Class of entity to be collected
      */
-    public EntityAxiomProvider(String persistenceUnit, Class<?> entityClass)
+    public EntityAxiomProvider(String persistenceUnit)
     {
-        this(persistenceUnit, entityClass, null);
+        this(persistenceUnit, null);
     }
 
     /**
      * EntityAxiomProvider
      * @param persistenceUnit Name of persistence unit defined in persistence.xml configuration file
-     * @param entityClass Class of entity to be collected
      * @param setUpTask PersistenceWork object to perform one-time initialization
      */
-    public EntityAxiomProvider(String persistenceUnit, Class<?> entityClass, PersistenceWork setUpTask)
+    public EntityAxiomProvider(String persistenceUnit, PersistenceWork setUpTask)
     {
+        this.persistenceUnit = persistenceUnit;
+        collectorMap = Collections.emptyMap();
         if (setUpTask == null)
             databaseCreated = true;
         else
             this.setUpTask = setUpTask;
-        jpaEntityCollector = new JpaEntityCollector(persistenceUnit, entityClass);
-        name = entityClass.getSimpleName();
     }
 
     /**
-     * Returns Axiom Provider identity, which is the entity class name
+     * 
+     * @param axiomName
+     * @param entityClass Class of entity to be collected
+     */
+    public void addEntity(String axiomName, Class<?> entityClass)
+    {
+        addCollector(axiomName, new JpaEntityCollector(persistenceUnit, entityClass));
+    }
+    
+    public void addCollector(String axiomName, JpaEntityCollector jpaEntityCollector)
+    {
+        if (collectorMap.size() == 0)
+            collectorMap = Collections.singletonMap(axiomName, jpaEntityCollector);
+        else
+        {
+            if (collectorMap.size() == 1)
+            {
+                Entry<String, JpaEntityCollector> entry =  collectorMap.entrySet().iterator().next();
+                collectorMap = new HashMap<String, JpaEntityCollector>();
+                collectorMap.put(entry.getKey(), entry.getValue());
+            }
+            collectorMap.put(axiomName, jpaEntityCollector);
+        }
+    }
+    
+    /**
+     * Returns Axiom Provider identity, which defaults to Persistence Unit name
      */
     @Override
     public String getName() 
     {
-        return name;
+        return persistenceUnit;
     }
 
     /**
@@ -86,14 +113,13 @@ public class EntityAxiomProvider implements AxiomProvider
     @Override
     public void setResourceProperties(String axiomName, Map<String, Object> properties) 
     {
-        String puName = jpaEntityCollector.getPersistenceUnit();
         // If properties provide, add them to the persistence unit's properties
         if (properties != null)
-            new PersistenceContext().getPersistenceAdmin(puName).getProperties().putAll(properties);
+            new PersistenceContext().getPersistenceAdmin(persistenceUnit).getProperties().putAll(properties);
         if ((setUpTask != null) && !databaseCreated)
         {
             // Execute work and wait synchronously for completion
-            PersistenceContainer container = new PersistenceContainer(puName);
+            PersistenceContainer container = new PersistenceContainer(persistenceUnit);
             try 
             {
                 container.executeTask(setUpTask).waitForTask();
@@ -114,18 +140,19 @@ public class EntityAxiomProvider implements AxiomProvider
     public AxiomSource getAxiomSource(String axiomName,
             List<String> axiomTermNameList) 
     {
+        if (isEmpty())
+            throw new QueryExecutionException("No axiomSource available for \"" + axiomName + "\"");
         List<NameMap> nameMapList = new ArrayList<NameMap>();
         for (String termName: axiomTermNameList)
-        {
             nameMapList.add(new NameMap(termName, termName));
-        }
+        JpaEntityCollector jpaEntityCollector = collectorMap.get(axiomName);
         return new JpaSource(jpaEntityCollector, axiomName, nameMapList);
     }
 
     @Override
     public boolean isEmpty() 
     {
-        return !databaseCreated;
+        return !databaseCreated && (collectorMap.size() > 0);
     }
 
     @Override

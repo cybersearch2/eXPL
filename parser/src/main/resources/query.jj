@@ -764,16 +764,34 @@ void AxiomItem(String axiomName, ParserAssembler parserAssembler) :
 
 void ChoiceItem(int selection, String axiomName, ParserAssembler parserAssembler) :
 {
-    Operand expression;
+    Operand expression = null;
     Parameter param = null;
+    Token regexId = null;
     parserAssembler.addAxiom(axiomName, new Parameter(Term.ANONYMOUS, new Null()));
 }
 {
-   "(" expression=Expression(parserAssembler) ("," Fact(axiomName, parserAssembler) )* ")" 
+   "(" 
+      (  
+        regexId=<IDENTIFIER>
+        |
+        expression=Expression(parserAssembler)
+      ) 
+      ("," Fact(axiomName, parserAssembler) )* 
+   ")" 
     {
+      Operand operand = null;
+      Operand regexOp = null;
+      String name = parserAssembler.getAxiomTermName(axiomName, 0);
       parserAssembler.saveAxiom(axiomName);
       Template template = parserAssembler.getTemplate(axiomName);
-      Operand operand = new Evaluator(parserAssembler.getAxiomTermName(axiomName, 0), expression, "&&" ); 
+      if (expression instanceof StringOperand)
+          regexOp = expression;
+      else if (regexId != null)
+          regexOp = parserAssembler.getOperandMap().addOperand(regexId.image, null);
+      if (regexOp != null)
+          operand = new RegExOperand(name, regexOp, 0, null);
+      else
+          operand = new Evaluator(name, expression, "&&" ); 
       parserAssembler.addTemplate(axiomName, operand);
     }
 }

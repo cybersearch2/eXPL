@@ -118,8 +118,6 @@ public class JpaSourceIterator implements Iterator<Axiom>
 					}
 					++termIndex;
 				}
-				if (termName == null)
-					continue;
 			}
             Object value = null;
             value = invoke(entity, descriptor); 

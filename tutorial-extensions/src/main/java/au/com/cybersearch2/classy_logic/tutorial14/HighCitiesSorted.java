@@ -42,7 +42,7 @@ import au.com.cybersearch2.classyinject.DI;
 public class HighCitiesSorted 
 {
 	static final String CITY_EVELATIONS =
-	        "axiom city (name, altitude): resource \"City\";\n" + 
+	        "axiom city (name, altitude): resource \"cities\";\n" + 
             "// Template for name and altitude of a high city\n" +
             "template high_city(string name, altitude ? altitude > 5000);\n" +
             "// Solution is a list named 'city_list' which receives 'high_city' axioms\n" +
@@ -77,7 +77,9 @@ public class HighCitiesSorted
 		// Configure dependency injection to get resource "cities"
 		new DI(new CitiesModule()).validate();
 		DI.inject(this);
-		providerManager.putAxiomProvider(new EntityAxiomProvider("cities", City.class, new CitiesDatabase()));
+		EntityAxiomProvider entityAxiomProvider = new EntityAxiomProvider("cities", new CitiesDatabase());
+		entityAxiomProvider.addEntity("city", City.class); 
+		providerManager.putAxiomProvider(entityAxiomProvider);
 	}
 	/**
 	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>

@@ -181,15 +181,9 @@
                  <configuration>
                    <groupId>au.com.cybersearch2</groupId>
                    <artifactId>classy_tools</artifactId>
-<<<<<<< HEAD
                    <version>1.0.7</version>
                    <packaging>pom</packaging>
                    <file>${basedir}/classyutils/classy_tools-1.0.7.pom</file>
-=======
-                   <version>1.0.5</version>
-                   <packaging>pom</packaging>
-                   <file>${basedir}/classy_tools-1.0.5.pom</file>
->>>>>>> 667435c73543f9af4d81286528fb9150c776858f
                  </configuration>
               </execution>
               <execution>
@@ -200,18 +194,11 @@
                  <phase>initialize</phase>
                  <configuration>
                    <packaging>jar</packaging>
-<<<<<<< HEAD
                    <file>${basedir}/classyutils/classyutils-1.0.7.jar</file>
                    <generatePom>false</generatePom>
                    <pomFile>${basedir}/classyutils/classyutils-1.0.7.pom</pomFile>
                    <sources>${basedir}/classyutils/classyutils-1.0.7-sources.jar</sources>
                    <javaDoc>${basedir}/classyutils/classyutils-1.0.7-javadoc.jar</javaDoc>
-=======
-                   <file>${basedir}/classyjava-1.0.5.jar</file>
-                   <generatePom>false</generatePom>
-                   <pomFile>${basedir}/classyjava-1.0.5.pom</pomFile>
-                   <javaDoc>${basedir}/classyjava-1.0.5-javadoc.jar</javaDoc>
->>>>>>> 667435c73543f9af4d81286528fb9150c776858f
                  </configuration>
               </execution>
            </executions>

@@ -17,6 +17,11 @@ package au.com.cybersearch2.telegen;
 
 import javax.inject.Singleton;
 
+import au.com.cybersearch2.classy_logic.JpaProviderHelper;
+import au.com.cybersearch2.classy_logic.ProviderManager;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
+import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classyapp.JavaTestResourceEnvironment;
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
 import au.com.cybersearch2.classydb.DatabaseAdminImpl;
@@ -36,6 +41,9 @@ import dagger.Provides;
  */
 @Module(injects = { 
         TelegenTest.class,
+        ParserResources.class,
+        ParserAssembler.ExternalAxiomSource.class,
+        JpaEntityCollector.class,
         PersistenceFactory.class,
         NativeScriptDatabaseWork.class,
         PersistenceContext.class,
@@ -64,5 +72,15 @@ public class TelegenTestModule implements ApplicationModule
     @Provides @Singleton PersistenceContext providesPersistenceContext()
     {
         return new PersistenceContext();
+    }
+
+    @Provides @Singleton ProviderManager provideProviderManager()
+    {
+        return new ProviderManager();
+    }
+    
+    @Provides @Singleton JpaProviderHelper provideJpaProviderHelper()
+    {
+        return new JpaProviderHelper();
     }
 }
