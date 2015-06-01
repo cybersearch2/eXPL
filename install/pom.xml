@@ -3,11 +3,11 @@
   <parent>
     <groupId>au.com.cybersearch2</groupId>
     <artifactId>xpl</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
   </parent>
   <artifactId>install</artifactId>
   <packaging>pom</packaging>
-  <name>Install Artifacts Unavailable Online</name>
+  <name>Install artifacts unavailable online and compiler eXPL compiler</name>
   <url>http://cybersearch2.com.au</url>
   <licenses>
      <license>
@@ -16,11 +16,6 @@
        <distribution>repo</distribution>
      </license>
   </licenses>
-  <scm>
-    <url>https://github.com/j256/ormlite-core</url>
-    <connection>scm:git:ssh://git@github.com/andrew-bowley/classy-logic.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/andrew-bowley/classy-logic.git</developerConnection>
-  </scm>
   <developers>
     <developer>
       <id>andrew-bowley</id>
@@ -36,182 +31,180 @@
     </developer>
   </developers>
   <properties>
+    <!-- Destination of eXPL compiler generated sources --> 
     <parser.dir>${basedir}/../parser</parser.dir>
   </properties>
-	<profiles>
-	    <profile>
-	        <id>javacc</id>
-	        <build>
-	            <plugins>
-            <plugin>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.1</version>
+  
+  <profiles>
+    <profile>
+        <id>javacc</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>jar-file</id>
+                            <phase>initialize</phase>
+                            <goals><goal>install-file</goal></goals>
+                            <configuration>
+                                <file>${basedir}/javacc/javacc-4.2.jar</file>
+                                <generatePom>false</generatePom>
+                                <pomFile>${basedir}/javacc/javacc-4.2.pom</pomFile>
+                            </configuration>
+                        </execution>
+                    </executions>
+              </plugin>
+              <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-clean-plugin</artifactId>
+                 <configuration>
+                  <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                  <filesets>
+                    <fileset>
+                      <directory>${parser.dir}/src/main/java/au/com/cybersearch2/classy_logic/parser</directory>
+                      <includes><include>**/*</include></includes>
+                    </fileset>
+                  </filesets>
+               </configuration>
+             </plugin>
+             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>jar-file</id>
-                        <phase>initialize</phase>
-                        <goals><goal>install-file</goal></goals>
-                        <configuration>
-                            <file>${basedir}/javacc/javacc-4.2.jar</file>
-                            <generatePom>false</generatePom>
-                            <pomFile>${basedir}/javacc/javacc-4.2.pom</pomFile>
-                        </configuration>
-                    </execution>
-                 </executions>
-            </plugin>
-          <plugin>
-            <artifactId>maven-clean-plugin</artifactId>
-            <version>2.6.1</version>
-            <configuration>
-              <excludeDefaultDirectories>true</excludeDefaultDirectories>
-              <filesets>
-                <fileset>
-                  <directory>${parser.dir}/src/main/java/au/com/cybersearch2/classy_logic/parser</directory>
-                  <includes><include>**/*</include></includes>
-                </fileset>
-              </filesets>
-           </configuration>
-         </plugin>
-         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>1.3.2</version>
-            <executions>
-              <execution>
-                 <phase>initialize</phase>
-                 <goals>
-                  <goal>java</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-            <!--
-              to get rid of the warning: [WARNING] Warning: killAfter is now deprecated. Do you need it ? Please comment on MEXEC-6.
-              see: method execute() in https://github.com/ispringer/exec-maven-plugin/blob/master/src/main/java/org/codehaus/mojo/exec/ExecJavaMojo.java
-            -->
-            <killAfter>-1</killAfter>           
-            <includeProjectDependencies>false</includeProjectDependencies>
-               <includePluginDependencies>true</includePluginDependencies>
-               <executable>java</executable>
-               <executableDependency>
-                <groupId>net.java.dev.javacc</groupId>
-                <artifactId>javacc</artifactId>
-              </executableDependency>
-              <mainClass>org.javacc.parser.Main</mainClass>
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}</additionalClasspathElement>
-              </additionalClasspathElements>
-              <arguments>
-                <argument>-OUTPUT_DIRECTORY=${parser.dir}/src/main/java</argument>
-                <argument>-PACKAGE=au.com.cybersearch2.classy_logic.parser</argument>
-                <argument>${parser.dir}/src/main/resources/query.jj</argument>
-               </arguments>
-             </configuration>
-             <dependencies>
-                 <dependency>
-                   <groupId>net.java.dev.javacc</groupId>
-                   <artifactId>javacc</artifactId>
-                   <version>4.2</version>
-                   <type>jar</type>
-                </dependency>
-            </dependencies>
-         </plugin>
-	            </plugins>
-	        </build>
-	    </profile>
-	    <profile>
-	        <id>java</id>
-	        <build>
-	            <plugins>
-          <plugin>
-           <groupId>org.apache.maven.plugins</groupId>
-           <artifactId>maven-install-plugin</artifactId>
-           <version>2.5.1</version>
-           <executions>
-              <execution>
-                 <id>persistence-api</id>
-                 <goals>
-                    <goal>install-file</goal>
-                 </goals>
-                 <phase>initialize</phase>
-                 <configuration>
-                   <groupId>javax.persistence</groupId>
-                   <artifactId>persistence-api</artifactId>
-                   <version>2.0</version>
-                   <packaging>jar</packaging>
-                   <file>${basedir}/jars/persistence-api-2.0.jar</file>
-                   <generatePom>true</generatePom>
+                  <execution>
+                     <phase>initialize</phase>
+                     <goals>
+                      <goal>java</goal>
+                    </goals>
+                  </execution>
+                </executions>
+                <configuration>
+                <!--
+                  to get rid of the warning: [WARNING] Warning: killAfter is now deprecated. Do you need it ? Please comment on MEXEC-6.
+                  see: method execute() in https://github.com/ispringer/exec-maven-plugin/blob/master/src/main/java/org/codehaus/mojo/exec/ExecJavaMojo.java
+                -->
+                <killAfter>-1</killAfter>           
+                <includeProjectDependencies>false</includeProjectDependencies>
+                   <includePluginDependencies>true</includePluginDependencies>
+                   <executable>java</executable>
+                   <executableDependency>
+                    <groupId>net.java.dev.javacc</groupId>
+                    <artifactId>javacc</artifactId>
+                  </executableDependency>
+                  <mainClass>org.javacc.parser.Main</mainClass>
+                  <additionalClasspathElements>
+                    <additionalClasspathElement>${basedir}</additionalClasspathElement>
+                  </additionalClasspathElements>
+                  <arguments>
+                    <argument>-OUTPUT_DIRECTORY=${parser.dir}/src/main/java</argument>
+                    <argument>-PACKAGE=au.com.cybersearch2.classy_logic.parser</argument>
+                    <argument>${parser.dir}/src/main/resources/query.jj</argument>
+                   </arguments>
                  </configuration>
-              </execution>
-              <execution>
-                 <id>openbeans</id>
-                 <goals>
-                    <goal>install-file</goal>
-                 </goals>
-                 <phase>initialize</phase>
-                 <configuration>
-                   <groupId>com.googlecode.openbeans</groupId>
-                   <artifactId>openbeans</artifactId>
-                   <version>1.0</version>
-                   <packaging>jar</packaging>
-                   <file>${basedir}/jars/openbeans-1.0.jar</file>
-                   <generatePom>true</generatePom>
-                 </configuration>
-              </execution>
-           </executions>
-          </plugin>      
-	            </plugins>
-	        </build>
-	    </profile>
-        <profile>
-            <id>tools</id>
-            <build>
-                <plugins>
-          <plugin>
-           <groupId>org.apache.maven.plugins</groupId>
-           <artifactId>maven-install-plugin</artifactId>
-           <version>2.5.1</version>
-           <executions>
-              <execution>
-                 <id>classy_tools</id>
-                 <goals>
-                    <goal>install-file</goal>
-                 </goals>
-                 <phase>initialize</phase>
-                 <configuration>
-                   <groupId>au.com.cybersearch2</groupId>
-                   <artifactId>classy_tools</artifactId>
-                   <version>1.0.7</version>
-                   <packaging>pom</packaging>
-                   <file>${basedir}/classyutils/classy_tools-1.0.7.pom</file>
-                 </configuration>
-              </execution>
-              <execution>
-                 <id>classyutils</id>
-                 <goals>
-                    <goal>install-file</goal>
-                 </goals>
-                 <phase>initialize</phase>
-                 <configuration>
-                   <packaging>jar</packaging>
-                   <file>${basedir}/classyutils/classyutils-1.0.7.jar</file>
-                   <generatePom>false</generatePom>
-                   <pomFile>${basedir}/classyutils/classyutils-1.0.7.pom</pomFile>
-                   <sources>${basedir}/classyutils/classyutils-1.0.7-sources.jar</sources>
-                   <javaDoc>${basedir}/classyutils/classyutils-1.0.7-javadoc.jar</javaDoc>
-                 </configuration>
-              </execution>
-           </executions>
-          </plugin>      
-                </plugins>
-            </build>
-        </profile>
-	</profiles>
-    <build>
+                 <dependencies>
+                     <dependency>
+                       <groupId>net.java.dev.javacc</groupId>
+                       <artifactId>javacc</artifactId>
+                       <version>4.2</version>
+                       <type>jar</type>
+                    </dependency>
+                </dependencies>
+              </plugin>
+            </plugins>
+        </build>
+    </profile>
+    <profile>
+        <id>java</id>
+        <build>
+            <plugins>
+              <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-install-plugin</artifactId>
+               <executions>
+                  <execution>
+                     <id>persistence-api</id>
+                     <goals>
+                        <goal>install-file</goal>
+                     </goals>
+                     <phase>initialize</phase>
+                     <configuration>
+                       <groupId>javax.persistence</groupId>
+                       <artifactId>persistence-api</artifactId>
+                       <version>2.0</version>
+                       <packaging>jar</packaging>
+                       <file>${basedir}/jars/persistence-api-2.0.jar</file>
+                       <generatePom>true</generatePom>
+                     </configuration>
+                  </execution>
+                  <execution>
+                     <id>openbeans</id>
+                     <goals>
+                        <goal>install-file</goal>
+                     </goals>
+                     <phase>initialize</phase>
+                     <configuration>
+                       <groupId>com.googlecode.openbeans</groupId>
+                       <artifactId>openbeans</artifactId>
+                       <version>1.0</version>
+                       <packaging>jar</packaging>
+                       <file>${basedir}/jars/openbeans-1.0.jar</file>
+                       <generatePom>true</generatePom>
+                     </configuration>
+                  </execution>
+               </executions>
+              </plugin>      
+            </plugins>
+        </build>
+    </profile>
+    <profile>
+        <id>tools</id>
+        <build>
+            <plugins>
+              <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-install-plugin</artifactId>
+               <executions>
+                  <execution>
+                     <id>classy_tools</id>
+                     <goals>
+                        <goal>install-file</goal>
+                     </goals>
+                     <phase>initialize</phase>
+                     <configuration>
+                       <groupId>au.com.cybersearch2</groupId>
+                       <artifactId>classy_tools</artifactId>
+                       <version>1.0.7</version>
+                       <packaging>pom</packaging>
+                       <file>${basedir}/classyutils/classy_tools-${classy_tools.version}.pom</file>
+                     </configuration>
+                  </execution>
+                  <execution>
+                     <id>classyutils</id>
+                     <goals>
+                        <goal>install-file</goal>
+                     </goals>
+                     <phase>initialize</phase>
+                     <configuration>
+                       <packaging>jar</packaging>
+                       <file>${basedir}/classyutils/classyutils-${classy_tools.version.jar}</file>
+                       <generatePom>false</generatePom>
+                       <pomFile>${basedir}/classyutils/classyutils-${classy_tools.version}.pom</pomFile>
+                       <sources>${basedir}/classyutils/classyutils-${classy_tools.version}-sources.jar</sources>
+                       <javaDoc>${basedir}/classyutils/classyutils-${classy_tools.version}-javadoc.jar</javaDoc>
+                     </configuration>
+                  </execution>
+               </executions>
+              </plugin>      
+            </plugins>
+        </build>
+    </profile>
+  </profiles>
+  <build>
       <plugins>
         <plugin>
             <artifactId>maven-install-plugin</artifactId>
-            <version>2.5.1</version>
             <configuration>
             	<skip>true</skip>
             </configuration>
@@ -253,6 +246,4 @@
       	</plugins>
       </pluginManagement>
     </build>
-    <dependencies>
-    </dependencies>
 </project>

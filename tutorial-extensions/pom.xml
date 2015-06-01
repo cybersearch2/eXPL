@@ -3,7 +3,7 @@
   <parent>
     <groupId>au.com.cybersearch2</groupId>
     <artifactId>xpl</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
   </parent>
   <artifactId>tutorial-extensions</artifactId>
   <name>tutorial-extensions</name>
@@ -17,20 +17,6 @@
   </profiles>
   <build>
     <finalName>${project.artifactId}</finalName>
-    <pluginManagement>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-                <source>1.6</source>
-                <target>1.6</target>
-            </configuration>
-          </plugin>
-        </plugins>
-    </pluginManagement>
-    <plugins>
-    </plugins>
   </build>
 
   <dependencies>
@@ -75,7 +61,7 @@
     <dependency>
       <groupId>com.squareup.dagger</groupId>
       <artifactId>dagger-compiler</artifactId>
-     <optional>true</optional>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 </project>
