@@ -1,9 +1,25 @@
-eXPL v1.0.2
+______________________________________________________________________________________________________________________
+eXPL v1.0.6
 
-1. Update to Classy Tools v1.0.4
+Release built on Jenkins
+______________________________________________________________________________________________________________________
+eXPL v1.0.5
 
+1. Fix JpaSourceIterator so id field added to Axiom only if no term names provided
+2. Fix compiler error in ChoiceItem introduced with regex matching. Add matching on numbers. 
+______________________________________________________________________________________________________________________
+eXPL v1.0.4
+
+Introduce Maven Release support, with snapshot versioning and SCM and Distribution Management activation.
+______________________________________________________________________________________________________________________
 eXPL v1.0.3
 
 Refactor modules so dependency on OrmLite is optional. This means additional 2 "extensions" modules.
 Core package now only depends on classyutils module, introduced in Classy Tools v1.0.7.
 Also refactored ProviderManager so persistence component is in new JpaProviderHelper class.
+
+______________________________________________________________________________________________________________________
+eXPL v1.0.2
+
+Update to Classy Tools v1.0.4
+
