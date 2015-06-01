@@ -52,6 +52,7 @@ import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
+import au.com.cybersearch2.classy_logic.expression.ExpressionParameter;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
@@ -764,35 +765,31 @@ void AxiomItem(String axiomName, ParserAssembler parserAssembler) :
 
 void ChoiceItem(int selection, String axiomName, ParserAssembler parserAssembler) :
 {
-    Operand expression = null;
-    Parameter param = null;
-    Token regexId = null;
+    Operand operand;
+    String name = parserAssembler.getAxiomTermName(axiomName, 0);
     parserAssembler.addAxiom(axiomName, new Parameter(Term.ANONYMOUS, new Null()));
 }
 {
-   "(" 
-      (  
-        regexId=<IDENTIFIER>
-        |
-        expression=Expression(parserAssembler)
-      ) 
-      ("," Fact(axiomName, parserAssembler) )* 
-   ")" 
+   "(" operand=ChoiceExpression(name, parserAssembler) ("," Fact(axiomName, parserAssembler) )* ")" 
     {
-      Operand operand = null;
-      Operand regexOp = null;
-      String name = parserAssembler.getAxiomTermName(axiomName, 0);
-      parserAssembler.saveAxiom(axiomName);
-      Template template = parserAssembler.getTemplate(axiomName);
-      if (expression instanceof StringOperand)
-          regexOp = expression;
-      else if (regexId != null)
-          regexOp = parserAssembler.getOperandMap().addOperand(regexId.image, null);
-      if (regexOp != null)
-          operand = new RegExOperand(name, regexOp, 0, null);
-      else
-          operand = new Evaluator(name, expression, "&&" ); 
-      parserAssembler.addTemplate(axiomName, operand);
+       parserAssembler.saveAxiom(axiomName);
+       parserAssembler.getTemplate(axiomName);
+       parserAssembler.addTemplate(axiomName, operand);
+    }
+}
+
+Operand ChoiceExpression(String name, ParserAssembler parserAssembler) :
+{
+    Operand expression;
+}
+{
+    expression=Expression(parserAssembler)
+    {
+      if ((expression instanceof StringOperand) || (expression instanceof Variable))
+          return new RegExOperand(name, expression, 0, null);
+      else if ((expression.getLeftOperand() == null) && (expression instanceof ExpressionParameter))
+          return new Evaluator(name, parserAssembler.getOperandMap().addOperand(name, null), "==", expression);
+       return new Evaluator(name, expression, "&&" ); 
     }
 }
 

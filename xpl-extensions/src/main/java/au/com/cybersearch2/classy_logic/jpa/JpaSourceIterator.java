@@ -107,6 +107,7 @@ public class JpaSourceIterator implements Iterator<Axiom>
 			String termName = null;
 			int termIndex = 0;
             String key = descriptor.getName();
+            Object value = null;
 			if (termNameList != null)
 			{
 				for (NameMap nameMap: termNameList)
@@ -114,22 +115,24 @@ public class JpaSourceIterator implements Iterator<Axiom>
 					if (nameMap.getFieldName().equalsIgnoreCase(key))
 					{
 						termName = nameMap.getTermName();
+			            value = invoke(entity, descriptor); 
+			            assignItem(paramList, termIndex, new Parameter(termName, value == null ? new Null() : value));
 						break;
 					}
 					++termIndex;
 				}
 			}
-            Object value = null;
-            value = invoke(entity, descriptor); 
-			if (termName != null)
-				assignItem(paramList, termIndex, new Parameter(termName, value == null ? new Null() : value));
-			else if ((value != null) && (DelegateParameter.isDelegateClass(value.getClass())))
+			else 
 			{
-                // By default, all fields of expression-capable type are added as terms to the axiom
-				if ("id".equals(key))
-					id = new Parameter(key, value);
-				else 
-					paramList.add(new Parameter(key, value));
+                value = invoke(entity, descriptor); 
+			    if ((value != null) && DelegateParameter.isDelegateClass(value.getClass()))
+			    {
+                    // By default, all fields of expression-capable type are added as terms to the axiom
+    				if ("id".equals(key))
+    					id = new Parameter(key, value);
+    				else 
+    					paramList.add(new Parameter(key, value));
+			    }
 			}
 		}
 		if (id != null)
