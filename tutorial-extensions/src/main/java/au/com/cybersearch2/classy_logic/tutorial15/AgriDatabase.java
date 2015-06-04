@@ -63,7 +63,8 @@ public class AgriDatabase implements PersistenceWork
     		{
     			Double percent = (Double) axiom.getTermByIndex(i).getValue();
     			if (Double.isNaN(percent))
-    				percent = Double.valueOf(0.0); // NaN is persisted by SQLite as null, so represent as zero
+    		         // Sqlite does not support NaN. So use special value "-0.001" to indicate NaN
+    				percent = Double.valueOf(-0.001); // NaN is persisted by SQLite as null, so represent as zero
     			YearPercent yearPercent = new YearPercent();
     			yearPercent.setYear("y" + year++);
     			yearPercent.setPercent(percent);

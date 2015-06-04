@@ -30,6 +30,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classyinject.DI;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * HighCities
@@ -71,12 +72,15 @@ public class HighCitiesSorted
 
 	@Inject
 	ProviderManager providerManager;
+	@Inject
+	PersistenceContext persistenceContext;
 
 	public HighCitiesSorted()
 	{
 		// Configure dependency injection to get resource "cities"
 		new DI(new CitiesModule()).validate();
 		DI.inject(this);
+        persistenceContext.initializeAllDatabases();
 		EntityAxiomProvider entityAxiomProvider = new EntityAxiomProvider("cities", new CitiesDatabase());
 		entityAxiomProvider.addEntity("city", City.class); 
 		providerManager.putAxiomProvider(entityAxiomProvider);

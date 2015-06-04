@@ -49,7 +49,7 @@ public class AgriPercentCollector extends JpaEntityCollector
 	{
 		super(persistenceUnit, YearPercent.class);
 		setUserTransactionMode(true);
-    	setMaxResults(50);
+    	setMaxResults(48 * 10); // Batch size 10
     	batchMode = true;
 	}
 
@@ -104,7 +104,8 @@ public class AgriPercentCollector extends JpaEntityCollector
         		fact.setCountry(country);
         		beanMap = new BeanMap(fact);
         	}
-        	if (Double.valueOf(0.0).equals(yearPercent.getPercent()))
+        	// Sqlite does not support NaN. So use special value "-0.001" to indicate NaN
+        	if (Double.valueOf(-0.001).equals(yearPercent.getPercent()))
         		yearPercent.setPercent(Double.NaN);
         	beanMap.put(year, yearPercent.getPercent());
         }

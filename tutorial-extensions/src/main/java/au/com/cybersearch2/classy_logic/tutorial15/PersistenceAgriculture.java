@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.persistence.PersistenceException;
+
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
@@ -26,32 +29,46 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classytask.WorkStatus;
 
 /**
- * PersistenceHighCities demonstrates how to source axioms from a database using
- * Classy Tools JPA implementation. 
+ * PersistenceAgriculture demonstrates a custom JpaEntityCollector, AgriPercentCollector, used to
+ * back a JpaSource axiom source. The database is populated using data in
+ * agriculture-land.xpl script (AgriDatabase).
  * @author Andrew Bowley
  * 17 Mar 2015
  */
 public class PersistenceAgriculture 
 {
-    /** Named query to find the percent change in agriculture land for all years */
-    static public final String ALL_YEAR_PERCENTS = "all_year_percents";
     /** Persistence Unit name to look up configuration details in persistence.xml */
     static public final String PU_NAME = "agriculture";
+    @Inject
+    PersistenceContext persistenceContext;
 
     /**
      * Construct PersistenceHighCities object. It initializes dependency injection
      * and creates a in-memory Cities database.
      * @throws InterruptedException
      */
-	public PersistenceAgriculture() throws InterruptedException 
+	public PersistenceAgriculture() 
 	{
 		new DI(new AgriModule()).validate();
+		DI.inject(this);
+        persistenceContext.initializeAllDatabases();
         PersistenceWork setUpWork = new AgriDatabase();
         // Execute work and wait synchronously for completion
         PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        container.executeTask(setUpWork).waitForTask();
+        try
+        {
+            WorkStatus status = container.executeTask(setUpWork).waitForTask();
+            if (status != WorkStatus.FINISHED)
+                throw new PersistenceException("Task to set up database failed");
+        }
+        catch (InterruptedException e)
+        {
+            throw new PersistenceException("Error setting up database", e);
+        }
 	}
 
 	/**
@@ -60,34 +77,25 @@ public class PersistenceAgriculture
 	 * <p>Expected results:<br/> 
 		</p>	 
 	 */
-    public void testDataQuery()
+    public Iterator<Axiom> testDataQuery()
     {
+        JpaEntityCollector yearPercentCollector = new AgriPercentCollector(PU_NAME);
     	List<NameMap> termNameList = new ArrayList<NameMap>();
-     	JpaEntityCollector agriPercentCollector = new JpaEntityCollector(PU_NAME, Agri10Year.class);
-    	termNameList.clear();
     	termNameList.add(new NameMap("country", "country"));
-		for (int year = 1962; year < 2012; ++year)
-			termNameList.add(new NameMap("y" + year, "Y" + year));
-    	JpaSource perCentSource = new JpaSource(agriPercentCollector, "Data", termNameList); 
-    	Iterator<Axiom> axiomIterator = perCentSource.iterator();
-    	while (axiomIterator.hasNext())
-    		System.out.println(axiomIterator.next().toString());
-    	System.out.println("Done!");
+        for (int year = 1962; year < 2012; ++year)
+            termNameList.add(new NameMap("y" + year, "Y" + year));
+    	JpaSource jpaSource = new JpaSource(yearPercentCollector, "Data", termNameList); 
+    	return jpaSource.iterator();
     }
 
 
 	public static void main(String[] args)
 	{
-		try 
-		{
-			PersistenceAgriculture ariculture = new PersistenceAgriculture();
-			ariculture.testDataQuery();
-		} 
-		catch (InterruptedException e) 
-		{
-			e.printStackTrace();
-			System.exit(1);
-		}
+		PersistenceAgriculture ariculture = new PersistenceAgriculture();
+		Iterator<Axiom> axiomIterator = ariculture.testDataQuery();
+        while (axiomIterator.hasNext())
+            System.out.println(axiomIterator.next().toString());
+        System.out.println("Done!");
 		System.exit(0);
 	}
 

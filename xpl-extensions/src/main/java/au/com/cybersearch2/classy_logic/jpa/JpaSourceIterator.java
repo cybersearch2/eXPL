@@ -108,7 +108,7 @@ public class JpaSourceIterator implements Iterator<Axiom>
 			int termIndex = 0;
             String key = descriptor.getName();
             Object value = null;
-			if (termNameList != null)
+			if ((termNameList != null) && !termNameList.isEmpty())
 			{
 				for (NameMap nameMap: termNameList)
 				{

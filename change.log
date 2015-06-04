@@ -1,3 +1,9 @@
+eXPL v1.0.7
+
+1. Fix JpaSourceIterator test for no term names supplied.
+2. Fix PersistenceAgriculture Tutorial - wrong JpaCollector used.
+3. Apply unit test to each Tutorial.
+
 ______________________________________________________________________________________________________________________
 eXPL v1.0.6
 

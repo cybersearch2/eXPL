@@ -67,7 +67,6 @@ public class Data
     Double y2008;
     Double y2009;
     Double y2010;
-    Double y2011;
     
 	public String getCountry() {
 		return country;
@@ -368,11 +367,5 @@ public class Data
 	}
 	public void setY2010(Double y2010) {
 		this.y2010 = y2010;
-	}
-	public Double getY2011() {
-		return y2011;
-	}
-	public void setY2011(Double y2011) {
-		this.y2011 = y2011;
 	}
 }
