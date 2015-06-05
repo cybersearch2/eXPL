@@ -15,14 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial13;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -51,45 +48,42 @@ public class GermanScope
 	 * Demonstrates passing an axiom to the query using a QueryParams object;
 	 * The expected result:<br/>
 	 * format_total(total_text = Gesamtkosten + gst: 13.580,24 EUR)<br/>
-	 * @throws ParseException
+	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
-	public void displayTotalAmount() throws ParseException
+    public Axiom getFormatedTotalAmount()
 	{
-		QueryProgram queryProgram = compileScript(GERMAN_SCOPE);
+		QueryProgram queryProgram = new QueryProgram(GERMAN_SCOPE);
 		// Create QueryParams object for scope "german" and query "item_query"
-		QueryParams queryParams = new QueryParams(queryProgram, "german","item_query");
+		QueryParams queryParams = new QueryParams(queryProgram, "german", "item_query");
 		// Add an item Axiom with a single "2.345,67 EUR" term
 		// This axiom goes into the Global scope and is removed at the start of the next query.
 		queryParams.addAxiom("item", "12.345,67 €");
-		// Add a solution handler to display the final Calculator solution
-		queryParams.setSolutionHandler(new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("format_total").toString());
-				return true;
-			}});
-		queryProgram.executeQuery(queryParams);
+        // Add a solution handler to display the final Calculator solution
+		final Axiom[] formatedTotalAmountHolder = new Axiom[1];
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                formatedTotalAmountHolder[0] = solution.getAxiom("format_total");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+		return formatedTotalAmountHolder[0];
 	}
 	
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
+    /**
+     * Run tutorial
+     * @param args
+     */
 	public static void main(String[] args)
 	{
-		GermanScope germanScope = new GermanScope();
 		try 
 		{
-			germanScope.displayTotalAmount();
+	        GermanScope germanScope = new GermanScope();
+            System.out.println(germanScope.getFormatedTotalAmount().toString());
 		} 
-		catch (ParseException e) 
-		{
-			e.printStackTrace();
+		catch (ExpressionException e) 
+		{ // Display nested ParseException
+			e.getCause().printStackTrace();
 			System.exit(1);
 		}
 		System.exit(0);

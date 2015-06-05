@@ -3,6 +3,8 @@ eXPL v1.0.7
 1. Fix JpaSourceIterator test for no term names supplied.
 2. Fix PersistenceAgriculture Tutorial - wrong JpaCollector used.
 3. Apply unit test to each Tutorial.
+4. Remove maven-processor-plugin
+5. Fix potential NPE in QueryParams.executeQueryParams()
 
 ______________________________________________________________________________________________________________________
 eXPL v1.0.6

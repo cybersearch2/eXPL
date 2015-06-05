@@ -20,20 +20,34 @@
   </build>
 
   <dependencies>
-     <dependency>
+    <dependency>
       <groupId>au.com.cybersearch2</groupId>
       <artifactId>parser</artifactId>
       <version>${project.version}</version>
-     </dependency>
-     <dependency>
+    </dependency>
+    <dependency>
       <groupId>au.com.cybersearch2</groupId>
       <artifactId>classyutils</artifactId>
-     </dependency>
+    </dependency>
     <dependency>
-      <groupId>org.bsc.maven</groupId>
-      <artifactId>maven-processor-plugin</artifactId>
-      <optional>true</optional>
-    </dependency>    
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-assert-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-util</artifactId>
+       <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>com.squareup.dagger</groupId>
       <artifactId>dagger-compiler</artifactId>

@@ -23,8 +23,6 @@ import javax.persistence.Query;
 
 import au.com.cybersearch2.classybean.BeanMap;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * AgriPercentCollector
@@ -85,7 +83,6 @@ public class AgriPercentCollector extends JpaEntityCollector
         Double y2008;
         Double y2009;
         Double y2010;
-        Double y2011;
 		public String getCountry() {
 			return country;
 		}
@@ -386,37 +383,28 @@ public class AgriPercentCollector extends JpaEntityCollector
 		public void setY2010(Double y2010) {
 			this.y2010 = y2010;
 		}
-		public Double getY2011() {
-			return y2011;
-		}
-		public void setY2011(Double y2011) {
-			this.y2011 = y2011;
-		}
-
 	}
 	
     /** Named query to find all cities */
-    static public final String ALL_YEAR_PERCENTS = "all_year_percents";
 
     protected YearPercent yearPercent;
     protected Data fact;
     protected BeanMap beanMap;
     protected String currentCountry = "";
+    protected Collection<YearPercent> yearPercentList;
     
-    /** Factory object to create "agriculture" Persistence Unit implementation */
-    protected PersistenceContext persistenceContext;
-
 	/**
 	 * 
 	 */
 	public AgriPercentCollector(String persistenceUnit) 
 	{
-		super(persistenceUnit);
-		this.namedJpaQuery = ALL_YEAR_PERCENTS;
-        persistenceContext = new PersistenceContext();
-		setUp(persistenceUnit);
+		super(persistenceUnit, YearPercent.class);
+		setUserTransactionMode(true);
+    	setMaxResults(48 * 10); // Batch size 10
+    	batchMode = true;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void doInBackground(EntityManagerLite entityManager) 
 	{
@@ -427,14 +415,19 @@ public class AgriPercentCollector extends JpaEntityCollector
         	query.setMaxResults(maxResults);
         	query.setFirstResult(startPosition);
         }
-        @SuppressWarnings({"unchecked"})
-		Collection<YearPercent> yearPercentList = (Collection<YearPercent>) query.getResultList();
+        yearPercentList = (Collection<YearPercent>) query.getResultList();
+	}
+	
+	@Override
+	protected void processBatch()
+	{
         startPosition += yearPercentList.size();
 		//System.out.println("Size = " + yearPercentList.size() + ", Position = " + startPosition);
         // Collate into country list
         Iterator<YearPercent> iterator = yearPercentList.iterator();
         if (!iterator.hasNext())
         {
+        	yearPercentList.clear();
         	if (moreExpected)
         	{
         		moreExpected = false;
@@ -462,17 +455,13 @@ public class AgriPercentCollector extends JpaEntityCollector
         		fact.setCountry(country);
         		beanMap = new BeanMap(fact);
         	}
+            // Sqlite does not support NaN. So use special value "-0.001" to indicate NaN
+            if (Double.valueOf(-0.001).equals(yearPercent.getPercent()))
+                yearPercent.setPercent(Double.NaN);
         	beanMap.put(year, yearPercent.getPercent());
         }
+        yearPercentList.clear();
     	moreExpected = true;
 	}
 
-	protected void setUp(String persistenceUnit)
-	{
-        // Get Interface for JPA Support, required to create named queries
-        PersistenceAdmin persistenceAdmin = persistenceContext.getPersistenceAdmin(persistenceUnit);
-        QueryForAllGenerator allEntitiesQuery = 
-            new QueryForAllGenerator(persistenceAdmin);
-        persistenceAdmin.addNamedQuery(YearPercent.class, ALL_YEAR_PERCENTS, allEntitiesQuery);
-	}
 }

@@ -15,16 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial12;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -49,7 +46,7 @@ public class MultiCurrency
 			"query price_query(price : charge) >> calc(charge_plus_gst) >> calc(format_total);";
 
 	/**
-	 * 
+	 * Construct MultiCurrency object
 	 */
 	public MultiCurrency() 
 	{
@@ -59,12 +56,14 @@ public class MultiCurrency
 	/**
 	 * Compiles the WORLD_CURRENCY script and runs the "price_query" query, displaying the solution on the console.<br/>
 	 * The first of 104 expected results:<br/>
-	 * format_total(total_text = MY Total + gst: MYR10,682.12)<br/>
-	 * @throws ParseException
+	 * format_total(total_text = MY Total + gst: MYR10,682.12)<br/><br/>
+	 * To view full expected result, see src/main/resource/multi-currency-list.txt
+	 * @return AxiomTermList iterator
 	 */
-	public void displayTotalAmount() throws ParseException
+    @SuppressWarnings("unchecked")
+	public Iterator<AxiomTermList> getFormatedAmounts()
 	{
-		QueryProgram queryProgram = compileScript(WORLD_CURRENCY);
+		QueryProgram queryProgram = new QueryProgram(WORLD_CURRENCY);
 		// Use this query to see the total amount before it is formatted
 		// Note adjustment of decimal places to suite currency.
 		//queryProgram.executeQuery("price_query", new SolutionHandler(){
@@ -74,33 +73,27 @@ public class MultiCurrency
 		//		return true;
 		//	}});
 		Result result = queryProgram.executeQuery("price_query");
-		@SuppressWarnings("unchecked")
-		Iterator<AxiomTermList> iterator = (Iterator<AxiomTermList>) result.getList("world_list").iterator();
-        while(iterator.hasNext())
-        {
-		    System.out.println(iterator.next().toString());
-         }
+		return (Iterator<AxiomTermList>) result.getList("world_list").iterator();
 	}
 	
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
+    /**
+     * Run tutorial
+     * @param args
+     */
 	public static void main(String[] args)
 	{
-		MultiCurrency multiCurrency = new MultiCurrency();
 		try 
 		{
-			multiCurrency.displayTotalAmount();
+	        MultiCurrency multiCurrency = new MultiCurrency();
+	        Iterator<AxiomTermList> iterator = multiCurrency.getFormatedAmounts();
+	        while(iterator.hasNext())
+	        {
+	            System.out.println(iterator.next().toString());
+	        }
 		} 
-		catch (ParseException e) 
-		{
-			e.printStackTrace();
+		catch (ExpressionException e) 
+		{ // Display nested ParseException
+			e.getCause().printStackTrace();
 			System.exit(1);
 		}
 		System.exit(0);

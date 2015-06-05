@@ -15,8 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial15;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import javax.inject.Inject;
@@ -24,15 +22,15 @@ import javax.inject.Inject;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
- * IncreasedAgriculture
- * Solves:  
+ * IncreasedAgriculture demonstrates Axiom Provider writing query results to a database.
+ * Two queries are executed. The first produces a list of countries which have increased the area
+ * under agriculture by more than 1% over the twenty years between 1990 and 2010. This query writes
+ * it's results to a database table. The second query reads this table and prints it's contents row by row. 
  * @author Andrew Bowley
  * 20 Feb 2015
  */
@@ -43,6 +41,7 @@ public class IncreasedAgriculture
 		"include \"surface-land.xpl\";\n" +
 	    "template agri_10y (country ? y2010 - y1990 > 1.0, double y1990, double y2010);\n" +
 		"template surface_area_increase (agri_10y.country, double surface_area = (y2010 - y1990)/100 * surface_area_Km2);\n" +
+	    "// Specify term list which writes to persistence resource 'agriculture'\n" +
 		"list<term> surface_area_axiom(surface_area_increase : resource \"agriculture\");\n" +
 	    "query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);"; 
 
@@ -52,29 +51,38 @@ public class IncreasedAgriculture
 		"list increased_list(increased);\n" +
 		"query increased_query(surface_area_increase : increased);";
 	
-	protected PersistenceContext persistenceContext;
-	
+	/** ProviderManager is Axiom source for eXPL compiler */
 	@Inject
 	ProviderManager providerManager;
 
+	/**
+	 * Construct IncreasedAgriculture object
+	 */
 	public IncreasedAgriculture()
 	{
-		// Configure dependency injection to get resource "cities"
+		// Configure dependency injection to get resource "agriculture"
 		new DI(new AgriModule()).validate();
 		DI.inject(this);
-		PersistenceContext persistenceContext = new PersistenceContext();
-		persistenceContext.initializeAllDatabases();
 		providerManager.putAxiomProvider(new AgriAxiomProvider());
 	}
+	
 	/**
-	 * Compiles the AGRICULTURAL_LAND script and runs the "more_agriculture" query, displaying the solution on the console.<br/>
-	 * The expected result:<br/>
-	 * @throws ParseException
+	 * Compiles the AGRICULTURAL_LAND script and runs the "more_agriculture" query, 
+	 * then compiles the AGRI_10_YEAR script and runs the "increased_query" query,
+	 * displaying the solution on the console.<br/>
+	 * The expected result first 3 lines:<br/>
+        increased(country = Albania, surface_area = 986.1249999999999, id = 0)<br/>
+        increased(country = Algeria, surface_area = 25722.79200000004, id = 1)<br/>
+        increased(country = American Samoa, surface_area = 10.0, id = 2)<br/><br/>
+     * The full result can be viewed in file src/main/resources/increased-agri-list.txt
+     * @return AxiomTermList iterator
 	 */
-	public void displayIncreasedAgri() throws ParseException
+    @SuppressWarnings("unchecked")
+	public Iterator<AxiomTermList> displayIncreasedAgri()
 	{
-		QueryProgram queryProgram1 = compileScript(AGRICULTURAL_LAND);
+		QueryProgram queryProgram1 = new QueryProgram(AGRICULTURAL_LAND);
 		queryProgram1.executeQuery("more_agriculture");
+        // Uncomment following SolutionHandler parameter to see intermediate result 
 		/*, new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -82,33 +90,28 @@ public class IncreasedAgriculture
 				return true;
 			}});
          */
-		QueryProgram queryProgram2 = compileScript(AGRI_10_YEAR);
+		QueryProgram queryProgram2 = new QueryProgram(AGRI_10_YEAR);
 		Result result = queryProgram2.executeQuery("increased_query");
-		@SuppressWarnings("unchecked")
-		Iterator<AxiomTermList> iterator = (Iterator<AxiomTermList>) result.getList("increased_list").iterator();
-        while(iterator.hasNext())
-		    System.out.println(iterator.next().toString());
+		return (Iterator<AxiomTermList>) result.getList("increased_list").iterator();
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
+	/**
+	 * Run tutorial
+	 * @param args
+	 */
 	public static void main(String[] args)
 	{
 		IncreasedAgriculture increasedAgri = new IncreasedAgriculture();
 		try 
 		{
-			increasedAgri.displayIncreasedAgri();
+		    Iterator<AxiomTermList> iterator = increasedAgri.displayIncreasedAgri();
+            while(iterator.hasNext())
+                System.out.println(iterator.next().toString());
+
 		} 
-		catch (ParseException e) 
-		{
-			e.printStackTrace();
+		catch (ExpressionException e) 
+		{ // Display nested ParseException
+			e.getCause().printStackTrace();
 			System.exit(1);
 		}
 		System.exit(0);

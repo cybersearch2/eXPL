@@ -20,17 +20,17 @@
   </build>
 
   <dependencies>
-     <dependency>
+    <dependency>
       <groupId>au.com.cybersearch2</groupId>
       <artifactId>parser</artifactId>
       <version>${project.version}</version>
-     </dependency>
-     <dependency>
+    </dependency>
+    <dependency>
       <groupId>au.com.cybersearch2</groupId>
       <artifactId>xpl-extensions</artifactId>
       <version>${project.version}</version>
-     </dependency>
-     <dependency>
+    </dependency>
+    <dependency>
       <groupId>au.com.cybersearch2</groupId>
       <artifactId>classyjava</artifactId>
     </dependency>
@@ -53,11 +53,6 @@
       <artifactId>fest-util</artifactId>
        <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.bsc.maven</groupId>
-      <artifactId>maven-processor-plugin</artifactId>
-      <optional>true</optional>
-    </dependency>    
     <dependency>
       <groupId>com.squareup.dagger</groupId>
       <artifactId>dagger-compiler</artifactId>

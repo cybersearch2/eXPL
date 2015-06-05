@@ -82,7 +82,7 @@ public class PersistenceAgriculture
         JpaEntityCollector yearPercentCollector = new AgriPercentCollector(PU_NAME);
     	List<NameMap> termNameList = new ArrayList<NameMap>();
     	termNameList.add(new NameMap("country", "country"));
-        for (int year = 1962; year < 2012; ++year)
+        for (int year = 1962; year < 2011; ++year)
             termNameList.add(new NameMap("y" + year, "Y" + year));
     	JpaSource jpaSource = new JpaSource(yearPercentCollector, "Data", termNameList); 
     	return jpaSource.iterator();

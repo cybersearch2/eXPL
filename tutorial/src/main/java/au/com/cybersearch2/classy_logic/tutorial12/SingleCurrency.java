@@ -15,13 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial12;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -46,38 +43,36 @@ public class SingleCurrency
 	 * Compiles the CURRENCY script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
 	 * format_total(total_text = Total + gst: AUD1,358.02)<br/>
-	 * @throws ParseException
 	 */
-	public void displayTotalAmount() throws ParseException
+	public Axiom getFormatedTotalAmount()
 	{
-		QueryProgram queryProgram = compileScript(CURRENCY);
+		QueryProgram queryProgram = new QueryProgram(CURRENCY);
+		final Axiom[] formatedTotalAmountHolder = new Axiom[1];
 		queryProgram.executeQuery("item_query", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("format_total").toString());
+			    formatedTotalAmountHolder[0] = solution.getAxiom("format_total");
 				return true;
 			}});
+		return formatedTotalAmountHolder[0];
 	}
 	
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
+    /**
+     * Run tutorial
+     * @param args
+     */
 	public static void main(String[] args)
 	{
 		SingleCurrency singleCurrency = new SingleCurrency();
 		try 
 		{
-			singleCurrency.displayTotalAmount();
+			Axiom formatedTotalAmount = singleCurrency.getFormatedTotalAmount();
+            System.out.println(formatedTotalAmount.toString());
+
 		} 
-		catch (ParseException e) 
-		{
-			e.printStackTrace();
+		catch (ExpressionException e) 
+		{ // Display nested ParseException   
+			e.getCause().printStackTrace();
 			System.exit(1);
 		}
 		System.exit(0);

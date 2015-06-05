@@ -15,8 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial14;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Iterator;
 
@@ -25,12 +23,10 @@ import javax.inject.Inject;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * HighCities
@@ -72,19 +68,17 @@ public class HighCitiesSorted
 
 	@Inject
 	ProviderManager providerManager;
-	@Inject
-	PersistenceContext persistenceContext;
 
 	public HighCitiesSorted()
 	{
 		// Configure dependency injection to get resource "cities"
 		new DI(new CitiesModule()).validate();
 		DI.inject(this);
-        persistenceContext.initializeAllDatabases();
 		EntityAxiomProvider entityAxiomProvider = new EntityAxiomProvider("cities", new CitiesDatabase());
 		entityAxiomProvider.addEntity("city", City.class); 
 		providerManager.putAxiomProvider(entityAxiomProvider);
 	}
+	
 	/**
 	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
@@ -92,23 +86,14 @@ public class HighCitiesSorted
 	 * high_city(name = flagstaff, altitude = 6970)<br/>
 	 * high_city(name = addis ababa, altitude = 8000)<br/>
 	 * high_city(name = leadville, altitude = 10200)<br/>
-	 * @throws ParseException
+	 * @return AxiomTermList iterator
 	 */
 	@SuppressWarnings("unchecked")
-    public Iterator<AxiomTermList> displayHighCities() throws ParseException
+    public Iterator<AxiomTermList> displayHighCities()
 	{
-		QueryProgram queryProgram = compileScript(CITY_EVELATIONS);
+		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities");
 		return (Iterator<AxiomTermList>) result.getList("city_list").iterator();
-	}
-
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
 	}
 
 	public static void main(String[] args) throws SQLException
@@ -120,9 +105,9 @@ public class HighCitiesSorted
 	        while(iterator.hasNext())
 	            System.out.println(iterator.next().toString());
 		} 
-		catch (ParseException e) 
-		{
-			e.printStackTrace();
+		catch (ExpressionException e) 
+		{   // Display nested ParseException
+			e.getCause().printStackTrace();
 			System.exit(1);
 		}
 		System.exit(0);

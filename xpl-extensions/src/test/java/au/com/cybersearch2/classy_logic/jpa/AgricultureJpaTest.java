@@ -17,6 +17,9 @@ package au.com.cybersearch2.classy_logic.jpa;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,9 +27,11 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
+import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.parser.QueryParserTest;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classyinject.DI;
@@ -88,8 +93,9 @@ public class AgricultureJpaTest
     	    		for (int i = 1; i < axiom.getTermCount(); ++i)
     	    		{
     	    			Double percent = (Double) axiom.getTermByIndex(i).getValue();
-    	    			if (Double.isNaN(percent))
-    	    				continue; // NaN is persisted by SQLite as null, so skip
+    	                if (Double.isNaN(percent))
+    	                     // Sqlite does not support NaN. So use special value "-0.001" to indicate NaN
+    	                    percent = Double.valueOf(-0.001); // NaN is persisted by SQLite as null, so represent as near zero
     	    			YearPercent yearPercent = new YearPercent();
     	    			yearPercent.setYear("y" + year++);
     	    			yearPercent.setPercent(percent);
@@ -99,6 +105,8 @@ public class AgricultureJpaTest
     	    			//System.out.println(yearPercent.getId() + ", " + yearPercent.getCountry().getCountry());
     	    			//System.out.println(axiom.getTermByIndex(i).getValue());
     	    		}
+    	    		if (year != 2011)
+    	    		    throw new IllegalArgumentException("Invalid year: " + year);
         	    }
             }
 
@@ -120,33 +128,52 @@ public class AgricultureJpaTest
         container.executeTask(setUpWork).waitForTask();
     }
 
+    /**
+     * Test round trip from axiom source to peristence unit and back again.
+     * @throws SQLException
+     * @throws ParseException
+     * @throws InterruptedException
+     */
     @Test
     public void test_query_term_names() throws Exception
     {
-    	AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME);
-    	agriPercentCollector.setMaxResults(1000);
-    	List<NameMap> termNameList = new ArrayList<NameMap>();
-    	termNameList.add(new NameMap("country", "country"));
-		for (int year = 1962; year < 2011; ++year)
-		{
-			String key = "Y" + year;
-			termNameList.add(new NameMap(key, key));
-		}
-    	JpaSource jpaSource = new JpaSource(agriPercentCollector, "Data", termNameList); 
-    	Iterator<Axiom> axiomIterator = jpaSource.iterator();
-    	int count = 0;
-    	if (axiomIterator.hasNext())
-    	{
-    		++count;
-    		//System.out.println();
-    		assertThat(axiomIterator.next().toString()).isEqualTo(AFGHANISTAN);
-    	}
-    	while (axiomIterator.hasNext())
-    	{
-    		++count;
-    		axiomIterator.next();
-    	}
-    	//System.out.println(count);
-    	assertThat(count).isEqualTo(208);
+        ParserAssembler parserAssembler = null;
+        parserAssembler = openScript("include \"agriculture-land.xpl\";");
+        AxiomSource agriSource = parserAssembler.getAxiomSource("Data");
+        Iterator<Axiom> dataIterator = agriSource.iterator();
+        AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME);
+        List<NameMap> termNameList = new ArrayList<NameMap>();
+        termNameList.add(new NameMap("country", "country"));
+        for (int year = 1962; year < 2011; ++year)
+        {
+            String key = "Y" + year;
+            termNameList.add(new NameMap(key, key));
+        }
+        JpaSource jpaSource = new JpaSource(agriPercentCollector, "Data", termNameList); 
+        Iterator<Axiom>  aricultureIterator = jpaSource.iterator();
+        while ( aricultureIterator.hasNext())
+        {
+           assertThat(dataIterator.hasNext());
+           Axiom output = aricultureIterator .next();
+           Axiom input = dataIterator.next();
+           assertThat(output.getTermCount()).isEqualTo(input.getTermCount());
+           assertThat(output.getTermByName("country").toString()).isEqualTo(input.getTermByName("country").toString());
+           for (int i = 1; i < input.getTermCount(); i++)
+           {
+               String inputTerm = input.getTermByIndex(i).toString();
+               String outputTerm = output.getTermByIndex(i).toString();
+               assertThat(outputTerm.toUpperCase()).isEqualTo(inputTerm.toUpperCase());
+           }
+        }
+    }
+    
+    protected ParserAssembler openScript(String script) throws ParseException
+    {
+        InputStream stream = new ByteArrayInputStream(script.getBytes());
+        QueryParser queryParser = new QueryParser(stream);
+        queryParser.enable_tracing();
+        QueryProgram queryProgram = new QueryProgram();
+        queryParser.input(queryProgram);
+        return queryProgram.getGlobalScope().getParserAssembler();
     }
 }

@@ -15,12 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.parser.ParseException;
+import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -88,6 +92,25 @@ public class QueryProgram
 		scopes = new HashMap<String, Scope>();
 		scopes.put(GLOBAL_SCOPE, new Scope(GLOBAL_SCOPE));
 	}
+
+    /**
+     * Construct a QueryProgram object compiled to specified script. 
+     * @see au.com.cybersearch2.classy_logic.parser.QueryParser
+     */
+    public QueryProgram(String script) 
+    {
+       this();
+       InputStream stream = new ByteArrayInputStream(script.getBytes());
+       QueryParser queryParser = new QueryParser(stream);
+       try
+       {
+            queryParser.input(this);
+       }
+       catch (ParseException e)
+       {
+            throw new ExpressionException("Error compiling script: " + e.getMessage(), e);
+       }
+    }
 
 	/**
 	 * Returns global scope
@@ -190,7 +213,11 @@ public class QueryProgram
 			}});
 
 	}
-	
+
+	/**
+     * Execute query by specification
+	 * @param queryParams QueryParams
+	 */
 	protected void executeQueryParams(QueryParams queryParams)
 	{
 		Scope scope = queryParams.getScope();
@@ -223,7 +250,7 @@ public class QueryProgram
 			}
 		while (headQuery.execute())
 		{
-			if (!solutionHandler.onSolution(headQuery.getSolution()) || isCalculation)
+			if ((solutionHandler != null) && !solutionHandler.onSolution(headQuery.getSolution()) || isCalculation)
 				break;
 		}
 		// Reset all query templates so they can be recycled
@@ -245,6 +272,12 @@ public class QueryProgram
 		return template;
 	}
 
+	/**
+	 * Returns Calculator axiom from supplied scope
+	 * @param scope Scope
+	 * @param querySpec QuerySpec
+	 * @return Axiom object
+	 */
 	protected Axiom getCalculatorAxiom(Scope scope, QuerySpec querySpec)
 	{
 		String axiomKey = getCalculatorKeyName(querySpec).getAxiomKey();
@@ -252,7 +285,13 @@ public class QueryProgram
 			return scope.getAxiomSource(axiomKey).iterator().next();
 		return null;
 	}
-	
+
+	/**
+	 * Returns key name from Calculator query specification
+	 * @param querySpec
+	 * @return KyeName object
+	 * @throws IllegalArgumentException if not exactly 1 key name specified
+	 */
 	protected KeyName getCalculatorKeyName(QuerySpec querySpec)
 	{
 		List<KeyName> keyNameList = querySpec.getKeyNameList();
