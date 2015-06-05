@@ -26,6 +26,7 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
@@ -64,9 +65,13 @@ public class RegexGroups
 	    "list word_definitions(word_def);\n" +
 		"query query_in_words(lexicon : in_words) >> (part : part_expand) >> calc(word_def);";
 
+	/** ProviderManager object wihich is axiom source for the compiler */
 	@Inject
 	ProviderManager providerManager;
 
+	/**
+	 * Construct RegexGroups object
+	 */
 	public RegexGroups()
 	{
 		// Configure dependency injection to get resource "lexicon"
@@ -75,37 +80,41 @@ public class RegexGroups
 		providerManager.putAxiomProvider(new LexiconAxiomProvider());
 	}
 	
-	public void displayRegexGroups() throws ParseException
+    /**
+     * Compiles the LEXICAL_SEARCH script and runs the "query_in_words" query, displaying the solution on the console.<br/>
+     * The first 3 lines of the expected result:<br/>
+        word_def(word = inadequate, part = adj., def = not sufficient to meet a need)<br/>
+        word_def(word = incentive, part = noun, def = a positive motivational influence)<br/>
+        word_def(word = incidence, part = noun, def = the relative frequency of occurrence of something)<br/><br/>
+      To view full results, go to src/main/resources/"in-words-list.txt  
+     * @return AxiomTermList iterator containing the final "in" words solution
+     */
+    @SuppressWarnings("unchecked")
+	public Iterator<AxiomTermList> getRegexGroups()
 	{
 		// Expected 54 results can be found in /src/test/resources/in_words.lst. 
 		// Here is the first solution: 
 		// word = inadequate, part = adj., def = not sufficient to meet a need
-		QueryProgram queryProgram = compileScript(LEXICAL_SEARCH);
+		QueryProgram queryProgram = new QueryProgram(LEXICAL_SEARCH);
 		Result result = queryProgram.executeQuery("query_in_words");
-		@SuppressWarnings("unchecked")
-		Iterator<AxiomTermList> iterator = (Iterator<AxiomTermList>) result.getList("word_definitions").iterator();
-        while(iterator.hasNext())
-		    System.out.println(iterator.next().toString());
-	}
+		return (Iterator<AxiomTermList>) result.getList("word_definitions").iterator();
+ 	}
 	
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
+    /**
+     * Run tutorial
+     * @param args
+     */
 	public static void main(String[] args)
 	{
-		RegexGroups regexGroups = new RegexGroups();
 		try 
 		{
-			regexGroups.displayRegexGroups();
+	        RegexGroups regexGroups = new RegexGroups();
+	        Iterator<AxiomTermList> iterator = regexGroups.getRegexGroups();
+	        while(iterator.hasNext())
+	            System.out.println(iterator.next().toString());
 		} 
-		catch (ParseException e) 
-		{
+        catch (ExpressionException e) 
+        { // Display nested ParseException
 			e.printStackTrace();
 			System.exit(1);
 		}

@@ -47,6 +47,7 @@ import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.NullOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.RegExOperand;
+import au.com.cybersearch2.classy_logic.expression.MatchOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
 import au.com.cybersearch2.classy_logic.expression.Variable;
@@ -788,8 +789,8 @@ Operand ChoiceExpression(String name, ParserAssembler parserAssembler) :
       if ((expression instanceof StringOperand) || (expression instanceof Variable))
           return new RegExOperand(name, expression, 0, null);
       else if ((expression.getLeftOperand() == null) && (expression instanceof ExpressionParameter))
-          return new Evaluator(name, parserAssembler.getOperandMap().addOperand(name, null), "==", expression);
-       return new Evaluator(name, expression, "&&" ); 
+          return new MatchOperand(name, expression.getValue());
+      return new Evaluator(name, expression, "&&" ); 
     }
 }
 
@@ -1279,7 +1280,8 @@ Operand Literal() :
 {
   lit=<INTEGER_LITERAL>
   {
-    return new IntegerOperand(Term.ANONYMOUS, Integer.parseInt(lit.image));
+    Integer litValue = Integer.decode(lit.image);
+    return new IntegerOperand(Term.ANONYMOUS, litValue);
   }
 |
   lit=<FLOATING_POINT_LITERAL>

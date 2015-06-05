@@ -28,6 +28,7 @@ import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.NullOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.RegExOperand;
+import au.com.cybersearch2.classy_logic.expression.MatchOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
 import au.com.cybersearch2.classy_logic.expression.Variable;
@@ -1212,8 +1213,8 @@ public class QueryParser implements QueryParserConstants
       if ((expression instanceof StringOperand) || (expression instanceof Variable))
           {if (true) return new RegExOperand(name, expression, 0, null);}
       else if ((expression.getLeftOperand() == null) && (expression instanceof ExpressionParameter))
-          {if (true) return new Evaluator(name, parserAssembler.getOperandMap().addOperand(name, null), "==", expression);}
-       {if (true) return new Evaluator(name, expression, "&&" );}
+          {if (true) return new MatchOperand(name, expression.getValue());}
+      {if (true) return new Evaluator(name, expression, "&&" );}
     throw new Error("Missing return statement in function");
   }
 
@@ -1912,7 +1913,8 @@ public class QueryParser implements QueryParserConstants
     {
     case INTEGER_LITERAL:
       lit = jj_consume_token(INTEGER_LITERAL);
-    {if (true) return new IntegerOperand(Term.ANONYMOUS, Integer.parseInt(lit.image));}
+    Integer litValue = Integer.decode(lit.image);
+    {if (true) return new IntegerOperand(Term.ANONYMOUS, litValue);}
       break;
     case FLOATING_POINT_LITERAL:
       lit = jj_consume_token(FLOATING_POINT_LITERAL);
@@ -2144,6 +2146,11 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3R_63() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
   private boolean jj_3R_41() {
     Token xsp;
     xsp = jj_scanpos;
@@ -2170,11 +2177,6 @@ public class QueryParser implements QueryParserConstants
     if (jj_3R_48()) return true;
     }
     }
-    return false;
-  }
-
-  private boolean jj_3R_63() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
     return false;
   }
 
@@ -2425,7 +2427,7 @@ public class QueryParser implements QueryParserConstants
     for (int i = 0; i < 74; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
-      jj_2_rtns[i] = new JJCalls();
+      jj_2_rtns[i]= new JJCalls();
   }
 
   /** Constructor with generated Token Manager. */

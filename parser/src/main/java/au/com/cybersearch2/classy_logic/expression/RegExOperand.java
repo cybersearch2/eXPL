@@ -39,8 +39,6 @@ public class RegExOperand extends StringOperand
     // just after or just before, respectively, a line terminator or the end of
     // the input sequence. 
 	protected static int REGEX_DEFAULT_FLAGS = 0; // Pattern.MULTILINE;
-    /** Term name */
-	protected String name;
 	/** Regular expression */
 	protected String regex;
 	/** Pre-compiled pattern */
@@ -51,6 +49,7 @@ public class RegExOperand extends StringOperand
 	protected Operand regexOp;
 	
 	/**
+	 * Construct RegExOperand object
 	 * @param name Term name
 	 * @param regex Regular expression
 	 * @param flags Optional flags to modify regular expression behavior

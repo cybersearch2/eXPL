@@ -228,7 +228,7 @@ public class Template extends Structure
 				++position;
 			}
 		}
-		return 0;
+		return Choice.NO_MATCH;
 	}
 
 	/**

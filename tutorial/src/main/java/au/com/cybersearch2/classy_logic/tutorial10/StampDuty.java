@@ -15,14 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial10;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -53,44 +50,40 @@ public class StampDuty
 	 * Compiles the STAMP_DUTY script and runs the "stamp_duty_query" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
 	 * payable(duty = 3768.32)<br/>
-	 * @throws ParseException
 	 */
-	public void displayStampDuty() throws ParseException
+	public Axiom getStampDuty()
 	{
-		QueryProgram queryProgram = compileScript(STAMP_DUTY);
+		QueryProgram queryProgram = new QueryProgram(STAMP_DUTY);
 		// Create QueryParams object for Global scope and query "stamp_duty_query"
 		QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "stamp_duty_query");
 		// Add a transacton_amount Axiom with a single 123,458 term
 		// This axiom goes into the Global scope and is removed at the start of the next query.
 		queryParams.addAxiom("transacton_amount", Integer.valueOf(123458));
+		final Axiom[] payableHolder = new Axiom[1];
 		// Add a solution handler to display the final Calculator solution
 		queryParams.setSolutionHandler(new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("payable").toString());
+			    payableHolder[0] = solution.getAxiom("payable");
 				return true;
 			}});
 		queryProgram.executeQuery(queryParams);
+		return payableHolder[0];
 	}
 	
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
+    /**
+     * Run tutorial
+     * @param args
+     */
 	public static void main(String[] args)
 	{
-		StampDuty stampDuty = new StampDuty();
 		try 
 		{
-			stampDuty.displayStampDuty();
+	        StampDuty stampDuty = new StampDuty();
+            System.out.println(stampDuty.getStampDuty().toString());
 		} 
-		catch (ParseException e) 
-		{
+        catch (ExpressionException e) 
+        { // Display nested ParseException
 			e.printStackTrace();
 			System.exit(1);
 		}

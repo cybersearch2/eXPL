@@ -329,7 +329,7 @@ public class CalculatorTest
 		template.setKey("Seed");
 		Solution solution = new Solution();
 		calculator.execute(seedAxiom, template, solution);
-		verify(choice).completeSolution(solution, template);
+		verify(choice).completeSolution(solution, template, calculator.axiom);
 
 		/*
 		//System.out.println(solution.getAxiom(CHOICE_NAME).toString());

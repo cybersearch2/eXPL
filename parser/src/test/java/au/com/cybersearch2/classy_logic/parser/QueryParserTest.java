@@ -372,7 +372,7 @@ public class QueryParserTest
 	        "calc format_total(string total_text = country + \" Total + gst: \" + format(total));\n" +
 	        "list world_list(format_total);\n" +
 			"query price_query(price : charge) >> calc(charge_plus_gst) >> calc(format_total);";
-//  			
+  			
 	static final String STAMP_DUTY_XPL =
 			"choice bracket "
 			+ "(amount,       threshold,  base,    percent) :\n" +
@@ -389,7 +389,26 @@ public class QueryParserTest
 			"axiom transacton_amount (amount) : ( 123458 );\n" +
 			"calc payable(duty = bracket.base + (bracket.percent / 100) * (amount - bracket.threshold));\n" +
 			"query stamp_duty_query calc(transacton_amount : bracket) >> calc(payable);\n";
-			
+
+    static final String CHOICE_COLORS =
+            "choice swatch (name, red, green, blue) :\n" +
+            "(\"aqua\", 0, 255, 255),\n" +
+            "(\"black\", 0, 0, 0),\n" +
+            "(\"blue\", 0, 0, 255),\n" +
+            "(\"white\", 255, 255, 255);\n" +
+            "axiom shade (name) : parameter;\n" +
+            "query color_query calc(shade : swatch);\n";
+            ;
+
+    static final String CHOICE_COLORS2 =
+            "choice swatch (rgb, color, red, green, blue) :\n" +
+            "(0x00FFFF, \"aqua\", 0, 255, 255),\n" +
+            "(0x000000, \"black\", 0, 0, 0),\n" +
+            "(0x0000FF, \"blue\", 0, 0, 255),\n" +
+            "(0xFFFFFF, \"white\", 255, 255, 255);\n" +
+            "axiom shade (rgb) : parameter;\n" +
+            "query color_query calc(shade : swatch);\n";
+            ;
     /** Named query to find all cities */
     static public final String ALL_CITIES = "all_cities";
 
@@ -400,12 +419,82 @@ public class QueryParserTest
     }
 
     @Test
-    public void test_stamp_duty() throws ParseException
+    public void test_choice_string_colors()
     {
-		InputStream stream = new ByteArrayInputStream(STAMP_DUTY_XPL.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+        QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS);
+        // Create QueryParams object for Global scope and query "stamp_duty_query"
+        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "color_query");
+        // Add a shade Axiom with a single "aqua" term
+        // This axiom goes into the Global scope and is removed at the start of the next query.
+        queryParams.addAxiom("shade", "aqua");
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                //System.out.println(solution.getAxiom("swatch").toString());
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name = aqua, red = 0, green = 255, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+        queryParams.addAxiom("shade", "blue");
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name = blue, red = 0, green = 0, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+        // Test defaults to first choice
+        queryParams.addAxiom("shade", "orange");
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name = orange, red = 255, green = 255, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+    }
+    
+
+    @Test
+    public void test_choice_hex_colors()
+    {
+        QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS2);
+        // Create QueryParams object for Global scope and query "stamp_duty_query"
+        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "color_query");
+        // Add a shade Axiom with a single "aqua" term
+        // This axiom goes into the Global scope and is removed at the start of the next query.
+        queryParams.addAxiom("shade", Integer.decode("0x00ffff"));
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                //System.out.println(solution.getAxiom("swatch").toString());
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(rgb = " + Integer.decode("0x00ffff").toString() + ", color = aqua, red = 0, green = 255, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+        queryParams.addAxiom("shade", Integer.decode("0x0000ff"));
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(rgb = 255, color = blue, red = 0, green = 0, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+        // Test defaults to first choice
+        queryParams.addAxiom("shade", Integer.decode("0x77ffff"));
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(rgb = " + Integer.decode("0x77ffff").toString() + ", color = white, red = 255, green = 255, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+    }
+    
+   @Test
+    public void test_stamp_duty()
+    {
+		QueryProgram queryProgram = new QueryProgram(STAMP_DUTY_XPL);
 		queryProgram.executeQuery("stamp_duty_query", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -416,12 +505,9 @@ public class QueryParserTest
     }
     
     @Test
-    public void test_world_currency_Format() throws ParseException, IOException
+    public void test_world_currency_Format() throws IOException
     {
-		InputStream stream = new ByteArrayInputStream(WORLD_CURRENCY_XPL.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+		QueryProgram queryProgram = new QueryProgram(WORLD_CURRENCY_XPL);
 		//queryProgram.executeQuery("price_query", new SolutionHandler(){
 		//	@Override
 		//	public boolean onSolution(Solution solution) {
@@ -443,12 +529,9 @@ public class QueryParserTest
     }
     
     @Test
-    public void test_currency_Format() throws ParseException
+    public void test_currency_Format()
     {
-		InputStream stream = new ByteArrayInputStream(CURRENCY_XPL.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+		QueryProgram queryProgram = new QueryProgram(CURRENCY_XPL);
 		queryProgram.executeQuery("item_query", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -461,11 +544,7 @@ public class QueryParserTest
 	@Test
 	public void test_high_cities_sorted() throws Exception
 	{
-		InputStream stream = new ByteArrayInputStream(CITY_EVELATIONS_SORTED.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		queryParser.enable_tracing();
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS_SORTED);
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 		QuerySpec querySpec = new QuerySpec("Test");
 		KeyName keyName1 = new KeyName("city", "high_city");
@@ -491,11 +570,7 @@ public class QueryParserTest
     @Test
     public void test_insert_sort() throws ParseException
     {
-		InputStream stream = new ByteArrayInputStream(INSERT_SORT_XPL.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		queryParser.enable_tracing();
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+		QueryProgram queryProgram = new QueryProgram(INSERT_SORT_XPL);
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 		ChainQueryExecuter queryExecuter = new ChainQueryExecuter(queryProgram.getGlobalScope());
         Template calcTemplate = parserAssembler.getTemplate("insert_sort");
@@ -681,10 +756,7 @@ public class QueryParserTest
 	@Test
 	public void test_highCities() throws Exception
 	{
-		InputStream stream = new ByteArrayInputStream(CITY_EVELATIONS.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 	    ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 	    Template highCities = parserAssembler.getTemplate("high_city");
 	    highCities.setKey("city");
@@ -701,10 +773,7 @@ public class QueryParserTest
 	@Test
 	public void test_colors() throws Exception
 	{
-		InputStream stream = new ByteArrayInputStream(AXIOM_WRAPPER_XPL.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+		QueryProgram queryProgram = new QueryProgram(AXIOM_WRAPPER_XPL);
 		QuerySpec querySpec = new QuerySpec("test");
 		KeyName keyName = new KeyName("colors", "color_convert");
 		querySpec.addKeyName(keyName);

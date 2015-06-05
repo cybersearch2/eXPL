@@ -15,16 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -47,35 +44,26 @@ public class CalculateSquareMiles
 		new DI(new QueryParserModule()).validate();
 	}
 	
-	public void displaySurfaceArea() throws ParseException
+    @SuppressWarnings("unchecked")
+	public Iterator<AxiomTermList> getSurfaceAreas()
 	{
-		QueryProgram queryProgram = compileScript(COUNTRY_SURFACE_AREA);
+		QueryProgram queryProgram = new QueryProgram(COUNTRY_SURFACE_AREA);
 		Result result = queryProgram.executeQuery("surface_area_mi2");
-		@SuppressWarnings("unchecked")
-		Iterator<AxiomTermList> iterator = (Iterator<AxiomTermList>) result.getList("surface_area").iterator();
-        while(iterator.hasNext())
-		    System.out.println(iterator.next().toString());
+		return (Iterator<AxiomTermList>) result.getList("surface_area").iterator();
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
-		CalculateSquareMiles calculateSquareMiles = new CalculateSquareMiles();
 		try 
 		{
-			calculateSquareMiles.displaySurfaceArea();
+	        CalculateSquareMiles calculateSquareMiles = new CalculateSquareMiles();
+	        Iterator<AxiomTermList> iterator = calculateSquareMiles.getSurfaceAreas();
+	        while(iterator.hasNext())
+	            System.out.println(iterator.next().toString());
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
-			e.printStackTrace();
+			e.getCause().printStackTrace();
 			System.exit(1);
 		}
 		System.exit(0);

@@ -164,7 +164,7 @@ public class Calculator implements SolutionFinder
 			}
 			else
 			{
-				choice.completeSolution(solution, template);
+				choice.completeSolution(solution, template, axiom.getTermByIndex(0).getValue());
 				return true;
 			}
 		}

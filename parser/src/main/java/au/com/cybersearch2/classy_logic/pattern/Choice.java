@@ -20,17 +20,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * Choice
+ * Container for 
  * @author Andrew Bowley
  * 16 Mar 2015
  */
 public class Choice 
 {
+    protected static final int NO_MATCH = -1;
     protected List<Axiom> choiceAxiomList;
     protected List<Operand> variableList;
 
@@ -57,16 +60,16 @@ public class Choice
 		return choiceAxiomList;
 	}
 
-	public void completeSolution(Solution solution, Template template)
+	public void completeSolution(Solution solution, Template template, Object matchValue)
 	{
 		int position = template.select();
+        Axiom choiceAxiom = choiceAxiomList.get(position != NO_MATCH ? position : template.getTermCount() - 1);
+        Object value = position != NO_MATCH ? template.getTermByIndex(position).getValue() : matchValue;
 		Template solutionTemplate = new Template(template.getName());
-		Term term0 = template.getTermByIndex(position);
 		int index = 0;
 		Operand operand = variableList.get(index++);
-		operand.assign(term0.getValue());
+		operand.assign(value);
 		solutionTemplate.addTerm(operand);
-		Axiom choiceAxiom = choiceAxiomList.get(position);
 		while (index < choiceAxiom.getTermCount())
 		{
 			operand = variableList.get(index);
