@@ -15,13 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial8;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -72,11 +69,10 @@ public class GreekConstruction3
 		delivery(city = Sparta, freight = 16)<br/>
 		account(name = Spiros Theodolites, fee = 57)<br/>
 		delivery(city = Milos, freight = 22)<br/>	 
-    * @throws ParseException
 	 */
-	public void displayCustomerCharges() throws ParseException
+	public void displayCustomerCharges()
 	{
-		QueryProgram queryProgram = compileScript(GREEK_CONSTRUCTION);
+		QueryProgram queryProgram = new QueryProgram(GREEK_CONSTRUCTION);
 		queryProgram.executeQuery("greek_business", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -86,27 +82,23 @@ public class GreekConstruction3
 			}});
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
-		GreekConstruction3 greekConstruction = new GreekConstruction3();
 		try 
 		{
+	        GreekConstruction3 greekConstruction = new GreekConstruction3();
 			greekConstruction.displayCustomerCharges();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

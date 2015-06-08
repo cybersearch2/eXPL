@@ -1,11 +1,22 @@
 eXPL v1.0.7
 
-1. Fix JpaSourceIterator test for no term names supplied.
-2. Fix PersistenceAgriculture Tutorial - wrong JpaCollector used.
-3. Apply unit test to each Tutorial.
-4. Remove maven-processor-plugin
-5. Fix potential NPE in QueryParams.executeQueryParams()
-
+ 1. Fix JpaSourceIterator test for no term names supplied.
+ 2. Fix PersistenceAgriculture Tutorial - wrong JpaCollector used.
+ 3. Apply unit test to each Tutorial.
+ 4. Remove maven-processor-plugin
+ 5. Fix potential NPE in QueryParams.executeQueryParams()
+ 6. Set first term of Choice result axiom if default selected
+ 7. Change default of Choice to last selection
+ 8. Add MatchOperand for correct Choice literal selection
+ 9. Add Choice literal selection tests to QueryParserTest
+10. Decode INTEGER literals to include hex literals
+11. Decode FLOATING_POINT literals using Double.valueOf for efficiency
+12. Enhance parsing of formated numbers by using JRE NumberFormat. 
+    Such numbers to be indicated by enclosing them in braces.
+13. Change internal IntegerOperand and IntegerTerm type to Long to support number formating.
+14. Allow choice selection from solution and change default to last row
+15. Add parsing of numbers enclosed in braces
+16. Update comments and review tutorials
 ______________________________________________________________________________________________________________________
 eXPL v1.0.6
 
@@ -14,7 +25,7 @@ ________________________________________________________________________________
 eXPL v1.0.5
 
 1. Fix JpaSourceIterator so id field added to Axiom only if no term names provided
-2. Fix compiler error in ChoiceItem introduced with regex matching. Add matching on numbers. 
+2. Fix compiler error in ChoiceItem introduced with regex matching. Add matching on literals. 
 ______________________________________________________________________________________________________________________
 eXPL v1.0.4
 

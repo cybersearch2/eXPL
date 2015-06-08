@@ -15,11 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -27,30 +23,28 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
-import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
  * CalculateSquareMiles
+ * Demonstrates using a  a conditional sequence in a calculator to adjust surface area from km2 to square miles. 
  * @author Andrew Bowley
  * 3 Mar 2015
  */
 public class CalculateSquareMiles2 
 {
+    // The surface-land.xpl file has country and surface_area terms eg.  ("United States",{9,831,510.00})
+    // Note the braces indicate the surface area is formatted, so must be parsed to get numeric value
 	static final String COUNTRY_SURFACE_AREA = 
 			"include \"surface-land.xpl\";\n" +
-	        "axiom locale(locale) : resource \"locale\";\n" +
-			"boolean imperial = locale == \"US\";\n" +
+	        "axiom env(country_code) : resource \"environment\";\n" +
+			"// Set imperial flag true if country is USA\n" +
+			"boolean imperial = country_code == \"US\";\n" +
 			"template surface_area(country, double surface_area_Km2);\n" +
-			"calc km2_to_mi2 (\n" +
+			"calc filter_area (\n" +
 			"country,\n" +
 			"double surface_area = surface_area.surface_area_Km2,\n" +
 			"? imperial\n" +
@@ -58,11 +52,14 @@ public class CalculateSquareMiles2
 			"  surface_area *= 0.3861\n" +
 			"}\n" +
 			");\n" +
-			"list surface_area_by_country(km2_to_mi2);\n" +
+			"list surface_area_by_country(filter_area);\n" +
 		    "query surface_area_mi2(surface_area : surface_area)\n" + 
-		    "  >> calc(locale : km2_to_mi2);";
+		    "  >> calc(env : filter_area);";
 
-	protected String localeCountry;
+    /** Environment axiom provider for USA */
+	protected EnvironmentAxiomProvider usAxiomProvider;
+	/** Environment axiom provider for Australia */
+    protected EnvironmentAxiomProvider auAxiomProvider;
 	
 	@Inject
 	ProviderManager providerManager;
@@ -71,74 +68,44 @@ public class CalculateSquareMiles2
 	{
 		new DI(new QueryParserModule()).validate();
 		DI.inject(this);
-		AxiomProvider axiomProvider = new AxiomProvider(){
-
-			@Override
-			public String getName() {
-				return "locale";
-			}
-
-			@Override
-			public void setResourceProperties(String axiomName,
-					Map<String, Object> properties) {
-			}
-
-			@Override
-			public AxiomSource getAxiomSource(String axiomName,
-					List<String> axiomTermNameList) {
-				AxiomSource axiomSource = null;
-				Axiom localeAxiom = new Axiom("locale", new Parameter("locale", localeCountry));
-				axiomSource = new SingleAxiomSource(localeAxiom);
-				return axiomSource;
-			}
-
-			@Override
-			public AxiomListener getAxiomListener() {
-				return new AxiomListener(){
-
-					@Override
-					public void onNextAxiom(Axiom axiom) {
-					}};
-			}
-
-			@Override
-			public boolean isEmpty() {
-				return false;
-			}};
-		providerManager.putAxiomProvider(axiomProvider );
+		usAxiomProvider = new EnvironmentAxiomProvider("US");
+        auAxiomProvider = new EnvironmentAxiomProvider("AU");
 	}
 	
-	public void displaySurfaceAreaOutsideUsa() throws ParseException
+    /**
+     * Display country surface areas in locale AU
+     * The first 3 results:</br>
+        filter_area(country = Afghanistan, surface_area = 652230)</br>
+        filter_area(country = Albania, surface_area = 28750)</br>
+        filter_area(country = Algeria, surface_area = 2381740)</br>
+     */
+	public void displaySurfaceAreaOutsideUsa()
 	{
-		localeCountry = "AU";
-		QueryProgram queryProgram = compileScript(COUNTRY_SURFACE_AREA);
+        providerManager.putAxiomProvider(auAxiomProvider);
+		QueryProgram queryProgram = new QueryProgram(COUNTRY_SURFACE_AREA);
 		Result result = queryProgram.executeQuery("surface_area_mi2");
-		@SuppressWarnings("unchecked")
-		Iterator<AxiomTermList> iterator = (Iterator<AxiomTermList>) result.getList("surface_area_by_country").iterator();
+		Iterator<AxiomTermList> iterator = result.getIterator("surface_area_by_country");
         while(iterator.hasNext())
 		    System.out.println(iterator.next().toString());
 	}
 
-	public void displaySurfaceAreaInUsa() throws ParseException
+	/**
+	 * Display country surface areas in locale US
+	 * The first 3 results:</br>
+	    filter_area(country = Afghanistan, surface_area = 251826.003)</br>
+        filter_area(country = Albania, surface_area = 11100.375)</br>
+        filter_area(country = Algeria, surface_area = 919589.814)</br>
+	 */
+	public void displaySurfaceAreaInUsa()
 	{
-		localeCountry = "US";
-		QueryProgram queryProgram = compileScript(COUNTRY_SURFACE_AREA);
+        providerManager.putAxiomProvider(usAxiomProvider);
+		QueryProgram queryProgram = new QueryProgram(COUNTRY_SURFACE_AREA);
 		Result result = queryProgram.executeQuery("surface_area_mi2");
-		@SuppressWarnings("unchecked")
-		Iterator<AxiomTermList> iterator = (Iterator<AxiomTermList>) result.getList("surface_area_by_country").iterator();
+		Iterator<AxiomTermList> iterator = result.getIterator("surface_area_by_country");
         while(iterator.hasNext())
 		    System.out.println(iterator.next().toString());
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
 		CalculateSquareMiles2 calculateSquareMiles = new CalculateSquareMiles2();
@@ -153,11 +120,16 @@ public class CalculateSquareMiles2
 			else
 				calculateSquareMiles.displaySurfaceAreaOutsideUsa();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

@@ -77,8 +77,18 @@ public class CalculateChainQuery extends ChainQuery
 	    	calculator.setChoice(choice);
 		if (axiom == null)
 			calculator.iterate(solution, template);
-		else
-			calculator.iterate(axiom, solution, template);
+		else 
+		{
+		    Axiom seedAxiom = axiom;
+		    if (axiom.getTermCount() == 0)
+    		{
+    		    // Placeholder axiom to be populated from solution
+    		    seedAxiom = solution.getAxiom(axiom.getName());
+    		    if (seedAxiom == null)
+    		        throw new QueryExecutionException("Calculator \"" + template.getName() + "\" cannot find axiom \"" + axiom.getName() + "\"");
+    		}
+    		calculator.iterate(seedAxiom, solution, template);
+		}
 		return super.executeQuery(solution);
  	}
 

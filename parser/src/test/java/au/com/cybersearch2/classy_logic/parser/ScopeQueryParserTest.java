@@ -17,14 +17,18 @@ package au.com.cybersearch2.classy_logic.parser;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,11 +42,13 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
@@ -250,6 +256,21 @@ public class ScopeQueryParserTest
 			"  query item_query(item : charge) >> calc(charge_plus_gst) >> calc(format_total);\n" +
 	        "}";
 
+    static final String MEGA_CITY3 = 
+            "include \"mega_city.xpl\";\n" +
+            "template city (Rank, Megacity, Continent, Country, decimal Population);\n" +
+            "scope german (language=\"de\", region=\"DE\")\n" +        
+            "{\n" +
+            "  choice population_group\n" +
+            "  (Population,                   Group):\n" +
+            "  (Population >= {30.000.000}, \"Mega\"),\n" +
+            "  (Population >= {20.000.000}, \"Huge\"),\n" +
+            "  (Population <  {20.000.000}, \"Large\");\n" +
+            "  list city_group_list(population_group);\n" +
+            "  query group_query (mega_city:city) >> calc(city:population_group);\n" +
+            "}\n";
+
+
     @Before
     public void setup() throws Exception
     {
@@ -258,13 +279,37 @@ public class ScopeQueryParserTest
 
 
     @Test
+    public void test_mega_cities3() throws IOException
+    {
+        QueryProgram queryProgram = new QueryProgram(MEGA_CITY3);
+        //queryProgram.executeQuery("german", "group_query", new SolutionHandler(){
+        //queryProgram.executeQuery("german.group_query", new SolutionHandler(){
+        //  @Override
+        //  public boolean onSolution(Solution solution) {
+        //      System.out.println(solution.getAxiom("population_group").toString());
+        //      return true;
+        //  }});
+        Result result = queryProgram.executeQuery("german.group_query");
+        Iterator<AxiomTermList> iterator = result.getIterator("german.city_group_list");
+        File worldCurrencyList = new File("src/test/resources", "cities-group.lst");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(worldCurrencyList), "UTF-8"));
+        while(iterator.hasNext())
+        {
+            //System.out.println(iterator.next().toString());
+            String line = reader.readLine();
+            assertThat(iterator.next().toString()).isEqualTo(line);
+        }
+        reader.close();
+    }
+    
+    @Test
     public void test_german_currency_Format() throws ParseException
     {
 		InputStream stream = new ByteArrayInputStream(GERMAN_CURRENCY_XPL.getBytes());
 		QueryParser queryParser = new QueryParser(stream);
 		QueryProgram queryProgram = new QueryProgram();
 		queryParser.input(queryProgram);
-		queryProgram.executeQuery("german", "item_query", new SolutionHandler(){
+		queryProgram.executeQuery("german.item_query", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
 				//System.out.println(solution.getAxiom("format_total").toString());
@@ -290,7 +335,7 @@ public class ScopeQueryParserTest
 				assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i = 5, n = 4, factorial = 24, factorial1 = true)");
 				return true;
 			}};
-		queryProgram.executeQuery("factorial_example", "factorial", solutionHandler);
+		queryProgram.executeQuery("factorial_example.factorial", solutionHandler);
 	}
 	
 
@@ -308,7 +353,7 @@ public class ScopeQueryParserTest
 				assertThat(solution.getAxiom("insert_sort").toString()).isEqualTo("insert_sort(i = 5, insert_sort1 = true)");
 				return true;
 			}};
-		queryProgram.executeQuery("sort_example", "insert_sort", solutionHandler);
+		queryProgram.executeQuery("sort_example.insert_sort", solutionHandler);
 		Axiom sortAxiom = sortScope.getParserAssembler().getAxiomSource("unsorted").iterator().next();
 		//System.out.println(sortAxiom.toString());
 		assertThat(sortAxiom.toString()).isEqualTo("unsorted(1, 3, 5, 8, 12)");
@@ -342,7 +387,7 @@ public class ScopeQueryParserTest
 				assertThat(solution.getAxiom("high_city").toString()).isEqualTo(HIGH_CITIES[index++]);
 				return true;
 			}};
-		queryProgram.executeQuery("cities", "high_cities", solutionHandler);
+		queryProgram.executeQuery("cities.high_cities", solutionHandler);
 	}
 
 	@Test
@@ -365,7 +410,7 @@ public class ScopeQueryParserTest
  	    		assertThat(solution.getAxiom("surface_area_increase").toString()).isEqualTo(line);
 				return true;
 			}};
-		queryProgram.executeQuery("countries", "more_agriculture", solutionHandler);
+		queryProgram.executeQuery("countries.more_agriculture", solutionHandler);
 		solutionHandler = new SolutionHandler(){
 	 	    File surfaceAreaList = new File("src/test/resources", "surface_area_mi2.lst");
 	  	    LineNumberReader reader = new LineNumberReader(new FileReader(surfaceAreaList));
@@ -382,7 +427,7 @@ public class ScopeQueryParserTest
  	    		assertThat(solution.getString("surface_area_increase", "country") + " " + solution.getString("km2_to_mi2", "mi2") + " mi2").isEqualTo(line);
 				return true;
 			}};
-		queryProgram.executeQuery("countries", "more_agriculture_mi2", solutionHandler);
+		queryProgram.executeQuery("countries.more_agriculture_mi2", solutionHandler);
 	}
 
 	@Test 
@@ -399,8 +444,7 @@ public class ScopeQueryParserTest
 				assertThat(solution.getAxiom("delivery").toString()).isEqualTo(FEE_AND_FREIGHT[index++]);
 				return true;
 			}};
-			//executeQuery(queryProgram, "greek_construction", "greek_business", solutionHandler);
-		queryProgram.executeQuery("greek_construction", "greek_business", solutionHandler);
+		queryProgram.executeQuery("greek_construction.greek_business", solutionHandler);
 	}
 
 	@Test 

@@ -24,6 +24,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -77,7 +78,6 @@ public class IncreasedAgriculture
      * The full result can be viewed in file src/main/resources/increased-agri-list.txt
      * @return AxiomTermList iterator
 	 */
-    @SuppressWarnings("unchecked")
 	public Iterator<AxiomTermList> displayIncreasedAgri()
 	{
 		QueryProgram queryProgram1 = new QueryProgram(AGRICULTURAL_LAND);
@@ -92,7 +92,7 @@ public class IncreasedAgriculture
          */
 		QueryProgram queryProgram2 = new QueryProgram(AGRI_10_YEAR);
 		Result result = queryProgram2.executeQuery("increased_query");
-		return (Iterator<AxiomTermList>) result.getList("increased_list").iterator();
+		return result.getIterator("increased_list");
 	}
 
 	/**
@@ -101,19 +101,24 @@ public class IncreasedAgriculture
 	 */
 	public static void main(String[] args)
 	{
-		IncreasedAgriculture increasedAgri = new IncreasedAgriculture();
 		try 
 		{
+	        IncreasedAgriculture increasedAgri = new IncreasedAgriculture();
 		    Iterator<AxiomTermList> iterator = increasedAgri.displayIncreasedAgri();
             while(iterator.hasNext())
                 System.out.println(iterator.next().toString());
 
 		} 
 		catch (ExpressionException e) 
-		{ // Display nested ParseException
-			e.getCause().printStackTrace();
+		{ 
+			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

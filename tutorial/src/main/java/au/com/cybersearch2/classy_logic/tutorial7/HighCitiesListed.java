@@ -15,15 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial7;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * HighCities
@@ -60,45 +58,39 @@ public class HighCitiesListed
 	 * high_city(name = addis ababa, altitude = 8000)<br/>
 	 * high_city(name = denver, altitude = 5280)<br/>
 	 * high_city(name = leadville, altitude = 10200)<br/>
-	 * @throws ParseException
 	 */
-	public void displayHighCities() throws ParseException
+	public Iterator<AxiomTermList> getHighCities()
 	{
-		QueryProgram queryProgram = compileScript(CITY_EVELATIONS);
+		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities"); 
-		@SuppressWarnings("unchecked")
-		Iterator<AxiomTermList> iterator = (Iterator<AxiomTermList>) result.getList("city_list").iterator();
-        while(iterator.hasNext())
-        {
-        	AxiomTermList city = iterator.next();
-        	// Following shows how to access values in list item. 
-        	// The same text can be returned using city.toString().
-        	Iterator<Object> cityIterator = city.iterator();
-		    System.out.println("high_city(name = " + cityIterator.next().toString() + ", altitue = " + cityIterator.next() + ")");
-        }
+		return result.getIterator("city_list");
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
-		HighCitiesListed highCities = new HighCitiesListed();
 		try 
 		{
-			highCities.displayHighCities();
-		} 
-		catch (ParseException e) 
+	        HighCitiesListed highCities = new HighCitiesListed();
+	        Iterator<AxiomTermList> iterator = highCities.getHighCities();
+	        while(iterator.hasNext())
+	        {
+	            AxiomTermList city = iterator.next();
+	            // Following shows how to access values in list item. 
+	            // The same text can be returned using city.toString().
+	            Iterator<Object> cityIterator = city.iterator();
+	            System.out.println("high_city(name = " + cityIterator.next().toString() + ", altitue = " + cityIterator.next() + ")");
+		    } 
+        }
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

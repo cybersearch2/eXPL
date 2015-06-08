@@ -165,12 +165,23 @@ public class Scope
 	 */
     public AxiomSource getAxiomSource(String axiomKey)
     {
-		AxiomSource axiomSource = parserAssembler.getAxiomSource(axiomKey);
-		if ((axiomSource == null) && (globalScope != null))
-			axiomSource = globalScope.getParserAssembler().getAxiomSource(axiomKey);
+		AxiomSource axiomSource = findAxiomSource(axiomKey);
 		if (axiomSource == null)
 			throw new IllegalArgumentException("Axiom \"" + axiomKey + "\" does not exist");
 		return axiomSource;
+    }
+
+    /**
+     * Returns axiom source for specified axiom name
+     * @param axiomKey
+     * @return AxiomSource object or null if it does not exist in scope
+     */
+    public AxiomSource findAxiomSource(String axiomKey)
+    {
+        AxiomSource axiomSource = parserAssembler.getAxiomSource(axiomKey);
+        if ((axiomSource == null) && (globalScope != null))
+            axiomSource = globalScope.getParserAssembler().getAxiomSource(axiomKey);
+        return axiomSource;
     }
 
 	/**
@@ -212,24 +223,42 @@ public class Scope
 		return axiomListenerMap == null ? null : Collections.unmodifiableMap(axiomListenerMap);
 	}
 
+	/**
+	 * Returns ItemList for specified list name 
+	 * @param listName
+	 * @return ItemList object
+	 */
 	public ItemList<?> getItemList(String listName) 
 	{
+	    // Look first in local scope, then if not found, try global scope
 		ItemList<?> itemList = parserAssembler.getOperandMap().getItemList(listName);
-		if ( (itemList == null) && (globalScope != null))
-				itemList = globalScope.getParserAssembler().getOperandMap().getItemList(listName);	
+		if ((itemList == null) && (globalScope != null))
+			itemList = globalScope.getParserAssembler().getOperandMap().getItemList(listName);	
 		return itemList;
 	}
 
+	/**
+	 * Returns context of this scope
+	 * @return ScopeContext object
+	 */
 	public ScopeContext getContext() 
 	{
 		return new ScopeContext(this);
 	}
 
+	/**
+	 * Returns global scope
+	 * @return Scope, which is this object if global scope not already set
+	 */
 	public Scope getGlobalScope() 
 	{
 		return globalScope == null ? this : globalScope;
 	}
 
+	/**
+	 * Returns map which provides access to result lists as iterables
+	 * @return Container which maps fully qualified name to list iterable
+	 */
 	public Map<String, Iterable<?>> getListMap() 
 	{
 		Map<String, Iterable<?>> listMap = new HashMap<String, Iterable<?>>();
@@ -243,6 +272,13 @@ public class Scope
 		return listMap;
 	}
 
+	/**
+	 * Returns Local specified by properties and language code
+	 * @param properties Script, region and variant values 
+	 * @param language Langauge code eg. "de" for Germany
+	 * @return Locale object
+	 * @throws ExpressionException if locale parameters are invalid
+	 */
 	protected Locale getLocale(Map<String, Object> properties, String language)
 	{
 		Object script = properties.get(QueryProgram.SCRIPT);
@@ -279,11 +315,16 @@ public class Scope
 		return locale;
 	}
 
+	/**
+	 * Add locale listener for local axiom identified by key. The supplied axiom listener is
+	 * notified of every change of scope.
+	 * @param key Local axiom id
+	 * @param axiomListener The local axiom listener
+	 */
 	public void addLocalAxiomListener(final String key, final AxiomListener axiomListener) 
 	{
 		// Register locale listener with Global scope in which all local axioms must be declared
-		Scope localAxiomsScope = globalScope == null ? this : globalScope;
-		final ParserAssembler parserAssembler = localAxiomsScope.getParserAssembler();
+		final ParserAssembler parserAssembler = getGlobalScope().getParserAssembler();
 		LocaleListener localeListener = new LocaleListener(){
 
 			@Override
@@ -318,6 +359,9 @@ public class Scope
 		    parserAssembler.registerLocaleListener(localeListener);	
 	}
 
+	/**
+	 * Notify change of scope
+	 */
 	public void notifyChange() 
 	{
 		// Notify Locale listeners in Global scope of scope locale

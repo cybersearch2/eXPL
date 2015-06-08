@@ -15,15 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * HighCities
@@ -80,27 +78,16 @@ public class HighCitiesSorted
 	 * high_city(name = flagstaff, altitude = 6970)<br/>
 	 * high_city(name = addis ababa, altitude = 8000)<br/>
 	 * high_city(name = leadville, altitude = 10200)<br/>
-	 * @throws ParseException
 	 */
-	public void displayHighCities() throws ParseException
+	public void displayHighCities()
 	{
-		QueryProgram queryProgram = compileScript(CITY_EVELATIONS);
+		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities");
-		@SuppressWarnings("unchecked")
-		Iterator<AxiomTermList> iterator = (Iterator<AxiomTermList>) result.getList("city_list").iterator();
+		Iterator<AxiomTermList> iterator = result.getIterator("city_list");
         while(iterator.hasNext())
 		    System.out.println(iterator.next().toString());
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
 		HighCitiesSorted highCities = new HighCitiesSorted();
@@ -108,11 +95,16 @@ public class HighCitiesSorted
 		{
 			highCities.displayHighCities();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

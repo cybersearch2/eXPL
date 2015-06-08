@@ -15,17 +15,17 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int DOUBLE = 7;
   /** RegularExpression Id. */
-  int BOOLEAN = 8;
+  int DECIMAL = 8;
   /** RegularExpression Id. */
-  int STRING = 9;
+  int BOOLEAN = 9;
   /** RegularExpression Id. */
-  int TEMPLATE = 10;
+  int STRING = 10;
   /** RegularExpression Id. */
-  int AXIOM = 11;
+  int TEMPLATE = 11;
   /** RegularExpression Id. */
-  int REGEX = 12;
+  int AXIOM = 12;
   /** RegularExpression Id. */
-  int BIGDECIMAL = 13;
+  int REGEX = 13;
   /** RegularExpression Id. */
   int INCLUDE = 14;
   /** RegularExpression Id. */
@@ -61,7 +61,7 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int FLOATING_POINT_LITERAL = 30;
   /** RegularExpression Id. */
-  int FORMATED_FLOATING_POINT_LITERAL = 31;
+  int NUMBER_LITERAL = 31;
   /** RegularExpression Id. */
   int EXPONENT = 32;
   /** RegularExpression Id. */
@@ -166,12 +166,12 @@ public interface QueryParserConstants {
     "<token of kind 5>",
     "\"integer\"",
     "\"double\"",
+    "\"decimal\"",
     "\"boolean\"",
     "\"string\"",
     "\"template\"",
     "\"axiom\"",
     "\"regex\"",
-    "\"decimal\"",
     "\"include\"",
     "\"scope\"",
     "\"query\"",
@@ -189,7 +189,7 @@ public interface QueryParserConstants {
     "<DECIMAL_LITERAL>",
     "<HEX_LITERAL>",
     "<FLOATING_POINT_LITERAL>",
-    "<FORMATED_FLOATING_POINT_LITERAL>",
+    "<NUMBER_LITERAL>",
     "<EXPONENT>",
     "<STRING_LITERAL>",
     "\"true\"",

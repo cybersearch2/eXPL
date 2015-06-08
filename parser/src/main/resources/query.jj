@@ -63,6 +63,7 @@ import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
 import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.terms.NumberTerm;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -71,14 +72,18 @@ import au.com.cybersearch2.classy_logic.helper.Null;
 
 
 
-/** main */
+/** 
+ * QueryParser
+ * JavaCC generated Expression Pattern Language Compiler 
+ * @author Andrew Bowley
+ * 30 Sep 2010
+ */
 public class QueryParser 
 {
   
   /** 
-   * Main entry point. 
+   * Main entry point reads from System.in. Generates console output only. Use for validation. 
    * @throws ParseException
-   * @throws LogicEngineException 
    */
   public static void main(String args[]) throws ParseException
   {
@@ -89,9 +94,10 @@ public class QueryParser
 
 
   /** 
-   * Parses a query input stream.
-   *  @param inputStream  InputStream
-   *  @throws ParseException if the parsing fails
+   * Returns compiled result of eXPL script from supplied input stream.
+   * @param inputStream  InputStream
+   * @return QueryProgram object
+   * @throws ParseException
    */
   public QueryProgram parse(InputStream inputStream) throws ParseException
   {
@@ -101,7 +107,12 @@ public class QueryParser
     return queryProgram;
    }
 
-
+  /**
+   * Include eXPL script from named resource
+   * @param resourceName Name of file or other resource to include
+   * @param queryProgram QueryProgram object accumulating the compiled result
+   * @throws ParseException
+   */
   public void includeResource(String resourceName, QueryProgram queryProgram) throws ParseException
   {
      if (resourceName.length() < 3)
@@ -116,7 +127,16 @@ public class QueryParser
          throw new ParseException(e.getMessage());
      }
   } 
-  
+ 
+  /**
+   * Returns content of string literal token stipped of quote delimiters
+   * @param stringLiteral Token object
+   * @return String
+   */
+  protected String getText(Token stringLiteral)
+  {
+      return stringLiteral.image.substring(1, stringLiteral.image.length() - 1);
+  } 
 }
 
 PARSER_END(QueryParser)
@@ -134,12 +154,12 @@ TOKEN :
 {
   < INTEGER: "integer" >
 | < DOUBLE: "double" >
+| < DECIMAL: "decimal" >
 | < BOOLEAN: "boolean" >
 | < STRING: "string" >
 | < TEMPLATE: "template" >
 | < AXIOM: "axiom" >
 | < REGEX: "regex" >
-| < BIGDECIMAL: "decimal" >
 | < INCLUDE: "include" >
 | < SCOPE: "scope" >
 | < QUERY: "query" >
@@ -160,8 +180,8 @@ TOKEN :
 TOKEN :
 {
   < INTEGER_LITERAL:
-        <DECIMAL_LITERAL> (["l","L"])?
-      | <HEX_LITERAL> (["l","L"])?
+        <DECIMAL_LITERAL>
+      | <HEX_LITERAL>
       | "0"
   >
 |
@@ -170,14 +190,16 @@ TOKEN :
   < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
 |
   < FLOATING_POINT_LITERAL:
-        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
-      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
-      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
-      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["d","D"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["d","D"]
   >
 |
-  < FORMATED_FLOATING_POINT_LITERAL:
-        ((["0"-"9"])+ (","))+ (["0"-"9"])+ "." (["0"-"9"])*
+  < NUMBER_LITERAL:
+       "{" 
+       ((["0"-"9"])+ ([",","."]))+ (["0"-"9"])+
+       "}"
   >
 |
   < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
@@ -437,7 +459,7 @@ VariableType Type(OperandMap operandMap) :
     { 
       return new VariableType(OperandType.STRING); 
     }
-|   <BIGDECIMAL>
+|   <DECIMAL>
     { 
       return new VariableType(OperandType.DECIMAL); 
     }
@@ -449,7 +471,7 @@ VariableType Type(OperandMap operandMap) :
     { 
       VariableType varType = new VariableType(OperandType.CURRENCY);
       if (qualifierLit != null)
-         varType.setProperty(VariableType.QUALIFIER_STRING, qualifierLit.image.substring(1, qualifierLit.image.length() - 1));
+         varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
       else if (qualifierId != null)
          varType.setProperty(VariableType.QUALIFIER_OPERAND, operandMap.addOperand(qualifierId.image, null));
       return varType; 
@@ -593,7 +615,7 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
      Operand assignExpression = (assignToken != null) ? expression : null;
      Operand regexOp = null;
      if (regexLit != null)
-         regexOp = new StringOperand(Term.ANONYMOUS, regexLit.image.substring(1, regexLit.image.length() - 1));
+         regexOp = new StringOperand(Term.ANONYMOUS, getText(regexLit));
      else if (regexId != null)
          regexOp = operandMap.addOperand(regexId.image, null);
      if (assignToken != null)
@@ -802,7 +824,7 @@ AxiomProvider ResourceDeclaration(String axiomName, ParserAssembler parserAssemb
 {
   <RESOURCE> nameToken=<STRING_LITERAL> ( "(" InitialiserList(properties) ")" )?
   {
-    return parserAssembler.setResourceProperties(nameToken.image.substring(1, nameToken.image.length() - 1), axiomName, properties);
+    return parserAssembler.setResourceProperties(getText(nameToken), axiomName, properties);
   }
 }
 
@@ -819,11 +841,17 @@ void ParameterDeclaration(String axiomName, ParserAssembler parserAssembler) :
 void Fact(String axiomName, ParserAssembler parserAssembler) :
 {
   Parameter param = null;
+  Token lit = null;
 }
 {
   param=LiteralTerm()
   {
     parserAssembler.addAxiom(axiomName, param);
+  }
+  |
+  lit=<NUMBER_LITERAL>
+  {
+    parserAssembler.addAxiom(axiomName, new NumberTerm(getText(lit), parserAssembler.getScopeLocale()));
   }
   |
   <NAN>
@@ -1219,6 +1247,14 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
     return param1;
   }
   |
+  numberToken=<NUMBER_LITERAL>
+  {
+    NumberTerm numberTerm = new NumberTerm(getText(numberToken), parserAssembler.getScopeLocale());
+    Variable var = new Variable(Term.ANONYMOUS);
+    var.assign(numberTerm.getValue());
+    return var;
+  }
+  |
   "(" param1=Expression(parserAssembler) ")"
   {
     return param1;
@@ -1280,25 +1316,25 @@ Operand Literal() :
 {
   lit=<INTEGER_LITERAL>
   {
-    Integer litValue = Integer.decode(lit.image);
+    Long litValue = Long.decode(lit.image);
     return new IntegerOperand(Term.ANONYMOUS, litValue);
   }
-|
+  |
   lit=<FLOATING_POINT_LITERAL>
   {
-    return new DoubleOperand(Term.ANONYMOUS, Double.parseDouble(lit.image));
+    return new DoubleOperand(Term.ANONYMOUS, Double.valueOf(lit.image));
   }
-|
+  |
   lit=<STRING_LITERAL>
   {
-    return new StringOperand(Term.ANONYMOUS, lit.image.substring(1, lit.image.length() - 1));
+    return new StringOperand(Term.ANONYMOUS, getText(lit));
   }
-|
+  |
   flag=BooleanLiteral()
   {
     return new BooleanOperand(Term.ANONYMOUS, flag);
   }
-|
+  |
   NullLiteral()
   {
     return new NullOperand();
@@ -1321,14 +1357,9 @@ Parameter LiteralTerm() :
     return new DoubleTerm(lit.image);
   }
 |
-  lit=<FORMATED_FLOATING_POINT_LITERAL>
-  {
-    return new DoubleTerm(lit.image.replace(",", ""));
-  }
-|
   lit=<STRING_LITERAL>
   {
-    return new StringTerm(lit.image.substring(1, lit.image.length() - 1));
+    return new StringTerm(getText(lit));
   }
 |
   flag=BooleanLiteral()
@@ -1349,7 +1380,7 @@ boolean BooleanLiteral() :
   { 
     return true; 
   }
-|
+  |
   <FALSE> 
   { 
     return false; 

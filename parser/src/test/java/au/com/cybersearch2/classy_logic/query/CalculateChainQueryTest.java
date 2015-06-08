@@ -43,8 +43,8 @@ public class CalculateChainQueryTest
 	public void test_simple() 
 	{
 	    Map<String,Object> props = new HashMap<String,Object>(); 
-	    props.put("n", Integer.valueOf(1));
-	    props.put("limit", Integer.valueOf(3));
+	    props.put("n", Long.valueOf(1));
+	    props.put("limit", Long.valueOf(3));
     	IntegerOperand n = new IntegerOperand("n");
     	IntegerOperand limit = new IntegerOperand("limit");
     	List<Operand> operandList = new ArrayList<Operand>();
@@ -70,9 +70,9 @@ public class CalculateChainQueryTest
 	public void test_factorial() 
 	{
 	    Map<String,Object> props = new HashMap<String,Object>(); 
-    	props.put("factorial", Integer.valueOf(1));
-    	props.put("n", Integer.valueOf(4));
-    	props.put("i", Integer.valueOf(1));
+    	props.put("factorial", Long.valueOf(1));
+    	props.put("n", Long.valueOf(4));
+    	props.put("i", Long.valueOf(1));
     	IntegerOperand n = new IntegerOperand("n");
     	BigDecimalOperand factorial = new BigDecimalOperand("factorial");
     	IntegerOperand i = new IntegerOperand("i");

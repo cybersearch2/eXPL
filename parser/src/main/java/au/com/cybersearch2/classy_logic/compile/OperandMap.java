@@ -27,7 +27,7 @@ import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 
 /**
  * OperandMap
- * References Operand and ItemList by name and supports parser object collection
+ * Operand and ItemList container. Items are referenced by name. 
  * @author Andrew Bowley
  *
  * @since 19/10/2010
@@ -48,6 +48,10 @@ public class OperandMap
 		listMap = new TreeMap<String, ItemList<?>>();
 	}
 
+	/**
+	 * Returns all operand values in a map container
+	 * @return Map with key of type Operand and value of type Object
+	 */
 	public  Map<Operand, Object> getOperandValues()
 	{
 		Map<Operand, Object> operandValueMap = new HashMap<Operand, Object>();
@@ -59,13 +63,18 @@ public class OperandMap
 		return operandValueMap;
 	}
 
+	/**
+	 * Set operand values
+	 * @param operandValueMap Map container
+	 */
 	public void setOperandValues(Map<Operand, Object> operandValueMap)
 	{
 		for (Entry<Operand, Object> entry: operandValueMap.entrySet())
-			if (entry.getValue() instanceof Null)
+			if (entry.getValue() instanceof Null) // Null special case
 				((Parameter)entry.getKey()).clearValue();
 			else
 			   entry.getKey().assign(entry.getValue());
+		// Clear operands not included in operandValueMap
 		for (Entry<String, Operand> entry: operandMap.entrySet())
 		{
 			if (!operandValueMap.containsKey(entry.getValue()))
@@ -104,11 +113,21 @@ public class OperandMap
 		operandMap.put(operand.getName(), operand);
     }
 
+	/**
+	 * Returns flag to indicate if this map contains operand with specified name
+	 * @param name
+	 * @return boolean
+	 */
 	public boolean hasOperand(String name)
 	{
 		return operandMap.containsKey(name);
 	}
-	
+
+	/**
+	 * Returns operand of specified name or null if not found
+	 * @param name
+	 * @return Operand
+	 */
 	public Operand getOperand(String name)
 	{
 		return operandMap.get(name);
@@ -153,8 +172,8 @@ public class OperandMap
 		String suffix = null;
 		if (!expression.isEmpty() && (expression instanceof IntegerOperand) && Term.ANONYMOUS.equals(expression.getName()))
 	    {
-		   index = ((Integer)(expression.getValue())).intValue();
-		   suffix = Integer.toString(index);
+		   index = ((Long)(expression.getValue())).intValue();
+		   suffix = Long.toString(index);
 		}
 		else if (expression.isEmpty() && (expression instanceof Variable))
 		{
@@ -187,6 +206,13 @@ public class OperandMap
 		return listVariable;
 	}
 
+	/**
+	 * Returns index of item identified by name
+	 * @param listName Name of list - used only for error reporting
+	 * @param item Item name
+	 * @param axiomTermNameList Term names of axiom source
+	 * @return Index
+	 */
 	protected int getIndexForName(String listName, String item, List<String> axiomTermNameList) 
 	{
 		for (int i = 0; i < axiomTermNameList.size(); i++)
@@ -206,7 +232,6 @@ public class OperandMap
 	 * @param expression2 Index expression operand 0f term
 	 * @return AxiomListVariable object
 	 */
-
 	public AxiomListVariable newListVariableInstance(String name, Operand expression1,
 			Operand expression2) 
 	{
@@ -218,10 +243,10 @@ public class OperandMap
 		String suffix = null;
 		// Check for non-empty Integer operand, which is used for a fixed index
 		if (!expression1.isEmpty() && (expression1 instanceof IntegerOperand && Term.ANONYMOUS.equals(expression1.getName())))
-			axiomIndex = ((Integer)(expression1.getValue())).intValue();
+			axiomIndex = ((Long)(expression1.getValue())).intValue();
 		if (!expression2.isEmpty() && (expression2 instanceof IntegerOperand) && Term.ANONYMOUS.equals(expression2.getName()))
 		{
-			termIndex = ((Integer)(expression2.getValue())).intValue();
+			termIndex = ((Long)(expression2.getValue())).intValue();
 			suffix = Integer.toString(termIndex);
 		}
 		else if (expression2.isEmpty() && (expression2 instanceof Variable))
@@ -352,6 +377,14 @@ public class OperandMap
 		return listVariable;
 	}
 
+	/**
+	 * Returns new ItemListVariable instance. 
+	 * This is wrapped in an assignment evaluator if optional expression parameter needs to be evaluated.
+	 * @param name Name of variable
+	 * @param index List index
+	 * @param expression Optional expression operand
+	 * @return Operand object
+	 */
 	public Operand setListVariable(String name, Operand index, Operand expression) 
 	{
 		checkListName(name);
@@ -359,23 +392,34 @@ public class OperandMap
 		if (expression != null)
 		{
 			if (expression.isEmpty() || (expression instanceof Evaluator))
+			    // Expression needs evaluation
 				return new Evaluator(name, variable, "=", expression);
+			// Expression has a value which will be assigned to the list item
 			variable.assign(expression.getValue());
 		}
 		return variable;
 	}
 
+	/**
+	 * Copy result lists as iterables to supplied container
+	 * @param prefix Scope name or empty if global scope
+	 * @param listMap2 Container to receive lists
+	 */
 	public void copyLists(String prefix, Map<String, Iterable<?>> listMap2) 
 	{
 		if (prefix == null)
 			prefix = "";
 		for (Entry<String, ItemList<?>> entry: listMap.entrySet())
 		{
+		    // Use fully qualified key to avoid name collisions
 			String key = prefix.isEmpty() ? entry.getKey() : (prefix + "." + entry.getKey());
 			listMap2.put(key, entry.getValue().getIterable());
 		}
 	}
 
+	/**
+	 * Clear result lists
+	 */
 	public void clearLists() 
 	{
 		for (ItemList<?> itemList: listMap.values())

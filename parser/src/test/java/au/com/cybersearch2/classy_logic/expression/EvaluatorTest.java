@@ -42,16 +42,16 @@ public class EvaluatorTest
 	
 	static class UnaryTestData
 	{
-		public UnaryTestData(int testValue, String operator, String result)
+		public UnaryTestData(long testValue, String operator, String result)
 		{
-			this.operand = new Integer(testValue);
+			this.operand = new Long(testValue);
 			this.operator = operator;
 			this.result = result;
 		}
 		
-		public UnaryTestData(int testValue, String operator, String result, boolean assign)
+		public UnaryTestData(long testValue, String operator, String result, boolean assign)
 		{
-			this.operand = new Integer(testValue);
+			this.operand = new Long(testValue);
 			this.operator = operator;
 			this.result = result;
 			this.assign = assign;
@@ -106,14 +106,14 @@ public class EvaluatorTest
 			this.operand2 = operand2;
 		}
 
-		public BinaryTestData(int testValue, Object operand2, String operator, String result,
+		public BinaryTestData(long testValue, Object operand2, String operator, String result,
 				boolean assign) 
 		{
 			super(testValue, operator, result, assign);
 			this.operand2 = operand2;
 		}
 
-		public BinaryTestData(int testValue, Object operand2, String operator, String result) 
+		public BinaryTestData(long testValue, Object operand2, String operator, String result) 
 		{
 			super(testValue, operator, result);
 			this.operand2 = operand2;
@@ -229,18 +229,18 @@ public class EvaluatorTest
 	{
 		Operand leftTerm = mock(Operand.class);
 		Operand rightTerm = mock(Operand.class);
-		Integer value = Integer.valueOf(76);
+		Long value = Long.valueOf(76);
 		when(rightTerm.getValue()).thenReturn(value);
 		Evaluator evaluator = new Evaluator(leftTerm, "=", rightTerm);
 		assertThat(evaluator.assign(leftTerm, rightTerm)).isEqualTo(value);
 		verify(leftTerm).assign(value);
 		leftTerm = mock(Operand.class);
 		rightTerm = mock(Operand.class);
-		Long longValue = Long.valueOf(76);
-		when(rightTerm.getValue()).thenReturn(longValue);
+		Float floatValue = Float.valueOf(63.0f);
+		when(rightTerm.getValue()).thenReturn(floatValue);
 		evaluator = new Evaluator(leftTerm, "=", rightTerm);
 		assertThat(evaluator.assign(leftTerm, rightTerm)).isInstanceOf(Null.class);
-		verify(leftTerm).assign(longValue);
+		verify(leftTerm).assign(floatValue);
 	}
 
 	@Test
@@ -248,11 +248,11 @@ public class EvaluatorTest
 	{
 		boolean leftIsEmpty = true;
 		String leftName = "LeftName";
-		Object leftValue = Integer.valueOf(237);
+		Object leftValue = Long.valueOf(237);
 		String leftToString = "x+y";
 		boolean rightIsEmpty = true;
 		String rightName = "RightName";
-		Object rightValue = Integer.valueOf(732);
+		Object rightValue = Long.valueOf(732);
 		String rightToString = "a+b";
 		testToString(leftIsEmpty, leftName, leftValue, leftToString, rightIsEmpty, rightName, rightValue, rightToString, "LeftName!=RightName");
 		leftIsEmpty = false;
@@ -390,7 +390,7 @@ public class EvaluatorTest
 			new UnaryTestData(2, "~", NAME + " = -3"),
 			new UnaryTestData(7, "-", NAME + " = -7"),
 			new UnaryTestData(-99, "+", NAME + " = -99"),
-			new UnaryTestData(Integer.MAX_VALUE, "~", NAME + " = " + (Integer.MIN_VALUE )),
+			new UnaryTestData(Integer.MAX_VALUE, "~", NAME + " = " + (~Integer.MAX_VALUE )),
 			new UnaryTestData(Integer.MAX_VALUE, "-", NAME + " = -" + Integer.MAX_VALUE),
 			new UnaryTestData(Integer.MAX_VALUE, "+", NAME + " = " + Integer.MAX_VALUE),
 			new UnaryTestData("9876.12", "-", NAME + " = -9876.12"),
@@ -404,8 +404,8 @@ public class EvaluatorTest
 		{
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
-			if (datum.operand instanceof Integer)
-				operand = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+			if (datum.operand instanceof Long)
+				operand = new IntegerOperand(NAME, ((Long)datum.operand).longValue());
 			else if (datum.operand instanceof BigDecimal)
 				operand = new BigDecimalOperand(NAME, ((BigDecimal)datum.operand));
 			else if (datum.operand instanceof Boolean)
@@ -431,15 +431,15 @@ public class EvaluatorTest
 		{
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
-			if (datum.operand instanceof Integer)
-				operand = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+			if (datum.operand instanceof Long)
+				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
 			Evaluator evaluator = doUnaryPostfixEvaluationTest(datum.operator, operand);
 			assertThat(evaluator.toString()).isEqualTo(datum.result);
 			int adjust = -1;
 			if (datum.operator.equals("++"))
 				adjust = 1;
 			Object evalValue = evaluator.getValue();
-			assertThat(operand.toString()).isEqualTo(NAME + " = " + (((Integer)evalValue).intValue() + adjust));
+			assertThat(operand.toString()).isEqualTo(NAME + " = " + (((Long)evalValue).intValue() + adjust));
 		}
 		Evaluator evaluator = new Evaluator(NAME, new BooleanOperand("isTrue", Boolean.TRUE), "&&");
 		StringTerm testTerm = new StringTerm("Hello world");
@@ -500,8 +500,8 @@ public class EvaluatorTest
 				System.out.println("?" + datum.operand + datum.operator);
 				Operand operand = new IntegerOperand("x");
 				Operand operand2 = null;
-				if (datum.operand instanceof Integer)
-					operand2 = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+				if (datum.operand instanceof Long)
+					operand2 = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
 				else if (datum.operand instanceof BigDecimal)
 					operand2 = new BigDecimalOperand(NAME, ((BigDecimal)datum.operand));
 				else if (datum.operand instanceof Boolean)
@@ -518,8 +518,8 @@ public class EvaluatorTest
 				System.out.println(datum.operand + datum.operator + datum.operand2);
 				Operand operand = null;
 				Operand operand2 = (Operand) datum.operand2;
-				if (datum.operand instanceof Integer)
-					operand = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+				if (datum.operand instanceof Long)
+					operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
 				else if (datum.operand instanceof BigDecimal)
 					operand = new BigDecimalOperand(NAME, ((BigDecimal)datum.operand));
 				else if (datum.operand instanceof Boolean)
@@ -537,11 +537,11 @@ public class EvaluatorTest
 			}
 		}
 		System.out.println("x==null");
-		Evaluator evaluator = new Evaluator(NAME, new IntegerOperand("x", Integer.MAX_VALUE), "==", new NullOperand("y"));
+		Evaluator evaluator = new Evaluator(NAME, new IntegerOperand("x", Long.MAX_VALUE), "==", new NullOperand("y"));
 		evaluator.evaluate(1);
 		assertThat(evaluator.toString()).isEqualTo(NAME + " = false");
 		System.out.println("x!=null");
-		evaluator = new Evaluator(NAME, new IntegerOperand("x", Integer.MAX_VALUE), "!=", new NullOperand("y"));
+		evaluator = new Evaluator(NAME, new IntegerOperand("x", Long.MAX_VALUE), "!=", new NullOperand("y"));
 		evaluator.evaluate(1);
 		assertThat(evaluator.toString()).isEqualTo(NAME + " = true");
 		System.out.println("null!=null");
@@ -581,59 +581,59 @@ public class EvaluatorTest
 		assertThat(evaluator.isNaN((Object)null)).isTrue();
 		assertThat(evaluator.isNaN(new Null())).isTrue();
 		assertThat(evaluator.isNaN(Double.valueOf(Double.NaN))).isTrue();
-		assertThat(evaluator.isNaN(Integer.MAX_VALUE)).isFalse();
+		assertThat(evaluator.isNaN(Long.MAX_VALUE)).isFalse();
 	}
 	
 	@Test 
 	public void test_unify()
 	{
-		Parameter otherTerm = new Parameter("O", Integer.MAX_VALUE);
+		Parameter otherTerm = new Parameter("O", Long.MAX_VALUE);
 		Operand leftOperand = mock(Operand.class);
 		when(leftOperand.unifyTerm(otherTerm, 1)).thenReturn(1);
-		when(leftOperand.getValue()).thenReturn(Integer.MAX_VALUE);
+		when(leftOperand.getValue()).thenReturn(Long.MAX_VALUE);
 		when(leftOperand.getLeftOperandOps()).thenReturn(new OperatorEnum[] { OperatorEnum.INCR, OperatorEnum.PLUS } );
 		Operand rightOperand = mock(Operand.class);
 		when(rightOperand.unifyTerm(otherTerm, 1)).thenReturn(1);
-		when(rightOperand.getValue()).thenReturn(Integer.MAX_VALUE);
+		when(rightOperand.getValue()).thenReturn(Long.MAX_VALUE);
 		when(rightOperand.getRightOperandOps()).thenReturn(new OperatorEnum[] { OperatorEnum.INCR, OperatorEnum.PLUS  });
 		Evaluator evaluator = new Evaluator(NAME, "++", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
-		assertThat(evaluator.getValue()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(evaluator.getValue()).isEqualTo(Long.MAX_VALUE);
 		assertThat(evaluator.isEmpty()).isFalse();
 		evaluator = new Evaluator(NAME, leftOperand, "++");
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
-		assertThat(evaluator.getValue()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(evaluator.getValue()).isEqualTo(Long.MAX_VALUE);
 		assertThat(evaluator.isEmpty()).isFalse();
 		evaluator = new Evaluator(NAME, leftOperand, "+", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
-		assertThat(evaluator.getValue()).isEqualTo(Integer.MAX_VALUE);
+		assertThat(evaluator.getValue()).isEqualTo(Long.MAX_VALUE);
 		assertThat(evaluator.isEmpty()).isFalse();
 	}
 	
 	@Test 
 	public void test_backup()
 	{
-		Parameter otherTerm = new Parameter("O", Integer.MAX_VALUE);
+		Parameter otherTerm = new Parameter("O", Long.MAX_VALUE);
 		Operand leftOperand = mock(Operand.class);
 		when(leftOperand.unifyTerm(otherTerm, 1)).thenReturn(1);
-		when(leftOperand.getValue()).thenReturn(Integer.MAX_VALUE);
+		when(leftOperand.getValue()).thenReturn(Long.MAX_VALUE);
 		when(leftOperand.getLeftOperandOps()).thenReturn(new OperatorEnum[] { OperatorEnum.INCR, OperatorEnum.PLUS } );
 		when(leftOperand.backup(anyInt())).thenReturn(true);
 		Operand rightOperand = mock(Operand.class);
 		when(rightOperand.unifyTerm(otherTerm, 1)).thenReturn(1);
-		when(rightOperand.getValue()).thenReturn(Integer.MAX_VALUE);
+		when(rightOperand.getValue()).thenReturn(Long.MAX_VALUE);
 		when(rightOperand.getRightOperandOps()).thenReturn(new OperatorEnum[] { OperatorEnum.INCR, OperatorEnum.PLUS  });
 		when(rightOperand.backup(anyInt())).thenReturn(true);
 		Evaluator evaluator = new Evaluator(NAME, "++", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
-		evaluator.assign(Integer.MAX_VALUE);
+		evaluator.assign(Long.MAX_VALUE);
 		assertThat(evaluator.backup(0)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
 		evaluator = new Evaluator(NAME, "++", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		when(rightOperand.backup(2)).thenReturn(false);
-		evaluator.assign(Integer.MAX_VALUE);
+		evaluator.assign(Long.MAX_VALUE);
 		assertThat(evaluator.backup(2)).isFalse();
 		when(rightOperand.backup(anyInt())).thenReturn(true);
 		assertThat(evaluator.backup(1)).isTrue();
@@ -641,14 +641,14 @@ public class EvaluatorTest
 		assertThat(evaluator.isEmpty()).isTrue();
 		evaluator = new Evaluator(NAME, leftOperand, "++");
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
-		evaluator.assign(Integer.MAX_VALUE);
+		evaluator.assign(Long.MAX_VALUE);
 		assertThat(evaluator.backup(0)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
 		evaluator = new Evaluator(NAME, leftOperand, "++");
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		when(leftOperand.backup(2)).thenReturn(false);
-		evaluator.assign(Integer.MAX_VALUE);
+		evaluator.assign(Long.MAX_VALUE);
 		assertThat(evaluator.backup(2)).isFalse();
 		when(leftOperand.backup(anyInt())).thenReturn(true);
 		assertThat(evaluator.backup(1)).isTrue();
@@ -656,7 +656,7 @@ public class EvaluatorTest
 		assertThat(evaluator.isEmpty()).isTrue();
 		evaluator = new Evaluator(NAME, leftOperand, "+", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
-		evaluator.assign(Integer.MAX_VALUE);
+		evaluator.assign(Long.MAX_VALUE);
 		assertThat(evaluator.backup(0)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
@@ -664,7 +664,7 @@ public class EvaluatorTest
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		when(leftOperand.backup(2)).thenReturn(false);
 		when(rightOperand.backup(2)).thenReturn(false);
-		evaluator.assign(Integer.MAX_VALUE);
+		evaluator.assign(Long.MAX_VALUE);
 		assertThat(evaluator.backup(2)).isFalse();
 		when(leftOperand.backup(1)).thenReturn(true);
 		when(rightOperand.backup(1)).thenReturn(true);
@@ -687,8 +687,8 @@ public class EvaluatorTest
 		{
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
-			if (datum.operand instanceof Integer)
-				operand = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+			if (datum.operand instanceof Long)
+				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
 				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof Null)
@@ -719,8 +719,8 @@ public class EvaluatorTest
 		{
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
-			if (datum.operand instanceof Integer)
-				operand = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+			if (datum.operand instanceof Long)
+				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Null)
 				operand = new NullOperand("R");
 			try
@@ -756,8 +756,8 @@ public class EvaluatorTest
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
 			Operand operand2 = (Operand) datum.operand2;
-			if (datum.operand instanceof Integer)
-				operand = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+			if (datum.operand instanceof Long)
+				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
 				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof BigDecimal)
@@ -791,8 +791,8 @@ public class EvaluatorTest
 		{
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
-			if (datum.operand instanceof Integer)
-				operand = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+			if (datum.operand instanceof Long)
+				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
 				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof Null)
@@ -804,8 +804,8 @@ public class EvaluatorTest
 		{
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
-			if (datum.operand instanceof Integer)
-				operand = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+			if (datum.operand instanceof Long)
+				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
 				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof Null)
@@ -826,8 +826,8 @@ public class EvaluatorTest
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
 			Operand operand2 = (Operand) datum.operand2;
-			if (datum.operand instanceof Integer)
-				operand = new IntegerOperand(NAME, ((Integer)datum.operand).intValue());
+			if (datum.operand instanceof Long)
+				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
 				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof BigDecimal)

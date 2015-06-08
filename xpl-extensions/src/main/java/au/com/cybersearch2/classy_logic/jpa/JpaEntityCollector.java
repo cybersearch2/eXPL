@@ -214,7 +214,7 @@ public class JpaEntityCollector implements DataCollector, PersistenceWork
 
 	/**
 	 * Returns peristence unit
-	 * @return
+	 * @return String
 	 */
 	public String getPersistenceUnit()
 	{

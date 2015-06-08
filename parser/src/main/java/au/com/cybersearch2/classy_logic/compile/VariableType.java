@@ -145,7 +145,7 @@ public class VariableType
 	    switch (operandType)
 	    {
         case INTEGER:
-            return new ArrayItemList<Integer>(Integer.class, new IntegerOperand(name));
+            return new ArrayItemList<Long>(Long.class, new IntegerOperand(name));
         case DOUBLE:
             return new ArrayItemList<Double>(Double.class, new DoubleOperand(name));
         case BOOLEAN:

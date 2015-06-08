@@ -106,7 +106,7 @@ public class OperandMapTest
 		AxiomList axiomList = mock(AxiomList.class);
 		operandMap.listMap.put(LIST_NAME, axiomList);
 		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
-		Operand axiomExpression = new IntegerOperand(Term.ANONYMOUS, Integer.valueOf(0));
+		Operand axiomExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
 		Operand termExpression = mock(Operand.class);
 		when(termExpression.isEmpty()).thenReturn(true);
 		when(axiomList.newVariableInstance(eq(0), eq(termExpression), isA(String.class))).thenReturn(axiomListVariable);
@@ -122,7 +122,7 @@ public class OperandMapTest
 		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		Operand axiomExpression = mock(Operand.class);
 		when(axiomExpression.isEmpty()).thenReturn(true);
-		Operand termExpression = new IntegerOperand(Term.ANONYMOUS, Integer.valueOf(0));
+		Operand termExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
 		when(axiomList.newVariableInstance(eq(axiomExpression), eq(0), isA(String.class))).thenReturn(axiomListVariable);
 		assertThat(operandMap.newListVariableInstance(LIST_NAME, axiomExpression, termExpression)).isEqualTo(axiomListVariable);
 	}
@@ -133,8 +133,8 @@ public class OperandMapTest
 		OperandMap operandMap = new OperandMap();
 		AxiomList axiomList = mock(AxiomList.class);
 		operandMap.listMap.put(LIST_NAME, axiomList);
-		Operand axiomExpression = new IntegerOperand(Term.ANONYMOUS, Integer.valueOf(0));
-		Operand termExpression = new IntegerOperand(Term.ANONYMOUS, Integer.valueOf(0));
+		Operand axiomExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
+		Operand termExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
 		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(0), eq(0), isA(String.class))).thenReturn(axiomListVariable);
 		assertThat(operandMap.newListVariableInstance(LIST_NAME, axiomExpression, termExpression)).isEqualTo(axiomListVariable);

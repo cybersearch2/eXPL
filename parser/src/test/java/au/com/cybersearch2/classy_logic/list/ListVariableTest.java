@@ -73,17 +73,17 @@ public class ListVariableTest
 		when(itemList.getName()).thenReturn(NAME);
 		when(itemList.hasItem(5)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
-		when(itemList.getItem(5)).thenReturn(Integer.valueOf(13));
-		IntegerOperand x = new IntegerOperand("x", Integer.valueOf(5));
+		when(itemList.getItem(5)).thenReturn(Long.valueOf(13));
+		IntegerOperand x = new IntegerOperand("x", Long.valueOf(5));
 		Operand indexExpression = new Evaluator("y ", x, "++", null);
-		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperand(NAME), indexExpression, "y");
-		Parameter otherTerm = new Parameter(NAME, Integer.valueOf(13));
+		ItemListVariable<Long> variable = new ItemListVariable<Long>(itemList, new IntegerOperand(NAME), indexExpression, "y");
+		Parameter otherTerm = new Parameter(NAME, Long.valueOf(13));
 		// No unification possible
 		assertThat(variable.unifyTerm(otherTerm, 1)).isEqualTo(0);
 		assertThat(variable.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		assertThat(variable.index).isEqualTo(5);
-		assertThat(variable.getValue()).isEqualTo(13);
-		assertThat(indexExpression.getValue()).isEqualTo(5);
+		assertThat(variable.getValue()).isEqualTo(13L);
+		assertThat(indexExpression.getValue()).isEqualTo(5L);
 		assertThat(x.getValue()).isEqualTo(6);
 		assertThat(variable.backup(1)).isTrue();
 		assertThat(variable.indexExpression.isEmpty()).isTrue();
@@ -238,16 +238,16 @@ public class ListVariableTest
 		when(itemList.getName()).thenReturn(NAME);
 		when(itemList.hasItem(0)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
-		when(itemList.getItem(0)).thenReturn(Integer.valueOf(13));
-		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperand(NAME), 0, "0");
+		when(itemList.getItem(0)).thenReturn(Long.valueOf(13L));
+		ItemListVariable<Long> variable = new ItemListVariable<Long>(itemList, new IntegerOperand(NAME), 0, "0");
 		Parameter otherTerm = new Parameter("x");
 		variable.unifyTerm(otherTerm, 1);
-		assertThat(otherTerm.getValue()).isEqualTo(13);
+		assertThat(otherTerm.getValue()).isEqualTo(13L);
 		assertThat(variable.getLeftOperandOps()).isEqualTo(new IntegerOperand("*").getLeftOperandOps());
 		assertThat(variable.getRightOperandOps()).isEqualTo(new IntegerOperand("*").getRightOperandOps());
-		assertThat(variable.booleanEvaluation(new IntegerOperand("L", Integer.valueOf(2)), OperatorEnum.GE, new IntegerOperand("R", Integer.valueOf(2)))).isTrue();
-		assertThat(variable.numberEvaluation(new IntegerOperand("L", Integer.valueOf(7)), OperatorEnum.XOR, new IntegerOperand("R", Integer.valueOf(5)))).isEqualTo(new Integer(2));
-		assertThat(variable.numberEvaluation(OperatorEnum.INCR, new IntegerOperand("R", Integer.valueOf(8)))).isEqualTo(new Integer(9));
+		assertThat(variable.booleanEvaluation(new IntegerOperand("L", Long.valueOf(2)), OperatorEnum.GE, new IntegerOperand("R", Long.valueOf(2)))).isTrue();
+		assertThat(variable.numberEvaluation(new IntegerOperand("L", Long.valueOf(7)), OperatorEnum.XOR, new IntegerOperand("R", Long.valueOf(5)))).isEqualTo(new Long(2));
+		assertThat(variable.numberEvaluation(OperatorEnum.INCR, new IntegerOperand("R", Integer.valueOf(8)))).isEqualTo(new Long(9));
 	}
 
 	@Test

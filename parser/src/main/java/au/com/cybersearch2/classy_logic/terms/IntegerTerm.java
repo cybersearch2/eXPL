@@ -22,13 +22,13 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 8 Dec 2014
  */
-public class IntegerTerm extends GenericParameter<Integer> 
+public class IntegerTerm extends GenericParameter<Long> 
 {
 	/**
 	 * Construct an anonymous IntegerTerm object 
 	 * @param value int
 	 */
-	public IntegerTerm(int value) 
+	public IntegerTerm(long value) 
 	{
 		super(Term.ANONYMOUS, value);
 
@@ -40,7 +40,7 @@ public class IntegerTerm extends GenericParameter<Integer>
 	 */
 	public IntegerTerm(String value) 
 	{
-		super(Term.ANONYMOUS, Integer.parseInt(value));
+		super(Term.ANONYMOUS, Long.parseLong(value));
 
 	}
 

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -251,7 +252,7 @@ public class Template extends Structure
 		return isMutable;
 	}
 
-	/*
+	/**
 	 * Exposes super addTerm()
 	 * @param term Term object
 	 */
@@ -272,10 +273,7 @@ public class Template extends Structure
 		{
 			if (!term.isEmpty() && !term.getName().isEmpty())
 			{
-				String termName = term.getName();
-				int dot = termName.lastIndexOf('.');
-				if (dot != -1)
-					termName = termName.substring(dot + 1);
+				String termName = NameParser.getNamePart(term.getName());
 				Parameter param = new Parameter(termName, term.getValue());
 				axiom.addTerm(param);
 			}

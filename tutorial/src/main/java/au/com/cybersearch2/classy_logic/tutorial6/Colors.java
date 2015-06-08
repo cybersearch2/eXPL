@@ -15,13 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial6;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -47,11 +44,10 @@ public class Colors {
 		shade(name = aqua, color.red = 0, color.green = 255, color.blue = 255)<br/>
 		shade(name = black, color.red = 0, color.green = 0, color.blue = 0)<br/>
 		shade(name = blue, color.red = 0, color.green = 0, color.blue = 255)<br/>
-	 * @throws ParseException
 	 */
-	public void displayShades() throws ParseException
+	public void displayShades()
 	{
-		QueryProgram queryProgram = compileScript(AXIOM_COLORS);
+		QueryProgram queryProgram = new QueryProgram(AXIOM_COLORS);
 		queryProgram.executeQuery("colors", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -60,27 +56,23 @@ public class Colors {
 			}});
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
-		Colors colorsDemo = new Colors();
 		try 
 		{
+	        Colors colorsDemo = new Colors();
 			colorsDemo.displayShades();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

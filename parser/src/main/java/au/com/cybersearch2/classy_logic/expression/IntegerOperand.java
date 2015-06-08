@@ -19,15 +19,15 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
- * IntegerOperand
+ * LongOperand
  * @author Andrew Bowley
  * 1 Dec 2014
  */
-public class IntegerOperand extends ExpressionParameter<Integer> 
+public class IntegerOperand extends ExpressionParameter<Long> 
 {
 
 	/**
-	 * Construct a variable IntegerOperand object
+	 * Construct a variable LongOperand object
 	 * @param name
 	 */
 	public IntegerOperand(String name) 
@@ -35,18 +35,28 @@ public class IntegerOperand extends ExpressionParameter<Integer>
 		super(name);
 	}
 
+    /**
+     * Construct a literal LongOperand object
+     * @param name
+     * @param value Long object
+     */
+    public IntegerOperand(String name, Integer value) 
+    {
+        super(name, value.longValue());
+    }
+
 	/**
-	 * Construct a literal IntegerOperand object
+	 * Construct a literal LongOperand object
 	 * @param name
-	 * @param value Integer object
+	 * @param value Long object
 	 */
-	public IntegerOperand(String name, Integer value) 
+	public IntegerOperand(String name, Long value) 
 	{
 		super(name, value);
 	}
 
 	/**
-	 * Integer Expression
+	 * Long Expression
 	 * @param name
 	 * @param expression Operand which evaluates value
 	 */
@@ -147,7 +157,7 @@ public class IntegerOperand extends ExpressionParameter<Integer>
 		case DECR: calc = --right; break;
 	    default:
 		}
-	    return new Integer(calc);
+	    return new Long(calc);
 	}
 
 	/**
@@ -157,9 +167,9 @@ public class IntegerOperand extends ExpressionParameter<Integer>
 	@Override
 	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
 	{
-		int right = ((Number)(rightTerm.getValue())).intValue();
-		int left =  ((Number)(leftTerm.getValue())).intValue();
-		int calc = 0;
+		long right = ((Number)(rightTerm.getValue())).longValue();
+		long left =  ((Number)(leftTerm.getValue())).longValue();
+		long calc = 0;
 		switch (operatorEnum2)
 		{
 		case PLUSASSIGN: // "+="
@@ -180,7 +190,7 @@ public class IntegerOperand extends ExpressionParameter<Integer>
 		case REM:       calc = left % right; break;
 	    default:
 		}
-	    return new Integer(calc);
+	    return new Long(calc);
 	}
 
 	/**
@@ -193,8 +203,8 @@ public class IntegerOperand extends ExpressionParameter<Integer>
 	@Override
 	public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
 	{
-		int right = ((Number) rightTerm.getValue()).intValue();
-		int left = ((Number) leftTerm.getValue()).intValue();
+		long right = ((Number) rightTerm.getValue()).longValue();
+		long left = ((Number) leftTerm.getValue()).longValue();
 		boolean calc = false;
 		switch (operatorEnum2)
 		{
@@ -216,7 +226,7 @@ public class IntegerOperand extends ExpressionParameter<Integer>
 	@Override
 	public void assign(Object value) 
 	{
-		setValue((Integer)value);
+		setValue((Long)value);
 	}
 
 }

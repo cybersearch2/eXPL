@@ -389,9 +389,9 @@ public class AxiomListVariableTest
 		variable.setTermIndex(0);
 		assertThat(variable.getLeftOperandOps()).isEqualTo(new IntegerOperand("*").getLeftOperandOps());
 		assertThat(variable.getRightOperandOps()).isEqualTo(new IntegerOperand("*").getRightOperandOps());
-		assertThat(variable.booleanEvaluation(new IntegerOperand("L", Integer.valueOf(2)), OperatorEnum.GE, new IntegerOperand("R", Integer.valueOf(2)))).isTrue();
-		assertThat(variable.numberEvaluation(new IntegerOperand("L", Integer.valueOf(7)), OperatorEnum.XOR, new IntegerOperand("R", Integer.valueOf(5)))).isEqualTo(new Integer(2));
-		assertThat(variable.numberEvaluation(OperatorEnum.INCR, new IntegerOperand("R", Integer.valueOf(8)))).isEqualTo(new Integer(9));
+		assertThat(variable.booleanEvaluation(new IntegerOperand("L", Long.valueOf(2)), OperatorEnum.GE, new IntegerOperand("R", Long.valueOf(2)))).isTrue();
+		assertThat(variable.numberEvaluation(new IntegerOperand("L", Long.valueOf(7)), OperatorEnum.XOR, new IntegerOperand("R", Long.valueOf(5)))).isEqualTo(new Long(2));
+		assertThat(variable.numberEvaluation(OperatorEnum.INCR, new IntegerOperand("R", Long.valueOf(8)))).isEqualTo(new Long(9));
 	}
 	
     @Test 
@@ -427,7 +427,7 @@ public class AxiomListVariableTest
 	    	assertThat(variable.getValue().toString()).isEqualTo(CITY_NAME_HEIGHT[index++]);
 	    	variable.backup(1);
     	}
-    	x.assign(Integer.valueOf(0));
+    	x.assign(Long.valueOf(0));
 		AxiomListVariable term0 = axiomList.newVariableInstance(x, 0, "0");
 		AxiomListVariable term1 = axiomList.newVariableInstance(axiomExpression, 1, "1");
     	index = 0;

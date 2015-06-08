@@ -44,6 +44,7 @@ import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
 import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.terms.NumberTerm;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -52,14 +53,18 @@ import au.com.cybersearch2.classy_logic.helper.Null;
 
 
 
-/** main */
+/** 
+ * QueryParser
+ * JavaCC generated Expression Pattern Language Compiler 
+ * @author Andrew Bowley
+ * 30 Sep 2010
+ */
 public class QueryParser implements QueryParserConstants 
 {
 
   /** 
-   * Main entry point. 
+   * Main entry point reads from System.in. Generates console output only. Use for validation. 
    * @throws ParseException
-   * @throws LogicEngineException 
    */
   public static void main(String args[]) throws ParseException
   {
@@ -70,9 +75,10 @@ public class QueryParser implements QueryParserConstants
 
 
   /** 
-   * Parses a query input stream.
-   *  @param inputStream  InputStream
-   *  @throws ParseException if the parsing fails
+   * Returns compiled result of eXPL script from supplied input stream.
+   * @param inputStream  InputStream
+   * @return QueryProgram object
+   * @throws ParseException
    */
   public QueryProgram parse(InputStream inputStream) throws ParseException
   {
@@ -82,7 +88,12 @@ public class QueryParser implements QueryParserConstants
     return queryProgram;
    }
 
-
+  /**
+   * Include eXPL script from named resource
+   * @param resourceName Name of file or other resource to include
+   * @param queryProgram QueryProgram object accumulating the compiled result
+   * @throws ParseException
+   */
   public void includeResource(String resourceName, QueryProgram queryProgram) throws ParseException
   {
      if (resourceName.length() < 3)
@@ -98,6 +109,16 @@ public class QueryParser implements QueryParserConstants
      }
   }
 
+  /**
+   * Returns content of string literal token stipped of quote delimiters
+   * @param stringLiteral Token object
+   * @return String
+   */
+  protected String getText(Token stringLiteral)
+  {
+      return stringLiteral.image.substring(1, stringLiteral.image.length() - 1);
+  }
+
 /** Root production. */
   final public void input(QueryProgram queryProgram) throws ParseException
   {
@@ -109,11 +130,11 @@ public class QueryParser implements QueryParserConstants
       {
       case INTEGER:
       case DOUBLE:
+      case DECIMAL:
       case BOOLEAN:
       case STRING:
       case TEMPLATE:
       case AXIOM:
-      case BIGDECIMAL:
       case INCLUDE:
       case CALC:
       case LIST:
@@ -172,11 +193,11 @@ public class QueryParser implements QueryParserConstants
       {
       case INTEGER:
       case DOUBLE:
+      case DECIMAL:
       case BOOLEAN:
       case STRING:
       case TEMPLATE:
       case AXIOM:
-      case BIGDECIMAL:
       case INCLUDE:
       case CALC:
       case LIST:
@@ -338,9 +359,9 @@ public class QueryParser implements QueryParserConstants
     {
     case INTEGER:
     case DOUBLE:
+    case DECIMAL:
     case BOOLEAN:
     case STRING:
-    case BIGDECIMAL:
     case TERM:
     case CURRENCY:
     case IDENTIFIER:
@@ -478,8 +499,8 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(STRING);
       {if (true) return new VariableType(OperandType.STRING);}
       break;
-    case BIGDECIMAL:
-      jj_consume_token(BIGDECIMAL);
+    case DECIMAL:
+      jj_consume_token(DECIMAL);
       {if (true) return new VariableType(OperandType.DECIMAL);}
       break;
     case TERM:
@@ -513,7 +534,7 @@ public class QueryParser implements QueryParserConstants
       }
       VariableType varType = new VariableType(OperandType.CURRENCY);
       if (qualifierLit != null)
-         varType.setProperty(VariableType.QUALIFIER_STRING, qualifierLit.image.substring(1, qualifierLit.image.length() - 1));
+         varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
       else if (qualifierId != null)
          varType.setProperty(VariableType.QUALIFIER_OPERAND, operandMap.addOperand(qualifierId.image, null));
       {if (true) return varType;}
@@ -642,9 +663,9 @@ public class QueryParser implements QueryParserConstants
     {
     case INTEGER:
     case DOUBLE:
+    case DECIMAL:
     case BOOLEAN:
     case STRING:
-    case BIGDECIMAL:
     case TERM:
     case CURRENCY:
       varType = Type(operandMap);
@@ -702,9 +723,9 @@ public class QueryParser implements QueryParserConstants
     {
     case INTEGER:
     case DOUBLE:
+    case DECIMAL:
     case BOOLEAN:
     case STRING:
-    case BIGDECIMAL:
     case TERM:
     case CURRENCY:
       varType = Type(operandMap);
@@ -850,7 +871,7 @@ public class QueryParser implements QueryParserConstants
      Operand assignExpression = (assignToken != null) ? expression : null;
      Operand regexOp = null;
      if (regexLit != null)
-         regexOp = new StringOperand(Term.ANONYMOUS, regexLit.image.substring(1, regexLit.image.length() - 1));
+         regexOp = new StringOperand(Term.ANONYMOUS, getText(regexLit));
      else if (regexId != null)
          regexOp = operandMap.addOperand(regexId.image, null);
      if (assignToken != null)
@@ -883,9 +904,9 @@ public class QueryParser implements QueryParserConstants
     {
     case INTEGER:
     case DOUBLE:
+    case DECIMAL:
     case BOOLEAN:
     case STRING:
-    case BIGDECIMAL:
     case TERM:
     case CURRENCY:
     case IDENTIFIER:
@@ -895,6 +916,7 @@ public class QueryParser implements QueryParserConstants
     case FORMAT:
     case INTEGER_LITERAL:
     case FLOATING_POINT_LITERAL:
+    case NUMBER_LITERAL:
     case STRING_LITERAL:
     case TRUE:
     case FALSE:
@@ -1235,7 +1257,7 @@ public class QueryParser implements QueryParserConstants
       jj_la1[47] = jj_gen;
       ;
     }
-    {if (true) return parserAssembler.setResourceProperties(nameToken.image.substring(1, nameToken.image.length() - 1), axiomName, properties);}
+    {if (true) return parserAssembler.setResourceProperties(getText(nameToken), axiomName, properties);}
     throw new Error("Missing return statement in function");
   }
 
@@ -1248,17 +1270,21 @@ public class QueryParser implements QueryParserConstants
   final public void Fact(String axiomName, ParserAssembler parserAssembler) throws ParseException
   {
   Parameter param = null;
+  Token lit = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case INTEGER_LITERAL:
     case FLOATING_POINT_LITERAL:
-    case FORMATED_FLOATING_POINT_LITERAL:
     case STRING_LITERAL:
     case TRUE:
     case FALSE:
     case NULL:
       param = LiteralTerm();
     parserAssembler.addAxiom(axiomName, param);
+      break;
+    case NUMBER_LITERAL:
+      lit = jj_consume_token(NUMBER_LITERAL);
+    parserAssembler.addAxiom(axiomName, new NumberTerm(getText(lit), parserAssembler.getScopeLocale()));
       break;
     case NAN:
       jj_consume_token(NAN);
@@ -1710,6 +1736,7 @@ public class QueryParser implements QueryParserConstants
     case FORMAT:
     case INTEGER_LITERAL:
     case FLOATING_POINT_LITERAL:
+    case NUMBER_LITERAL:
     case STRING_LITERAL:
     case TRUE:
     case FALSE:
@@ -1760,6 +1787,7 @@ public class QueryParser implements QueryParserConstants
     case FORMAT:
     case INTEGER_LITERAL:
     case FLOATING_POINT_LITERAL:
+    case NUMBER_LITERAL:
     case STRING_LITERAL:
     case TRUE:
     case FALSE:
@@ -1834,6 +1862,13 @@ public class QueryParser implements QueryParserConstants
     case NULL:
       param1 = Literal();
     {if (true) return param1;}
+      break;
+    case NUMBER_LITERAL:
+      numberToken = jj_consume_token(NUMBER_LITERAL);
+    NumberTerm numberTerm = new NumberTerm(getText(numberToken), parserAssembler.getScopeLocale());
+    Variable var = new Variable(Term.ANONYMOUS);
+    var.assign(numberTerm.getValue());
+    {if (true) return var;}
       break;
     case LPAREN:
       jj_consume_token(LPAREN);
@@ -1913,16 +1948,16 @@ public class QueryParser implements QueryParserConstants
     {
     case INTEGER_LITERAL:
       lit = jj_consume_token(INTEGER_LITERAL);
-    Integer litValue = Integer.decode(lit.image);
+    Long litValue = Long.decode(lit.image);
     {if (true) return new IntegerOperand(Term.ANONYMOUS, litValue);}
       break;
     case FLOATING_POINT_LITERAL:
       lit = jj_consume_token(FLOATING_POINT_LITERAL);
-    {if (true) return new DoubleOperand(Term.ANONYMOUS, Double.parseDouble(lit.image));}
+    {if (true) return new DoubleOperand(Term.ANONYMOUS, Double.valueOf(lit.image));}
       break;
     case STRING_LITERAL:
       lit = jj_consume_token(STRING_LITERAL);
-    {if (true) return new StringOperand(Term.ANONYMOUS, lit.image.substring(1, lit.image.length() - 1));}
+    {if (true) return new StringOperand(Term.ANONYMOUS, getText(lit));}
       break;
     case TRUE:
     case FALSE:
@@ -1955,13 +1990,9 @@ public class QueryParser implements QueryParserConstants
       lit = jj_consume_token(FLOATING_POINT_LITERAL);
     {if (true) return new DoubleTerm(lit.image);}
       break;
-    case FORMATED_FLOATING_POINT_LITERAL:
-      lit = jj_consume_token(FORMATED_FLOATING_POINT_LITERAL);
-    {if (true) return new DoubleTerm(lit.image.replace(",", ""));}
-      break;
     case STRING_LITERAL:
       lit = jj_consume_token(STRING_LITERAL);
-    {if (true) return new StringTerm(lit.image.substring(1, lit.image.length() - 1));}
+    {if (true) return new StringTerm(getText(lit));}
       break;
     case TRUE:
     case FALSE:
@@ -2026,118 +2057,13 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(2, xla); }
   }
 
-  private boolean jj_3R_45() {
-    if (jj_3R_51()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_30() {
-    if (jj_scan_token(DOT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_58() {
-    if (jj_3R_28()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_34() {
-    if (jj_3R_35()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_44() {
-    if (jj_3R_50()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_57() {
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_28() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    Token xsp;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_30()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_43() {
-    if (jj_3R_49()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_55() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_56()) {
-    jj_scanpos = xsp;
-    if (jj_3R_57()) {
-    jj_scanpos = xsp;
-    if (jj_3R_58()) {
-    jj_scanpos = xsp;
-    if (jj_3R_59()) {
-    jj_scanpos = xsp;
-    if (jj_3R_60()) return true;
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_56() {
-    if (jj_3R_61()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_38() {
-    if (jj_3R_39()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_66() {
-    if (jj_scan_token(36)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_33() {
-    if (jj_3R_34()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_48() {
-    if (jj_scan_token(79)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_65() {
-    if (jj_3R_67()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_29()) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_28()) return true;
-    if (jj_scan_token(COLON)) return true;
+  private boolean jj_3R_64() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
     return false;
   }
 
   private boolean jj_3R_47() {
     if (jj_scan_token(MINUS)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_64() {
-    if (jj_scan_token(STRING_LITERAL)) return true;
     return false;
   }
 
@@ -2147,7 +2073,32 @@ public class QueryParser implements QueryParserConstants
   }
 
   private boolean jj_3R_63() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    if (jj_scan_token(INTEGER_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_62() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_63()) {
+    jj_scanpos = xsp;
+    if (jj_3R_64()) {
+    jj_scanpos = xsp;
+    if (jj_3R_65()) {
+    jj_scanpos = xsp;
+    if (jj_3R_66()) {
+    jj_scanpos = xsp;
+    if (jj_3R_67()) return true;
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_28()) return true;
+    if (jj_scan_token(COLON)) return true;
     return false;
   }
 
@@ -2190,32 +2141,14 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_62() {
-    if (jj_scan_token(INTEGER_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_61() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_62()) {
-    jj_scanpos = xsp;
-    if (jj_3R_63()) {
-    jj_scanpos = xsp;
-    if (jj_3R_64()) {
-    jj_scanpos = xsp;
-    if (jj_3R_65()) {
-    jj_scanpos = xsp;
-    if (jj_3R_66()) return true;
-    }
-    }
-    }
-    }
-    return false;
-  }
-
   private boolean jj_3R_54() {
     if (jj_3R_55()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_29() {
+    if (jj_scan_token(LBRACKET)) return true;
+    if (jj_3R_31()) return true;
     return false;
   }
 
@@ -2226,12 +2159,6 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_36() {
     if (jj_3R_37()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_29() {
-    if (jj_scan_token(LBRACKET)) return true;
-    if (jj_3R_31()) return true;
     return false;
   }
 
@@ -2250,13 +2177,13 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_40() {
-    if (jj_3R_41()) return true;
+  private boolean jj_3R_70() {
+    if (jj_scan_token(FALSE)) return true;
     return false;
   }
 
-  private boolean jj_3R_69() {
-    if (jj_scan_token(FALSE)) return true;
+  private boolean jj_3R_40() {
+    if (jj_3R_41()) return true;
     return false;
   }
 
@@ -2265,18 +2192,23 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_68() {
+  private boolean jj_3R_69() {
     if (jj_scan_token(TRUE)) return true;
     return false;
   }
 
-  private boolean jj_3R_67() {
+  private boolean jj_3R_68() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_68()) {
+    if (jj_3R_69()) {
     jj_scanpos = xsp;
-    if (jj_3R_69()) return true;
+    if (jj_3R_70()) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3R_61() {
+    if (jj_scan_token(FORMAT)) return true;
     return false;
   }
 
@@ -2285,18 +2217,18 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_35() {
-    if (jj_3R_36()) return true;
+  private boolean jj_3_3() {
+    if (jj_3R_29()) return true;
     return false;
   }
 
   private boolean jj_3R_60() {
-    if (jj_scan_token(FORMAT)) return true;
+    if (jj_scan_token(LENGTH)) return true;
     return false;
   }
 
-  private boolean jj_3_3() {
-    if (jj_3R_29()) return true;
+  private boolean jj_3R_35() {
+    if (jj_3R_36()) return true;
     return false;
   }
 
@@ -2305,13 +2237,120 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_59() {
-    if (jj_scan_token(LENGTH)) return true;
+  private boolean jj_3R_39() {
+    if (jj_3R_40()) return true;
     return false;
   }
 
-  private boolean jj_3R_39() {
-    if (jj_3R_40()) return true;
+  private boolean jj_3R_59() {
+    if (jj_3R_28()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_58() {
+    if (jj_scan_token(LPAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_45() {
+    if (jj_3R_51()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_30() {
+    if (jj_scan_token(DOT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_34() {
+    if (jj_3R_35()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_44() {
+    if (jj_3R_50()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_57() {
+    if (jj_scan_token(NUMBER_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_28() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    Token xsp;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_30()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_43() {
+    if (jj_3R_49()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_55() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_56()) {
+    jj_scanpos = xsp;
+    if (jj_3R_57()) {
+    jj_scanpos = xsp;
+    if (jj_3R_58()) {
+    jj_scanpos = xsp;
+    if (jj_3R_59()) {
+    jj_scanpos = xsp;
+    if (jj_3R_60()) {
+    jj_scanpos = xsp;
+    if (jj_3R_61()) return true;
+    }
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_56() {
+    if (jj_3R_62()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_67() {
+    if (jj_scan_token(36)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_66() {
+    if (jj_3R_68()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_38() {
+    if (jj_3R_39()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_29()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_33() {
+    if (jj_3R_34()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_65() {
+    if (jj_scan_token(STRING_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_48() {
+    if (jj_scan_token(79)) return true;
     return false;
   }
 
@@ -2338,7 +2377,7 @@ public class QueryParser implements QueryParserConstants
   }
   private static void jj_la1_init_0() 
   {
-    jj_la1_0 = new int[] { 0x3566fc0,0x18000,0x18000,0x3566fc0,0x10000,0x0,0x0,0x0,0x20000,0x0,0x3566fc0,0x1040000,0x0,0x0,0x0,0x0,0x0,0x5023c0,0x0,0x0,0x0,0x0,0x5023c0,0x0,0x0,0x5023c0,0x0,0x0,0x0,0x0,0x0,0x1000,0x1000,0x0,0x0,0x0,0x48d823c0,0x0,0x0,0x0,0x0,0x0,0x4200000,0x0,0x0,0x0,0x0,0x0,0xc8000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x48880000,0x48880000,0x0,0x0,0x48880000,0x48000000,0xc8000000,0x0, };
+    jj_la1_0 = new int[] { 0x3565fc0,0x18000,0x18000,0x3565fc0,0x10000,0x0,0x0,0x0,0x20000,0x0,0x3565fc0,0x1040000,0x0,0x0,0x0,0x0,0x0,0x5007c0,0x0,0x0,0x0,0x0,0x5007c0,0x0,0x0,0x5007c0,0x0,0x0,0x0,0x0,0x0,0x2000,0x2000,0x0,0x0,0x0,0xc8d807c0,0x0,0x0,0x0,0x0,0x0,0x4200000,0x0,0x0,0x0,0x0,0x0,0xc8000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xc8880000,0xc8880000,0x0,0x0,0xc8880000,0x48000000,0x48000000,0x0, };
   }
   private static void jj_la1_init_1() 
   {
@@ -2427,7 +2466,7 @@ public class QueryParser implements QueryParserConstants
     for (int i = 0; i < 74; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
-      jj_2_rtns[i]= new JJCalls();
+        jj_2_rtns[i] = new JJCalls();
   }
 
   /** Constructor with generated Token Manager. */

@@ -22,10 +22,12 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
  * CalculateSquareMiles
+ * Demonstrates using a calculator to convert surface area in square kilometres to square miles. 
  * @author Andrew Bowley
  * 3 Mar 2015
  */
@@ -34,8 +36,11 @@ public class CalculateSquareMiles
 	static final String COUNTRY_SURFACE_AREA = 
 			"include \"surface-land.xpl\";\n" +
 			"template surface_area(country, double surface_area_Km2);\n" +
+			"// Calculator declaration:\n" +
 			"calc km2_to_mi2 (country, double surface_area_mi2 = surface_area.surface_area_Km2 *= 0.3861);" +
+			"// Result list receives calculator solution\n" +
 			"list surface_area(km2_to_mi2);\n" +
+            "// Chained query with calculator performing conversion:\n" +
 		    "query surface_area_mi2(surface_area : surface_area)\n" + 
 		    "  >> calc(km2_to_mi2);";
 
@@ -44,12 +49,11 @@ public class CalculateSquareMiles
 		new DI(new QueryParserModule()).validate();
 	}
 	
-    @SuppressWarnings("unchecked")
 	public Iterator<AxiomTermList> getSurfaceAreas()
 	{
 		QueryProgram queryProgram = new QueryProgram(COUNTRY_SURFACE_AREA);
 		Result result = queryProgram.executeQuery("surface_area_mi2");
-		return (Iterator<AxiomTermList>) result.getList("surface_area").iterator();
+		return  result.getIterator("surface_area");
 	}
 
 	public static void main(String[] args)
@@ -63,9 +67,14 @@ public class CalculateSquareMiles
 		} 
 		catch (ExpressionException e) 
 		{
-			e.getCause().printStackTrace();
+			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

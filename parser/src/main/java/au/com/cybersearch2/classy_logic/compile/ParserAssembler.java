@@ -383,13 +383,19 @@ public class ParserAssembler implements LocaleListener
 		scope.addLocalAxiomListener(key, axiomTermList.getAxiomListener());
 	}
 
-
-
+	/**
+	 * Register locale listener to be notified when the scope changes
+	 * @param localeListener LocaleListener object
+	 */
 	public void registerLocaleListener(LocaleListener localeListener)
 	{
 		localeListenerList.add(localeListener);
 	}
 
+	/**
+	 * Notify all locale listeners that the scope has changed
+	 * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(au.com.cybersearch2.classy_logic.Scope)
+	 */
 	@Override
 	public void onScopeChange(Scope scope) 
 	{
@@ -399,6 +405,11 @@ public class ParserAssembler implements LocaleListener
 			localeListener.onScopeChange(scope);
 	}
 
+	/**
+	 * Returns list of axiom listeners for specified key
+	 * @param key
+	 * @return List containing AxiomListener objects 
+	 */
 	protected List<AxiomListener> getAxiomListenerList(String key)
 	{
 		List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
@@ -528,6 +539,11 @@ public class ParserAssembler implements LocaleListener
 		templateMap.put(chainName, chainTemplate);
 	}
 
+	/**
+	 * Returns axiom provider specified by resource name
+	 * @param resourceName
+	 * @return AxiomProvider object
+	 */
 	protected AxiomProvider getAxiomProvider(String resourceName) 
 	{
     	if (externalAxiomSource == null)

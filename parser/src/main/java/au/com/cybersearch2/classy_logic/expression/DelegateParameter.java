@@ -48,6 +48,7 @@ public abstract class DelegateParameter extends Parameter implements Operand
 		delegateClassMap = new HashMap<Class<?>,  Operand>();
 		delegateClassMap.put(String.class, new StringOperand(DELEGATE_NAME));
 		delegateClassMap.put(Integer.class, new IntegerOperand(DELEGATE_NAME));
+        delegateClassMap.put(Long.class, new IntegerOperand(DELEGATE_NAME));
 		delegateClassMap.put(Boolean.class, new BooleanOperand(DELEGATE_NAME));
 		delegateClassMap.put(Double.class, new DoubleOperand(DELEGATE_NAME));
 		delegateClassMap.put(BigDecimal.class, new BigDecimalOperand(DELEGATE_NAME));

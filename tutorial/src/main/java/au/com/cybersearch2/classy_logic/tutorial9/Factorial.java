@@ -15,17 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * Factorial
+ * Demonstrates using a calculator loop iteratation to arrive at a result
  * @author Andrew Bowley
  * 5 Mar 2015
  */
@@ -50,9 +49,9 @@ public class Factorial
 	 * factorial(i = 5, n = 4, factorial = 24)<br/>
 	 * @throws ParseException
 	 */
-	public void display4Factorial() throws ParseException
+	public void display4Factorial()
 	{
-		QueryProgram queryProgram = compileScript(FACTORIAL_CALCULATE);
+		QueryProgram queryProgram = new QueryProgram(FACTORIAL_CALCULATE);
 		queryProgram.executeQuery("factorial", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -61,15 +60,6 @@ public class Factorial
 			}});
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
 		Factorial factorial = new Factorial();
@@ -77,11 +67,16 @@ public class Factorial
 		{
 			factorial.display4Factorial();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

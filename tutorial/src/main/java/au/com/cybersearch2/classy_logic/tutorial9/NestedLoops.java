@@ -15,17 +15,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * NestedLoops
+ * Demonstrates  one loop nested inside another. 
+ * The inner loop does an insert sort while the outer loop advances to the next axiom term to be sorted. 
  * @author Andrew Bowley
  * 5 Mar 2015
  */
@@ -57,14 +57,12 @@ public class NestedLoops
 	 * while the outer loop advances to the next axiom term to be sorted.
 	 * The expected result:<br/>
 	 * 1, 3, 5, 8, 12<br/>
-	 * @throws ParseException
 	 */
-	public void displayAxiomSort() throws ParseException
+	public void displayAxiomSort()
 	{
-		QueryProgram queryProgram = compileScript(INSERT_SORT);
+		QueryProgram queryProgram = new QueryProgram(INSERT_SORT);
 		Result result = queryProgram.executeQuery("sort_axiom");
-		@SuppressWarnings("unchecked")
-		Iterator<Object> axiomIterator = ((Iterable<Object>) result.getList("sorted")).iterator();
+		Iterator<Object> axiomIterator = result.getIterator("sorted");
 		boolean firstTime = true;
 		while (axiomIterator.hasNext())
 		{
@@ -77,15 +75,6 @@ public class NestedLoops
 		System.out.println();
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
 		NestedLoops nestedLoops = new NestedLoops();
@@ -93,11 +82,16 @@ public class NestedLoops
 		{
 			nestedLoops.displayAxiomSort();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 

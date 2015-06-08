@@ -22,6 +22,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -60,7 +61,6 @@ public class MultiCurrency
 	 * To view full expected result, see src/main/resource/multi-currency-list.txt
 	 * @return AxiomTermList iterator
 	 */
-    @SuppressWarnings("unchecked")
 	public Iterator<AxiomTermList> getFormatedAmounts()
 	{
 		QueryProgram queryProgram = new QueryProgram(WORLD_CURRENCY);
@@ -73,7 +73,7 @@ public class MultiCurrency
 		//		return true;
 		//	}});
 		Result result = queryProgram.executeQuery("price_query");
-		return (Iterator<AxiomTermList>) result.getList("world_list").iterator();
+		return result.getIterator("world_list");
 	}
 	
     /**
@@ -92,10 +92,15 @@ public class MultiCurrency
 	        }
 		} 
 		catch (ExpressionException e) 
-		{ // Display nested ParseException
-			e.getCause().printStackTrace();
+		{ 
+			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

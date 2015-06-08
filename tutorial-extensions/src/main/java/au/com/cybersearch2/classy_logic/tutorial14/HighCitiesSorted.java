@@ -26,6 +26,7 @@ import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -88,28 +89,32 @@ public class HighCitiesSorted
 	 * high_city(name = leadville, altitude = 10200)<br/>
 	 * @return AxiomTermList iterator
 	 */
-	@SuppressWarnings("unchecked")
-    public Iterator<AxiomTermList> displayHighCities()
+    public Iterator<AxiomTermList> getHighCities()
 	{
 		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities");
-		return (Iterator<AxiomTermList>) result.getList("city_list").iterator();
+		return result.getIterator("city_list");
 	}
 
 	public static void main(String[] args) throws SQLException
 	{
-		HighCitiesSorted highCities = new HighCitiesSorted();
 		try 
 		{
-			Iterator<AxiomTermList> iterator = highCities.displayHighCities();
+	        HighCitiesSorted highCities = new HighCitiesSorted();
+			Iterator<AxiomTermList> iterator = highCities.getHighCities();
 	        while(iterator.hasNext())
 	            System.out.println(iterator.next().toString());
 		} 
 		catch (ExpressionException e) 
 		{   // Display nested ParseException
-			e.getCause().printStackTrace();
+			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

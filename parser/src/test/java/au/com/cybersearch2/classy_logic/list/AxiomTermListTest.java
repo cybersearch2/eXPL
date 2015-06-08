@@ -57,14 +57,14 @@ public class AxiomTermListTest
 			assertThat(axiomTermList.getItem(i)).isEqualTo(axiom.getTermByIndex(i));
 		for (int i = 0; i < axiom.getTermCount(); i++)
 		{
-			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(i, Integer.toString(i));
+			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(i, Long.toString(i));
 			assertThat(listVariable.getValue()).isEqualTo(axiom.getTermByIndex(i).getValue());
 		}
 		for (int i = 0; i < axiom.getTermCount(); i++)
 		{
 			IntegerOperand expression = new IntegerOperand("" + i);
-			expression.assign(Integer.valueOf(i));
-			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(expression, Integer.toString(i));
+			expression.assign(Long.valueOf(i));
+			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(expression, Long.toString(i));
 			listVariable.evaluate(1);
 			assertThat(listVariable.getValue()).isEqualTo(axiom.getTermByIndex(i).getValue());
 		}

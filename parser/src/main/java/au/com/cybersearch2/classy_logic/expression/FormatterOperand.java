@@ -38,7 +38,9 @@ public class FormatterOperand extends StringOperand implements LocaleListener
 	protected Locale locale;
 	
 	/**
-	 * @param name
+	 * @param name The name of this operand
+	 * @param operand The Operand containing the value to format
+	 * @param locale Initial locale - can be updated through LocaleListener interface
 	 */
 	public FormatterOperand(String name, Operand operand, Locale locale) 
 	{

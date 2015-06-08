@@ -19,17 +19,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 import au.com.cybersearch2.classytask.WorkStatus;
 
 /**
@@ -43,8 +43,6 @@ public class PersistenceAgriculture
 {
     /** Persistence Unit name to look up configuration details in persistence.xml */
     static public final String PU_NAME = "agriculture";
-    @Inject
-    PersistenceContext persistenceContext;
 
     /**
      * Construct PersistenceHighCities object. It initializes dependency injection
@@ -54,8 +52,6 @@ public class PersistenceAgriculture
 	public PersistenceAgriculture() 
 	{
 		new DI(new AgriModule()).validate();
-		DI.inject(this);
-        persistenceContext.initializeAllDatabases();
         PersistenceWork setUpWork = new AgriDatabase();
         // Execute work and wait synchronously for completion
         PersistenceContainer container = new PersistenceContainer(PU_NAME);
@@ -91,12 +87,25 @@ public class PersistenceAgriculture
 
 	public static void main(String[] args)
 	{
-		PersistenceAgriculture ariculture = new PersistenceAgriculture();
-		Iterator<Axiom> axiomIterator = ariculture.testDataQuery();
-        while (axiomIterator.hasNext())
-            System.out.println(axiomIterator.next().toString());
-        System.out.println("Done!");
-		System.exit(0);
+        try 
+        {
+    		PersistenceAgriculture ariculture = new PersistenceAgriculture();
+    		Iterator<Axiom> axiomIterator = ariculture.testDataQuery();
+            while (axiomIterator.hasNext())
+                System.out.println(axiomIterator.next().toString());
+            System.out.println("Done!");
+        } 
+        catch (ExpressionException e) 
+        { 
+            e.printStackTrace();
+            System.exit(1);
+        }
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        System.exit(0);
 	}
 
 }

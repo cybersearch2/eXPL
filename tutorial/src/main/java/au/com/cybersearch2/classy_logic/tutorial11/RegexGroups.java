@@ -15,8 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial11;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import javax.inject.Inject;
@@ -28,8 +26,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -89,7 +86,6 @@ public class RegexGroups
       To view full results, go to src/main/resources/"in-words-list.txt  
      * @return AxiomTermList iterator containing the final "in" words solution
      */
-    @SuppressWarnings("unchecked")
 	public Iterator<AxiomTermList> getRegexGroups()
 	{
 		// Expected 54 results can be found in /src/test/resources/in_words.lst. 
@@ -97,7 +93,7 @@ public class RegexGroups
 		// word = inadequate, part = adj., def = not sufficient to meet a need
 		QueryProgram queryProgram = new QueryProgram(LEXICAL_SEARCH);
 		Result result = queryProgram.executeQuery("query_in_words");
-		return (Iterator<AxiomTermList>) result.getList("word_definitions").iterator();
+		return result.getIterator("word_definitions");
  	}
 	
     /**
@@ -118,6 +114,11 @@ public class RegexGroups
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

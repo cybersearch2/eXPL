@@ -34,8 +34,7 @@ import dagger.Provides;
 		IncreasedAgriculture.class,
         AgriPercentCollector.class, 
 		JpaEntityCollector.class,
-		AgriAxiomProvider.class,
-		PersistenceAgriculture.class
+		AgriAxiomProvider.class
 },
 includes=TestModule.class)
 public class AgriModule implements ApplicationModule 

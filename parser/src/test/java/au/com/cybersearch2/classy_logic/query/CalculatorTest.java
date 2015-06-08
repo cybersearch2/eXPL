@@ -41,7 +41,6 @@ import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
 import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -220,8 +219,8 @@ public class CalculatorTest
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
         Template calcTemplate = new Template("calc", n, loopy, limit);
-        calcTemplate.putInitData("n", Integer.valueOf(1));
-        calcTemplate.putInitData("limit", Integer.valueOf(3));
+        calcTemplate.putInitData("n", Long.valueOf(1));
+        calcTemplate.putInitData("limit", Long.valueOf(3));
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
@@ -247,8 +246,8 @@ public class CalculatorTest
     	LoopEvaluator loopy = new LoopEvaluator(template);
         Template calcTemplate = new Template("factorial", n, factorialExpression, i, loopy);
         calcTemplate.putInitData("factorial", Integer.valueOf(1));
-        calcTemplate.putInitData("n", Integer.valueOf(4));
-        calcTemplate.putInitData("i", Integer.valueOf(1));
+        calcTemplate.putInitData("n", Long.valueOf(4));
+        calcTemplate.putInitData("i", Long.valueOf(1));
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
@@ -273,8 +272,8 @@ public class CalculatorTest
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
         Template calcTemplate = new Template("factorial", n, factorialExpression, i, loopy);
-        calcTemplate.putInitData("factorial", Integer.valueOf(1));
-        calcTemplate.putInitData("i", Integer.valueOf(1));
+        calcTemplate.putInitData("factorial", Long.valueOf(1));
+        calcTemplate.putInitData("i", Long.valueOf(1));
         Solution solution = new Solution();
         AxiomListener axiomListener = new AxiomListener(){
             int result[] = new int[] { 1, 2, 6, 24 };
@@ -293,7 +292,7 @@ public class CalculatorTest
 		{
 			Calculator calculator = new Calculator();
 			calculator.setAxiomListener(axiomListener);
-	        calcTemplate.putInitData("n", Integer.valueOf(count));
+	        calcTemplate.putInitData("n", Long.valueOf(count));
 			calculator.iterate(solution, calcTemplate);
 			calcTemplate.backup(false);
 		}
@@ -325,11 +324,12 @@ public class CalculatorTest
 		Calculator calculator = new Calculator();
 		Choice choice = mock(Choice.class);
 		calculator.setChoice(choice);
-		Axiom seedAxiom = new Axiom("Seed", new Parameter("amount", Integer.valueOf(123000)));
+		Long seedAmount = Long.valueOf(123000);
+		Axiom seedAxiom = new Axiom("Seed", new Parameter("amount", seedAmount));
 		template.setKey("Seed");
 		Solution solution = new Solution();
 		calculator.execute(seedAxiom, template, solution);
-		verify(choice).completeSolution(solution, template, calculator.axiom);
+		verify(choice).completeSolution(solution, template, seedAmount);
 
 		/*
 		//System.out.println(solution.getAxiom(CHOICE_NAME).toString());

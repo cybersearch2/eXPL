@@ -63,17 +63,17 @@ public class ArrayItemListTest
 	public void test_assign()
 	{
 		IntegerOperand proxy = new IntegerOperand(NAME);
-		ArrayItemList<Integer> listOperand = new ArrayItemList<Integer>(Integer.class, proxy);
-		listOperand.assignItem(0, Integer.valueOf(17));
+		ArrayItemList<Long> listOperand = new ArrayItemList<Long>(Long.class, proxy);
+		listOperand.assignItem(0, Long.valueOf(17));
 		assertThat(listOperand.getItem(0)).isEqualTo(17);
-		listOperand.assignItem(0, Integer.valueOf(21));
+		listOperand.assignItem(0, Long.valueOf(21));
 		assertThat(listOperand.getItem(0)).isEqualTo(21);
-		listOperand.assignItem(1, Integer.valueOf(8));
+		listOperand.assignItem(1, Long.valueOf(8));
 		assertThat(listOperand.getItem(1)).isEqualTo(8);
-		listOperand.assignItem(0, Integer.valueOf(-1));
+		listOperand.assignItem(0, Long.valueOf(-1));
 		assertThat(listOperand.getItem(0)).isEqualTo(-1);
 		assertThat(listOperand.getItem(1)).isEqualTo(8);
-		listOperand.assignItem(3, Integer.valueOf(89));
+		listOperand.assignItem(3, Long.valueOf(89));
 		assertThat(listOperand.getItem(0)).isEqualTo(-1);
 		assertThat(listOperand.getItem(1)).isEqualTo(8);
 		assertThat(listOperand.getItem(3)).isEqualTo(89);
@@ -100,13 +100,13 @@ public class ArrayItemListTest
 	@Test
 	public void test_new_variable_instance()
 	{
-		ArrayItemList<Integer> intOperandList = new ArrayItemList<Integer>(Integer.class, new IntegerOperand(NAME));
-		intOperandList.assignItem(0, Integer.valueOf(21));
-		ItemListVariable<Integer> intListVariable = intOperandList.newVariableInstance(0, "0");
+		ArrayItemList<Long> intOperandList = new ArrayItemList<Long>(Long.class, new IntegerOperand(NAME));
+		intOperandList.assignItem(0, Long.valueOf(21));
+		ItemListVariable<Long> intListVariable = intOperandList.newVariableInstance(0, "0");
 		intListVariable.evaluate(1);
 		assertThat(intListVariable.getValue()).isEqualTo(21);
-		intOperandList.assignItem(0, Integer.valueOf(72));
-		Operand expression = new IntegerOperand("test", Integer.valueOf(0));
+		intOperandList.assignItem(0, Long.valueOf(72));
+		Operand expression = new IntegerOperand("test", Long.valueOf(0));
 		intListVariable = intOperandList.newVariableInstance(expression, "test");
 		intListVariable.evaluate(1);
 		assertThat(intListVariable.getValue()).isEqualTo(72);

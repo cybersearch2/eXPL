@@ -15,19 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial4;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import javax.inject.Inject;
 
 import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.DI;
 
@@ -57,12 +54,12 @@ public class InWords
 		providerManager.putAxiomProvider(new LexiconAxiomProvider());
 	}
 	
-	public void displayInWords() throws ParseException
+	public void displayInWords()
 	{
 		// Expected 54 results can be found in /src/test/resources/in_words.lst. 
 		// Here is the first result: 
 		// in_words(Word = inadequate, Definition = j. not sufficient to meet a need)
-		QueryProgram queryProgram = compileScript(LEXICAL_SEARCH);
+		QueryProgram queryProgram = new QueryProgram(LEXICAL_SEARCH);
 		queryProgram.executeQuery("query_in_words", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -72,27 +69,23 @@ public class InWords
 			}});
 	}
 	
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
-		InWords inWords = new InWords();
 		try 
 		{
+	        InWords inWords = new InWords();
 			inWords.displayInWords();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

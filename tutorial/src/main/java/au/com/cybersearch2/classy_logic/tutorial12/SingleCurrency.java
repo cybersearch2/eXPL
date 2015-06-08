@@ -19,6 +19,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -63,18 +64,23 @@ public class SingleCurrency
      */
 	public static void main(String[] args)
 	{
-		SingleCurrency singleCurrency = new SingleCurrency();
 		try 
 		{
+	        SingleCurrency singleCurrency = new SingleCurrency();
 			Axiom formatedTotalAmount = singleCurrency.getFormatedTotalAmount();
             System.out.println(formatedTotalAmount.toString());
 
 		} 
 		catch (ExpressionException e) 
-		{ // Display nested ParseException   
-			e.getCause().printStackTrace();
+		{    
+			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

@@ -15,13 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial2;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -60,11 +57,10 @@ public class GreekConstruction
 	 * customer_freight(name = Marathon Marble, city = Sparta, charge = 13)<br/>
 	 * customer_freight(name = Agora Imports, city = Sparta, charge = 13)<br/>
 	 * customer_freight(name = Spiros Theodolites, city = Milos, charge = 17)<br/>
-	 * @throws ParseException
 	 */
-	public void displayCustomerCharges() throws ParseException
+	public void displayCustomerCharges()
 	{
-		QueryProgram queryProgram = compileScript(GREEK_CONSTRUCTION);
+		QueryProgram queryProgram = new QueryProgram(GREEK_CONSTRUCTION);
 		// The first unification fills in variables "city" and "charge".
 		// Both templates here share variables "city" and "charge", so only the "name" term
 		// empty in the second unification.
@@ -77,27 +73,23 @@ public class GreekConstruction
 			}});
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
-		GreekConstruction greekConstruction = new GreekConstruction();
 		try 
 		{
+	        GreekConstruction greekConstruction = new GreekConstruction();
 			greekConstruction.displayCustomerCharges();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

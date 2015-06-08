@@ -15,15 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial3;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
-import au.com.cybersearch2.classy_logic.QueryProgram;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.QueryParserModule;
+import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.DI;
 
@@ -57,11 +54,10 @@ public class EuropeanMegaCities
 		euro_megacities(Megacity = Istanbul, Country = Turkey, Population = 14800000, Continent = Europe)<br/>
 		euro_megacities(Megacity = Rhine-Ruhr, Country = Germany, Population = 11350000, Continent = Europe)<br/>
 		euro_megacities(Megacity = Paris, Country = France, Population = 10770000, Continent = Europe)<br/>
-	 * @throws ParseException
 	 */
-	public void displayEuropeanCities() throws ParseException
+	public void displayEuropeanCities()
 	{
-		QueryProgram queryProgram = compileScript(MEGA_CITY);
+		QueryProgram queryProgram = new QueryProgram(MEGA_CITY);
 		queryProgram.executeQuery("euro_megacities", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -71,27 +67,23 @@ public class EuropeanMegaCities
 			}});
 	}
 	
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
-		EuropeanMegaCities europeanMegaCities = new EuropeanMegaCities();
 		try 
 		{
+	        EuropeanMegaCities europeanMegaCities = new EuropeanMegaCities();
 			europeanMegaCities.displayEuropeanCities();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

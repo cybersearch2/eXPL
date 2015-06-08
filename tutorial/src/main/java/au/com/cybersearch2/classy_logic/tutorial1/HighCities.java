@@ -15,13 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial1;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -56,11 +53,10 @@ public class HighCities
 	 * high_city(name = denver, altitude = 5280)<br/>
 	 * high_city(name = flagstaff, altitude = 6970)<br/>
 	 * high_city(name = leadville, altitude = 10200)<br/>
-	 * @throws ParseException
 	 */
-	public void displayHighCities() throws ParseException
+	public void displayHighCities() 
 	{
-		QueryProgram queryProgram = compileScript(CITY_EVELATIONS);
+		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		queryProgram.executeQuery("high_cities", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -69,27 +65,23 @@ public class HighCities
 			}});
 	}
 
-	protected QueryProgram compileScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-		return queryProgram;
-	}
-	
 	public static void main(String[] args)
 	{
-		HighCities highCities = new HighCities();
 		try 
 		{
+	        HighCities highCities = new HighCities();
 			highCities.displayHighCities();
 		} 
-		catch (ParseException e) 
+		catch (ExpressionException e) 
 		{
 			e.printStackTrace();
 			System.exit(1);
 		}
+        catch (QueryExecutionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
 		System.exit(0);
 	}
 }

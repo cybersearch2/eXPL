@@ -74,7 +74,7 @@ public class ArrayItemList<T> implements ItemList<T>
 					ItemList<?> operandList, Operand proxy, Operand expression, String suffix) {
 				return new ItemListVariable<String>(operandList, proxy, expression, suffix);
 			}});
-    	factorylassMap.put(Integer.class, new VariableFactory(){
+    	factorylassMap.put(Long.class, new VariableFactory(){
 
 			@Override
 			public ItemListVariable<Integer> newVariableInstance(ItemList<?> operandList, Operand proxy, 

@@ -10,6 +10,7 @@ import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.AxiomMapCollection;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
+import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * QueryParams
@@ -20,6 +21,7 @@ import au.com.cybersearch2.classy_logic.query.QuerySpec;
  */
 public class QueryParams 
 {
+    /** Query specification */
 	protected QuerySpec querySpec;
     /** 1st query parameter - AxiomCollection object */
 	protected AxiomMapCollection axiomEnsemble;
@@ -27,14 +29,17 @@ public class QueryParams
 	protected List<Template> templateList;
 	/** Scope object which provides objects to be passed to the query */
 	protected Scope scope;
+	/** Solution handler (optional). Do-nothing handler applied if none supplied */
 	protected SolutionHandler solutionHandler;
+	/** List of optional axioms to add to global scope */
 	protected List<Axiom> scopeAxiomList;
 
 
 	/**
 	 * Construct QueryParams object
-	 * @param scopeName
-	 * @param queryName
+	 * @param queryProgram The global compiler accumulator
+	 * @param scopeName The scope the query applies to
+	 * @param queryName Name of query in scope
 	 */
 	public QueryParams(QueryProgram queryProgram, String scopeName, String queryName)
 	{
@@ -54,25 +59,35 @@ public class QueryParams
 		this.scope = scope;
 		this.querySpec = querySpec;
 	}
-	
+
+	/**
+	 * Initialize these query parameters
+	 */
 	public void initialize()
 	{
+	    // Notify locale listeners of change of scope
 		scope.notifyChange();
+		// Set scope axioms in global scope
 		if (scopeAxiomList != null)
 			for (Axiom axiom: scopeAxiomList)
 				scope.getGlobalScope().getParserAssembler().addScopeAxiom(axiom); 
+		// Collect query axiom sources and templates
 		templateList = new ArrayList<Template>();
 		axiomEnsemble = new AxiomMapCollection();
+		// Iterate through list of query specification KeyNames
 		for (KeyName keyname: querySpec.getKeyNameList())
 		{
+		    // Collect axiom source
 			String axiomKey = keyname.getAxiomKey();
 			if (!axiomKey.isEmpty())
 				axiomEnsemble.put(axiomKey, scope.getAxiomSource(axiomKey));
+			// Collect template
 			String templateName = keyname.getTemplateName();
 			Template template = scope.getTemplate(templateName);
 			if (template == null)
 				throw new IllegalArgumentException("Template \"" + templateName + "\" does not exist");
 			if (!axiomKey.isEmpty()) // Empty axiom key indicates no axiom
+			    // Setting template key here faciltates unification
 				template.setKey(axiomKey);
 			templateList.add(template);
 		}
@@ -101,14 +116,22 @@ public class QueryParams
 	}
 
 	/**
-	 * @return the solutionHandler
+	 * Returns solution handler. Return do-nothing handler if none supplied
+	 * @return SolutionHandler object
 	 */
 	public SolutionHandler getSolutionHandler() 
 	{
-		return solutionHandler;
+		return solutionHandler != null ? solutionHandler : new SolutionHandler(){
+
+            @Override
+            public boolean onSolution(Solution solution)
+            {
+                return true;
+            }};
 	}
 
 	/**
+	 * Set the solution handler
 	 * @param solutionHandler the solutionHandler to set
 	 */
 	public void setSolutionHandler(SolutionHandler solutionHandler) 
@@ -117,7 +140,8 @@ public class QueryParams
 	}
 
 	/**
-	 * @return the scope
+	 * Returns the scope
+	 * @return Scope object
 	 */
 	public Scope getScope() 
 	{
@@ -125,13 +149,20 @@ public class QueryParams
 	}
 
 	/**
-	 * @return the querySpec
+	 * Returns query specification
+	 * @return QuerySpec object
 	 */
 	public QuerySpec getQuerySpec() 
 	{
 		return querySpec;
 	}
 
+	/**
+	 * Add an axiom populated with supplied parameters to
+	 * @param name
+	 * @param params
+	 * @return Axiom object
+	 */
 	public Axiom addAxiom(String name, Object... params)
 	{
 		Axiom axiom = new Axiom(name, params);
