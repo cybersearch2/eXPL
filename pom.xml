@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>au.com.cybersearch2</groupId>
   <artifactId>xpl</artifactId>
-  <version>1.0.7-SNAPSHOT</version>
+  <version>1.0.7</version>
   <packaging>pom</packaging>
   <name>Expression Pattern Language (eXPL) Parent</name>
   <description>Expression Pattern Language Compiler and Query Engine</description>
@@ -19,7 +19,7 @@
     <url>https://github.com/andrew-bowley/classy_logic</url>
     <connection>scm:git:ssh://git@github.com/andrew-bowley/classy_logic.git</connection>
     <developerConnection>scm:git:ssh://git@gitserver:/opt/git/xpl.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>xpl-1.0.7</tag>
   </scm>
   <distributionManagement>
     <repository>
