@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
@@ -41,19 +43,25 @@ public class Choice
 	/**
 	 * Construct Choice object
 	 * @param name Key to identify choice
-	 * @param parserAssembler ParserAssembler compiler object
+	 * @param scope Scope
 	 */
-	public Choice(String name, ParserAssembler parserAssembler) 
+	public Choice(String name, Scope scope) 
 	{
+	    // Get axiom source for this Choice and determine it's scope
+	    AxiomSource choiceAxiomSource = scope.getGlobalScope().findAxiomSource(name); 
+	    if (choiceAxiomSource == null)
+	        choiceAxiomSource = scope.getAxiomSource(name);
+	    else
+	        scope = scope.getGlobalScope();
+	    ParserAssembler parserAssembler = scope.getParserAssembler();
 	    // Populate choiceAxiomList from axiom source with choice identity
-		Iterator<Axiom> iterator = parserAssembler.getAxiomSource(name).iterator();
+		Iterator<Axiom> iterator = choiceAxiomSource.iterator();
 		choiceAxiomList = new ArrayList<Axiom>();
 		while (iterator.hasNext())
 			choiceAxiomList.add(iterator.next());
 		// Populate variableList from operand map using axiom term name keys
 		variableList = new ArrayList<Operand>();
-	    List<String> termNameList = parserAssembler.getAxiomTermNameList(name);
-	    for (String termName: termNameList)
+	    for (String termName: choiceAxiomSource.getAxiomTermNameList())
 	    	variableList.add(parserAssembler.getOperandMap().get(termName));
 	}
 
@@ -70,16 +78,21 @@ public class Choice
 	 * Complete solution for given parameters
 	 * @param solution Solution containing query results so far
 	 * @param template Template used to calculate choice
-	 * @param matchValue Value used to select choice, needed for default scenario
+	 * @param matchValue Value used to select choice
+	 * @return Flag set true if selection match was found
 	 */
-	public void completeSolution(Solution solution, Template template, Object matchValue)
+	public boolean completeSolution(Solution solution, Template template, Object matchValue)
 	{
 	    // Get template to perform selection
 		int position = template.select();
+		if (position == NO_MATCH)
+		    return false;
 		// Get selected axiom, default being last one in choice axiom list
-        Axiom choiceAxiom = choiceAxiomList.get(position != NO_MATCH ? position : template.getTermCount() - 1);
+        Axiom choiceAxiom = choiceAxiomList.get(position);
         // Get value to assign as result, default being match value
-        Object value = position != NO_MATCH ? template.getTermByIndex(position).getValue() : matchValue;
+        Object value = template.getTermByIndex(position).getValue();
+        if (value.equals(null)) // Ensure value is valid
+            value = matchValue;
         // Create solution axiom using Template toAxiom() method
 		Template solutionTemplate = new Template(template.getName());
 		int index = 0;
@@ -94,5 +107,6 @@ public class Choice
 			++index;
 		}
 		solution.put(template.getName(), solutionTemplate.toAxiom());
+		return true;
 	}
 }

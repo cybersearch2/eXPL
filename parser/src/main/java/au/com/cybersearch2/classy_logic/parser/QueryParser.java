@@ -39,6 +39,8 @@ import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.ListLength;
+import au.com.cybersearch2.classy_logic.list.ItemListVariable;
+import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
@@ -1232,10 +1234,13 @@ public class QueryParser implements QueryParserConstants
   {
     Operand expression;
     expression = Expression(parserAssembler);
-      if ((expression instanceof StringOperand) || (expression instanceof Variable))
+      if (expression instanceof StringOperand)
           {if (true) return new RegExOperand(name, expression, 0, null);}
-      else if ((expression.getLeftOperand() == null) && (expression instanceof ExpressionParameter))
-          {if (true) return new MatchOperand(name, expression.getValue());}
+      else if ((expression instanceof Variable) ||
+               (expression instanceof ExpressionParameter) ||
+               (expression instanceof ItemListVariable) ||
+               (expression instanceof AxiomListVariable))
+          {if (true) return new MatchOperand(name, expression);}
       {if (true) return new Evaluator(name, expression, "&&" );}
     throw new Error("Missing return statement in function");
   }
@@ -2057,16 +2062,6 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(2, xla); }
   }
 
-  private boolean jj_3R_64() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_47() {
-    if (jj_scan_token(MINUS)) return true;
-    return false;
-  }
-
   private boolean jj_3R_46() {
     if (jj_scan_token(PLUS)) return true;
     return false;
@@ -2096,12 +2091,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_28()) return true;
-    if (jj_scan_token(COLON)) return true;
-    return false;
-  }
-
   private boolean jj_3R_41() {
     Token xsp;
     xsp = jj_scanpos;
@@ -2128,6 +2117,12 @@ public class QueryParser implements QueryParserConstants
     if (jj_3R_48()) return true;
     }
     }
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_28()) return true;
+    if (jj_scan_token(COLON)) return true;
     return false;
   }
 
@@ -2354,6 +2349,16 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3R_64() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_47() {
+    if (jj_scan_token(MINUS)) return true;
+    return false;
+  }
+
   /** Generated Token Manager. */
   public QueryParserTokenManager token_source;
   SimpleCharStream jj_input_stream;
@@ -2466,7 +2471,7 @@ public class QueryParser implements QueryParserConstants
     for (int i = 0; i < 74; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
-        jj_2_rtns[i] = new JJCalls();
+        jj_2_rtns[i]= new JJCalls();
   }
 
   /** Constructor with generated Token Manager. */

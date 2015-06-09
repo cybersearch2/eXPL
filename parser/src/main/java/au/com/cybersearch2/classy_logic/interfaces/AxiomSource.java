@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 import java.util.Iterator;
+import java.util.List;
 
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
@@ -33,4 +34,9 @@ public interface AxiomSource
 	 * @return Iterator of generic type Axiom
 	 */
 	Iterator<Axiom> iterator();
+	/**
+	 * Return list of term names
+	 * @return List of String objects
+	 */
+	List<String> getAxiomTermNameList();
 }

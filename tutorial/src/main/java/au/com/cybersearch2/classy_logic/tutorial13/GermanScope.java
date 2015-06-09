@@ -25,6 +25,8 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * GermanScope
+ * Demonstrates handling an amount espressed in Euros within a German scope and 
+ * translating a term using a local axiom. 
  * @author Andrew Bowley
  * 17 Mar 2015
  */
@@ -46,9 +48,6 @@ public class GermanScope
 
 	/**
 	 * Compiles the GERMAN_SCOPE script and runs the "item_query" query, displaying the solution on the console.<br/>
-	 * Demonstrates passing an axiom to the query using a QueryParams object;
-	 * The expected result:<br/>
-	 * format_total(total_text = Gesamtkosten + gst: 13.580,24 EUR)<br/>
 	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
     public Axiom getFormatedTotalAmount()
@@ -73,6 +72,8 @@ public class GermanScope
 	
     /**
      * Run tutorial
+     * The expected result:<br/>
+     * format_total(total_text = Gesamtkosten + gst: 13.580,24 EUR)<br/>
      * @param args
      */
 	public static void main(String[] args)

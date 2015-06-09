@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.jpa;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,12 +32,21 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  */
 public class JpaSource implements AxiomSource
 {
+    public static final List<String> EMPTY_LIST;
+    
 	/** Name to use when creating axioms. Defaults to data object simple class name. */
 	protected String axiomName;
 	/** List of axiom term names. If not supplied, the term names come from data object field names */
 	protected List<NameMap> termNameList;
 	/** Executes JPA named queries to obtain data objects */
 	protected DataCollector dataCollector;
+    /** The term names */
+    protected List<String> axiomTermNameList;
+
+    static
+    {
+        EMPTY_LIST = Collections.emptyList();
+    }
 
 	/**
 	 * Constructs default JpaSource object.
@@ -57,6 +68,12 @@ public class JpaSource implements AxiomSource
 		this.dataCollector = dataCollector;
 		this.axiomName = axiomName;
 		this.termNameList = termNameList;
+		if ((termNameList != null) && !termNameList.isEmpty())
+		{
+		    List<String> axiomTermNameList = new ArrayList<String>();
+		    for (NameMap nameMap: termNameList)
+		        axiomTermNameList.add(nameMap.getTermName());
+		}
     }
 
 	/**
@@ -69,5 +86,10 @@ public class JpaSource implements AxiomSource
 		return new JpaSourceIterator(dataCollector, axiomName, termNameList);
 	}
 
+    @Override
+    public List<String> getAxiomTermNameList()
+    {
+        return axiomTermNameList == null ? EMPTY_LIST : axiomTermNameList;
+    }
 
 }

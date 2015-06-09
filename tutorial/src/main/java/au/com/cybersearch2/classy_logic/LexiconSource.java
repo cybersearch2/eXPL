@@ -119,4 +119,10 @@ public class LexiconSource implements AxiomSource
 			}
 		};
 	}
+
+    @Override
+    public List<String> getAxiomTermNameList()
+    {
+        return axiomTermNameList;
+    }
 }

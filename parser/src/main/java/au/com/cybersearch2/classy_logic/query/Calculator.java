@@ -59,7 +59,7 @@ public class Calculator implements SolutionFinder
 	 * Find a solution for specified template
 	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
 	 * @param template Template used on each iteration
-	 * @return Always true to indicate the query is resolved
+     * @return Always true to indicate the query is resolved
 	 */
 	@Override
 	public boolean iterate(Solution solution, Template template)
@@ -70,17 +70,17 @@ public class Calculator implements SolutionFinder
 	}
 	
 	/**
-	 * Find a solution for specified template and initializer axiom
+	 * Find a solution for specified template and initializer axiom.
+	 * Return false when choice fails to match any of the alternatives.
 	 * @param axiom Initializer axiom
 	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
 	 * @param template Template used on each iteration
-	 * @return Always true to indicate the query is resolved
+     * @return Flag to indicate whether or not the query is resolved
 	 */
 	public boolean iterate(Axiom axiom, Solution solution, Template template)
 	{
 		template.initialize();
-		execute(axiom, template, solution);
-		return true;
+		return execute(axiom, template, solution);
 	}
 	
 	/**
@@ -109,8 +109,9 @@ public class Calculator implements SolutionFinder
 	 * An axiom to seed the calculation is optional, but it will be set if this is called from iterate().
 	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
 	 * @param template Template used on each iteration
+     * @return Flag to indicate whether or not the query is resolved
 	 */
-	public void execute(Axiom seedAxiom, Template template, Solution solution)
+	public boolean execute(Axiom seedAxiom, Template template, Solution solution)
 	{
 		if (seedAxiom != null) 
 		{
@@ -136,7 +137,13 @@ public class Calculator implements SolutionFinder
 		else 
             unifySolution(solution, template);
 		if (unificationSuccess)
-			completeSolution(solution, template);
+		{
+			if (completeSolution(solution, template))
+			    return true;
+            template.backup(true);
+		}
+		// Short circuit when solution not available
+		return false;
 	}
 
 	/**
@@ -161,18 +168,16 @@ public class Calculator implements SolutionFinder
 					solution.put(template.getName(), axiom);
 					return true;
 				}
+				else
+				    return evaluationStatus != EvaluationStatus.SKIP;
 			}
 			else
-			{
-				choice.completeSolution(solution, template, axiom.getTermByIndex(0).getValue());
-				return true;
-			}
+				return choice.completeSolution(solution, template, axiom.getTermByIndex(0).getValue());
 		}
 		catch (ExpressionException e)
 		{   // evaluate() exceptions are thrown by Evaluator objects 
 			throw new QueryExecutionException("Error evaluating: " + template.toString(), e);
 		}
-		return evaluationStatus != EvaluationStatus.SKIP;
 	}
 	
 	/**

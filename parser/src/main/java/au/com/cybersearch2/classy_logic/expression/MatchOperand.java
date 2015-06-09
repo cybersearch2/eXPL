@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
  * MatchOperand
@@ -26,17 +27,15 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
  */
 public class MatchOperand extends Variable
 {
-    protected Object literal;
     
     /**
      * Construct MatchOperand object
      * @param name Term name
      * @param literal The literal value to match on
      */
-    public MatchOperand(String name, Object literal)
+    public MatchOperand(String name, Operand expression)
     {
-        super(name);
-        this.literal = literal;
+        super(name, expression);
     }
 
     /**
@@ -47,24 +46,25 @@ public class MatchOperand extends Variable
     @Override
     public EvaluationStatus evaluate(int id) 
     {
+        // Save value populated by unification
+        Object selectionValue = value;
+        clearValue();
+        // Evaluate match value
+        super.evaluate(id);
         // Retain value on match
-        boolean isMatch = value.equals(literal);
-        if (!isMatch) // No match is same as unification failed
-            clearValue();
-        // Returning false for no match will cause evaluation short circuit
+        boolean isMatch = value.equals(selectionValue);
+        if (!isMatch)
+        {   // Handle Null match value
+            if (value.equals(null))
+            {
+                isMatch = true; // Null is default match
+                setValue(selectionValue);
+            }
+            else // No match is same as unification failed
+                clearValue();
+        }
+        // Returning SHORT_CIRCUIT for no match will cause evaluation short circuit
         return isMatch ? EvaluationStatus.COMPLETE : EvaluationStatus.SHORT_CIRCUIT;
-    }
-
-    /**
-     * Override toString() to report &lt;empty&gt;, null or value
-     * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
-     */
-    @Override
-    public String toString()
-    {
-        if (empty)
-            return "? \"" + literal + "\"";
-        return super.toString();
     }
 
 }

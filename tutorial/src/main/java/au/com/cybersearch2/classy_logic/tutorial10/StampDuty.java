@@ -44,7 +44,7 @@ public class StampDuty
 			"  (amount > 500000, 500000, 21330.00, 5.50);\n" +
 			"\n" +
 			"axiom transacton_amount (amount) : parameter;\n" +
-			"calc payable(duty = base + (percent / 100) * (amount - threshold));\n" +
+			"calc payable(duty = base + (amount - threshold) * (percent / 100));\n" +
 			"query stamp_duty_query calc(transacton_amount : bracket) >> calc(payable);\n";
 
 	/**

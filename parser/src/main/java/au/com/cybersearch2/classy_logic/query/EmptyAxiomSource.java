@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import java.util.Iterator;
+import java.util.List;
 
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -50,5 +51,11 @@ public class EmptyAxiomSource implements AxiomSource
 			public void remove() {
 			}};
 	}
+
+    @Override
+    public List<String> getAxiomTermNameList()
+    {
+        return AxiomListSource.EMPTY_LIST;
+    }
 
 }

@@ -117,7 +117,24 @@ public class CalculatorTest
         when(template.evaluate()).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
         assertThat(calculator.completeSolution(solution, template)).isTrue();
 	}
-	
+
+   @Test
+    public void test_choice_completeSolution()
+    {
+        Calculator calculator = new Calculator();
+        Solution solution = mock(Solution.class);
+        Template template = mock(Template.class);
+        Choice choice = mock(Choice.class);
+        Axiom axiom = mock(Axiom.class);
+        when(axiom.getTermByIndex(0)).thenReturn(new Parameter("x"));
+        calculator.axiom = axiom;
+        when(choice.completeSolution(solution, template, "x")).thenReturn(true);
+        when(template.isChoice()).thenReturn(true);
+        when(template.evaluate()).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
+        assertThat(calculator.completeSolution(solution, template)).isTrue();
+    }
+	    
+
 	@Test
 	public void test_skip_completeSolution()
 	{

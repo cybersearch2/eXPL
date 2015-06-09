@@ -1,3 +1,13 @@
+eXPL v1.0.8
+
+1. Add axiom term names to AxiomSource for working with scopes
+2. Control how Evaluator performs implicit type conversion to prevent loss of information
+3. Change MatchOperand to take Operand as match item and match anything to Null for default case
+4. Fix Choice so it handles scopes correctly
+5. Change Choice and Calculator so a short circuit happens when no selection is made
+6. Allow list items as Choice selection terms
+7. Add GermanColors and ColorSwatch Tutorials
+______________________________________________________________________________________________________________________
 eXPL v1.0.7
 
  1. Fix JpaSourceIterator test for no term names supplied.

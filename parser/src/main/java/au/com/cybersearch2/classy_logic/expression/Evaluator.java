@@ -3,6 +3,8 @@
  */
 package au.com.cybersearch2.classy_logic.expression;
 
+import java.math.BigDecimal;
+
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -154,7 +156,8 @@ public class Evaluator extends DelegateParameter
     				throw new ExpressionException("Cannot evaluate " + (left == null ? unaryRightToString() : binaryToString()));
      		}
     	}
-    	// Delegate can be set in advance if operation is assign or result is boolean
+    	// Delegate can be set in advance if result is boolean
+    	// Otherwise, delegate will be set on value assigment
     	presetDelegate();
     	// Now perform evaluation, depending on status of left and right terms
 		Object result = null;
@@ -336,7 +339,7 @@ public class Evaluator extends DelegateParameter
 	}
 
 	/**
-	 * Set delegate in advance if operation is assign or result is boolean
+	 * Set delegate in advance if result is boolean
 	 */
 	protected void presetDelegate() 
 	{
@@ -397,7 +400,22 @@ public class Evaluator extends DelegateParameter
 		case ORASSIGN: // "|"
 		case XORASSIGN: // "^"
 		case REMASSIGN: // "%"
-			return leftTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
+            // Prevent conversion of BigDecimal to Integer or Double by 
+            // always selecting the BigDecimal term to perform the operation
+            boolean leftIsBigDec = leftTerm.getValueClass().equals(BigDecimal.class);
+            boolean rightIsBigDec = rightTerm.getValueClass().equals(BigDecimal.class);
+            if (leftIsBigDec)
+                return leftTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
+            else if (rightIsBigDec)
+                return rightTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
+		    // Prevent conversion of Double to Integer by 
+		    // always selecting the Double term to perform the operation
+		    boolean leftIsDouble = leftTerm.getValueClass().equals(Double.class);
+            boolean rightIsDouble = rightTerm.getValueClass().equals(Double.class);
+            if (leftIsDouble || !rightIsDouble)
+                return leftTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
+            else
+                return rightTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
 	    default:
 		}
 		return null;
@@ -560,6 +578,11 @@ public class Evaluator extends DelegateParameter
 		return false;
 	}
 
+	/**
+	 * Returns flag to indicate if supplied term is allowed to perform String operations
+	 * @param term
+	 * @return boolean
+	 */
 	protected boolean isValidStringOperation(Operand term)
 	{
 		for (OperatorEnum operatorEnum2: term.getStringOperandOps())

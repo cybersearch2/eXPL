@@ -164,7 +164,7 @@ public class ChainQueryExecuter
 		CalculateChainQuery chainQuery = new CalculateChainQuery(axiom, template);
 		if (template.isChoice())
 		{
-			Choice choice = new Choice(template.getName(), scope.getParserAssembler());
+			Choice choice = new Choice(template.getName(), scope);
 			chainQuery.setChoice(choice);
 		}
 		if (axiomListenerMap != null)

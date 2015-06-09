@@ -339,7 +339,11 @@ public class ParserAssembler implements LocaleListener
     	}
        	List<Axiom> axiomList = axiomListMap.get(axiomName);
     	if (axiomList != null)
-    		return new AxiomListSource(axiomList);
+    	{
+    	    AxiomListSource axiomListSource = new AxiomListSource(axiomList);
+    	    axiomListSource.setAxiomTermNameList(axiomTermNameMap.get(axiomName));
+    		return axiomListSource;
+    	}
     	String qualifiedName = getQualifiedName(axiomName);
     	String resourceName = axiomResourceMap.get(qualifiedName);
     	if (resourceName == null)

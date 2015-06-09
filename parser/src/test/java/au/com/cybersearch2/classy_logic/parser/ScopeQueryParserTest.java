@@ -256,6 +256,22 @@ public class ScopeQueryParserTest
 			"  query item_query(item : charge) >> calc(charge_plus_gst) >> calc(format_total);\n" +
 	        "}";
 
+    static final String GERMAN_COLORS =
+            "axiom lexicon (language, aqua, black, blue, white):\n" +
+            "  (\"english\", \"aqua\", \"black\", \"blue\", \"white\"),\n" +
+            "  (\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\");\n" +
+            "local colors(lexicon);" +
+            "choice swatch (name, red, green, blue) :\n" +
+            "(colors[aqua], 0, 255, 255),\n" +
+            "(colors[black], 0, 0, 0),\n" +
+            "(colors[blue], 0, 0, 255),\n" +
+            "(colors[white], 255, 255, 255);\n" +
+            "axiom shade (name) : parameter;\n" +
+            "scope german (language=\"de\", region=\"DE\")\n" +
+            "{\n" +
+            "  query color_query calc(shade : swatch);\n" +
+            "}";
+
     static final String MEGA_CITY3 = 
             "include \"mega_city.xpl\";\n" +
             "template city (Rank, Megacity, Continent, Country, decimal Population);\n" +
@@ -277,6 +293,42 @@ public class ScopeQueryParserTest
         new DI(new QueryParserModule()).validate();
     }
 
+    @Test
+    public void test_choice_string_colors()
+    {
+        QueryProgram queryProgram = new QueryProgram(GERMAN_COLORS);
+        // Create QueryParams object for Global scope and query "stamp_duty_query"
+        QueryParams queryParams = new QueryParams(queryProgram, "german", "color_query");
+        // Add a shade Axiom with a single "aqua" term
+        // This axiom goes into the Global scope and is removed at the start of the next query.
+        queryParams.addAxiom("shade", "Wasser"); // aqua
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                //System.out.println(solution.getAxiom("swatch").toString());
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name = Wasser, red = 0, green = 255, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+        queryParams.addAxiom("shade", "blau"); // blue
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name = blau, red = 0, green = 0, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+        // Test choice short circuit on no match
+        queryParams.addAxiom("shade", "Orange"); // orange
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                assertThat(solution.getAxiom("swatch")).isNull();
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+    }
+    
 
     @Test
     public void test_mega_cities3() throws IOException

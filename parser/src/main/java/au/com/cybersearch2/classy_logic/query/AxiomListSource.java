@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,9 +30,18 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  */
 public class AxiomListSource  implements AxiomSource, Iterable<Axiom>
 {
+    public static final List<String> EMPTY_LIST;
+    
 	/** The axiom list */
     protected List<Axiom> axiomList;
-  
+    /** The term names */
+    protected List<String> axiomTermNameList;
+
+    static
+    {
+        EMPTY_LIST = Collections.emptyList();
+    }
+    
     /**
      * Construct an AxiomListSource object
      * @param axiomList The axiom list or null to create a empty AxiomSource
@@ -59,5 +69,20 @@ public class AxiomListSource  implements AxiomSource, Iterable<Axiom>
 	{
 		return axiomList;
 	}
+
+    @Override
+    public List<String> getAxiomTermNameList()
+    {
+        return axiomTermNameList == null ? EMPTY_LIST : axiomTermNameList;
+    }
+
+    /**
+     * Set axiom TermName List
+     * @param axiomTermNameList the axiomTermNameList to set
+     */
+    public void setAxiomTermNameList(List<String> axiomTermNameList)
+    {
+        this.axiomTermNameList = axiomTermNameList;
+    }
 
 }

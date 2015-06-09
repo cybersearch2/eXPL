@@ -387,7 +387,7 @@ public class QueryParserTest
 			"  (amount > 500000, 500000, 21330.00, 5.50);\n" +
 			"\n" +
 			"axiom transacton_amount (amount) : ( 123458 );\n" +
-			"calc payable(duty = bracket.base + (bracket.percent / 100) * (amount - bracket.threshold));\n" +
+			"calc payable(duty = bracket.base + (amount - bracket.threshold) * (bracket.percent / 100));\n" +
 			"query stamp_duty_query calc(transacton_amount : bracket) >> calc(payable);\n";
 
     static final String CHOICE_COLORS =
@@ -406,6 +406,18 @@ public class QueryParserTest
             "(0x000000, \"black\", 0, 0, 0),\n" +
             "(0x0000FF, \"blue\", 0, 0, 255),\n" +
             "(0xFFFFFF, \"white\", 255, 255, 255);\n" +
+            "axiom shade (rgb) : parameter;\n" +
+            "query color_query calc(shade : swatch);\n";
+            ;
+
+    static final String CHOICE_COLORS3 =
+            "double unknown_rgb;\n" +
+            "choice swatch (rgb, color, red, green, blue) :\n" +
+            "(0x00FFFF, \"aqua\", 0, 255, 255),\n" +
+            "(0x000000, \"black\", 0, 0, 0),\n" +
+            "(0x0000FF, \"blue\", 0, 0, 255),\n" +
+            "(0xFFFFFF, \"white\", 255, 255, 255),\n" +
+            "(unknown_rgb,  \"unknown\", 0, 0, 0);\n" +
             "axiom shade (rgb) : parameter;\n" +
             "query color_query calc(shade : swatch);\n";
             ;
@@ -478,12 +490,12 @@ public class QueryParserTest
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
-        // Test defaults to first choice
+        // Test choice short circuit on no match
         queryParams.addAxiom("shade", "orange");
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name = orange, red = 255, green = 255, blue = 255)");
+                assertThat(solution.getAxiom("swatch")).isNull();
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
@@ -502,8 +514,8 @@ public class QueryParserTest
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                System.out.println(solution.getAxiom("swatch").toString());
-                //assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(rgb = " + Long.decode("0x00ffff").toString() + ", color = aqua, red = 0, green = 255, blue = 255)");
+                //System.out.println(solution.getAxiom("swatch").toString());
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(rgb = " + Long.decode("0x00ffff").toString() + ", color = aqua, red = 0, green = 255, blue = 255)");
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
@@ -515,12 +527,48 @@ public class QueryParserTest
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
-        // Test defaults to first choice
+        // Test choice short circuit on no match
         queryParams.addAxiom("shade", Long.decode("0x77ffff"));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(rgb = " + Long.decode("0x77ffff").toString() + ", color = white, red = 255, green = 255, blue = 255)");
+                assertThat(solution.getAxiom("swatch")).isNull();
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+    }
+    
+    @Test
+    public void test_choice_unknown_hex_color()
+    {
+        QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS3);
+        // Create QueryParams object for Global scope and query "stamp_duty_query"
+        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "color_query");
+        // Add a shade Axiom with a single "aqua" term
+        // This axiom goes into the Global scope and is removed at the start of the next query.
+        queryParams.addAxiom("shade", Long.decode("0x00ffff"));
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                //System.out.println(solution.getAxiom("swatch").toString());
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(rgb = " + Long.decode("0x00ffff").toString() + ", color = aqua, red = 0, green = 255, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+        queryParams.addAxiom("shade", Long.decode("0x0000ff"));
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(rgb = 255, color = blue, red = 0, green = 0, blue = 255)");
+                return true;
+            }});
+        queryProgram.executeQuery(queryParams);
+        // Test default choice on no match
+        queryParams.addAxiom("shade", Long.decode("0x77ffff"));
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(rgb = " + Long.decode("0x77ffff").toString() + ", color = unknown, red = 0, green = 0, blue = 0)");
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
