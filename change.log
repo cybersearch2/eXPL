@@ -1,3 +1,8 @@
+eXPL v1.0.9
+
+1. Comment out SE7 code in parser Scope and ScopeTest classes
+2. Import Tele-Genious application from Classy_apps to reverse project dependency
+______________________________________________________________________________________________________________________
 eXPL v1.0.8
 
 1. Add axiom term names to AxiomSource for working with scopes

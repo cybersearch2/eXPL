@@ -17,7 +17,7 @@ package au.com.cybersearch2.classy_logic;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.IllformedLocaleException;
+//import java.util.IllformedLocaleException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -72,17 +72,19 @@ public class Scope
 		{
 			Object language = properties.get(QueryProgram.LANGUAGE);
 			if (language != null)
-				try 
-				{
+		        // Uncomment following if SE7 supported
+				//try 
+				//{
 					locale = getLocale(properties, language.toString());
-				}
-				catch (IllformedLocaleException e)
-				{
-					throw new ExpressionException("Scope \"" + name + "\" invalid Locale settings", e);
-				}
+				//}
+				//catch (IllformedLocaleException e)
+				//{
+				//	throw new ExpressionException("Scope \"" + name + "\" invalid Locale settings", e);
+				//}
 		}
 		if (locale == null)
-		    locale = Locale.getDefault(Locale.Category.FORMAT);
+	        // Uncomment following if SE7 supported
+		    locale = Locale.getDefault(/*Locale.Category.FORMAT*/);
 		querySpecMap = new HashMap<String, QuerySpec>();
 		parserAssembler = new ParserAssembler(this);
 	}
@@ -281,12 +283,13 @@ public class Scope
 	 */
 	protected Locale getLocale(Map<String, Object> properties, String language)
 	{
-		Object script = properties.get(QueryProgram.SCRIPT);
+	    // Uncomment following if SE7 supported
+		//Object script = properties.get(QueryProgram.SCRIPT);
 		Object region = properties.get(QueryProgram.REGION);
 		Object variant = properties.get(QueryProgram.VARIANT);
 		Locale locale = null;
-		if (script == null)
-		{
+		//if (script == null)
+		//{
 			if ((region == null) && (variant == null))
 				 locale = new Locale(language);
 			else if (region != null)
@@ -296,20 +299,20 @@ public class Scope
 			    else
 					 locale = new Locale(language, region.toString(), variant.toString());
 			}
-		}
-		else
-		{
-			Locale.Builder builder = new Locale.Builder();
-			builder.setLanguage(language);
-			if (region != null)
-			{
-				builder.setRegion(region.toString());
-				if (variant != null)
-					builder.setVariant(variant.toString());
-			}
-			builder.setScript(script.toString());
-			locale = builder.build();
-		}
+		//}
+		//else
+		//{
+		//	Locale.Builder builder = new Locale.Builder();
+		//	builder.setLanguage(language);
+		//	if (region != null)
+		//	{
+		//		builder.setRegion(region.toString());
+		//		if (variant != null)
+		//			builder.setVariant(variant.toString());
+		//	}
+		//	builder.setScript(script.toString());
+		//	locale = builder.build();
+		//}
 		if (locale == null)
 			throw new ExpressionException("Scope \"" + name + "\" invalid Locale settings combination for language " + language);
 		return locale;

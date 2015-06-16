@@ -201,14 +201,15 @@ public class ScopeTest
 		properties.put(QueryProgram.VARIANT, "JP");
 		Scope scope = new Scope(globalScope, SCOPE_NAME, properties);
 		assertThat(scope.getLocale().toString()).isEqualTo("ja_JP_JP_#u-ca-japanese");
+        // Uncomment following if SE7 supported
 		// sr_BA_#Latn
-		properties = new HashMap<String, Object>();
-		properties = new HashMap<String, Object>();
-		properties.put(QueryProgram.LANGUAGE, "sr");
-		properties.put(QueryProgram.REGION, "BA");
-		properties.put(QueryProgram.SCRIPT, "Latn");
-		scope = new Scope(globalScope, SCOPE_NAME, properties);
-		assertThat(scope.getLocale().toString()).isEqualTo("sr_BA_#Latn");
+		//properties = new HashMap<String, Object>();
+		//properties = new HashMap<String, Object>();
+		//properties.put(QueryProgram.LANGUAGE, "sr");
+		//properties.put(QueryProgram.REGION, "BA");
+		//properties.put(QueryProgram.SCRIPT, "Latn");
+		//scope = new Scope(globalScope, SCOPE_NAME, properties);
+		//assertThat(scope.getLocale().toString()).isEqualTo("sr_BA_#Latn");
 
 	}
 	
