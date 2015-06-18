@@ -35,6 +35,7 @@ import dagger.Provides;
 { 
     TelegenStartup.class , 
     MainActivity.class,
+    TelegenLogic.class,
     ParserAssembler.ExternalAxiomSource.class
 }, includes = TelegenEnvironmentModule.class)
 public class TelegenApplicationModule implements ApplicationModule

@@ -23,7 +23,7 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
@@ -76,9 +76,9 @@ public class IncreasedAgriculture
         increased(country = Algeria, surface_area = 25722.79200000004, id = 1)<br/>
         increased(country = American Samoa, surface_area = 10.0, id = 2)<br/><br/>
      * The full result can be viewed in file src/main/resources/increased-agri-list.txt
-     * @return AxiomTermList iterator
+     * @return Axiom iterator
 	 */
-	public Iterator<AxiomTermList> displayIncreasedAgri()
+	public Iterator<Axiom> displayIncreasedAgri()
 	{
 		QueryProgram queryProgram1 = new QueryProgram(AGRICULTURAL_LAND);
 		queryProgram1.executeQuery("more_agriculture");
@@ -104,7 +104,7 @@ public class IncreasedAgriculture
 		try 
 		{
 	        IncreasedAgriculture increasedAgri = new IncreasedAgriculture();
-		    Iterator<AxiomTermList> iterator = increasedAgri.displayIncreasedAgri();
+		    Iterator<Axiom> iterator = increasedAgri.displayIncreasedAgri();
             while(iterator.hasNext())
                 System.out.println(iterator.next().toString());
 

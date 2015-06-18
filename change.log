@@ -2,6 +2,8 @@ eXPL v1.0.9
 
 1. Comment out SE7 code in parser Scope and ScopeTest classes
 2. Import Tele-Genious application from Classy_apps to reverse project dependency
+3. Refactor parser Result class and dependent Scope and Operand classes so it delivers Axioms instead of iterables
+4. Move ParserAssembler addAxiomCollection() and addTemplateList() to test class QueryExecuterAdapter
 ______________________________________________________________________________________________________________________
 eXPL v1.0.8
 

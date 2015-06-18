@@ -56,7 +56,6 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -453,7 +452,7 @@ public class QueryParserTest
        //       return true;
        //   }});
         Result result = queryProgram.executeQuery("group_query");
-        Iterator<AxiomTermList> iterator = result.getIterator("city_group_list");
+        Iterator<Axiom> iterator = result.getIterator("city_group_list");
         File worldCurrencyList = new File("src/test/resources", "cities-group.lst");
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(worldCurrencyList), "UTF-8"));
         while(iterator.hasNext())
@@ -598,7 +597,7 @@ public class QueryParserTest
 		//		return true;
 		//	}});
 		Result result = queryProgram.executeQuery("price_query");
-		Iterator<AxiomTermList> iterator = result.getIterator("world_list");
+		Iterator<Axiom> iterator = result.getIterator("world_list");
     	File worldCurrencyList = new File("src/test/resources", "world_currency.lst");
      	BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(worldCurrencyList), "UTF-8"));
         while(iterator.hasNext())

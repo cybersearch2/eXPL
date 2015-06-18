@@ -21,7 +21,7 @@ import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
@@ -59,9 +59,9 @@ public class MultiCurrency
 	 * The first of 104 expected results:<br/>
 	 * format_total(total_text = MY Total + gst: MYR10,682.12)<br/><br/>
 	 * To view full expected result, see src/main/resource/multi-currency-list.txt
-	 * @return AxiomTermList iterator
+	 * @return Axiom iterator
 	 */
-	public Iterator<AxiomTermList> getFormatedAmounts()
+	public Iterator<Axiom> getFormatedAmounts()
 	{
 		QueryProgram queryProgram = new QueryProgram(WORLD_CURRENCY);
 		// Use this query to see the total amount before it is formatted
@@ -85,7 +85,7 @@ public class MultiCurrency
 		try 
 		{
 	        MultiCurrency multiCurrency = new MultiCurrency();
-	        Iterator<AxiomTermList> iterator = multiCurrency.getFormatedAmounts();
+	        Iterator<Axiom> iterator = multiCurrency.getFormatedAmounts();
 	        while(iterator.hasNext())
 	        {
 	            System.out.println(iterator.next().toString());

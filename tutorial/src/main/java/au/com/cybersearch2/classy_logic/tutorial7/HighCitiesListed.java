@@ -20,7 +20,7 @@ import java.util.Iterator;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
@@ -59,7 +59,7 @@ public class HighCitiesListed
 	 * high_city(name = denver, altitude = 5280)<br/>
 	 * high_city(name = leadville, altitude = 10200)<br/>
 	 */
-	public Iterator<AxiomTermList> getHighCities()
+	public Iterator<Axiom> getHighCities()
 	{
 		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities"); 
@@ -71,15 +71,9 @@ public class HighCitiesListed
 		try 
 		{
 	        HighCitiesListed highCities = new HighCitiesListed();
-	        Iterator<AxiomTermList> iterator = highCities.getHighCities();
+	        Iterator<Axiom> iterator = highCities.getHighCities();
 	        while(iterator.hasNext())
-	        {
-	            AxiomTermList city = iterator.next();
-	            // Following shows how to access values in list item. 
-	            // The same text can be returned using city.toString().
-	            Iterator<Object> cityIterator = city.iterator();
-	            System.out.println("high_city(name = " + cityIterator.next().toString() + ", altitue = " + cityIterator.next() + ")");
-		    } 
+	            System.out.println(iterator.next().toString());
         }
 		catch (ExpressionException e) 
 		{

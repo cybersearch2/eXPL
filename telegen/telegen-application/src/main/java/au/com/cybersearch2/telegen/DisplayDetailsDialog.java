@@ -19,7 +19,9 @@ import android.widget.TextView;
 public class DisplayDetailsDialog extends DialogFragment 
 {
     public static final String KEY_TITLE = "Telegen.Title";
-    public static final String KEY_CONTEXT = "Telegen.Model";
+    public static final String KEY_CONTEXT = "Telegen.Context";
+    public static final String KEY_CONTENT = "Telegen.Content";
+    public static final CharSequence DIALOG_TITLE = "Troubleshooting";
     
     protected Dialog dialog;
   
@@ -27,19 +29,25 @@ public class DisplayDetailsDialog extends DialogFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) 
     {
     
-         View view = inflater.inflate(R.layout.node_details, container, false); 
+         View view = inflater.inflate(R.layout.display_details, container, false); 
 
          String title = getArguments().getString(KEY_TITLE);
          String context = getArguments().getString(KEY_CONTEXT);
+         String content = getArguments().getString(KEY_CONTENT);
          if ((title != null) && (title.length() > 0))
          {
-             TextView tv1 = (TextView)view.findViewById(R.id.node_detail_title);
+             TextView tv1 = (TextView)view.findViewById(R.id.detail_title);
              tv1.setText(title);
          }
          if ((context != null) && (context.length() > 0))
          {
-             TextView tv2 = (TextView)view.findViewById(R.id.node_detail_model);
+             TextView tv2 = (TextView)view.findViewById(R.id.detail_context);
              tv2.setText(context);
+        }
+        if ((content != null) && (content.length() > 0))
+        {
+             TextView tv3 = (TextView)view.findViewById(R.id.detail_content);
+             tv3.setText(content);
         }
          //LinearLayout propertiesLayout = (LinearLayout) view.findViewById(R.id.node_properties);
          //Node node = (Node) getArguments().get(MainActivity.NODE_KEY);
@@ -51,7 +59,7 @@ public class DisplayDetailsDialog extends DialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState) 
     {
         dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle("Troubleshooting");
+        dialog.setTitle(DIALOG_TITLE);
         dialog.setCanceledOnTouchOutside(true);
         return dialog;
     }

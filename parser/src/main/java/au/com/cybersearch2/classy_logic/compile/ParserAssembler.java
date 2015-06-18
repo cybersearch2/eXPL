@@ -6,7 +6,6 @@ package au.com.cybersearch2.classy_logic.compile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Locale.Category;
@@ -17,7 +16,6 @@ import javax.inject.Inject;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -81,8 +79,9 @@ public class ParserAssembler implements LocaleListener
 	protected Map<String, List<AxiomListener>> axiomListenerMap;
 	/** Maps qualified axiom name to resource name */
 	protected Map<String, String> axiomResourceMap;
+	/** List of Locale listeners which are notified of change of scope */
 	protected List<LocaleListener> localeListenerList;
-	/** Axioms which live only for current scope */
+	/** Axioms which are bound to the current scope */
 	protected Map<String, Axiom> scopeAxiomMap;
 
 	/** Axiom provider connects to persistence back end */
@@ -222,6 +221,10 @@ public class ParserAssembler implements LocaleListener
 			axiom.addTerm(term);
 	}
 
+	/**
+	 * Add scope-bound axiom
+	 * @param axiom Axiom object
+	 */
 	public void addScopeAxiom(Axiom axiom)
 	{
 		if (scopeAxiomMap == null)
@@ -403,8 +406,9 @@ public class ParserAssembler implements LocaleListener
 	@Override
 	public void onScopeChange(Scope scope) 
 	{
-		if (scopeAxiomMap != null)
-			scopeAxiomMap.clear();
+	    // TODO - Investigate whento clear scope axioms
+		//if (scopeAxiomMap != null)
+		//	scopeAxiomMap.clear();
 		for (LocaleListener localeListener: localeListenerList)
 			localeListener.onScopeChange(scope);
 	}
@@ -467,55 +471,6 @@ public class ParserAssembler implements LocaleListener
 		axiomListenerList.add(axiomListener);
 	}
 
-    /**
-     * Add all axioms in a collection to this object.
-     * Intended only for use in testing.
-     * @param keyList List of axiom names
-     * @param axiomCollection The axiom collection
-     */
-    public void addAxiomCollection(List<String> keyList, AxiomCollection axiomCollection)
-    {
-    	for (String key: keyList)
-    	{
-    		AxiomSource axiomSource = axiomCollection.getAxiomSource(key);
-    		Iterator<Axiom> iterator = axiomSource.iterator();
-    		Axiom axiom = null;
-    		List<Axiom> axiomList = new ArrayList<Axiom>();
-    		while (iterator.hasNext())
-    		{
-    			axiom = iterator.next();
-    			axiomList.add(axiom);
-    		}
-    		axiomListMap.put(key, axiomList);
-    		if ((axiom != null) && 
-    			(axiom.getTermCount() > 0) && 
-    			(!Term.ANONYMOUS.equals(axiom.getTermByIndex(0).getName())))
-    		{
-    			List<String> termNameList = new ArrayList<String>();
-    			for (int i = 0; i < axiom.getTermCount(); ++i)
-    			{
-    				String name = axiom.getTermByIndex(i).getName();
-    				if (Term.ANONYMOUS.equals(name))
-    					break;
-    				termNameList.add(name);
-    			}
-    			axiomTermNameMap.put(key, termNameList);
-    		}
-    		
-    	}
-    }
-
-    /**
-     * Add templates to this object.
-     * Intended only for use in testing.
-     * @param templateList List of templates
-     */
-    public void addTemplateList(List<Template> templateList)
-    {
-    	for (Template template: templateList)
-    		templateMap.put(template.getName(), template);
-    }
-    
 	/**
 	 * Returns the given name prepended with the scope name and a dot 
 	 * unless this ParserAssembler is enclosing the Global scope.

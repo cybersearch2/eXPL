@@ -171,17 +171,19 @@ public class QueryProgram
 	{
 		Scope scope = queryParams.getScope();
 		ScopeContext scopeContext = scope.getContext();
-		Map<String, Iterable<?>> listMap = null;
+		Map<String, Iterable<Axiom>> listMap = null;
+		Map<String, Axiom> axiomMap = null;
 		try
 		{
 			executeQueryParams(queryParams);
 			listMap = scope.getListMap();
+			axiomMap = scope.getAxiomMap();
 		}
 		finally
 		{
 			scopeContext.resetScope();
 		}
-		return new Result(listMap);
+		return new Result(listMap, axiomMap);
 	}
 
 	/**

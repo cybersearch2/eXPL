@@ -144,6 +144,12 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 		this.axiomTermNameList = axiomTermNameList;
 	}
 
+    @Override
+    public Class<?> getItemClass()
+    {
+        return Axiom.class;
+    }
+
     /**
 	 * @see java.lang.Object#toString()
 	 */

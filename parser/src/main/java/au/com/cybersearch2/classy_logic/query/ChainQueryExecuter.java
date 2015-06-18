@@ -95,15 +95,14 @@ public class ChainQueryExecuter
 		Set<String> keys = axiomListenerMap.keySet();
 		for (String key: keys)
 		{
-        	AxiomSource axiomSource = scope.getAxiomSource(key);
-        	if (axiomSource != null)
+        	AxiomSource axiomSource = scope.findAxiomSource(key);
+        	// TODO - Log warning if axiom source not found
+        	if (axiomSource !=null)
         	{
-	        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
-        		for (AxiomListener axiomListener: axiomListenerList)
-        			axiomListener.onNextAxiom(axiomSource.iterator().next());
+        	    List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
+        	    for (AxiomListener axiomListener: axiomListenerList)
+        	        axiomListener.onNextAxiom(axiomSource.iterator().next());
         	}
-        	else 
-    			throw new QueryExecutionException("No axiom source found for axiom \"" + key + "\"");
 		}
 		// Delete the axiom listener map as binding is complete
 		axiomListenerMap = null;

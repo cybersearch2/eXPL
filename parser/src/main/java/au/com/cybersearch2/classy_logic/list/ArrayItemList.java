@@ -289,4 +289,10 @@ public class ArrayItemList<T> implements ItemList<T>
 	{
 		valueList.clear();
 	}
+
+    @Override
+    public Class<?> getItemClass()
+    {
+        return clazz;
+    }
 }

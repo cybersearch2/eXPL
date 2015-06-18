@@ -23,8 +23,8 @@ import java.util.Iterator;
 import org.junit.Before;
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.tutorial14.HighCitiesSorted;
 
 /**
@@ -44,7 +44,7 @@ public class HighCitiesSortedTest
     public void test_HighCitiesSorted() throws SQLException, ParseException
     {
         HighCitiesSorted highCitiesSorted = new HighCitiesSorted();
-        Iterator<AxiomTermList> iterator = highCitiesSorted.getHighCities();
+        Iterator<Axiom> iterator = highCitiesSorted.getHighCities();
         assertThat(iterator.next().toString()).isEqualTo("high_city(name = denver, altitude = 5280)");
         assertThat(iterator.next().toString()).isEqualTo("high_city(name = flagstaff, altitude = 6970)");
         assertThat(iterator.next().toString()).isEqualTo("high_city(name = addis ababa, altitude = 8000)");

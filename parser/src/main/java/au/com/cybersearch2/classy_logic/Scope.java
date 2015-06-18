@@ -261,9 +261,9 @@ public class Scope
 	 * Returns map which provides access to result lists as iterables
 	 * @return Container which maps fully qualified name to list iterable
 	 */
-	public Map<String, Iterable<?>> getListMap() 
+	public Map<String, Iterable<Axiom>> getListMap() 
 	{
-		Map<String, Iterable<?>> listMap = new HashMap<String, Iterable<?>>();
+		Map<String, Iterable<Axiom>> listMap = new HashMap<String, Iterable<Axiom>>();
         if (globalScope != null)
         {
         	globalScope.getParserAssembler().getOperandMap().copyLists("", listMap);
@@ -273,6 +273,19 @@ public class Scope
     		parserAssembler.getOperandMap().copyLists("", listMap);
 		return listMap;
 	}
+
+    public Map<String, Axiom> getAxiomMap()
+    {
+        Map<String, Axiom> axiomMap = new HashMap<String, Axiom>();
+        if (globalScope != null)
+        {
+            globalScope.getParserAssembler().getOperandMap().copyAxioms("", axiomMap);
+            parserAssembler.getOperandMap().copyAxioms(name, axiomMap);
+        }
+        else
+            parserAssembler.getOperandMap().copyAxioms("", axiomMap);
+        return axiomMap;
+    }
 
 	/**
 	 * Returns Local specified by properties and language code
@@ -371,6 +384,7 @@ public class Scope
         if (globalScope != null)
         	globalScope.getParserAssembler().onScopeChange(this);
 	}
+
 
 
 

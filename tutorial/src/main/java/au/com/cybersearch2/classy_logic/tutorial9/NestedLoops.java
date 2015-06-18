@@ -15,11 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
-import java.util.Iterator;
-
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
@@ -62,17 +61,8 @@ public class NestedLoops
 	{
 		QueryProgram queryProgram = new QueryProgram(INSERT_SORT);
 		Result result = queryProgram.executeQuery("sort_axiom");
-		Iterator<Object> axiomIterator = result.getIterator("sorted");
-		boolean firstTime = true;
-		while (axiomIterator.hasNext())
-		{
-			if (firstTime)
-				firstTime = false;
-			else
-				System.out.print(", ");
-			System.out.print(axiomIterator.next().toString());
-		}
-		System.out.println();
+		Axiom axiom = result.getAxiom("sorted");
+		System.out.println(axiom.toString());
 	}
 
 	public static void main(String[] args)

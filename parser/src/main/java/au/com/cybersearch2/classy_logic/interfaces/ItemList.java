@@ -69,12 +69,18 @@ public interface ItemList<T> extends Iterable<T>
     ItemListVariable<T> newVariableInstance(Operand expression, String suffix);
 
     /**
-     * Returns item referenced by indesx
+     * Returns item referenced by index
      * @param index int
      * @return Object of generic type T 
      */
 	T getItem(int index);
 
+	/**
+	 * Returns class of items in this container
+	 * @return
+	 */
+	Class<?> getItemClass();
+	
 	/**
 	 * Returns true if index is valid and item exists reference by that index
 	 * @param index int
@@ -82,7 +88,14 @@ public interface ItemList<T> extends Iterable<T>
 	 */
     boolean hasItem(int index);
 
-	Iterable<?> getIterable();
+    /**
+     * Returns implementation of Iterable interface
+     * @return Iterable of generice type T
+     */
+	Iterable<T> getIterable();
 
+	/**
+	 * Clear item list
+	 */
 	void clear();
 }

@@ -99,6 +99,11 @@
           <scope>test</scope>
         </dependency>
         <dependency>
+          <groupId>org.easytesting</groupId>
+          <artifactId>fest-util</artifactId>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
           <groupId>com.j256.ormlite</groupId>
           <artifactId>ormlite-jdbc</artifactId>
           <version>${ormlite.version}</version>
@@ -107,7 +112,6 @@
         <dependency>
           <groupId>com.squareup.dagger</groupId>
           <artifactId>dagger-compiler</artifactId>
-          <version>${dagger.version}</version>
           <optional>true</optional>
         </dependency>
         <!-- Exclude Support Library as already have android.support:compatibility-v4 above -->

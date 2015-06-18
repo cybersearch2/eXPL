@@ -83,6 +83,15 @@ public class AxiomTermList implements ItemList<Object>
 	}
 
 	/**
+	 * Returns backing axiom
+	 * @return Axiom object
+	 */
+	public Axiom getAxiom()
+	{
+	    return axiom;
+	}
+	
+	/**
 	 * @return the axiomTermNameList
 	 */
 	public List<String> getAxiomTermNameList() 
@@ -273,4 +282,11 @@ public class AxiomTermList implements ItemList<Object>
 	{
 		axiom = EMPTY_AXIOM;
 	}
+
+    @Override
+    public Class<?> getItemClass()
+    {
+        return Term.class;
+    }
+
 }

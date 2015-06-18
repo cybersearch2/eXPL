@@ -4,11 +4,13 @@
 package au.com.cybersearch2.classy_logic.compile;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
@@ -401,21 +403,89 @@ public class OperandMap
 	}
 
 	/**
-	 * Copy result lists as iterables to supplied container
+	 * Copy result axiom lists as iterables to supplied container
 	 * @param prefix Scope name or empty if global scope
 	 * @param listMap2 Container to receive lists
 	 */
-	public void copyLists(String prefix, Map<String, Iterable<?>> listMap2) 
+	public void copyLists(String prefix, Map<String, Iterable<Axiom>> listMap2) 
 	{
 		if (prefix == null)
 			prefix = "";
 		for (Entry<String, ItemList<?>> entry: listMap.entrySet())
 		{
-		    // Use fully qualified key to avoid name collisions
-			String key = prefix.isEmpty() ? entry.getKey() : (prefix + "." + entry.getKey());
-			listMap2.put(key, entry.getValue().getIterable());
+		    ItemList<?> itemList = entry.getValue();
+		    if (itemList.getItemClass().equals(Axiom.class))
+		    {
+		        // Use fully qualified key to avoid name collisions
+		        String key = prefix.isEmpty() ? entry.getKey() : (prefix + "." + entry.getKey());
+		        AxiomList axiomList = (AxiomList) itemList;
+		        final Iterable<AxiomTermList> axiomTermListIterble = axiomList.getIterable(); 
+		        Iterable<Axiom> axiomIterable = new Iterable<Axiom>(){
+
+                    @Override
+                    public Iterator<Axiom> iterator()
+                    {
+                        return new Iterator<Axiom>(){
+                            Iterator<AxiomTermList> axiomTermListIterator = axiomTermListIterble.iterator();
+                            @Override
+                            public boolean hasNext()
+                            {
+                                return axiomTermListIterator.hasNext();
+                            }
+
+                            @Override
+                            public Axiom next()
+                            {
+                                return axiomTermListIterator.next().getAxiom();
+                            }
+
+                            @Override
+                            public void remove()
+                            {
+                            }};
+                    }};
+		        listMap2.put(key, axiomIterable);
+		    }
 		}
 	}
+
+    /**
+     * Copy result axioms to supplied container
+     * @param prefix Scope name or empty if global scope
+     * @param listMap2 Container to receive lists
+     */
+    public void copyAxioms(String prefix, Map<String, Axiom> axiomMap)
+    {
+        if (prefix == null)
+            prefix = "";
+        for (Entry<String, ItemList<?>> entry: listMap.entrySet())
+        {
+            ItemList<?> itemList = entry.getValue();
+            // Create deep copy in case item list is cleared
+            Axiom axiom = null;
+            if (itemList.getItemClass().equals(Term.class))
+            {   // AxiomTermList contains backing axiom
+                AxiomTermList axiomTermList = (AxiomTermList)itemList;
+                axiom = new Axiom(entry.getKey());
+                Axiom source = axiomTermList.getAxiom();
+                for (int i = 0; i < source.getTermCount(); i++)
+                    axiom.addTerm(source.getTermByIndex(i));
+            }
+            else if (!itemList.getItemClass().equals(Axiom.class))
+            {   // Regular ItemList contains objects which are packed into axiom to return
+                axiom = new Axiom(entry.getKey());
+                Iterator<?> iterator = itemList.getIterable().iterator();
+                while (iterator.hasNext())
+                    axiom.addTerm(new Parameter(Term.ANONYMOUS, iterator.next()));
+            }
+            if (axiom != null)
+            {
+                // Use fully qualified key to avoid name collisions
+                String key = prefix.isEmpty() ? entry.getKey() : (prefix + "." + entry.getKey());
+                axiomMap.put(key, axiom);
+            }
+        }
+    }
 
 	/**
 	 * Clear result lists
@@ -425,5 +495,6 @@ public class OperandMap
 		for (ItemList<?> itemList: listMap.values())
 			itemList.clear();
 	}
+
 
 }

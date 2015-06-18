@@ -48,7 +48,6 @@ import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
@@ -342,7 +341,7 @@ public class ScopeQueryParserTest
         //      return true;
         //  }});
         Result result = queryProgram.executeQuery("german.group_query");
-        Iterator<AxiomTermList> iterator = result.getIterator("german.city_group_list");
+        Iterator<Axiom> iterator = result.getIterator("german.city_group_list");
         File worldCurrencyList = new File("src/test/resources", "cities-group.lst");
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(worldCurrencyList), "UTF-8"));
         while(iterator.hasNext())

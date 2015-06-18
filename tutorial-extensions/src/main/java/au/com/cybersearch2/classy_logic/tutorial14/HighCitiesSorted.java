@@ -25,7 +25,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
@@ -87,9 +87,9 @@ public class HighCitiesSorted
 	 * high_city(name = flagstaff, altitude = 6970)<br/>
 	 * high_city(name = addis ababa, altitude = 8000)<br/>
 	 * high_city(name = leadville, altitude = 10200)<br/>
-	 * @return AxiomTermList iterator
+	 * @return Axiom iterator
 	 */
-    public Iterator<AxiomTermList> getHighCities()
+    public Iterator<Axiom> getHighCities()
 	{
 		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities");
@@ -101,7 +101,7 @@ public class HighCitiesSorted
 		try 
 		{
 	        HighCitiesSorted highCities = new HighCitiesSorted();
-			Iterator<AxiomTermList> iterator = highCities.getHighCities();
+			Iterator<Axiom> iterator = highCities.getHighCities();
 	        while(iterator.hasNext())
 	            System.out.println(iterator.next().toString());
 		} 

@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.tutorial12.SingleCurrency;
 import au.com.cybersearch2.classy_logic.tutorial12.MultiCurrency;
 
@@ -49,7 +49,7 @@ public class CurrencyTest
     public void test_MultiCurrency() throws Exception
     {
         MultiCurrency multiCurrency = new MultiCurrency();
-        Iterator<AxiomTermList> iterator = multiCurrency.getFormatedAmounts();
+        Iterator<Axiom> iterator = multiCurrency.getFormatedAmounts();
         File testFile = new File("src/main/resources", "multi-currency-list.txt");
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         while(iterator.hasNext())

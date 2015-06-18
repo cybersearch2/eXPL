@@ -356,4 +356,13 @@ public class Template extends Structure
 	{
 		this.next = next;
 	}
+
+	/**
+	 * Returns properties
+	 * @return Map container or null if no properties
+	 */
+    public Map<String, Object> getProperties()
+    {
+        return initData;
+    }
 }

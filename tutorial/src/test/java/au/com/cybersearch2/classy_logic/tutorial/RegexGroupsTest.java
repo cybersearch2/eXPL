@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.tutorial11.RegexGroups;
 
 
@@ -41,7 +41,7 @@ public class RegexGroupsTest
     public void test_RegexGroups() throws Exception
     {
         RegexGroups regexGroups = new RegexGroups();
-        Iterator<AxiomTermList> iterator = regexGroups.getRegexGroups();
+        Iterator<Axiom> iterator = regexGroups.getRegexGroups();
         File testFile = new File("src/main/resources", "in-words-list.txt");
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         while(iterator.hasNext())

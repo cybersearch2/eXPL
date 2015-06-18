@@ -31,8 +31,6 @@ public class QueryParams
 	protected Scope scope;
 	/** Solution handler (optional). Do-nothing handler applied if none supplied */
 	protected SolutionHandler solutionHandler;
-	/** List of optional axioms to add to global scope */
-	protected List<Axiom> scopeAxiomList;
 
 
 	/**
@@ -67,10 +65,6 @@ public class QueryParams
 	{
 	    // Notify locale listeners of change of scope
 		scope.notifyChange();
-		// Set scope axioms in global scope
-		if (scopeAxiomList != null)
-			for (Axiom axiom: scopeAxiomList)
-				scope.getGlobalScope().getParserAssembler().addScopeAxiom(axiom); 
 		// Collect query axiom sources and templates
 		templateList = new ArrayList<Template>();
 		axiomEnsemble = new AxiomMapCollection();
@@ -166,9 +160,8 @@ public class QueryParams
 	public Axiom addAxiom(String name, Object... params)
 	{
 		Axiom axiom = new Axiom(name, params);
-		if (scopeAxiomList == null)
-			scopeAxiomList = new ArrayList<Axiom>();
-		scopeAxiomList.add(axiom);
+        // Set scope axiom in global scope
+        scope.getGlobalScope().getParserAssembler().addScopeAxiom(axiom); 
 		return axiom;
 	}
 }

@@ -25,7 +25,7 @@ import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
 
@@ -84,9 +84,9 @@ public class RegexGroups
         word_def(word = incentive, part = noun, def = a positive motivational influence)<br/>
         word_def(word = incidence, part = noun, def = the relative frequency of occurrence of something)<br/><br/>
       To view full results, go to src/main/resources/"in-words-list.txt  
-     * @return AxiomTermList iterator containing the final "in" words solution
+     * @return Axiom iterator containing the final "in" words solution
      */
-	public Iterator<AxiomTermList> getRegexGroups()
+	public Iterator<Axiom> getRegexGroups()
 	{
 		// Expected 54 results can be found in /src/test/resources/in_words.lst. 
 		// Here is the first solution: 
@@ -105,7 +105,7 @@ public class RegexGroups
 		try 
 		{
 	        RegexGroups regexGroups = new RegexGroups();
-	        Iterator<AxiomTermList> iterator = regexGroups.getRegexGroups();
+	        Iterator<Axiom> iterator = regexGroups.getRegexGroups();
 	        while(iterator.hasNext())
 	            System.out.println(iterator.next().toString());
 		} 

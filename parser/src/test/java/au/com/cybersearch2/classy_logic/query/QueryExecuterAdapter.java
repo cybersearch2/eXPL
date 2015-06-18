@@ -16,7 +16,9 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -24,6 +26,7 @@ import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 
@@ -53,8 +56,8 @@ public class QueryExecuterAdapter
 			KeyName keyName = new KeyName(key, template.getName());
 			querySpec.addKeyName(keyName);
 		}
-		parserAssembler.addAxiomCollection(keyList, axiomCollection);
-		parserAssembler.addTemplateList(templateList);
+		addAxiomCollection(parserAssembler, keyList, axiomCollection);
+		addTemplateList(parserAssembler, templateList);
 	}
 
 	public QueryExecuterAdapter(AxiomSource axiomSource, List<Template> templateList) 
@@ -103,4 +106,57 @@ public class QueryExecuterAdapter
 				return false;
 			}};
 	}
+
+    /**
+     * Add all axioms in a collection to a ParserAssembler object.
+     * @param parserAssembler The destination
+     * @param keyList List of axiom names
+     * @param axiomCollection The axiom collection
+     */
+    public void addAxiomCollection(ParserAssembler parserAssembler, List<String> keyList, AxiomCollection axiomCollection)
+    {
+        for (String key: keyList)
+        {
+            AxiomSource axiomSource = axiomCollection.getAxiomSource(key);
+            Iterator<Axiom> iterator = axiomSource.iterator();
+            boolean firstTime = true;
+            while (iterator.hasNext())
+            {
+                Axiom axiom = iterator.next();
+                String axiomName = axiom.getName();
+                if (firstTime)
+                {
+                    firstTime = false;
+                    parserAssembler.createAxiom(axiomName);
+                }
+                for (int i = 0; i < axiom.getTermCount(); i++)
+                    parserAssembler.addAxiom(axiomName, axiom.getTermByIndex(i));
+                parserAssembler.saveAxiom(axiomName);
+            }
+        }
+    }
+    
+    /**
+     * Add templates to  a ParserAssembler object.
+     * @param parserAssembler The destination
+     * @param templateList List of templates
+     */
+    public void addTemplateList(ParserAssembler parserAssembler, List<Template> templateList)
+    {
+        for (Template template: templateList)
+        {
+            String templateName = template.getName();
+            String templateKey = template.getKey();
+            Map<String, Object> props = template.getProperties();
+            parserAssembler.createTemplate(templateName);
+            parserAssembler.getTemplate(templateName).setKey(templateKey);
+            if (props != null)
+                parserAssembler.addTemplate(templateName, props);
+            Template newTemplate = parserAssembler.getTemplate(templateName);
+            for (int i = 0; i < template.getTermCount(); i++)
+                newTemplate.addTerm(template.getTermByIndex(i));
+        }
+    }
+    
+
 }
