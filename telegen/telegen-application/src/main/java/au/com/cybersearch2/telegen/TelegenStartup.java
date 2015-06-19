@@ -44,7 +44,7 @@ public class TelegenStartup
    
     public static final String TAG = "TelegenStartup";
     /** Application  Dependency Injection configuration */
-    protected TelegenApplicationModule classyFyApplicationModule;
+    protected TelegenApplicationModule telegenApplicationModule;
     /** Tracks progress of start up and signals completion */
     protected WorkTracker applicationSetup;
     /** Persistence system configured by persistence.xml contains one or more Persistence Units */
@@ -69,8 +69,8 @@ public class TelegenStartup
     	// Clear out ORMLite internal caches.
         DaoManager.clearCache();
         // Create application Object Graph for Dependency Injection
-        classyFyApplicationModule = new TelegenApplicationModule();
-        DI dependencyInjection = new DI(classyFyApplicationModule, new ContextModule(context));
+        telegenApplicationModule = new TelegenApplicationModule();
+        DI dependencyInjection = new DI(telegenApplicationModule, new ContextModule(context));
         dependencyInjection.validate();
         persistenceContext = new PersistenceContext();
         // Inject threadHelper
@@ -113,33 +113,20 @@ public class TelegenStartup
     }
 
     /**
-     * Returns read-only application WorkTracker
-     * @return Executable
-     */
-    Executable getApplicationSetup()
-    {
-        return applicationSetup;
-    }
-
-    /**
      * Wait for start up to complete
      * @return WorkStatus indicating final status of finished or failed
      */
     public WorkStatus waitForApplicationSetup()
     {
-        if ((applicationSetup.getStatus() != WorkStatus.FINISHED) &&
-             (applicationSetup.getStatus() != WorkStatus.FAILED))
-            synchronized(applicationSetup)
-            {
-                try
-                {
-                    applicationSetup.wait();
-                }
-                catch (InterruptedException e)
-                {
-                }
-            }
-        return applicationSetup.getStatus();
+        try
+        {
+            return applicationSetup.waitForTask();
+        }
+        catch (InterruptedException e)
+        {
+            Log.e(TAG, "Telegen interupted on startup", e);
+        }
+        return WorkStatus.FAILED;
     }
     
 }

@@ -1,19 +1,19 @@
 package au.com.cybersearch2.telegen;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import javax.inject.Inject;
 
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.view.Gravity;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
+import android.widget.Button;
 import android.widget.TextView;
+import android.view.View.OnClickListener;
+import au.com.cybersearch2.classyapp.ApplicationContext;
+import au.com.cybersearch2.classytask.BackgroundTask;
 
 
 public class DisplayDetailsDialog extends DialogFragment 
@@ -24,12 +24,14 @@ public class DisplayDetailsDialog extends DialogFragment
     public static final CharSequence DIALOG_TITLE = "Troubleshooting";
     
     protected Dialog dialog;
+    @Inject
+    TelegenLogic telegenLogic;
   
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) 
     {
     
-         View view = inflater.inflate(R.layout.display_details, container, false); 
+         final View view = inflater.inflate(R.layout.display_details, container, false); 
 
          String title = getArguments().getString(KEY_TITLE);
          String context = getArguments().getString(KEY_CONTEXT);
@@ -49,9 +51,32 @@ public class DisplayDetailsDialog extends DialogFragment
              TextView tv3 = (TextView)view.findViewById(R.id.detail_content);
              tv3.setText(content);
         }
-         //LinearLayout propertiesLayout = (LinearLayout) view.findViewById(R.id.node_properties);
-         //Node node = (Node) getArguments().get(MainActivity.NODE_KEY);
-         //createDynamicLayout(propertiesLayout, node.getProperties());
+        final ApplicationContext applicationContext = new ApplicationContext();
+        // Watch for button clicks.
+        Button button = (Button)view.findViewById(R.id.button_next);
+        button.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                final BackgroundTask responder =  new BackgroundTask(applicationContext.getContext())
+                {
+                    String check;
+                    
+                    @Override
+                    public Boolean loadInBackground()
+                    {
+                        check = telegenLogic.getNextCheck();
+                        return Boolean.TRUE;
+                     }
+
+                    @Override
+                    public void onLoadComplete(Loader<Boolean> loader, Boolean success)
+                    {
+                        TextView tv3 = (TextView)view.findViewById(R.id.detail_content);
+                        tv3.setText(check);
+                    }
+                };
+                responder.onStartLoading();
+            }
+         });
          return view;
      }
 
@@ -67,65 +92,5 @@ public class DisplayDetailsDialog extends DialogFragment
     public Dialog getDialog()
     {
         return dialog;
-    }
-    
-    public void createDynamicLayout(LinearLayout propertiesLayout, Map<String,Object> valueMap)
-    {
-        /*
-        FieldDescriptor descriptionField = new FieldDescriptor();
-        descriptionField.setOrder(1);
-        descriptionField.setName("description");
-        descriptionField.setTitle("Description");
-        FieldDescriptor createdField = new FieldDescriptor();
-        createdField.setOrder(2);
-        createdField.setName("created");
-        createdField.setTitle("Created");
-        FieldDescriptor creatorField = new FieldDescriptor();
-        creatorField.setOrder(3);
-        creatorField.setName("creator");
-        creatorField.setTitle("Creator");
-        FieldDescriptor modifiedField = new FieldDescriptor();
-        modifiedField.setOrder(4);
-        modifiedField.setName("modified");
-        modifiedField.setTitle("Modified");
-        FieldDescriptor modifier = new FieldDescriptor();
-        modifier.setOrder(5);
-        modifier.setName("modifier");
-        modifier.setTitle("Modifier");
-        FieldDescriptor identifierField = new FieldDescriptor();
-        identifierField.setOrder(6);
-        identifierField.setName("identifier");
-        identifierField.setTitle("Identifier");
-        Set<FieldDescriptor> fieldSet = new TreeSet<FieldDescriptor>();
-        fieldSet.add(descriptionField);
-        fieldSet.add(createdField);
-        fieldSet.add(creatorField);
-        fieldSet.add(modifiedField);
-        fieldSet.add(modifier);
-        fieldSet.add(identifierField);
-        LinearLayout dynamicLayout = new LinearLayout(getActivity());
-        dynamicLayout.setOrientation(LinearLayout.VERTICAL);
-        int layoutHeight = LinearLayout.LayoutParams.MATCH_PARENT;
-        int layoutWidth = LinearLayout.LayoutParams.MATCH_PARENT;
-        for (FieldDescriptor descriptor: fieldSet)
-        {
-            Object value = valueMap.get(descriptor.getName());
-            if (value == null)
-                continue;
-            TextView titleView = new TextView(getActivity());
-            titleView.setText(descriptor.getTitle());
-            TextView valueView = new TextView(getActivity());
-            valueView.setText(value.toString());
-            LinearLayout fieldLayout = new LinearLayout(getActivity());
-            fieldLayout.setOrientation(LinearLayout.HORIZONTAL);
-            LayoutParams titleLayoutParms = new LinearLayout.LayoutParams(layoutWidth, layoutHeight);
-            titleLayoutParms.gravity = Gravity.LEFT;
-            fieldLayout.addView(titleView, titleLayoutParms);
-            LayoutParams valueLayoutParms = new LinearLayout.LayoutParams(layoutWidth, layoutHeight);
-            valueLayoutParms.gravity = Gravity.RIGHT;
-            fieldLayout.addView(valueView, valueLayoutParms);
-            propertiesLayout.addView(fieldLayout);
-        }
-        */
     }
 }

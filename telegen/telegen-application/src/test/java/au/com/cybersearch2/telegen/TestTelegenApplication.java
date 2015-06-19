@@ -23,17 +23,17 @@ import org.robolectric.TestLifecycleApplication;
 import android.app.Application;
 import au.com.cybersearch2.classyapp.ContextModule;
 import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classytask.Executable;
 import au.com.cybersearch2.classytask.WorkStatus;
+import au.com.cybersearch2.telegen.interfaces.TelegenLauncher;
 
 /**
  * TestTelegenApplication
  * @author Andrew Bowley
  * 14/04/2014
  */
-public class TestTelegenApplication extends Application implements TestLifecycleApplication
+public class TestTelegenApplication extends Application implements TestLifecycleApplication, TelegenLauncher
 {
-    private static TelegenApplicationModule classyFyApplicationModule;
+    private static TelegenApplicationModule telegenApplicationModule;
     public static final String TAG = "TestTelegenApplication";
     public static final String PU_NAME = "telegen";
     private static TestTelegenApplication singleton;
@@ -76,31 +76,27 @@ public class TestTelegenApplication extends Application implements TestLifecycle
     
     public static TelegenApplicationModule getTestApplicationModule()
     {
-        return classyFyApplicationModule;
+        return telegenApplicationModule;
     }
 
     public void init(Object... extraModules)
     {
-        classyFyApplicationModule = new TelegenApplicationModule();
+        telegenApplicationModule = new TelegenApplicationModule();
         ContextModule contextModule = new ContextModule(this);
         Object[] initModules = new Object[extraModules.length + 1];
         initModules[0] = contextModule;
         if (extraModules.length > 0)
             for (int i = 0; i < extraModules.length; i++)
                 initModules[i + 1] = extraModules[i];
-        new DI(classyFyApplicationModule, initModules);
+        new DI(telegenApplicationModule, initModules);
     }
     
     public void startup()
     {
         startup.start(this);
     }
-
-    Executable getApplicationSetup()
-    {
-        return startup.getApplicationSetup();
-    }
-
+    
+    @Override
     public WorkStatus waitForApplicationSetup()
     {
         return startup.waitForApplicationSetup();

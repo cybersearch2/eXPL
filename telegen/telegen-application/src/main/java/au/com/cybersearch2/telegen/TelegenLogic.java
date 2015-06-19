@@ -111,23 +111,43 @@ public class TelegenLogic
         return result.getIterator("checks_list");
     }
 */
-    protected String getFirstCheck(String issue)
+    public String getFirstCheck(String issue)
     {
         // Create QueryParams object for Global scope and query "first_check_query"
         QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "first_check_query");
         queryParams.addAxiom("issue_param", issue);
-        final String[] checkNameHolder = new String[1];
+        final String[] checkHolder = new String[1];
         // Add a solution handler to capture the query result
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
                 currentCheck = solution.getString("first_check_item", "name");
-                checkNameHolder[0] = solution.getString("first_check_item", "instruction");
+                checkHolder[0] = solution.getString("first_check_item", "instruction");
                 // End query
                 return false;
             }});
         queryProgram.executeQuery(queryParams);
-        return checkNameHolder[0];
+        return checkHolder[0];
     }
+
+    public String getNextCheck()
+    {
+        // Create QueryParams object for Global scope and query "next_check_query"
+        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "next_check_query");
+        queryParams.addAxiom("check_param", currentCheck);
+        final String[] checkHolder = new String[1];
+        // Add a solution handler to capture the query result
+        queryParams.setSolutionHandler(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                currentCheck = solution.getString("next_check_item", "name");
+                checkHolder[0] = solution.getString("next_check_item", "instruction");
+                // End query
+                return false;
+            }});
+        queryProgram.executeQuery(queryParams);
+        return checkHolder[0];
+    }
+
 
 }

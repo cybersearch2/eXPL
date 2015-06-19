@@ -42,11 +42,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.SystemClock;
 import android.support.v4.content.AsyncTaskLoader;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import au.com.cybersearch2.classyjpa.AndroidPersistenceEnvironment;
 import au.com.cybersearch2.classywidget.PropertiesListAdapter.Value;
+import au.com.cybersearch2.telegen.MainActivity.MainStatus;
 import au.com.cybersearch2.telegen.entity.TestChecks;
 import au.com.cybersearch2.telegen.entity.TestIssues;
 
@@ -114,7 +114,9 @@ public class MainActivityTest
     @Before
     public void setUp() 
     {
-        TestTelegenApplication.getTestInstance().init(); // For DI
+        TestTelegenApplication testTelegenApplication = TestTelegenApplication.getTestInstance();
+        testTelegenApplication.startup();// Initialize database
+        testTelegenApplication.waitForApplicationSetup();
         Robolectric.getForegroundThreadScheduler().pause();
         ShadowApplication.getInstance().getBackgroundScheduler().pause();
     }
@@ -137,21 +139,30 @@ public class MainActivityTest
     {
         controller = Robolectric.buildActivity(MainActivity.class);
         mainActivity = controller.create().start().visible().get();
-        ShadowApplication.getInstance().getBackgroundScheduler().runOneTask();
-        AndroidPersistenceEnvironment androidPersistenceEnvironment = mainActivity.androidPersistenceEnvironment;
-        assertThat(mainActivity.telegenLogic.queryProgram).isNotNull();
-        assertThat(mainActivity.fieldList).isNotNull();
+        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.CREATE);
+        
+        ShadowApplication.getInstance().getBackgroundScheduler().advanceToLastPostedRunnable();
+        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.INIT);
+        
+        assertThat(mainActivity.telegenLogic).isNotNull();
+        Robolectric.getForegroundThreadScheduler().advanceToLastPostedRunnable();
+        ShadowApplication.getInstance().getBackgroundScheduler().advanceToLastPostedRunnable();
+        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.START);
+        
+        Robolectric.flushForegroundScheduler();
+        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.ISSUES);
+        
+        assertThat(mainActivity.adapter.getCount()).isEqualTo(TestIssues.ISSUE_DATA.length);
         int index = 0;
-        for (Value value: mainActivity.fieldList)
+        for (int i = 0; i < TestIssues.ISSUE_DATA.length; i++)
         {
+            Value value = (Value)mainActivity.adapter.getItem(i);
             String[] issueItem = TestIssues.ISSUE_DATA[index++];
             assertThat(value.getName()).isEqualTo(issueItem[0]);
             assertThat(value.getValue()).isEqualTo(issueItem[1]);
         }
-        Robolectric.flushForegroundScheduler();
-        assertThat(mainActivity.adapter.getCount()).isEqualTo(index);
         assertThat(mainActivity.displayListFragment.isVisible()).isTrue();
-        assertThat(mainActivity.displayListFragment.getListView().getCount()).isEqualTo(index);
+        assertThat(mainActivity.displayListFragment.getListView().getCount()).isEqualTo(TestIssues.ISSUE_DATA.length);
         OnItemClickListener onItemClickListener = mainActivity.displayListFragment.getListView().getOnItemClickListener();
         ShadowApplication.getInstance().getBackgroundScheduler().advanceToLastPostedRunnable();
         Robolectric.getForegroundThreadScheduler().pause();
@@ -160,6 +171,8 @@ public class MainActivityTest
         ShadowApplication.getInstance().getBackgroundScheduler().runOneTask();
         assertThat(mainActivity.telegenLogic.currentCheck).isEqualTo(TestChecks.CHECK_DATA[0][0]);
         Robolectric.flushForegroundScheduler();
+        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.CHECKS);
+        
         ShadowDialog dialog = Shadows.shadowOf(ShadowDialog.getLatestDialog());
         assertThat(dialog.getTitle()).isEqualTo(DisplayDetailsDialog.DIALOG_TITLE);
         assertThat(dialog.isCancelableOnTouchOutside()).isTrue();
@@ -169,6 +182,7 @@ public class MainActivityTest
         assertThat(tv2.getText()).isEqualTo(TestIssues.ISSUE_DATA[0][1]);
         TextView tv3 = (TextView) ShadowDialog.getLatestDialog().findViewById(R.id.detail_content);
         assertThat(tv3.getText()).isEqualTo(TestChecks.CHECK_DATA[0][1]);
+        AndroidPersistenceEnvironment androidPersistenceEnvironment = mainActivity.androidPersistenceEnvironment;
         assertThat(androidPersistenceEnvironment).isNotNull();
         SQLiteOpenHelper sqlLiteOpenHelper = androidPersistenceEnvironment.getSQLiteOpenHelper();
         assertThat(sqlLiteOpenHelper).isNotNull();
@@ -187,18 +201,4 @@ public class MainActivityTest
         }
     }
  
-    @Test
-    public void test_displayIssues()
-    {
-        Intent intent = getNewIntent();
-        intent.setAction(Intent.ACTION_MAIN);
-        controller = Robolectric.buildActivity(MainActivity.class).withIntent(intent);
-        mainActivity = (MainActivity) controller
-                .create()
-                .start()
-                .visible()
-                .get();
-        assertThat(mainActivity.displayListFragment.isVisible()).isTrue();
-        assertThat(mainActivity.displayListFragment.getListView().getCount()).isEqualTo(TestIssues.ISSUE_DATA.length);
-    }
 }

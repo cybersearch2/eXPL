@@ -33,10 +33,11 @@ import dagger.Provides;
  */
 @Module(injects = 
 { 
-    TelegenStartup.class , 
+    TelegenStartup.class,
     MainActivity.class,
     TelegenLogic.class,
-    ParserAssembler.ExternalAxiomSource.class
+    ParserAssembler.ExternalAxiomSource.class,
+    DisplayDetailsDialog.class,
 }, includes = TelegenEnvironmentModule.class)
 public class TelegenApplicationModule implements ApplicationModule
 {
@@ -51,4 +52,8 @@ public class TelegenApplicationModule implements ApplicationModule
         return new ProviderManager();
     }
     
+    @Provides @Singleton TelegenLogic provideTelegenLogic()
+    {
+        return new TelegenLogic();
+    }
 }

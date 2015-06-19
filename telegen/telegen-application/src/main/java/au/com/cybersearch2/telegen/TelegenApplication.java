@@ -17,10 +17,10 @@ package au.com.cybersearch2.telegen;
 
 import android.app.Application;
 import android.content.Context;
-import au.com.cybersearch2.classytask.Executable;
 import au.com.cybersearch2.classytask.WorkStatus;
+import au.com.cybersearch2.telegen.interfaces.TelegenLauncher;
 
-public class TelegenApplication extends Application
+public class TelegenApplication extends Application implements TelegenLauncher
 {
 
     public static final String PU_NAME = "telegen";
@@ -40,19 +40,14 @@ public class TelegenApplication extends Application
     {
         super.onCreate();
         init(this);
-     }
+    }
 
-    
     public void init(final Context context)
     {
         startup.start(context);
     }
 
-    Executable getApplicationSetup()
-    {
-        return startup.getApplicationSetup();
-    }
-
+    @Override
     public WorkStatus waitForApplicationSetup()
     {
         return startup.waitForApplicationSetup();

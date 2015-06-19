@@ -25,8 +25,14 @@
             android:layout_height="wrap_content" />
     <LinearLayout
         android:id="@+id/node_properties"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:padding="5dp" />
+        android:padding="5dp" >
+        <!-- NEXT - Regular sized button -->
+        <Button android:id="@+id/button_next"
+            android:text="@string/buttons_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>    
 </LinearLayout>
