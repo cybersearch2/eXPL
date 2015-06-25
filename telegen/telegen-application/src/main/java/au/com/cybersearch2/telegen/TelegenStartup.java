@@ -18,14 +18,11 @@ package au.com.cybersearch2.telegen;
 import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.util.Log;
 import au.com.cybersearch2.classyapp.ContextModule;
 import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
-import au.com.cybersearch2.classytask.Executable;
 import au.com.cybersearch2.classytask.ThreadHelper;
 import au.com.cybersearch2.classytask.WorkStatus;
 import au.com.cybersearch2.classytask.WorkTracker;
@@ -124,7 +121,7 @@ public class TelegenStartup
         }
         catch (InterruptedException e)
         {
-            Log.e(TAG, "Telegen interupted on startup", e);
+            Log.e(TAG, "Telegen interrupted on startup", e);
         }
         return WorkStatus.FAILED;
     }

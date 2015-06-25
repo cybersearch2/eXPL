@@ -20,6 +20,12 @@ import android.content.Context;
 import au.com.cybersearch2.classytask.WorkStatus;
 import au.com.cybersearch2.telegen.interfaces.TelegenLauncher;
 
+/**
+ * TelegenApplication
+ * Launches Telegen persistence 
+ * @author Andrew Bowley
+ * 19 Jun 2015
+ */
 public class TelegenApplication extends Application implements TelegenLauncher
 {
 

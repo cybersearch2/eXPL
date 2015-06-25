@@ -4,6 +4,8 @@ eXPL v1.0.9
 2. Import Tele-Genious application from Classy_apps to reverse project dependency
 3. Refactor parser Result class and dependent Scope and Operand classes so it delivers Axioms instead of iterables
 4. Move ParserAssembler addAxiomCollection() and addTemplateList() to test class QueryExecuterAdapter
+5. Fix QueryProgram so backup is performed after a calculation 
+6. Tele-Genious displays issues as a list and click issue brings up troubleshooting dialog
 ______________________________________________________________________________________________________________________
 eXPL v1.0.8
 

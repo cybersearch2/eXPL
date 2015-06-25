@@ -266,7 +266,10 @@ public class QueryProgram
 				break;
 		}
 		// Reset all query templates so they can be recycled
-		headQuery.reset();
+		if (isCalculation)
+		    headQuery.backupToStart();
+		else
+		    headQuery.reset();
 	}
 	
 	/**

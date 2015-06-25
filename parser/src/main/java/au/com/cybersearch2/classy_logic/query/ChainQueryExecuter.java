@@ -257,7 +257,7 @@ public class ChainQueryExecuter
 	/**
 	 * Backup to start state
 	 */
-	protected void backupToStart()
+	public void backupToStart()
 	{
 		if (headChainQuery != null)
 		{

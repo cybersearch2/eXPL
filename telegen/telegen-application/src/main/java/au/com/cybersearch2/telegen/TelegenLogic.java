@@ -38,7 +38,9 @@ import au.com.cybersearch2.classywidget.PropertiesListAdapter.Value;
  */
 public class TelegenLogic
 {
-    static public final String TELEGEN_XPL =
+    static public final String CALL_SUPPORT = "Support";
+    
+    static protected final String TELEGEN_XPL =
             "axiom issue : resource \"telegen\";\n" +
             "axiom check : resource \"telegen\";\n" +
             "axiom issue_param (issue_name): parameter;\n" +
@@ -50,22 +52,22 @@ public class TelegenLogic
             "    (\"Video\",            \"Connections\"),\n" +
             "    (\"Remote\",           \"Batteries\"),\n" +
             "    (\"Set top box\",      \"Programme\"),\n" +
-            "    (true,                 \"Support\");\n" +
+            "    (true,                 \"" + CALL_SUPPORT + "\");\n" +
             "choice next_check\n"  +
             "    (  check_name,           next_check): \n" +
             "    (\"Power cord\",       \"Wall outlet\"),\n" +
             "    (\"Wall outlet\",      \"Remote\"),\n" +
-            "    (\"Remote\",           \"Support\"),\n" +
+            "    (\"Remote\",           \"" + CALL_SUPPORT + "\"),\n" +
             "    (\"Connections\",      \"Cables\"),\n" +
             "    (\"Cables\",           \"Connected devices\"),\n" +
             "    (\"Connected devices\",\"Source\"),\n" +
             "    (\"Source\",           \"Running state\"),\n" +
-            "    (\"Running state\",    \"Support\"),\n" +
+            "    (\"Running state\",    \"" + CALL_SUPPORT + "\"),\n" +
             "    (\"Batteries\",        \"Sensor\"),\n" +
             "    (\"Sensor\",           \"Pointing\"),\n" +
-            "    (\"Pointing\",         \"Support\"),\n" +
-            "    (\"Programme\",        \"Support\"),\n" +
-            "    (true,                 \"Support\");\n" +
+            "    (\"Pointing\",         \"" + CALL_SUPPORT + "\"),\n" +
+            "    (\"Programme\",        \"" + CALL_SUPPORT + "\"),\n" +
+            "    (true,                 \"" + CALL_SUPPORT + "\");\n" +
             "template first_check_item (name ? name == check_name, instruction);\n" +
             "template next_check_item (name ? name == next_check, instruction);\n" +
             "list issues_list(issue_item);\n" +
@@ -88,6 +90,16 @@ public class TelegenLogic
         queryProgram = new QueryProgram(TELEGEN_XPL);
     }
  
+    public String getCurrentQuery()
+    {
+        return currentQuery;
+    }
+
+    public String getCurrentCheck()
+    {
+        return currentCheck;
+    }
+
     public List<Value> getIssues()
     {
         List<Value> fieldList = new ArrayList<Value>();

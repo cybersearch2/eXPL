@@ -6,7 +6,7 @@ INSERT INTO `Issue` VALUES (3,'Remote','The remote control does not work');
 INSERT INTO `Issue` VALUES (4,'Set top box','The cable/set top box remote control doesn''t turn the TV on or off, or adjust the volume');
 INSERT INTO `Check` VALUES (1,'Power cord','Make sure the AC power cord is securely plugged in to the wall outlet');
 INSERT INTO `Check` VALUES (2,'Wall outlet','Make sure the wall outlet is working');
-INSERT INTO `Check` VALUES (3,'Remote','Try pressing the POWER button on the TV to make sure the problem is nto the remote.');
+INSERT INTO `Check` VALUES (3,'Remote','Try pressing the POWER button on the TV to make sure the problem is not the remote.');
 INSERT INTO `Check` VALUES (4,'Connections','Check cable connections (remove and reconnect all cables connected to the TV and external devices)');
 INSERT INTO `Check` VALUES (5,'Cables','Set your external device''s (Cable/Set Box, DVD, Blu-ray etc) video outputs to match the connections to the TV input.For example, if an external device''s output is HDMI, it should be connected to an HDMI input on the TV.');
 INSERT INTO `Check` VALUES (6,'Connected devices','Make sure your connected devices are powered on.');

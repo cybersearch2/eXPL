@@ -3,6 +3,7 @@ package au.com.cybersearch2.telegen;
 import javax.inject.Inject;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.Loader;
@@ -13,6 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 import au.com.cybersearch2.classyapp.ApplicationContext;
+import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classytask.BackgroundTask;
 
 
@@ -24,6 +26,8 @@ public class DisplayDetailsDialog extends DialogFragment
     public static final CharSequence DIALOG_TITLE = "Troubleshooting";
     
     protected Dialog dialog;
+    protected Context androidContext;
+    
     @Inject
     TelegenLogic telegenLogic;
   
@@ -51,12 +55,11 @@ public class DisplayDetailsDialog extends DialogFragment
              TextView tv3 = (TextView)view.findViewById(R.id.detail_content);
              tv3.setText(content);
         }
-        final ApplicationContext applicationContext = new ApplicationContext();
         // Watch for button clicks.
-        Button button = (Button)view.findViewById(R.id.button_next);
+        final Button button = (Button)view.findViewById(R.id.button_next);
         button.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                final BackgroundTask responder =  new BackgroundTask(applicationContext.getContext())
+                final BackgroundTask responder =  new BackgroundTask(androidContext)
                 {
                     String check;
                     
@@ -65,13 +68,24 @@ public class DisplayDetailsDialog extends DialogFragment
                     {
                         check = telegenLogic.getNextCheck();
                         return Boolean.TRUE;
-                     }
+                    }
 
                     @Override
                     public void onLoadComplete(Loader<Boolean> loader, Boolean success)
                     {
                         TextView tv3 = (TextView)view.findViewById(R.id.detail_content);
                         tv3.setText(check);
+                        if (telegenLogic.getCurrentCheck().equals(TelegenLogic.CALL_SUPPORT))
+                        {
+                            button.setText("OK");
+                            button.setOnClickListener(new OnClickListener() {
+
+                                @Override
+                                public void onClick(View v)
+                                {
+                                    dialog.dismiss();
+                                }});
+                        }
                     }
                 };
                 responder.onStartLoading();
@@ -86,6 +100,9 @@ public class DisplayDetailsDialog extends DialogFragment
         dialog = super.onCreateDialog(savedInstanceState);
         dialog.setTitle(DIALOG_TITLE);
         dialog.setCanceledOnTouchOutside(true);
+        dialog.setCancelable(true);
+        DI.inject(this);
+        androidContext = new ApplicationContext().getContext();
         return dialog;
     }
     
