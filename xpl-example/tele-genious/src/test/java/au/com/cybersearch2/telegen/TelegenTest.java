@@ -144,7 +144,7 @@ public class TelegenTest
         PersistenceWork verificationWork = new PersistenceWork(){
 
             @Override
-            public void doInBackground(EntityManagerLite entityManager)
+            public void doTask(EntityManagerLite entityManager)
             {
                 int id = 1;
                 for (String[] issueItem: TestIssues.ISSUE_DATA)

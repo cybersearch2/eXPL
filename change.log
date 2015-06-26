@@ -6,6 +6,7 @@ eXPL v1.0.9
 4. Move ParserAssembler addAxiomCollection() and addTemplateList() to test class QueryExecuterAdapter
 5. Fix QueryProgram so backup is performed after a calculation 
 6. Tele-Genious displays issues as a list and click issue brings up troubleshooting dialog
+7. Adjust for classyjava change to interface PersistenceWork, which now extends PersistenceTask
 ______________________________________________________________________________________________________________________
 eXPL v1.0.8
 

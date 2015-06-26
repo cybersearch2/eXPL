@@ -106,6 +106,9 @@ public class MainActivity extends ActionBarActivity
          starter.onStartLoading();
      }
 
+    /**
+     * Display list of issues
+     */
     protected void startActivity()
     {
         mainStatus = MainStatus.START;

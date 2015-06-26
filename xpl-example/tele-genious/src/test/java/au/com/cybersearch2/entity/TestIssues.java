@@ -54,7 +54,7 @@ public class TestIssues
         PersistenceWork setUpWork = new PersistenceWork(){
 
             @Override
-            public void doInBackground(EntityManagerLite entityManager)
+            public void doTask(EntityManagerLite entityManager)
             {
             	for (String[] issueItem: ISSUE_DATA)
             	{

@@ -111,9 +111,9 @@ public class JpaProviderHelper
 		PersistenceWork workAsync = new PersistenceWork(){
 
 			@Override
-			public void doInBackground(EntityManagerLite entityManager) 
+			public void doTask(EntityManagerLite entityManager) 
 			{
-				persistenceWork.doInBackground(entityManager);
+				persistenceWork.doTask(entityManager);
 			}
 
 			@Override

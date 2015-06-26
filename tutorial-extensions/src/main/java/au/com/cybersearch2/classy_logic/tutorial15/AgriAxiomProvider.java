@@ -80,7 +80,7 @@ public class AgriAxiomProvider extends EntityAxiomProvider
 		 * @see au.com.cybersearch2.classyjpa.entity.PersistenceWork#doInBackground(au.com.cybersearch2.classyjpa.EntityManagerLite)
 		 */
         @Override
-	    public void doInBackground(EntityManagerLite entityManager)
+	    public void doTask(EntityManagerLite entityManager)
 	    {
 	    	// Use OrmLite query to get Country object from database 
             EntityManagerDelegate delegate = (EntityManagerDelegate)entityManager.getDelegate();

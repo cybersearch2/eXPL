@@ -113,7 +113,7 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
         return new PersistenceWork()
         {
 	        @Override
-	        public void doInBackground(EntityManagerLite entityManager)
+	        public void doTask(EntityManagerLite entityManager)
 	        {
 	        	for (Object object: data)
 	            	entityManager.persist(object);

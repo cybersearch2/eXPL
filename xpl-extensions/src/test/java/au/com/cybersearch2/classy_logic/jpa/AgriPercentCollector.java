@@ -406,7 +406,7 @@ public class AgriPercentCollector extends JpaEntityCollector
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void doInBackground(EntityManagerLite entityManager) 
+	public void doTask(EntityManagerLite entityManager) 
 	{
 		// Collect all year percent items 
         Query query = entityManager.createNamedQuery(namedJpaQuery);

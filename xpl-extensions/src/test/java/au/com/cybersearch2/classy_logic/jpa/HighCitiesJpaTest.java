@@ -81,7 +81,7 @@ public class HighCitiesJpaTest
         PersistenceWork setUpWork = new PersistenceWork(){
 
             @Override
-            public void doInBackground(EntityManagerLite entityManager)
+            public void doTask(EntityManagerLite entityManager)
             {
             	entityManager.persist(new City("bilene", 1718));
             	entityManager.persist(new City("addis ababa", 8000));

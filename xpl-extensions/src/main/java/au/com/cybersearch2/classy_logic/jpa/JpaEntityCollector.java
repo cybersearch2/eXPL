@@ -117,7 +117,7 @@ public class JpaEntityCollector implements DataCollector, PersistenceWork
      */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void doInBackground(EntityManagerLite entityManager) 
+	public void doTask(EntityManagerLite entityManager) 
 	{
         Query query = entityManager.createNamedQuery(namedJpaQuery);
         if (maxResults > 0)

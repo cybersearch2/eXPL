@@ -65,7 +65,7 @@ public class TestChecks
         PersistenceWork setUpWork = new PersistenceWork(){
 
             @Override
-            public void doInBackground(EntityManagerLite entityManager)
+            public void doTask(EntityManagerLite entityManager)
             {
             	for (String[] checkItem: CHECK_DATA)
             	{

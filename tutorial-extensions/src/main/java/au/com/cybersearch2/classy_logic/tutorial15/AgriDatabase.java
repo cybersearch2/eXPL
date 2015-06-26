@@ -37,7 +37,7 @@ public class AgriDatabase implements PersistenceWork
 {
 
     @Override
-    public void doInBackground(EntityManagerLite entityManager)
+    public void doTask(EntityManagerLite entityManager)
     {
 		ParserAssembler parserAssembler = null;
 		try 

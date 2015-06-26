@@ -71,7 +71,7 @@ public class AgricultureJpaTest
         PersistenceWork setUpWork = new PersistenceWork(){
 
             @Override
-            public void doInBackground(EntityManagerLite entityManager)
+            public void doTask(EntityManagerLite entityManager)
             {
         		ParserAssembler parserAssembler = null;
 				try {
