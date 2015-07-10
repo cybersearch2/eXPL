@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>au.com.cybersearch2</groupId>
 		<artifactId>telegen-parent</artifactId>
-		<version>1.0.9</version>
+		<version>1.0.9-SNAPSHOT</version>
 	</parent>
 	<artifactId>telegen</artifactId>
 	<packaging>apk</packaging>
@@ -15,7 +15,7 @@
         <dependency>
 		    <groupId>au.com.cybersearch2</groupId>
             <artifactId>tele-genious</artifactId>
-            <version>1.0.9</version>
+            <version>1.0.9-SNAPSHOT</version>
         </dependency>
          <dependency>
           <groupId>junit</groupId>
