@@ -21,7 +21,7 @@ import au.com.cybersearch2.classyjpa.AndroidPersistenceEnvironment;
 import au.com.cybersearch2.classytask.BackgroundTask;
 import au.com.cybersearch2.classytask.WorkStatus;
 import au.com.cybersearch2.classywidget.PropertiesListAdapter;
-import au.com.cybersearch2.classywidget.PropertiesListAdapter.Value;
+import au.com.cybersearch2.classywidget.ListItem;
 import au.com.cybersearch2.telegen.interfaces.TelegenLauncher;
 
 /**
@@ -113,7 +113,7 @@ public class MainActivity extends ActionBarActivity
     {
         mainStatus = MainStatus.START;
         BackgroundTask issuesLoader = new BackgroundTask(this){
-            List<Value> issuesList;
+            List<ListItem> issuesList;
             
             @Override
             public Boolean loadInBackground()
@@ -178,7 +178,7 @@ public class MainActivity extends ActionBarActivity
      * Display issues as a list
      * @param issuesList Backing list for display list view
      */
-    protected void displayIssues(final List<Value> issuesList)
+    protected void displayIssues(final List<ListItem> issuesList)
     {
         mainStatus = MainStatus.ISSUES;
         adapter.changeData(issuesList);
@@ -193,7 +193,7 @@ public class MainActivity extends ActionBarActivity
      * Start troubleshooting dialog
      * @param issue Value object containing selected issue
      */
-    protected void startChecksDialog(final Value issue)
+    protected void startChecksDialog(final ListItem issue)
     {
         BackgroundTask responder =  new BackgroundTask(this) 
         {   // Bundle supplies title, context and context to dialog

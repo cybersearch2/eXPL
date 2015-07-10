@@ -29,7 +29,7 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classywidget.PropertiesListAdapter.Value;
+import au.com.cybersearch2.classywidget.ListItem;
 
 /**
  * TelegenLogic
@@ -100,16 +100,16 @@ public class TelegenLogic
         return currentCheck;
     }
 
-    public List<Value> getIssues()
+    public List<ListItem> getIssues()
     {
-        List<Value> fieldList = new ArrayList<Value>();
+        List<ListItem> fieldList = new ArrayList<ListItem>();
         currentQuery = ISSUES_QUERY;
         Result result = queryProgram.executeQuery(ISSUES_QUERY);
         Iterator<Axiom> iterator = result.getIterator("issues_list");
         while (iterator.hasNext())
         {
             Axiom axiom =iterator.next();
-            fieldList.add(new Value(axiom.getTermByName("name").getValue().toString(), 
+            fieldList.add(new ListItem(axiom.getTermByName("name").getValue().toString(), 
                                     axiom.getTermByName("observation").getValue().toString()));
         }
         return fieldList;

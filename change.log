@@ -7,6 +7,7 @@ eXPL v1.0.9
 5. Fix QueryProgram so backup is performed after a calculation 
 6. Tele-Genious displays issues as a list and click issue brings up troubleshooting dialog
 7. Adjust for classyjava change to interface PersistenceWork, which now extends PersistenceTask
+8. Replace PropertiesListAdapter.Value with Parcelable ListItem
 ______________________________________________________________________________________________________________________
 eXPL v1.0.8
 

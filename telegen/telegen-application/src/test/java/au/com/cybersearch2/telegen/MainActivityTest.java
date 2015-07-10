@@ -45,7 +45,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import au.com.cybersearch2.classyjpa.AndroidPersistenceEnvironment;
-import au.com.cybersearch2.classywidget.PropertiesListAdapter.Value;
+import au.com.cybersearch2.classywidget.ListItem;
 import au.com.cybersearch2.telegen.MainActivity.MainStatus;
 import au.com.cybersearch2.telegen.entity.TestChecks;
 import au.com.cybersearch2.telegen.entity.TestIssues;
@@ -156,7 +156,7 @@ public class MainActivityTest
         int index = 0;
         for (int i = 0; i < TestIssues.ISSUE_DATA.length; i++)
         {
-            Value value = (Value)mainActivity.adapter.getItem(i);
+            ListItem value = (ListItem)mainActivity.adapter.getItem(i);
             String[] issueItem = TestIssues.ISSUE_DATA[index++];
             assertThat(value.getName()).isEqualTo(issueItem[0]);
             assertThat(value.getValue()).isEqualTo(issueItem[1]);
