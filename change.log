@@ -8,6 +8,7 @@ eXPL v1.0.9
 6. Tele-Genious displays issues as a list and click issue brings up troubleshooting dialog
 7. Adjust for classyjava change to interface PersistenceWork, which now extends PersistenceTask
 8. Replace PropertiesListAdapter.Value with Parcelable ListItem
+9. Update android.support.version to 22.2 and android.plugin.version to 4.3.0
 ______________________________________________________________________________________________________________________
 eXPL v1.0.8
 
