@@ -12,32 +12,41 @@
 	<name>Telegen - Application</name>
 
 	<dependencies>
+        <!-- Added for Proguard -->
         <dependency>
-		    <groupId>au.com.cybersearch2</groupId>
-            <artifactId>tele-genious</artifactId>
-            <version>1.0.9-SNAPSHOT</version>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>${slf4j-version}</version>
+          <scope>provided</scope>
         </dependency>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+          <version>${slf4j-version}</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+         <version>3.0.0</version>
+        </dependency> 
+        <dependency>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+          <version>1.1.1</version>
+         </dependency> 
+        <dependency>
+          <groupId>commons-collections</groupId>
+          <artifactId>commons-collections</artifactId>
+          <version>3.2.1</version>
+          <scope>provided</scope>
+        </dependency> 
+        <!---->
          <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
           <scope>test</scope>
         </dependency>  
-        <dependency>
-          <groupId>au.com.cybersearch2</groupId>
-          <artifactId>classyjava</artifactId>
-          <exclusions>
-            <exclusion>
-              <groupId>commons-logging</groupId>
-              <artifactId>commons-logging</artifactId>
-            </exclusion>
-            <exclusion>
-              <groupId>commons-collections</groupId>
-              <artifactId>commons-collections</artifactId>
-            </exclusion>
-          </exclusions>
-          <type>jar</type>
-          <scope>compile</scope>
-        </dependency>
         <dependency>
           <groupId>au.com.cybersearch2</groupId>
           <artifactId>classyandroid</artifactId>
@@ -66,6 +75,28 @@
           <type>jar</type>
           <scope>compile</scope>
         </dependency>
+        <dependency>
+          <groupId>au.com.cybersearch2</groupId>
+          <artifactId>parser</artifactId>
+          <version>${project.version}</version>
+          <exclusions>
+             <exclusion>
+              <groupId>*</groupId>
+              <artifactId>*</artifactId>
+            </exclusion>
+           </exclusions>
+	    </dependency>
+	    <dependency>
+	      <groupId>au.com.cybersearch2</groupId>
+	      <artifactId>xpl-extensions</artifactId>
+	          <exclusions>
+	             <exclusion>
+	              <groupId>*</groupId>
+	              <artifactId>*</artifactId>
+	            </exclusion>
+	          </exclusions>
+	      <version>${project.version}</version>
+	    </dependency>
         <dependency>
           <groupId>com.j256.ormlite</groupId>
           <artifactId>ormlite-android</artifactId>
@@ -289,11 +320,6 @@
 								<debuggable>false</debuggable>
 								<versionCodeAutoIncrement>true</versionCodeAutoIncrement>
 							</manifest>
-							<!-- Change to true to skip Proguard -->
-							<proguard>
-								<skip>false</skip>
-								<config>proguard.conf</config>
-							</proguard>
 						</configuration>
 						<executions>
 							<execution>
