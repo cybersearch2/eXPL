@@ -3,7 +3,7 @@
   <parent>
     <groupId>au.com.cybersearch2</groupId>
     <artifactId>xpl</artifactId>
-    <version>1.10-SNAPSHOT</version>
+    <version>1.10</version>
   </parent>
   <artifactId>example</artifactId>
   <packaging>pom</packaging>
