@@ -101,27 +101,6 @@
                 <additionalparam>-tag inheritDoc:X</additionalparam>
             </configuration>
           </plugin>
-          <plugin>
-             <groupId>org.apache.maven.plugins</groupId>
-             <artifactId>maven-shade-plugin</artifactId>
-             <version>2.4</version>
-             <executions>
-               <execution>
-                 <phase>package</phase>
-                 <goals>
-                   <goal>shade</goal>
-                 </goals>
-                 <configuration>
-                   <artifactSet>
-                     <excludes>
-                       <exclude>commons-logging:commons-logging</exclude>
-                     </excludes>
-                   </artifactSet>
-                   <minimizeJar>true</minimizeJar>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
       </plugins>
 	  <pluginManagement>
 		  <plugins>
