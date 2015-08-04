@@ -56,7 +56,7 @@ public class StampDuty
 	{
 		QueryProgram queryProgram = new QueryProgram(STAMP_DUTY);
 		// Create QueryParams object for Global scope and query "stamp_duty_query"
-		QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "stamp_duty_query");
+		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "stamp_duty_query");
 		// Add a transacton_amount Axiom with a single 123,458 term
 		// This axiom goes into the Global scope and is removed at the start of the next query.
 		queryParams.addAxiom("transacton_amount", Integer.valueOf(123458));

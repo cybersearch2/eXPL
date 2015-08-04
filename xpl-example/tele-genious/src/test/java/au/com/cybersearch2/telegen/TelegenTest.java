@@ -250,7 +250,7 @@ public class TelegenTest
     protected void doFirstCheck(QueryProgram queryProgram, String issue, final String check) throws Exception
     {
         // Create QueryParams object for Global scope and query "stamp_duty_query"
-        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "first_check_query");
+        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "first_check_query");
         // Add a transacton_amount Axiom with a single 123,458 term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         queryParams.addAxiom("issue_param", issue);
@@ -267,7 +267,7 @@ public class TelegenTest
     protected void doNextCheck(QueryProgram queryProgram, String check, final String nextcheck) throws Exception
     {
         // Create QueryParams object for Global scope and query "stamp_duty_query"
-        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "next_check_query");
+        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "next_check_query");
         // Add a transacton_amount Axiom with a single 123,458 term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         queryParams.addAxiom("check_param", check);

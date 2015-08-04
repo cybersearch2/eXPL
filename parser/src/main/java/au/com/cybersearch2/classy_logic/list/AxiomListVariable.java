@@ -30,6 +30,13 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class AxiomListVariable  extends Parameter implements Operand
 {
+    static AxiomList EMPTY_AXIOM_LIST;
+    
+    static
+    {
+        EMPTY_AXIOM_LIST = new AxiomList("","");
+    }
+    
 	/** The backing axiom list */
     protected AxiomList axiomList;
     /** Variable to access the terms of a particular axiom in the axiom list */
@@ -42,6 +49,8 @@ public class AxiomListVariable  extends Parameter implements Operand
 	protected int termIndex;
 	/** Term index evaluation operand or null if fixed index specified */
 	protected Operand termExpression;
+	/** AxiomList specification used for dynamic AxiomList */
+	protected AxiomListSpec axiomListSpec;
 	
 	/** OperatorEnum const array for no operations permitted */
 	protected static OperatorEnum[] EMPTY_OPERAND_OPS = new OperatorEnum[0];
@@ -78,6 +87,24 @@ public class AxiomListVariable  extends Parameter implements Operand
         axiomIndex = -1; // Set index to invalid value to avoid accidental uninitialised list access
 	}
 
+	/**
+	 * Construct a AxiomListVariable object for a dynamic AxiomList ie. created by a script query
+	 * @param axiomListSpec AxiomList Specification including Variable holding AxiomList
+	 */
+	public AxiomListVariable(AxiomListSpec axiomListSpec)
+	{
+        super(axiomListSpec.getListName() + 
+              (axiomListSpec.getAxiomIndex() < 0 ? ".index" : axiomListSpec.getAxiomIndex()) + 
+              "." + axiomListSpec.getSuffix());
+        this.axiomListSpec = axiomListSpec;
+        // Set an empty axiom list to avoid NPEs
+        axiomList = EMPTY_AXIOM_LIST;
+        if (axiomListSpec.getAxiomIndex() < 0)
+            axiomExpression = axiomListSpec.getAxiomExpression();
+        else 
+            axiomIndex = axiomListSpec.getAxiomIndex();
+	}
+	
 	/**
 	 * Assign a value and set the delegate
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
@@ -200,6 +227,15 @@ public class AxiomListVariable  extends Parameter implements Operand
 	@Override
 	public EvaluationStatus evaluate(int id)
 	{
+	    if ((axiomListSpec != null) && axiomListSpec.update())
+	    {   // Dynamic AxiomList should now exist, so initialization of
+	        // of this object can be completed
+	        axiomList = axiomListSpec.getAxiomList();
+            if (axiomListSpec.getTermIndex() < 0) 
+                setTermExpression(axiomListSpec.getTermExpression());
+            else
+                setTermIndex(axiomListSpec.getTermIndex());
+	    }
 		if (axiomExpression != null)
 		{   // Evaluate index. The resulting value must be a sub class of Number to be usable as an index.
 			axiomExpression.evaluate(id);
@@ -226,6 +262,8 @@ public class AxiomListVariable  extends Parameter implements Operand
 		}
 		else if (termExpression != null)
 		{
+		    if (axiomTermListVariable.isEmpty())
+                updateAxiomTermListVariable();
 			axiomTermListVariable.evaluate(id);
 		    super.assign(axiomTermListVariable.getValue());
 			this.id = id;
@@ -240,7 +278,12 @@ public class AxiomListVariable  extends Parameter implements Operand
 	protected void updateAxiomTermListVariable()
 	{
 		// Get currently selected item in owning axiom list
-		AxiomTermList axiomTermList = axiomList.getItem(axiomIndex);
+	    
+		AxiomTermList axiomTermList = null;
+		if (!axiomList.isEmpty())
+		    axiomTermList = axiomList.getItem(axiomIndex);
+		else
+		    axiomTermList = new AxiomTermList(axiomList.getName() + ".item", axiomList.getKey());
 		String suffix = null;
 		if (termExpression != null)
 		{

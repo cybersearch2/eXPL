@@ -47,8 +47,8 @@ public class Scope
     protected Map<String, QuerySpec> querySpecMap;
     /** Local pattern assembler */
     protected ParserAssembler parserAssembler;
-    /** Global scope or null if this is a global scope */
-    protected Scope globalScope;
+    /** Scopes container */
+    protected Map<String, Scope> scopeMap;
     /** A scope locale can be different to the system default */
     protected Locale locale;
 	
@@ -61,12 +61,12 @@ public class Scope
     
 	/**
 	 * Construct a Scope object with access to the global scope
-	 * @param globalScope Unnamed scope shared by all scopes
+	 * @param scopeMap Scopes container
 	 * @param name Scope name - must be unique to all scopes
 	 */
-	public Scope(Scope globalScope, String name, Map<String, Object> properties) 
+	public Scope(Map<String, Scope> scopeMap, String name, Map<String, Object> properties) 
 	{
-		this.globalScope = globalScope;
+		this.scopeMap = scopeMap;
 		this.name = name;
 		if (properties != null)
 		{
@@ -89,15 +89,6 @@ public class Scope
 		parserAssembler = new ParserAssembler(this);
 	}
 	
-	/**
-	 * Construct a Scope object
-	 * @param name Scope name - must be unique to all scopes
-	 */
-	protected Scope(String name) 
-	{
-		this(null, name, EMPTY_PROPERTIES);
-	}
-
 	/**
 	 * @return the locale
 	 */
@@ -131,6 +122,31 @@ public class Scope
 	{
 		return name;
 	}
+
+	/**
+     * Returns scope specified by name.
+     * @param name
+     * @return Scope object
+     * @throws IllegalArgumentException if scope does not exist
+     */
+    public Scope getScope(String name)
+    {
+        Scope scope = scopeMap.get(name);
+        if (scope == null)
+            throw new IllegalArgumentException("Scope \"" + name + "\" does not exist");
+        return scope;
+    }
+
+    /**
+     * Returns scope specified by name.
+     * @param name
+     * @return Scope object or null if not foune
+     */
+    public Scope findScope(String name)
+    {
+        return scopeMap.get(name);
+    }
+
 
 	/**
 	 * Returns local parser assembler
@@ -181,8 +197,8 @@ public class Scope
     public AxiomSource findAxiomSource(String axiomKey)
     {
         AxiomSource axiomSource = parserAssembler.getAxiomSource(axiomKey);
-        if ((axiomSource == null) && (globalScope != null))
-            axiomSource = globalScope.getParserAssembler().getAxiomSource(axiomKey);
+        if ((axiomSource == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
+            axiomSource = getGlobalParserAssembler().getAxiomSource(axiomKey);
         return axiomSource;
     }
 
@@ -194,8 +210,8 @@ public class Scope
 	public Template getTemplate(String name)
     {
 		Template template = parserAssembler.getTemplate(name);
-		if ((template == null) && (globalScope != null))
-			template = globalScope.getParserAssembler().getTemplate(name);
+		if ((template == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
+			template = getGlobalParserAssembler().getTemplate(name);
 		if (template == null)
 			throw new IllegalArgumentException("Template \"" + name + "\" does not exist");
 	    return template;
@@ -208,8 +224,8 @@ public class Scope
 	public Map<String, List<AxiomListener>> getAxiomListenerMap()
 	{
 		Map<String, List<AxiomListener>> axiomListenerMap = null;
-		if ((globalScope != null) && (globalScope.getParserAssembler().getAxiomListenerMap().size() > 0))
-			axiomListenerMap = globalScope.getParserAssembler().getAxiomListenerMap();
+		if ((!name.equals(QueryProgram.GLOBAL_SCOPE)) && (getGlobalParserAssembler().getAxiomListenerMap().size() > 0))
+			axiomListenerMap = getGlobalParserAssembler().getAxiomListenerMap();
 		if (parserAssembler.getAxiomListenerMap().size() > 0)
 		{
 			if (axiomListenerMap != null)
@@ -234,8 +250,8 @@ public class Scope
 	{
 	    // Look first in local scope, then if not found, try global scope
 		ItemList<?> itemList = parserAssembler.getOperandMap().getItemList(listName);
-		if ((itemList == null) && (globalScope != null))
-			itemList = globalScope.getParserAssembler().getOperandMap().getItemList(listName);	
+		if ((itemList == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
+			itemList = getGlobalParserAssembler().getOperandMap().getItemList(listName);	
 		return itemList;
 	}
 
@@ -254,7 +270,7 @@ public class Scope
 	 */
 	public Scope getGlobalScope() 
 	{
-		return globalScope == null ? this : globalScope;
+		return name.equals(QueryProgram.GLOBAL_SCOPE) ? this : scopeMap.get(QueryProgram.GLOBAL_SCOPE);
 	}
 
 	/**
@@ -264,9 +280,9 @@ public class Scope
 	public Map<String, Iterable<Axiom>> getListMap() 
 	{
 		Map<String, Iterable<Axiom>> listMap = new HashMap<String, Iterable<Axiom>>();
-        if (globalScope != null)
+        if (!name.equals(QueryProgram.GLOBAL_SCOPE))
         {
-        	globalScope.getParserAssembler().getOperandMap().copyLists("", listMap);
+        	getGlobalParserAssembler().getOperandMap().copyLists("", listMap);
     		parserAssembler.getOperandMap().copyLists(name, listMap);
         }
         else
@@ -277,9 +293,9 @@ public class Scope
     public Map<String, Axiom> getAxiomMap()
     {
         Map<String, Axiom> axiomMap = new HashMap<String, Axiom>();
-        if (globalScope != null)
+        if (!name.equals(QueryProgram.GLOBAL_SCOPE))
         {
-            globalScope.getParserAssembler().getOperandMap().copyAxioms("", axiomMap);
+            getGlobalParserAssembler().getOperandMap().copyAxioms("", axiomMap);
             parserAssembler.getOperandMap().copyAxioms(name, axiomMap);
         }
         else
@@ -369,7 +385,7 @@ public class Scope
 			}
 		};
 		// If the local is declared inside a scope, then it's scope never changes and a LocaleListener is not required
-        if (globalScope != null)
+        if (!name.equals(QueryProgram.GLOBAL_SCOPE))
         	localeListener.onScopeChange(this);
         else
 		    parserAssembler.registerLocaleListener(localeListener);	
@@ -381,11 +397,18 @@ public class Scope
 	public void notifyChange() 
 	{
 		// Notify Locale listeners in Global scope of scope locale
-        if (globalScope != null)
-        	globalScope.getParserAssembler().onScopeChange(this);
+        if (!name.equals(QueryProgram.GLOBAL_SCOPE))
+        	getGlobalParserAssembler().onScopeChange(this);
 	}
 
-
+	/**
+	 * Returns ParserAssembler belonging to the global scope
+	 * @return ParserAssembler object
+	 */
+    public ParserAssembler getGlobalParserAssembler()
+    {
+        return scopeMap.get(QueryProgram.GLOBAL_SCOPE).getParserAssembler();
+    }
 
 
 }

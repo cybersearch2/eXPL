@@ -26,6 +26,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.AxiomListSpec;
 import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 
@@ -62,9 +63,15 @@ public class OperandMapTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(0), eq(0), isA(String.class))).thenReturn(axiomListVariable);
-		assertThat(operandMap.getListVariable(axiomList, LIST_NAME, 0, 0, "0")).isEqualTo(axiomListVariable);
+		AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
+		when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
+		when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
+		when(axiomListSpec.getAxiomIndex()).thenReturn(0);
+        when(axiomListSpec.getTermIndex()).thenReturn(0);
+        when(axiomListSpec.getSuffix()).thenReturn("0");
+		assertThat(operandMap.getListVariable(axiomListSpec)).isEqualTo(axiomListVariable);
 		assertThat(operandMap.operandMap.get(LIST_NAME + ".0.0")).isEqualTo(axiomListVariable);
-		assertThat(operandMap.getListVariable(axiomList, LIST_NAME, 0, 0, "0")).isEqualTo(axiomListVariable);
+		assertThat(operandMap.getListVariable(axiomListSpec)).isEqualTo(axiomListVariable);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -74,6 +81,7 @@ public class OperandMapTest
 		OperandMap operandMap = new OperandMap();
 		@SuppressWarnings("rawtypes")
 		ItemList itemList = mock(ItemList.class);
+        when(itemList.getName()).thenReturn(LIST_NAME);
 		operandMap.listMap.put(LIST_NAME, itemList);
 		@SuppressWarnings("rawtypes")
 		ItemListVariable itemListVariable = mock(ItemListVariable.class);
@@ -81,7 +89,7 @@ public class OperandMapTest
 		when(expression.isEmpty()).thenReturn(true);
 		when(expression.getName()).thenReturn("X");
 		when(itemList.newVariableInstance(expression, "X")).thenReturn(itemListVariable);
-		assertThat(operandMap.newListVariableInstance(LIST_NAME, expression)).isEqualTo(itemListVariable);
+		assertThat(operandMap.newListVariableInstance(itemList, expression)).isEqualTo(itemListVariable);
 	}
 	
 	@Test
@@ -89,58 +97,84 @@ public class OperandMapTest
 	{
 		OperandMap operandMap = new OperandMap();
 		AxiomList axiomList = mock(AxiomList.class);
-		operandMap.listMap.put(LIST_NAME, axiomList);
-		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
+        AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
+        when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
+        when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
+        when(axiomListSpec.getAxiomIndex()).thenReturn(-1);
+        when(axiomListSpec.getTermIndex()).thenReturn(-1);
+        when(axiomListSpec.getSuffix()).thenReturn("0");
 		Operand axiomExpression = mock(Operand.class);
 		when(axiomExpression.isEmpty()).thenReturn(true);
+		when(axiomListSpec.getAxiomExpression()).thenReturn(axiomExpression);
 		Operand termExpression = mock(Operand.class);
 		when(termExpression.isEmpty()).thenReturn(true);
+		when(axiomListSpec.getTermExpression()).thenReturn(termExpression);
+        AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(axiomExpression), eq(termExpression), isA(String.class))).thenReturn(axiomListVariable);
-		assertThat(operandMap.newListVariableInstance(LIST_NAME, axiomExpression, termExpression)).isEqualTo(axiomListVariable);
+		assertThat(operandMap.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
 	}
-
+	
 	@Test
 	public void test_axiom_list_newListVariableInstance_ie()
 	{
 		OperandMap operandMap = new OperandMap();
 		AxiomList axiomList = mock(AxiomList.class);
-		operandMap.listMap.put(LIST_NAME, axiomList);
-		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		Operand axiomExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
-		Operand termExpression = mock(Operand.class);
-		when(termExpression.isEmpty()).thenReturn(true);
+        AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
+        when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
+        when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
+        when(axiomListSpec.getAxiomIndex()).thenReturn(0);
+        when(axiomListSpec.getTermIndex()).thenReturn(-1);
+        when(axiomListSpec.getSuffix()).thenReturn("0");
+        when(axiomListSpec.getAxiomExpression()).thenReturn(axiomExpression);
+        Operand termExpression = mock(Operand.class);
+        when(termExpression.isEmpty()).thenReturn(true);
+        when(axiomListSpec.getTermExpression()).thenReturn(termExpression);
+        AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(0), eq(termExpression), isA(String.class))).thenReturn(axiomListVariable);
-		assertThat(operandMap.newListVariableInstance(LIST_NAME, axiomExpression, termExpression)).isEqualTo(axiomListVariable);
+		assertThat(operandMap.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
 	}
-
+	
 	@Test
 	public void test_axiom_list_newListVariableInstance_ei()
 	{
 		OperandMap operandMap = new OperandMap();
 		AxiomList axiomList = mock(AxiomList.class);
-		operandMap.listMap.put(LIST_NAME, axiomList);
-		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
-		Operand axiomExpression = mock(Operand.class);
-		when(axiomExpression.isEmpty()).thenReturn(true);
 		Operand termExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
+        AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
+        when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
+        when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
+        when(axiomListSpec.getAxiomIndex()).thenReturn(-1);
+        when(axiomListSpec.getTermIndex()).thenReturn(0);
+        when(axiomListSpec.getSuffix()).thenReturn("0");
+        Operand axiomExpression = mock(Operand.class);
+        when(axiomExpression.isEmpty()).thenReturn(true);
+        when(axiomListSpec.getAxiomExpression()).thenReturn(axiomExpression);
+        when(axiomListSpec.getTermExpression()).thenReturn(termExpression);
+        AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(axiomExpression), eq(0), isA(String.class))).thenReturn(axiomListVariable);
-		assertThat(operandMap.newListVariableInstance(LIST_NAME, axiomExpression, termExpression)).isEqualTo(axiomListVariable);
+		assertThat(operandMap.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
 	}
-
+	
 	@Test
 	public void test_axiom_list_newListVariableInstance_ii()
 	{
 		OperandMap operandMap = new OperandMap();
 		AxiomList axiomList = mock(AxiomList.class);
-		operandMap.listMap.put(LIST_NAME, axiomList);
 		Operand axiomExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
 		Operand termExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
+        AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
+        when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
+        when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
+        when(axiomListSpec.getAxiomIndex()).thenReturn(0);
+        when(axiomListSpec.getTermIndex()).thenReturn(0);
+        when(axiomListSpec.getSuffix()).thenReturn("0");
+        when(axiomListSpec.getAxiomExpression()).thenReturn(axiomExpression);
+        when(axiomListSpec.getTermExpression()).thenReturn(termExpression);
 		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(0), eq(0), isA(String.class))).thenReturn(axiomListVariable);
-		assertThat(operandMap.newListVariableInstance(LIST_NAME, axiomExpression, termExpression)).isEqualTo(axiomListVariable);
+		assertThat(operandMap.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
 		assertThat(operandMap.operandMap.get(LIST_NAME + ".0.0")).isEqualTo(axiomListVariable);
-		assertThat(operandMap.newListVariableInstance(LIST_NAME, axiomExpression, termExpression)).isEqualTo(axiomListVariable);
+		assertThat(operandMap.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
 	}
-
-
 }

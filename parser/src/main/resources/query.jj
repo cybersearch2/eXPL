@@ -51,6 +51,7 @@ import au.com.cybersearch2.classy_logic.expression.MatchOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
 import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionParameter;
@@ -175,6 +176,7 @@ TOKEN :
 | < LOCAL: "local" >
 | < CHOICE: "choice" >
 | < PARAMETER: "parameter" >
+| < CALL: "call" >
 }
 
 /* LITERALS */
@@ -288,8 +290,7 @@ void input(QueryProgram queryProgram) :
 {
 }
 {
-  ( Statement(queryProgram, queryProgram.getGlobalScope()) )+
-  ( Queries(queryProgram.getGlobalScope()) | ScopeDeclaration(queryProgram) )* 
+  ( Statement(queryProgram, queryProgram.getGlobalScope()) | QueryChain(queryProgram.getGlobalScope()) | ScopeDeclaration(queryProgram) )+
   <EOF>
 }
 
@@ -298,16 +299,15 @@ void ScopeDeclaration(QueryProgram queryProgram) :
   Scope scope;
 }
 {
-  <SCOPE> scope=Scope(queryProgram.getGlobalScope()) 
+  <SCOPE> scope=Scope(queryProgram) 
   "{" 
-     ( Statement(queryProgram, scope) )* ( Queries(scope) )+
+     ( Statement(queryProgram, scope) | QueryChain(scope) )+
   "}" 
   {
-    queryProgram.addScope(scope);  
   }
 }
 
-Scope Scope(Scope globalScope) :
+Scope Scope(QueryProgram queryProgram) :
 {
   Token scopeToken;
   Map<String, Object> properties = new HashMap<String, Object>();
@@ -315,11 +315,11 @@ Scope Scope(Scope globalScope) :
 {
    scopeToken = <IDENTIFIER>  [ "(" InitialiserList(properties) ")" ]
    {
-      return new Scope(globalScope, scopeToken.image , properties);
+      return queryProgram.scopeInstance(scopeToken.image , properties);
    }
 }
 
-void Queries(Scope scope) :
+void QueryChain(Scope scope) :
 {
     QuerySpec querySpec;
 }
@@ -567,7 +567,7 @@ Operand VariableDeclaration(ParserAssembler parserAssembler) :
   ( varType=Type(operandMap) )? nameToken=<IDENTIFIER> ( index=IndexExpression(parserAssembler) )? ( "=" expression=Expression(parserAssembler) )?
   {
      if (index !=null)
-         return operandMap.setListVariable(nameToken.image, index, expression);
+         return operandMap.setListVariable(parserAssembler.getItemList(nameToken.image), index, expression);
      if (varType == null)
          varType = new VariableType(OperandType.NULL);
      if (expression != null) 
@@ -583,6 +583,7 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
 {
     String name;
     VariableType varType = null;
+    VariableType listVarType = null;
     Operand index = null;
     Operand var = null;
     Token scToken = null;
@@ -625,7 +626,7 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
      if (expression != null)
          varType.setProperty(VariableType.EXPRESSION, expression);
      if (index !=null)
-       var = operandMap.setListVariable(name, index, expression);
+       var = operandMap.setListVariable(parserAssembler.getItemList(name), index, expression);
      else if (regexOp != null)
        var = new RegExOperand(name, regexOp, 0, group);
      else if (scToken != null) 
@@ -1238,12 +1239,10 @@ Operand PostfixExpression(ParserAssembler parserAssembler) :
 
 Operand PrimaryExpression(ParserAssembler parserAssembler) :
 {
+  String name = null;;
+  Token literal = null;
   Operand param1 = null;
   Operand param2 = null;
-  String index1 = null;
-  String index2 = null;
-  String name;
-  Token numberToken = null;
   OperandMap operandMap = parserAssembler.getOperandMap();
 }
 {
@@ -1252,33 +1251,29 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
     return param1;
   }
   |
-  numberToken=<NUMBER_LITERAL>
+  literal=<NUMBER_LITERAL>
   {
-    NumberTerm numberTerm = new NumberTerm(getText(numberToken), parserAssembler.getScopeLocale());
+    NumberTerm numberTerm = new NumberTerm(getText(literal), parserAssembler.getScopeLocale());
     Variable var = new Variable(Term.ANONYMOUS);
     var.assign(numberTerm.getValue());
     return var;
   }
   |
-  "(" param1=Expression(parserAssembler) ")"
+  name=Name() ( param1=NamedExpression(name, parserAssembler) )?
+  {
+    if (param1 == null)
+        return operandMap.addOperand(name, null);
+    return param1;
+  }
+  |
+  "(" ( param1 = Expression(parserAssembler) ) ")" 
   {
     return param1;
   }
   |
-  name=Name() ( LOOKAHEAD(2) param1=IndexExpression(parserAssembler) ( LOOKAHEAD(2) param2=IndexExpression(parserAssembler) )? )?
-  {
-    if (param1 == null)
-        return operandMap.addOperand(name, null);
-    if (param2 == null)
-        return operandMap.newListVariableInstance(name, param1);
-    if (param1 instanceof StringOperand)
-        throw new ParseException("List \"" + name + "\" cannot be indexed by name");
-    return operandMap.newListVariableInstance(name, param1, param2);
-  }
-  |
   <LENGTH> "("  name=Name() ")"
   {
-    return new ListLength(name, operandMap.getItemList(name));
+    return new ListLength(name, parserAssembler.getItemList(name));
   }
   |
   <FORMAT> "("  name=Name() ")"
@@ -1294,6 +1289,22 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
   }
 }
 
+Operand NamedExpression(String name, ParserAssembler parserAssembler) :
+{
+  Operand param1 = null;
+  Operand param2 = null;
+}
+{
+  param1=IndexExpression(parserAssembler) ( LOOKAHEAD(2) param2=IndexExpression(parserAssembler) )?
+  {
+    return parserAssembler.newListVariableInstance(name, param1, param2);
+  }
+  | 
+  "(" ( param1 = ArgumentList(parserAssembler) )? ")"
+  {
+    return parserAssembler.getCallOperand(name, param1);
+  }
+}
 
 Operand IndexExpression(ParserAssembler parserAssembler) :
 {
@@ -1312,6 +1323,47 @@ Operand IndexExpression(ParserAssembler parserAssembler) :
     return param;
   }
 }
+
+Operand ArgumentList(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0] = Argument(parserAssembler)
+  ( 
+    op="," 
+    params[1]=Argument(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
+Operand Argument(ParserAssembler parserAssembler) :
+{
+    Token nameToken = null;
+    VariableType varType = null;
+    Operand expression;
+    OperandMap operandMap = parserAssembler.getOperandMap();
+}
+{
+  ( LOOKAHEAD(2) ( varType=Type(operandMap) )? nameToken=<IDENTIFIER> "=" )? expression=Expression(parserAssembler) 
+  {
+     if (varType == null)
+         varType = new VariableType(OperandType.NULL);
+     String name = (nameToken == null) ? Term.ANONYMOUS : nameToken.image;
+     varType.setProperty(VariableType.EXPRESSION, expression);
+     Operand operand = varType.getInstance(parserAssembler, name);
+     if (nameToken != null)
+         operandMap.addOperand(operand);
+     return operand;
+  }
+}
+
 
 Operand Literal() :
 {
@@ -1397,3 +1449,4 @@ void NullLiteral() :
 {
   <NULL>
 }
+

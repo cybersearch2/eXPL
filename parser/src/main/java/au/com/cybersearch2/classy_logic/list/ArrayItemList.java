@@ -26,7 +26,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 
 /**
- * ListOperand
+ * ArrayItemList
  * List implementation. Generic types are String, Integer, Double, BigDecimal and Boolean
  * A proxy Operand is supplied to participate in item expressions. 
  * The proxy is shared by dependent ItemListVariable objects which take their values from the list.

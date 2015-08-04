@@ -469,7 +469,7 @@ public class QueryParserTest
     {
         QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
-        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "color_query");
+        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         queryParams.addAxiom("shade", "aqua");
@@ -506,7 +506,7 @@ public class QueryParserTest
     {
         QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS2);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
-        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "color_query");
+        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         queryParams.addAxiom("shade", Long.decode("0x00ffff"));
@@ -542,7 +542,7 @@ public class QueryParserTest
     {
         QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS3);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
-        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "color_query");
+        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         queryParams.addAxiom("shade", Long.decode("0x00ffff"));

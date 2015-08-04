@@ -172,7 +172,7 @@ public class Calculator implements SolutionFinder
 				    return evaluationStatus != EvaluationStatus.SKIP;
 			}
 			else
-				return choice.completeSolution(solution, template, axiom.getTermByIndex(0).getValue());
+				return choice.completeSolution(solution, template, axiom);
 		}
 		catch (ExpressionException e)
 		{   // evaluate() exceptions are thrown by Evaluator objects 

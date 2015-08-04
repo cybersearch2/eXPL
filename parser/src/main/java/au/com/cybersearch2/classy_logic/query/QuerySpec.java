@@ -135,12 +135,12 @@ public class QuerySpec
 
 	/**
 	 * Returns properties referenced by template name or null if no properties found
-	 * @param name Template name of calculator
+	 * @param tempateName Template name of calculator
 	 * @return Properties object
 	 */
-	public Map<String, Object> getProperties(String name) 
+	public Map<String, Object> getProperties(String tempateName) 
 	{
-		return propertiesMap.get(name);
+		return propertiesMap.get(tempateName);
 	}
 
 	/**
@@ -156,5 +156,6 @@ public class QuerySpec
 		queryChainList.add(queryChain);
 		return queryChain;
 	}
+
 
 }

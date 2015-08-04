@@ -128,7 +128,7 @@ public class CalculatorTest
         Axiom axiom = mock(Axiom.class);
         when(axiom.getTermByIndex(0)).thenReturn(new Parameter("x"));
         calculator.axiom = axiom;
-        when(choice.completeSolution(solution, template, "x")).thenReturn(true);
+        when(choice.completeSolution(solution, template, axiom)).thenReturn(true);
         when(template.isChoice()).thenReturn(true);
         when(template.evaluate()).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
         assertThat(calculator.completeSolution(solution, template)).isTrue();
@@ -346,7 +346,7 @@ public class CalculatorTest
 		template.setKey("Seed");
 		Solution solution = new Solution();
 		calculator.execute(seedAxiom, template, solution);
-		verify(choice).completeSolution(solution, template, seedAmount);
+		verify(choice).completeSolution(solution, template, seedAxiom);
 
 		/*
 		//System.out.println(solution.getAxiom(CHOICE_NAME).toString());

@@ -54,7 +54,7 @@ public class GermanScope
 	{
 		QueryProgram queryProgram = new QueryProgram(GERMAN_SCOPE);
 		// Create QueryParams object for scope "german" and query "item_query"
-		QueryParams queryParams = new QueryParams(queryProgram, "german", "item_query");
+		QueryParams queryParams = queryProgram.getQueryParams("german", "item_query");
 		// Add an item Axiom with a single "2.345,67 EUR" term
 		// This axiom goes into the Global scope and is removed at the start of the next query.
 		queryParams.addAxiom("item", "12.345,67 €");

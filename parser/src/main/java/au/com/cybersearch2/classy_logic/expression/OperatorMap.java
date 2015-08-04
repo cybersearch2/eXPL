@@ -73,7 +73,8 @@ public class OperatorMap
 		new OperatorChar('&', OperatorEnum.BIT_AND),
 		new OperatorChar('|', OperatorEnum.BIT_OR),
 		new OperatorChar('^', OperatorEnum.XOR),
-		new OperatorChar('%', OperatorEnum.REM)
+		new OperatorChar('%', OperatorEnum.REM),
+        new OperatorChar(',', OperatorEnum.COMMA)
 	};
 
 	/** Initialisation String data */

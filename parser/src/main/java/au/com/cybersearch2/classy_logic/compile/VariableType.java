@@ -36,40 +36,49 @@ import au.com.cybersearch2.classy_logic.parser.ParseException;
 
 /**
  * VariableType
+ * Factory class creates instances of logic programming types
  * @author Andrew Bowley
  * 10 Mar 2015
  */
 public class VariableType 
 {
+    /** Logic programming type enumeration */
 	protected OperandType operandType;
+	/** Type qualifier properties eg. Currency country */
 	protected Map<String, Object> properties;
 	
+	/** Key value for axiom name property */
 	public final static String AXIOM_KEY = "AxiomKey";
+    /** Key value for variable initialization property */
 	public final static String EXPRESSION = "Expression";
+    /** Key value for Currency country property */
 	public final static String QUALIFIER_STRING = "QualifierString";
+    /** Key value for Currency country evaluation operand property */
 	public final static String QUALIFIER_OPERAND = "QualifierOperand";
 	
 	/**
-	 * 
+	 * Construct VariableType object
+	 * @param operandType Logic programming type enumeration
 	 */
 	public VariableType(OperandType operandType) 
 	{
 		this.operandType = operandType;
 	}
 
-	Operand newInstance()
-	{
-		return null;
-	}
-
 	/**
+	 * Returns logic programming type enumeration
 	 * @return the operandType
 	 */
 	public OperandType getOperandType() 
 	{
 		return operandType;
 	}
-	
+
+	/**
+	 * Set property
+	 * @param key  Key - AxiomKey, Expression, QualifierString or QualifierOperand
+	 * @param value Object
+	 */
 	public void setProperty(String key, Object value)
 	{
 		if (properties == null)
@@ -77,6 +86,12 @@ public class VariableType
 		properties.put(key, value);
 	}
 
+	/**
+	 * Return new Operand instance of this type
+	 * @param parserAssembler ParserAssembler object
+	 * @param name Name of new variable
+	 * @return Operand object
+	 */
 	public Operand getInstance(ParserAssembler parserAssembler, String name)
 	{
 		Operand expression = (Operand)getProperty(EXPRESSION);
@@ -122,12 +137,20 @@ public class VariableType
 	    		parserAssembler.registerLocaleListener(currencyOperand);
 	    }
 	    if ((expression != null) && !hasExpression)
+	        // Expression is a literal
 	        operand.assign(expression.getValue());
 	    return operand;
     }
 
-
-	public ItemList<?> getItemListInstance(ParserAssembler parserAssembler, String name) throws ParseException
+	/**
+	 * Returns ItemList object for this type. 
+	 * NOTE: AxiomKey proptery must be set for Term, Axiom or Local type
+     * @param parserAssembler ParserAssembler object
+     * @param name Name of new variable
+	 * @return ItemList object
+	 * @throws ParseException
+	 */
+  	public ItemList<?> getItemListInstance(ParserAssembler parserAssembler, String name) throws ParseException
 	{
 		String axiomKey = getPropertyString(AXIOM_KEY);
 		if ((operandType == OperandType.TERM) || 
@@ -172,7 +195,12 @@ public class VariableType
             throw new ParseException("List " + name + " type unknown");
        }
     }
-
+  	
+    /**
+     * Returns property value as String
+     * @param key
+     * @return String
+     */
 	protected String getPropertyString(String key) 
 	{
 		if (properties == null)
@@ -180,7 +208,12 @@ public class VariableType
 		Object value = properties.get(key);
 		return value == null ? null : value.toString();
 	}
-	
+
+	/**
+	 * Returns property for specified key
+	 * @param key
+	 * @return Object
+	 */
 	protected Object getProperty(String key) 
 	{
 		return properties == null ? null : properties.get(key);

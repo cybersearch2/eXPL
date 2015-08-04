@@ -51,7 +51,7 @@ public class ColorSwatch
 	{
         QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
-        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "color_query");
+        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         queryParams.addAxiom("shade", Long.valueOf(hexColor));

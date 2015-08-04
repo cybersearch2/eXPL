@@ -22,6 +22,7 @@ import java.util.Map;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -53,6 +54,7 @@ public abstract class DelegateParameter extends Parameter implements Operand
 		delegateClassMap.put(Double.class, new DoubleOperand(DELEGATE_NAME));
 		delegateClassMap.put(BigDecimal.class, new BigDecimalOperand(DELEGATE_NAME));
 		delegateClassMap.put(AxiomTermList.class, new AssignOnlyOperand(DELEGATE_NAME));
+        delegateClassMap.put(AxiomList.class, new AssignOnlyOperand(DELEGATE_NAME));
 		delegateClassMap.put(Null.class, null);
 	}
 	

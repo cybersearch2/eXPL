@@ -19,6 +19,9 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Mockito.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Singleton;
 
 import org.junit.Before;
@@ -97,30 +100,39 @@ public class QueryProgramTest
 	}
 	
 	@Test
-	public void test_add_scope()
+	public void test_new_scope()
 	{
-		Scope scope = mock(Scope.class);
-		when (scope.getName()).thenReturn(SCOPE_NAME);
 		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.addScope(scope);
+		Map<String, Object> properties = new HashMap<String, Object>();
+		Scope scope = queryProgram.scopeInstance(SCOPE_NAME, properties);
 		assertThat(queryProgram.getScope(SCOPE_NAME)).isEqualTo(scope);
 		try
 		{
-			queryProgram.addScope(scope);
+	        Map<String, Object> properties2 = new HashMap<String, Object>();
+	        queryProgram.scopeInstance(SCOPE_NAME, properties2);
 			failBecauseExceptionWasNotThrown(ExpressionException.class);
 		}
 		catch(ExpressionException e)
 		{
-			assertThat(e.getMessage()).isEqualTo("Duplicate scope: \"" + SCOPE_NAME + "\"");
+			assertThat(e.getMessage()).isEqualTo("Scope named \"" + SCOPE_NAME + "\" already exists");
 		}
+        try
+        {
+            Map<String, Object> properties2 = new HashMap<String, Object>();
+            queryProgram.scopeInstance(QueryProgram.GLOBAL_SCOPE, properties2);
+            failBecauseExceptionWasNotThrown(ExpressionException.class);
+        }
+        catch(ExpressionException e)
+        {
+            assertThat(e.getMessage()).isEqualTo("Scope name \"" + QueryProgram.GLOBAL_SCOPE + "\" is reserved");
+        }
 	}
 	
 	@Test
 	public void test_execute_query()
 	{
 		QueryProgram queryProgram = new QueryProgram();
-		Scope scope = new Scope(queryProgram.getGlobalScope(), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
-		queryProgram.addScope(scope);
+        Scope scope = queryProgram.scopeInstance(SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler parserAssembler = scope.getParserAssembler();
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
@@ -153,8 +165,7 @@ public class QueryProgramTest
 	public void test_execute_logic_chainquery()
 	{
 		QueryProgram queryProgram = new QueryProgram();
-		Scope scope = new Scope(queryProgram.getGlobalScope(), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
-		queryProgram.addScope(scope);
+        Scope scope = queryProgram.scopeInstance(SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler parserAssembler = scope.getParserAssembler();
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
@@ -199,8 +210,7 @@ public class QueryProgramTest
 	public void test_execute_calculate_chainquery()
 	{
 		QueryProgram queryProgram = new QueryProgram();
-		Scope scope = new Scope(queryProgram.getGlobalScope(), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
-		queryProgram.addScope(scope);
+		Scope scope = queryProgram.scopeInstance(SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler parserAssembler = scope.getParserAssembler();
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
@@ -244,8 +254,7 @@ public class QueryProgramTest
 	public void test_execute_calculate_no_axiom_chainquery()
 	{
 		QueryProgram queryProgram = new QueryProgram();
-		Scope scope = new Scope(queryProgram.getGlobalScope(), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
-		queryProgram.addScope(scope);
+        Scope scope = queryProgram.scopeInstance(SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler parserAssembler = scope.getParserAssembler();
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
@@ -305,7 +314,7 @@ public class QueryProgramTest
 	{
 		SolutionHandler solutionHandler = mock(SolutionHandler.class);
 		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.addScope(new Scope(queryProgram.getGlobalScope(), SCOPE_NAME, Scope.EMPTY_PROPERTIES));
+        queryProgram.scopeInstance(SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		try
 		{
 			queryProgram.executeQuery(SCOPE_NAME, "x", solutionHandler);

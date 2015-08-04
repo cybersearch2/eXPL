@@ -1,3 +1,14 @@
+eXPL v1.12
+
+1. Add functions and script queries. A major update which introduced new interfaces and classes.
+2. Give access to all scopes from any scope
+3. Allow an axiom parameter to be to be assigned an Axiom List returned from a function or script query
+4. Fix Choice default value design which was selecting an invalid item 
+
+eXPL v1.11
+
+Update to Classy Tools v1.12 and Android Support Library v22.2.1
+______________________________________________________________________________________________________________________
 eXPL v1.0.9
 
  1. Comment out SE7 code in parser Scope and ScopeTest classes

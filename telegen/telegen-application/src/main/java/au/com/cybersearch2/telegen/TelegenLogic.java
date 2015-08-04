@@ -126,7 +126,7 @@ public class TelegenLogic
     public String getFirstCheck(String issue)
     {
         // Create QueryParams object for Global scope and query "first_check_query"
-        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "first_check_query");
+        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "first_check_query");
         queryParams.addAxiom("issue_param", issue);
         final String[] checkHolder = new String[1];
         // Add a solution handler to capture the query result
@@ -145,7 +145,7 @@ public class TelegenLogic
     public String getNextCheck()
     {
         // Create QueryParams object for Global scope and query "next_check_query"
-        QueryParams queryParams = new QueryParams(queryProgram, QueryProgram.GLOBAL_SCOPE, "next_check_query");
+        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "next_check_query");
         queryParams.addAxiom("check_param", currentCheck);
         final String[] checkHolder = new String[1];
         // Add a solution handler to capture the query result

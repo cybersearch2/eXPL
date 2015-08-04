@@ -416,6 +416,8 @@ public class Evaluator extends DelegateParameter
                 return leftTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
             else
                 return rightTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
+		case COMMA: 
+		    return new Null(); // Set dummy value so this variable is no longer empty
 	    default:
 		}
 		return null;
@@ -573,7 +575,9 @@ public class Evaluator extends DelegateParameter
 		for (OperatorEnum operatorEnum2: leftTerm.getLeftOperandOps())
 			if (operatorEnum2 == operatorEnum)
 				return true;
-		if (isValidStringOperation(leftTerm))
+		if (isValidStringOperation(leftTerm) || 
+		    // Comma operator valid if right operand present    
+		    ((operatorEnum == OperatorEnum.COMMA) && (right != null)))
 			return true;
 		return false;
 	}
@@ -620,7 +624,8 @@ public class Evaluator extends DelegateParameter
 		for (OperatorEnum operatorEnum2: rightTerm.getRightOperandOps())
 			if (operatorEnum2 == operatorEnum)
 				return true;
-		return false;
+		// Only Comma operator is valid at this point
+		return operatorEnum == OperatorEnum.COMMA;
 	}
 
 	/**

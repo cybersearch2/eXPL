@@ -1,7 +1,9 @@
 package au.com.cybersearch2.classy_logic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -31,22 +33,10 @@ public class QueryParams
 	protected Scope scope;
 	/** Solution handler (optional). Do-nothing handler applied if none supplied */
 	protected SolutionHandler solutionHandler;
+    /** Properties for calculations referenced by template name */
+    protected Map<String, Map<String, Object>> propertiesMap;
 
 
-	/**
-	 * Construct QueryParams object
-	 * @param queryProgram The global compiler accumulator
-	 * @param scopeName The scope the query applies to
-	 * @param queryName Name of query in scope
-	 */
-	public QueryParams(QueryProgram queryProgram, String scopeName, String queryName)
-	{
-		scope = queryProgram.getScope(scopeName);
-		querySpec = scope.getQuerySpec(queryName);
-		if (querySpec == null)
-			throw new IllegalArgumentException("Query \"" + queryName + "\" does not exist");
-	}
-	
 	/**
 	 * Construct QueryParams object
 	 * @param scope Specified scope
@@ -56,6 +46,7 @@ public class QueryParams
 	{
 		this.scope = scope;
 		this.querySpec = querySpec;
+        propertiesMap = new HashMap<String, Map<String, Object>>();
 	}
 
 	/**
@@ -161,7 +152,41 @@ public class QueryParams
 	{
 		Axiom axiom = new Axiom(name, params);
         // Set scope axiom in global scope
-        scope.getGlobalScope().getParserAssembler().addScopeAxiom(axiom); 
+        scope.getParserAssembler().addScopeAxiom(axiom); 
 		return axiom;
 	}
+
+    /**
+     * Add axiom key / template name pair for calculator query, along with optional properties
+     * @param templateName Name of template to which the properties apply
+     * @param properties Calculator properties
+     */
+    public void putProperties(String templateName, Map<String, Object> properties) 
+    {
+        if ((properties != null) && properties.size() > 0)
+            propertiesMap.put(templateName, properties);
+    }
+
+    /**
+     * Returns properties referenced by template name or null if no properties found
+     * @param templateName Template name of calculator
+     * @return Properties object
+     */
+    public Map<String, Object> getProperties(String templateName) 
+    {
+        return propertiesMap.get(templateName);
+    }
+
+    /**
+     * Clears properties referenced by template name or null if no properties found
+     * @param templateName Template name of calculator
+     * @return Properties object
+     */
+    public void clearProperties(String templateName) 
+    {
+        Map<String, Object> properties = propertiesMap.get(templateName);
+        if (properties != null)
+            properties.clear();
+    }
+
 }

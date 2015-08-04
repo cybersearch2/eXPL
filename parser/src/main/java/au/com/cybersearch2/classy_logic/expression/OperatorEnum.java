@@ -58,7 +58,8 @@ public enum OperatorEnum
     LSHIFTASSIGN, // "<<="
     RSIGNEDSHIFTASSIGN, // ">>="
     RUNSIGNEDSHIFTASSIGN, // ">>>="
-    ELLIPSIS, // "..."
+    ELLIPSIS, // "...",
+    COMMA,
     UNKOWN;
 
 	static OperatorMap operatorMap;

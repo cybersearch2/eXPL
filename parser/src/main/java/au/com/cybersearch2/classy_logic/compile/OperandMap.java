@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.AxiomListSpec;
 import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
@@ -150,25 +151,23 @@ public class OperandMap
 	/** 
 	 * Returns Operand list referenced by name
 	 * @param name
-	 * @return ItemList object
+	 * @return ItemList object or null if not exists
 	 */
 	public ItemList<?> getItemList(String name)
 	{
-		checkListName(name);
 		return listMap.get(name);
 	}
 	
 	/**
 	 * Returns ItemListVariable object with specified name and index expression operand. 
 	 * Will create object if it does not already exist.
-	 * @param name List name
+	 * @param itemList The list
 	 * @param expression Index expression operand
 	 * @return ItemListVariable object
 	 */
-	public ItemListVariable<?> newListVariableInstance(String name, Operand expression)
+	public ItemListVariable<?> newListVariableInstance(ItemList<?> itemList, Operand expression)
 	{
-		checkListName(name);
-		ItemList<?> itemList = listMap.get(name);
+		String name = itemList.getName();
 		ItemListVariable<?> listVariable = null;
 		int index = -1;
 		String suffix = null;
@@ -229,53 +228,26 @@ public class OperandMap
 	 * Returns a list variable for a term in an axiom in a axiom list. 
 	 * Both the axiom and the term are referenced by index.
 	 * There is only one variable instance for any specific index combination.
-	 * @param name List name
-	 * @param expression1 Index expression operand of axiom
-	 * @param expression2 Index expression operand 0f term
+	 * @param axiomListSpec AxiomList specification
 	 * @return AxiomListVariable object
 	 */
-	public AxiomListVariable newListVariableInstance(String name, Operand expression1,
-			Operand expression2) 
+	public AxiomListVariable newListVariableInstance(AxiomListSpec axiomListSpec) 
 	{
-		checkListName(name);
-		AxiomList axiomList = (AxiomList) listMap.get(name);
-		AxiomListVariable listVariable = null;
-		int axiomIndex = -1;
-		int termIndex = -1;
-		String suffix = null;
-		// Check for non-empty Integer operand, which is used for a fixed index
-		if (!expression1.isEmpty() && (expression1 instanceof IntegerOperand && Term.ANONYMOUS.equals(expression1.getName())))
-			axiomIndex = ((Long)(expression1.getValue())).intValue();
-		if (!expression2.isEmpty() && (expression2 instanceof IntegerOperand) && Term.ANONYMOUS.equals(expression2.getName()))
-		{
-			termIndex = ((Long)(expression2.getValue())).intValue();
-			suffix = Integer.toString(termIndex);
-		}
-		else if (expression2.isEmpty() && (expression2 instanceof Variable))
-		{
-			List<String> axiomTermNameList = axiomList.getAxiomTermNameList();
-			if (axiomTermNameList != null)
-			{
-			    suffix = expression2.getName();
-			    termIndex = getIndexForName(name, suffix, axiomTermNameList);
-			}
-			else
-				suffix = expression2.toString();
-		}
-		else
-			suffix = expression2.toString();
+        AxiomListVariable listVariable = null;
 		// IntegerOperand value is treated as fixed
-		if ((axiomIndex >= 0) && (termIndex >= 0))
+		if ((axiomListSpec.getAxiomIndex() >= 0) && (axiomListSpec.getTermIndex() >= 0))
 			// The variable only has a single instance if both axiom and term indexes are fixed
-			listVariable = getListVariable(axiomList, name, axiomIndex, termIndex, suffix);
+			listVariable = getListVariable(axiomListSpec);
 		else
 		{
-			if ((axiomIndex >= 0))
-				listVariable = axiomList.newVariableInstance(axiomIndex, expression2, suffix);
-			else if (termIndex >= 0)
-				listVariable = axiomList.newVariableInstance(expression1, termIndex, suffix);
+		    AxiomList axiomList = axiomListSpec.getAxiomList();
+		    String suffix = axiomListSpec.getSuffix();
+			if ((axiomListSpec.getAxiomIndex() >= 0))
+				listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getTermExpression(), suffix);
+			else if (axiomListSpec.getTermIndex() >= 0)
+				listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomExpression(), axiomListSpec.getTermIndex(), suffix);
 			else
-				listVariable = axiomList.newVariableInstance(expression1, expression2, suffix);
+				listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomExpression(), axiomListSpec.getTermExpression(), suffix);
 		}
 		return listVariable;
 	}
@@ -321,17 +293,6 @@ public class OperandMap
 	}
 
 	/**
-	 * Throw expection if list name not found in list set
-	 * @param name
-	 * @throws ExpressionException
-	 */
-	protected void checkListName(String name)
-	{
-		if (!listMap.containsKey(name))
-			throw new ExpressionException("List not found with name \"" + name + "\"");
-	}
-
-	/**
 	 * Returns ItemListVariable object with specified name and index. 
 	 * There is only one variable instance for any specific index.
 	 * Will create object if it does not already exist.
@@ -365,16 +326,15 @@ public class OperandMap
 	 * @param suffix To append to name
 	 * @return AxiomListVariable object
 	 */
-	protected AxiomListVariable getListVariable(AxiomList axiomList, String name, int axiomIndex,
-			int termIndex, String suffix) 
+	protected AxiomListVariable getListVariable(AxiomListSpec axiomListSpec) 
 	{
 		// Variable name is list name with dot index suffix
-		String listVarName = name + "." + axiomIndex + "." + suffix;
+		String listVarName = axiomListSpec.getListName() + "." + axiomListSpec.getAxiomIndex() + "." + axiomListSpec.getSuffix();
 		AxiomListVariable listVariable = (AxiomListVariable) get(listVarName);
 		if (listVariable != null)
 			return listVariable;
 		// Use axiomList object to create new ItemListVariable instance
-		listVariable = axiomList.newVariableInstance(axiomIndex, termIndex, suffix);
+		listVariable = axiomListSpec.getAxiomList().newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getTermIndex(), axiomListSpec.getSuffix());
 		operandMap.put(listVarName, listVariable);
 		return listVariable;
 	}
@@ -382,15 +342,15 @@ public class OperandMap
 	/**
 	 * Returns new ItemListVariable instance. 
 	 * This is wrapped in an assignment evaluator if optional expression parameter needs to be evaluated.
-	 * @param name Name of variable
+	 * @param itemList The list
 	 * @param index List index
 	 * @param expression Optional expression operand
 	 * @return Operand object
 	 */
-	public Operand setListVariable(String name, Operand index, Operand expression) 
+	public Operand setListVariable(ItemList<?> itemList, Operand index, Operand expression) 
 	{
-		checkListName(name);
-		ItemListVariable<?> variable = newListVariableInstance(name, index);
+		String name = itemList.getName();
+		ItemListVariable<?> variable = newListVariableInstance(itemList, index);
 		if (expression != null)
 		{
 			if (expression.isEmpty() || (expression instanceof Evaluator))

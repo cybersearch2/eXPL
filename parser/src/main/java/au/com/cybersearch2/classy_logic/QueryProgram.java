@@ -18,22 +18,16 @@ package au.com.cybersearch2.classy_logic;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.pattern.KeyName;
-import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.query.ChainQueryExecuter;
-import au.com.cybersearch2.classy_logic.query.QueryExecuter;
+import au.com.cybersearch2.classy_logic.query.QueryLauncher;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
-import au.com.cybersearch2.classy_logic.query.QueryType;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -44,7 +38,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 27 Dec 2014
  */
-public class QueryProgram 
+public class QueryProgram extends QueryLauncher
 {
 	/** The global scope is accessible from all scopes */
 	static public final String GLOBAL_SCOPE = "global";
@@ -92,7 +86,7 @@ public class QueryProgram
 	public QueryProgram() 
 	{
 		scopes = new HashMap<String, Scope>();
-		scopes.put(GLOBAL_SCOPE, new Scope(GLOBAL_SCOPE));
+		scopes.put(GLOBAL_SCOPE, new Scope(scopes, GLOBAL_SCOPE, Scope.EMPTY_PROPERTIES));
 	}
 
     /**
@@ -114,6 +108,24 @@ public class QueryProgram
        }
     }
 
+    /**
+     * Construct a new Scope instance
+     * @param scopeName
+     * @param properties Optional properties eg. Locale
+     * @return Scope object
+     * @throws ExpressionException if global scope name requested or a scope exists with the same name
+     */
+    public Scope scopeInstance(String scopeName, Map<String, Object> properties)
+    {
+        if (scopeName.equals(GLOBAL_SCOPE))
+            throw new ExpressionException("Scope name \"" + GLOBAL_SCOPE + "\" is reserved");
+        if (scopes.get(scopeName) != null)
+            throw new ExpressionException("Scope named \"" + scopeName + "\" already exists");
+       Scope newScope = new Scope(scopes, scopeName, properties);
+       scopes.put(scopeName, newScope);
+       return newScope;
+    }
+
 	/**
 	 * Returns global scope
 	 * @return Scope
@@ -124,9 +136,10 @@ public class QueryProgram
 	}
 
 	/**
-	 * Returns named scope. The scope will be created if it does not exist.
+	 * Returns scope specified by name.
 	 * @param name
-	 * @return Scope
+	 * @return Scope object
+	 * @throws IllegalArgumentException if scope does not exist
 	 */
 	public Scope getScope(String name)
 	{
@@ -137,17 +150,19 @@ public class QueryProgram
 	}
 
     /**
-     * Add supplied scope to this object. Duplicates not permitted.
-     * @param scope Scope object
+     * Returns QueryParams object for specified by scope and name
+     * @param scopeName The scope the query applies to
+     * @param queryName Name of query in scope
      */
-	public void addScope(Scope scope)
+	public QueryParams getQueryParams(String scopeName, String queryName)
 	{
-		String name = scope.getName();
-		if (scopes.containsKey(name))
-			throw new ExpressionException("Duplicate scope: \"" + name + "\"");
-		scopes.put(name, scope);
+        Scope scope = getScope(scopeName);
+        QuerySpec querySpec = scope.getQuerySpec(queryName);
+        if (querySpec == null)
+            throw new IllegalArgumentException("Query \"" + queryName + "\" does not exist");
+        return new QueryParams(scope, querySpec);
 	}
-
+	
 	/**
 	 * Execute query identified by name in named scope.
 	 * @param scopeName
@@ -157,7 +172,7 @@ public class QueryProgram
 	 */
 	public Result executeQuery(String scopeName, String queryName, SolutionHandler solutionHandler)
 	{
-		QueryParams queryParams = new QueryParams(this, scopeName, queryName);
+		QueryParams queryParams = getQueryParams(scopeName, queryName);
 		queryParams.setSolutionHandler(solutionHandler);
 		return executeQuery(queryParams);
 	}
@@ -175,7 +190,7 @@ public class QueryProgram
 		Map<String, Axiom> axiomMap = null;
 		try
 		{
-			executeQueryParams(queryParams);
+		    launch(queryParams);
 			listMap = scope.getListMap();
 			axiomMap = scope.getAxiomMap();
 		}
@@ -226,102 +241,6 @@ public class QueryProgram
 
 	}
 
-	/**
-     * Execute query by specification
-	 * @param queryParams QueryParams
-	 */
-	protected void executeQueryParams(QueryParams queryParams)
-	{
-		Scope scope = queryParams.getScope();
-		QuerySpec querySpec = queryParams.getQuerySpec();
-		SolutionHandler solutionHandler = queryParams.getSolutionHandler();
-		ChainQueryExecuter headQuery = null;
-		boolean isCalculation = false;
-		if (querySpec.getQueryType() != QueryType.calculator)
-			headQuery =	new QueryExecuter(queryParams);
-		else
-		{   // QueryParams need to be initialized to set up parameter axioms
-			queryParams.initialize();
-			headQuery =	new ChainQueryExecuter(scope);
-			headQuery.chainCalculator(getCalculatorAxiom(scope, querySpec), getCalculatorTemplate(scope, querySpec));
-			isCalculation = true;
-		}
-		// Chained queries are optional
-		if (querySpec.getQueryChainList() != null)
-			for (QuerySpec chainQuerySpec: querySpec.getQueryChainList())
-			{
-				if (chainQuerySpec.getQueryType() == QueryType.calculator)
-				{   // Calculator uses a single template
-					headQuery.chainCalculator(getCalculatorAxiom(scope, chainQuerySpec), getCalculatorTemplate(scope, chainQuerySpec));
-				}
-				else
-				{
-					QueryParams chainQueryParams = new QueryParams(scope, chainQuerySpec);
-					headQuery.chain(chainQueryParams.getAxiomCollection(), chainQueryParams.getTemplateList());
-				}
-			}
-		while (headQuery.execute())
-		{
-			if ((solutionHandler != null) && !solutionHandler.onSolution(headQuery.getSolution()) || isCalculation)
-				break;
-		}
-		// Reset all query templates so they can be recycled
-		if (isCalculation)
-		    headQuery.backupToStart();
-		else
-		    headQuery.reset();
-	}
-	
-	/**
-	 * Returns the single template for a Calculator query referenced as the first template in the supplied specification
-	 * @param scope Current scope
-	 * @param querySpec Calculator type query specification
-	 * @return Template object which is initialized with properties, if any, in the query specification  
-	 */
-	protected Template getCalculatorTemplate(Scope scope, QuerySpec querySpec)
-	{   // Calculator uses a single template
-		Template template = scope.getTemplate(getCalculatorKeyName(querySpec).getTemplateName());
-		Map<String, Object> properties = querySpec.getProperties(template.getName()); 
-		if (properties != null)
-			template.addProperties(properties);
-		return template;
-	}
 
-	/**
-	 * Returns Calculator axiom from supplied scope
-	 * @param scope Scope
-	 * @param querySpec QuerySpec
-	 * @return Axiom object
-	 */
-	protected Axiom getCalculatorAxiom(Scope scope, QuerySpec querySpec)
-	{
-		String axiomKey = getCalculatorKeyName(querySpec).getAxiomKey();
-		if (!axiomKey.isEmpty())
-		{
-		    Axiom axiom = null;
-		    AxiomSource source = scope.findAxiomSource(axiomKey);
-		    if (source == null)
-                // Return empty axiom as placeholder for axiom to come from solution
-                axiom = new Axiom(axiomKey);
-		    else
-		        axiom = source.iterator().next();
-            return axiom;  
-		}
-		return null;
-	}
-
-	/**
-	 * Returns key name from Calculator query specification
-	 * @param querySpec
-	 * @return KyeName object
-	 * @throws IllegalArgumentException if not exactly 1 key name specified
-	 */
-	protected KeyName getCalculatorKeyName(QuerySpec querySpec)
-	{
-		List<KeyName> keyNameList = querySpec.getKeyNameList();
-		if (keyNameList.size() != 1)
-			throw new IllegalArgumentException("Calculator querySpec does not contain single KeyName as expected");
-		return keyNameList.get(0);
-	}
 
 }

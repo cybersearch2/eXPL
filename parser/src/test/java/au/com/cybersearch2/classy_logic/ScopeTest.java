@@ -56,6 +56,8 @@ public class ScopeTest
 	    }
 	}
 
+	static Map<String, List<AxiomListener>> EMPTY_AXIOM_LISTENER_MAP = Collections.emptyMap();
+	
 	private static final String AXIOM_KEY = "AxiomKey";
 	private static final String TEMPLATE_NAME = "TemplateName";
 	private static final String SCOPE_NAME = "ScopeName";
@@ -71,7 +73,7 @@ public class ScopeTest
 	public void test_internal_global_scope()
 	{
 		Scope globalScope = mock(Scope.class);
-		Scope scope = new Scope(globalScope, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler globalParserAssembler = mock(ParserAssembler.class);
 		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
 		AxiomSource axiomSource = mock(AxiomSource.class);
@@ -88,7 +90,7 @@ public class ScopeTest
 	public void test_global_scope_precidence()
 	{
 		Scope globalScope = mock(Scope.class);
-		Scope scope = new Scope(globalScope, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler globalParserAssembler = mock(ParserAssembler.class);
 		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
 		scope.getParserAssembler().createAxiom(AXIOM_KEY);
@@ -104,7 +106,11 @@ public class ScopeTest
 	@Test
 	public void test_missing_axiom_source()
 	{
-		Scope scope = new Scope(SCOPE_NAME);
+        Scope globalScope = mock(Scope.class);
+        ParserAssembler parserAssembler = mock(ParserAssembler.class);
+        when(parserAssembler.getAxiomSource(AXIOM_KEY)).thenReturn(null);
+        when(globalScope.getParserAssembler()).thenReturn(parserAssembler);
+        Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		try
 		{
 			scope.getAxiomSource(AXIOM_KEY);
@@ -119,7 +125,11 @@ public class ScopeTest
 	@Test
 	public void test_missing_template()
 	{
-		Scope scope = new Scope(SCOPE_NAME);
+        Scope globalScope = mock(Scope.class);
+        ParserAssembler parserAssembler = mock(ParserAssembler.class);
+        when(parserAssembler.getTemplate(TEMPLATE_NAME)).thenReturn(null);
+        when(globalScope.getParserAssembler()).thenReturn(parserAssembler);
+        Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		try
 		{
 			scope.getTemplate(TEMPLATE_NAME);
@@ -134,7 +144,11 @@ public class ScopeTest
 	@Test
 	public void test_get_null_AxiomListenerMap()
 	{
-		Scope scope = new Scope(SCOPE_NAME);
+        Scope globalScope = mock(Scope.class);
+        ParserAssembler parserAssembler = mock(ParserAssembler.class);
+        when(parserAssembler.getAxiomListenerMap()).thenReturn(EMPTY_AXIOM_LISTENER_MAP);
+        when(globalScope.getParserAssembler()).thenReturn(parserAssembler);
+        Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		assertThat(scope.getAxiomListenerMap()).isNull();
 	}
 	
@@ -148,7 +162,7 @@ public class ScopeTest
 		AxiomListener axiomListener = mock(AxiomListener.class);
 		axiomListenerMap.put(AXIOM_KEY, Collections.singletonList(axiomListener));
 		when(globalParserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
-		Scope scope = new Scope(globalScope, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		assertThat(scope.getAxiomListenerMap().get(AXIOM_KEY).get(0)).isEqualTo(axiomListener);
 	}
 
@@ -162,7 +176,7 @@ public class ScopeTest
 		AxiomListener axiomListener = mock(AxiomListener.class);
 		axiomListenerMap.put(AXIOM_KEY, Collections.singletonList(axiomListener));
 		when(globalParserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
-		Scope scope = new Scope(globalScope, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		AxiomListener axiomListener2 = mock(AxiomListener.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomTermList.getAxiomListener()).thenReturn(axiomListener2);
@@ -181,7 +195,7 @@ public class ScopeTest
 		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
 		Map<String, List<AxiomListener>> axiomListenerMap = new HashMap<String, List<AxiomListener>>();
 		when(globalParserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
-		Scope scope = new Scope(globalScope, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		AxiomListener axiomListener2 = mock(AxiomListener.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomTermList.getAxiomListener()).thenReturn(axiomListener2);
@@ -199,7 +213,7 @@ public class ScopeTest
 		properties.put(QueryProgram.LANGUAGE, "ja");
 		properties.put(QueryProgram.REGION, "JP");
 		properties.put(QueryProgram.VARIANT, "JP");
-		Scope scope = new Scope(globalScope, SCOPE_NAME, properties);
+		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, properties);
 		assertThat(scope.getLocale().toString()).isEqualTo("ja_JP_JP_#u-ca-japanese");
         // Uncomment following if SE7 supported
 		// sr_BA_#Latn

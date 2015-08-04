@@ -55,7 +55,7 @@ public class GermanColors
 	{
         QueryProgram queryProgram = new QueryProgram(GERMAN_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
-        QueryParams queryParams = new QueryParams(queryProgram, "german", "color_query");
+        QueryParams queryParams = queryProgram.getQueryParams("german", "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         queryParams.addAxiom("shade", name); 

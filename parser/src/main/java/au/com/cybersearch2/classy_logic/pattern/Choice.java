@@ -21,8 +21,10 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -76,12 +78,12 @@ public class Choice
 
 	/**
 	 * Complete solution for given parameters
+     * @param axiom Initializer axiom
 	 * @param solution Solution containing query results so far
 	 * @param template Template used to calculate choice
-	 * @param matchValue Value used to select choice
 	 * @return Flag set true if selection match was found
 	 */
-	public boolean completeSolution(Solution solution, Template template, Object matchValue)
+	public boolean completeSolution(Solution solution, Template template, Axiom axiom)
 	{
 	    // Get template to perform selection
 		int position = template.select();
@@ -91,8 +93,12 @@ public class Choice
         Axiom choiceAxiom = choiceAxiomList.get(position);
         // Get value to assign as result, default being match value
         Object value = template.getTermByIndex(position).getValue();
-        if (value.equals(null)) // Ensure value is valid
-            value = matchValue;
+        if (value instanceof Null) // Ensure value is valid
+        {   // Use initializer axiom term as fallback
+            Term defaultTerm = axiom.getTermByName(choiceAxiom.getTermByIndex(0).getName());
+            if (defaultTerm != null)
+                value = defaultTerm.getValue();
+        }
         // Create solution axiom using Template toAxiom() method
 		Template solutionTemplate = new Template(template.getName());
 		int index = 0;
