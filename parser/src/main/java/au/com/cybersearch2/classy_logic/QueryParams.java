@@ -163,7 +163,7 @@ public class QueryParams
      */
     public void putProperties(String templateName, Map<String, Object> properties) 
     {
-        if ((properties != null) && properties.size() > 0)
+        if ((properties != null) && (properties.size() > 0))
             propertiesMap.put(templateName, properties);
     }
 

@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Singleton;
@@ -32,6 +33,7 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
@@ -258,13 +260,39 @@ public class CallOperandTest
             "  );\n" +
             "  query average_height calc(average_height);\n" +
             "}\n"  +
-            "axiom calc_average(average_height, average) : parameter;\n" + 
             "calc call_average_height(\n" +
-            "  calc_average = city.average_height(),\n" +
+            "  axiom calc_average = city.average_height(),\n" +
             "  average = calc_average[average]\n" +
             ");\n" +
             "query function_average_height calc(call_average_height);"
            ;
+    static final String GERMAN_COLORS =
+            "axiom lexicon (language, aqua, black, blue, white):\n" +
+            "  (\"english\", \"aqua\", \"black\", \"blue\", \"white\"),\n" +
+            "  (\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\");\n" +
+            "local colors(lexicon);" +
+            "choice swatch (shade, red, green, blue) :\n" +
+            "(colors[aqua], 0, 255, 255),\n" +
+            "(colors[black], 0, 0, 0),\n" +
+            "(colors[blue], 0, 0, 255),\n" +
+            "(colors[white], 255, 255, 255);\n" +
+            "scope german (language=\"de\", region=\"DE\")\n" +
+            "{\n" +
+            "  query color_query calc(swatch);\n" +
+            "}\n" +
+            "calc calc_german_colors\n" +
+            "(\n" +
+            "  solution color_list = german.color_query(shade=\"Wasser\"),\n" + 
+            "  color_list += german.color_query(shade=\"blau\")\n" + 
+            ");\n" +
+            "query german_colors calc(calc_german_colors);\n" +
+            "calc calc_german_orange\n" +
+            "(\n" +
+            "  solution german_orange = german.color_query(shade=\"Orange\")\n" + 
+            ");\n" +
+            "query german_orange calc(calc_german_orange);"
+            ;
+
 
     @Before
     public void setUp()
@@ -378,7 +406,7 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                System.out.println(solution.getAxiom("call_average_height").toString());
+                //System.out.println(solution.getAxiom("call_average_height").toString());
                 Axiom result = solution.getAxiom("call_average_height");
                 AxiomList calcAverageList = (AxiomList) result.getTermByIndex(0).getValue();
                 Axiom calcAverage = ((AxiomTermList)(calcAverageList.getItem(0))).getAxiom();
@@ -389,4 +417,37 @@ public class CallOperandTest
             }});
     }
 
+    @Test
+    public void test_choice_string_colors()
+    {
+        QueryProgram queryProgram = new QueryProgram(GERMAN_COLORS);
+        queryProgram.executeQuery("german_colors", new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution)
+            {
+                //System.out.println(solution.getAxiom("calc_german_colors").toString());
+                Axiom calcGermanColors = solution.getAxiom("calc_german_colors");
+                assertThat(calcGermanColors.getName()).isEqualTo("color_list");
+                @SuppressWarnings("unchecked")
+                Iterator<AxiomTermList> iterator = ((Iterable<AxiomTermList>)calcGermanColors.getTermByName(Template.ITERABLE).getValue()).iterator();
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("swatch(shade = Wasser, red = 0, green = 255, blue = 255)");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("swatch(shade = blau, red = 0, green = 0, blue = 255)");
+                assertThat(iterator.hasNext()).isFalse();
+                assertThat(calcGermanColors.getTermByName(Template.TERMNAMES).toString()).isEqualTo("termnames = [shade, red, green, blue]");
+                return true;
+            }});
+        queryProgram.executeQuery("german_orange", new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution)
+            {
+                //System.out.println(solution.getAxiom("calc_german_orange").toString());
+                Axiom calcGermanOrange = solution.getAxiom("calc_german_orange");
+                assertThat(calcGermanOrange.getName()).isEqualTo("german_orange");
+                @SuppressWarnings("unchecked")
+                Iterator<AxiomTermList> iterator = ((Iterable<AxiomTermList>)calcGermanOrange.getTermByName(Template.ITERABLE).getValue()).iterator();
+                assertThat(iterator.hasNext()).isFalse();
+                assertThat(calcGermanOrange.getTermByName(Template.TERMNAMES).toString()).isEqualTo("termnames = [shade, red, green, blue]");
+                return true;
+            }});
+    }
 }

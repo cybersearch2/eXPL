@@ -49,6 +49,7 @@ public  class GenericParameter<T> extends Parameter
 
 	/**
 	 * Set value
+	 * Note this masks non-type-specific setValue() of super class
 	 * @param value Object of generic type T
 	 */
 	public void setValue(T value)

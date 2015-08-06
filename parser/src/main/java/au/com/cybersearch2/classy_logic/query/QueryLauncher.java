@@ -25,6 +25,7 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * QueryLauncher
@@ -51,7 +52,7 @@ public class QueryLauncher
         {   // QueryParams need to be initialized to set up parameter axioms
             queryParams.initialize();
             headQuery = new ChainQueryExecuter(scope);
-            headQuery.chainCalculator(getCalculatorAxiom(scope, querySpec), getCalculatorTemplate(scope, querySpec));
+            chainCalculator(queryParams, scope, querySpec, headQuery);
             isCalculation = true;
         }
         // Chained queries are optional
@@ -59,9 +60,7 @@ public class QueryLauncher
             for (QuerySpec chainQuerySpec: querySpec.getQueryChainList())
             {
                 if (chainQuerySpec.getQueryType() == QueryType.calculator)
-                {   // Calculator uses a single template
-                    headQuery.chainCalculator(getCalculatorAxiom(scope, chainQuerySpec), getCalculatorTemplate(scope, chainQuerySpec));
-                }
+                    chainCalculator(queryParams, scope, chainQuerySpec, headQuery);
                 else
                 {
                     QueryParams chainQueryParams = new QueryParams(scope, chainQuerySpec);
@@ -80,6 +79,23 @@ public class QueryLauncher
             headQuery.reset();
     }
     
+    protected void chainCalculator(QueryParams queryParams, Scope scope, QuerySpec chainQuerySpec, ChainQueryExecuter headQuery)
+    {   // Calculator uses a single template
+        Axiom calculatorAxiom = getCalculatorAxiom(scope, chainQuerySpec);
+        Template calculatorTemplate = getCalculatorTemplate(scope, chainQuerySpec);
+        if (calculatorAxiom == null)
+        {
+            Map<String, Object> properties = queryParams.getProperties(calculatorTemplate.getName());
+            if (properties != null)
+            {
+                calculatorAxiom = new Axiom(calculatorTemplate.getName());
+                for (Map.Entry<String, Object> entry: properties.entrySet())
+                    calculatorAxiom.addTerm(new Parameter(entry.getKey(), entry.getValue()));
+            }
+        }
+        headQuery.chainCalculator(calculatorAxiom, calculatorTemplate);
+    }
+
     /**
      * Returns the single template for a Calculator query referenced as the first template in the supplied specification
      * @param scope Current scope

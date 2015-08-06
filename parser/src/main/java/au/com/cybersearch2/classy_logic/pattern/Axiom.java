@@ -204,26 +204,4 @@ public class Axiom extends Structure
 		pairByPosition = false;
 	}
 
-	/**
-	 * Returns Term referenced by name
-	 * @param name String
-	 * @return Term object
-	 */
-	@Override
-    public Term getTermByName(String name)
-    {
-    	return super.getTermByName(name);
-    }
-
-	/**
-	 * Returns Term referenced by index
-	 * @param index int
-	 * @return Term Object
-	 */
-	@Override
-    public Term getTermByIndex(int index)
-    {
-    	return super.getTermByIndex(index);
-    }
-
 }

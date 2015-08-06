@@ -227,6 +227,9 @@ public class Parameter implements Term
 		}
 	}
 
+	/**
+	 * Set value to null, mark Parameter as empty and set id to 0
+	 */
 	public void clearValue()
 	{
 		empty = true;
@@ -245,6 +248,11 @@ public class Parameter implements Term
 		return EvaluationStatus.COMPLETE;
 	}
 
+	/**
+	 * Update Parameter value - use for assignment operation
+     * @param value Object containing new value.
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Term#assign(java.lang.Object)
+	 */
 	@Override
 	public void assign(Object value) 
 	{

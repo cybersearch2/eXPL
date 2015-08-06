@@ -1,9 +1,24 @@
 eXPL v1.12
 
-1. Add functions and script queries. A major update which introduced new interfaces and classes.
-2. Give access to all scopes from any scope
-3. Allow an axiom parameter to be to be assigned an Axiom List returned from a function or script query
-4. Fix Choice default value design which was selecting an invalid item 
+ 1. Add functions and script queries. A major update which introduced new interfaces and classes.
+ 2. Give access to all scopes from any scope
+ 3. Allow an axiom parameter to be to be assigned an Axiom List returned from a function or script query
+ 4. Fix Choice default value design which was selecting an invalid item 
+ 5. Add flag to ScopeContext constructor to limit preservation to only the current (function) scope
+ 6. Add duplicateOperandCheck() method to OperandMap
+ 7. Add 'solution' alias for 'axiom' to indicate variable to return Calculator result
+ 8. Enhance Template toAxiom() method to pass a 'solution' Term as a Calculator result
+ 9. Minor fixes to QueryEvaluator
+10, Add AxiomOperand to support AxiomList assignment and concatenation
+10. Enhance VariableType to return AxiomOperand instance for AXIOM OperandType
+11. Remove unnecessary Template and Axiom super class overrides
+12. Fix CallOperand visitor logic
+13. Add Concaten interface to generalize Evaluator concatenation operation
+14. Add AxiomUtils for deep copy of Axioms and axiom Terms
+15. Enhance QueryLauncher by allowing passing of arguments from QueryParams to Calculator execution calls
+
+
+
 
 eXPL v1.11
 

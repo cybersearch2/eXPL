@@ -37,123 +37,125 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int LIST = 18;
   /** RegularExpression Id. */
-  int LENGTH = 19;
+  int SOLUTION = 19;
   /** RegularExpression Id. */
-  int TERM = 20;
+  int LENGTH = 20;
   /** RegularExpression Id. */
-  int RESOURCE = 21;
+  int TERM = 21;
   /** RegularExpression Id. */
-  int CURRENCY = 22;
+  int RESOURCE = 22;
   /** RegularExpression Id. */
-  int FORMAT = 23;
+  int CURRENCY = 23;
   /** RegularExpression Id. */
-  int LOCAL = 24;
+  int FORMAT = 24;
   /** RegularExpression Id. */
-  int CHOICE = 25;
+  int LOCAL = 25;
   /** RegularExpression Id. */
-  int PARAMETER = 26;
+  int CHOICE = 26;
   /** RegularExpression Id. */
-  int CALL = 27;
+  int PARAMETER = 27;
   /** RegularExpression Id. */
-  int INTEGER_LITERAL = 28;
+  int CALL = 28;
   /** RegularExpression Id. */
-  int DECIMAL_LITERAL = 29;
+  int INTEGER_LITERAL = 29;
   /** RegularExpression Id. */
-  int HEX_LITERAL = 30;
+  int DECIMAL_LITERAL = 30;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 31;
+  int HEX_LITERAL = 31;
   /** RegularExpression Id. */
-  int NUMBER_LITERAL = 32;
+  int FLOATING_POINT_LITERAL = 32;
   /** RegularExpression Id. */
-  int EXPONENT = 33;
+  int NUMBER_LITERAL = 33;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 34;
+  int EXPONENT = 34;
   /** RegularExpression Id. */
-  int TRUE = 35;
+  int STRING_LITERAL = 35;
   /** RegularExpression Id. */
-  int FALSE = 36;
+  int TRUE = 36;
   /** RegularExpression Id. */
-  int NULL = 37;
+  int FALSE = 37;
   /** RegularExpression Id. */
-  int NAN = 38;
+  int NULL = 38;
   /** RegularExpression Id. */
-  int IDENTIFIER = 39;
+  int NAN = 39;
   /** RegularExpression Id. */
-  int LPAREN = 40;
+  int IDENTIFIER = 40;
   /** RegularExpression Id. */
-  int RPAREN = 41;
+  int LPAREN = 41;
   /** RegularExpression Id. */
-  int LBRACE = 42;
+  int RPAREN = 42;
   /** RegularExpression Id. */
-  int RBRACE = 43;
+  int LBRACE = 43;
   /** RegularExpression Id. */
-  int LBRACKET = 44;
+  int RBRACE = 44;
   /** RegularExpression Id. */
-  int RBRACKET = 45;
+  int LBRACKET = 45;
   /** RegularExpression Id. */
-  int SEMICOLON = 46;
+  int RBRACKET = 46;
   /** RegularExpression Id. */
-  int COMMA = 47;
+  int SEMICOLON = 47;
   /** RegularExpression Id. */
-  int DOT = 48;
+  int COMMA = 48;
   /** RegularExpression Id. */
-  int ASSIGN = 49;
+  int DOT = 49;
   /** RegularExpression Id. */
-  int GT = 50;
+  int ASSIGN = 50;
   /** RegularExpression Id. */
-  int LT = 51;
+  int GT = 51;
   /** RegularExpression Id. */
-  int BANG = 52;
+  int LT = 52;
   /** RegularExpression Id. */
-  int COLON = 53;
+  int BANG = 53;
   /** RegularExpression Id. */
-  int EQ = 54;
+  int COLON = 54;
   /** RegularExpression Id. */
-  int LE = 55;
+  int EQ = 55;
   /** RegularExpression Id. */
-  int GE = 56;
+  int LE = 56;
   /** RegularExpression Id. */
-  int NE = 57;
+  int GE = 57;
   /** RegularExpression Id. */
-  int SC_OR = 58;
+  int NE = 58;
   /** RegularExpression Id. */
-  int SC_AND = 59;
+  int SC_OR = 59;
   /** RegularExpression Id. */
-  int INCR = 60;
+  int SC_AND = 60;
   /** RegularExpression Id. */
-  int DECR = 61;
+  int INCR = 61;
   /** RegularExpression Id. */
-  int PLUS = 62;
+  int DECR = 62;
   /** RegularExpression Id. */
-  int MINUS = 63;
+  int PLUS = 63;
   /** RegularExpression Id. */
-  int STAR = 64;
+  int MINUS = 64;
   /** RegularExpression Id. */
-  int SLASH = 65;
+  int STAR = 65;
   /** RegularExpression Id. */
-  int BIT_AND = 66;
+  int SLASH = 66;
   /** RegularExpression Id. */
-  int BIT_OR = 67;
+  int BIT_AND = 67;
   /** RegularExpression Id. */
-  int XOR = 68;
+  int BIT_OR = 68;
   /** RegularExpression Id. */
-  int REM = 69;
+  int XOR = 69;
   /** RegularExpression Id. */
-  int PLUSASSIGN = 70;
+  int REM = 70;
   /** RegularExpression Id. */
-  int MINUSASSIGN = 71;
+  int PLUSASSIGN = 71;
   /** RegularExpression Id. */
-  int STARASSIGN = 72;
+  int MINUSASSIGN = 72;
   /** RegularExpression Id. */
-  int SLASHASSIGN = 73;
+  int STARASSIGN = 73;
   /** RegularExpression Id. */
-  int ANDASSIGN = 74;
+  int SLASHASSIGN = 74;
   /** RegularExpression Id. */
-  int ORASSIGN = 75;
+  int ANDASSIGN = 75;
   /** RegularExpression Id. */
-  int XORASSIGN = 76;
+  int ORASSIGN = 76;
   /** RegularExpression Id. */
-  int REMASSIGN = 77;
+  int XORASSIGN = 77;
+  /** RegularExpression Id. */
+  int REMASSIGN = 78;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -179,6 +181,7 @@ public interface QueryParserConstants {
     "\"query\"",
     "\"calc\"",
     "\"list\"",
+    "\"solution\"",
     "\"length\"",
     "\"term\"",
     "\"resource\"",

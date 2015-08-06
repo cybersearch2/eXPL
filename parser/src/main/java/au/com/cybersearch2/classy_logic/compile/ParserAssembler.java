@@ -17,6 +17,7 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
@@ -213,9 +214,20 @@ public class ParserAssembler implements LocaleListener
 	 */
 	public void addTemplate(String templateName, Operand term)
 	{
-		Template template = templateMap.get(templateName);
-		template.addTerm((Term)term);
+	    addTemplate(templateName, term, false);
 	}
+
+    /**
+     * Add a term to a template
+     * @param templateName
+     * @param term Operand object
+     * @param isSolution Flag to indicate return this term as Calculator result
+     */
+    public void addTemplate(String templateName, Operand term, boolean isSolution)
+    {
+        Template template = templateMap.get(templateName);
+        template.addTerm((Term)term, isSolution);
+    }
 
 	/**
 	 * Set template properties - applies only to Calculator
@@ -375,8 +387,8 @@ public class ParserAssembler implements LocaleListener
 	    if (parameterList == null)
 	        parameterList = new ArrayList<String>();
 	    parameterList.add(axiomName);
-	    // Create a variable to permit setting the parameter in a script
-	    operandMap.addOperand(axiomName, null);
+	    if (!axiomListMap.containsKey(axiomName))
+	        createAxiom(axiomName);
 	}
 
 	/**
@@ -537,6 +549,16 @@ public class ParserAssembler implements LocaleListener
     {
 	    List<String> axiomTermNameList = null;
         Template template = templateMap.get(templateName);
+        if (template == null)
+            throw new ExpressionException("Template \"" + templateName + "\" not found");
+        if (template.isChoice())
+        {
+            // Get axiom source for this Choice and determine it's scope
+            AxiomSource choiceAxiomSource = scope.getGlobalScope().findAxiomSource(templateName); 
+            if (choiceAxiomSource == null)
+                choiceAxiomSource = scope.getAxiomSource(templateName);
+            return choiceAxiomSource.getAxiomTermNameList();
+        }
         if (template != null)
         {
             axiomTermNameList = new ArrayList<String>();
@@ -710,7 +732,7 @@ public class ParserAssembler implements LocaleListener
         }
         if (isAxiomListVariable)
         {   // Return dynamic AxiomListVariable instance
-            axiomListSpec = new AxiomListSpec(listName, (Variable) operandMap.get(listName), param1, param2);
+            axiomListSpec = new AxiomListSpec(listName, (AxiomOperand) operandMap.get(listName), param1, param2);
             return new AxiomListVariable(axiomListSpec);
         }
         axiomListSpec = new AxiomListSpec((AxiomList)itemList, param1, param2);

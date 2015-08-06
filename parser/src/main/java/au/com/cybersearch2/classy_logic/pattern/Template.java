@@ -15,7 +15,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,6 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -37,7 +41,40 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class Template extends Structure 
 {
-	/** Unique identity generator */
+	public static final String ITERABLE = "iterable";
+    public static final String TERMNAMES = "termnames";
+    public static Iterable<AxiomTermList> EMPTY_ITERABLE;
+    public static List<String> EMPTY_NAMES_LIST;
+  
+    static
+    {
+        EMPTY_ITERABLE = new Iterable<AxiomTermList>(){
+
+            @Override
+            public Iterator<AxiomTermList> iterator()
+            {
+                return new Iterator<AxiomTermList>(){
+
+                    @Override
+                    public boolean hasNext()
+                    {
+                        return false;
+                    }
+
+                    @Override
+                    public AxiomTermList next()
+                    {
+                        return null;
+                    }
+
+                    @Override
+                    public void remove()
+                    {
+                    }};
+            }};
+        EMPTY_NAMES_LIST = Collections.emptyList();
+    }
+    /** Unique identity generator */
     static protected AtomicInteger referenceCount;
     /** Key to match with Axiom name for unification */
 	protected String key;
@@ -49,6 +86,8 @@ public class Template extends Structure
     protected Template next;
     /** Flag true if template used to make selection. Used by Calculator. */
     protected boolean choice;
+    /** Calculator solution as single term (optional) */
+    protected Term solutionTerm;
     
 	static
 	{
@@ -166,27 +205,6 @@ public class Template extends Structure
 	}
 
 	/**
-	 * Returns Term referenced by name
-	 * @param name String
-	 * @return Term object or null if not found
-	 */
-    public Term getTermByName(String name)
-    {
-    	return super.getTermByName(name);
-    }
-
-	/**
-	 * Returns Term referenced by index
-	 * @param index int
-	 * @return Term Object
-	 */
-	@Override
-    public Term getTermByIndex(int index)
-    {
-    	return super.getTermByIndex(index);
-    }
-
-	/**
 	 * Returns identity of this structure
 	 * @return int
 	 */
@@ -252,14 +270,17 @@ public class Template extends Structure
 		return isMutable;
 	}
 
-	/**
-	 * Exposes super addTerm()
-	 * @param term Term object
-	 */
-	public void addTerm(Term term)
-	{
-		super.addTerm(term);
-	}
+    /**
+     * Exposes super addTerm()
+     * @param term Term object
+     * @param isSolution 
+     */
+    public void addTerm(Term term, boolean isSolution)
+    {
+        super.addTerm(term);
+        if (isSolution)
+            solutionTerm = term;
+    }
 
 	/**
 	 * Returns an axiom containing the values of this template and 
@@ -268,16 +289,37 @@ public class Template extends Structure
 	 */
 	public Axiom toAxiom()
 	{
-		Axiom axiom = new Axiom(name);
-		for (Term term: termList)
-		{
-			if (!term.isEmpty() && !term.getName().isEmpty())
-			{
-				String termName = NameParser.getNamePart(term.getName());
-				Parameter param = new Parameter(termName, term.getValue());
-				axiom.addTerm(param);
-			}
-		}
+        Axiom axiom = null;
+        if (solutionTerm != null)
+        {
+            String termName = NameParser.getNamePart(solutionTerm.getName());
+            axiom = new Axiom(termName);
+            Iterable<AxiomTermList> iterable = EMPTY_ITERABLE;
+            List<String> termNamesList = EMPTY_NAMES_LIST;
+            if (!solutionTerm.isEmpty())
+            {
+                AxiomList axiomList = (AxiomList)solutionTerm.getValue();
+                if (!axiomList.isEmpty())
+                    iterable = axiomList.getIterable();
+                if (axiomList.getAxiomTermNameList() != null)
+                    termNamesList = axiomList.getAxiomTermNameList();
+            }
+            axiom.addTerm(new Parameter(ITERABLE, iterable));
+            axiom.addTerm(new Parameter(TERMNAMES, termNamesList));
+        }
+        else
+        {
+            axiom = new Axiom(name);
+    		for (Term term: termList)
+    		{
+    			if (!term.isEmpty() && !term.getName().isEmpty())
+    			{
+    				String termName = NameParser.getNamePart(term.getName());
+    				Parameter param = new Parameter(termName, term.getValue());
+    				axiom.addTerm(param);
+    			}
+    		}
+        }
 		return axiom;
 	}
 

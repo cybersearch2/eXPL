@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -385,7 +386,7 @@ public class Evaluator extends DelegateParameter
 		case PLUS: // "+"
 		case PLUSASSIGN: // "+"
 			if (isValidStringOperation(leftTerm))
-				return leftTerm.getValue().toString() + rightTerm.getValue().toString();
+				return ((Concaten<?>)leftTerm).concatenate(rightTerm);
 		case MINUS: // "-"
 		case STAR: // "*"
 		case SLASH: // "/"

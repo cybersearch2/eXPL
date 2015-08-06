@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.list;
 
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
@@ -39,7 +40,7 @@ public class AxiomListSpec
     protected Operand axiomExpression;
     protected Operand termExpression;
     protected String suffix;
-    protected Variable axiomListVariable;
+    protected AxiomOperand axiomListVariable;
     
     public AxiomListSpec(AxiomList axiomList, Operand axiomExpression, Operand termExpression)
     {
@@ -50,7 +51,7 @@ public class AxiomListSpec
         init();
     }
 
-    public AxiomListSpec(String listName, Variable axiomListVariable, Operand axiomExpression, Operand termExpression)
+    public AxiomListSpec(String listName, AxiomOperand axiomListVariable, Operand axiomExpression, Operand termExpression)
     {
         this.listName = listName;
         this.axiomListVariable = axiomListVariable;

@@ -168,6 +168,7 @@ TOKEN :
 | < QUERY: "query" >
 | < CALC: "calc" >
 | < LIST: "list" >
+| < SOLUTION: "solution" >
 | < LENGTH: "length" >
 | < TERM: "term" >
 | < RESOURCE: "resource" >
@@ -573,7 +574,6 @@ Operand VariableDeclaration(ParserAssembler parserAssembler) :
      if (expression != null) 
          varType.setProperty(VariableType.EXPRESSION, expression);
      Operand operand = varType.getInstance(parserAssembler, nameToken.image);
-     operandMap.addOperand(operand);
      return operand;
   }
 }
@@ -646,10 +646,18 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
 void CalculatorExpression(int loop_number, String loopName, String templateName, ParserAssembler parserAssembler) :
 {
   Token scToken = null;
+  Token keywordToken;
   Operand expression = null;
   Operand innerLoop = null;
 }
 {
+  ( keywordToken=<AXIOM> | keywordToken=<SOLUTION> ) expression = AxiomVariable(parserAssembler) 
+  {
+    boolean isSolution = keywordToken.kind == QueryParserConstants.SOLUTION;
+    parserAssembler.getOperandMap().addOperand(expression);
+    parserAssembler.addTemplate(loopName, expression, isSolution);
+  }
+  |
   TemplateExpression(loopName, parserAssembler)
   |
   ( scToken=":" | scToken="?" )? expression=Expression(parserAssembler) 
@@ -684,6 +692,24 @@ Operand InnerCalculator(int loop_number, String templateName, ParserAssembler pa
   }
 }
 
+Operand AxiomVariable(ParserAssembler parserAssembler) :
+{
+    Token axiomToken;
+    Operand expression = null;
+}
+{
+  axiomToken=<IDENTIFIER> ( "=" expression=Expression(parserAssembler) )?
+  {
+     String axiomName = axiomToken.image;
+     VariableType varType = new VariableType(OperandType.AXIOM);
+     if (expression != null) 
+         varType.setProperty(VariableType.EXPRESSION, expression);
+     Operand operand = varType.getInstance(parserAssembler, axiomName);
+     parserAssembler.setParameter(axiomName);
+     return operand;
+  }
+} 
+
 
 
 Group GroupDeclaration(String template, String name, ParserAssembler parserAssembler) :
@@ -716,14 +742,22 @@ void AxiomDeclaration(ParserAssembler parserAssembler) :
     String axiomName;
 }
 {
-  <AXIOM> axiomName=Axiom(parserAssembler) [ "(" TermName(axiomName, parserAssembler) ("," TermName(axiomName, parserAssembler) )*  ")" ] 
-                                           ":"  
-                                           ( ( AxiomItem(axiomName, parserAssembler) ( "," AxiomItem(axiomName, parserAssembler) )* ) 
-                                             |
-                                             ResourceDeclaration(axiomName, parserAssembler)
-                                             |
-                                             ParameterDeclaration(axiomName, parserAssembler) )
+  <AXIOM> axiomName=Axiom(parserAssembler) AxiomSpecification(axiomName, parserAssembler) 
 } 
+
+
+void AxiomSpecification(String axiomName, ParserAssembler parserAssembler) :
+{
+}
+{
+  [ "(" TermName(axiomName, parserAssembler) ("," TermName(axiomName, parserAssembler) )*  ")" ] 
+  ":"  
+     ( ( AxiomItem(axiomName, parserAssembler) ( "," AxiomItem(axiomName, parserAssembler) )* ) 
+     |
+     ResourceDeclaration(axiomName, parserAssembler)
+     |
+     ParameterDeclaration(axiomName, parserAssembler) )
+}
 
 void ChoiceDeclaration(ParserAssembler parserAssembler) :
 {
@@ -1358,8 +1392,8 @@ Operand Argument(ParserAssembler parserAssembler) :
      String name = (nameToken == null) ? Term.ANONYMOUS : nameToken.image;
      varType.setProperty(VariableType.EXPRESSION, expression);
      Operand operand = varType.getInstance(parserAssembler, name);
-     if (nameToken != null)
-         operandMap.addOperand(operand);
+     //if (nameToken != null)
+     //    operandMap.addOperand(operand);
      return operand;
   }
 }

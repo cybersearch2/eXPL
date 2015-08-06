@@ -160,7 +160,7 @@ public class Structure
 	 * @param name String
 	 * @return Term
 	 */
-    protected Term getTermByName(String name)
+    public Term getTermByName(String name)
     {
 		Term result = null;
     	if (termMap == null)
@@ -170,7 +170,7 @@ public class Structure
 	    return termMap.get(name.toUpperCase());
     }
 
-    protected Term getTermByIndex(int index)
+    public Term getTermByIndex(int index)
     {
     	if ((termList == null) || (index >= termList.size()) ||( index < 0))
     		return null;
@@ -228,7 +228,7 @@ public class Structure
 	 * Add a parameter
 	 * @param param Term object
 	 */
-	protected void addTerm(Term param)
+	public void addTerm(Term param)
 	{
 		if (termList == null) // First time after name-only constructor invoked
 			termList = new ArrayList<Term>();

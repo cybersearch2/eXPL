@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -23,7 +24,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 8 Dec 2014
  */
-public class StringOperand  extends ExpressionParameter<String> 
+public class StringOperand  extends ExpressionParameter<String> implements Concaten<String>
 {
 
 	/**
@@ -114,5 +115,11 @@ public class StringOperand  extends ExpressionParameter<String>
 	{
 		setValue(value.toString());
 	}
+
+    @Override
+    public String concatenate(Operand leftOperand)
+    {
+        return value.toString() + leftOperand.getValue().toString();
+    }
 
 }

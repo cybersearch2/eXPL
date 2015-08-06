@@ -257,11 +257,12 @@ public class Scope
 
 	/**
 	 * Returns context of this scope
+	 * @param isFunctionScope Flag to indicate function scope
 	 * @return ScopeContext object
 	 */
-	public ScopeContext getContext() 
+	public ScopeContext getContext(boolean isFunctionScope) 
 	{
-		return new ScopeContext(this);
+		return new ScopeContext(this, isFunctionScope);
 	}
 
 	/**

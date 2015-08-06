@@ -54,7 +54,7 @@ public abstract class DelegateParameter extends Parameter implements Operand
 		delegateClassMap.put(Double.class, new DoubleOperand(DELEGATE_NAME));
 		delegateClassMap.put(BigDecimal.class, new BigDecimalOperand(DELEGATE_NAME));
 		delegateClassMap.put(AxiomTermList.class, new AssignOnlyOperand(DELEGATE_NAME));
-        delegateClassMap.put(AxiomList.class, new AssignOnlyOperand(DELEGATE_NAME));
+        delegateClassMap.put(AxiomList.class, new AxiomOperand(DELEGATE_NAME));
 		delegateClassMap.put(Null.class, null);
 	}
 	

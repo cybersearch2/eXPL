@@ -79,7 +79,7 @@ public class CallOperand extends Variable
     protected boolean visit(Term term, OperandVisitor visitor, int depth)
     {
         // Only Terms which also implement Operand interface will have left and right Operands
-        if (!(term instanceof Operand))
+        if (!(term instanceof Evaluator))
         {
             visitor.next(term, depth);
             return true;

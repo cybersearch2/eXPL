@@ -41,6 +41,8 @@ public class Choice
     protected List<Axiom> choiceAxiomList;
     /** List of operands, with each operand representing the selection term of one row */
     protected List<Operand> variableList;
+    /** Choice term names */
+    protected List<String> termNameList;
 
 	/**
 	 * Construct Choice object
@@ -63,7 +65,8 @@ public class Choice
 			choiceAxiomList.add(iterator.next());
 		// Populate variableList from operand map using axiom term name keys
 		variableList = new ArrayList<Operand>();
-	    for (String termName: choiceAxiomSource.getAxiomTermNameList())
+		termNameList = choiceAxiomSource.getAxiomTermNameList();
+	    for (String termName: termNameList)
 	    	variableList.add(parserAssembler.getOperandMap().get(termName));
 	}
 
@@ -76,7 +79,12 @@ public class Choice
 		return choiceAxiomList;
 	}
 
-	/**
+	public List<String> getTermNameList()
+    {
+        return termNameList;
+    }
+
+    /**
 	 * Complete solution for given parameters
      * @param axiom Initializer axiom
 	 * @param solution Solution containing query results so far

@@ -34,17 +34,20 @@ public class ScopeContext
     protected Map<Operand, Object> operandValueMap;
 	/** Map of global operands and values used to save and restore initial state */
     protected Map<Operand, Object> globalOperandValueMap;
+    /** Flag to indicate function scope */
+    protected boolean isFunctionScope;
 
 	/**
 	 * Construct ScopeContext object
 	 * @param scope Scope
 	 */
-	public ScopeContext(Scope scope) 
+	public ScopeContext(Scope scope, boolean isFunctionScope) 
 	{
 		this.scope = scope;
+		this.isFunctionScope = isFunctionScope;
 		OperandMap operandMap = scope.getParserAssembler().getOperandMap();
 		operandValueMap = operandMap.getOperandValues();
-		if (!QueryProgram.GLOBAL_SCOPE.equals(scope.getName()))
+		if (!isFunctionScope && !QueryProgram.GLOBAL_SCOPE.equals(scope.getName()))
 		{
 			OperandMap globalOperandMap = scope.getGlobalScope().getParserAssembler().getOperandMap();
 			globalOperandValueMap = globalOperandMap.getOperandValues();

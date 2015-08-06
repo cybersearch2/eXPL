@@ -84,7 +84,12 @@ public class OperandMap
 				((Parameter)entry.getValue()).clearValue();
 		}
 	}
-	
+
+	public void duplicateOperandCheck(String name)
+	{
+	    if (operandMap.containsKey(name))
+	        throw new ExpressionException("Duplicate Operand name \"" + name + "\" encountered");
+	}
     /**
      * Add new Variable operand of specified name, unless it already exists
      * @param name
@@ -113,6 +118,7 @@ public class OperandMap
     {
 		if (operand.getName().isEmpty())
 			throw new ExpressionException("addOperand() passed annonymous object");
+		duplicateOperandCheck(operand.getName());
 		operandMap.put(operand.getName(), operand);
     }
 

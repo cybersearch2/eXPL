@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
@@ -116,6 +117,9 @@ public class VariableType
         case DECIMAL:
         	operand = !hasExpression ? new BigDecimalOperand(name) : new BigDecimalOperand(name, expression);
 	    	break;
+        case AXIOM:
+            operand = !hasExpression ? new AxiomOperand(name) : new AxiomOperand(name, expression);
+            break;
         case CURRENCY:
         	operand = !hasExpression ? 
         			  new CurrencyOperand(name, parserAssembler.getScopeLocale()) : 

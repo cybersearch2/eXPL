@@ -185,7 +185,7 @@ public class QueryProgram extends QueryLauncher
 	public Result executeQuery(QueryParams queryParams)
 	{
 		Scope scope = queryParams.getScope();
-		ScopeContext scopeContext = scope.getContext();
+		ScopeContext scopeContext = scope.getContext(false);
 		Map<String, Iterable<Axiom>> listMap = null;
 		Map<String, Axiom> axiomMap = null;
 		try

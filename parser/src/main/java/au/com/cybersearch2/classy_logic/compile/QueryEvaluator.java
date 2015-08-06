@@ -46,7 +46,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator
 
     /**
      * Construct a QueryEvaluator object for a query specified by query parameters
-     * @param queryName 
+     * @param queryParams  Query parameters
      */
     public QueryEvaluator(QueryParams queryParams)
     {
@@ -76,34 +76,44 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator
         if (argumentList.size() > 0)
         {
             Map<String, Object> properties = new HashMap<String, Object>();
-            queryParams.putProperties(templateName, properties);
             for (Variable argument: argumentList)
                 properties.put(argument.getName(), argument.getValue());
+            queryParams.putProperties(templateName, properties);
         }
         // Set SolutionHander to collect results
         final List<Axiom> resultList = new ArrayList<Axiom>();
         SolutionHandler solutionHandler = new SolutionHandler(){
-
+            SolutionHandler parentSolutionHandler = queryParams.getSolutionHandler();
             @Override
             public boolean onSolution(Solution solution)
             {
                 Axiom axiom = solution.getAxiom(templateName);
                 if (axiom != null)
+                {   
+                    if ((parentSolutionHandler != null) &&
+                        !parentSolutionHandler.onSolution(solution))
+                        return false;
                     resultList.add(axiom);
+                }
                 return true;
             }};
         queryParams.setSolutionHandler(solutionHandler);
         // Do query using QueryLauncher utility class
         Scope scope = queryParams.getScope();
-        ScopeContext scopeContext = scope.getContext();
+        ScopeContext scopeContext = scope.getContext(true);
         AxiomList axiomList = null;
         try
         {
             launch(queryParams);
             // Marshall Axioms in result list into AxiomList object
             axiomList = new AxiomList(templateName, templateName);
+            ParserAssembler parserAssembler = scope.getGlobalParserAssembler();
+            if (parserAssembler.getTemplate(templateName) == null)
+                parserAssembler = scope.getParserAssembler();
             List<String> axiomTermNameList = 
-                scope.getParserAssembler().setAxiomTermNameList(templateName, axiomList);
+                parserAssembler.setAxiomTermNameList(templateName, axiomList);
+            if (axiomTermNameList != null)
+                axiomList.setAxiomTermNameList(axiomTermNameList);
             for (int i = 0; i < resultList.size(); i++)
             {   // Each axiom is wrapped in an AxiomTermList to allow access from script
                 AxiomTermList axiomTermList = new AxiomTermList(templateName, templateName);
