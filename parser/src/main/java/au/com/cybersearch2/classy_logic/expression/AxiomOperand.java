@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -128,6 +129,20 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     {   // There is no valid evaluation involving an axiom resulting in a boolean
         return Boolean.FALSE;
     }
+
+    /**
+     * Execute operation for expression
+     * @param id Identity of caller, which must be provided for backup()
+     * @return Flag set true if evaluation is to continue
+     */
+    public EvaluationStatus evaluate(int id)
+    {
+        EvaluationStatus status = super.evaluate(id);
+        if (isEmpty())
+            setValue(new AxiomList(name,name));
+        return status;
+    }
+    
 
     @Override
     public AxiomList concatenate(Operand rightOperand)

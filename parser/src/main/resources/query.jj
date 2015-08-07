@@ -52,6 +52,7 @@ import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
+import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionParameter;
@@ -698,19 +699,54 @@ Operand AxiomVariable(ParserAssembler parserAssembler) :
     Operand expression = null;
 }
 {
-  axiomToken=<IDENTIFIER> ( "=" expression=Expression(parserAssembler) )?
+  axiomToken=<IDENTIFIER> "="
+  ( 
+     expression=Expression(parserAssembler) 
+  | 
+     expression=AxiomList(axiomToken.image, parserAssembler) 
+  )
   {
      String axiomName = axiomToken.image;
      VariableType varType = new VariableType(OperandType.AXIOM);
-     if (expression != null) 
-         varType.setProperty(VariableType.EXPRESSION, expression);
+     varType.setProperty(VariableType.EXPRESSION, expression);
      Operand operand = varType.getInstance(parserAssembler, axiomName);
      parserAssembler.setParameter(axiomName);
      return operand;
   }
 } 
 
+Operand AxiomList(String axiomName, ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+}
+{
+  params[0] = AxiomInitializer(axiomName, parserAssembler)
+  ( 
+    params[1] = AxiomInitializer(axiomName, parserAssembler)
+    {
+      params[0] = new Evaluator(params[0], "+=", params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
 
+Operand AxiomInitializer(String axiomName, ParserAssembler parserAssembler) :
+{
+    Operand initializeList = null;
+}
+{
+  <LBRACE> ( initializeList = ArgumentList(parserAssembler) )? <RBRACE>
+  {
+     VariableType varType = new VariableType(OperandType.AXIOM);
+     if (initializeList != null)
+        varType.setProperty(VariableType.EXPRESSION, parserAssembler.getParameterOperand(axiomName, initializeList));
+     Operand operand = varType.getInstance(parserAssembler, axiomName);
+     parserAssembler.setParameter(axiomName);
+     return operand;
+  }
+}
 
 Group GroupDeclaration(String template, String name, ParserAssembler parserAssembler) :
 {
@@ -1389,11 +1425,9 @@ Operand Argument(ParserAssembler parserAssembler) :
   {
      if (varType == null)
          varType = new VariableType(OperandType.NULL);
-     String name = (nameToken == null) ? Term.ANONYMOUS : nameToken.image;
+     String name = (nameToken == null) ? expression.getName() : nameToken.image;
      varType.setProperty(VariableType.EXPRESSION, expression);
      Operand operand = varType.getInstance(parserAssembler, name);
-     //if (nameToken != null)
-     //    operandMap.addOperand(operand);
      return operand;
   }
 }

@@ -16,6 +16,7 @@ eXPL v1.12
 13. Add Concaten interface to generalize Evaluator concatenation operation
 14. Add AxiomUtils for deep copy of Axioms and axiom Terms
 15. Enhance QueryLauncher by allowing passing of arguments from QueryParams to Calculator execution calls
+16. Add initialization of axioms to Calculator and return of solution from Template as AxiomList
 
 
 

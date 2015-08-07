@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -613,6 +614,18 @@ public class ParserAssembler implements LocaleListener
 		templateMap.put(chainName, chainTemplate);
 	}
 
+	/**
+	 * Returns an operand which dynamically creates an axiom from an argument list
+	 * The axiom is wrapped in an AxiomList to allow interaction with other AxiomLists.
+	 * @param axiomName Name of axiom
+     * @param argumentExpression Operand with one or more arguments contained in it. Must not be null.
+     * @return Operand object
+	 */
+	public Operand getParameterOperand(String axiomName, Operand argumentExpression)
+	{
+        return new ParameterOperand(axiomName, argumentExpression);
+	}
+	
 	/**
 	 * Returns operand which invokes a function call in script. The function can be
 	 * provided in an external library or a script query with optional parameters.

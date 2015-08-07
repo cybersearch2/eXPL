@@ -23,8 +23,10 @@ import java.util.Map;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.ScopeContext;
-import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
+import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
@@ -68,7 +70,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator
      * @see au.com.cybersearch2.classy_logic.interfaces.CallEvaluator#evaluate(java.util.List)
      */
     @Override
-    public Object evaluate(List<Variable> argumentList)
+    public Object evaluate(List<Term> argumentList)
     {
         QuerySpec querySpec = queryParams.getQuerySpec();
         final String templateName = getCalculatorKeyName(querySpec).getTemplateName();
@@ -76,24 +78,39 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator
         if (argumentList.size() > 0)
         {
             Map<String, Object> properties = new HashMap<String, Object>();
-            for (Variable argument: argumentList)
+            for (Term argument: argumentList)
                 properties.put(argument.getName(), argument.getValue());
             queryParams.putProperties(templateName, properties);
         }
         // Set SolutionHander to collect results
         final List<Axiom> resultList = new ArrayList<Axiom>();
+        final AxiomList[] axiomListHolder = new AxiomList[1];
         SolutionHandler solutionHandler = new SolutionHandler(){
-            SolutionHandler parentSolutionHandler = queryParams.getSolutionHandler();
             @Override
             public boolean onSolution(Solution solution)
             {
                 Axiom axiom = solution.getAxiom(templateName);
                 if (axiom != null)
-                {   
-                    if ((parentSolutionHandler != null) &&
-                        !parentSolutionHandler.onSolution(solution))
-                        return false;
                     resultList.add(axiom);
+                else
+                {
+                    AxiomList axiomList = solution.getAxiomList(templateName);
+                    if (axiomList != null)
+                    {
+                        List<Axiom> dupAxioms = AxiomUtils.copyItemList(axiomList.getName(), axiomList);
+                        AxiomList dupAxiomList = new AxiomList(axiomList.getName(), axiomList.getName());
+                        dupAxiomList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
+                        int index = 0;
+                        for (Axiom dupAxiom: dupAxioms)
+                        {
+                            AxiomTermList axiomTermList = new AxiomTermList(axiomList.getName(), axiomList.getName());
+                            axiomTermList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
+                            axiomTermList.setAxiom(dupAxiom);
+                            dupAxiomList.assignItem(index++, axiomTermList);
+                        }
+                        axiomListHolder[0] = dupAxiomList;
+                        return false;
+                    }
                 }
                 return true;
             }};
@@ -101,26 +118,29 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator
         // Do query using QueryLauncher utility class
         Scope scope = queryParams.getScope();
         ScopeContext scopeContext = scope.getContext(true);
-        AxiomList axiomList = null;
         try
         {
             launch(queryParams);
-            // Marshall Axioms in result list into AxiomList object
-            axiomList = new AxiomList(templateName, templateName);
-            ParserAssembler parserAssembler = scope.getGlobalParserAssembler();
-            if (parserAssembler.getTemplate(templateName) == null)
-                parserAssembler = scope.getParserAssembler();
-            List<String> axiomTermNameList = 
-                parserAssembler.setAxiomTermNameList(templateName, axiomList);
-            if (axiomTermNameList != null)
-                axiomList.setAxiomTermNameList(axiomTermNameList);
-            for (int i = 0; i < resultList.size(); i++)
-            {   // Each axiom is wrapped in an AxiomTermList to allow access from script
-                AxiomTermList axiomTermList = new AxiomTermList(templateName, templateName);
-                axiomTermList.setAxiom(resultList.get(i));
+            if (axiomListHolder[0] == null)
+            {
+                // Marshall Axioms in result list into AxiomList object
+                AxiomList axiomList = new AxiomList(templateName, templateName);
+                ParserAssembler parserAssembler = scope.getGlobalParserAssembler();
+                if (parserAssembler.getTemplate(templateName) == null)
+                    parserAssembler = scope.getParserAssembler();
+                List<String> axiomTermNameList = 
+                    parserAssembler.setAxiomTermNameList(templateName, axiomList);
                 if (axiomTermNameList != null)
-                    axiomTermList.setAxiomTermNameList(axiomTermNameList);
-                axiomList.assignItem(i, axiomTermList);
+                    axiomList.setAxiomTermNameList(axiomTermNameList);
+                for (int i = 0; i < resultList.size(); i++)
+                {   // Each axiom is wrapped in an AxiomTermList to allow access from script
+                    AxiomTermList axiomTermList = new AxiomTermList(templateName, templateName);
+                    axiomTermList.setAxiom(resultList.get(i));
+                    if (axiomTermNameList != null)
+                        axiomTermList.setAxiomTermNameList(axiomTermNameList);
+                    axiomList.assignItem(i, axiomTermList);
+                }
+                axiomListHolder[0] = axiomList;
             }
             
         }
@@ -130,7 +150,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator
             // Scope restored to original state
             scopeContext.resetScope();
         }
-        return axiomList;
+        return axiomListHolder[0];
     }
 
 }

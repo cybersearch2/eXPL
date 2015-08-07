@@ -17,8 +17,6 @@ package au.com.cybersearch2.classy_logic.interfaces;
 
 import java.util.List;
 
-import au.com.cybersearch2.classy_logic.expression.Variable;
-
 /**
  * CallEvaluator
  * @author Andrew Bowley
@@ -27,5 +25,5 @@ import au.com.cybersearch2.classy_logic.expression.Variable;
 public interface CallEvaluator
 {
     String getName();
-    Object evaluate(List<Variable> argumentList);
+    Object evaluate(List<Term> argumentList);
 }

@@ -34,7 +34,7 @@ public class Variable extends DelegateParameter
 
 	/**
 	 * Construct a Variable object
-	 * @param name
+	 * @param name Name of variable
 	 */
 	public Variable(String name) 
 	{
@@ -43,8 +43,8 @@ public class Variable extends DelegateParameter
 
 	/**
 	 * Construct a Variable object which uses an Expression operand to evaluate it's value
-	 * @param name
-	 * 
+	 * @param name Name of variable
+	 * @param expression Operand to initialize this Variable upon evaluation
 	 */
 	public Variable(String name, Operand expression) 
 	{
