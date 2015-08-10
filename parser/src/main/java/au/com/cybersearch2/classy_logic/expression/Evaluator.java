@@ -23,7 +23,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @see DelegateParameter
  * @see Variable
  */
-public class Evaluator extends DelegateParameter
+public class Evaluator extends DelegateParameter implements Concaten<String>
 {
     /** Not a number */
 	private static final String NAN = "NaN"; //Double.valueOf(Double.NaN).toString();
@@ -712,5 +712,11 @@ public class Evaluator extends DelegateParameter
 		// This is defensive only as Operands are expected to only support Delegate classes
 		return DelegateParameter.isDelegateClass(value.getClass()) ? value : new Null();
 	}
+
+    @Override
+    public String concatenate(Operand rightOperand)
+    {
+        return value.toString() + rightOperand.getValue().toString();
+    }
 
 }

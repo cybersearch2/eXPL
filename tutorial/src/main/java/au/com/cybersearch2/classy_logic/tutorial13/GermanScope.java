@@ -43,7 +43,7 @@ public class GermanScope
 			"calc format_total(string total_text = translate[Total] + \" + gst: \" + format(total));\n" +
 			"scope german (language=\"de\", region=\"DE\")\n" +
 			"{\n" +
-			"  query item_query(item : charge) >> calc(charge_plus_gst) >> calc(format_total);\n" +
+			"  query item_query(item : charge) >> (charge_plus_gst) >> (format_total);\n" +
 	        "}";
 
 	/**

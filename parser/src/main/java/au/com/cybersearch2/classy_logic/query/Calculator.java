@@ -119,6 +119,8 @@ public class Calculator implements SolutionFinder
 				throw new QueryExecutionException("Axiom key \"" + axiom.getName() + "\" does not match Template key \"" + template.getKey() + "\"");
 			axiom = seedAxiom;
 		}
+		else
+		    axiom = solution.getAxiom(template.getKey());
 		boolean unificationSuccess = true;
 		if (axiom != null)
 		{

@@ -35,7 +35,7 @@ public class QuerySpec
 	/** Query type: logic, calculator, unknown (ie. unassigned) */
 	protected QueryType queryType;
 	/** List of axiom key / template name pairs */
-	protected List<KeyName> keyNameList;
+	protected ArrayList<KeyName> keyNameList;
 	/** Specificatiion list for chained queries */
 	protected List<QuerySpec> queryChainList;
 	/** Properties for calculations referenced by template name */
@@ -48,7 +48,7 @@ public class QuerySpec
 	public QuerySpec(String name) 
 	{
 		this.name = name;
-		queryType = QueryType.unknown;
+		queryType = QueryType.logic;
 		keyNameList = new ArrayList<KeyName>();
 		propertiesMap = new HashMap<String, Map<String, Object>>();
 	}
@@ -59,20 +59,16 @@ public class QuerySpec
 	 */
 	public void addKeyName(KeyName keyName)
 	{
-		addKeyName(keyName, QueryType.logic);
+        keyNameList.add(keyName);
 	}
 
 	/**
 	 * Add axiom key / template name pair for specified query type
-	 * @param keyName KeyName object
 	 * @param queryType
 	 */
-	public void addKeyName(KeyName keyName, QueryType queryType)
+	public void setQueryType(QueryType queryType)
 	{
-		keyNameList.add(keyName);
-		// Only change query type away from unknown
-		if ((queryType != QueryType.unknown) && (this.queryType == QueryType.unknown))
-			this.queryType = queryType;
+		this.queryType = queryType;
 	}
 
 	/**
@@ -80,11 +76,10 @@ public class QuerySpec
 	 * @param keyName KeyName object, axiomKey may be empty
 	 * @param properties Calculator properties - may be empty
 	 */
-	public void addCalculator(KeyName keyName, Map<String, Object> properties) 
+	public void putProperties(KeyName keyName, Map<String, Object> properties) 
 	{
 		if ((properties != null) && properties.size() > 0)
 			propertiesMap.put(keyName.getTemplateName(), properties);
-		addKeyName(keyName, QueryType.calculator);
 	}
 
 	/**
@@ -143,6 +138,11 @@ public class QuerySpec
 		return propertiesMap.get(tempateName);
 	}
 
+	public boolean isHeadQuery()
+	{
+	    return queryChainList == null;
+	}
+	
 	/**
 	 * Returns new QuerySpec object chained to this query specification
 	 * @return QuerySpec object

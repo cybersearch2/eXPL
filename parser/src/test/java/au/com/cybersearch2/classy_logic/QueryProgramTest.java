@@ -90,7 +90,7 @@ public class QueryProgramTest
 		parserAssembler.createAxiom(AXIOM_KEY);
 		parserAssembler.addAxiom(AXIOM_KEY, new Parameter("x", Integer.valueOf(3)));
 		parserAssembler.saveAxiom(AXIOM_KEY);
-		parserAssembler.createTemplate(TEMPLATE_NAME);
+		parserAssembler.createTemplate(TEMPLATE_NAME, false);
 		Template template = parserAssembler.getTemplate(TEMPLATE_NAME);
 		OperandMap operandMap = parserAssembler.getOperandMap();
 		operandMap.addOperand(OPERAND_NAME, null);
@@ -139,7 +139,7 @@ public class QueryProgramTest
 		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
 		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
 		parserAssembler.createAxiom(AXIOM_KEY);
-		parserAssembler.createTemplate(TEMPLATE_NAME);
+		parserAssembler.createTemplate(TEMPLATE_NAME, false);
 		Variable variable = new Variable(VARIABLE_NAME);
 		parserAssembler.addTemplate(TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
@@ -172,7 +172,7 @@ public class QueryProgramTest
 		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
 		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
 		parserAssembler.createAxiom(AXIOM_KEY);
-		parserAssembler.createTemplate(TEMPLATE_NAME);
+		parserAssembler.createTemplate(TEMPLATE_NAME, false);
 		Variable variable = new Variable(VARIABLE_NAME);
 		parserAssembler.addTemplate(TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
@@ -184,7 +184,7 @@ public class QueryProgramTest
 		when(keyname2.getAxiomKey()).thenReturn(AXIOM_KEY2);
 		when(keyname2.getTemplateName()).thenReturn(TEMPLATE_NAME2);
 		parserAssembler.createAxiom(AXIOM_KEY2);
-		parserAssembler.createTemplate(TEMPLATE_NAME2);
+		parserAssembler.createTemplate(TEMPLATE_NAME2, false);
 		Variable variable2 = new Variable(VARIABLE_NAME);
 		parserAssembler.addTemplate(TEMPLATE_NAME2, variable2);
 		Parameter param2 = new Parameter(VARIABLE_NAME, "eureka2!");
@@ -217,7 +217,7 @@ public class QueryProgramTest
 		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
 		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
 		parserAssembler.createAxiom(AXIOM_KEY);
-		parserAssembler.createTemplate(TEMPLATE_NAME);
+		parserAssembler.createTemplate(TEMPLATE_NAME, false);
 		Variable variable = new Variable(VARIABLE_NAME);
 		parserAssembler.addTemplate(TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
@@ -229,12 +229,13 @@ public class QueryProgramTest
 		KeyName keyname2 = mock(KeyName.class);
 		when(keyname2.getAxiomKey()).thenReturn("");
 		when(keyname2.getTemplateName()).thenReturn(TEMPLATE_NAME2);
-		parserAssembler.createTemplate(TEMPLATE_NAME2);
+		parserAssembler.createTemplate(TEMPLATE_NAME2, true);
 		Variable variable2 = new Variable(VARIABLE_NAME);
 		parserAssembler.addTemplate(TEMPLATE_NAME2, variable2);
 		Template template2 = parserAssembler.getTemplate(TEMPLATE_NAME2);
 		template2.putInitData(VARIABLE_NAME, "eureka2!");
-		querySpec2.addKeyName(keyname2, QueryType.calculator);
+		querySpec2.addKeyName(keyname2);
+		querySpec2.setQueryType(QueryType.calculator);
 		scope.addQuerySpec(querySpec);
 		SolutionHandler solutionHandler = new SolutionHandler(){
 
@@ -261,7 +262,7 @@ public class QueryProgramTest
 		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
 		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
 		parserAssembler.createAxiom(AXIOM_KEY);
-		parserAssembler.createTemplate(TEMPLATE_NAME);
+		parserAssembler.createTemplate(TEMPLATE_NAME, false);
 		Variable variable = new Variable(VARIABLE_NAME);
 		parserAssembler.addTemplate(TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
@@ -274,10 +275,11 @@ public class QueryProgramTest
 		when(keyname2.getAxiomKey()).thenReturn("");
 		when(keyname2.getTemplateName()).thenReturn(TEMPLATE_NAME2);
 		Variable variable2 = new Variable(TEMPLATE_NAME + "." + VARIABLE_NAME);
-		parserAssembler.createTemplate(TEMPLATE_NAME2);
+		parserAssembler.createTemplate(TEMPLATE_NAME2, true);
 		parserAssembler.addTemplate(TEMPLATE_NAME2, variable2);
 		parserAssembler.getOperandMap().addOperand(OPERAND_NAME, null);
-		querySpec2.addKeyName(keyname2, QueryType.calculator);
+		querySpec2.addKeyName(keyname2);
+		querySpec2.setQueryType(QueryType.calculator);
 		scope.addQuerySpec(querySpec);
 		SolutionHandler solutionHandler = new SolutionHandler(){
 

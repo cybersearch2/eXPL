@@ -41,7 +41,7 @@ public class ColorSwatch
             "(0xFFFFFF, \"white\", 255, 255, 255),\n" +
             "(unknown_rgb,  \"unknown\", 0, 0, 0);\n" +
             "axiom shade (rgb) : parameter;\n" +
-            "query color_query calc(shade : swatch);\n";
+            "query color_query (shade : swatch);\n";
             ;
 
 	/**

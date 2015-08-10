@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
@@ -27,7 +28,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
  * @author Andrew Bowley
  * 11 Dec 2014
  */
-public class Variable extends DelegateParameter 
+public class Variable extends DelegateParameter implements Concaten<String>
 {
 	/** Optional Parameter which evaluates value */
 	protected Operand expression;
@@ -134,5 +135,11 @@ public class Variable extends DelegateParameter
 	{
 		return null;
 	}
+
+    @Override
+    public String concatenate(Operand rightOperand)
+    {
+        return value.toString() + rightOperand.getValue().toString();
+    }
 
 }

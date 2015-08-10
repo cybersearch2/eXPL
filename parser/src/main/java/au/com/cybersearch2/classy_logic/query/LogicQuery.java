@@ -20,11 +20,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionFinder;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
@@ -84,11 +86,15 @@ public class LogicQuery implements SolutionFinder
 	@Override
 	public boolean iterate(Solution solution, Template template)
 	{
+	    boolean emptyTemplate = false;
 		if (queryStatus == QueryStatus.start)
 		{   // Start from beginning of axiom sequence
 			axiomIterator = axiomSource.iterator();
 			if ((axiomIterator.hasNext()))
+			{    
 				queryStatus = QueryStatus.in_progress; 
+				emptyTemplate = (template.getTermCount() == 0);
+			}
 			else
 			   // When AxiomSource is empty, allow unification solely with solution
 				return unifySolution(solution, template) &&
@@ -102,6 +108,16 @@ public class LogicQuery implements SolutionFinder
 			if (axiomListenerList != null)
 				for (AxiomListener axiomListener: axiomListenerList)
 					axiomListener.onNextAxiom(axiom);
+			if (emptyTemplate && template.getName().equals(axiom.getName()) && template.getKey().equals(axiom.getName()))
+	        {
+	            for (int i = 0; i < axiom.getTermCount(); i++)
+	            {
+	                Term term = axiom.getTermByIndex(i);
+	                if (!term.getName().equals(Term.ANONYMOUS))
+	                    template.addTerm(new Variable(term.getName()));
+	            }
+	            emptyTemplate = false;
+	        }
 			// Unify use to not happen if keys don't match, but scope names broke this rule
 			//if (!axiom.getName().equals(template.getKey()))
 			//	throw new QueryExecutionException("Axiom key \"" + axiom.getName() + "\" does not match Template key \"" + template.getKey() + "\"");

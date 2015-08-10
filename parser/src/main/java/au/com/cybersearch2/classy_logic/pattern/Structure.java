@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.pattern;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +37,15 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class Structure
 {
-	protected final String NAME_INVALID_MESSAGE = "Parameter \"name\" is null or empty";
-	protected final String TERMS_NULL_MESSAGE = "Parameter \"terms\" is null";
-	
+	protected static final String NAME_INVALID_MESSAGE = "Parameter \"name\" is null or empty";
+	protected static final String TERMS_NULL_MESSAGE = "Parameter \"terms\" is null";
+    public static List<Term> EMPTY_TERM_LIST;
+
+    static
+    {
+        EMPTY_TERM_LIST = Collections.emptyList();
+    }
+    
 	/** The Structure name is required for unification */
     protected String name;
     /** Terms to be paired on unification by position. */
@@ -57,6 +64,7 @@ public class Structure
 		if ((name == null) || name.isEmpty())
 		    throw new IllegalArgumentException(NAME_INVALID_MESSAGE);
 		this.name = name;
+		termList = EMPTY_TERM_LIST;
 	}
 	
 	/**
@@ -115,18 +123,15 @@ public class Structure
 	 */
 	public boolean isFact()
 	{
-		if (termList != null)
-		{
-			for (Term param: termList)
-				if (param.isEmpty())
-					return false;
-		}
+		for (Term param: termList)
+			if (param.isEmpty())
+				return false;
 		return true;
 	}
 
 	public int getTermCount()
 	{
-		return termList == null ? 0 : termList.size();
+		return termList.size();
 	}
 	
 	/**
@@ -136,7 +141,7 @@ public class Structure
 	public String toString()
 	{
 		StringBuilder builder = new StringBuilder(name);
-		if (termList != null)
+		if (!termList.isEmpty())
 		{
 			builder.append('(');
 			boolean firstTime = true;
@@ -172,7 +177,7 @@ public class Structure
 
     public Term getTermByIndex(int index)
     {
-    	if ((termList == null) || (index >= termList.size()) ||( index < 0))
+    	if (termList.isEmpty() || (index >= termList.size()) ||( index < 0))
     		return null;
     	return termList.get(index);
     }
@@ -230,7 +235,7 @@ public class Structure
 	 */
 	public void addTerm(Term param)
 	{
-		if (termList == null) // First time after name-only constructor invoked
+		if (termList.isEmpty()) // First time after name-only constructor invoked
 			termList = new ArrayList<Term>();
 		termList.add(param);
 		// If the parameter is named, add it to the term map as well

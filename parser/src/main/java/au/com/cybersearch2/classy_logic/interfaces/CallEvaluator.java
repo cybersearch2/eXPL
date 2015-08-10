@@ -22,8 +22,8 @@ import java.util.List;
  * @author Andrew Bowley
  * 30 Jul 2015
  */
-public interface CallEvaluator
+public interface CallEvaluator<R>
 {
     String getName();
-    Object evaluate(List<Term> argumentList);
+    R evaluate(List<Term> argumentList);
 }

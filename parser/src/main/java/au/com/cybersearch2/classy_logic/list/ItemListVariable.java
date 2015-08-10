@@ -108,7 +108,8 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 			onIndexSet(index);
 			this.id = id;
 		}
-		else if (empty)
+		else if (empty && itemList.hasItem(index))
+
 		{
 			onIndexSet(index);
 			this.id = id;

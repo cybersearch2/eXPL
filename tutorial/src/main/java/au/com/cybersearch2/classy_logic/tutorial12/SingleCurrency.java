@@ -38,7 +38,7 @@ public class SingleCurrency
 		"template charge(currency(\"AU\") amount);\n" +
 	    "calc charge_plus_gst(currency(\"AU\") total = amount * 1.1);\n" +
 	    "calc format_total(string total_text = \"Total + gst: \" + format(total));\n" +
-		"query item_query(item : charge) >> calc(charge_plus_gst) >> calc(format_total);";
+		"query item_query(item : charge) >> (charge_plus_gst) >> (format_total);";
 
 	/**
 	 * Compiles the CURRENCY script and runs the "item_query" query, displaying the solution on the console.<br/>

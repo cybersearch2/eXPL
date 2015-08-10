@@ -26,7 +26,6 @@ import au.com.cybersearch2.classy_logic.ScopeContext;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
-import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
@@ -41,7 +40,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 1 Aug 2015
  */
-public class QueryEvaluator  extends QueryLauncher implements CallEvaluator
+public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<AxiomList>
 {
     /** Query parameters */
     protected QueryParams queryParams;
@@ -70,7 +69,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator
      * @see au.com.cybersearch2.classy_logic.interfaces.CallEvaluator#evaluate(java.util.List)
      */
     @Override
-    public Object evaluate(List<Term> argumentList)
+    public AxiomList evaluate(List<Term> argumentList)
     {
         QuerySpec querySpec = queryParams.getQuerySpec();
         final String templateName = getCalculatorKeyName(querySpec).getTemplateName();

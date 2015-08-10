@@ -23,5 +23,5 @@ package au.com.cybersearch2.classy_logic.interfaces;
  */
 public interface  Concaten<V>
 {
-    V concatenate(Operand leftOperand);
+    V concatenate(Operand rightOperand);
 }

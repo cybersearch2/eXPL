@@ -148,7 +148,7 @@ public class QueryExecuterAdapter
             String templateName = template.getName();
             String templateKey = template.getKey();
             Map<String, Object> props = template.getProperties();
-            parserAssembler.createTemplate(templateName);
+            parserAssembler.createTemplate(templateName, false);
             parserAssembler.getTemplate(templateName).setKey(templateKey);
             if (props != null)
                 parserAssembler.addTemplate(templateName, props);

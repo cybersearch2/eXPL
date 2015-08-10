@@ -117,9 +117,9 @@ public class StringOperand  extends ExpressionParameter<String> implements Conca
 	}
 
     @Override
-    public String concatenate(Operand leftOperand)
+    public String concatenate(Operand rightOperand)
     {
-        return value.toString() + leftOperand.getValue().toString();
+        return value.toString() + rightOperand.getValue().toString();
     }
 
 }

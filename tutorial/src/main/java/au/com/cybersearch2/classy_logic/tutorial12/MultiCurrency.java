@@ -44,7 +44,7 @@ public class MultiCurrency
 	        "calc charge_plus_gst(currency(country) total = amount * 1.1);\n" +
 	        "calc format_total(string total_text = country + \" Total + gst: \" + format(total));\n" +
 	        "list world_list(format_total);\n" +
-			"query price_query(price : charge) >> calc(charge_plus_gst) >> calc(format_total);";
+			"query price_query(price : charge) >> (charge_plus_gst) >> (format_total);";
 
 	/**
 	 * Construct MultiCurrency object

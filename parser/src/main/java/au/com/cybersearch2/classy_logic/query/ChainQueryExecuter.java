@@ -157,7 +157,10 @@ public class ChainQueryExecuter
 	public void chainCalculator(Axiom axiom, Template template) 
 	{
 		if (axiom == null)
-			template.setKey("");
+		{
+		    if (template.getKey() == null)
+			     template.setKey("");
+		}
 		else
 			template.setKey(axiom.getName());
 		CalculateChainQuery chainQuery = new CalculateChainQuery(axiom, template);

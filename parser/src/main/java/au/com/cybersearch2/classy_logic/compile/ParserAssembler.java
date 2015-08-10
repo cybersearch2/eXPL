@@ -18,6 +18,7 @@ import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
+import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
@@ -200,10 +201,12 @@ public class ParserAssembler implements LocaleListener
 	/**
 	 * Add a new template to this ParserAssembler
 	 * @param templateName
+	 * @param isCalculator Flag true if template declared a calculator
 	 */
-	public Template createTemplate(String templateName)
+	public Template createTemplate(String templateName, boolean isCalculator)
 	{
 		Template template = new Template(templateName);
+		template.setCalculator(isCalculator);
 		templateMap.put(templateName, template);
 		return template;
 	}
@@ -292,7 +295,7 @@ public class ParserAssembler implements LocaleListener
 		if (scopeAxiomMap == null)
 			scopeAxiomMap = new HashMap<String, Axiom>();
 		String axiomName = axiom.getName();
-		List<String> termNameList = axiomTermNameMap.get(axiomName);
+		List<String> termNameList = getAxiomTermNameList(axiomName);
 		if (termNameList != null)
 		{	
 			Axiom termNameAxiom = new Axiom(axiomName);
@@ -344,7 +347,10 @@ public class ParserAssembler implements LocaleListener
 	 */
 	public List<String> getAxiomTermNameList(String axiomName)
 	{
-		return axiomTermNameMap.get(axiomName);
+	    List<String> axiomTermNameList = scope.getGlobalParserAssembler().axiomTermNameMap.get(axiomName);
+	    if ((axiomTermNameList == null) && !QueryProgram.GLOBAL_SCOPE.equals(scope.getName()))
+	        axiomTermNameList = axiomTermNameMap.get(axiomName);
+	    return axiomTermNameList;
 	}
 	
 	/**
@@ -623,7 +629,7 @@ public class ParserAssembler implements LocaleListener
 	 */
 	public Operand getParameterOperand(String axiomName, Operand argumentExpression)
 	{
-        return new ParameterOperand(axiomName, argumentExpression);
+        return new AxiomParameterOperand(axiomName, argumentExpression);
 	}
 	
 	/**
@@ -646,8 +652,8 @@ public class ParserAssembler implements LocaleListener
             throw new ExpressionException("Call name \"" + name + "\" is invalid");
         String library = parts[0];
         final String function = parts[parts.length - 1];
-        CallEvaluator callEvaluator = null;
         Scope functionScope = scope.findScope(library);
+        String callName = library + "." + function;
         if (functionScope != null)
         {
             if (functionScope == scope)
@@ -656,7 +662,7 @@ public class ParserAssembler implements LocaleListener
             if (querySpec == null)
                 throw new ExpressionException("Query \"" + function + "\" not found in scope \"" + library + "\"");
             QueryParams queryParams = new QueryParams(functionScope, querySpec);
-            callEvaluator = new QueryEvaluator(queryParams);
+            return new CallOperand<AxiomList>(callName, new QueryEvaluator(queryParams), argumentExpression);
         }
         else
         {
@@ -665,11 +671,11 @@ public class ParserAssembler implements LocaleListener
     	        externalFunctionProvider = new ExternalFunctionProvider();
     	    }
     	    FunctionProvider functionProvider = externalFunctionProvider.getFunctionProvider(library);
-    	    callEvaluator = functionProvider.getCallEvaluator(function);
+    	    CallEvaluator<Object>callEvaluator = functionProvider.getCallEvaluator(function);
     	    if (callEvaluator == null)
     	        throw new ExpressionException("Function \"" + function + "\" not supported");
+            return new CallOperand<Object>(callName, callEvaluator, argumentExpression);
         }
-	    return new CallOperand(library + "." + function, callEvaluator, argumentExpression);
 	}
 	
 	/**

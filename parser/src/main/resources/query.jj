@@ -326,49 +326,61 @@ void QueryChain(Scope scope) :
     QuerySpec querySpec;
 }
 {  
-  <QUERY> querySpec=Query() QueryDeclaration(querySpec) ( ">>" QueryDeclaration(querySpec.chain()) )* ";"
+  <QUERY> querySpec=Query() querySpec=QueryDeclaration(querySpec, scope) ( ">>" QueryDeclaration(querySpec.chain(), scope) )* ";"
   {
       scope.addQuerySpec(querySpec);
   }  
 }
 
-void QueryDeclaration(QuerySpec querySpec) :
+QuerySpec QueryDeclaration(QuerySpec querySpec, Scope scope) :
 {
+  KeyName firstKeyname;
+  int keynameCount = 1;
+  Map<String, Object> properties = new HashMap<String, Object>();
 }
 {
    "(" 
       ( 
-        KeyName(querySpec)
+        firstKeyname = KeyName(querySpec)
       )
       (
         "," 
         (
           KeyName(querySpec)
         )
-      )* ")" 
+        {
+            ++keynameCount;
+        }
+      )* ")" ( "(" InitialiserList(properties) ")" )?
     {
+       String templateName = firstKeyname.getTemplateName();
+       Template firstTemplate = scope.getTemplate(templateName);
+       if (!firstTemplate.isCalculator())
+           return querySpec;
+       if (keynameCount > 1)
+          throw new ParseException("Calculator " + templateName + " can only have one query step");
+       querySpec.setQueryType(QueryType.calculator);
+       if (properties.size() > 0)
+          querySpec.putProperties(firstKeyname, properties);
+       String axiomName = firstKeyname.getAxiomKey();
+       if (!querySpec.isHeadQuery() || axiomName.isEmpty())
+          return querySpec;
+       QuerySpec headQuerySpec = new QuerySpec(querySpec.getName());   
+       headQuerySpec.addKeyName(new KeyName(axiomName, axiomName));
+       QuerySpec chainQuerySpec = headQuerySpec.chain();
+       chainQuerySpec.addKeyName(firstKeyname);
+       chainQuerySpec.setQueryType(QueryType.calculator);
+       if (properties.size() > 0)
+          chainQuerySpec.putProperties(firstKeyname, properties);
+       firstTemplate.setKey(axiomName);
+       Template logicTemplate = scope.findTemplate(axiomName);
+       if (logicTemplate != null)
+           return headQuerySpec;
+       logicTemplate = scope.getParserAssembler().createTemplate(axiomName, false);
+       logicTemplate.setKey(axiomName);
+       return headQuerySpec;
     }
-    |
-    CalculatorDeclaration(querySpec)
 }
-
-void CalculatorDeclaration(QuerySpec querySpec) :
-{
-   String axiomKey = null;
-   String templateName;
-   Map<String, Object> properties = new HashMap<String, Object>();
-}
-{
-   <CALC> "(" 
-      ( 
-        (LOOKAHEAD(2) axiomKey=Name() ":" )? templateName=Name() 
-      )
-   ")" ( "(" InitialiserList(properties) ")" )?
-  {
-    querySpec.addCalculator(new KeyName(axiomKey == null ? "" : axiomKey, templateName), properties);
-  }
-}
-
 
 QuerySpec Query() :
 {
@@ -488,7 +500,7 @@ void TemplateDeclaration(ParserAssembler parserAssembler) :
     String templateName;
 }
 {  
-    <TEMPLATE> templateName=Template(parserAssembler) "(" 
+    <TEMPLATE> templateName=Template(parserAssembler, false) "(" 
       ( 
         TemplateExpression(templateName, parserAssembler)
       )
@@ -502,14 +514,14 @@ void TemplateDeclaration(ParserAssembler parserAssembler) :
     }
 }
 
-String Template(ParserAssembler parserAssembler) :
+String Template(ParserAssembler parserAssembler, boolean isCalculator) :
 {
     Token templateToken;
 }
 {
   templateToken=<IDENTIFIER>
   { 
-    parserAssembler.createTemplate(templateToken.image);
+    parserAssembler.createTemplate(templateToken.image, isCalculator);
     return templateToken.image; 
   }
 }
@@ -521,7 +533,7 @@ void CalculatorTemplate(ParserAssembler parserAssembler) :
     int loopNumber = 0;
 }
 {  
-    <CALC> templateName=Template(parserAssembler) "(" 
+    <CALC> templateName=Template(parserAssembler, true) "(" 
       ( 
         CalculatorExpression(loopNumber, templateName, templateName, parserAssembler)
       )
@@ -832,7 +844,7 @@ String Choice(ParserAssembler parserAssembler) :
   { 
     String name = choiceToken.image;
     parserAssembler.createAxiom(name);
-    Template template = parserAssembler.createTemplate(name);
+    Template template = parserAssembler.createTemplate(name, true);
     template.setChoice(true);
     return name; 
   }
@@ -958,15 +970,17 @@ String Name() :
   }
 }
 
-void KeyName(QuerySpec querySpec) :
+KeyName KeyName(QuerySpec querySpec) :
 {
-  String axiomKey;
+  String axiomKey = null;
   String templateName;
 }
 {
-  axiomKey=Name() ":" templateName=Name()
+  ( LOOKAHEAD(2) axiomKey=Name() ":" )? templateName=Name()
   {
-    querySpec.addKeyName(new KeyName(axiomKey, templateName));
+    KeyName keyname = new KeyName(axiomKey == null ? "" : axiomKey, templateName);
+    querySpec.addKeyName(keyname);
+    return keyname;
   }
 }
 
@@ -1378,8 +1392,7 @@ Operand NamedExpression(String name, ParserAssembler parserAssembler) :
 
 Operand IndexExpression(ParserAssembler parserAssembler) :
 {
-  Operand param = null;
-  String index = null;
+  Operand param;
 }
 {
   <LBRACKET> 

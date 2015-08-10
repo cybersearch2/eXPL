@@ -65,7 +65,7 @@ public class HighCitiesSorted
             "},\n" +
             "// Insert saved axiom in correct position\n" +
             "city_list[j + 1] = temp);\n" +
-	    "query high_cities (city : high_city) >> calc(insert_sort);\n"; 
+	    "query high_cities (city : high_city) >> (insert_sort);\n"; 
 
 	@Inject
 	ProviderManager providerManager;

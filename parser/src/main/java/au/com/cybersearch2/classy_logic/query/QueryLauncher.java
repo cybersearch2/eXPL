@@ -45,15 +45,14 @@ public class QueryLauncher
         QuerySpec querySpec = queryParams.getQuerySpec();
         SolutionHandler solutionHandler = queryParams.getSolutionHandler();
         ChainQueryExecuter headQuery = null;
-        boolean isCalculation = false;
-        if (querySpec.getQueryType() != QueryType.calculator)
+        boolean isCalculation = querySpec.getQueryType() == QueryType.calculator;
+        if (!isCalculation)
             headQuery = new QueryExecuter(queryParams);
         else
         {   // QueryParams need to be initialized to set up parameter axioms
             queryParams.initialize();
             headQuery = new ChainQueryExecuter(scope);
             chainCalculator(queryParams, scope, querySpec, headQuery);
-            isCalculation = true;
         }
         // Chained queries are optional
         if (querySpec.getQueryChainList() != null)
@@ -81,8 +80,10 @@ public class QueryLauncher
     
     protected void chainCalculator(QueryParams queryParams, Scope scope, QuerySpec chainQuerySpec, ChainQueryExecuter headQuery)
     {   // Calculator uses a single template
-        Axiom calculatorAxiom = getCalculatorAxiom(scope, chainQuerySpec);
         Template calculatorTemplate = getCalculatorTemplate(scope, chainQuerySpec);
+        Axiom calculatorAxiom = null;
+        if (calculatorTemplate.isChoice())
+            calculatorAxiom = getCalculatorAxiom(scope, chainQuerySpec);
         if (calculatorAxiom == null)
         {
             Map<String, Object> properties = queryParams.getProperties(calculatorTemplate.getName());
@@ -143,8 +144,6 @@ public class QueryLauncher
     public KeyName getCalculatorKeyName(QuerySpec querySpec)
     {
         List<KeyName> keyNameList = querySpec.getKeyNameList();
-        if (keyNameList.size() != 1)
-            throw new IllegalArgumentException("Calculator querySpec does not contain single KeyName as expected");
-        return keyNameList.get(0);
+        return keyNameList.get(keyNameList.size() - 1);
     }
 }

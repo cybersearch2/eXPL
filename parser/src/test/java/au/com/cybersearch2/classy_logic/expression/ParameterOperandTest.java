@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.expression;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.junit.Test;
 
@@ -26,8 +25,6 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -39,7 +36,7 @@ public class ParameterOperandTest
 {
     static final String NO_ARG_CALC =
         "calc test (solution x = {} );\n" +
-        "query no_arg_query calc(test);";
+        "query no_arg_query (test);";
 
     static final String ALL_TYPES_ARG_CALC =
             "calc test (\n" +
@@ -51,7 +48,7 @@ public class ParameterOperandTest
             "currency(\"AU\") amount = 19.76,\n" +       
             "string text = \"To be, or not to be\"\n" +       
             "} );\n" +
-            "query all_types_arg_query calc(test);";
+            "query all_types_arg_query (test);";
 
     static final String ALL_TYPES_VARS_ARG_CALC =
             "boolean bool = true;\n" +       
@@ -69,7 +66,7 @@ public class ParameterOperandTest
             "e = amount,\n" +       
             "f = text\n" +       
             "} );\n" +
-            "query all_types_vars_arg_query calc(test);";
+            "query all_types_vars_arg_query (test);";
 
     @Test
     public void testNoArgs()
@@ -80,7 +77,7 @@ public class ParameterOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                //System.out.println(solution.getAxiom("test").toString());
+                //System.out.println(solution.getAxiomList("test").toString());
                 validateSolution(solution.getAxiomList("test"), "x", null);
                 return false;
             }});

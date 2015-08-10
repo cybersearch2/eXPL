@@ -362,7 +362,7 @@ public class QueryParserTest
 			"template charge(currency(\"AU\") amount);\n" +
 	        "calc charge_plus_gst(currency(\"AU\") total = charge.amount * 1.1);\n" +
 	        "calc format_total(string total_text = \"Total + gst: \" + format(total));\n" +
-			"query item_query(item : charge) >> calc(charge_plus_gst) >> calc(format_total);";
+			"query item_query(item : charge) >> (charge_plus_gst) >> (format_total);";
 	
 	static final String WORLD_CURRENCY_XPL =
 			"include \"world_currency.xpl\";\n" +
@@ -370,7 +370,7 @@ public class QueryParserTest
 	        "calc charge_plus_gst(currency(country) total = amount * 1.1);\n" +
 	        "calc format_total(string total_text = country + \" Total + gst: \" + format(total));\n" +
 	        "list world_list(format_total);\n" +
-			"query price_query(price : charge) >> calc(charge_plus_gst) >> calc(format_total);";
+			"query price_query(price : charge) >> (charge_plus_gst) >> (format_total);";
   			
 	static final String STAMP_DUTY_XPL =
 			"choice bracket "
@@ -387,7 +387,7 @@ public class QueryParserTest
 			"\n" +
 			"axiom transacton_amount (amount) : ( 123458 );\n" +
 			"calc payable(duty = bracket.base + (amount - bracket.threshold) * (bracket.percent / 100));\n" +
-			"query stamp_duty_query calc(transacton_amount : bracket) >> calc(payable);\n";
+			"query stamp_duty_query (transacton_amount : bracket) >> (payable);\n";
 
     static final String CHOICE_COLORS =
             "choice swatch (name, red, green, blue) :\n" +
@@ -396,7 +396,7 @@ public class QueryParserTest
             "(\"blue\", 0, 0, 255),\n" +
             "(\"white\", 255, 255, 255);\n" +
             "axiom shade (name) : parameter;\n" +
-            "query color_query calc(shade : swatch);\n";
+            "query color_query (shade : swatch);\n";
             ;
 
     static final String CHOICE_COLORS2 =
@@ -406,7 +406,7 @@ public class QueryParserTest
             "(0x0000FF, \"blue\", 0, 0, 255),\n" +
             "(0xFFFFFF, \"white\", 255, 255, 255);\n" +
             "axiom shade (rgb) : parameter;\n" +
-            "query color_query calc(shade : swatch);\n";
+            "query color_query (shade : swatch);\n";
             ;
 
     static final String CHOICE_COLORS3 =
@@ -418,7 +418,7 @@ public class QueryParserTest
             "(0xFFFFFF, \"white\", 255, 255, 255),\n" +
             "(unknown_rgb,  \"unknown\", 0, 0, 0);\n" +
             "axiom shade (rgb) : parameter;\n" +
-            "query color_query calc(shade : swatch);\n";
+            "query color_query (shade : swatch);\n";
             ;
 
     static final String MEGA_CITY3 = 
@@ -430,7 +430,7 @@ public class QueryParserTest
             "(Population >= {20,000,000}, \"Huge\"),\n" +
             "(Population <  {20,000,000}, \"Large\");\n" +
             "list city_group_list(population_group);\n" +
-            "query group_query (mega_city:city) >> calc(city:population_group);";
+            "query group_query (mega_city:city) >> (city:population_group);";
 
             /** Named query to find all cities */
     static public final String ALL_CITIES = "all_cities";

@@ -83,7 +83,7 @@ public class ScopeTest
 		assertThat(scope.getAxiomSource(AXIOM_KEY)).isEqualTo(axiomSource);
 		assertThat(scope.getTemplate(TEMPLATE_NAME)).isEqualTo(template);
 		scope.getParserAssembler().createAxiom(AXIOM_KEY);
-		scope.getParserAssembler().createTemplate(TEMPLATE_NAME);
+		scope.getParserAssembler().createTemplate(TEMPLATE_NAME, false);
 	}
 	
 	@Test
@@ -96,7 +96,7 @@ public class ScopeTest
 		scope.getParserAssembler().createAxiom(AXIOM_KEY);
 		scope.getParserAssembler().addAxiom(AXIOM_KEY, new Parameter("x"));
 		scope.getParserAssembler().saveAxiom(AXIOM_KEY);
-		scope.getParserAssembler().createTemplate(TEMPLATE_NAME);
+		scope.getParserAssembler().createTemplate(TEMPLATE_NAME, false);
 		assertThat(scope.getAxiomSource(AXIOM_KEY).iterator().next()).isNotNull();
 		assertThat(scope.getTemplate(TEMPLATE_NAME)).isNotNull();
 		verify(globalParserAssembler, times(0)).getAxiomSource(AXIOM_KEY);

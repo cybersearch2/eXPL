@@ -23,10 +23,10 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
  * @author Andrew Bowley
  * 30 Jul 2015
  */
-public class CallOperand extends ParameterOperand
+public class CallOperand<R> extends ParameterOperand<R>
 {
     
-    public CallOperand(String name, CallEvaluator callEvaluator, Operand expression)
+    public CallOperand(String name, CallEvaluator<R> callEvaluator, Operand expression)
     {
         super(name, expression, callEvaluator);
     }

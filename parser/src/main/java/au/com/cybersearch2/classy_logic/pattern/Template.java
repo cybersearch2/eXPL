@@ -45,8 +45,8 @@ public class Template extends Structure
 {
 	public static final String ITERABLE = "iterable";
     public static final String TERMNAMES = "termnames";
+    public static List<String>  EMPTY_NAMES_LIST;
     public static Iterable<AxiomTermList> EMPTY_ITERABLE;
-    public static List<String> EMPTY_NAMES_LIST;
   
     static
     {
@@ -86,6 +86,8 @@ public class Template extends Structure
     protected Map<String, Object> initData;
     /** Link to next Template in chain. Used by Calculator. */
     protected Template next;
+    /** Flag true if template declared a calculator */
+    protected boolean isCalculator;
     /** Flag true if template used to make selection. Used by Calculator. */
     protected boolean choice;
     /** Calculator solution as single AxiomList (optional) */
@@ -119,8 +121,6 @@ public class Template extends Structure
 		this.key = key;
 		id = referenceCount.incrementAndGet();
 	}
-
-
 
 	/**
 	 * Construct Template object
@@ -190,7 +190,17 @@ public class Template extends Structure
     	key = value;
     }
 
-	/**
+	public boolean isCalculator()
+    {
+        return isCalculator;
+    }
+
+    public void setCalculator(boolean isCalculator)
+    {
+        this.isCalculator = isCalculator;
+    }
+
+    /**
 	 * @return the choice
 	 */
 	public boolean isChoice() 
@@ -226,7 +236,7 @@ public class Template extends Structure
 	 */
 	public EvaluationStatus evaluate()
 	{
-		if (termList != null)
+		if (!termList.isEmpty())
 		{
 			for (Term term: termList)
 			{
@@ -244,7 +254,7 @@ public class Template extends Structure
 	 */
 	public int select()
 	{
-		if (termList != null)
+		if (!termList.isEmpty())
 		{
 			int position = 0;
 			for (Term term: termList)
@@ -266,7 +276,7 @@ public class Template extends Structure
 	public boolean backup(boolean partial)
 	{
 		boolean isMutable = false;
-		if (termList != null)
+		if (!termList.isEmpty())
 			for (Term term: termList)
 			{
 				boolean backupPerformed = (partial ? term.backup(id) : term.backup(0));
@@ -322,7 +332,9 @@ public class Template extends Structure
 	 */
 	public OperandWalker getOperandWalker()
 	{
-		return new OperandWalker(termList);
+	    if (!termList.isEmpty())
+		    return new OperandWalker(termList);
+	    return new OperandWalker(EMPTY_TERM_LIST);
 	}
 
 	/**
@@ -330,7 +342,7 @@ public class Template extends Structure
 	 */
 	public void reset() 
 	{
-		if (termList != null)
+		if (!termList.isEmpty())
 			for (Term term: termList)
 				((Parameter)term).clearValue();
 	}

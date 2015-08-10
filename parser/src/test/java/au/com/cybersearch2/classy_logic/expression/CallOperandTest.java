@@ -34,7 +34,6 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
@@ -62,7 +61,7 @@ public class CallOperandTest
         }
     }
     
-    static class MathFunctionProvider implements FunctionProvider
+    static class MathFunctionProvider implements FunctionProvider<Number>
     {
 
         @Override
@@ -72,10 +71,10 @@ public class CallOperandTest
         }
 
         @Override
-        public CallEvaluator getCallEvaluator(String identifier)
+        public CallEvaluator<Number> getCallEvaluator(String identifier)
         {
             if (identifier.equals("add"))
-                return new CallEvaluator(){
+                return new CallEvaluator<Number>(){
     
                     @Override
                     public String getName()
@@ -84,7 +83,7 @@ public class CallOperandTest
                     }
     
                     @Override
-                    public Object evaluate(List<Term> argumentList)
+                    public Number evaluate(List<Term> argumentList)
                     {
                         if ((argumentList == null) || argumentList.isEmpty())
                             return Double.NaN;
@@ -98,7 +97,7 @@ public class CallOperandTest
                     }
                 };
             if (identifier.equals("avg"))
-                return new CallEvaluator(){
+                return new CallEvaluator<Number>(){
 
                     @Override
                     public String getName()
@@ -107,7 +106,7 @@ public class CallOperandTest
                     }
 
                     @Override
-                    public Object evaluate(List<Term> argumentList)
+                    public Number evaluate(List<Term> argumentList)
                     {
                         if ((argumentList == null) || argumentList.isEmpty())
                             return Double.NaN;
@@ -123,7 +122,7 @@ public class CallOperandTest
         }
     }
 
-    static class EduFunctionProvider implements FunctionProvider
+    static class EduFunctionProvider implements FunctionProvider<Long>
     {
 
         @Override
@@ -133,9 +132,9 @@ public class CallOperandTest
         }
 
         @Override
-        public CallEvaluator getCallEvaluator(String identifier)
+        public CallEvaluator<Long> getCallEvaluator(String identifier)
         {
-            return new CallEvaluator(){
+            return new CallEvaluator<Long>(){
 
                 @Override
                 public String getName()
@@ -144,7 +143,7 @@ public class CallOperandTest
                 }
 
                 @Override
-                public Object evaluate(List<Term> argumentList)
+                public Long evaluate(List<Term> argumentList)
                 {
                     long total = 0;
                     for (Object letterGrade: argumentList)
@@ -178,13 +177,13 @@ public class CallOperandTest
 
     static final String TWO_ARG_CALC =
         " calc test (integer x = math.add(1,2));\n" +
-        " query two_arg_query calc(test);";
+        " query two_arg_query (test);";
     static final String THREE_ARG_CALC =
         " calc test (integer x = math.add(1,2,3));\n" +
-        " query three_arg_query calc(test);";
+        " query three_arg_query (test);";
     static final String FOUR_ARG_CALC =
         " calc test (integer x = math.add(12,42,93,55));\n" +
-        " query four_arg_query calc(test);";
+        " query four_arg_query (test);";
     static final String GRADES = 
         "axiom grades (student, english, math, history):\n" +
         " (\"George\", 15, 13, 16),\n" +
@@ -266,7 +265,7 @@ public class CallOperandTest
             "  city_list[8][altitude],\n" +
             "  city_list[9][altitude]\n" +
             "));\n" +
-            "query average_height calc(city : average);";
+            "query average_height (city : average);";
     
     static final String CITY_AVERAGE_HEIGHT_CALC2 = CITY_EVELATIONS +
             "list city_list(city);\n" +
@@ -282,13 +281,13 @@ public class CallOperandTest
             "  },\n" +
             "  average = accum / index\n" +
             "  );\n" +
-            "  query average_height calc(average_height);\n" +
+            "  query average_height (average_height);\n" +
             "}\n"  +
             "calc call_average_height(\n" +
             "  axiom calc_average = city.average_height(),\n" +
             "  average = calc_average[average]\n" +
             ");\n" +
-            "query function_average_height calc(call_average_height);"
+            "query function_average_height (call_average_height);"
            ;
     static final String GERMAN_COLORS =
             "axiom lexicon (language, aqua, black, blue, white):\n" +
@@ -302,19 +301,19 @@ public class CallOperandTest
             "(colors[white], 255, 255, 255);\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
-            "  query color_query calc(swatch);\n" +
+            "  query color_query (swatch);\n" +
             "}\n" +
             "calc calc_german_colors\n" +
             "(\n" +
             "  solution color_list = german.color_query(shade=\"Wasser\"),\n" + 
             "  color_list += german.color_query(shade=\"blau\")\n" + 
             ");\n" +
-            "query german_colors calc(calc_german_colors);\n" +
+            "query german_colors (calc_german_colors);\n" +
             "calc calc_german_orange\n" +
             "(\n" +
             "  solution german_orange = german.color_query(shade=\"Orange\")\n" + 
             ");\n" +
-            "query german_orange calc(calc_german_orange);"
+            "query german_orange (calc_german_orange);"
             ;
 
 
@@ -400,7 +399,7 @@ public class CallOperandTest
         "scope school\n" +
         "{\n" +
         "  calc calc_total_score(solution total_score = { \"Total score\", english+math+history });\n" +
-        "  query calc_total_score calc(calc_total_score);\n" +
+        "  query calc_total_score (calc_total_score);\n" +
         "}\n"  +
         "calc score(\n" +
         "    axiom school_total_score = school.calc_total_score(english,math,history),\n" +
@@ -408,8 +407,7 @@ public class CallOperandTest
         "    integer score1 = school_total_score[0][1],\n" +
         "    string total_text = text1 + score1\n" + 
         ");\n" +
-        "template student_grades(student, english, math, history);\n" +
-        "query marks(grades : student_grades) >> calc(score);";
+        "query marks(grades : score);";
 
     @Test
     public void test_school_grades()

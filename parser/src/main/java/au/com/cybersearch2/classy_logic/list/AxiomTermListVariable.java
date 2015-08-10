@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.list;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -26,7 +27,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 19 Jan 2015
  */
-public class AxiomTermListVariable extends ItemListVariable<Object> 
+public class AxiomTermListVariable extends ItemListVariable<Object> implements Concaten<String>
 {
 
 	/**
@@ -96,5 +97,11 @@ public class AxiomTermListVariable extends ItemListVariable<Object>
 
 	    return itemValue;
 	}
+
+    @Override
+    public String concatenate(Operand rightOperand)
+    {
+        return getItemValue().toString() + rightOperand.getValue().toString();
+    }
 
 }

@@ -17,6 +17,19 @@ eXPL v1.12
 14. Add AxiomUtils for deep copy of Axioms and axiom Terms
 15. Enhance QueryLauncher by allowing passing of arguments from QueryParams to Calculator execution calls
 16. Add initialization of axioms to Calculator and return of solution from Template as AxiomList
+17. Change Scope.getTemplate() so it looks first in global scope
+18. Change ScopeContext and OperandMap so only lists which are empty at the start are cleared on reset.
+19. Change OperandMap to remove addition of new item list variable to OperandMap.
+20. Update syntax to remove 'calc' keyword from query declaration. 
+21. Update ParserAssembler and Template to use new 'isCalculator" flag
+22. ParserAssembler addScopeAxiom() and getAxiomTermNameList() now look first in global scope for axiomTermNameList
+23. Refactor active part of ParameterOperand to dependency ParameterList and share it with new AxiomParameterOperand
+24. Make return type of CallEvaluator generic and make associated classes generic to suit
+25. Apply interface Concaten<String> to Operands which may have StringOperand delegates
+26. Set Structure termList to empty list in constructor and update all empty list tests
+27. Automatically insert LogicQuery as head query when a calculator is at the head and an axiom key specified
+28. Dynamically populate automatically inserted Template and get Calculator to look for axiom in Solution
+29. QueryLauncher now uses axiomKey only for choice Template
 
 
 

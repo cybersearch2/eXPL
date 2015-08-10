@@ -3,6 +3,7 @@
  */
 package au.com.cybersearch2.classy_logic.compile;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -317,7 +318,6 @@ public class OperandMap
 			return listVariable;
 		// Use ItemList object to create new ItemListVariable instance
 		listVariable = itemList.newVariableInstance(index, suffix);
-		operandMap.put(listVarName, listVariable);
 		return listVariable;
 	}
 
@@ -341,7 +341,6 @@ public class OperandMap
 			return listVariable;
 		// Use axiomList object to create new ItemListVariable instance
 		listVariable = axiomListSpec.getAxiomList().newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getTermIndex(), axiomListSpec.getSuffix());
-		operandMap.put(listVarName, listVariable);
 		return listVariable;
 	}
 
@@ -456,11 +455,22 @@ public class OperandMap
 	/**
 	 * Clear result lists
 	 */
-	public void clearLists() 
+	public void clearLists(List<String> listNames) 
 	{
-		for (ItemList<?> itemList: listMap.values())
+	    for (String listName: listNames)
+	    {
+		    ItemList<?> itemList= listMap.get(listName);
 			itemList.clear();
+	    }
 	}
 
+	public List<String> getEmptyListNames()
+	{
+	    List<String> listNames = new ArrayList<String>();
+	    for (ItemList<?> itemList: listMap.values())
+	        if (itemList.isEmpty())
+	            listNames.add(itemList.getName());
+	    return listNames;
+	}
 
 }

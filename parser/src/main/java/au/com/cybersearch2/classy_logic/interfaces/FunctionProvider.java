@@ -20,9 +20,9 @@ package au.com.cybersearch2.classy_logic.interfaces;
  * @author Andrew Bowley
  * 30 Jul 2015
  */
-public interface FunctionProvider
+public interface FunctionProvider<R>
 {
     
     String getName();
-    CallEvaluator getCallEvaluator(String identifier);
+    CallEvaluator<R> getCallEvaluator(String identifier);
 }

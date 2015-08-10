@@ -45,7 +45,7 @@ public class StampDuty
 			"\n" +
 			"axiom transacton_amount (amount) : parameter;\n" +
 			"calc payable(duty = base + (amount - threshold) * (percent / 100));\n" +
-			"query stamp_duty_query calc(transacton_amount : bracket) >> calc(payable);\n";
+			"query stamp_duty_query (transacton_amount : bracket) >> (payable);\n";
 
 	/**
 	 * Compiles the STAMP_DUTY script and runs the "stamp_duty_query" query, displaying the solution on the console.<br/>

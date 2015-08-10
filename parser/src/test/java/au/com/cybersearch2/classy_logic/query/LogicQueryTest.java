@@ -226,6 +226,7 @@ public class LogicQueryTest
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
@@ -266,6 +267,7 @@ public class LogicQueryTest
 		final Axiom axiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(false);
@@ -306,6 +308,7 @@ public class LogicQueryTest
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
@@ -346,6 +349,7 @@ public class LogicQueryTest
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+		when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
 		when(template.isFact()).thenReturn(true);
@@ -385,6 +389,7 @@ public class LogicQueryTest
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
@@ -423,6 +428,7 @@ public class LogicQueryTest
 		LogicQuery logicQuery = new LogicQuery(axiomSource);
 		Solution solution = new Solution();
 		Template template = mock(Template.class);
+        when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenThrow(new ExpressionException("Syntax error"));
 		when(template.toString()).thenReturn("surface_area(km2)");

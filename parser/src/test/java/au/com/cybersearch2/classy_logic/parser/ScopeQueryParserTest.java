@@ -91,7 +91,7 @@ public class ScopeQueryParserTest
 	    "{\n" +
 	    "  query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);\n" + 
 	    "  query more_agriculture_mi2(Data :agri_10y, surface_area : surface_area_increase)\n" + 
-	    "  >> calc(km2_to_mi2);" +
+	    "  >> (km2_to_mi2);" +
 		"}\n";
  
 	static final String GREEK_CONSTRUCTION =
@@ -221,7 +221,7 @@ public class ScopeQueryParserTest
     		"    ? ++i < length(sort_list)\n" +
     		"  }\n" +
             "  ) (i = 1);\n" +
-		    "  query insert_sort calc(insert_sort);\n" + 
+		    "  query insert_sort (insert_sort);\n" + 
 			"}\n"
 		    ;
 
@@ -237,7 +237,7 @@ public class ScopeQueryParserTest
     		")(factorial = 1, i = 1);\n" +
 	        "scope factorial_example\n" +
 		    "{\n" +
-		    "  query factorial calc(factorial)(n = 4);\n" + 
+		    "  query factorial(factorial)(n = 4);\n" + 
 			"}"
 		    ;
  
@@ -252,7 +252,7 @@ public class ScopeQueryParserTest
 			"scope german (language=\"de\", region=\"DE\")\n" +
 			"{\n" +
 			"  axiom item: (\"12.345,67 €\");\n" +
-			"  query item_query(item : charge) >> calc(charge_plus_gst) >> calc(format_total);\n" +
+			"  query item_query(item : charge) >> (charge_plus_gst) >> (format_total);\n" +
 	        "}";
 
     static final String GERMAN_COLORS =
@@ -268,7 +268,7 @@ public class ScopeQueryParserTest
             "axiom shade (name) : parameter;\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
-            "  query color_query calc(shade : swatch);\n" +
+            "  query color_query (shade : swatch);\n" +
             "}";
 
     static final String MEGA_CITY3 = 
@@ -282,7 +282,7 @@ public class ScopeQueryParserTest
             "  (Population >= {20.000.000}, \"Huge\"),\n" +
             "  (Population <  {20.000.000}, \"Large\");\n" +
             "  list city_group_list(population_group);\n" +
-            "  query group_query (mega_city:city) >> calc(city:population_group);\n" +
+            "  query group_query (mega_city:city) >> (city:population_group);\n" +
             "}\n";
 
 
@@ -294,7 +294,7 @@ public class ScopeQueryParserTest
 
     @Test
     public void test_choice_string_colors()
-    {
+    { 
         QueryProgram queryProgram = new QueryProgram(GERMAN_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams("german", "color_query");
@@ -309,6 +309,7 @@ public class ScopeQueryParserTest
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
+        queryParams = queryProgram.getQueryParams("german", "color_query");
         queryParams.addAxiom("shade", "blau"); // blue
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
@@ -318,6 +319,7 @@ public class ScopeQueryParserTest
             }});
         queryProgram.executeQuery(queryParams);
         // Test choice short circuit on no match
+        queryParams  = queryProgram.getQueryParams("german", "color_query");
         queryParams.addAxiom("shade", "Orange"); // orange
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override

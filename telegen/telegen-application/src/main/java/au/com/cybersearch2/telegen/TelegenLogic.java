@@ -72,8 +72,8 @@ public class TelegenLogic
             "template next_check_item (name ? name == next_check, instruction);\n" +
             "list issues_list(issue_item);\n" +
             "query issues (issue:issue_item);\n" +
-            "query first_check_query calc(issue_param: first_check) >> (check:first_check_item);\n" +
-            "query next_check_query calc(check_param: next_check) >> (check:next_check_item);";
+            "query first_check_query (issue_param: first_check) >> (check:first_check_item);\n" +
+            "query next_check_query (check_param: next_check) >> (check:next_check_item);";
 
     public static final String ISSUES_QUERY = "issues";
     

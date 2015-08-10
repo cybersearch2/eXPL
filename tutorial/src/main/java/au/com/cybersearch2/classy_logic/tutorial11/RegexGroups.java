@@ -60,7 +60,7 @@ public class RegexGroups
 		"  def = in_words.def);\n" +
 		"// Send result to a list\n" +
 	    "list word_definitions(word_def);\n" +
-		"query query_in_words(lexicon : in_words) >> (part : part_expand) >> calc(word_def);";
+		"query query_in_words(lexicon : in_words) >> (part : part_expand) >> (word_def);";
 
 	/** ProviderManager object wihich is axiom source for the compiler */
 	@Inject

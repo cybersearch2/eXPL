@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic;
 
+import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
@@ -34,6 +35,10 @@ public class ScopeContext
     protected Map<Operand, Object> operandValueMap;
 	/** Map of global operands and values used to save and restore initial state */
     protected Map<Operand, Object> globalOperandValueMap;
+    /** Names of lists which are empty at time of object construction */
+    protected List<String> emptyListNames;
+    /** Names of global lists which are empty at time of object construction */
+    protected List<String> emptyGlobalListNames;
     /** Flag to indicate function scope */
     protected boolean isFunctionScope;
 
@@ -47,10 +52,12 @@ public class ScopeContext
 		this.isFunctionScope = isFunctionScope;
 		OperandMap operandMap = scope.getParserAssembler().getOperandMap();
 		operandValueMap = operandMap.getOperandValues();
+		emptyListNames = operandMap.getEmptyListNames();
 		if (!isFunctionScope && !QueryProgram.GLOBAL_SCOPE.equals(scope.getName()))
 		{
 			OperandMap globalOperandMap = scope.getGlobalScope().getParserAssembler().getOperandMap();
 			globalOperandValueMap = globalOperandMap.getOperandValues();
+	        emptyGlobalListNames = globalOperandMap.getEmptyListNames();
 		}
 	}
 
@@ -61,12 +68,12 @@ public class ScopeContext
 	{
 		OperandMap operandMap = scope.getParserAssembler().getOperandMap();
 		operandMap.setOperandValues(operandValueMap);
-		operandMap.clearLists();
+		operandMap.clearLists(emptyListNames);
 		if (globalOperandValueMap != null)
 		{
 			OperandMap globalOperandMap = scope.getGlobalScope().getParserAssembler().getOperandMap();
 			globalOperandMap.setOperandValues(operandValueMap);
-			globalOperandMap.clearLists();
+			globalOperandMap.clearLists(emptyGlobalListNames);
 		}
 		// Restore Global scope locale which may be changed when used within another scope 
 		if (QueryProgram.GLOBAL_SCOPE.equals(scope.getName()))

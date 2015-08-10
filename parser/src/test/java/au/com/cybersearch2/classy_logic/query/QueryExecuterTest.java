@@ -367,14 +367,14 @@ public class QueryExecuterTest
  	    Variable city = new Variable("city");
 	    Variable charge = new Variable("charge");
 	    Variable name = new Variable("name");
-	    parserAssembler.createTemplate("charge");
+	    parserAssembler.createTemplate("charge", false);
 	    Template s1 = parserAssembler.getTemplate("charge");
 	    s1.addTerm(city);
 	    s1.addTerm(charge);
 	    s1.setKey(charges.get(0).getName());
 		KeyName keyName1 = new KeyName(s1.getKey(), "charge");
 		querySpec.addKeyName(keyName1);
-		parserAssembler.createTemplate("customer");
+		parserAssembler.createTemplate("customer", false);
 	    Template s2 = parserAssembler.getTemplate("customer");
 	    s2.addTerm(name);
 	    s2.addTerm(city);

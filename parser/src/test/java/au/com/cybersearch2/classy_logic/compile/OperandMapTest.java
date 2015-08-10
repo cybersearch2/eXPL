@@ -52,16 +52,16 @@ public class OperandMapTest
 		ItemListVariable itemListVariable = mock(ItemListVariable.class);
 		when(itemList.newVariableInstance(0, "0")).thenReturn(itemListVariable);
 		assertThat(operandMap.getListVariable(itemList, LIST_NAME, 0, "0")).isEqualTo(itemListVariable);
-		assertThat(operandMap.operandMap.get(LIST_NAME + ".0")).isEqualTo(itemListVariable);
-		assertThat(operandMap.getListVariable(itemList, LIST_NAME, 0, "0")).isEqualTo(itemListVariable);
 	}
 
 	@Test
 	public void test_axiom_list_getListVariable()
 	{
+        String LIST_VAR_NAME = LIST_NAME + ".0.0";
 		OperandMap operandMap = new OperandMap();
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
+		when(axiomListVariable.getName()).thenReturn(LIST_VAR_NAME);
 		when(axiomList.newVariableInstance(eq(0), eq(0), isA(String.class))).thenReturn(axiomListVariable);
 		AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
 		when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
@@ -70,7 +70,8 @@ public class OperandMapTest
         when(axiomListSpec.getTermIndex()).thenReturn(0);
         when(axiomListSpec.getSuffix()).thenReturn("0");
 		assertThat(operandMap.getListVariable(axiomListSpec)).isEqualTo(axiomListVariable);
-		assertThat(operandMap.operandMap.get(LIST_NAME + ".0.0")).isEqualTo(axiomListVariable);
+		operandMap.addOperand(axiomListVariable);
+        assertThat(operandMap.operandMap.get(LIST_VAR_NAME)).isEqualTo(axiomListVariable);
 		assertThat(operandMap.getListVariable(axiomListSpec)).isEqualTo(axiomListVariable);
 	}
 
@@ -173,8 +174,6 @@ public class OperandMapTest
         when(axiomListSpec.getTermExpression()).thenReturn(termExpression);
 		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(0), eq(0), isA(String.class))).thenReturn(axiomListVariable);
-		assertThat(operandMap.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
-		assertThat(operandMap.operandMap.get(LIST_NAME + ".0.0")).isEqualTo(axiomListVariable);
 		assertThat(operandMap.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
 	}
 }

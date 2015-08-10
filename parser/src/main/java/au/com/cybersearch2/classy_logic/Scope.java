@@ -209,12 +209,23 @@ public class Scope
 	 */
 	public Template getTemplate(String name)
     {
-		Template template = parserAssembler.getTemplate(name);
-		if ((template == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
-			template = getGlobalParserAssembler().getTemplate(name);
+		Template template = findTemplate(name);
 		if (template == null)
 			throw new IllegalArgumentException("Template \"" + name + "\" does not exist");
 	    return template;
+    }
+
+    /**
+     * Returns template with specified name
+     * @param name
+     * @return Template object or null if template not found
+     */
+    public Template findTemplate(String name)
+    {
+        Template template = parserAssembler.getTemplate(name);
+        if ((template == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
+            template = getGlobalParserAssembler().getTemplate(name);
+        return template;
     }
 
     /**

@@ -44,7 +44,7 @@ public class GermanColors
             "axiom shade (name) : parameter;\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
-            "  query color_query calc(shade : swatch);\n" +
+            "  query color_query (shade : swatch);\n" +
             "}";
 
 	/**

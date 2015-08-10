@@ -108,8 +108,8 @@ public class TelegenTest
         "    (true,                 \"Support\");\n" +
         "query issues (issue:issue);\n" +
         "query checks (check:check);\n" +
-        "query first_check_query calc(issue_param: first_check);\n" +
-        "query next_check_query calc(check_param: next_check);";
+        "query first_check_query (issue_param: first_check);\n" +
+        "query next_check_query (check_param: next_check);";
 
     /** Factory object to create "telegen" Persistence Unit implementation */
     @Inject
