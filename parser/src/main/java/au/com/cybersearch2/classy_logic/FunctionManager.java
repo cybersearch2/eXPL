@@ -29,21 +29,21 @@ import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 public class FunctionManager
 {
     /** Map Function Providers to their names */
-    protected Map<String, FunctionProvider> functionProviderMap;
+    protected Map<String, FunctionProvider<?>> functionProviderMap;
     
     public FunctionManager()
     {
-        functionProviderMap = new HashMap<String, FunctionProvider>();
+        functionProviderMap = new HashMap<String, FunctionProvider<?>>();
     }
     
-    public void putFunctionProvider(String name, FunctionProvider functionProvider)
+    public void putFunctionProvider(String name, FunctionProvider<?> functionProvider)
     {
         functionProviderMap.put(name, functionProvider);
     }
     
-    public FunctionProvider getFunctionProvider(String name)
+    public FunctionProvider<?> getFunctionProvider(String name)
     {
-        FunctionProvider functionProvider = functionProviderMap.get(name);
+        FunctionProvider<?> functionProvider = functionProviderMap.get(name);
         if (functionProvider == null)
             throw new ExpressionException("FunctionProvider \"" + name + "\" not found");
         return functionProvider;

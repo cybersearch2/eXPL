@@ -385,7 +385,6 @@ public class CallOperandTest
     {
         QueryProgram queryProgram = new QueryProgram(MARKS_CALC);
         queryProgram.executeQuery("marks", new SolutionHandler(){
-            int index = 0;  
             @Override
             public boolean onSolution(Solution solution)
             {

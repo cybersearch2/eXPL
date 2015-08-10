@@ -22,6 +22,7 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * StampDuty
@@ -59,7 +60,8 @@ public class StampDuty
 		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "stamp_duty_query");
 		// Add a transacton_amount Axiom with a single 123,458 term
 		// This axiom goes into the Global scope and is removed at the start of the next query.
-		queryParams.addAxiom("transacton_amount", Integer.valueOf(123458));
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("transacton_amount", new Axiom("transacton_amount", new Parameter("amount", Integer.valueOf(123458)))); // aqua
 		final Axiom[] payableHolder = new Axiom[1];
 		// Add a solution handler to display the final Calculator solution
 		queryParams.setSolutionHandler(new SolutionHandler(){

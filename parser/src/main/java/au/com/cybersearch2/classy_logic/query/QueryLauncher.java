@@ -45,13 +45,17 @@ public class QueryLauncher
         QuerySpec querySpec = queryParams.getQuerySpec();
         SolutionHandler solutionHandler = queryParams.getSolutionHandler();
         ChainQueryExecuter headQuery = null;
+        queryParams.initialize();
         boolean isCalculation = querySpec.getQueryType() == QueryType.calculator;
         if (!isCalculation)
             headQuery = new QueryExecuter(queryParams);
         else
         {   // QueryParams need to be initialized to set up parameter axioms
-            queryParams.initialize();
             headQuery = new ChainQueryExecuter(scope);
+            if (queryParams.hasInitialSolution())
+                headQuery.setSolution(queryParams.getInitialSolution());
+            else
+                headQuery.setSolution(new Solution());
             chainCalculator(queryParams, scope, querySpec, headQuery);
         }
         // Chained queries are optional

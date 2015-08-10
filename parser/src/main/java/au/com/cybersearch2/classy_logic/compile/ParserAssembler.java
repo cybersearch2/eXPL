@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -38,7 +37,6 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.AxiomListSource;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
-import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomListSpec;
@@ -102,7 +100,7 @@ public class ParserAssembler implements LocaleListener
             DI.inject(this); 
         }
 
-        public FunctionProvider getFunctionProvider(String name)
+        public FunctionProvider<?> getFunctionProvider(String name)
         {
             return functionManager.getFunctionProvider(name);
         }
@@ -298,18 +296,13 @@ public class ParserAssembler implements LocaleListener
 		List<String> termNameList = getAxiomTermNameList(axiomName);
 		if (termNameList != null)
 		{	
-			Axiom termNameAxiom = new Axiom(axiomName);
-			int index = 0;
 		    for (String termName: termNameList)
 		    {
-		    	if (index == axiom.getTermCount())
-		    		break;
-		    	termNameAxiom.addTerm(new Parameter(termName, axiom.getTermByIndex(index++).getValue()));
+		        if (axiom.getTermByName(termName) == null)
+		            throw new ExpressionException("Axiom \"" + axiomName + "\" missing term \"" + termName + "\"");
 		    }
-			scopeAxiomMap.put(axiomName, termNameAxiom);
 		}
-		else
-			scopeAxiomMap.put(axiomName, axiom);
+		scopeAxiomMap.put(axiomName, axiom);
 	}
 	
 	/**
@@ -492,13 +485,16 @@ public class ParserAssembler implements LocaleListener
 	@Override
 	public void onScopeChange(Scope scope) 
 	{
-	    // TODO - Investigate whento clear scope axioms
-		//if (scopeAxiomMap != null)
-		//	scopeAxiomMap.clear();
 		for (LocaleListener localeListener: localeListenerList)
 			localeListener.onScopeChange(scope);
 	}
 
+	public void clearScopeAxioms()
+	{
+        if (scopeAxiomMap != null)
+          scopeAxiomMap.clear();
+	}
+	
 	/**
 	 * Returns list of axiom listeners for specified key
 	 * @param key
@@ -645,7 +641,8 @@ public class ParserAssembler implements LocaleListener
 	 * @param argumentExpression Operand with one or more arguments contained in it or null for no arguments
 	 * @return Operand object
 	 */
-	public Operand getCallOperand(String name, Operand argumentExpression)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+    public Operand getCallOperand(String name, Operand argumentExpression)
 	{
         String[] parts = name.split("\\.");
         if (parts.length != 2)
@@ -670,11 +667,11 @@ public class ParserAssembler implements LocaleListener
     	    {
     	        externalFunctionProvider = new ExternalFunctionProvider();
     	    }
-    	    FunctionProvider functionProvider = externalFunctionProvider.getFunctionProvider(library);
-    	    CallEvaluator<Object>callEvaluator = functionProvider.getCallEvaluator(function);
+    	    FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
+    	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(function);
     	    if (callEvaluator == null)
     	        throw new ExpressionException("Function \"" + function + "\" not supported");
-            return new CallOperand<Object>(callName, callEvaluator, argumentExpression);
+            return new CallOperand(callName, callEvaluator, argumentExpression);
         }
 	}
 	

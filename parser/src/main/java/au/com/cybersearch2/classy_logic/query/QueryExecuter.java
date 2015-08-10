@@ -82,6 +82,10 @@ public class QueryExecuter extends ChainQueryExecuter
 	public QueryExecuter(QueryParams queryParams) 
 	{
 		super(queryParams.getScope());
+		if (queryParams.hasInitialSolution())
+		    setSolution(queryParams.getInitialSolution());
+	    else
+	        setSolution(new Solution());
 		// A collection of axiom sources which are referenced by name
 		this.axiomCollection = queryParams.getAxiomCollection();
 		// The template sequence. Each template is assigned to a LogicQuery object

@@ -33,6 +33,7 @@ import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
@@ -253,8 +254,9 @@ public class TelegenTest
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "first_check_query");
         // Add a transacton_amount Axiom with a single 123,458 term
         // This axiom goes into the Global scope and is removed at the start of the next query.
-        queryParams.addAxiom("issue_param", issue);
-        // Add a solution handler to display the final Calculator solution
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("issue_param", new Axiom("issue_param", new Parameter("issue_name", issue)));
+       // Add a solution handler to display the final Calculator solution
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -270,7 +272,8 @@ public class TelegenTest
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "next_check_query");
         // Add a transacton_amount Axiom with a single 123,458 term
         // This axiom goes into the Global scope and is removed at the start of the next query.
-        queryParams.addAxiom("check_param", check);
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("check_param", new Axiom("check_param", new Parameter("check_name", check)));
         // Add a solution handler to display the final Calculator solution
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override

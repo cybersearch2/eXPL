@@ -30,6 +30,7 @@ eXPL v1.12
 27. Automatically insert LogicQuery as head query when a calculator is at the head and an axiom key specified
 28. Dynamically populate automatically inserted Template and get Calculator to look for axiom in Solution
 29. QueryLauncher now uses axiomKey only for choice Template
+30. Replace QueryParams Axiom passing design to use a Solution object and clear Scope Axioms on ScopeContext reset()
 
 
 

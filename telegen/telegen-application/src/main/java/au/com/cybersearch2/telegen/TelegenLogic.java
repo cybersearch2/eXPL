@@ -28,6 +28,7 @@ import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classywidget.ListItem;
 
@@ -127,7 +128,8 @@ public class TelegenLogic
     {
         // Create QueryParams object for Global scope and query "first_check_query"
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "first_check_query");
-        queryParams.addAxiom("issue_param", issue);
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("issue_param", new Axiom("issue_param", new Parameter("issue_name", issue)));
         final String[] checkHolder = new String[1];
         // Add a solution handler to capture the query result
         queryParams.setSolutionHandler(new SolutionHandler(){
@@ -146,7 +148,8 @@ public class TelegenLogic
     {
         // Create QueryParams object for Global scope and query "next_check_query"
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "next_check_query");
-        queryParams.addAxiom("check_param", currentCheck);
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("check_param", new Axiom("check_param", new Parameter("check_name", currentCheck)));
         final String[] checkHolder = new String[1];
         // Add a solution handler to capture the query result
         queryParams.setSolutionHandler(new SolutionHandler(){

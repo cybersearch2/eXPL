@@ -472,7 +472,8 @@ public class QueryParserTest
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
-        queryParams.addAxiom("shade", "aqua");
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("name", "aqua")));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -481,7 +482,8 @@ public class QueryParserTest
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
-        queryParams.addAxiom("shade", "blue");
+        initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("name", "blue")));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -490,7 +492,8 @@ public class QueryParserTest
             }});
         queryProgram.executeQuery(queryParams);
         // Test choice short circuit on no match
-        queryParams.addAxiom("shade", "orange");
+        initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("name", "orange")));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -509,7 +512,8 @@ public class QueryParserTest
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
-        queryParams.addAxiom("shade", Long.decode("0x00ffff"));
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", Long.decode("0x00ffff"))));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -518,7 +522,8 @@ public class QueryParserTest
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
-        queryParams.addAxiom("shade", Long.decode("0x0000ff"));
+        initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", Long.decode("0x0000ff"))));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -527,7 +532,8 @@ public class QueryParserTest
             }});
         queryProgram.executeQuery(queryParams);
         // Test choice short circuit on no match
-        queryParams.addAxiom("shade", Long.decode("0x77ffff"));
+        initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", Long.decode("0x77ffff"))));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -545,7 +551,8 @@ public class QueryParserTest
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
-        queryParams.addAxiom("shade", Long.decode("0x00ffff"));
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", Long.decode("0x00ffff"))));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -554,7 +561,8 @@ public class QueryParserTest
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
-        queryParams.addAxiom("shade", Long.decode("0x0000ff"));
+        initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", Long.decode("0x0000ff"))));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -563,7 +571,8 @@ public class QueryParserTest
             }});
         queryProgram.executeQuery(queryParams);
         // Test default choice on no match
-        queryParams.addAxiom("shade", Long.decode("0x77ffff"));
+        initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", Long.decode("0x77ffff"))));
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {

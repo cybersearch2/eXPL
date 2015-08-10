@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.AxiomMapCollection;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
+import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -33,6 +35,8 @@ public class QueryParams
 	protected Scope scope;
 	/** Solution handler (optional). Do-nothing handler applied if none supplied */
 	protected SolutionHandler solutionHandler;
+	/** Solution (optional). Source of initialization axioms */
+	protected Solution initialSolution;
     /** Properties for calculations referenced by template name */
     protected Map<String, Map<String, Object>> propertiesMap;
 
@@ -56,17 +60,40 @@ public class QueryParams
 	{
 	    // Notify locale listeners of change of scope
 		scope.notifyChange();
-		// Collect query axiom sources and templates
-		templateList = new ArrayList<Template>();
-		axiomEnsemble = new AxiomMapCollection();
-		// Iterate through list of query specification KeyNames
-		for (KeyName keyname: querySpec.getKeyNameList())
+		boolean isStart = (axiomEnsemble == null) || (templateList == null);
+		if (isStart)
 		{
-		    // Collect axiom source
-			String axiomKey = keyname.getAxiomKey();
-			if (!axiomKey.isEmpty())
-				axiomEnsemble.put(axiomKey, scope.getAxiomSource(axiomKey));
-			// Collect template
+		    // Collect query axiom sources and templates
+		    templateList = new ArrayList<Template>();
+		    axiomEnsemble = new AxiomMapCollection();
+		}
+		// Iterate through list of query specification KeyNames
+		if (isStart || (initialSolution != null))
+    		for (KeyName keyname: querySpec.getKeyNameList())
+    		{
+    		    // Collect axiom source
+    			String axiomKey = keyname.getAxiomKey();
+    			if (!axiomKey.isEmpty())
+    			{
+    			    AxiomSource axiomSource = scope.findAxiomSource(axiomKey);
+    			    if ((axiomSource == null) && (initialSolution != null))
+    			    {
+    			        Axiom axiom = initialSolution.getAxiom(axiomKey);
+    			        if (axiom != null)
+    			        {
+    			            axiomSource = new SingleAxiomSource(axiom);
+    			            scope.getParserAssembler().addScopeAxiom(axiom);
+    			        }
+    			    }
+    			    if (axiomSource == null)
+    			        // Trigger source not found exception
+    			        scope.getAxiomSource(axiomKey);
+    			    else
+                        axiomEnsemble.put(axiomKey, axiomSource);
+    			}
+    	    if (!isStart)
+    	        return;
+    		// Collect template
 			String templateName = keyname.getTemplateName();
 			Template template = scope.getTemplate(templateName);
 			if (template == null)
@@ -84,8 +111,6 @@ public class QueryParams
 	 */
 	public AxiomCollection getAxiomCollection() 
 	{
-		if (axiomEnsemble == null)
-			initialize();
 		return axiomEnsemble;
 	}
 
@@ -95,8 +120,6 @@ public class QueryParams
 	 */
 	public List<Template> getTemplateList() 
 	{
-		if (templateList == null)
-			initialize();
 		return templateList;
 	}
 
@@ -142,20 +165,6 @@ public class QueryParams
 		return querySpec;
 	}
 
-	/**
-	 * Add an axiom populated with supplied parameters to
-	 * @param name
-	 * @param params
-	 * @return Axiom object
-	 */
-	public Axiom addAxiom(String name, Object... params)
-	{
-		Axiom axiom = new Axiom(name, params);
-        // Set scope axiom in global scope
-        scope.getParserAssembler().addScopeAxiom(axiom); 
-		return axiom;
-	}
-
     /**
      * Add axiom key / template name pair for calculator query, along with optional properties
      * @param templateName Name of template to which the properties apply
@@ -189,4 +198,15 @@ public class QueryParams
             properties.clear();
     }
 
+    public boolean hasInitialSolution()
+    {
+        return initialSolution != null;
+    }
+    
+    public Solution getInitialSolution()
+    {
+        if (initialSolution == null)
+            initialSolution = new Solution();
+        return initialSolution;
+    }
 }

@@ -69,11 +69,13 @@ public class ScopeContext
 		OperandMap operandMap = scope.getParserAssembler().getOperandMap();
 		operandMap.setOperandValues(operandValueMap);
 		operandMap.clearLists(emptyListNames);
+		scope.getParserAssembler().clearScopeAxioms();
 		if (globalOperandValueMap != null)
 		{
 			OperandMap globalOperandMap = scope.getGlobalScope().getParserAssembler().getOperandMap();
 			globalOperandMap.setOperandValues(operandValueMap);
 			globalOperandMap.clearLists(emptyGlobalListNames);
+			scope.getGlobalParserAssembler().clearScopeAxioms();
 		}
 		// Restore Global scope locale which may be changed when used within another scope 
 		if (QueryProgram.GLOBAL_SCOPE.equals(scope.getName()))

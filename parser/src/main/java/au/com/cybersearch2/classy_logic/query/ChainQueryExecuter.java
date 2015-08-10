@@ -55,7 +55,6 @@ public class ChainQueryExecuter
 	public ChainQueryExecuter(Scope scope) 
 	{
 		this.scope = scope;
-		solution = new Solution();
 		if ((scope != null) && (scope.getAxiomListenerMap() != null))
 		{   // Create a copy of the axiom listener map and remove entries as axiom listeners are bound to processors
 			axiomListenerMap = new HashMap<String, List<AxiomListener>>();
@@ -63,7 +62,12 @@ public class ChainQueryExecuter
 		}
 	}
 
-	/**
+	public void setSolution(Solution solution)
+    {
+        this.solution = solution;
+    }
+
+    /**
 	 * Returns solution
 	 * @return Collection of axioms referenced by name. The axioms reference the templates supplied to the query.
 	 */

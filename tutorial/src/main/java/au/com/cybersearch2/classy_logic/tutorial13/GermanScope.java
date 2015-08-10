@@ -22,6 +22,7 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * GermanScope
@@ -57,7 +58,8 @@ public class GermanScope
 		QueryParams queryParams = queryProgram.getQueryParams("german", "item_query");
 		// Add an item Axiom with a single "2.345,67 EUR" term
 		// This axiom goes into the Global scope and is removed at the start of the next query.
-		queryParams.addAxiom("item", "12.345,67 €");
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("item", new Axiom("item", new Parameter("amount", "12.345,67 €")));
         // Add a solution handler to display the final Calculator solution
 		final Axiom[] formatedTotalAmountHolder = new Axiom[1];
         queryParams.setSolutionHandler(new SolutionHandler(){

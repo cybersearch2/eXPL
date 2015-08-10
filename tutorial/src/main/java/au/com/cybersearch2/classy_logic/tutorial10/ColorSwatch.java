@@ -19,8 +19,10 @@ import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * ColorSwatch
@@ -54,7 +56,8 @@ public class ColorSwatch
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
-        queryParams.addAxiom("shade", Long.valueOf(hexColor));
+        Solution initialSolution = queryParams.getInitialSolution();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", Long.valueOf(hexColor)))); // aqua
         final StringBuilder builder = new StringBuilder();
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
