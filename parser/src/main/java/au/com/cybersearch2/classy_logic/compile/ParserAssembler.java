@@ -285,8 +285,16 @@ public class ParserAssembler implements LocaleListener
 	}
 
 	/**
-	 * Add scope-bound axiom
+	 * Add scope-bound axiom. 
+	 * This axiom will be passed to the query by containing it in
+	 * the QueryParams initialSolution object.
+	 * The axiom can also be declared in the script as a parameter,
+	 * which allows checking that required terms are present.
+	 * All scope-bound axioms are removed on scope context reset at the
+	 * conclusion of a query.
 	 * @param axiom Axiom object
+	 * @see au.com.cybersearch2.classy_logic.QueryParams.initialize()
+	 * @see setParameter(au.com.cybersearch2.classy_logic.pattern.Axiom)
 	 */
 	public void addScopeAxiom(Axiom axiom)
 	{
@@ -410,12 +418,15 @@ public class ParserAssembler implements LocaleListener
 	 */
     public AxiomSource getAxiomSource(String axiomName)
     {
+        // Scope-bound axioms are passed in query parameters and
+        // removed at the end of the query
     	if (scopeAxiomMap != null)
     	{   // Scope axioms are provided in query parameters.
     		Axiom axiom = scopeAxiomMap.get(axiomName);
     		if (axiom != null)
     			return new SingleAxiomSource(axiom);
     	}
+    	// Look for list defined in the script
         if ((parameterList == null) || !parameterList.contains(axiomName))
         {   // Axiom is declared in script?
            	List<Axiom> axiomList = axiomListMap.get(axiomName);
@@ -426,6 +437,7 @@ public class ParserAssembler implements LocaleListener
         		return axiomListSource;
         	}
         }
+        // List for external source. Requires qualified name (2 part scope.name)
     	String qualifiedName = getQualifiedName(axiomName);
     	String resourceName = axiomResourceMap.get(qualifiedName);
     	if (resourceName == null)
@@ -489,6 +501,9 @@ public class ParserAssembler implements LocaleListener
 			localeListener.onScopeChange(scope);
 	}
 
+	/**
+	 * Remove all scope-bound axioms
+	 */
 	public void clearScopeAxioms()
 	{
         if (scopeAxiomMap != null)
@@ -546,7 +561,7 @@ public class ParserAssembler implements LocaleListener
 	 * Set axiom term name list from template
 	 * @param templateName Name of template
 	 * @param axiomList Axiom list to be updated
-	 * @return
+	 * @return List of term names
 	 */
 	public List<String> setAxiomTermNameList(String templateName, AxiomList axiomList)
     {
@@ -664,9 +679,7 @@ public class ParserAssembler implements LocaleListener
         else
         {
     	    if (externalFunctionProvider == null)
-    	    {
     	        externalFunctionProvider = new ExternalFunctionProvider();
-    	    }
     	    FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
     	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(function);
     	    if (callEvaluator == null)

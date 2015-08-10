@@ -265,7 +265,9 @@ public class QueryExecuterTest
 				return false;
 			}};
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, Collections.singletonList(cities));
-        QueryExecuter query = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter query = new QueryExecuter(queryParams);
     	assertThat(query.toString()).isEqualTo("city(name, altitude)");
     	int index = 0;
 	    while (query.execute())
@@ -302,7 +304,9 @@ public class QueryExecuterTest
 	    templateList.add(s1);
 	    templateList.add(s2);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
-        QueryExecuter query = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter query = new QueryExecuter(queryParams);
     	assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
        	int index = 0;
 	    while (query.execute())
@@ -340,7 +344,9 @@ public class QueryExecuterTest
 	    templateList.add(s1);
 	    templateList.add(s2);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
-        QueryExecuter query = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter query = new QueryExecuter(queryParams);
 	    Evaluator expression = new Evaluator(new StringOperand("customer.name"), "==", new StringOperand("name"));
 	    Evaluator invoice = new Evaluator("name", expression, "&&");
 	    Variable fee = new Variable("fee");
@@ -381,7 +387,9 @@ public class QueryExecuterTest
 	    s2.setKey(customers.get(0).getName());
 		KeyName keyName2 = new KeyName(s2.getKey(), "customer");
 		querySpec.addKeyName(keyName2);
-        QueryExecuter query = new QueryExecuter(new QueryParams(queryProgram.getGlobalScope(), querySpec));
+        QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
+        queryParams.initialize();
+        QueryExecuter query = new QueryExecuter(queryParams);
 	    Evaluator expression = new Evaluator(new StringOperand("customer.name"), "!=", new StringOperand("name"));
 	    Evaluator nameMatch = new Evaluator("name", expression, "||");
 	    Variable fee = new Variable("fee");
@@ -450,7 +458,9 @@ public class QueryExecuterTest
 	    templateList.add(s1);
 	    templateList.add(s2);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
-        QueryExecuter query = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter query = new QueryExecuter(queryParams);
 	    Evaluator expression = new Evaluator(new StringOperand("customer.name"), "!=", new StringOperand("name"));
 	    Evaluator nameMatch = new Evaluator("name", expression, "||");
 	    Variable fee = new Variable("fee");
@@ -515,7 +525,9 @@ public class QueryExecuterTest
 	    templateList.add(s1);
 	    templateList.add(s2);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
-        QueryExecuter query = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter query = new QueryExecuter(queryParams);
 	    Evaluator expression = new Evaluator(new BooleanOperand("True", Boolean.TRUE), "==", new BooleanOperand("True2", Boolean.TRUE));
 	    Evaluator invoice = new Evaluator("name", expression, "||");
 	    Variable fee = new Variable("fee");
@@ -549,13 +561,15 @@ public class QueryExecuterTest
 		Scope scope = mock(Scope.class);
 		when(scope.getParserAssembler()).thenReturn(parserAssembler);
 		when(parserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
-		when(scope.getAxiomSource("city")).thenReturn(new AxiomListSource(cityList));
+		when(scope.findAxiomSource("city")).thenReturn(new AxiomListSource(cityList));
 		when(scope.getTemplate("city")).thenReturn(cities);
 		axiomListenerMap.put("city", Collections.singletonList(axiomListener));
 		QuerySpec querySpec = new QuerySpec("Test");
 		KeyName keyName1 = new KeyName("city", "city");
 		querySpec.addKeyName(keyName1);
-	    QueryExecuter query = new QueryExecuter(new QueryParams(scope, querySpec));
+        QueryParams queryParams = new QueryParams(scope, querySpec);
+        queryParams.initialize();
+        QueryExecuter query = new QueryExecuter(queryParams);
     	assertThat(query.toString()).isEqualTo("city(name, altitude)");
     	int index = 0;
 	    while (query.execute())
@@ -637,10 +651,10 @@ public class QueryExecuterTest
 		ParserAssembler parserAssembler = mock(ParserAssembler.class);
 		Scope scope = mock(Scope.class);
 		when(scope.getParserAssembler()).thenReturn(parserAssembler);
-		when(scope.getAxiomSource("charge")).thenReturn(new AxiomListSource(charges));
-		when(scope.getAxiomSource("customer")).thenReturn(new AxiomListSource(customers));
-		when(scope.getAxiomSource("fee")).thenReturn(new AxiomListSource(fees));
-		when(scope.getAxiomSource("freight")).thenReturn(new AxiomListSource(freights));
+		when(scope.findAxiomSource("charge")).thenReturn(new AxiomListSource(charges));
+		when(scope.findAxiomSource("customer")).thenReturn(new AxiomListSource(customers));
+		when(scope.findAxiomSource("fee")).thenReturn(new AxiomListSource(fees));
+		when(scope.findAxiomSource("freight")).thenReturn(new AxiomListSource(freights));
 		when(scope.getTemplate("charge")).thenReturn(s1);
 		when(scope.getTemplate("customer")).thenReturn(s2);
 		when(parserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
@@ -649,7 +663,9 @@ public class QueryExecuterTest
 		querySpec.addKeyName(keyName1);
 		KeyName keyName2 = new KeyName(s2.getKey(), "customer");
 		querySpec.addKeyName(keyName2);
-	    QueryExecuter query = new QueryExecuter(new QueryParams(scope, querySpec));
+        QueryParams queryParams = new QueryParams(scope, querySpec);
+        queryParams.initialize();
+        QueryExecuter query = new QueryExecuter(queryParams);
 	    Evaluator expression = new Evaluator(new StringOperand("customer.name"), "!=", new StringOperand("name"));
 	    Evaluator nameMatch = new Evaluator("name", expression, "||");
 	    Variable fee = new Variable("fee");

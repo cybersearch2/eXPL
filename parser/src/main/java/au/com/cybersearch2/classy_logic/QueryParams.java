@@ -91,18 +91,19 @@ public class QueryParams
     			    else
                         axiomEnsemble.put(axiomKey, axiomSource);
     			}
-    	    if (!isStart)
-    	        return;
-    		// Collect template
-			String templateName = keyname.getTemplateName();
-			Template template = scope.getTemplate(templateName);
-			if (template == null)
-				throw new IllegalArgumentException("Template \"" + templateName + "\" does not exist");
-			if (!axiomKey.isEmpty()) // Empty axiom key indicates no axiom
-			    // Setting template key here faciltates unification
-				template.setKey(axiomKey);
-			templateList.add(template);
-		}
+        	    if (isStart)
+        	    {
+            		// Collect template
+        			String templateName = keyname.getTemplateName();
+        			Template template = scope.getTemplate(templateName);
+        			if (template == null)
+        				throw new IllegalArgumentException("Template \"" + templateName + "\" does not exist");
+        			if (!axiomKey.isEmpty()) // Empty axiom key indicates no axiom
+        			    // Setting template key here faciltates unification
+        				template.setKey(axiomKey);
+        			templateList.add(template);
+        	    }
+    		}
 	}
 
 	/**

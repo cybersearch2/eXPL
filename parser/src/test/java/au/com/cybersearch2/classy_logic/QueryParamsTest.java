@@ -46,10 +46,11 @@ public class QueryParamsTest
 		KeyName keyname = mock(KeyName.class);
 		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
 		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
-		when(scope.getAxiomSource(AXIOM_KEY)).thenReturn(axiomSource);
+		when(scope.findAxiomSource(AXIOM_KEY)).thenReturn(axiomSource);
 		when(scope.getTemplate(TEMPLATE_NAME)).thenReturn(template);
 		querySpec.addKeyName(keyname);
 		QueryParams queryParams = new QueryParams(scope, querySpec);
+		queryParams.initialize();
 		assertThat(queryParams.getAxiomCollection().getAxiomSource(AXIOM_KEY)).isEqualTo(axiomSource);
 		assertThat(queryParams.getTemplateList().get(0)).isEqualTo(template);
 	}
@@ -66,6 +67,7 @@ public class QueryParamsTest
 		when(scope.getTemplate(TEMPLATE_NAME)).thenReturn(template);
 		querySpec.addKeyName(keyname);
 		QueryParams queryParams = new QueryParams(scope, querySpec);
+		queryParams.initialize();
 		assertThat(queryParams.getTemplateList().get(0)).isEqualTo(template);
 		verify(scope, never()).getAxiomSource("");
 		verify(template, never()).setKey("");

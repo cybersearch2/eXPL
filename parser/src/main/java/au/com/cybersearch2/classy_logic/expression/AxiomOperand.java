@@ -16,8 +16,8 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import java.util.Iterator;
-import java.util.List;
 
+import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -27,6 +27,9 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 
 /**
  * AxiomOperand
+ * Contains an AxiomList value. 
+ * Concatenation operation causes contents of right operand to be appended to the this operand.
+ * Assignment is only other operation allowed.
  * @author Andrew Bowley
  * 5 Aug 2015
  */
@@ -169,22 +172,7 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     {
         if (!(operand.getValueClass() == AxiomList.class))
             return false;
-        AxiomList rightAxiomList = (AxiomList)operand.getValue();
-        AxiomList leftAxiomList = (AxiomList)getValue();
-        List<String> leftTermNames = leftAxiomList.getAxiomTermNameList();
-        List<String> rightTermNames = rightAxiomList.getAxiomTermNameList();
-        if ((leftTermNames != null) && (rightTermNames != null))
-        {
-            if (leftTermNames.size() != rightTermNames.size())
-                return false;
-            int index = 0;
-            for (String termName: rightTermNames)
-                if (!termName.equalsIgnoreCase(leftTermNames.get(index++)))
-                    return false;
-        }
-        else if ((leftTermNames != null) || (rightTermNames != null))
-            return false;
-        return true;
+        return AxiomUtils.isCongruent((AxiomList)getValue(), (AxiomList)operand.getValue());
     }
 
 }

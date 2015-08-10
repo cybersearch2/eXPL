@@ -67,6 +67,7 @@ public class QueryLauncher
                 else
                 {
                     QueryParams chainQueryParams = new QueryParams(scope, chainQuerySpec);
+                    chainQueryParams.initialize();
                     headQuery.chain(chainQueryParams.getAxiomCollection(), chainQueryParams.getTemplateList());
                 }
             }

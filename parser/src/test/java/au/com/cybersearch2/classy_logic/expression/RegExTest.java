@@ -77,7 +77,9 @@ public class RegExTest
 		inWordsTemplate.addTerm(new StringOperand("Definition"));
 		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(\"^in[^ ]+\", Definition)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(inWordsTemplate));
-		QueryExecuter inWordsQuery = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter inWordsQuery = new QueryExecuter(queryParams);
     	File inWordList = new File("src/test/resources", "in_words.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(inWordList));
 		while (inWordsQuery.execute())
@@ -103,7 +105,9 @@ public class RegExTest
 		dictionaryTemplate.addTerm(new StringOperand("Word"));
 		dictionaryTemplate.addTerm(regExOperand);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(dictionaryTemplate));
-		QueryExecuter dictionaryQuery = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter dictionaryQuery = new QueryExecuter(queryParams);
 		//while(dictionaryQuery.execute())
         //    System.out.println(dictionaryQuery.toString());
 		if (dictionaryQuery.execute())

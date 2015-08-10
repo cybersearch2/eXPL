@@ -15,12 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.query;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -45,12 +44,7 @@ public class SingleAxiomSource implements AxiomSource, Iterator<Axiom>, Iterable
     public SingleAxiomSource(Axiom axiom)
     {
     	this.axiom = axiom;
-    	if ((axiom.getTermCount() > 0) && (!axiom.getTermByIndex(0).getName().equals(Term.ANONYMOUS)))
-        {
-    	    axiomTermNameList = new ArrayList<String>(axiom.getTermCount());
-    	    for (int i = 0; i < axiom.getTermCount(); i++)
-    	        axiomTermNameList.add(axiom.getTermByIndex(i).getName());
-        }
+    	axiomTermNameList = AxiomUtils.getTermNames(axiom);
     }
 
     /**
@@ -105,7 +99,7 @@ public class SingleAxiomSource implements AxiomSource, Iterator<Axiom>, Iterable
     @Override
     public List<String> getAxiomTermNameList()
     {
-        return axiomTermNameList == null ? AxiomListSource.EMPTY_LIST : axiomTermNameList;
+        return axiomTermNameList;
     }
 
 }

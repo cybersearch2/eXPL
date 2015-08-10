@@ -640,7 +640,9 @@ public class QueryParserTest
 		KeyName keyName1 = new KeyName("city", "high_city");
 		querySpec.addKeyName(keyName1);
         Template calcTemplate = parserAssembler.getTemplate("insert_sort");
-		QueryExecuter highCitiesQuery = new QueryExecuter(new QueryParams(queryProgram.getGlobalScope(), querySpec));
+        QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
+        queryParams.initialize();
+        QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
 	    highCitiesQuery.chainCalculator(null, calcTemplate);
 	    //System.out.println(highCitiesQuery.toString());
     	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude?altitude>5000)");
@@ -665,6 +667,7 @@ public class QueryParserTest
 		ChainQueryExecuter queryExecuter = new ChainQueryExecuter(queryProgram.getGlobalScope());
         Template calcTemplate = parserAssembler.getTemplate("insert_sort");
 		queryExecuter.chainCalculator(null, calcTemplate);
+		queryExecuter.setSolution(new Solution());
 		queryExecuter.execute();
 		Axiom unsortedAxiom = parserAssembler.getAxiomSource("unsorted").iterator().next();
 		assertThat(queryExecuter.getSolution().getString("insert_sort", "i")).isEqualTo("5");
@@ -853,7 +856,9 @@ public class QueryParserTest
         QuerySpec querySpec = new QuerySpec("TEST");
 		KeyName keyName = new KeyName("city", "high_city");
 		querySpec.addKeyName(keyName);
-	    QueryExecuter highCitiesQuery = new QueryExecuter(new QueryParams(queryProgram.getGlobalScope(), querySpec));
+        QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
+        queryParams.initialize();
+        QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
     	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude, is_high = altitude>5000)");
     	int index = 0;
  	    while (highCitiesQuery.execute())
@@ -867,7 +872,9 @@ public class QueryParserTest
 		QuerySpec querySpec = new QuerySpec("test");
 		KeyName keyName = new KeyName("colors", "color_convert");
 		querySpec.addKeyName(keyName);
-	    QueryExecuter colorsQuery = new QueryExecuter(new QueryParams(queryProgram.getGlobalScope(), querySpec));
+        QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
+        queryParams.initialize();
+        QueryExecuter colorsQuery = new QueryExecuter(queryParams);
     	//assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude, is_high = altitude>5000)");
  	    if (colorsQuery.execute())
   	    	System.out.println(colorsQuery.getSolution().getAxiom("color_convert").toString());
@@ -951,7 +958,9 @@ public class QueryParserTest
 	    more_agriculture_y1990_y2010.setKey("Data");
 	    AxiomSource agriSource = parserAssembler.getAxiomSource("Data");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(agriSource, Collections.singletonList(more_agriculture_y1990_y2010));
-	    QueryExecuter agriculturalQuery = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter agriculturalQuery = new QueryExecuter(queryParams);
     	assertThat(agriculturalQuery.toString()).isEqualTo("agri_10y(country?Y2010-Y1990>1.0, Y1990, Y2010)");
     	File agriList = new File("src/test/resources", "agriculture-land.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(agriList));
@@ -964,7 +973,8 @@ public class QueryParserTest
  	    reader.close();
  	    
         QueryExecuterAdapter adapter2 = new QueryExecuterAdapter(agriSource, Collections.singletonList(more_agriculture_y1990_y2010));
-        QueryParams queryParams = new QueryParams(adapter2.getScope(), adapter2.getQuerySpec());
+        QueryParams queryParams2 = new QueryParams(adapter2.getScope(), adapter2.getQuerySpec());
+        queryParams2.initialize();
  	    File surfaceAreaList = new File("src/test/resources", "surface-area.lst");
   	    final LineNumberReader reader2 = new LineNumberReader(new FileReader(surfaceAreaList));
   	    SolutionHandler solutionHandler = new SolutionHandler(){
@@ -982,7 +992,7 @@ public class QueryParserTest
 				return true;
 			}};
 
- 	    agriculturalQuery = new QueryExecuter(queryParams);
+ 	    agriculturalQuery = new QueryExecuter(queryParams2);
 	    more_agriculture_y1990_y2010.backup(false);
 	    Template surface_area = parserAssembler.getTemplate("surface_area_increase");
 	    surface_area.setKey("surface_area");
@@ -1001,7 +1011,9 @@ public class QueryParserTest
  	    };
  	    more_agriculture_y1990_y2010.backup(false);
         QueryExecuterAdapter adapter3 = new QueryExecuterAdapter(new SingleAxiomSource(new Axiom("Data", dataParms)), Collections.singletonList(more_agriculture_y1990_y2010));
- 	    agriculturalQuery = new QueryExecuter(new QueryParams(adapter3.getScope(), adapter3.getQuerySpec()));
+ 	    QueryParams queryParams3 = new QueryParams(adapter3.getScope(), adapter3.getQuerySpec());
+ 	    queryParams3.initialize();
+        agriculturalQuery = new QueryExecuter(queryParams3);
  	    try
  	    {
  	    	agriculturalQuery.execute();
@@ -1023,7 +1035,9 @@ public class QueryParserTest
 		inWordsTemplate.setKey("Lexicon");
 		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(\"^in[^ ]+\", Definition)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
-		QueryExecuter inWordsQuery = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter inWordsQuery = new QueryExecuter(queryParams);
     	File inWordList = new File("src/test/resources", "in_words.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(inWordList));
 		while (inWordsQuery.execute())
@@ -1043,7 +1057,9 @@ public class QueryParserTest
 		dictionaryTemplate.setKey("Lexicon");
 		LexiconSource lexiconSource = new LexiconSource();
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(dictionaryTemplate));
-		QueryExecuter dictionaryQuery = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter dictionaryQuery = new QueryExecuter(queryParams);
 		int count = 0;
 		if (dictionaryQuery.execute())
 		{
@@ -1072,7 +1088,9 @@ public class QueryParserTest
 		asia_top_ten.setKey("mega_city");
 	    AxiomSource megacitySource = parserAssembler.getAxiomSource("mega_city");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(megacitySource, Collections.singletonList(asia_top_ten));
-	    QueryExecuter asiaTopTenQuery = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter asiaTopTenQuery = new QueryExecuter(queryParams);
     	File megaCityList = new File("src/test/resources", "mega_city1.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(megaCityList));
 		while(asiaTopTenQuery.execute())
@@ -1087,7 +1105,9 @@ public class QueryParserTest
 		american_megacities.setKey("mega_city");
 		megacitySource = parserAssembler.getAxiomSource("mega_city");
         QueryExecuterAdapter adapter2 = new QueryExecuterAdapter(megacitySource, Collections.singletonList(american_megacities));
-		QueryExecuter americanMegacitiesQuery = new QueryExecuter(new QueryParams(adapter2.getScope(), adapter2.getQuerySpec()));
+        QueryParams queryParams2 = new QueryParams(adapter2.getScope(), adapter2.getQuerySpec());
+        queryParams2.initialize();
+		QueryExecuter americanMegacitiesQuery = new QueryExecuter(queryParams2);
     	File americanCityList = new File("src/test/resources", "mega_city2.lst");
      	reader = new LineNumberReader(new FileReader(americanCityList));
 		while (americanMegacitiesQuery.execute())
@@ -1107,7 +1127,9 @@ public class QueryParserTest
 		inWordsTemplate.setKey("Lexicon");
 		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(\"^in[^ ]+\", \"^n\")");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
-		QueryExecuter inWordsQuery = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        QueryExecuter inWordsQuery = new QueryExecuter(queryParams);
 		while (inWordsQuery.execute())
 		{
 			assertThat(inWordsTemplate.getTermByName("Word").getValue().toString().startsWith("in")).isTrue();

@@ -64,7 +64,9 @@ public class QueryParserTest
         QuerySpec querySpec = new QuerySpec("TEST");
 		KeyName keyName = new KeyName("city", "high_city");
 		querySpec.addKeyName(keyName);
-	    QueryExecuter highCitiesQuery = new QueryExecuter(new QueryParams(queryProgram.getGlobalScope(), querySpec));
+		QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
+		queryParams.initialize();
+	    QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
 	    int count = 0;
  	    if (highCitiesQuery.execute())
  	    {

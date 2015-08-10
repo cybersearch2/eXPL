@@ -28,21 +28,33 @@ import au.com.cybersearch2.classy_logic.parser.QueryParser;
 
 /**
  * ParserResources
+ * Provides access to external scripts via streaming. 
+ * Requires dependency injection for system adaption.
  * @author Andrew Bowley
  * 9 Dec 2014
  */
 public class ParserResources 
 {
+    /** Main compiler object to parse */
 	protected QueryProgram queryProgram;
     @Inject ResourceEnvironment resourceEnvironment;
-    
+ 
+    /**
+     * Construct ParserResources object
+     * @param queryProgram Main compiler object
+     */
 	public ParserResources(QueryProgram queryProgram) 
 	{
 		this.queryProgram = queryProgram;
 		DI.inject(this);
 	}
 
-	
+    /**
+     * Include script from an external streaming source	
+     * @param resourceName
+     * @throws IOException
+     * @throws ParseException
+     */
 	public void includeResource(String resourceName) throws IOException, ParseException
 	{	
 		InputStream instream = resourceEnvironment.openResource(resourceName);
@@ -58,7 +70,7 @@ public class ParserResources
 	}
 
     /**
-     * Cloes input stream quietly
+     * Closes input stream quietly
      * @param instream InputStream
      * @param filename Name of file being closed
      */

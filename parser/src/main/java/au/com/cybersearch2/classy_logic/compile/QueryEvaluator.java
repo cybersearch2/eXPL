@@ -28,7 +28,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryLauncher;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
@@ -36,7 +35,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * QueryEvaluator
- * Adapter to run a query as a function call.
+ * Adapter to run a query as a function call and return result as an AxiomList.
  * @author Andrew Bowley
  * 1 Aug 2015
  */
@@ -96,18 +95,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
                     AxiomList axiomList = solution.getAxiomList(templateName);
                     if (axiomList != null)
                     {
-                        List<Axiom> dupAxioms = AxiomUtils.copyItemList(axiomList.getName(), axiomList);
-                        AxiomList dupAxiomList = new AxiomList(axiomList.getName(), axiomList.getName());
-                        dupAxiomList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
-                        int index = 0;
-                        for (Axiom dupAxiom: dupAxioms)
-                        {
-                            AxiomTermList axiomTermList = new AxiomTermList(axiomList.getName(), axiomList.getName());
-                            axiomTermList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
-                            axiomTermList.setAxiom(dupAxiom);
-                            dupAxiomList.assignItem(index++, axiomTermList);
-                        }
-                        axiomListHolder[0] = dupAxiomList;
+                        axiomListHolder[0] = AxiomUtils.duplicateAxiomList(axiomList);
                         return false;
                     }
                 }
@@ -131,14 +119,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
                     parserAssembler.setAxiomTermNameList(templateName, axiomList);
                 if (axiomTermNameList != null)
                     axiomList.setAxiomTermNameList(axiomTermNameList);
-                for (int i = 0; i < resultList.size(); i++)
-                {   // Each axiom is wrapped in an AxiomTermList to allow access from script
-                    AxiomTermList axiomTermList = new AxiomTermList(templateName, templateName);
-                    axiomTermList.setAxiom(resultList.get(i));
-                    if (axiomTermNameList != null)
-                        axiomTermList.setAxiomTermNameList(axiomTermNameList);
-                    axiomList.assignItem(i, axiomTermList);
-                }
+                AxiomUtils.marshallAxioms(axiomList, resultList);
                 axiomListHolder[0] = axiomList;
             }
             
