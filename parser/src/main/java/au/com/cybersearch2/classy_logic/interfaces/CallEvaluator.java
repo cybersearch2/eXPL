@@ -19,11 +19,21 @@ import java.util.List;
 
 /**
  * CallEvaluator
+ * Performs function using parameters collected after query evaluation and returns value
  * @author Andrew Bowley
  * 30 Jul 2015
  */
 public interface CallEvaluator<R>
 {
+    /**
+     * Returns name of function. Must be unique in context.
+     * @return String
+     */
     String getName();
+    /**
+     * Perform function 
+     * @param argumentList List of terms
+     * @return Object of generic type
+     */
     R evaluate(List<Term> argumentList);
 }

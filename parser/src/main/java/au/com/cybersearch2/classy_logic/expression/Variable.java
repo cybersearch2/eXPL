@@ -81,7 +81,7 @@ public class Variable extends DelegateParameter implements Concaten<String>
 	/**
 	 * Execute operation for expression
 	 * @param id Identity of caller, which must be provided for backup()
-	 * @return Flag set true if evaluation is to continue
+	 * @return EvaluationStatus
 	 */
 	public EvaluationStatus evaluate(int id)
 	{

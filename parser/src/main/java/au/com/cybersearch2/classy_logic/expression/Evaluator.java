@@ -417,7 +417,7 @@ public class Evaluator extends DelegateParameter implements Concaten<String>
                 return leftTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
             else
                 return rightTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
-		case COMMA: 
+		case COMMA: // Comma operator builds a tree of operands instead of performing a calculation
 		    return new Null(); // Set dummy value so this variable is no longer empty
 	    default:
 		}
@@ -426,23 +426,45 @@ public class Evaluator extends DelegateParameter implements Concaten<String>
 
 	/**
 	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 
-	 * @param id Identity of caller. 
+	 * @param modifierId Identity of caller. 
 	 * @return boolean true if backup occurred
 	 * @see au.com.cybersearch2.classy_logic.terms.Parameter#unify(Term otherParam, int id)
 	 * @see au.com.cybersearch2.classy_logic.terms.Parameter#evaluate(int id)
 	 */
 	@Override
-	public boolean backup(int id)
+	public boolean backup(int modifierId)
 	{
 		boolean backupOccurred = false;
-		if (super.backup(id))
+		// Parameter backup() invokes this object's clearValue(), 
+		// which we do not want to happen, so implement own logic
+        if (!((id == 0) || ((modifierId != 0) && (id != modifierId))))
+            super.clearValue();
+		if (super.backup(modifierId))
 			backupOccurred = true;
-		if ((right != null) && right.backup(id)) 
+		if ((right != null) && right.backup(modifierId)) 
 			backupOccurred = true;
-		if ((left != null) && left.backup(id))
+		if ((left != null) && left.backup(modifierId))
 			backupOccurred = true;
 		return backupOccurred;
 	}
+
+    /**
+     * Set value to null, mark Parameter as empty and set id to 0
+     */
+    @Override
+    public void clearValue()
+    {
+        // Force backup of operands to permit calculation of a new value
+        if (!empty)
+        {   // Only do if not empty because clearValue also populates term value
+            // with Null object on creation to avoid NPEs
+            if (right != null) 
+                right.backup(0); 
+            if (left != null)
+                left.backup(0);
+        }
+        super.clearValue();
+    }
 
 	/**
  	 * Evaluate a unary expression 
@@ -713,6 +735,10 @@ public class Evaluator extends DelegateParameter implements Concaten<String>
 		return DelegateParameter.isDelegateClass(value.getClass()) ? value : new Null();
 	}
 
+	/**
+	 * concatenate
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
+	 */
     @Override
     public String concatenate(Operand rightOperand)
     {

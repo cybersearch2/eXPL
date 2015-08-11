@@ -20,15 +20,23 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
  * CallOperand
+ * Performs function according to generic CallEvaluator interface.
+ * Call arguments are collected by super class.
  * @author Andrew Bowley
  * 30 Jul 2015
  */
 public class CallOperand<R> extends ParameterOperand<R>
 {
-    
-    public CallOperand(String name, CallEvaluator<R> callEvaluator, Operand expression)
+   
+    /**
+     * Construct CallOperand object
+     * @param name Operand  name
+     * @param callEvaluator Executes function using parameters and returns object of generic type
+     * @param parameters Root of Operand parameter tree or null if no parameters
+     */
+    public CallOperand(String name, CallEvaluator<R> callEvaluator, Operand parameters)
     {
-        super(name, expression, callEvaluator);
+        super(name, parameters, callEvaluator);
     }
 
 }

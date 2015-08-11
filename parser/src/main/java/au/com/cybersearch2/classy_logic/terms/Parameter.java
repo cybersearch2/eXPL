@@ -240,7 +240,7 @@ public class Parameter implements Term
 	/**
 	 * Evaluate value using data gathered during unification.
 	 * @param id Identity of caller, which must be provided for backup()
-	 * @return Flag set true if evaluation is to continue
+	 * @return EvaluationStatus
 	 */
 	@Override
 	public EvaluationStatus evaluate(int id) 

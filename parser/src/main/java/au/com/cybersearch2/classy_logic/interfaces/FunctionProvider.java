@@ -17,12 +17,21 @@ package au.com.cybersearch2.classy_logic.interfaces;
 
 /**
  * FunctionProvider
+ * Sources functions from external libraries
  * @author Andrew Bowley
  * 30 Jul 2015
  */
 public interface FunctionProvider<R>
 {
-    
+    /**
+     * Name of function provider - must be unique
+     * @return String
+     */
     String getName();
+    /**
+     * Returns function object specified by name
+     * @param identifier Name of function
+     * @return Function object implementing CallEvaluator interface
+     */
     CallEvaluator<R> getCallEvaluator(String identifier);
 }

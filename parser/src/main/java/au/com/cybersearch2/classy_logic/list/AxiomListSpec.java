@@ -33,15 +33,29 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class AxiomListSpec
 {
+    /** Name of axiom list */
     protected String listName;
+    /** Backing axiom list */
     protected AxiomList axiomList;
+    /** Axiom selection index. Value of -1 means not used */
     protected int axiomIndex;
+    /** Term selection index. Value of -1 means not used */
     protected int termIndex;
+    /** Compiler operand for axiom selection */
     protected Operand axiomExpression;
+    /** Compiler operand for term selection */
     protected Operand termExpression;
+    /** Text to append to name of variable */
     protected String suffix;
+    /** Compiler operand to supply AxiomList object on evaluation */
     protected AxiomOperand axiomListVariable;
-    
+ 
+    /**
+     * Construct AxiomListSpec object for case backing AxiomList is available
+     * @param axiomList Backing axiom list
+     * @param axiomExpression Compiler operand for axiom selection
+     * @param termExpression Compiler operand for term selection
+     */
     public AxiomListSpec(AxiomList axiomList, Operand axiomExpression, Operand termExpression)
     {
         this.axiomList = axiomList;
@@ -51,6 +65,13 @@ public class AxiomListSpec
         init();
     }
 
+    /**
+    * Construct AxiomListSpec object for case backing AxiomList needs to be evaluated
+     * @param listName Name of axiom list
+     * @param axiomListVariable Compiler operand to supply AxiomList object on evaluation
+     * @param axiomExpression Compiler operand for axiom selection
+     * @param termExpression Compiler operand for term selection
+     */
     public AxiomListSpec(String listName, AxiomOperand axiomListVariable, Operand axiomExpression, Operand termExpression)
     {
         this.listName = listName;
@@ -59,77 +80,91 @@ public class AxiomListSpec
         this.termExpression = termExpression;
         init();
     }
-    
+ 
+    /**
+     * Returns name of axiom list
+     * @return String
+     */
     public String getListName()
     {
         return listName;
     }
 
+    /**
+     * Sets name of axiom list
+     * @param listName
+     */
     public void setListName(String listName)
     {
         this.listName = listName;
     }
 
+    /**
+     * Returns backing axiom list
+     * @return AxiomList object or null if waiting for evaluation
+     */
     public AxiomList getAxiomList()
     {
         return axiomList;
     }
 
+    /**
+     * Sets backing axiom list
+     * @param axiomList AxionList object
+     */
     public void setAxiomList(AxiomList axiomList)
     {
         this.axiomList = axiomList;
     }
 
+    /**
+     * Returns axiom selection index
+     * @return Valid index or -1 if not used
+     */
     public int getAxiomIndex()
     {
         return axiomIndex;
     }
 
-    public void setAxiomIndex(int axiomIndex)
-    {
-        this.axiomIndex = axiomIndex;
-    }
-
+    /**
+     * Returns term selection index
+     * @return Valid index or -1 if not used
+     */
     public int getTermIndex()
     {
         return termIndex;
     }
 
-    public void setTermIndex(int termIndex)
-    {
-        this.termIndex = termIndex;
-    }
-
+    /**
+     * Returns Compiler operand for axiom selection
+     * @return Operand object
+     */
     public Operand getAxiomExpression()
     {
         return axiomExpression;
     }
 
-    public void setAxiomExpression(Operand axiomExpression)
-    {
-        this.axiomExpression = axiomExpression;
-    }
-
+    /**
+     * Returns Compiler operand for term selection
+     * @return Operand object
+     */
     public Operand getTermExpression()
     {
         return termExpression;
     }
 
-    public void setTermExpression(Operand termExpression)
-    {
-        this.termExpression = termExpression;
-    }
-
+    /**
+     * Returns Text to append to name of variable
+     * @return String
+     */
     public String getSuffix()
     {
         return suffix;
     }
 
-    public void setSuffix(String suffix)
-    {
-        this.suffix = suffix;
-    }
-
+    /**
+     * Initialize this object. Determines if index values are available or need to be evaluated.
+     */
     protected void init()
     {
         axiomIndex = -1;
@@ -152,6 +187,10 @@ public class AxiomListSpec
             suffix = termExpression.toString();
     }
 
+    /**
+     * Complete any initialization dependent on completion of evaluation
+     * @return Flag set true if update occurred
+     */
     public boolean update()
     {
         if ((axiomListVariable == null) || axiomListVariable.isEmpty())
@@ -162,12 +201,16 @@ public class AxiomListSpec
         return true;
     }
 
+    /**
+     * Set term index for case it is specifed by name. 
+     * Requires axiom term name list to be available. 
+     */
     protected void setTermIndex()
     {
         List<String> axiomTermNameList = axiomList.getAxiomTermNameList();
         if (axiomTermNameList != null)
             termIndex = getIndexForName(listName, suffix, axiomTermNameList);
-        else
+        else // Note the following has no effect when called from update()
             suffix = termExpression.toString();
     }
     

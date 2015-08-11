@@ -47,9 +47,12 @@ public class Template extends Structure
     public static final String TERMNAMES = "termnames";
     public static List<String>  EMPTY_NAMES_LIST;
     public static Iterable<AxiomTermList> EMPTY_ITERABLE;
+    /** Unique identity generator */
+    static protected AtomicInteger referenceCount;
   
     static
     {
+        referenceCount = new AtomicInteger();
         EMPTY_ITERABLE = new Iterable<AxiomTermList>(){
 
             @Override
@@ -76,8 +79,6 @@ public class Template extends Structure
             }};
         EMPTY_NAMES_LIST = Collections.emptyList();
     }
-    /** Unique identity generator */
-    static protected AtomicInteger referenceCount;
     /** Key to match with Axiom name for unification */
 	protected String key;
     /** Identity used in backup to allow partial backup to last unifying agent */
@@ -89,16 +90,10 @@ public class Template extends Structure
     /** Flag true if template declared a calculator */
     protected boolean isCalculator;
     /** Flag true if template used to make selection. Used by Calculator. */
-    protected boolean choice;
+    protected boolean isChoice;
     /** Calculator solution as single AxiomList (optional) */
     protected AxiomOperand solutionTerm;
     
-	static
-	{
-		referenceCount = new AtomicInteger();
-	}
-	
-
 	/**
 	 * Construct Template object
 	 * @param name Template name and also, by default, axiom key 
@@ -173,7 +168,7 @@ public class Template extends Structure
 	}
 
 	/**
-	 * Returns axiom key
+	 * Returns key to match with Axiom name for unification
 	 * @return String
 	 */
 	public String getKey() 
@@ -190,30 +185,40 @@ public class Template extends Structure
     	key = value;
     }
 
+    /**
+     * Returns flag set true if this object is used as a Calculator
+     * @return boolean
+     */
 	public boolean isCalculator()
     {
         return isCalculator;
     }
 
+	/**
+	 * Sets flag to indicate this object is used as a Calculator
+	 * @param isCalculator
+	 */
     public void setCalculator(boolean isCalculator)
     {
         this.isCalculator = isCalculator;
     }
 
     /**
-	 * @return the choice
+     * Returns flag set true if this object is used as a Choice
+	 * @return boolean
 	 */
 	public boolean isChoice() 
 	{
-		return choice;
+		return isChoice;
 	}
 
 	/**
-	 * @param choice the choice to set
+	 * Set flag to indicate this object is used as a Choice
+	 * @param choice Value
 	 */
-	public void setChoice(boolean choice) 
+	public void setChoice(boolean isChoice) 
 	{
-		this.choice = choice;
+		this.isChoice = isChoice;
 	}
 
 	/**
@@ -225,6 +230,10 @@ public class Template extends Structure
 		return id;
 	}
 
+	/**
+	 * Returns flag set true if this object has a solution Term
+	 * @return boolean
+	 */
 	public boolean hasSolution()
 	{
 	    return solutionTerm != null;
@@ -299,6 +308,11 @@ public class Template extends Structure
             solutionTerm = (AxiomOperand)term;
     }
 
+    /**
+     * Returns solution value 
+     * @return AxiomList object
+     * @throws ExpressionException if value not available
+     */
     public AxiomList getSolution()
     {
         if ((solutionTerm != null) && !solutionTerm.isEmpty())
@@ -389,7 +403,8 @@ public class Template extends Structure
 	}
 
 	/**
-	 * @return the next
+	 * Returns next template in chain
+	 * @return Template object or null
 	 */
 	public Template getNext() 
 	{
@@ -397,7 +412,8 @@ public class Template extends Structure
 	}
 
 	/**
-	 * @param next the next to set
+	 * Set new template object in chain
+	 * @param next Template object
 	 */
 	public void setNext(Template next) 
 	{

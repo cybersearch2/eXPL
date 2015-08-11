@@ -31,6 +31,7 @@ eXPL v1.12
 28. Dynamically populate automatically inserted Template and get Calculator to look for axiom in Solution
 29. QueryLauncher now uses axiomKey only for choice Template
 30. Replace QueryParams Axiom passing design to use a Solution object and clear Scope Axioms on ScopeContext reset()
+31. Fixed issue with Evaluator clearValue() which was not invoking operand backup to permit another calculation
 
 
 

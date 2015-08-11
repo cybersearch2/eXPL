@@ -129,6 +129,10 @@ public class Structure
 		return true;
 	}
 
+	/**
+	 * Returns number of terms in this object
+	 * @return 0 or greater
+	 */
 	public int getTermCount()
 	{
 		return termList.size();
@@ -163,7 +167,7 @@ public class Structure
 	/**
 	 * Returns Term referenced by name
 	 * @param name String
-	 * @return Term
+	 * @return Term object or null if not found
 	 */
     public Term getTermByName(String name)
     {
@@ -175,6 +179,11 @@ public class Structure
 	    return termMap.get(name.toUpperCase());
     }
 
+    /**
+     * Returns Term referenced by index
+     * @param index Valid index value
+     * @return Term object or null if index out of range
+     */
     public Term getTermByIndex(int index)
     {
     	if (termList.isEmpty() || (index >= termList.size()) ||( index < 0))

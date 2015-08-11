@@ -33,7 +33,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
  */
 public class AxiomParameterOperand extends AxiomOperand
 {
-    /** Performs function using parameters contained in expression and returns value */
+    /** Collects parameters from an Operand tree and passes them to a supplied function object */
     protected ParameterList<AxiomList> parameterList;
 
     /**
@@ -72,7 +72,7 @@ public class AxiomParameterOperand extends AxiomOperand
     /**
      * Execute operation for expression
      * @param id Identity of caller, which must be provided for backup()
-     * @return Flag set true if evaluation is to continue
+     * @return EvaluationStatus
      */
     public EvaluationStatus evaluate(int id)
     {

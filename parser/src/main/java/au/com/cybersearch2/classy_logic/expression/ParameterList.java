@@ -25,48 +25,47 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
  * ParameterList
+ * Collects parameters from an Operand tree and passes them to a supplied function object.
  * @author Andrew Bowley
  * 7 Aug 2015
  */
 public class ParameterList<R>
 {
-    /** Performs function using parameters contained in expression and returns value */
+    /** Performs function using parameters collected after query evaluation and returns value */
     protected CallEvaluator<R> callEvaluator;
-    protected Operand expression;
+    /** Root of Operand parameter tree or null if no parameters */
+    protected Operand parameters;
     
     /**
      * Construct a ParameterList object which uses parameters in an an Expression operand 
      * and a supplied evaluator object to create it's value
-     * @param name Name of Variable
-     * @param expression Operand to initialize this Variable upon evaluation
+     * @param parameters Root of Operand parameter tree or null if no parameters
+     * @param callEvaluator Executes function using parameters and returns object of generic type
      */
-    protected ParameterList(Operand expression, CallEvaluator<R> callEvaluator) 
+    protected ParameterList(Operand parameters, CallEvaluator<R> callEvaluator) 
     {
-        this.expression = expression;
+        this.parameters = parameters;
         this.callEvaluator = callEvaluator;
     }
 
     /**
-     * Execute operation for expression
-     * @param id Identity of caller, which must be provided for backup()
-     * @return Flag set true if evaluation is to continue
+     * Perform function using parameters
+     * @return Object of generic type
      */
     public R evaluate()
     {
         final List<Term> argumentList = new ArrayList<Term>();
-        // TODO - Change to using expression in Variable
-        if ((expression != null) && !expression.isEmpty())
-        {
+        if ((parameters != null) && !parameters.isEmpty())
+        {   // Collect parameters using visitor
             OperandVisitor visitor = new OperandVisitor(){
     
                 @Override
                 public boolean next(Term term, int depth)
                 {
-                    // Wrap non-Variable arguments in Variable wrapper
                     argumentList.add(term);
                     return true;
                 }};
-                visit(expression, visitor, 1);
+                visit(parameters, visitor, 1);
         }
         return callEvaluator.evaluate(argumentList);
     }
@@ -80,9 +79,9 @@ public class ParameterList<R>
      */
     protected boolean visit(Term term, OperandVisitor visitor, int depth)
     {
-        // Only Terms which also implement Operand interface will have left and right Operands
+        // Only Evaluator terms will have left and right Operands containing parameters
         if (!(term instanceof Evaluator))
-        {
+        {   // Collect paramater 
             visitor.next(term, depth);
             return true;
         }
@@ -91,16 +90,20 @@ public class ParameterList<R>
         if (left != null)
         {
             if (!(left instanceof Evaluator))
+                // Collect paramater 
                 visitor.next(left, depth);
             else
+                // Keep walking
                 visit(left, visitor, depth + 1);
         }
         Operand right = operand.getRightOperand();
         if (right != null)
         {
             if (!(right instanceof Evaluator))
+                // Collect paramater 
                 visitor.next(right, depth);
             else
+                // Keep walking
                 visit(right, visitor, depth + 1);
         }
         return true;

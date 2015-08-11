@@ -21,30 +21,32 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
  * ParameterOperand
+ * Variable which is set using a supplied function object and parameters contained in an Operand tree
  * @author Andrew Bowley
  * 7 Aug 2015
  */
 public class ParameterOperand<R> extends Variable
 {
-    /** Performs function using parameters contained in expression and returns value */
+    /** Collects parameters from an Operand tree and passes them to a supplied function object */
     protected ParameterList<R> parameterList;
     
     /**
-     * Construct a ParameterOperand object which uses parameters in an an Expression operand 
-     * and a supplied evaluator object to create it's value
+     * Construct a ParameterOperand object
      * @param name Name of Variable
-     * @param expression Operand to initialize this Variable upon evaluation
+     * @param parameters Root of Operand parameter tree or null if no parameters
+     * @param callEvaluator Executes function using parameters and returns object of generic type
      */
-    protected ParameterOperand(String name, Operand expression, CallEvaluator<R> callEvaluator) 
+    public ParameterOperand(String name, Operand parameters, CallEvaluator<R> callEvaluator) 
     {
-        super(name, expression);
-        parameterList = new ParameterList<R>(expression, callEvaluator);
+        // Note the value set when the super class evaluates will be subsequently overriden.
+        super(name, parameters);
+        parameterList = new ParameterList<R>(parameters, callEvaluator);
     }
 
     /**
      * Execute operation for expression
      * @param id Identity of caller, which must be provided for backup()
-     * @return Flag set true if evaluation is to continue
+     * @return EvaluationStatus
      */
     public EvaluationStatus evaluate(int id)
     {
