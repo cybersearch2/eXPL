@@ -56,17 +56,19 @@ public interface ItemList<T> extends Iterable<T>
      * Returns list variable to access list using fixed index
      * @param index int
      * @param suffix To append to name
+     * @param id Id of owner to be assigned to variable
      * @return ItemListVariable 
      */
-    ItemListVariable<T> newVariableInstance(int index, String suffix);
+    ItemListVariable<T> newVariableInstance(int index, String suffix, int id);
 
     /**
      * Returns list variable to access list using expression to evaluate index
      * @param expression Operand
      * @param suffix To append to name
+     * @param id Id of owner to be assigned to variable
      * @return ItemListVariable   
      */
-    ItemListVariable<T> newVariableInstance(Operand expression, String suffix);
+    ItemListVariable<T> newVariableInstance(Operand expression, String suffix, int id);
 
     /**
      * Returns item referenced by index

@@ -36,10 +36,12 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 	 * @param proxy Operand object to perform evaluation
 	 * @param index Position of term in axiom
 	 * @param suffix To append to name
+     * @param id Id of owner to be assigned to variable
 	 */
-	public AxiomTermListVariable(AxiomTermList axiomTermList, Operand proxy, int index, String suffix) 
+	public AxiomTermListVariable(AxiomTermList axiomTermList, Operand proxy, int index, String suffix, int id) 
 	{
 		super(axiomTermList, proxy, index, suffix);
+		this.id = id;
 	}
 
 	/**
@@ -48,11 +50,13 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 	 * @param proxy Operand object to perform evaluation
 	 * @param indexExpression Operand object to evaluate position of term in axiom
 	 * @param suffix To append to name
+     * @param id Id of owner to be assigned to variable
 	 */
 	public AxiomTermListVariable(AxiomTermList axiomTermList, Operand proxy,
-			Operand indexExpression, String suffix) 
+			Operand indexExpression, String suffix, int id) 
 	{
 		super(axiomTermList, proxy, indexExpression, suffix);
+		this.id = id;
 	}
 	/**
 	 * Set value from term in backing axiom	at specified position and update proxy with this term if 

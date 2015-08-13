@@ -23,7 +23,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @see DelegateParameter
  * @see Variable
  */
-public class Evaluator extends DelegateParameter implements Concaten<String>
+public class Evaluator extends DelegateParameter
 {
     /** Not a number */
 	private static final String NAN = "NaN"; //Double.valueOf(Double.NaN).toString();
@@ -434,37 +434,13 @@ public class Evaluator extends DelegateParameter implements Concaten<String>
 	@Override
 	public boolean backup(int modifierId)
 	{
-		boolean backupOccurred = false;
-		// Parameter backup() invokes this object's clearValue(), 
-		// which we do not want to happen, so implement own logic
-        if (!((id == 0) || ((modifierId != 0) && (id != modifierId))))
-            super.clearValue();
-		if (super.backup(modifierId))
-			backupOccurred = true;
+		boolean backupOccurred = super.backup(modifierId);
 		if ((right != null) && right.backup(modifierId)) 
 			backupOccurred = true;
 		if ((left != null) && left.backup(modifierId))
 			backupOccurred = true;
 		return backupOccurred;
 	}
-
-    /**
-     * Set value to null, mark Parameter as empty and set id to 0
-     */
-    @Override
-    public void clearValue()
-    {
-        // Force backup of operands to permit calculation of a new value
-        if (!empty)
-        {   // Only do if not empty because clearValue also populates term value
-            // with Null object on creation to avoid NPEs
-            if (right != null) 
-                right.backup(0); 
-            if (left != null)
-                left.backup(0);
-        }
-        super.clearValue();
-    }
 
 	/**
  	 * Evaluate a unary expression 
@@ -734,15 +710,5 @@ public class Evaluator extends DelegateParameter implements Concaten<String>
 		// This is defensive only as Operands are expected to only support Delegate classes
 		return DelegateParameter.isDelegateClass(value.getClass()) ? value : new Null();
 	}
-
-	/**
-	 * concatenate
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
-	 */
-    @Override
-    public String concatenate(Operand rightOperand)
-    {
-        return value.toString() + rightOperand.getValue().toString();
-    }
 
 }

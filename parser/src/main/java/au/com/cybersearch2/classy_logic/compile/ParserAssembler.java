@@ -17,8 +17,6 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
-import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
-import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
@@ -632,18 +630,6 @@ public class ParserAssembler implements LocaleListener
 	}
 
 	/**
-	 * Returns an operand which dynamically creates an axiom from an argument list
-	 * The axiom is wrapped in an AxiomList to allow interaction with other AxiomLists.
-	 * @param axiomName Name of axiom
-     * @param argumentExpression Operand with one or more arguments contained in it. Must not be null.
-     * @return Operand object
-	 */
-	public Operand getParameterOperand(String axiomName, Operand argumentExpression)
-	{
-        return new AxiomParameterOperand(axiomName, argumentExpression);
-	}
-	
-	/**
 	 * Returns operand which invokes a function call in script. The function can be
 	 * provided in an external library or a script query with optional parameters.
 	 * The function name must consist of 2 parts. The first is the name of a library or scope.
@@ -713,7 +699,7 @@ public class ParserAssembler implements LocaleListener
             itemList = scope.getParserAssembler().getOperandMap().getItemList(name);
         if (itemList == null)
         {
-            if ((parameterList == null) || parameterList.contains(name))
+            if ((parameterList != null) && parameterList.contains(name))
             {
                 Variable operand = (Variable) operandMap.getOperand(name);
                 if (!operand.isEmpty())
@@ -745,7 +731,7 @@ public class ParserAssembler implements LocaleListener
         AxiomListSpec axiomListSpec = null;
         // When an axiom parameter is specified, then initialization of the list variable must be delayed 
         // until evaluation occurs when running the first query.
-        boolean isAxiomListVariable = isParameter(listName);
+        boolean isAxiomListVariable = isParameter(listName) || (operandMap.get(listName) != null);
         if (!isAxiomListVariable)
         {   // A normal list should be ready to go
             itemList = getItemList(listName);
@@ -761,7 +747,7 @@ public class ParserAssembler implements LocaleListener
         }
         if (isAxiomListVariable)
         {   // Return dynamic AxiomListVariable instance
-            axiomListSpec = new AxiomListSpec(listName, (AxiomOperand) operandMap.get(listName), param1, param2);
+            axiomListSpec = new AxiomListSpec(listName, operandMap.get(listName), param1, param2);
             return new AxiomListVariable(axiomListSpec);
         }
         axiomListSpec = new AxiomListSpec((AxiomList)itemList, param1, param2);

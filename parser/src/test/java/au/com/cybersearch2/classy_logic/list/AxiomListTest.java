@@ -76,13 +76,13 @@ public class AxiomListTest
 		AxiomList axiomList = new AxiomList(NAME, KEY);
 		AxiomTermList axiomTermList = new AxiomTermList(KEY, KEY);
 		axiomList.assignItem(0, axiomTermList);
-		ItemListVariable<AxiomTermList> axiomListVariable = axiomList.newVariableInstance(0, "0");
+		ItemListVariable<AxiomTermList> axiomListVariable = axiomList.newVariableInstance(0, "0", 1);
 		axiomListVariable.evaluate(1);
 		assertThat(axiomListVariable.getValue()).isEqualTo(axiomTermList);
 		AxiomTermList axiomOperandList2 = new AxiomTermList(KEY + 1, KEY + 1);
 		axiomList.assignItem(0, axiomOperandList2);
 		Operand expression = new IntegerOperand("test", Integer.valueOf(0));
-		axiomListVariable = axiomList.newVariableInstance(expression, "test");
+		axiomListVariable = axiomList.newVariableInstance(expression, "test", 1);
 		axiomListVariable.evaluate(1);
 		assertThat(axiomListVariable.getValue()).isEqualTo(axiomOperandList2);
 	}

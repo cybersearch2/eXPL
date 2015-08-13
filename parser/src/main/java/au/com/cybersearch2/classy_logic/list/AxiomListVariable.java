@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.list;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -28,7 +29,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 28 Jan 2015
  */
-public class AxiomListVariable  extends Parameter implements Operand
+public class AxiomListVariable  extends Parameter implements Operand, Concaten<String>
 {
     static AxiomList EMPTY_AXIOM_LIST;
     
@@ -150,15 +151,16 @@ public class AxiomListVariable  extends Parameter implements Operand
     /**
      * Set index of axiom term to specified value
      * @param termIndex In range index value
+     * @param modifierId Identity of caller, which must be provided for backup()
      */
-	public void setTermIndex(int termIndex) 
+	public void setTermIndex(int termIndex, int modifierId) 
 	{
 		this.termIndex = termIndex;
 		// When both axiom and term indexes are fixed, 
 		// then this object's axiom term list variable and value can be updated immediately
         if ((axiomIndex >= 0) && (termIndex >= 0))
         {
-    		updateAxiomTermListVariable();
+    		updateAxiomTermListVariable(modifierId);
         	Object item = axiomTermListVariable.getValue();
         	if (item != null)
         		super.assign(item);
@@ -168,14 +170,15 @@ public class AxiomListVariable  extends Parameter implements Operand
 	/**
 	 * Set operand to evaluate index of axiom term
 	 * @param termExpression Operand object which evaluates to an Integer value
+     * @param modifierId Identity of caller, which must be provided for backup()
 	 */
-	public void setTermExpression(Operand termExpression) 
+	public void setTermExpression(Operand termExpression, int modifierId) 
 	{
 		this.termExpression = termExpression;
 		termIndex = -1; // Set index to invalid value to avoid accidental uninitialised list access
         if (axiomIndex >= 0)
         	// Only  this object's axiom term list variable can be updated
-    		updateAxiomTermListVariable();
+    		updateAxiomTermListVariable(modifierId);
 	}
 
 	/**
@@ -221,24 +224,24 @@ public class AxiomListVariable  extends Parameter implements Operand
 
 	/**
 	 * Evaluate index if expression provided
-	 * @param id Identity of caller, which must be provided for backup()
+	 * @param modifierId Identity of caller, which must be provided for backup()
 	 * @return Flag set true if evaluation is to continue
 	 */
 	@Override
-	public EvaluationStatus evaluate(int id)
+	public EvaluationStatus evaluate(int modifierId)
 	{
 	    if ((axiomListSpec != null) && axiomListSpec.update())
 	    {   // Dynamic AxiomList should now exist, so initialization of
 	        // of this object can be completed
 	        axiomList = axiomListSpec.getAxiomList();
             if (axiomListSpec.getTermIndex() < 0) 
-                setTermExpression(axiomListSpec.getTermExpression());
+                setTermExpression(axiomListSpec.getTermExpression(), modifierId);
             else
-                setTermIndex(axiomListSpec.getTermIndex());
+                setTermIndex(axiomListSpec.getTermIndex(), modifierId);
 	    }
 		if (axiomExpression != null)
 		{   // Evaluate index. The resulting value must be a sub class of Number to be usable as an index.
-			axiomExpression.evaluate(id);
+			axiomExpression.evaluate(modifierId);
 			if (axiomExpression.isEmpty())
 				throw new ExpressionException("Axiom index for list \"" + axiomList.getName() + "\" is empty" );
 			if (!(axiomExpression.getValue() instanceof Number))
@@ -252,30 +255,30 @@ public class AxiomListVariable  extends Parameter implements Operand
 				if (index != axiomIndex)
 				{
 					axiomIndex = index;
-					updateAxiomTermListVariable();
+					updateAxiomTermListVariable(modifierId);
 				}
 				if (termExpression != null)
-					axiomTermListVariable.evaluate(id);
+					axiomTermListVariable.evaluate(modifierId);
 				super.assign(axiomTermListVariable.getValue());
 			}
-			this.id = id;
+			this.id = modifierId;
 		}
 		else if (termExpression != null)
 		{
 		    if (axiomTermListVariable.isEmpty())
-                updateAxiomTermListVariable();
-			axiomTermListVariable.evaluate(id);
+                updateAxiomTermListVariable(modifierId);
+			axiomTermListVariable.evaluate(modifierId);
 		    super.assign(axiomTermListVariable.getValue());
-			this.id = id;
+			this.id = modifierId;
 		}
 		return EvaluationStatus.COMPLETE;
 	}
 
 	/**
 	 * Update this object's axiom term list variable
-	 * @param suffix The axiom term identity
+     * @param modifierId Identity of caller, which must be provided for backup()
 	 */
-	protected void updateAxiomTermListVariable()
+	protected void updateAxiomTermListVariable(int modifierId)
 	{
 		// Get currently selected item in owning axiom list
 	    
@@ -297,8 +300,8 @@ public class AxiomListVariable  extends Parameter implements Operand
 		// Create new instance of a variable to access the axiom
 		ItemListVariable<Object> variable = null;
 		variable = termExpression != null ? 
-				                   axiomTermList.newVariableInstance(termExpression, suffix) :
-				            	   axiomTermList.newVariableInstance(termIndex, suffix);
+				                   axiomTermList.newVariableInstance(termExpression, suffix, modifierId) :
+				            	   axiomTermList.newVariableInstance(termIndex, suffix, modifierId);
 		axiomTermListVariable = variable;				                   
 	}
 
@@ -333,6 +336,15 @@ public class AxiomListVariable  extends Parameter implements Operand
 	 @Override
      public OperatorEnum[] getStringOperandOps()
      {
+	     if (!empty)
+	     {
+	         return  new OperatorEnum[]
+	                 { 
+	                     OperatorEnum.PLUS,
+	                     OperatorEnum.PLUSASSIGN
+	                 };
+
+	     }
 	     return Operand.EMPTY_OPERAND_OPS;
      }
 
@@ -394,4 +406,9 @@ public class AxiomListVariable  extends Parameter implements Operand
 		return null;
 	}
 
+    @Override
+    public String concatenate(Operand rightOperand)
+    {
+        return getItemValue().toString() + rightOperand.getValue().toString();
+    }
 }

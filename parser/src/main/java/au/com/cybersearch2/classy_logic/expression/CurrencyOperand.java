@@ -78,6 +78,8 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 	@Override
 	public String formatValue()
 	{
+	    if ((countryOperand != null)  && !countryOperand.isEmpty())
+	        setCountry(countryOperand.getValue().toString());
 		return localeCurrency.format(getValue());
 	}
 	

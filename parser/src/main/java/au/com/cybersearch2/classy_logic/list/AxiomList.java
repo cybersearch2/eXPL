@@ -56,7 +56,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
     public AxiomListVariable newVariableInstance(int axiomIndex, Operand termExpression, String suffix)
     {
     	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomIndex, suffix);
-    	axiomListVariable.setTermExpression(termExpression);
+    	axiomListVariable.setTermExpression(termExpression, 0);
     	return axiomListVariable;
     }
 
@@ -70,7 +70,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
     public AxiomListVariable newVariableInstance(Operand axiomExpression, int termIndex, String suffix)
     {
     	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomExpression, suffix);
-    	axiomListVariable.setTermIndex(termIndex);
+    	axiomListVariable.setTermIndex(termIndex, 0);
     	return axiomListVariable;
     }
 
@@ -84,7 +84,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
     public AxiomListVariable newVariableInstance(int axiomIndex, int termIndex, String suffix)
     {
     	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomIndex, suffix);
-    	axiomListVariable.setTermIndex(termIndex);
+    	axiomListVariable.setTermIndex(termIndex, 0);
     	return axiomListVariable;
     }
 
@@ -98,7 +98,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
     public AxiomListVariable newVariableInstance(Operand axiomExpression, Operand termExpression, String suffix)
     {
     	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomExpression, suffix);
-    	axiomListVariable.setTermExpression(termExpression);
+    	axiomListVariable.setTermExpression(termExpression, 0);
     	return axiomListVariable;
     }
 

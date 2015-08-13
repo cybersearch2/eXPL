@@ -19,8 +19,11 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
@@ -31,7 +34,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 25 Dec 2014
  */
-public abstract class DelegateParameter extends Parameter implements Operand 
+public abstract class DelegateParameter extends Parameter implements Operand, Concaten<Object> 
 {
 	static final String DELEGATE_NAME = "delegate";
     /** Constant value for no operators permited */
@@ -54,7 +57,7 @@ public abstract class DelegateParameter extends Parameter implements Operand
 		delegateClassMap.put(Double.class, new DoubleOperand(DELEGATE_NAME));
 		delegateClassMap.put(BigDecimal.class, new BigDecimalOperand(DELEGATE_NAME));
 		delegateClassMap.put(AxiomTermList.class, new AssignOnlyOperand(DELEGATE_NAME));
-        delegateClassMap.put(AxiomList.class, new AxiomOperand(DELEGATE_NAME));
+        delegateClassMap.put(AxiomList.class, new AxiomOperand(DELEGATE_NAME, "*"));
 		delegateClassMap.put(Null.class, null);
 	}
 	
@@ -147,7 +150,7 @@ public abstract class DelegateParameter extends Parameter implements Operand
 	protected void setDelegate(Class<?> clazz)
 	{
 		Operand newDelegate = clazz == Null.class ? null : delegateClassMap.get(clazz);
-		if (newDelegate == null) 
+	    if (newDelegate == null)
 		{
 			if (delegate.getClass() != AssignOnlyOperand.class)
 				//throw new ExpressionException("Unknown value class: " + getValueClass().toString());
@@ -186,10 +189,84 @@ public abstract class DelegateParameter extends Parameter implements Operand
 	 * @return Identity passed in param "id" or zero if unification failed
 	 * @see au.com.cybersearch2.classy_logic.terms.Parameter#backup(int id)
 	 */
-	protected int unify(Term otherTerm, int id)
+    @Override
+	public int unify(Term otherTerm, int id)
 	{
 		int result = super.unify(otherTerm, id);
 		setDelegate(getValueClass());
 		return result;
 	}
+
+    @Override
+    public Object concatenate(Operand rightOperand)
+    {
+        if (delegate.getClass() == AxiomOperand.class)
+            return AxiomUtils.concatenate(this, rightOperand);
+        return value.toString() + rightOperand.getValue().toString();
+    }
+
+    /**
+     * Backup to intial state if given id matches id assigned on unification or given id = 0. 
+     * @param modifierId Identity of caller. 
+     * @return boolean true if backup occurred
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#unify(Term otherParam, int id)
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#evaluate(int id)
+     */
+    @Override
+    public boolean backup(int modifierId)
+    {
+        boolean backupOccurred = false;
+        // Parameter backup() invokes this object's clearValue(), 
+        // which we do not want to happen, so implement own logic
+        if (!((id == 0) || ((modifierId != 0) && (id != modifierId))))
+        {
+            super.clearValue();
+            backupOccurred = true;
+        }
+        return backupOccurred;
+    }
+
+
+
+	/**
+     * Set value to null, mark Parameter as empty and set id to 0
+     */
+    public void clearValue()
+    {
+        OperandVisitor visitor = new OperandVisitor(){
+
+            @Override
+            public boolean next(Term term, int depth)
+            {
+                term.backup(0);
+                return true;
+            }};
+        Operand leftOperand = getLeftOperand();
+        // Use unifyTerm as substitute for clearValue() in case it is overriden
+        if (leftOperand != null)
+            visit(leftOperand, visitor, 1);
+        Operand rightOperand = getRightOperand();
+        // Use unifyTerm as substitute for clearValue() in case it is overriden
+        if (rightOperand != null)
+            visit(rightOperand, visitor, 1);
+        super.clearValue();
+    }
+    
+    /**
+     * Visit a node of the Operand tree. Recursively navigates left and right operands, if any.
+     * @param term The term being visited
+     * @param visitor Object implementing OperandVisitor interface
+     * @param depth Depth in tree. The root has depth 1.
+     * @return flag set true if entire tree formed by this term is navigated. 
+     */
+    public boolean visit(Term term, OperandVisitor visitor, int depth)
+    {
+        visitor.next(term, depth);
+        Operand operand = (Operand)term;
+        if (operand.getLeftOperand() != null)
+            visit(operand.getLeftOperand(), visitor, depth + 1);
+        if (operand.getRightOperand() != null)
+            visit(operand.getRightOperand(), visitor, depth + 1);
+        return true;
+    }
 }

@@ -43,9 +43,9 @@ public class ArrayItemList<T> implements ItemList<T>
 	interface VariableFactory
 	{
 		/** Construct a list variable for a fixed list item */
-		ItemListVariable<?> newVariableInstance(ItemList<?> operandList, Operand proxy, int index, String suffix);
+		ItemListVariable<?> newVariableInstance(ItemList<?> operandList, Operand proxy, int index, String suffix, int id);
 		/** Construct a list variable for a dynamically selected item */
-		ItemListVariable<?> newVariableInstance(ItemList<?> operandList, Operand proxy, Operand expression, String suffix);
+		ItemListVariable<?> newVariableInstance(ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id);
 	}
 	
 	/** Map value class to ItemListVariable class factory */
@@ -65,78 +65,78 @@ public class ArrayItemList<T> implements ItemList<T>
 
 			@Override
 			public ItemListVariable<String> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix) {
+					int index, String suffix, int id) {
 				return new ItemListVariable<String>(operandList, proxy, index, suffix);
 			}
 
 			@Override
 			public ItemListVariable<String> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix) {
+					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
 				return new ItemListVariable<String>(operandList, proxy, expression, suffix);
 			}});
     	factorylassMap.put(Long.class, new VariableFactory(){
 
 			@Override
 			public ItemListVariable<Integer> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix) {
+					int index, String suffix, int id) {
 				return new ItemListVariable<Integer>(operandList, proxy, index, suffix);
 			}
 
 			@Override
 			public ItemListVariable<Integer> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix) {
+					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
 				return new ItemListVariable<Integer>(operandList, proxy, expression, suffix);
 			}});
     	factorylassMap.put(Boolean.class, new VariableFactory(){
 
 			@Override
 			public ItemListVariable<Boolean> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix) {
+					int index, String suffix, int id) {
 				return new ItemListVariable<Boolean>(operandList, proxy, index, suffix);
 			}
 
 			@Override
 			public ItemListVariable<Boolean> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix) {
+					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
 				return new ItemListVariable<Boolean>(operandList, proxy, expression, suffix);
 			}});
     	factorylassMap.put(Double.class, new VariableFactory(){
 
 			@Override
 			public ItemListVariable<Double> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix) {
+					int index, String suffix, int id) {
 				return new ItemListVariable<Double>(operandList, proxy, index, suffix);
 			}
 
 			@Override
 			public ItemListVariable<Double> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix) {
+					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
 				return new ItemListVariable<Double>(operandList, proxy, expression, suffix);
 			}});
     	factorylassMap.put(BigDecimal.class, new VariableFactory(){
 
 			@Override
 			public ItemListVariable<BigDecimal> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix) {
+					int index, String suffix, int id) {
 				return new ItemListVariable<BigDecimal>(operandList, proxy, index, suffix);
 			}
 
 			@Override
 			public ItemListVariable<BigDecimal> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix) {
+					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
 				return new ItemListVariable<BigDecimal>(operandList, proxy, expression, suffix);
 		    }});
     	factorylassMap.put(AxiomTermList.class, new VariableFactory(){
 
 			@Override
 			public AxiomArrayVariable newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix) {
+					int index, String suffix, int id) {
 				return new AxiomArrayVariable(operandList, proxy, index, suffix);
 			}
 
 			@Override
 			public AxiomArrayVariable newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix) {
+					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
 				return new AxiomArrayVariable(operandList, proxy, expression, suffix);
 		    }});
     }
@@ -209,9 +209,9 @@ public class ArrayItemList<T> implements ItemList<T>
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public ItemListVariable<T> newVariableInstance(int index, String suffix)
+	public ItemListVariable<T> newVariableInstance(int index, String suffix, int id)
 	{
-		return (ItemListVariable<T>) factorylassMap.get(clazz).newVariableInstance(this, proxy, index, suffix);
+		return (ItemListVariable<T>) factorylassMap.get(clazz).newVariableInstance(this, proxy, index, suffix, id);
 	}
 
 	/**
@@ -220,9 +220,9 @@ public class ArrayItemList<T> implements ItemList<T>
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public ItemListVariable<T> newVariableInstance(Operand expression, String suffix)
+	public ItemListVariable<T> newVariableInstance(Operand expression, String suffix, int id)
 	{
-		return (ItemListVariable<T>) factorylassMap.get(clazz).newVariableInstance(this, proxy, expression, suffix);
+		return (ItemListVariable<T>) factorylassMap.get(clazz).newVariableInstance(this, proxy, expression, suffix, id);
 	}
 
 	/**

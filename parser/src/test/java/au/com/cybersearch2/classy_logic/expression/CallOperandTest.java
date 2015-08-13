@@ -186,9 +186,9 @@ public class CallOperandTest
         " query four_arg_query (test);";
     static final String GRADES = 
         "axiom grades (student, english, math, history):\n" +
-        " (\"George\", 15, 13, 16),\n" +
-        " (\"Sarah\", 12, 17, 15),\n" +
-        " (\"Amy\", 14, 16, 6);\n";
+            " (\"Amy\", 14, 16, 6),\n" +
+            " (\"George\", 15, 13, 16),\n" +
+            " (\"Sarah\", 12, 17, 15);\n";
 
     static final String GRADES_CALC = GRADES +
         " template score(student, integer total = math.add(english, math, history));\n" +
@@ -196,12 +196,42 @@ public class CallOperandTest
 
     static final String[] GRADES_RESULTS = 
     {
+        "score(student = Amy, total = 36)",
         "score(student = George, total = 44)",
-        "score(student = Sarah, total = 44)",
-        "score(student = Amy, total = 36)"
+        "score(student = Sarah, total = 44)"
+    };
+
+    static final String[] STUDENTS =
+    {
+         "Amy",
+         "George",
+         "Sarah"
+    };
+    
+    static final String[] MARKS_GRADES_RESULTS = 
+    {
+        "Total score: 36",
+        "Total score: 44",
+        "Total score: 44"
     };
  
-    static final String ALPHA_MARKS = 
+    static final String[] SCHOOL_REPORT = 
+    {
+        "English b",
+        "Math a-",
+        "History e+",
+        "Total score 36",
+        "English b+",
+        "Math b-",
+        "History a-",
+        "Total score 44",
+        "English c+",
+        "Math a",
+        "History b+",
+        "Total score 44"
+    };
+    
+   static final String ALPHA_MARKS = 
     " axiom alpha_marks :\n" +
     "(\n" +
     " \"\",\n" +
@@ -217,26 +247,36 @@ public class CallOperandTest
     static final String MARKS_CALC = GRADES + ALPHA_MARKS +
     "template score(student, integer total = edu.add(mark[(english)], mark[(math)], mark[(history)]));\n" +
     "query marks(grades : score);";
-/*
+    
     static final String MARKS_GRADES_CALC = GRADES + ALPHA_MARKS +
-    "scope school\n" +
-    "{\n" +
-    "  calc marks(solution marks =  { \"English\", mark[(english)] } \n" +
-    "                               { \"Math\",    mark[(math)] }\n" +
-    "                               { \"History\", mark[(history)] });\n" +
-    "  calc total_score(solution total_score = { \"Total score\", english + math + history });\n" +
-    "  query calc_marks calc(marks);\n" +
-    "  query calc_total_score calc(total_score);\n" +
-    "}\n"  +
-    "calc score(\n" +
-    "  solution school_marks =\n" +
-    "    //query school.marks(english,math,history) \n" +
-    "    school.calc_total_score(english,math,history)\n" +
-    ");\n" +
-    "template student_grades(student, english, math, history);\n" +
-    "query marks(grades : student_grades) >> calc(score);";
-*/
+        "scope school\n" +
+        "{\n" +
+        "  calc calc_total_score(solution total_score = { label=\"Total score\", value=english+math+history });\n" +
+        "  query calc_total_score (calc_total_score);\n" +
+        "}\n"  +
+        "calc score(\n" +
+        "    school.total_score = school.calc_total_score(english,math,history),\n" +
+        "    string total_text = school.total_score[label] + \": \" + school.total_score[value]\n" +
+        ");\n" +
+        "query marks(grades : score);";
 
+    static final String ITEM_MARKS_GRADES_CALC = GRADES + ALPHA_MARKS +
+        "scope school\n" +
+        "{\n" +
+        "  calc subjects(solution marks =\n" +
+        "                { \"English\", mark[(english)] } \n" +
+        "                { \"Math\",    mark[(math)] }\n" +
+        "                { \"History\", mark[(history)] });\n" +
+        "  calc total_score(solution total_score = { \"Total score\", english + math + history });\n" +
+        "  query calc_marks (subjects);\n" +
+        "  query calc_total_score (total_score);\n" +
+        "}\n"  +
+        "calc score(\n" +
+        "    school.marks = school.calc_marks(english,math,history), \n" +
+        "    school.total = school.calc_total_score(english,math,history),\n" +
+        "    solution report = school.marks + school.total\n" +
+        ");\n" +
+        "query marks(grades : score);";
 
     static final String CITY_EVELATIONS =
         "axiom city (name, altitude):\n" + 
@@ -394,33 +434,43 @@ public class CallOperandTest
             }});
     }
 
-    static final String MARKS_GRADES_CALC = GRADES + ALPHA_MARKS +
-        "scope school\n" +
-        "{\n" +
-        "  calc calc_total_score(solution total_score = { \"Total score\", english+math+history });\n" +
-        "  query calc_total_score (calc_total_score);\n" +
-        "}\n"  +
-        "calc score(\n" +
-        "    axiom school_total_score = school.calc_total_score(english,math,history),\n" +
-        "    string text1 = school_total_score[0][0],\n" +
-        "    integer score1 = school_total_score[0][1],\n" +
-        "    string total_text = text1 + score1\n" + 
-        ");\n" +
-        "query marks(grades : score);";
-
     @Test
     public void test_school_grades()
     {
         QueryProgram queryProgram = new QueryProgram(MARKS_GRADES_CALC);
         queryProgram.executeQuery("marks", new SolutionHandler(){
-            //int index = 0;  
+            int index = 0;  
             @Override
             public boolean onSolution(Solution solution)
             {
-                //Axiom scoreAxiom = solution.getAxiom("score");
-                //scoreAxiom.getTermByName("calc_total_score");
-                System.out.println(solution.getString("score", "total_text"));
-                //assertThat(solution.getAxiom("score").toString()).isEqualTo(GRADES_RESULTS[index++]);
+                 //System.out.println(solution.getString("score", "total_text"));
+                assertThat(solution.getString("grades", "student")).isEqualTo(STUDENTS[index]);
+                assertThat(solution.getString("score", "total_text")).isEqualTo(MARKS_GRADES_RESULTS[index++]);
+                return true;
+            }});
+    }
+//
+    @Test
+    public void test_school_report()
+    {
+        QueryProgram queryProgram = new QueryProgram(ITEM_MARKS_GRADES_CALC);
+        queryProgram.executeQuery("marks", new SolutionHandler(){
+            int index1 = 0;  
+            int index2 = 0;  
+            @Override
+            public boolean onSolution(Solution solution)
+            {
+                Iterator<AxiomTermList> iterator = solution.getAxiomList("score").iterator();
+                assertThat(solution.getString("grades", "student")).isEqualTo(STUDENTS[index1++]);
+                while (iterator.hasNext())
+                {
+                    AxiomTermList termList = iterator.next();
+                    Axiom item = termList.getAxiom();
+                    String subject = item.getTermByIndex(0).toString();
+                    String mark = item.getTermByIndex(1).getValue().toString();
+                    //System.out.println(subject + " " + mark);
+                    assertThat(subject + " " + mark).isEqualTo(SCHOOL_REPORT[index2++]);
+                }
                 return true;
             }});
     }

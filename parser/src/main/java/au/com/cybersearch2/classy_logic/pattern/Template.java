@@ -316,7 +316,11 @@ public class Template extends Structure
     public AxiomList getSolution()
     {
         if ((solutionTerm != null) && !solutionTerm.isEmpty())
+        {
+            if (solutionTerm.getValueClass() != AxiomList.class)
+                throw new ExpressionException("Template \"" + name + "\" solution does not contain axioms");
             return solutionTerm.getValue();
+        }
         throw new ExpressionException("Template \"" + name + "\" cannot provide solution");
     }
     
@@ -330,7 +334,7 @@ public class Template extends Structure
         Axiom axiom = new Axiom(name);
 		for (Term term: termList)
 		{
-			if (!term.isEmpty() && !term.getName().isEmpty())
+			if (!term.isEmpty() && !term.getName().isEmpty() && (term.getName().indexOf('.') == -1))
 			{
 				String termName = NameParser.getNamePart(term.getName());
 				Parameter param = new Parameter(termName, term.getValue());
@@ -339,7 +343,7 @@ public class Template extends Structure
 		}
 		return axiom;
 	}
-
+	
 	/**
 	 * Returns an OperandWalker object for navigating this template
 	 * @return OperandWalker 

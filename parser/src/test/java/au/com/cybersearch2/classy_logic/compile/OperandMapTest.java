@@ -50,7 +50,7 @@ public class OperandMapTest
 		ItemList itemList = mock(ItemList.class);
 		@SuppressWarnings("rawtypes")
 		ItemListVariable itemListVariable = mock(ItemListVariable.class);
-		when(itemList.newVariableInstance(0, "0")).thenReturn(itemListVariable);
+		when(itemList.newVariableInstance(0, "0", 0)).thenReturn(itemListVariable);
 		assertThat(operandMap.getListVariable(itemList, LIST_NAME, 0, "0")).isEqualTo(itemListVariable);
 	}
 
@@ -89,7 +89,7 @@ public class OperandMapTest
 		Operand expression = mock(Operand.class);
 		when(expression.isEmpty()).thenReturn(true);
 		when(expression.getName()).thenReturn("X");
-		when(itemList.newVariableInstance(expression, "X")).thenReturn(itemListVariable);
+		when(itemList.newVariableInstance(expression, "X", 0)).thenReturn(itemListVariable);
 		assertThat(operandMap.newListVariableInstance(itemList, expression)).isEqualTo(itemListVariable);
 	}
 	

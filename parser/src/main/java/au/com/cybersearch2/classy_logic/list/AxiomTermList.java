@@ -171,7 +171,7 @@ public class AxiomTermList implements ItemList<Object>
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String)
 	 */
 	@Override
-	public ItemListVariable<Object> newVariableInstance(int index, String suffix) 
+	public ItemListVariable<Object> newVariableInstance(int index, String suffix, int id) 
 	{
 		Variable variable = new Variable(name + "." + suffix);
 		if (axiom.getTermCount() > 0)
@@ -180,7 +180,7 @@ public class AxiomTermList implements ItemList<Object>
 		    // Assign a value to set the delegate
 			variable.assign(axiom.getTermByIndex(index).getValue());
 		}
-		return new AxiomTermListVariable(this, variable, index, suffix);
+		return new AxiomTermListVariable(this, variable, index, suffix, id);
 	}
 
 	/**
@@ -188,11 +188,11 @@ public class AxiomTermList implements ItemList<Object>
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String)
 	 */
 	@Override
-	public ItemListVariable<Object> newVariableInstance(Operand expression, String suffix) 
+	public ItemListVariable<Object> newVariableInstance(Operand expression, String suffix, int id) 
 	{
 		Variable itemOperand = new Variable(name + "." + suffix);
 		// Assign a value to set the delegate must be delayed until the expression is evaluated
-		return new AxiomTermListVariable(this, itemOperand, expression, suffix);
+		return new AxiomTermListVariable(this, itemOperand, expression, suffix, id);
 	}
 
 	/**

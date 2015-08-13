@@ -121,7 +121,7 @@ public class QueryParserTest
 		"include \"agriculture-land.xpl\";" +
 		"include \"surface-land.xpl\";" +
 	    "template agri_10y (country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);" +
-		"template surface_area_increase (agri_10y.country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);";
+		"template surface_area_increase (country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);";
 
 	static final String[] GREEK_BUSINESS_LIST =
 	{
@@ -859,7 +859,7 @@ public class QueryParserTest
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
         QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
-    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude, is_high = altitude>5000)");
+    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude, is_high=altitude>5000)");
     	int index = 0;
  	    while (highCitiesQuery.execute())
   	    	assertThat(highCitiesQuery.toString()).isEqualTo(HIGH_CITY_v2[index++]);

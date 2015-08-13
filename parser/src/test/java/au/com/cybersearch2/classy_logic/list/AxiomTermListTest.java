@@ -57,14 +57,14 @@ public class AxiomTermListTest
 			assertThat(axiomTermList.getItem(i)).isEqualTo(axiom.getTermByIndex(i));
 		for (int i = 0; i < axiom.getTermCount(); i++)
 		{
-			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(i, Long.toString(i));
+			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(i, Long.toString(i), 1);
 			assertThat(listVariable.getValue()).isEqualTo(axiom.getTermByIndex(i).getValue());
 		}
 		for (int i = 0; i < axiom.getTermCount(); i++)
 		{
 			IntegerOperand expression = new IntegerOperand("" + i);
 			expression.assign(Long.valueOf(i));
-			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(expression, Long.toString(i));
+			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(expression, Long.toString(i), 1);
 			listVariable.evaluate(1);
 			assertThat(listVariable.getValue()).isEqualTo(axiom.getTermByIndex(i).getValue());
 		}
@@ -83,8 +83,8 @@ public class AxiomTermListTest
 		{
 			assertThat(e.getMessage()).isEqualTo(OUT_OF_BOUNDS_MESSAGE);
 		}
-		axiomOperandList.newVariableInstance(0, "0");
-		ItemListVariable<Object> variable1 = axiomOperandList.newVariableInstance(new IntegerOperand("x"), "x");
+		axiomOperandList.newVariableInstance(0, "0", 1);
+		ItemListVariable<Object> variable1 = axiomOperandList.newVariableInstance(new IntegerOperand("x"), "x", 1);
 		assertThat(variable1).isInstanceOf(AxiomTermListVariable.class);
 		axiomOperandList.setAxiom(new Axiom(KEY));
 		try
@@ -96,8 +96,8 @@ public class AxiomTermListTest
 		{
 			assertThat(e.getMessage()).isEqualTo(OUT_OF_BOUNDS_MESSAGE);
 		}
-		axiomOperandList.newVariableInstance(0, "0");
-		ItemListVariable<Object> variable2 = axiomOperandList.newVariableInstance(new IntegerOperand("x"), "x");
+		axiomOperandList.newVariableInstance(0, "0", 1);
+		ItemListVariable<Object> variable2 = axiomOperandList.newVariableInstance(new IntegerOperand("x"), "x", 1);
 		assertThat(variable2).isInstanceOf(AxiomTermListVariable.class);
 		assertThat(variable1).isNotEqualTo(variable2);
 	}

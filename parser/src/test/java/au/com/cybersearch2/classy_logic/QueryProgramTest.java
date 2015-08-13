@@ -275,9 +275,9 @@ public class QueryProgramTest
 		when(keyname2.getAxiomKey()).thenReturn("");
 		when(keyname2.getTemplateName()).thenReturn(TEMPLATE_NAME2);
 		Variable variable2 = new Variable(TEMPLATE_NAME + "." + VARIABLE_NAME);
+        Variable variable3 = new Variable(VARIABLE_NAME + "3", variable2);
 		parserAssembler.createTemplate(TEMPLATE_NAME2, true);
-		parserAssembler.addTemplate(TEMPLATE_NAME2, variable2);
-		parserAssembler.getOperandMap().addOperand(OPERAND_NAME, null);
+		parserAssembler.addTemplate(TEMPLATE_NAME2, variable3);
 		querySpec2.addKeyName(keyname2);
 		querySpec2.setQueryType(QueryType.calculator);
 		scope.addQuerySpec(querySpec);
@@ -287,7 +287,7 @@ public class QueryProgramTest
 			public boolean onSolution(Solution solution) 
 			{
 				assertThat(solution.getString(TEMPLATE_NAME, VARIABLE_NAME)).isEqualTo("eureka!");
-				assertThat(solution.getString(TEMPLATE_NAME2, VARIABLE_NAME)).isEqualTo("eureka!");
+				assertThat(solution.getString(TEMPLATE_NAME2, VARIABLE_NAME + "3")).isEqualTo("eureka!");
 				return true;
 			}};
 		queryProgram.executeQuery(SCOPE_NAME, QUERY_SPEC_NAME, solutionHandler);

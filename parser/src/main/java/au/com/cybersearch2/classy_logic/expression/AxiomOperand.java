@@ -15,15 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
-import java.util.Iterator;
-
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 
 /**
  * AxiomOperand
@@ -35,13 +32,16 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
  */
 public class AxiomOperand extends ExpressionParameter<AxiomList>implements Concaten<AxiomList>
 {
+    protected String axiomKey;
+    
     /**
      * Axiom Variable
      * @param name
      */
-    public AxiomOperand(String name) 
+    public AxiomOperand(String name, String axiomKey) 
     {
         super(name);
+        this.axiomKey = axiomKey;
     }
 
     /**
@@ -52,6 +52,7 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     public AxiomOperand(String name, AxiomList value) 
     {
         super(name, value);
+        axiomKey = value.getKey();
     }
 
     /**
@@ -59,11 +60,12 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
      * @param name
      * @param expression Operand which evaluates value
      */
-    public AxiomOperand(String name, Operand expression) 
+    public AxiomOperand(String name, String axiomKey, Operand expression) 
     {
         super(name, expression);
-
+        this.axiomKey = axiomKey;
     }
+
     /**
      * Update Parameter value - use for assignment operation
      * @param value Object containing new value. Must be AxiomList or sub class
@@ -142,37 +144,18 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     {
         EvaluationStatus status = super.evaluate(id);
         if (isEmpty())
-            setValue(new AxiomList(name,name));
+            setValue(new AxiomList(axiomKey, axiomKey));
         return status;
     }
-    
 
+    /**
+     * concatenate
+     * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
+     */
     @Override
     public AxiomList concatenate(Operand rightOperand)
     {
-        if (rightOperand.isEmpty()) // Add empty list means no change
-            return (AxiomList)getValue();
-        if (isEmpty()) // Just assign left to right if this operand is empty
-            return (AxiomList)rightOperand.getValue();
-        // Check for congruence. Both Operands must be AxiomOperands with
-        // AxiomLists containing matching Axioms
-        if (!isCongruent(rightOperand))
-            throw new ExpressionException("Cannot concatenate " + toString() + " to " + rightOperand.toString());
-        AxiomList rightAxiomList = (AxiomList)rightOperand.getValue();
-        AxiomList leftAxiomList = (AxiomList)getValue();
-        // For efficiency, update the value of this operand as it will be assigned back to it anyway.
-        Iterator<AxiomTermList> iterator = rightAxiomList.getIterable().iterator();
-        int index = leftAxiomList.getLength();
-        while (iterator.hasNext())
-            leftAxiomList.assignItem(index++, iterator.next());
-        return getValue();
-    }
-
-    protected boolean isCongruent(Operand operand)
-    {
-        if (!(operand.getValueClass() == AxiomList.class))
-            return false;
-        return AxiomUtils.isCongruent((AxiomList)getValue(), (AxiomList)operand.getValue());
+        return AxiomUtils.concatenate(this, rightOperand);
     }
 
 }

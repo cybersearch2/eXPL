@@ -35,15 +35,18 @@ public class AxiomParameterOperand extends AxiomOperand
 {
     /** Collects parameters from an Operand tree and passes them to a supplied function object */
     protected ParameterList<AxiomList> parameterList;
+    protected String axiomName;
 
     /**
      * Construct an AxiomParameterOperand object
      * @param name Name of operand
+     * @param axiomName Name of axiom list to be generated
      * @param argumentExpression Operand containing parameters as a tree of operands
      */
-    public AxiomParameterOperand(String name, Operand argumentExpression)
+    public AxiomParameterOperand(String name, String axiomName, Operand argumentExpression)
     {
-        super(name, argumentExpression);
+        super(name, axiomName, argumentExpression);
+        this.axiomName = axiomName;
         parameterList = new ParameterList<AxiomList>(argumentExpression, axiomGenerator());
     }
 
@@ -65,7 +68,7 @@ public class AxiomParameterOperand extends AxiomOperand
             @Override
             public AxiomList evaluate(List<Term> argumentList)
             {
-                return AxiomUtils.marshallAxiomTerms(name, name, argumentList);
+                return AxiomUtils.marshallAxiomTerms(axiomName, axiomName, argumentList);
             }};
     }
 

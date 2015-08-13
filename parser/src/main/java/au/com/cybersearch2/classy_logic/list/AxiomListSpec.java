@@ -17,10 +17,8 @@ package au.com.cybersearch2.classy_logic.list;
 
 import java.util.List;
 
-import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -48,7 +46,7 @@ public class AxiomListSpec
     /** Text to append to name of variable */
     protected String suffix;
     /** Compiler operand to supply AxiomList object on evaluation */
-    protected AxiomOperand axiomListVariable;
+    protected Operand axiomListVariable;
  
     /**
      * Construct AxiomListSpec object for case backing AxiomList is available
@@ -72,7 +70,7 @@ public class AxiomListSpec
      * @param axiomExpression Compiler operand for axiom selection
      * @param termExpression Compiler operand for term selection
      */
-    public AxiomListSpec(String listName, AxiomOperand axiomListVariable, Operand axiomExpression, Operand termExpression)
+    public AxiomListSpec(String listName, Operand axiomListVariable, Operand axiomExpression, Operand termExpression)
     {
         this.listName = listName;
         this.axiomListVariable = axiomListVariable;
@@ -177,7 +175,7 @@ public class AxiomListSpec
             termIndex = ((Long)(termExpression.getValue())).intValue();
             suffix = Integer.toString(termIndex);
         }
-        else if (termExpression.isEmpty() && (termExpression instanceof Variable))
+        else if (termExpression.isEmpty())/* && (termExpression instanceof Variable))*/
         {
             suffix = termExpression.getName();
             if (axiomList != null)

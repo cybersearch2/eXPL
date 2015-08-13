@@ -56,6 +56,7 @@ import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionParameter;
+import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
@@ -611,7 +612,7 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
    ( varType=Type(operandMap) )? name=Name() ( index=IndexExpression(parserAssembler) )? 
    (     
       ( 
-        scToken=":" | scToken="?" | "=" |
+        scToken=":" | scToken="?" | assignToken="=" |
         ( assignToken=<PLUSASSIGN>
         | assignToken=<MINUSASSIGN>
         | assignToken=<STARASSIGN>
@@ -709,32 +710,36 @@ Operand AxiomVariable(ParserAssembler parserAssembler) :
 {
     Token axiomToken;
     Operand expression = null;
+    Operand axiomList = null;
 }
 {
   axiomToken=<IDENTIFIER> "="
   ( 
      expression=Expression(parserAssembler) 
   | 
-     expression=AxiomList(axiomToken.image, parserAssembler) 
+     axiomList=AxiomList(axiomToken.image, parserAssembler) 
   )
   {
      String axiomName = axiomToken.image;
      VariableType varType = new VariableType(OperandType.AXIOM);
-     varType.setProperty(VariableType.EXPRESSION, expression);
+     varType.setProperty(VariableType.EXPRESSION, axiomList == null ? expression : axiomList);
      Operand operand = varType.getInstance(parserAssembler, axiomName);
-     parserAssembler.setParameter(axiomName);
+     if (expression != null)
+         parserAssembler.setParameter(axiomName);
      return operand;
   }
 } 
 
 Operand AxiomList(String axiomName, ParserAssembler parserAssembler) :
 {
+  String listName = axiomName + "_list";
   Operand[] params = new Operand[2];
+  int count = 0;
 }
 {
-  params[0] = AxiomInitializer(axiomName, parserAssembler)
+  params[0] = AxiomInitializer(listName + "0", axiomName, parserAssembler)
   ( 
-    params[1] = AxiomInitializer(axiomName, parserAssembler)
+    params[1] = AxiomInitializer(listName + ++count, axiomName, parserAssembler)
     {
       params[0] = new Evaluator(params[0], "+=", params[1]);
     }
@@ -744,7 +749,7 @@ Operand AxiomList(String axiomName, ParserAssembler parserAssembler) :
   }
 }
 
-Operand AxiomInitializer(String axiomName, ParserAssembler parserAssembler) :
+Operand AxiomInitializer(String listName, String axiomName, ParserAssembler parserAssembler) :
 {
     Operand initializeList = null;
 }
@@ -752,10 +757,10 @@ Operand AxiomInitializer(String axiomName, ParserAssembler parserAssembler) :
   <LBRACE> ( initializeList = ArgumentList(parserAssembler) )? <RBRACE>
   {
      VariableType varType = new VariableType(OperandType.AXIOM);
+     varType.setProperty(VariableType.AXIOM_KEY, axiomName);
      if (initializeList != null)
-        varType.setProperty(VariableType.EXPRESSION, parserAssembler.getParameterOperand(axiomName, initializeList));
-     Operand operand = varType.getInstance(parserAssembler, axiomName);
-     parserAssembler.setParameter(axiomName);
+        varType.setProperty(VariableType.EXPRESSION, new AxiomParameterOperand(listName + "_params", axiomName, initializeList));
+     Operand operand = varType.getInstance(parserAssembler, listName);
      return operand;
   }
 }

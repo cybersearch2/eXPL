@@ -85,7 +85,7 @@ public class ScopeQueryParserTest
 		"include \"agriculture-land.xpl\";\n" +
 		"include \"surface-land.xpl\";\n" +
 		"template agri_10y(country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);\n" +
-		"template surface_area_increase(agri_10y.country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);\n" +
+		"template surface_area_increase(country = agri_10y.country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);\n" +
 		"calc km2_to_mi2 (decimal mi2, mi2 = surface_area_increase.surface_area * 0.3861);" +
         "scope countries\n" +
 	    "{\n" +

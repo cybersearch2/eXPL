@@ -118,7 +118,10 @@ public class VariableType
         	operand = !hasExpression ? new BigDecimalOperand(name) : new BigDecimalOperand(name, expression);
 	    	break;
         case AXIOM:
-            operand = !hasExpression ? new AxiomOperand(name) : new AxiomOperand(name, expression);
+            String axiomKey = getPropertyString(AXIOM_KEY);
+            if (axiomKey == null)
+                axiomKey = name;
+            operand = !hasExpression ? new AxiomOperand(name, axiomKey) : new AxiomOperand(name, axiomKey, expression);
             break;
         case CURRENCY:
         	operand = !hasExpression ? 

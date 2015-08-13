@@ -204,7 +204,7 @@ public class Parameter implements Term
 	 * @return Identity passed in param "id" or zero if unification failed
 	 * @see #backup(int id)
 	 */
-	protected int unify(Term otherTerm, int id)
+	public int unify(Term otherTerm, int id)
 	{
 		this.id = id;
 		setValue(otherTerm.getValue());
@@ -237,6 +237,7 @@ public class Parameter implements Term
 		value = new Null();
 		id = 0;
 	}
+	
 	/**
 	 * Evaluate value using data gathered during unification.
 	 * @param id Identity of caller, which must be provided for backup()

@@ -210,7 +210,7 @@ public class OperandMap
 		if (index >= 0)
 			listVariable = getListVariable(itemList, name, index, suffix);
 		else
-			listVariable = itemList.newVariableInstance(expression, suffix);
+			listVariable = itemList.newVariableInstance(expression, suffix, 0);
 		return listVariable;
 	}
 
@@ -317,7 +317,7 @@ public class OperandMap
 		if (listVariable != null)
 			return listVariable;
 		// Use ItemList object to create new ItemListVariable instance
-		listVariable = itemList.newVariableInstance(index, suffix);
+		listVariable = itemList.newVariableInstance(index, suffix, 0);
 		return listVariable;
 	}
 

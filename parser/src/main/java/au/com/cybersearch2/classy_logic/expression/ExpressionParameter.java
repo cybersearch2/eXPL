@@ -62,6 +62,11 @@ public abstract class ExpressionParameter<T> extends GenericParameter<T> impleme
 		this.expression = expression;
 	}
 
+	public boolean hasExpression()
+	{
+	    return expression != null;
+	}
+	
 	/**
 	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 
 	 * @param id Identity of caller. 
@@ -142,6 +147,8 @@ public abstract class ExpressionParameter<T> extends GenericParameter<T> impleme
 	 @Override
      public OperatorEnum[] getStringOperandOps()
      {
+         if (expression != null)
+             return expression.getStringOperandOps();
 	     return Operand.EMPTY_OPERAND_OPS;
      }
 }

@@ -78,6 +78,8 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             Map<String, Object> properties = new HashMap<String, Object>();
             for (Term argument: argumentList)
                 properties.put(argument.getName(), argument.getValue());
+            // TODO - Do not use just template name as can cause accidental unification
+            // when query axiom is employed
             queryParams.putProperties(templateName, properties);
         }
         // Set SolutionHander to collect results

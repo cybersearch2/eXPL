@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
@@ -35,6 +37,37 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class AxiomUtils
 {
+    /**
+     * Concatenate two operands containing AxiomLists
+     * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
+     */
+    public static AxiomList concatenate(Operand leftOperand, Operand rightOperand)
+    {
+        if (rightOperand.isEmpty()) // Add empty list means no change
+            return (AxiomList)leftOperand.getValue();
+        if (leftOperand.isEmpty()) // Just assign left to right if this operand is empty
+            return (AxiomList)rightOperand.getValue();
+        // Check for congruence. Both Operands must be AxiomOperands with
+        // AxiomLists containing matching Axioms
+        AxiomList rightAxiomList = null;
+        AxiomList leftAxiomList = null;
+        boolean argumentsValid = (leftOperand.getValueClass() == AxiomList.class) && (rightOperand.getValueClass() == AxiomList.class);
+        if (argumentsValid)
+        {
+            rightAxiomList = (AxiomList)rightOperand.getValue();
+            leftAxiomList = (AxiomList)leftOperand.getValue();
+            argumentsValid = AxiomUtils.isCongruent(rightAxiomList, leftAxiomList);
+        }
+        if (!argumentsValid)
+            throw new ExpressionException("Cannot concatenate " + leftOperand.toString() + " to " + rightOperand.toString());
+        // For efficiency, update the value of this operand as it will be assigned back to it anyway.
+        Iterator<AxiomTermList> iterator = rightAxiomList.getIterable().iterator();
+        int index = leftAxiomList.getLength();
+        while (iterator.hasNext())
+            leftAxiomList.assignItem(index++, iterator.next());
+        return (AxiomList) leftOperand.getValue();
+    }
+
     /**
      * Returns an AxiomList object given a list of terms to marshall into an axiom
      * @param listName Name of axiom list to return
