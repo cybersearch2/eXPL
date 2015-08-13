@@ -32,8 +32,14 @@ eXPL v1.12
 29. QueryLauncher now uses axiomKey only for choice Template
 30. Replace QueryParams Axiom passing design to use a Solution object and clear Scope Axioms on ScopeContext reset()
 31. Fixed issue with Evaluator clearValue() which was not invoking operand backup to permit another calculation
-
-
+32. Added id to interface ItemList newVariableInstance() so list variable id can be set for AxiomTermList item in AxiomList
+33. Bind a dynamic AxiomListVariable to to a Variable operand instead of an AxiomOperand
+34. Add concatenation to DelegateOperand, with AxiomList a special case from standard String concatenation.
+35. Add clearValue() override to DelegateOperand which visits child operand tree and forces backup
+36. AxiomParameterOperand updated to specify axiom name separately from operand name
+37. Do not add terms with qualified names to Axiom from Template conversion
+38. Fix compiler TemplateExpression and AxiomList productions
+39. CurrencyOperand to refresh it's country locale in formatValue() in case it has changed since last evaluation
 
 
 eXPL v1.11
