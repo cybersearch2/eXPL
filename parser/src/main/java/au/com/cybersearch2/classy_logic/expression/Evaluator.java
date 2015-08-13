@@ -467,18 +467,6 @@ public class Evaluator extends DelegateParameter
 	}
 
 	/**
-	 * Assign a value to this Operand. It may overwrite and existing value
-	 * This value will be overwritten on next call to evaluate(), so calling
-	 * assign() on an Evaluator is pointless.
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
-	 */
-	@Override
-	public void assign(Object value) 
-	{
-		setValue(value);
-	}
-
-	/**
 	 * Returns left child of Operand
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperand()
 	 */

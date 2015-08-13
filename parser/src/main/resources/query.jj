@@ -612,7 +612,7 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
    ( varType=Type(operandMap) )? name=Name() ( index=IndexExpression(parserAssembler) )? 
    (     
       ( 
-        scToken=":" | scToken="?" | assignToken="=" |
+        scToken=":" | scToken="?" | "=" |
         ( assignToken=<PLUSASSIGN>
         | assignToken=<MINUSASSIGN>
         | assignToken=<STARASSIGN>

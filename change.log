@@ -40,6 +40,8 @@ eXPL v1.12
 37. Do not add terms with qualified names to Axiom from Template conversion
 38. Fix compiler TemplateExpression and AxiomList productions
 39. CurrencyOperand to refresh it's country locale in formatValue() in case it has changed since last evaluation
+40. Fix Variable not updating delegate class after evaluation
+41. Create static AssignOnlyOperator delegate for DelegateOperator
 
 
 eXPL v1.11

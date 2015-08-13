@@ -859,7 +859,7 @@ public class QueryParserTest
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
         QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
-    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude, is_high=altitude>5000)");
+    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude, is_high = altitude>5000)");
     	int index = 0;
  	    while (highCitiesQuery.execute())
   	    	assertThat(highCitiesQuery.toString()).isEqualTo(HIGH_CITY_v2[index++]);

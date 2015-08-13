@@ -800,7 +800,7 @@ public class QueryParser implements QueryParserConstants
           scToken = jj_consume_token(80);
           break;
         case ASSIGN:
-          assignToken = jj_consume_token(ASSIGN);
+          jj_consume_token(ASSIGN);
           break;
         case PLUSASSIGN:
         case MINUSASSIGN:

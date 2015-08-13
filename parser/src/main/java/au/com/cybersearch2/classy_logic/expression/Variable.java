@@ -90,8 +90,7 @@ public class Variable extends DelegateParameter
 			status = expression.evaluate(id);
 			if (!expression.isEmpty())
 			{
-				this.value = expression.getValue();
-			    this.empty = false;
+				setValue(expression.getValue());
 			    this.id = id;
 			}
 		}

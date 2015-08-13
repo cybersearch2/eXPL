@@ -37,6 +37,8 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 public abstract class DelegateParameter extends Parameter implements Operand, Concaten<Object> 
 {
 	static final String DELEGATE_NAME = "delegate";
+	static final AssignOnlyOperand ASSIGN_ONLY_DELEGATE;
+	
     /** Constant value for no operators permited */
 	protected static OperatorEnum[] EMPTY_OPERAND_OPS = new OperatorEnum[0];
 	protected static OperatorEnum[] ASSIGN_OPERAND_OP = { OperatorEnum.ASSIGN };
@@ -49,6 +51,7 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 
 	static
 	{
+	    ASSIGN_ONLY_DELEGATE = new AssignOnlyOperand(DELEGATE_NAME);
 		delegateClassMap = new HashMap<Class<?>,  Operand>();
 		delegateClassMap.put(String.class, new StringOperand(DELEGATE_NAME));
 		delegateClassMap.put(Integer.class, new IntegerOperand(DELEGATE_NAME));
@@ -56,7 +59,7 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 		delegateClassMap.put(Boolean.class, new BooleanOperand(DELEGATE_NAME));
 		delegateClassMap.put(Double.class, new DoubleOperand(DELEGATE_NAME));
 		delegateClassMap.put(BigDecimal.class, new BigDecimalOperand(DELEGATE_NAME));
-		delegateClassMap.put(AxiomTermList.class, new AssignOnlyOperand(DELEGATE_NAME));
+		delegateClassMap.put(AxiomTermList.class, ASSIGN_ONLY_DELEGATE);
         delegateClassMap.put(AxiomList.class, new AxiomOperand(DELEGATE_NAME, "*"));
 		delegateClassMap.put(Null.class, null);
 	}
@@ -78,7 +81,7 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 	protected DelegateParameter(String name) 
 	{
 		super(name);
-        delegate = new AssignOnlyOperand(name);
+        delegate = ASSIGN_ONLY_DELEGATE;
 	}
 
 	/**
@@ -181,6 +184,19 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 		    setDelegate(getValueClass());
 		}
 	}
+
+   /**
+     * Assign a value to this Operand. It may overwrite and existing value
+     * This value will be overwritten on next call to evaluate(), so calling
+     * assign() on an Evaluator is pointless.
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
+     */
+    @Override
+    public void assign(Object value) 
+    {
+         setValue(value);
+    }
+
 
 	/**
 	 * Delegate to perform actual unification with other Term. If successful, two terms will be equivalent. 
