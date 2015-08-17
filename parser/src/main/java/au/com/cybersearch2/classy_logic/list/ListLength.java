@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.list;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
  * ListLength
@@ -29,20 +30,34 @@ public class ListLength extends Variable
 {
 	/** List name. This operand's name has ".length" appended */
 	protected String listName;
-	/** The list object, which is also an operand */
+	/** The list object */
     protected ItemList<?> itemList;
+    /** Operand containing a list value */
+    protected Operand itemListOperand;
 	
 	/**
 	 * Construct a ListLength object
 	 * @param listName
-	 * @param listOperand The list object, which is also an operand
+	 * @param itemList The list object
 	 */
-	public ListLength(String listName, ItemList<?> listOperand) 
+	public ListLength(String listName, ItemList<?> itemList) 
 	{
 		super(listName + "." + "length");
 		this.listName = listName;
-        this.itemList = listOperand;
+        this.itemList = itemList;
 	}
+
+    /**
+     * Construct a ListLength object
+     * @param listName
+     * @param itemListOperand The operand to contain a list object after evaluation
+     */
+    public ListLength(String listName, Operand itemListOperand) 
+    {
+        super(listName + "." + "length");
+        this.listName = listName;
+        this.itemListOperand = itemListOperand;
+    }
 
 	/**
 	 * Evaluate list length. 
@@ -52,7 +67,12 @@ public class ListLength extends Variable
 	@Override
 	public EvaluationStatus evaluate(int id) 
 	{
-		setValue(Integer.valueOf(itemList.getLength()));
+	    if (itemListOperand != null)
+	    {
+	        if (!itemListOperand.isEmpty())
+	            itemList = (ItemList<?>)itemListOperand.getValue();
+	    }
+		setValue(Integer.valueOf(itemList != null ? itemList.getLength() : 0));
 		this.id = id;
 		return EvaluationStatus.COMPLETE;
 	}

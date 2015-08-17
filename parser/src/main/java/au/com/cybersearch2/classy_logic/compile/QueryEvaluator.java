@@ -23,12 +23,14 @@ import java.util.Map;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.ScopeContext;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryLauncher;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -43,14 +45,20 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
 {
     /** Query parameters */
     protected QueryParams queryParams;
+    /** Flag to indicate if call to Calculator in same scope */
+    protected boolean isCallInScope;
 
     /**
      * Construct a QueryEvaluator object for a query specified by query parameters
      * @param queryParams  Query parameters
      */
-    public QueryEvaluator(QueryParams queryParams)
+    public QueryEvaluator(QueryParams queryParams, boolean isCallInScope)
     {
         this.queryParams = queryParams;
+        this.isCallInScope = isCallInScope;
+        // TODO add call in same scope
+        if (isCallInScope)
+            throw new ExpressionException("Call in own scope not supported");
     }
     
     /**
@@ -72,12 +80,30 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
     {
         QuerySpec querySpec = queryParams.getQuerySpec();
         final String templateName = getCalculatorKeyName(querySpec).getTemplateName();
+        Scope scope = queryParams.getScope();
+        ParserAssembler parserAssembler = scope.getGlobalParserAssembler();
+        Template template = parserAssembler.getTemplate(templateName);
+        if (template == null)
+        {
+            parserAssembler = scope.getParserAssembler();
+            template = parserAssembler.getTemplate(templateName);
+        }
         // Marshall arguments provided as a list of Variables into a properties container 
         if (argumentList.size() > 0)
         {
             Map<String, Object> properties = new HashMap<String, Object>();
+            int index = 0; // Map unnamed arguments to template term names
             for (Term argument: argumentList)
-                properties.put(argument.getName(), argument.getValue());
+            {
+                String argName = argument.getName();
+                if (argName.isEmpty())
+                {
+                    if (index == template.getTermCount())
+                        throw new ExpressionException("Unnamed argument at position " + index + " out of bounds");
+                    argName = template.getTermByIndex(index++).getName();
+                }
+                properties.put(argName, argument.getValue());
+            }
             // TODO - Do not use just template name as can cause accidental unification
             // when query axiom is employed
             queryParams.putProperties(templateName, properties);
@@ -105,8 +131,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             }};
         queryParams.setSolutionHandler(solutionHandler);
         // Do query using QueryLauncher utility class
-        Scope scope = queryParams.getScope();
-        ScopeContext scopeContext = scope.getContext(true);
+        ScopeContext scopeContext = isCallInScope ? null : scope.getContext(true);
         try
         {
             launch(queryParams);
@@ -114,9 +139,6 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             {
                 // Marshall Axioms in result list into AxiomList object
                 AxiomList axiomList = new AxiomList(templateName, templateName);
-                ParserAssembler parserAssembler = scope.getGlobalParserAssembler();
-                if (parserAssembler.getTemplate(templateName) == null)
-                    parserAssembler = scope.getParserAssembler();
                 List<String> axiomTermNameList = 
                     parserAssembler.setAxiomTermNameList(templateName, axiomList);
                 if (axiomTermNameList != null)
@@ -129,8 +151,11 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         finally
         {   // Clear call properties so query params can be recycled
             queryParams.clearProperties(templateName);
-            // Scope restored to original state
-            scopeContext.resetScope();
+            if (scopeContext != null)
+               // Scope restored to original state
+                scopeContext.resetScope();
+            else
+                template.reset();
         }
         return axiomListHolder[0];
     }

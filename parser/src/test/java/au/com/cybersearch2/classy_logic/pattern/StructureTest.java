@@ -391,6 +391,12 @@ public class StructureTest
 			public Operand getRightOperand() {
 				return term3;
 			}
+
+            @Override
+            public int getId()
+            {
+                return 0;
+            }
 			
 		};
 		testStructure.addTerm(term4);
@@ -490,6 +496,12 @@ public class StructureTest
 			public Operand getRightOperand() {
 				return null;
 			}
+
+            @Override
+            public int getId()
+            {
+                return 0;
+            }
 			
 		};
 		testStructure.addTerm(term6);

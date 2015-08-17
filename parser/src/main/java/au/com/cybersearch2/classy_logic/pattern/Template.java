@@ -360,9 +360,15 @@ public class Template extends Structure
 	 */
 	public void reset() 
 	{
-		if (!termList.isEmpty())
-			for (Term term: termList)
-				((Parameter)term).clearValue();
+	    Template template = this;
+	    while (template != null)
+	    {
+    		if (!template.termList.isEmpty())
+    			for (Term term: template.termList)
+    			    term.backup(0);
+    				//((Parameter)term).clearValue();
+    		template = template.getNext();
+	    }
 	}
 
 	/**
@@ -432,4 +438,5 @@ public class Template extends Structure
     {
         return initData;
     }
+    
 }

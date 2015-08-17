@@ -26,6 +26,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
@@ -57,7 +58,42 @@ public class CallOperandTest
             functionManager.putFunctionProvider(mathFunctionProvider.getName(), mathFunctionProvider);
             EduFunctionProvider eduFunctionProvider = new EduFunctionProvider();
             functionManager.putFunctionProvider(eduFunctionProvider.getName(), eduFunctionProvider);
+            SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
+            functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
             return functionManager;
+        }
+    }
+ 
+    static class SystemFunctionProvider implements FunctionProvider<Void>
+    {
+        @Override
+        public String getName()
+        {
+            return "system";
+        }
+
+        @Override
+        public CallEvaluator<Void> getCallEvaluator(String identifier)
+        {
+            if (identifier.equals("print"))
+                return new CallEvaluator<Void>(){
+    
+                    @Override
+                    public String getName()
+                    {
+                        return "print";
+                    }
+    
+                    @Override
+                    public Void evaluate(List<Term> argumentList)
+                    {
+                        for (Term term: argumentList)
+                            System.out.println(term.toString());
+                        return null;
+                    }
+                    
+            };
+            throw new ExpressionException("Unknown function identifier: " + identifier);
         }
     }
     
@@ -251,7 +287,12 @@ public class CallOperandTest
     static final String MARKS_GRADES_CALC = GRADES + ALPHA_MARKS +
         "scope school\n" +
         "{\n" +
-        "  calc calc_total_score(solution total_score = { label=\"Total score\", value=english+math+history });\n" +
+        "  calc calc_total_score(\n" +
+        "    integer english,\n" +
+        "    integer math,\n" +
+        "    integer history,\n" +
+        "    solution total_score = { label=\"Total score\", value=english+math+history }\n" +
+        "  );\n" +
         "  query calc_total_score (calc_total_score);\n" +
         "}\n"  +
         "calc score(\n" +
@@ -263,16 +304,26 @@ public class CallOperandTest
     static final String ITEM_MARKS_GRADES_CALC = GRADES + ALPHA_MARKS +
         "scope school\n" +
         "{\n" +
-        "  calc subjects(solution marks =\n" +
+        "  calc subjects(\n" +
+        "    integer english,\n" +
+        "    integer math,\n" +
+        "    integer history,\n" +
+        "    solution marks =\n" +
         "                { \"English\", mark[(english)] } \n" +
         "                { \"Math\",    mark[(math)] }\n" +
-        "                { \"History\", mark[(history)] });\n" +
-        "  calc total_score(solution total_score = { \"Total score\", english + math + history });\n" +
+        "                { \"History\", mark[(history)] }\n" +
+        "  );\n" +
+        "  calc total_score(\n" +
+        "    integer english,\n" +
+        "    integer math,\n" +
+        "    integer history,\n" +
+        "    solution total_score = { \"Total score\", english + math + history }\n" +
+        "  );\n" +
         "  query calc_marks (subjects);\n" +
         "  query calc_total_score (total_score);\n" +
         "}\n"  +
         "calc score(\n" +
-        "    school.marks = school.calc_marks(english,math,history), \n" +
+        "    school.marks = school.calc_marks(english,math,history),\n" +
         "    school.total = school.calc_total_score(english,math,history),\n" +
         "    solution report = school.marks + school.total\n" +
         ");\n" +
@@ -356,13 +407,12 @@ public class CallOperandTest
             "query german_orange (calc_german_orange);"
             ;
 
-
     @Before
     public void setUp()
     {
         new DI(new CallOperandTestModule());
     }
-    
+
     @Test
     public void test_two_argument()
     {

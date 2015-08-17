@@ -754,7 +754,7 @@ Operand AxiomInitializer(String listName, String axiomName, ParserAssembler pars
     Operand initializeList = null;
 }
 {
-  <LBRACE> ( initializeList = ArgumentList(parserAssembler) )? <RBRACE>
+  <LBRACE> ( initializeList = ParameterList(parserAssembler) )? <RBRACE>
   {
      VariableType varType = new VariableType(OperandType.AXIOM);
      varType.setProperty(VariableType.AXIOM_KEY, axiomName);
@@ -1362,7 +1362,11 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
   |
   <LENGTH> "("  name=Name() ")"
   {
-    return new ListLength(name, parserAssembler.getItemList(name));
+    Operand listOperand = parserAssembler.getOperandMap().get(name);
+    if (listOperand != null)
+        return new ListLength(name, listOperand);
+    else 
+        return new ListLength(name, parserAssembler.getItemList(name));
   }
   |
   <FORMAT> "("  name=Name() ")"
@@ -1443,12 +1447,32 @@ Operand Argument(ParserAssembler parserAssembler) :
   {
      if (varType == null)
          varType = new VariableType(OperandType.NULL);
-     String name = (nameToken == null) ? expression.getName() : nameToken.image;
+     String name = (nameToken == null) ? Term.ANONYMOUS : nameToken.image;
      varType.setProperty(VariableType.EXPRESSION, expression);
      Operand operand = varType.getInstance(parserAssembler, name);
      return operand;
   }
 }
+
+Operand ParameterList(ParserAssembler parserAssembler) :
+{
+  Operand[] params = new Operand[2];
+  Token op;
+}
+{
+  params[0] = Argument(parserAssembler)
+  ( 
+    op="," 
+    params[1]=Argument(parserAssembler) 
+    {
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
 
 
 Operand Literal() :

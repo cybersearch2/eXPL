@@ -93,4 +93,10 @@ public interface Term
 	 */
 	void assign(Object value);
 
+	/**
+     * Returns id
+     * @return int
+     */
+    int getId(); 
+
 }

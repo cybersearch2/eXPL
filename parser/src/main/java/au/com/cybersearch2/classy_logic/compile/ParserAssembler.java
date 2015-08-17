@@ -31,9 +31,11 @@ import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.AxiomListSource;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
+import au.com.cybersearch2.classy_logic.query.QueryType;
 import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
@@ -645,22 +647,43 @@ public class ParserAssembler implements LocaleListener
 	@SuppressWarnings({ "unchecked", "rawtypes" })
     public Operand getCallOperand(String name, Operand argumentExpression)
 	{
+	    Scope functionScope = null;
+        String library = null;
         String[] parts = name.split("\\.");
-        if (parts.length != 2)
+        if (parts.length > 2)
             throw new ExpressionException("Call name \"" + name + "\" is invalid");
-        String library = parts[0];
         final String function = parts[parts.length - 1];
-        Scope functionScope = scope.findScope(library);
+        if (parts.length == 1)
+        {
+            // Inner call
+            functionScope = scope;
+            library = scope.getName();
+        }
+        else
+        {
+            library = parts[0];
+            functionScope = scope.findScope(library);
+        }
         String callName = library + "." + function;
         if (functionScope != null)
         {
+            QuerySpec querySpec = null;
             if (functionScope == scope)
-                throw new ExpressionException("Query \"" + function + "\" in scope \"" + library + "\" not allowed in own scope");
-            QuerySpec querySpec = functionScope.getQuerySpec(function);
+            {
+                if (getTemplate(function) == null)
+                    throw new ExpressionException("Query \"" + function + "\" not found in scope \"" + library + "\"");
+                querySpec = new QuerySpec(callName);
+                querySpec.addKeyName(new KeyName("", function));
+                querySpec.setQueryType(QueryType.calculator);
+            }
+            else
+                querySpec = functionScope.getQuerySpec(function);
             if (querySpec == null)
                 throw new ExpressionException("Query \"" + function + "\" not found in scope \"" + library + "\"");
             QueryParams queryParams = new QueryParams(functionScope, querySpec);
-            return new CallOperand<AxiomList>(callName, new QueryEvaluator(queryParams), argumentExpression);
+            return new CallOperand<AxiomList>(callName, 
+                                               new QueryEvaluator(queryParams,functionScope == scope), 
+                                               argumentExpression);
         }
         else
         {
@@ -701,7 +724,7 @@ public class ParserAssembler implements LocaleListener
         {
             if ((parameterList != null) && parameterList.contains(name))
             {
-                Variable operand = (Variable) operandMap.getOperand(name);
+                Operand operand = operandMap.getOperand(name);
                 if (!operand.isEmpty())
                 {
                     AxiomList axiomList = (AxiomList)operand.getValue();

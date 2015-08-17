@@ -56,7 +56,7 @@ public class AxiomUtils
         {
             rightAxiomList = (AxiomList)rightOperand.getValue();
             leftAxiomList = (AxiomList)leftOperand.getValue();
-            argumentsValid = AxiomUtils.isCongruent(rightAxiomList, leftAxiomList);
+            argumentsValid = AxiomUtils.isCongruent(leftAxiomList, rightAxiomList);
         }
         if (!argumentsValid)
             throw new ExpressionException("Cannot concatenate " + leftOperand.toString() + " to " + rightOperand.toString());
@@ -92,8 +92,11 @@ public class AxiomUtils
         return axiomList;
     }
 
-    public static boolean isCongruent(AxiomList rightAxiomList, AxiomList leftAxiomList)
+    public static boolean isCongruent(AxiomList leftAxiomList, AxiomList rightAxiomList)
     {
+        if (leftAxiomList.isEmpty())
+            // Any right hand list can be concatenated to an empty left hand list
+            return true;
         List<String> leftTermNames = leftAxiomList.getAxiomTermNameList();
         List<String> rightTermNames = rightAxiomList.getAxiomTermNameList();
         if ((leftTermNames != null) && (rightTermNames != null))
