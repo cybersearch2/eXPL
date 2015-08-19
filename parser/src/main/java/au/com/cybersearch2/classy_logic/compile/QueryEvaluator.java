@@ -57,8 +57,8 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         this.queryParams = queryParams;
         this.isCallInScope = isCallInScope;
         // TODO add call in same scope
-        if (isCallInScope)
-            throw new ExpressionException("Call in own scope not supported");
+        //if (isCallInScope)
+        //    throw new ExpressionException("Call in own scope not supported");
     }
     
     /**
@@ -132,6 +132,8 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         queryParams.setSolutionHandler(solutionHandler);
         // Do query using QueryLauncher utility class
         ScopeContext scopeContext = isCallInScope ? null : scope.getContext(true);
+        if (isCallInScope)
+            template.push();
         try
         {
             launch(queryParams);
@@ -155,7 +157,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
                // Scope restored to original state
                 scopeContext.resetScope();
             else
-                template.reset();
+                template.pop();
         }
         return axiomListHolder[0];
     }

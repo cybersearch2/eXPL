@@ -18,7 +18,7 @@ package au.com.cybersearch2.classy_logic.list;
 import java.util.Iterator;
 import java.util.List;
 
-import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -173,14 +173,7 @@ public class AxiomTermList implements ItemList<Object>
 	@Override
 	public ItemListVariable<Object> newVariableInstance(int index, String suffix, int id) 
 	{
-		Variable variable = new Variable(name + "." + suffix);
-		if (axiom.getTermCount() > 0)
-		{
-			verify(index);
-		    // Assign a value to set the delegate
-			variable.assign(axiom.getTermByIndex(index).getValue());
-		}
-		return new AxiomTermListVariable(this, variable, index, suffix, id);
+		return AxiomUtils.newVariableInstance(this, index, suffix, id);
 	}
 
 	/**
@@ -190,9 +183,8 @@ public class AxiomTermList implements ItemList<Object>
 	@Override
 	public ItemListVariable<Object> newVariableInstance(Operand expression, String suffix, int id) 
 	{
-		Variable itemOperand = new Variable(name + "." + suffix);
 		// Assign a value to set the delegate must be delayed until the expression is evaluated
-		return new AxiomTermListVariable(this, itemOperand, expression, suffix, id);
+		return AxiomUtils.newVariableInstance(this, expression, suffix, id);
 	}
 
 	/**
@@ -228,7 +220,7 @@ public class AxiomTermList implements ItemList<Object>
 	/**
 	 * Verify axiom has been assigned to this list and index is in bounds
 	 */
-	protected void verify(int index) 
+	public void verify(int index) 
 	{
 		if (index >= axiom.getTermCount() || (index < 0))
 			throw new IllegalStateException("AxiomTermList \"" + name +"\" index " + index + " out of bounds");

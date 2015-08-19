@@ -297,11 +297,11 @@ public class CallOperandTest
         "}\n"  +
         "calc score(\n" +
         "    school.total_score = school.calc_total_score(english,math,history),\n" +
-        "    string total_text = school.total_score[label] + \": \" + school.total_score[value]\n" +
+        "    string total_text = school.total_score[0][label] + \": \" + school.total_score[0][value]\n" +
         ");\n" +
         "query marks(grades : score);";
 
-    static final String ITEM_MARKS_GRADES_CALC = GRADES + ALPHA_MARKS +
+    static final String SCHOOL_REPORT_OUT_SCOPE = GRADES + ALPHA_MARKS +
         "scope school\n" +
         "{\n" +
         "  calc subjects(\n" +
@@ -319,15 +319,36 @@ public class CallOperandTest
         "    integer history,\n" +
         "    solution total_score = { \"Total score\", english + math + history }\n" +
         "  );\n" +
-        "  query calc_marks (subjects);\n" +
-        "  query calc_total_score (total_score);\n" +
         "}\n"  +
         "calc score(\n" +
-        "    school.marks = school.calc_marks(english,math,history),\n" +
-        "    school.total = school.calc_total_score(english,math,history),\n" +
+        "    school.marks = school.subjects(english,math,history),\n" +
+        "    school.total = school.total_score(english,math,history),\n" +
         "    solution report = school.marks + school.total\n" +
         ");\n" +
         "query marks(grades : score);";
+
+    static final String SCHOOL_REPORT_IN_SCOPE= GRADES + ALPHA_MARKS +
+            "  calc subjects(\n" +
+            "    integer english,\n" +
+            "    integer math,\n" +
+            "    integer history,\n" +
+            "    solution marks =\n" +
+            "                { \"English\", mark[(english)] } \n" +
+            "                { \"Math\",    mark[(math)] }\n" +
+            "                { \"History\", mark[(history)] }\n" +
+            "  );\n" +
+            "  calc total_score(\n" +
+            "    integer english,\n" +
+            "    integer math,\n" +
+            "    integer history,\n" +
+            "    solution total_score = { \"Total score\", english + math + history }\n" +
+            "  );\n" +
+            "calc score(\n" +
+            "    school.marks = subjects(english,math,history),\n" +
+            "    school.total = total_score(english,math,history),\n" +
+            "    solution report = school.marks + school.total\n" +
+            ");\n" +
+            "query marks(grades : score);";
 
     static final String CITY_EVELATIONS =
         "axiom city (name, altitude):\n" + 
@@ -362,7 +383,6 @@ public class CallOperandTest
             "list city_list(city);\n" +
             "scope city\n" +
             "{\n" +
-            "  integer average;\n" +
             "  integer accum = 0;\n" +
             "  integer index = 0;\n" +
            "   calc average_height(\n" +
@@ -372,11 +392,10 @@ public class CallOperandTest
             "  },\n" +
             "  average = accum / index\n" +
             "  );\n" +
-            "  query average_height (average_height);\n" +
             "}\n"  +
             "calc call_average_height(\n" +
             "  axiom calc_average = city.average_height(),\n" +
-            "  average = calc_average[average]\n" +
+            "  average = calc_average[0][average]\n" +
             ");\n" +
             "query function_average_height (call_average_height);"
            ;
@@ -406,6 +425,49 @@ public class CallOperandTest
             ");\n" +
             "query german_orange (calc_german_orange);"
             ;
+    static final String SORTED_CITIES = CITY_EVELATIONS +
+            "axiom city_list = {};\n" +
+            "// Calculator to perform insert sort on any list\n" +
+            "calc list_sort (\n" +
+            "  // This calculator takes 2 parameters, an axiom list\n" +
+            "  // and the name of the column to sort on\n " +
+            "  sort_list,\n" +
+            "  string column,\n" +
+            "  // i is index to last item appended to the list\n" +
+            "  integer i = length(sort_list) - 1,\n" +
+            "  // Skip first time when only one item in list\n" +
+            "  : i < 1,\n" +
+            "  // j is the swap index\n" + 
+            "  integer j = i - 1,\n" +
+            "  // Get last altitude for sort comparison\n" + 
+            "  integer altitude = sort_list[i][column],\n" +
+            "  // Save axiom to swap\n" +
+            "  temp = sort_list[i],\n" +
+            "  // Shuffle list until sort order restored\n" + 
+            "  {\n" +
+            "    ? altitude < sort_list[j][column],\n" +
+            "    sort_list[j + 1] = sort_list[j],\n" +
+            "    ? --j >= 0\n" +
+            "  },\n" +
+            "  // Insert saved axiom in correct position\n" +
+            "  sort_list[j + 1] = temp\n" +
+            ");\n" +
+            "calc sort_cities(\n" +
+            "  string name,\n" +
+            "  integer altitude,\n" +
+            "  output = system.print(name + \": \" + altitude),\n" +
+            "  axiom city = { name, altitude },\n" +
+            "  city_list += city,\n" +
+            "  sorted = list_sort(city_list, \"altitude\"),\n" +
+            "  output = system.print(\"Sorted cities\"),\n" +
+            "  integer i = 0,\n" +
+            "  {\n" +
+            "      output = system.print(city_list[i++]),\n" +
+            "      ? i < length(city_list)\n" +
+            "  }\n" +
+            ");\n" +
+            "query sort_cities (city : sort_cities);\n"; 
+
 
     @Before
     public void setUp()
@@ -413,6 +475,16 @@ public class CallOperandTest
         new DI(new CallOperandTestModule());
     }
 
+    @Test
+    public void test_sort_cities()
+    {
+        QueryProgram queryProgram = new QueryProgram(SORTED_CITIES);
+        Result result = queryProgram.executeQuery("sort_cities");
+        //Iterator<Axiom> iterator = result.getIterator("city_list");
+        //while(iterator.hasNext())
+        //    System.out.println(iterator.next().toString());
+    }
+    
     @Test
     public void test_two_argument()
     {
@@ -493,7 +565,7 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                 //System.out.println(solution.getString("score", "total_text"));
+                //System.out.println(solution.getString("score", "total_text"));
                 assertThat(solution.getString("grades", "student")).isEqualTo(STUDENTS[index]);
                 assertThat(solution.getString("score", "total_text")).isEqualTo(MARKS_GRADES_RESULTS[index++]);
                 return true;
@@ -503,7 +575,32 @@ public class CallOperandTest
     @Test
     public void test_school_report()
     {
-        QueryProgram queryProgram = new QueryProgram(ITEM_MARKS_GRADES_CALC);
+        QueryProgram queryProgram = new QueryProgram(SCHOOL_REPORT_OUT_SCOPE);
+        queryProgram.executeQuery("marks", new SolutionHandler(){
+            int index1 = 0;  
+            int index2 = 0;  
+            @Override
+            public boolean onSolution(Solution solution)
+            {
+                Iterator<AxiomTermList> iterator = solution.getAxiomList("score").iterator();
+                assertThat(solution.getString("grades", "student")).isEqualTo(STUDENTS[index1++]);
+                while (iterator.hasNext())
+                {
+                    AxiomTermList termList = iterator.next();
+                    Axiom item = termList.getAxiom();
+                    String subject = item.getTermByIndex(0).toString();
+                    String mark = item.getTermByIndex(1).getValue().toString();
+                    //System.out.println(subject + " " + mark);
+                    assertThat(subject + " " + mark).isEqualTo(SCHOOL_REPORT[index2++]);
+                }
+                return true;
+            }});
+    }
+
+    @Test
+    public void test_school_report_in_scope()
+    {
+        QueryProgram queryProgram = new QueryProgram(SCHOOL_REPORT_IN_SCOPE);
         queryProgram.executeQuery("marks", new SolutionHandler(){
             int index1 = 0;  
             int index2 = 0;  

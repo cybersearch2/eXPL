@@ -19,9 +19,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
-import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -667,19 +665,15 @@ public class ParserAssembler implements LocaleListener
         String callName = library + "." + function;
         if (functionScope != null)
         {
-            QuerySpec querySpec = null;
-            if (functionScope == scope)
+            QuerySpec querySpec = functionScope.getQuerySpec(function);
+            if (querySpec == null)
             {
-                if (getTemplate(function) == null)
-                    throw new ExpressionException("Query \"" + function + "\" not found in scope \"" + library + "\"");
+                if ((functionScope == scope) && (getTemplate(function) == null))
+                        throw new ExpressionException("Query \"" + function + "\" not found in scope \"" + library + "\"");
                 querySpec = new QuerySpec(callName);
                 querySpec.addKeyName(new KeyName("", function));
                 querySpec.setQueryType(QueryType.calculator);
             }
-            else
-                querySpec = functionScope.getQuerySpec(function);
-            if (querySpec == null)
-                throw new ExpressionException("Query \"" + function + "\" not found in scope \"" + library + "\"");
             QueryParams queryParams = new QueryParams(functionScope, querySpec);
             return new CallOperand<AxiomList>(callName, 
                                                new QueryEvaluator(queryParams,functionScope == scope), 
@@ -716,29 +710,35 @@ public class ParserAssembler implements LocaleListener
 	 */
     public ItemList<?> getItemList(String name)
     {
-        Scope globalScope = scope.getGlobalScope();
-        ItemList<?> itemList = globalScope.getParserAssembler().getOperandMap().getItemList(name);
-        if ((itemList == null) && (scope != globalScope))
-            itemList = scope.getParserAssembler().getOperandMap().getItemList(name);
+        ItemList<?> itemList = findItemList(name);
         if (itemList == null)
         {
-            if ((parameterList != null) && parameterList.contains(name))
-            {
-                Operand operand = operandMap.getOperand(name);
-                if (!operand.isEmpty())
-                {
-                    AxiomList axiomList = (AxiomList)operand.getValue();
-                    axiomTermNameMap.put(name, axiomList.getAxiomTermNameList());
-                    return axiomList;
-                }
-                else
-                    return null;
-            }
-            throw new ExpressionException("List not found with name \"" + name + "\"");
+            Operand operand = operandMap.getOperand(name);
+            if ((operand == null) || 
+                 operand.isEmpty() || 
+                 (operand.getValueClass() != AxiomList.class))
+                throw new ExpressionException("List not found with name \"" + name + "\"");
+            AxiomList axiomList = (AxiomList)operand.getValue();
+            axiomTermNameMap.put(name, axiomList.getAxiomTermNameList());
+            return axiomList;
         }
         return itemList;
     }
 
+    /**
+     * Returns item list specified by name.
+     * @param name Name of list
+     * @return ItemList object or null if not found
+     */
+    public ItemList<?> findItemList(String name)
+    {
+        Scope globalScope = scope.getGlobalScope();
+        ItemList<?> itemList = globalScope.getParserAssembler().getOperandMap().getItemList(name);
+        if ((itemList == null) && (scope != globalScope))
+            itemList = scope.getParserAssembler().getOperandMap().getItemList(name);
+        return itemList;
+    }
+    
     /**
      * Returns Operand which accesses a list
      * @param listName
@@ -755,26 +755,33 @@ public class ParserAssembler implements LocaleListener
         // When an axiom parameter is specified, then initialization of the list variable must be delayed 
         // until evaluation occurs when running the first query.
         boolean isAxiomListVariable = isParameter(listName) || (operandMap.get(listName) != null);
-        if (!isAxiomListVariable)
-        {   // A normal list should be ready to go
-            itemList = getItemList(listName);
-            //operandMap.addItemList(listName, itemList);
-            if (param2 == null) // Single index case is easy
-                return operandMap.newListVariableInstance(itemList, param1);
-        }
-        else if (param2 == null) 
-        {  // As an axiom parameter will normally be contained in a list containing a single item,
-           // default axiom index to 0 if missing
-           param2 = param1;
-           param1 = new IntegerOperand("0", Integer.valueOf(0));
-        }
         if (isAxiomListVariable)
         {   // Return dynamic AxiomListVariable instance
             axiomListSpec = new AxiomListSpec(listName, operandMap.get(listName), param1, param2);
             return new AxiomListVariable(axiomListSpec);
         }
+        // A normal list should be ready to go
+        itemList = getItemList(listName);
+        //operandMap.addItemList(listName, itemList);
+        if (param2 == null) // Single index case is easy
+            return operandMap.newListVariableInstance(itemList, param1);
         axiomListSpec = new AxiomListSpec((AxiomList)itemList, param1, param2);
         return operandMap.newListVariableInstance(axiomListSpec);
     }
 
+    /**
+     * Returns new ItemListVariable instance. 
+     * This is wrapped in an assignment evaluator if optional expression parameter needs to be evaluated.
+     * @param itemList The list
+     * @param index List index
+     * @param expression Optional expression operand
+     * @return Operand object
+     */
+    public Operand setListVariable(String listName, Operand index, Operand expression) 
+    {
+        ItemList<?> itemList = findItemList(listName);
+        if (itemList != null)
+            return operandMap.setListVariable(itemList, index, expression);
+        return newListVariableInstance(listName, index, expression);
+    }
 }

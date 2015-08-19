@@ -16,15 +16,19 @@
 package au.com.cybersearch2.classy_logic.helper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.list.AxiomTermListVariable;
+import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.AxiomListSource;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -37,6 +41,12 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class AxiomUtils
 {
+    public static List<String> EMPTY_NAMES_LIST;
+    
+    {
+        EMPTY_NAMES_LIST = Collections.emptyList();
+    }
+    
     /**
      * Concatenate two operands containing AxiomLists
      * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
@@ -65,6 +75,14 @@ public class AxiomUtils
         int index = leftAxiomList.getLength();
         while (iterator.hasNext())
             leftAxiomList.assignItem(index++, iterator.next());
+        List<String> leftTermNames = leftAxiomList.getAxiomTermNameList();
+        if (leftTermNames == null) 
+        {   // Concatenation to an empty list
+            if (leftAxiomList.isEmpty())
+                leftAxiomList.setAxiomTermNameList(EMPTY_NAMES_LIST);
+            else
+                leftAxiomList.setAxiomTermNameList(getTermNames(leftAxiomList.getItem(0).getAxiom()));
+        }
         return (AxiomList) leftOperand.getValue();
     }
 
@@ -80,7 +98,10 @@ public class AxiomUtils
         // Give axiom same name as operand
         Axiom axiom = new Axiom(axiomKey);
         for (Term arg: argumentList)
-            axiom.addTerm(arg);
+        {   // Copy value to Parameter to make it immutable
+            Parameter param = new Parameter(arg.getName(), arg.getValue());
+            axiom.addTerm(param);
+        }
         List<String> axiomTermNameList = getTermNames(axiom);
         // Wrap axiom in AxiomList object to allow interaction with other AxiomLists
         AxiomTermList axiomTermList = new AxiomTermList(axiomKey, axiomKey);
@@ -161,7 +182,7 @@ public class AxiomUtils
     public static List<String> getTermNames(Axiom axiom)
     {
         if (axiom.getTermCount() == 0) 
-            return AxiomListSource.EMPTY_LIST;
+            return EMPTY_NAMES_LIST;
         List<String> axiomTermNameList = new ArrayList<String>(axiom.getTermCount());
         for (int i = 0; i < axiom.getTermCount(); i++)
         {
@@ -260,5 +281,33 @@ public class AxiomUtils
         }
         copyTerm.assign(value);
         return copyTerm;
+    }
+
+    /**
+     * 
+     * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String)
+     */
+    public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, int index, String suffix, int id) 
+    {
+        Variable variable = new Variable(axiomTermList.getName() + "." + suffix);
+        Axiom axiom = axiomTermList.getAxiom();
+        if (axiom.getTermCount() > 0)
+        {
+            axiomTermList.verify(index);
+            // Assign a value to set the delegate
+            variable.assign(axiom.getTermByIndex(index).getValue());
+        }
+        return new AxiomTermListVariable(axiomTermList, variable, index, suffix, id);
+    }
+
+    /**
+     * 
+     * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String)
+     */
+    public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, Operand expression, String suffix, int id) 
+    {
+        Variable itemOperand = new Variable(axiomTermList.getName() + "." + suffix);
+        // Assign a value to set the delegate must be delayed until the expression is evaluated
+        return new AxiomTermListVariable(axiomTermList, itemOperand, expression, suffix, id);
     }
 }

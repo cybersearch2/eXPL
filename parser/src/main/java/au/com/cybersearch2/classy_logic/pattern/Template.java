@@ -93,6 +93,8 @@ public class Template extends Structure
     protected boolean isChoice;
     /** Calculator solution as single AxiomList (optional) */
     protected AxiomOperand solutionTerm;
+    protected CallContext headCallContext;
+    protected CallContext tailCallContext;
     
 	/**
 	 * Construct Template object
@@ -438,5 +440,58 @@ public class Template extends Structure
     {
         return initData;
     }
-    
+
+    /**
+     * Push template terms on stack
+     */
+    public void push()
+    {
+        CallContext newCallContext = new CallContext(this);
+        if (headCallContext == null)
+        {
+            headCallContext = newCallContext;
+            tailCallContext = newCallContext;
+        }
+        else
+        {
+            tailCallContext.setNext(newCallContext);
+            tailCallContext = newCallContext;
+        }
+        Template template = getNext();
+        while (template != null)
+        {
+            template.push();
+            template = template.getNext();
+        }
+        
+    }
+ 
+    /**
+     * Pop template terms ooff stack
+     */
+    public void pop()
+    {
+        if (tailCallContext != null)
+        {
+            tailCallContext.restoreContext();
+            if (headCallContext == tailCallContext)
+            {
+                headCallContext = null;
+                tailCallContext = null;
+            }
+            else
+            {
+                CallContext newTail = headCallContext;
+                while (newTail.getNext() != tailCallContext)
+                    newTail = newTail.getNext();
+                tailCallContext = newTail;
+            }
+        }
+        Template template = getNext();
+        while (template != null)
+        {
+            template.pop();
+            template = template.getNext();
+        }
+    }
 }

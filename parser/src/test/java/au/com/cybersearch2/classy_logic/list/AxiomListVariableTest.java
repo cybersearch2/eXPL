@@ -87,7 +87,7 @@ public class AxiomListVariableTest
 		assertThat(variable.axiomIndex).isEqualTo(5);
 		assertThat(variable.getValue()).isEqualTo(13);
 		variable.backup(1);
-		assertThat(variable.isEmpty()).isFalse();
+		assertThat(variable.isEmpty()).isTrue();
 	}
 
 	@Test

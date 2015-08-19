@@ -43,6 +43,12 @@ eXPL v1.12
 40. Fix Variable not updating delegate class after evaluation
 41. Create static AssignOnlyOperator delegate for DelegateOperator
 42. Allow unnamed parameters to be used in query call
+43. Add Calculator queries in same scope. Template push() and pop() saves and restores call context.
+44. A Calculator query can now reference a query or a Calculator, with query having precedence
+45. ParserAssembler changes to reference AxiomLists in variables completed
+46. Support single dimension AxiomList variable access. See insert sort for example.
+47. Copy term names list when concatenating to an empty AxiomLIst
+48. Update AxiomUtils.marshallAxiomTerms() to copy each term value to Parameter to make it immutable
 
 
 eXPL v1.11

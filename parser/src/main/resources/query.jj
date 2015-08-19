@@ -581,13 +581,14 @@ Operand VariableDeclaration(ParserAssembler parserAssembler) :
 {
   ( varType=Type(operandMap) )? nameToken=<IDENTIFIER> ( index=IndexExpression(parserAssembler) )? ( "=" expression=Expression(parserAssembler) )?
   {
+     String listName = nameToken.image;
      if (index !=null)
-         return operandMap.setListVariable(parserAssembler.getItemList(nameToken.image), index, expression);
+         return parserAssembler.setListVariable(listName, index, expression);
      if (varType == null)
          varType = new VariableType(OperandType.NULL);
      if (expression != null) 
          varType.setProperty(VariableType.EXPRESSION, expression);
-     Operand operand = varType.getInstance(parserAssembler, nameToken.image);
+     Operand operand = varType.getInstance(parserAssembler, listName);
      return operand;
   }
 }
@@ -602,6 +603,7 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
     Operand var = null;
     Token scToken = null;
     Token assignToken = null;
+    Token equalsToken = null;
     Token regexLit = null;
     Token regexId = null;
     Operand expression = null;
@@ -612,7 +614,7 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
    ( varType=Type(operandMap) )? name=Name() ( index=IndexExpression(parserAssembler) )? 
    (     
       ( 
-        scToken=":" | scToken="?" | "=" |
+        scToken=":" | scToken="?" | equalsToken="=" |
         ( assignToken=<PLUSASSIGN>
         | assignToken=<MINUSASSIGN>
         | assignToken=<STARASSIGN>
@@ -640,7 +642,7 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
      if (expression != null)
          varType.setProperty(VariableType.EXPRESSION, expression);
      if (index !=null)
-       var = operandMap.setListVariable(parserAssembler.getItemList(name), index, expression);
+       var = parserAssembler.setListVariable(name, index, null);
      else if (regexOp != null)
        var = new RegExOperand(name, regexOp, 0, group);
      else if (scToken != null) 
@@ -653,6 +655,8 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
         operandMap.addOperand(var);
      if (assignToken != null) 
         var = new Evaluator(name, var, assignToken.image, assignExpression);
+     if ((index !=null) && (equalsToken != null)) 
+        var = new Evaluator(expression.getName(), var, "=", expression);
      parserAssembler.addTemplate(templateName, var);
   }
 }
@@ -663,9 +667,10 @@ void CalculatorExpression(int loop_number, String loopName, String templateName,
   Token keywordToken;
   Operand expression = null;
   Operand innerLoop = null;
+  String axiomName;
 }
 {
-  ( keywordToken=<AXIOM> | keywordToken=<SOLUTION> ) expression = AxiomVariable(parserAssembler) 
+  ( keywordToken=<AXIOM> | keywordToken=<SOLUTION> ) axiomName=Axiom(parserAssembler) expression = AxiomVariable(axiomName, parserAssembler) 
   {
     boolean isSolution = keywordToken.kind == QueryParserConstants.SOLUTION;
     parserAssembler.getOperandMap().addOperand(expression);
@@ -706,21 +711,19 @@ Operand InnerCalculator(int loop_number, String templateName, ParserAssembler pa
   }
 }
 
-Operand AxiomVariable(ParserAssembler parserAssembler) :
+Operand AxiomVariable(String axiomName, ParserAssembler parserAssembler) :
 {
-    Token axiomToken;
     Operand expression = null;
     Operand axiomList = null;
 }
 {
-  axiomToken=<IDENTIFIER> "="
+  "="
   ( 
      expression=Expression(parserAssembler) 
   | 
-     axiomList=AxiomList(axiomToken.image, parserAssembler) 
+     axiomList=AxiomList(axiomName, parserAssembler) 
   )
   {
-     String axiomName = axiomToken.image;
      VariableType varType = new VariableType(OperandType.AXIOM);
      varType.setProperty(VariableType.EXPRESSION, axiomList == null ? expression : axiomList);
      Operand operand = varType.getInstance(parserAssembler, axiomName);
@@ -793,14 +796,22 @@ void Group(Group group, String template, String name, ParserAssembler parserAsse
 void AxiomDeclaration(ParserAssembler parserAssembler) :
 {
     String axiomName;
+    Operand operand = null;
 }
 {
-  <AXIOM> axiomName=Axiom(parserAssembler) AxiomSpecification(axiomName, parserAssembler) 
+  <AXIOM> axiomName=Axiom(parserAssembler) 
+          ( AxiomSpecification(axiomName, parserAssembler) |
+            operand=AxiomVariable(axiomName, parserAssembler) )
+    {
+        if (operand != null)
+            parserAssembler.getOperandMap().addOperand(operand);
+    }
 } 
 
 
 void AxiomSpecification(String axiomName, ParserAssembler parserAssembler) :
 {
+    parserAssembler.createAxiom(axiomName);
 }
 {
   [ "(" TermName(axiomName, parserAssembler) ("," TermName(axiomName, parserAssembler) )*  ")" ] 
@@ -835,7 +846,6 @@ String Axiom(ParserAssembler parserAssembler) :
 {
   axiomToken=<IDENTIFIER>
   { 
-    parserAssembler.createAxiom(axiomToken.image);
     return axiomToken.image; 
   }
 }
@@ -1460,16 +1470,35 @@ Operand ParameterList(ParserAssembler parserAssembler) :
   Token op;
 }
 {
-  params[0] = Argument(parserAssembler)
+  params[0] = Parameter(parserAssembler)
   ( 
     op="," 
-    params[1]=Argument(parserAssembler) 
+    params[1]=Parameter(parserAssembler) 
     {
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
   )*
   {
     return params[0];
+  }
+}
+
+Operand Parameter(ParserAssembler parserAssembler) :
+{
+    Token nameToken = null;
+    VariableType varType = null;
+    Operand expression;
+    OperandMap operandMap = parserAssembler.getOperandMap();
+}
+{
+  ( LOOKAHEAD(2) ( varType=Type(operandMap) )? nameToken=<IDENTIFIER> "=" )? expression=Expression(parserAssembler) 
+  {
+     if (varType == null)
+         varType = new VariableType(OperandType.NULL);
+     String name = (nameToken == null) ? expression.getName() : nameToken.image;
+     varType.setProperty(VariableType.EXPRESSION, expression);
+     Operand operand = varType.getInstance(parserAssembler, name);
+     return operand;
   }
 }
 

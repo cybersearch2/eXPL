@@ -170,6 +170,11 @@ public class AxiomListSpec
         // Check for non-empty Integer operand, which is used for a fixed index
         if (!axiomExpression.isEmpty() && (axiomExpression instanceof IntegerOperand && Term.ANONYMOUS.equals(axiomExpression.getName())))
             axiomIndex = ((Long)(axiomExpression.getValue())).intValue();
+        if (termExpression == null)
+        {
+            suffix = "";
+            return; // Single dimension
+        }
         if (!termExpression.isEmpty() && (termExpression instanceof IntegerOperand) && Term.ANONYMOUS.equals(termExpression.getName()))
         {
             termIndex = ((Long)(termExpression.getValue())).intValue();
@@ -194,7 +199,7 @@ public class AxiomListSpec
         if ((axiomListVariable == null) || axiomListVariable.isEmpty())
             return false;
         axiomList = (AxiomList)axiomListVariable.getValue();
-        if (suffix.equals(termExpression.getName()))
+        if ((termExpression != null) && suffix.equals(termExpression.getName()))
             setTermIndex();
         return true;
     }
@@ -207,7 +212,11 @@ public class AxiomListSpec
     {
         List<String> axiomTermNameList = axiomList.getAxiomTermNameList();
         if (axiomTermNameList != null)
-            termIndex = getIndexForName(listName, suffix, axiomTermNameList);
+        {
+            termIndex = getIndexForName(suffix, axiomTermNameList);
+            if (termIndex == -1)
+                 throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + suffix + "\"");
+        }
         else // Note the following has no effect when called from update()
             suffix = termExpression.toString();
     }
@@ -215,18 +224,26 @@ public class AxiomListSpec
     /**
      * Returns index of item identified by name
      * @param listName Name of list - used only for error reporting
-     * @param item Item name
+     * @param itemName Item name
      * @param axiomTermNameList Term names of axiom source
      * @return Index
      */
-    protected int getIndexForName(String listName, String item, List<String> axiomTermNameList) 
+    protected int getIndexForName(String itemName, List<String> axiomTermNameList) 
+    {
+        int index = getIndexByName(itemName, axiomTermNameList);
+        if ((index == -1) && (termExpression != null) && !termExpression.isEmpty())
+            index = getIndexByName(termExpression.getValue().toString(), axiomTermNameList);
+        return index;
+    }
+
+    protected int getIndexByName(String itemName, List<String> axiomTermNameList)
     {
         for (int i = 0; i < axiomTermNameList.size(); i++)
         {
-            if (item.equals(axiomTermNameList.get(i)))
+            if (itemName.equals(axiomTermNameList.get(i)))
                 return i;
         }
-        throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + item + "\"");
+        return -1;
     }
 
 }
