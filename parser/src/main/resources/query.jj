@@ -85,6 +85,7 @@ import au.com.cybersearch2.classy_logic.helper.Null;
  */
 public class QueryParser 
 {
+  static int INNER_TEMPLATE = -1;
   
   /** 
    * Main entry point reads from System.in. Generates console output only. Use for validation. 
@@ -170,7 +171,7 @@ TOKEN :
 | < QUERY: "query" >
 | < CALC: "calc" >
 | < LIST: "list" >
-| < SOLUTION: "solution" >
+| < Fact: "fact" >
 | < LENGTH: "length" >
 | < TERM: "term" >
 | < RESOURCE: "resource" >
@@ -304,7 +305,7 @@ void ScopeDeclaration(QueryProgram queryProgram) :
 {
   <SCOPE> scope=Scope(queryProgram) 
   "{" 
-     ( Statement(queryProgram, scope) | QueryChain(scope) )+
+     ( Statement(queryProgram, scope) | QueryChain(scope) )*
   "}" 
   {
   }
@@ -498,55 +499,56 @@ VariableType Type(OperandMap operandMap) :
 
 void TemplateDeclaration(ParserAssembler parserAssembler) :
 {
-    String templateName;
+    Template template;
 }
-{  
-    <TEMPLATE> templateName=Template(parserAssembler, false) "(" 
+{
+    <TEMPLATE> template=Template(parserAssembler, false) "(" 
       ( 
-        TemplateExpression(templateName, parserAssembler)
+        TemplateExpression(template, parserAssembler)
       )
       (
         "," 
         (
-          TemplateExpression(templateName, parserAssembler)
+          TemplateExpression(template, parserAssembler)
         )
       )* ")" 
     {
     }
 }
 
-String Template(ParserAssembler parserAssembler, boolean isCalculator) :
+Template Template(ParserAssembler parserAssembler, boolean isCalculator) :
 {
     Token templateToken;
 }
 {
   templateToken=<IDENTIFIER>
   { 
-    parserAssembler.createTemplate(templateToken.image, isCalculator);
-    return templateToken.image; 
+     return parserAssembler.createTemplate(templateToken.image, isCalculator); 
   }
 }
 
 void CalculatorTemplate(ParserAssembler parserAssembler) :
 {
-    String templateName;
+    Template template;
     Map<String, Object> properties = new HashMap<String, Object>();
     int loopNumber = 0;
 }
 {  
-    <CALC> templateName=Template(parserAssembler, true) "(" 
+    <CALC> template=Template(parserAssembler, true) "(" 
       ( 
-        CalculatorExpression(loopNumber, templateName, templateName, parserAssembler)
+        ( CalculatorExpression(loopNumber, template, template.getName(), parserAssembler) |
+          CalculatorQuery(template, parserAssembler) )
       )
       (
         "," 
         (
-          CalculatorExpression(loopNumber, templateName, templateName, parserAssembler)
+          ( CalculatorExpression(loopNumber, template, template.getName(), parserAssembler) |
+            CalculatorQuery(template, parserAssembler) )
         )
       )* ")" [ "(" InitialiserList(properties) ")" ]
     {
       if (properties.size() > 0)
-          parserAssembler.addTemplate(templateName, properties);
+          template.addProperties(properties);
     }
 }
 
@@ -594,7 +596,7 @@ Operand VariableDeclaration(ParserAssembler parserAssembler) :
 }
 
 
-void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
+void TemplateExpression(Template template, ParserAssembler parserAssembler) :
 {
     String name;
     VariableType varType = null;
@@ -626,7 +628,7 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
         ) 
       expression=Expression(parserAssembler)
       |
-      <REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(templateName, name, parserAssembler) )? ")"
+      <REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(template.getName(), name, parserAssembler) )? ")"
     )?
   {
      if (varType == null)
@@ -649,47 +651,47 @@ void TemplateExpression(String templateName, ParserAssembler parserAssembler) :
        var = new Evaluator(name, expression, (scToken.image == "?" ? "&&" : "||"));
      else if (!operandMap.hasOperand(name))
        var = varType.getInstance(parserAssembler, name);
-     else
+     else if (!template.isInnerTemplate())
        var = operandMap.addOperand(name, expression);
-     if ((index ==null) && (!operandMap.hasOperand(name)))
+     else
+       var = new Variable(name, expression);
+     if ((index ==null) && (!operandMap.hasOperand(name)) && !template.isInnerTemplate())
         operandMap.addOperand(var);
      if (assignToken != null) 
         var = new Evaluator(name, var, assignToken.image, assignExpression);
      if ((index !=null) && (equalsToken != null)) 
         var = new Evaluator(expression.getName(), var, "=", expression);
-     parserAssembler.addTemplate(templateName, var);
+     template.addTerm(var);
   }
 }
 
-void CalculatorExpression(int loop_number, String loopName, String templateName, ParserAssembler parserAssembler) :
+void CalculatorExpression(int loop_number, Template template, String templateName, ParserAssembler parserAssembler) :
 {
   Token scToken = null;
-  Token keywordToken;
   Operand expression = null;
   Operand innerLoop = null;
   String axiomName;
 }
 {
-  ( keywordToken=<AXIOM> | keywordToken=<SOLUTION> ) axiomName=Axiom(parserAssembler) expression = AxiomVariable(axiomName, parserAssembler) 
+  <AXIOM> axiomName=Axiom(parserAssembler) expression = AxiomVariable(axiomName, parserAssembler) 
   {
-    boolean isSolution = keywordToken.kind == QueryParserConstants.SOLUTION;
     parserAssembler.getOperandMap().addOperand(expression);
-    parserAssembler.addTemplate(loopName, expression, isSolution);
+    template.addTerm(expression);
   }
   |
-  TemplateExpression(loopName, parserAssembler)
+  TemplateExpression(template, parserAssembler)
   |
   ( scToken=":" | scToken="?" )? expression=Expression(parserAssembler) 
     ( innerLoop=InnerCalculator(loop_number + 1, templateName, parserAssembler, scToken != null) )?  
   {
     if (scToken != null)
       expression = new Evaluator(expression, (scToken.image == "?" ? "&&" : "||"), innerLoop);
-    parserAssembler.addTemplate(loopName, expression);
+    template.addTerm(expression);
   }
   |
   innerLoop=InnerCalculator(loop_number + 1, templateName, parserAssembler, false)
   {
-    parserAssembler.addTemplate(loopName, innerLoop);
+    template.addTerm(innerLoop);
   }
 }
 
@@ -697,19 +699,72 @@ Operand InnerCalculator(int loop_number, String templateName, ParserAssembler pa
 {
   Operand calcExpression;
   String loopName = templateName + loop_number;
-  parserAssembler.chainTemplate(templateName, loopName);
+  Template template = parserAssembler.chainTemplate(templateName, loopName);
 }
 {
   "{" 
-    CalculatorExpression(loop_number, loopName, templateName, parserAssembler)
+    CalculatorExpression(loop_number, template, templateName, parserAssembler)
     ("," 
-        CalculatorExpression(loop_number, loopName, templateName, parserAssembler)
+        CalculatorExpression(loop_number, template, templateName, parserAssembler)
     )* 
   "}"
   {
-    return new LoopEvaluator(parserAssembler.getTemplate(loopName), runOnce);
+    return new LoopEvaluator(template, runOnce);
   }
 }
+
+void CalculatorQuery(Template template, ParserAssembler parserAssembler) :
+{
+  String queryName;
+  Operand params = null;
+  Template innerTemplate = null;
+}
+{
+  ( innerTemplate=InnerTemplateDeclaration(template.getName(), parserAssembler) )? "<<" queryName=Name()  
+   "(" ( params = ArgumentList(parserAssembler) )? ")"
+  {
+    Operand queryOperand = parserAssembler.getQueryOperand(queryName, params, innerTemplate);
+    template.addTerm(queryOperand);
+    if (innerTemplate != null)
+        parserAssembler.addInnerTemplate(innerTemplate);
+  }
+}
+
+Template InnerTemplateDeclaration(String ownerName, ParserAssembler parserAssembler) :
+{
+    Template template;
+}
+{
+    <TEMPLATE> template=InnerTemplate(ownerName, parserAssembler) "(" 
+      ( 
+        TemplateExpression(template, parserAssembler)
+      )
+      (
+        "," 
+        (
+          TemplateExpression(template, parserAssembler)
+        )
+      )* ")" 
+    {
+        return template;
+    }
+}
+
+Template InnerTemplate(String ownerName, ParserAssembler parserAssembler) :
+{
+    Token templateToken;
+}
+{
+  templateToken=<IDENTIFIER>
+  { 
+    String templateName = ownerName + "." + templateToken.image;
+    Template innerTemplate = parserAssembler.createTemplate(templateName, false);
+    innerTemplate.setInnerTemplate(true);
+    innerTemplate.setKey(templateToken.image);
+    return innerTemplate; 
+  }
+}
+
 
 Operand AxiomVariable(String axiomName, ParserAssembler parserAssembler) :
 {

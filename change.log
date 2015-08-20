@@ -6,9 +6,9 @@ eXPL v1.12
  4. Fix Choice default value design which was selecting an invalid item 
  5. Add flag to ScopeContext constructor to limit preservation to only the current (function) scope
  6. Add duplicateOperandCheck() method to OperandMap
- 7. Add 'solution' alias for 'axiom' to indicate variable to return Calculator result
- 8. Enhance Template toAxiom() method to pass a 'solution' Term as a Calculator result
- 9. Minor fixes to QueryEvaluator
+ 7. Introduce inner Template and '<<' operator to for Calculator query. 
+ 8. Add 'isInnerTemplate' flag to Template to provid a way to signal added terms should not be added to the OperandMap
+ 9. QueryEvaluator fixes applied and now returns Void type as results are now placed in prepared AxiomTermList
 10, Add AxiomOperand to support AxiomList assignment and concatenation
 10. Enhance VariableType to return AxiomOperand instance for AXIOM OperandType
 11. Remove unnecessary Template and Axiom super class overrides
@@ -49,6 +49,9 @@ eXPL v1.12
 46. Support single dimension AxiomList variable access. See insert sort for example.
 47. Copy term names list when concatenating to an empty AxiomLIst
 48. Update AxiomUtils.marshallAxiomTerms() to copy each term value to Parameter to make it immutable
+49. ParserAssembler getQueryOperand() method split off from getCallOperand() as function and query invocations are now different
+50. Allow an AxiomTermList object to be assigned to an AxiomListVariable object
+
 
 
 eXPL v1.11

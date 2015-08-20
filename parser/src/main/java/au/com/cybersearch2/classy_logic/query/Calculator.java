@@ -166,13 +166,8 @@ public class Calculator implements SolutionFinder
 				evaluationStatus = template.evaluate();
 				if (evaluationStatus == EvaluationStatus.COMPLETE)
 				{
-				    if (template.hasSolution())
-				        solution.put(template.getName(), template.getSolution());
-				    else
-				    {
-    					axiom = template.toAxiom();
-    					solution.put(template.getName(), axiom);
-				    }
+					axiom = template.toAxiom();
+					solution.put(template.getName(), axiom);
 					return true;
 				}
 				else

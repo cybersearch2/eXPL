@@ -22,12 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
-import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -91,9 +88,11 @@ public class Template extends Structure
     protected boolean isCalculator;
     /** Flag true if template used to make selection. Used by Calculator. */
     protected boolean isChoice;
-    /** Calculator solution as single AxiomList (optional) */
-    protected AxiomOperand solutionTerm;
+    /** Flag true if inner template */
+    protected boolean isInnerTemplate;
+    /** Head of call stack */
     protected CallContext headCallContext;
+    /** Tail of call stack */
     protected CallContext tailCallContext;
     
 	/**
@@ -223,7 +222,17 @@ public class Template extends Structure
 		this.isChoice = isChoice;
 	}
 
-	/**
+	public boolean isInnerTemplate()
+    {
+        return isInnerTemplate;
+    }
+
+    public void setInnerTemplate(boolean isInnerTemplate)
+    {
+        this.isInnerTemplate = isInnerTemplate;
+    }
+
+    /**
 	 * Returns identity of this structure
 	 * @return int
 	 */
@@ -232,15 +241,6 @@ public class Template extends Structure
 		return id;
 	}
 
-	/**
-	 * Returns flag set true if this object has a solution Term
-	 * @return boolean
-	 */
-	public boolean hasSolution()
-	{
-	    return solutionTerm != null;
-	}
-	
 	/**
 	 * Evaluate Terms of this Template
 	 * @return EvaluationStatus
@@ -301,31 +301,12 @@ public class Template extends Structure
     /**
      * Exposes super addTerm()
      * @param term Term object
-     * @param isSolution 
      */
-    public void addTerm(Term term, boolean isSolution)
+    public void addTerm(Term term)
     {
         super.addTerm(term);
-        if (isSolution)
-            solutionTerm = (AxiomOperand)term;
     }
 
-    /**
-     * Returns solution value 
-     * @return AxiomList object
-     * @throws ExpressionException if value not available
-     */
-    public AxiomList getSolution()
-    {
-        if ((solutionTerm != null) && !solutionTerm.isEmpty())
-        {
-            if (solutionTerm.getValueClass() != AxiomList.class)
-                throw new ExpressionException("Template \"" + name + "\" solution does not contain axioms");
-            return solutionTerm.getValue();
-        }
-        throw new ExpressionException("Template \"" + name + "\" cannot provide solution");
-    }
-    
 	/**
 	 * Returns an axiom containing the values of this template and 
 	 * having same key and name as this template's name.

@@ -15,7 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.compile;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +23,17 @@ import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.ScopeContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
+import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryLauncher;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * QueryEvaluator
@@ -41,24 +41,26 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 1 Aug 2015
  */
-public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<AxiomList>
+public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void>
 {
     /** Query parameters */
     protected QueryParams queryParams;
     /** Flag to indicate if call to Calculator in same scope */
     protected boolean isCallInScope;
+    /** Optional inner Template to receive query results */
+    protected Template innerTemplate;
 
     /**
      * Construct a QueryEvaluator object for a query specified by query parameters
      * @param queryParams  Query parameters
+     * @param isCallInScope Flag set true if call to query in same scope
+     * @param innerTemplate Optional inner Template to receive query results
      */
-    public QueryEvaluator(QueryParams queryParams, boolean isCallInScope)
+    public QueryEvaluator(QueryParams queryParams, boolean isCallInScope, Template innerTemplate)
     {
         this.queryParams = queryParams;
         this.isCallInScope = isCallInScope;
-        // TODO add call in same scope
-        //if (isCallInScope)
-        //    throw new ExpressionException("Call in own scope not supported");
+        this.innerTemplate = innerTemplate;
     }
     
     /**
@@ -76,7 +78,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
      * @see au.com.cybersearch2.classy_logic.interfaces.CallEvaluator#evaluate(java.util.List)
      */
     @Override
-    public AxiomList evaluate(List<Term> argumentList)
+    public Void evaluate(List<Term> argumentList)
     {
         QuerySpec querySpec = queryParams.getQuerySpec();
         final String templateName = getCalculatorKeyName(querySpec).getTemplateName();
@@ -109,22 +111,31 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             queryParams.putProperties(templateName, properties);
         }
         // Set SolutionHander to collect results
-        final List<Axiom> resultList = new ArrayList<Axiom>();
-        final AxiomList[] axiomListHolder = new AxiomList[1];
         SolutionHandler solutionHandler = new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution)
             {
                 Axiom axiom = solution.getAxiom(templateName);
-                if (axiom != null)
-                    resultList.add(axiom);
-                else
+                if ((axiom != null) && (innerTemplate != null))
                 {
-                    AxiomList axiomList = solution.getAxiomList(templateName);
-                    if (axiomList != null)
+                    // No backup, so reset before unification
+                    innerTemplate.reset();
+                    if (axiom.unifyTemplate(innerTemplate, solution))
                     {
-                        axiomListHolder[0] = AxiomUtils.duplicateAxiomList(axiomList);
-                        return false;
+                        if (innerTemplate.evaluate() == EvaluationStatus.COMPLETE);
+                        {
+                            AxiomTermList axiomTermList = (AxiomTermList)(innerTemplate.getTermByName(innerTemplate.getName()).getValue());
+                            Axiom innerAxiom = new Axiom(innerTemplate.getKey());
+                            for (int i = 0; i < (innerTemplate.getTermCount() -1); i++)
+                            {
+                                String termName = innerTemplate.getTermByIndex(i).getName();
+                                Term term = axiom.getTermByName(termName);
+                                if (term == null)
+                                    term = new Parameter(termName);
+                                innerAxiom.addTerm(term);
+                            }
+                            axiomTermList.setAxiom(innerAxiom);
+                        }
                     }
                 }
                 return true;
@@ -137,18 +148,6 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         try
         {
             launch(queryParams);
-            if (axiomListHolder[0] == null)
-            {
-                // Marshall Axioms in result list into AxiomList object
-                AxiomList axiomList = new AxiomList(templateName, templateName);
-                List<String> axiomTermNameList = 
-                    parserAssembler.setAxiomTermNameList(templateName, axiomList);
-                if (axiomTermNameList != null)
-                    axiomList.setAxiomTermNameList(axiomTermNameList);
-                AxiomUtils.marshallAxioms(axiomList, resultList);
-                axiomListHolder[0] = axiomList;
-            }
-            
         }
         finally
         {   // Clear call properties so query params can be recycled
@@ -159,7 +158,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             else
                 template.pop();
         }
-        return axiomListHolder[0];
+        return null;
     }
 
 }

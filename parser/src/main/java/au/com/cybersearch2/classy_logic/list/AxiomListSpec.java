@@ -19,6 +19,7 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
+import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -47,6 +48,8 @@ public class AxiomListSpec
     protected String suffix;
     /** Compiler operand to supply AxiomList object on evaluation */
     protected Operand axiomListVariable;
+    /** Flag set true if assigned to an AxiomTermList */
+    protected boolean isTermList;
  
     /**
      * Construct AxiomListSpec object for case backing AxiomList is available
@@ -198,7 +201,40 @@ public class AxiomListSpec
     {
         if ((axiomListVariable == null) || axiomListVariable.isEmpty())
             return false;
-        axiomList = (AxiomList)axiomListVariable.getValue();
+        Object itemListVariable = axiomListVariable.getValue();
+        if (itemListVariable instanceof AxiomTermList)
+        {
+            AxiomTermList axiomTermList = (AxiomTermList)itemListVariable;
+            String axiomKey = axiomTermList.getKey();
+            String axiomName = axiomTermList.getName();
+            if ((axiomList == null) || 
+                 !axiomList.getName().equals(axiomTermList.getName()) ||
+                 !axiomList.getKey().equals(axiomTermList.getKey()))
+            {
+                axiomList = new AxiomList(axiomName, axiomKey);
+                axiomList.setAxiomTermNameList(AxiomUtils.getTermNames(axiomTermList.getAxiom()));
+            }
+            axiomList.assignItem(0, axiomTermList);
+            if (isTermList)
+                return true; // Ready to reference term in list
+            {   // Adjust index values for AxiomTermList
+                isTermList = true;
+                if (axiomIndex >= 0)
+                    termIndex = axiomIndex;
+                else
+                {
+                    termIndex = -1;
+                    termExpression = axiomExpression;
+                    suffix = termExpression.getName();
+                }
+                axiomIndex = 0;
+                axiomExpression = null;
+            }
+        }
+        else if (!isTermList & (itemListVariable instanceof AxiomList))
+            axiomList = (AxiomList)itemListVariable;
+        else
+            throw new ExpressionException("Value has incompatible type. Expecting " + (isTermList ? "AxiomTermList" : "AxiomList"));
         if ((termExpression != null) && suffix.equals(termExpression.getName()))
             setTermIndex();
         return true;
@@ -216,6 +252,7 @@ public class AxiomListSpec
             termIndex = getIndexForName(suffix, axiomTermNameList);
             if (termIndex == -1)
                  throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + suffix + "\"");
+            termExpression = null;
         }
         else // Note the following has no effect when called from update()
             suffix = termExpression.toString();

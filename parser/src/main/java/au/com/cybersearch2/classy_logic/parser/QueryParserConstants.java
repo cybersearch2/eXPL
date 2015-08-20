@@ -37,7 +37,7 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int LIST = 18;
   /** RegularExpression Id. */
-  int SOLUTION = 19;
+  int Fact = 19;
   /** RegularExpression Id. */
   int LENGTH = 20;
   /** RegularExpression Id. */
@@ -181,7 +181,7 @@ public interface QueryParserConstants {
     "\"query\"",
     "\"calc\"",
     "\"list\"",
-    "\"solution\"",
+    "\"fact\"",
     "\"length\"",
     "\"term\"",
     "\"resource\"",
@@ -243,6 +243,7 @@ public interface QueryParserConstants {
     "\"%=\"",
     "\">>\"",
     "\"?\"",
+    "\"<<\"",
     "\"~\"",
   };
 

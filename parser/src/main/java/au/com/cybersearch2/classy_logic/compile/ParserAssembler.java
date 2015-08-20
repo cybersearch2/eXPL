@@ -20,6 +20,7 @@ import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -207,26 +208,15 @@ public class ParserAssembler implements LocaleListener
 		return template;
 	}
 
-	/**
-	 * Add a term to a template
-	 * @param templateName
-	 * @param term Operand object
-	 */
-	public void addTemplate(String templateName, Operand term)
-	{
-	    addTemplate(templateName, term, false);
-	}
-
     /**
      * Add a term to a template
      * @param templateName
      * @param term Operand object
-     * @param isSolution Flag to indicate return this term as Calculator result
      */
-    public void addTemplate(String templateName, Operand term, boolean isSolution)
+    public void addTemplate(String templateName, Operand term)
     {
         Template template = templateMap.get(templateName);
-        template.addTerm((Term)term, isSolution);
+        template.addTerm((Term)term);
     }
 
 	/**
@@ -251,6 +241,24 @@ public class ParserAssembler implements LocaleListener
 	    return templateMap.get(name);
     }
 
+	/**
+	 * Create Variable to contain inner Tempate values and add to OperandMap
+	 * @param innerTemplate The inner Template
+	 */
+	public void addInnerTemplate(Template innerTemplate)
+	{
+	    // Create AxiomTermList to contain query result. 
+	    AxiomTermList axiomTermList = new AxiomTermList(innerTemplate.getKey(), innerTemplate.getKey());
+	    // Create Variable to be axiomTermList container. Give it the same name as the inner Template 
+	    // so it is qualified by the name of the enclosing Template
+	    Variable listVariable = new Variable(innerTemplate.getName());
+	    listVariable.assign(axiomTermList);
+	    // Add variable to OperandMap so it can be referenced from script
+	    operandMap.addOperand(listVariable);
+	    // Add variable to inner template so it can be referenced by QueryEvaluator
+	    innerTemplate.addTerm(listVariable);
+	}
+	
 	/**
 	 * Add a new axiom to this ParserAssembler
 	 * @param axiomName
@@ -618,8 +626,9 @@ public class ParserAssembler implements LocaleListener
 	 * Create new template and add to head template chain
 	 * @param templateName Name of head template
 	 * @param chainName Name of template to add to chain
+	 * @returns Template object
 	 */
-	public void chainTemplate(String templateName, String chainName) 
+	public Template chainTemplate(String templateName, String chainName) 
 	{
 		Template template = getTemplate(templateName);
 		while (template.getNext() != null)
@@ -627,29 +636,53 @@ public class ParserAssembler implements LocaleListener
 		Template chainTemplate = new Template(chainName);
 		template.setNext(chainTemplate);
 		templateMap.put(chainName, chainTemplate);
+		return chainTemplate;
 	}
 
 	/**
-	 * Returns operand which invokes a function call in script. The function can be
-	 * provided in an external library or a script query with optional parameters.
-	 * The function name must consist of 2 parts. The first is the name of a library or scope.
+	 * Returns operand which invokes a function call in script. The function must be
+	 * provided in an external library.
+	 * The function name must consist of 2 parts. The first is the name of a library.
 	 * If the first part is a library name, then the second part is the name of a function in that library.
-	 * If the first part is a scope name, then the second part is the name of a query in that library.
-	 * The type of object returned from the call is an AxiomList which must be declared as a parameter
-	 * beforehand.<br/>
-	 * <code axiom my_result(function_called, wanted_value): parameter;</code> 
+	 * The type of object returned from the call depends on the library.
 	 * @param name Function name
 	 * @param argumentExpression Operand with one or more arguments contained in it or null for no arguments
-	 * @return Operand object
+	 * @return CallOperand object
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
     public Operand getCallOperand(String name, Operand argumentExpression)
 	{
-	    Scope functionScope = null;
         String library = null;
         String[] parts = name.split("\\.");
-        if (parts.length > 2)
+        if (parts.length != 2)
             throw new ExpressionException("Call name \"" + name + "\" is invalid");
+        final String function = parts[1];
+        library = parts[0];
+        String callName = library + "." + function;
+	    if (externalFunctionProvider == null)
+	        externalFunctionProvider = new ExternalFunctionProvider();
+	    FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
+	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(function);
+	    if (callEvaluator == null)
+	        throw new ExpressionException("Function \"" + function + "\" not supported");
+        return new CallOperand(callName, callEvaluator, argumentExpression);
+	}
+
+	/**
+	 * Returns operand which invokes a query call.
+	 * @param queryName Query name - can be qualified by the name of a scope
+	 * @param params Optional query parameters
+	 * @param innerTemplate Optional template to recieve query results
+	 * @return CallOperand object containing a QueryEvaluator object
+	 * @see QueryEvaluator
+	 */
+    public Operand getQueryOperand(String queryName, Operand params, Template innerTemplate)
+    {
+        Scope functionScope = null;
+        String library = null;
+        String[] parts = queryName.split("\\.");
+        if (parts.length > 2)
+            throw new ExpressionException("Query name \"" + queryName + "\" is invalid");
         final String function = parts[parts.length - 1];
         if (parts.length == 1)
         {
@@ -663,34 +696,23 @@ public class ParserAssembler implements LocaleListener
             functionScope = scope.findScope(library);
         }
         String callName = library + "." + function;
-        if (functionScope != null)
+        if (functionScope == null)
+            throw new ExpressionException("Scope \"" + library + "\" not found");
+        QuerySpec querySpec = functionScope.getQuerySpec(function);
+        if (querySpec == null)
         {
-            QuerySpec querySpec = functionScope.getQuerySpec(function);
-            if (querySpec == null)
-            {
-                if ((functionScope == scope) && (getTemplate(function) == null))
-                        throw new ExpressionException("Query \"" + function + "\" not found in scope \"" + library + "\"");
-                querySpec = new QuerySpec(callName);
-                querySpec.addKeyName(new KeyName("", function));
-                querySpec.setQueryType(QueryType.calculator);
-            }
-            QueryParams queryParams = new QueryParams(functionScope, querySpec);
-            return new CallOperand<AxiomList>(callName, 
-                                               new QueryEvaluator(queryParams,functionScope == scope), 
-                                               argumentExpression);
+            if ((functionScope == scope) && (getTemplate(function) == null))
+                    throw new ExpressionException("Query \"" + function + "\" not found in scope \"" + library + "\"");
+            querySpec = new QuerySpec(callName);
+            querySpec.addKeyName(new KeyName("", function));
+            querySpec.setQueryType(QueryType.calculator);
         }
-        else
-        {
-    	    if (externalFunctionProvider == null)
-    	        externalFunctionProvider = new ExternalFunctionProvider();
-    	    FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
-    	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(function);
-    	    if (callEvaluator == null)
-    	        throw new ExpressionException("Function \"" + function + "\" not supported");
-            return new CallOperand(callName, callEvaluator, argumentExpression);
-        }
-	}
-	
+        QueryParams queryParams = new QueryParams(functionScope, querySpec);
+        QueryEvaluator queryEvaluator = 
+                new QueryEvaluator(queryParams, functionScope == scope, innerTemplate);
+        return new CallOperand<Void>(callName, queryEvaluator, params);
+    }
+
 	/**
 	 * Returns axiom provider specified by resource name
 	 * @param resourceName
@@ -784,4 +806,5 @@ public class ParserAssembler implements LocaleListener
             return operandMap.setListVariable(itemList, index, expression);
         return newListVariableInstance(listName, index, expression);
     }
+
 }

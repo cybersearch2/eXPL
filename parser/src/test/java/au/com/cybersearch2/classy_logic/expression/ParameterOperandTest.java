@@ -35,12 +35,12 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class ParameterOperandTest
 {
     static final String NO_ARG_CALC =
-        "calc test (solution x = {} );\n" +
+        "calc test (axiom x = {} );\n" +
         "query no_arg_query (test);";
 
     static final String ALL_TYPES_ARG_CALC =
             "calc test (\n" +
-            "solution all_types = {\n" +
+            "axiom all_types = {\n" +
             "boolean bool = true,\n" +       
             "integer int = 123,\n" +       
             "double real = 1.456,\n" +       
@@ -58,7 +58,7 @@ public class ParameterOperandTest
             "currency(\"AU\") amount = 19.76;\n" +       
             "string text = \"To be, or not to be\";\n" +       
             "calc test (\n" +
-            "solution all_types = {\n" +
+            "axiom all_types = {\n" +
             "a = bool,\n" +       
             "b = int,\n" +       
             "c = real,\n" +       
@@ -78,7 +78,7 @@ public class ParameterOperandTest
             public boolean onSolution(Solution solution)
             {
                 //System.out.println(solution.getAxiomList("test").toString());
-                validateSolution(solution.getAxiomList("test"), "x", null);
+                validateSolution((AxiomList)solution.getAxiom("test").getTermByIndex(0).getValue(), "x", null);
                 return false;
             }});
     }
@@ -93,7 +93,7 @@ public class ParameterOperandTest
             public boolean onSolution(Solution solution)
             {
                 //System.out.println(solution.getAxiom("test").toString());
-                validateSolution(solution.getAxiomList("test"), "all_types", "bool, int, real, dec, amount, text", 
+                validateSolution((AxiomList)solution.getAxiom("test").getTermByIndex(0).getValue(), "all_types", "bool, int, real, dec, amount, text", 
                         "all_types(bool = true, int = 123, real = 1.456, dec = 5.0, amount = 19.76, text = To be, or not to be)");
                 return false;
             }});
@@ -109,7 +109,7 @@ public class ParameterOperandTest
             public boolean onSolution(Solution solution)
             {
                 //System.out.println(solution.getAxiom("test").toString());
-                validateSolution(solution.getAxiomList("test"), "all_types", "a, b, c, d, e, f", 
+                validateSolution((AxiomList)solution.getAxiom("test").getTermByIndex(0).getValue(), "all_types", "a, b, c, d, e, f", 
                         "all_types(a = true, b = 123, c = 1.456, d = 5.0, e = 19.76, f = To be, or not to be)");
                 return false;
             }});
@@ -123,7 +123,8 @@ public class ParameterOperandTest
         //    System.out.println(iterator.next().toString());
         for (String param: params)
         {
-            assertThat(iterator.next().getAxiom().toString()).isEqualTo(param);
+            Object item = iterator.next();
+            assertThat(item.toString()).isEqualTo(param);
         }
         assertThat(iterator.hasNext()).isFalse();
         //System.out.println(result.getTermByName(Template.TERMNAMES).toString());

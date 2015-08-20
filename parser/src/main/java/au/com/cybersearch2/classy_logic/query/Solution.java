@@ -16,17 +16,13 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.list.AxiomList;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -37,17 +33,8 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  */
 public class Solution 
 {
-    static protected Map<String, AxiomList> EMPTY_LIST_MAP;
-    
-    static 
-    {
-        EMPTY_LIST_MAP = Collections.emptyMap();
-    }
-    
 	/** Axioms referenced by key */
 	protected Map<String, Axiom> axiomMap;
-    /** AxiomLists referenced by key */
-    protected Map<String, AxiomList> axiomListMap;
 	/** Optional axiom listeners referenced by key */
 	protected Map<String, List<AxiomListener>> axiomListenerMap;
 
@@ -57,7 +44,6 @@ public class Solution
 	public Solution() 
 	{
 		axiomMap = new HashMap<String, Axiom>();
-		axiomListMap = EMPTY_LIST_MAP;
 	}
 
 	/**
@@ -78,15 +64,6 @@ public class Solution
 		axiomMap.remove(key);
 	}
 
-    /**
-     * Remove AxioList referenced by key
-     * @param key
-     */
-    public void removeList(String key) 
-    {
-        axiomListMap.remove(key);
-    }
-
 	/**
 	 * Add axiom to this object and notify listener if present
 	 * @param key
@@ -100,25 +77,6 @@ public class Solution
 				axiomListener.onNextAxiom(axiom);
 	}
 
-    /**
-     * Add AxiomList object to this object and notify listener if present
-     * @param key
-     * @param axiomList AxiomList object
-     */
-    public void put(String key, AxiomList axiomList) 
-    {
-        if (axiomListMap.isEmpty())
-            axiomListMap = new HashMap<String, AxiomList>();
-        axiomListMap.put(key, axiomList);
-        if ((axiomListenerMap != null) && axiomListenerMap.containsKey(key))
-            for (AxiomListener axiomListener: axiomListenerMap.get(key))
-            {
-                Iterator<AxiomTermList> iterator = axiomList.iterator();
-                while (iterator.hasNext())
-                    axiomListener.onNextAxiom(iterator.next().getAxiom());
-            }
-    }
-
 	/**
 	 * Returns set of axiom keys
 	 * @return Set of generic type String
@@ -127,16 +85,6 @@ public class Solution
 	{
 		return axiomMap.keySet();
 	}
-
-    /**
-     * Returns set of AxiomList keys
-     * @return Set of generic type String
-     */
-    public Set<String> listKeySet() 
-    {
-        return axiomListMap.keySet();
-    }
-
 
 	/**
 	 * Returns axiom referenced by key
@@ -148,23 +96,12 @@ public class Solution
 		return axiomMap.get(key);
 	}
 
-    /**
-     * Returns AxiomList referenced by key
-     * @param key
-     * @return AxiomList object
-     */
-    public AxiomList getAxiomList(String key)
-    {
-        return axiomListMap.get(key);
-    }
-
 	/**
 	 * Clear axiom container. Has no impact on axiom listeners.
 	 */
 	public void reset() 
 	{
 		axiomMap.clear();
-		axiomListMap.clear();
 	}
 
 	/**
@@ -224,8 +161,7 @@ public class Solution
 	@Override
 	public String toString() 
 	{
-	    StringBuilder builder = new StringBuilder(axiomMap.toString()).append(" {").append(axiomListMap.toString()).append('}');
-		return  builder.toString();
+		return axiomMap.toString();
 	}
 
 }

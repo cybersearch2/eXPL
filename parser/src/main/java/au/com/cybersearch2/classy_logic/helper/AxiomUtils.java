@@ -124,10 +124,10 @@ public class AxiomUtils
         {
             if (leftTermNames.size() != rightTermNames.size())
                 return false;
-            int index = 0;
-            for (String termName: rightTermNames)
-                if (!termName.equalsIgnoreCase(leftTermNames.get(index++)))
-                    return false;
+//            int index = 0;
+//            for (String termName: rightTermNames)
+//                if (!termName.equalsIgnoreCase(leftTermNames.get(index++)))
+//                    return false;
         }
         else if ((leftTermNames != null) || (rightTermNames != null))
             return false;

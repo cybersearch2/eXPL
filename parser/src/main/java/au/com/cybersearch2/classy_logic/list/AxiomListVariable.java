@@ -262,6 +262,11 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	    {   // Dynamic AxiomList should now exist, so initialization of
 	        // of this object can be completed
 	        axiomList = axiomListSpec.getAxiomList();
+	        // Refresh index parameters which may have changed
+	        axiomIndex = axiomListSpec.getAxiomIndex();
+	        axiomExpression = axiomListSpec.getAxiomExpression();
+	        termIndex = axiomListSpec.getTermIndex();
+	        termExpression = axiomListSpec.getTermExpression();
             if (axiomListSpec.getTermIndex() < 0) 
                 setTermExpression( axiomListSpec.getTermExpression(), modifierId);
             else
