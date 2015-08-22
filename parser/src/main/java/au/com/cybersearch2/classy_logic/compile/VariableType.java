@@ -122,6 +122,7 @@ public class VariableType
             if (axiomKey == null)
                 axiomKey = name;
             operand = !hasExpression ? new AxiomOperand(name, axiomKey) : new AxiomOperand(name, axiomKey, expression);
+            parserAssembler.addAxiomOperand(operand.getName());
             break;
         case CURRENCY:
         	operand = !hasExpression ? 

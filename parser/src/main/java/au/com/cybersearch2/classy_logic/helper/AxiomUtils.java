@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
@@ -61,10 +62,19 @@ public class AxiomUtils
         // AxiomLists containing matching Axioms
         AxiomList rightAxiomList = null;
         AxiomList leftAxiomList = null;
-        boolean argumentsValid = (leftOperand.getValueClass() == AxiomList.class) && (rightOperand.getValueClass() == AxiomList.class);
+        boolean argumentsValid = (leftOperand.getValueClass() == AxiomList.class) && 
+                ((rightOperand.getValueClass() == AxiomList.class) || (rightOperand.getValueClass() == AxiomTermList.class));
         if (argumentsValid)
         {
-            rightAxiomList = (AxiomList)rightOperand.getValue();
+            if (rightOperand.getValueClass() == AxiomList.class)
+                rightAxiomList = (AxiomList)rightOperand.getValue();
+            else
+            {
+                AxiomTermList rightAxiomTermList = (AxiomTermList)rightOperand.getValue();
+                rightAxiomList = new AxiomList(rightAxiomTermList.getName(), rightAxiomTermList.getKey());
+                rightAxiomList.setAxiomTermNameList(getTermNames(rightAxiomTermList.getAxiom()));
+                rightAxiomList.assignItem(0, rightAxiomTermList);
+            }
             leftAxiomList = (AxiomList)leftOperand.getValue();
             argumentsValid = AxiomUtils.isCongruent(leftAxiomList, rightAxiomList);
         }
@@ -309,5 +319,37 @@ public class AxiomUtils
         Variable itemOperand = new Variable(axiomTermList.getName() + "." + suffix);
         // Assign a value to set the delegate must be delayed until the expression is evaluated
         return new AxiomTermListVariable(axiomTermList, itemOperand, expression, suffix, id);
+    }
+    
+    public static void copyList(String listName, AxiomList axiomList, String prefix, Map<String, Iterable<Axiom>> listMap)
+    {
+            // Use fully qualified key to avoid name collisions
+            String key = prefix.isEmpty() ? listName : (prefix + "." + listName);
+            final Iterable<AxiomTermList> axiomTermListIterble = axiomList.getIterable(); 
+            Iterable<Axiom> axiomIterable = new Iterable<Axiom>(){
+
+                @Override
+                public Iterator<Axiom> iterator()
+                {
+                    return new Iterator<Axiom>(){
+                        Iterator<AxiomTermList> axiomTermListIterator = axiomTermListIterble.iterator();
+                        @Override
+                        public boolean hasNext()
+                        {
+                            return axiomTermListIterator.hasNext();
+                        }
+
+                        @Override
+                        public Axiom next()
+                        {
+                            return axiomTermListIterator.next().getAxiom();
+                        }
+
+                        @Override
+                        public void remove()
+                        {
+                        }};
+                }};
+            listMap.put(key, axiomIterable);
     }
 }

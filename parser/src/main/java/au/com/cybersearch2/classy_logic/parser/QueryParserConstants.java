@@ -37,7 +37,7 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int LIST = 18;
   /** RegularExpression Id. */
-  int Fact = 19;
+  int FACT = 19;
   /** RegularExpression Id. */
   int LENGTH = 20;
   /** RegularExpression Id. */

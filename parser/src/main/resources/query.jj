@@ -57,6 +57,7 @@ import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionParameter;
 import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
+import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
@@ -171,7 +172,7 @@ TOKEN :
 | < QUERY: "query" >
 | < CALC: "calc" >
 | < LIST: "list" >
-| < Fact: "fact" >
+| < FACT: "fact" >
 | < LENGTH: "length" >
 | < TERM: "term" >
 | < RESOURCE: "resource" >
@@ -535,15 +536,15 @@ void CalculatorTemplate(ParserAssembler parserAssembler) :
 }
 {  
     <CALC> template=Template(parserAssembler, true) "(" 
-      ( 
+      (  
         ( CalculatorExpression(loopNumber, template, template.getName(), parserAssembler) |
-          CalculatorQuery(template, parserAssembler) )
+          CalculatorQuery(template, parserAssembler))
       )
       (
         "," 
-        (
+        (  
           ( CalculatorExpression(loopNumber, template, template.getName(), parserAssembler) |
-            CalculatorQuery(template, parserAssembler) )
+            CalculatorQuery(template, parserAssembler))
         )
       )* ")" [ "(" InitialiserList(properties) ")" ]
     {
@@ -583,14 +584,14 @@ Operand VariableDeclaration(ParserAssembler parserAssembler) :
 {
   ( varType=Type(operandMap) )? nameToken=<IDENTIFIER> ( index=IndexExpression(parserAssembler) )? ( "=" expression=Expression(parserAssembler) )?
   {
-     String listName = nameToken.image;
+     String name = nameToken.image;
      if (index !=null)
-         return parserAssembler.setListVariable(listName, index, expression);
+         return parserAssembler.setListVariable(name, index, expression);
      if (varType == null)
          varType = new VariableType(OperandType.NULL);
      if (expression != null) 
          varType.setProperty(VariableType.EXPRESSION, expression);
-     Operand operand = varType.getInstance(parserAssembler, listName);
+     Operand operand = varType.getInstance(parserAssembler, name);
      return operand;
   }
 }
@@ -625,11 +626,11 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
         | assignToken=<ORASSIGN>
         | assignToken=<XORASSIGN>
         | assignToken=<REMASSIGN>)
-        ) 
-      expression=Expression(parserAssembler)
+      ) 
+      expression=Expression(parserAssembler) 
       |
       <REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(template.getName(), name, parserAssembler) )? ")"
-    )?
+  )?
   {
      if (varType == null)
          varType = new VariableType(OperandType.NULL);
@@ -679,9 +680,14 @@ void CalculatorExpression(int loop_number, Template template, String templateNam
     template.addTerm(expression);
   }
   |
-  TemplateExpression(template, parserAssembler)
+  LOOKAHEAD(3) expression=CalculatorFunction(parserAssembler) 
+  {
+    template.addTerm(expression);
+  }
   |
-  ( scToken=":" | scToken="?" )? expression=Expression(parserAssembler) 
+  LOOKAHEAD(3) TemplateExpression(template, parserAssembler)
+  |
+  LOOKAHEAD(3) ( scToken=":" | scToken="?" )? expression=Expression(parserAssembler) 
     ( innerLoop=InnerCalculator(loop_number + 1, templateName, parserAssembler, scToken != null) )?  
   {
     if (scToken != null)
@@ -727,6 +733,18 @@ void CalculatorQuery(Template template, ParserAssembler parserAssembler) :
     template.addTerm(queryOperand);
     if (innerTemplate != null)
         parserAssembler.addInnerTemplate(innerTemplate);
+  }
+}
+
+Operand CalculatorFunction(ParserAssembler parserAssembler) :
+{
+    String fnName;
+    Operand params = null;
+}
+{
+  fnName=Name() "(" ( params = ArgumentList(parserAssembler) )? ")"
+  {
+    return parserAssembler.getCallOperand(fnName, params);
   }
 }
 
@@ -1445,23 +1463,34 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
         parserAssembler.registerLocaleListener(formatter);
     return formatter;
   }
+  |
+  <FACT> "("  name=Name() ")"
+  {
+    Operand factOperand = parserAssembler.getOperandMap().get(name);
+    if (factOperand != null)
+        return new FactOperand(factOperand);
+    else 
+        throw new ParseException("Operand " + name + " not found");
+  }
 }
 
 Operand NamedExpression(String name, ParserAssembler parserAssembler) :
 {
   Operand param1 = null;
   Operand param2 = null;
+  Operand params = null;
 }
 {
   param1=IndexExpression(parserAssembler) ( LOOKAHEAD(2) param2=IndexExpression(parserAssembler) )?
   {
     return parserAssembler.newListVariableInstance(name, param1, param2);
   }
-  | 
-  "(" ( param1 = ArgumentList(parserAssembler) )? ")"
+  |
+  "(" ( params = ArgumentList(parserAssembler) )? ")"
   {
-    return parserAssembler.getCallOperand(name, param1);
+    return parserAssembler.getCallOperand(name, params);
   }
+  
 }
 
 Operand IndexExpression(ParserAssembler parserAssembler) :

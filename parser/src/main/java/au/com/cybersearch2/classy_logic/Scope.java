@@ -292,13 +292,7 @@ public class Scope
 	public Map<String, Iterable<Axiom>> getListMap() 
 	{
 		Map<String, Iterable<Axiom>> listMap = new HashMap<String, Iterable<Axiom>>();
-        if (!name.equals(QueryProgram.GLOBAL_SCOPE))
-        {
-        	getGlobalParserAssembler().getOperandMap().copyLists("", listMap);
-    		parserAssembler.getOperandMap().copyLists(name, listMap);
-        }
-        else
-    		parserAssembler.getOperandMap().copyLists("", listMap);
+    	parserAssembler.copyLists(listMap);
 		return listMap;
 	}
 

@@ -474,6 +474,51 @@ public class CallOperandTest
             ");\n" +
             "query sort_cities (city : sort_cities);\n"; 
 
+    static final String PERFECT_MATCH = 
+            " axiom person (name, sex, age, starsign):\n" +
+            "              (\"John\", \"m\", 23, \"gemini\"),\n" + 
+            "              (\"Sue\", \"f\", 19, \"cancer\"),\n" + 
+            "              (\"Sam\", \"m\", 24, \"scorpio\"),\n" + 
+            "              (\"Jenny\", \"f\", 21, \"gemini\"),\n" + 
+            "              (\"Andrew\", \"m\", 26, \"virgo\"),\n" + 
+            "              (\"Alice\", \"f\", 20, \"pices\"),\n" + 
+            "              (\"Ingrid\", \"f\", 23, \"cancer\"),\n" + 
+            "              (\"Jack\", \"m\", 32, \"pices\"),\n" + 
+            "              (\"Sonia\", \"f\", 33, \"gemini\"),\n" + 
+            "              (\"Alex\", \"m\", 22, \"aquarius\"),\n" + 
+            "              (\"Jill\", \"f\", 33, \"cancer\"),\n" + 
+            "              (\"Fiona\", \"f\", 29, \"gemini\"),\n" + 
+            "              (\"melissa\", \"f\", 30, \"virgo\"),\n" + 
+            "              (\"Tom\", \"m\", 22, \"cancer\"),\n" + 
+            "              (\"Bill\", \"m\", 19, \"virgo\");\n" + 
+            "list person_list(person);\n" +
+            "calc people_by_starsign(\n" +
+            "  string starsign,\n" +
+            "  axiom candidate = {},\n" +
+            "  integer i = 0,\n" +
+            "  {\n" +
+            "    ? i < length(person_list),\n" +
+            "    ? person_list[i][starsign] == starsign\n" +
+            "    {\n" +
+            "       candidate += person_list[i]\n" +
+            "    },\n" +
+            "    ++i\n" +
+            "  }\n" +
+            ");\n" +
+            "calc match(\n" +
+            "  template perfect(candidate) << people_by_starsign(\"gemini\"),\n" +
+            "  candidate_list = match.perfect[candidate],\n" +
+            "  //system.print(candidate_list),\n" +
+            "  integer i = 0,\n" +
+            "  {\n" +
+            "    ? i < length(candidate_list),\n" +
+            "    gemini = candidate_list[i++],\n" +
+            "    system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign])\n" +
+            "  }\n" +
+            " );\n" +
+            " query match(match);";
+
+
 
     @Before
     public void setUp()
@@ -482,13 +527,21 @@ public class CallOperandTest
     }
 
     @Test
+    public void test_gemini_people()
+    {
+        QueryProgram queryProgram = new QueryProgram(PERFECT_MATCH);
+        Result result = queryProgram.executeQuery("match");
+        //System.out.println(result.getIterator("geminis").next());
+    }
+    
+    @Test
     public void test_sort_cities()
     {
         QueryProgram queryProgram = new QueryProgram(SORTED_CITIES);
         Result result = queryProgram.executeQuery("sort_cities");
-        //Iterator<Axiom> iterator = result.getIterator("city_list");
-        //while(iterator.hasNext())
-        //    System.out.println(iterator.next().toString());
+        Iterator<Axiom> iterator = result.getIterator("city_list");
+        while(iterator.hasNext())
+            System.out.println(iterator.next().toString());
     }
     
     @Test

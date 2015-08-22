@@ -17,6 +17,7 @@ import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -380,37 +381,7 @@ public class OperandMap
 		{
 		    ItemList<?> itemList = entry.getValue();
 		    if (itemList.getItemClass().equals(Axiom.class))
-		    {
-		        // Use fully qualified key to avoid name collisions
-		        String key = prefix.isEmpty() ? entry.getKey() : (prefix + "." + entry.getKey());
-		        AxiomList axiomList = (AxiomList) itemList;
-		        final Iterable<AxiomTermList> axiomTermListIterble = axiomList.getIterable(); 
-		        Iterable<Axiom> axiomIterable = new Iterable<Axiom>(){
-
-                    @Override
-                    public Iterator<Axiom> iterator()
-                    {
-                        return new Iterator<Axiom>(){
-                            Iterator<AxiomTermList> axiomTermListIterator = axiomTermListIterble.iterator();
-                            @Override
-                            public boolean hasNext()
-                            {
-                                return axiomTermListIterator.hasNext();
-                            }
-
-                            @Override
-                            public Axiom next()
-                            {
-                                return axiomTermListIterator.next().getAxiom();
-                            }
-
-                            @Override
-                            public void remove()
-                            {
-                            }};
-                    }};
-		        listMap2.put(key, axiomIterable);
-		    }
+		        AxiomUtils.copyList(entry.getKey(), (AxiomList) itemList, prefix, listMap2);
 		}
 	}
 
