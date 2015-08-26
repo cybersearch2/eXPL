@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 
 /**
  * Operand 
@@ -27,6 +28,12 @@ public interface Operand extends Term
 {
 
 	public static OperatorEnum[] EMPTY_OPERAND_OPS = new OperatorEnum[0];
+
+	/**
+	 * Returns qualified name
+	 * @return QualifiedName object
+	 */
+	QualifiedName getQualifiedName();
 	
     /**
 	 * Returns OperatorEnum values for which this Term is a valid right operand

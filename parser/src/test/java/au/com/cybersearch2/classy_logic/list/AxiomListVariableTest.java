@@ -27,13 +27,15 @@ import java.util.List;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
-import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;
+import au.com.cybersearch2.classy_logic.expression.TestEvaluator;
+import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
@@ -47,6 +49,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 public class AxiomListVariableTest 
 {
 	private static final String NAME = "AxiomListName";
+	static QualifiedName QNAME = QualifiedName.parseName(NAME);
 	
 	private static final String[] CITY_NAME_HEIGHT =
 	{
@@ -69,6 +72,7 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+		when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(false, true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "0");
@@ -96,6 +100,7 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "0");
@@ -128,10 +133,11 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
-		IntegerOperand x = new IntegerOperand("x", Integer.valueOf(5));
-		Operand indexExpression = new Evaluator("y ", x, "++", null);
+		IntegerOperand x = new TestIntegerOperand("x", Integer.valueOf(5));
+		Operand indexExpression = new TestEvaluator("y ", x, "++", null);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, indexExpression, "0");
 		assertThat(variable.getName()).isEqualTo(NAME + ".index.0");
 		assertThat(variable.axiomIndex).isEqualTo(-1);
@@ -159,18 +165,19 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
-		IntegerOperand x = new IntegerOperand("x", Integer.valueOf(5));
-		Operand axiomExpression = new Evaluator("y ", x, "++", null);
+		IntegerOperand x = new TestIntegerOperand("x", Integer.valueOf(5));
+		Operand axiomExpression = new TestEvaluator("y ", x, "++", null);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, axiomExpression, "item");
 		assertThat(variable.getName()).isEqualTo(NAME + ".index.item");
 		assertThat(variable.axiomIndex).isEqualTo(-1);
 		assertThat(variable.isEmpty()).isTrue();
 		AxiomTermListVariable axiomTermListVariable = mock(AxiomTermListVariable.class);
 		when(axiomTermListVariable.getValue()).thenReturn(Integer.valueOf(13));
-		IntegerOperand a = new IntegerOperand("a", Integer.valueOf(0));
-		Operand termExpression = new Evaluator("b ", a, "++", null);
+		IntegerOperand a = new TestIntegerOperand("a", Integer.valueOf(0));
+		Operand termExpression = new TestEvaluator("b ", a, "++", null);
 		when(axiomTermList.newVariableInstance(isA(Operand.class), isA(String.class), eq(1))).thenReturn(axiomTermListVariable);
 		variable.setTermExpression(termExpression, 0);
 		assertThat(variable.isEmpty()).isTrue();
@@ -193,6 +200,7 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "item");
@@ -203,8 +211,8 @@ public class AxiomListVariableTest
 		when(axiomTermListVariable.getValue()).thenReturn(Integer.valueOf(13));
 		when(axiomTermList.newVariableInstance(0, "0", 1)).thenReturn(axiomTermListVariable);
 		when(axiomTermListVariable.backup(1)).thenReturn(true);
-		IntegerOperand a = new IntegerOperand("a", Integer.valueOf(0));
-		Operand termExpression = new Evaluator("b ", a, "++", null);
+		IntegerOperand a = new TestIntegerOperand("a", Integer.valueOf(0));
+		Operand termExpression = new TestEvaluator("b ", a, "++", null);
 		when(axiomTermList.newVariableInstance(isA(Operand.class), isA(String.class),eq(1))).thenReturn(axiomTermListVariable);
 		variable.setTermExpression(termExpression, 1);
 		assertThat(variable.isEmpty()).isTrue();
@@ -225,9 +233,10 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
-		Operand indexExpression = new IntegerOperand("x");
+		Operand indexExpression = new TestIntegerOperand("x");
 		AxiomListVariable variable = new AxiomListVariable(axiomList, indexExpression, "0");
 		AxiomTermListVariable axiomTermListVariable = mock(AxiomTermListVariable.class);
 		when(axiomTermListVariable.getValue()).thenReturn(Integer.valueOf(13));
@@ -250,9 +259,10 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
-		Operand indexExpression = new BooleanOperand("x", Boolean.TRUE);
+		Operand indexExpression = new TestBooleanOperand("x", Boolean.TRUE);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, indexExpression, "0");
 		AxiomTermListVariable axiomTermListVariable = mock(AxiomTermListVariable.class);
 		when(axiomTermListVariable.getValue()).thenReturn(Integer.valueOf(13));
@@ -275,8 +285,9 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(false);
-		Operand indexExpression = new IntegerOperand("x", Integer.valueOf(5));
+		Operand indexExpression = new TestIntegerOperand("x", Integer.valueOf(5));
 		AxiomListVariable variable = new AxiomListVariable(axiomList, indexExpression, "0");
 		AxiomTermListVariable axiomTermListVariable = mock(AxiomTermListVariable.class);
 		when(axiomTermList.newVariableInstance(0, "0", 1)).thenReturn(axiomTermListVariable);
@@ -298,6 +309,7 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(false, true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "0");
@@ -317,6 +329,7 @@ public class AxiomListVariableTest
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "0");
@@ -337,6 +350,7 @@ public class AxiomListVariableTest
  		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(false);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "item");
@@ -344,8 +358,8 @@ public class AxiomListVariableTest
 		when(axiomTermListVariable.getValue()).thenReturn(new Null());
 		when(axiomTermList.newVariableInstance(0, "0", 1)).thenReturn(axiomTermListVariable);
 		when(axiomTermListVariable.backup(1)).thenReturn(true);
-		IntegerOperand a = new IntegerOperand("a", Integer.valueOf(0));
-		Operand termExpression = new Evaluator("b ", a, "++", null);
+		IntegerOperand a = new TestIntegerOperand("a", Integer.valueOf(0));
+		Operand termExpression = new TestEvaluator("b ", a, "++", null);
 		when(axiomTermList.newVariableInstance(isA(Operand.class), isA(String.class), eq(1))).thenReturn(axiomTermListVariable);
 		variable.setTermExpression(termExpression, 1);
 		assertThat(variable.isEmpty()).isTrue();
@@ -360,14 +374,15 @@ public class AxiomListVariableTest
 	{
 		AxiomList axiomList = mock(AxiomList.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.getName()).thenReturn(NAME);
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
-		IntegerOperand x = new IntegerOperand("x", Integer.valueOf(5));
-		Operand axiomExpression = new Evaluator("y ", x, "++", null);
+		IntegerOperand x = new TestIntegerOperand("x", Integer.valueOf(5));
+		Operand axiomExpression = new TestEvaluator("y ", x, "++", null);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, axiomExpression, "item");
-		IntegerOperand a = new IntegerOperand("a", Integer.valueOf(0));
-		Operand termExpression = new Evaluator("b ", a, "++", null);
+		IntegerOperand a = new TestIntegerOperand("a", Integer.valueOf(0));
+		Operand termExpression = new TestEvaluator("b ", a, "++", null);
 		variable.setTermExpression(termExpression, 0);
 		assertThat(variable.isEmpty()).isTrue();
 		assertThat(variable.toString()).isEqualTo(NAME + ".index.item = <empty>");
@@ -380,24 +395,25 @@ public class AxiomListVariableTest
 	public void test_integer_operand_ops()
 	{
 		AxiomList axiomList = mock(AxiomList.class);
-		AxiomTermList axiomTermList = new AxiomTermList(NAME, "AxiomKey");
+		AxiomTermList axiomTermList = new AxiomTermList(QNAME, "AxiomKey");
 		axiomTermList.setAxiom(new Axiom("AxiomKey", new IntegerTerm(13)));
 		when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "0");
 		variable.setTermIndex(0, 1);
-		assertThat(variable.getLeftOperandOps()).isEqualTo(new IntegerOperand("*").getLeftOperandOps());
-		assertThat(variable.getRightOperandOps()).isEqualTo(new IntegerOperand("*").getRightOperandOps());
-		assertThat(variable.booleanEvaluation(new IntegerOperand("L", Long.valueOf(2)), OperatorEnum.GE, new IntegerOperand("R", Long.valueOf(2)))).isTrue();
-		assertThat(variable.numberEvaluation(new IntegerOperand("L", Long.valueOf(7)), OperatorEnum.XOR, new IntegerOperand("R", Long.valueOf(5)))).isEqualTo(new Long(2));
-		assertThat(variable.numberEvaluation(OperatorEnum.INCR, new IntegerOperand("R", Long.valueOf(8)))).isEqualTo(new Long(9));
+		assertThat(variable.getLeftOperandOps()).isEqualTo(new TestIntegerOperand("*").getLeftOperandOps());
+		assertThat(variable.getRightOperandOps()).isEqualTo(new TestIntegerOperand("*").getRightOperandOps());
+		assertThat(variable.booleanEvaluation(new TestIntegerOperand("L", Long.valueOf(2)), OperatorEnum.GE, new TestIntegerOperand("R", Long.valueOf(2)))).isTrue();
+		assertThat(variable.numberEvaluation(new TestIntegerOperand("L", Long.valueOf(7)), OperatorEnum.XOR, new TestIntegerOperand("R", Long.valueOf(5)))).isEqualTo(new Long(2));
+		assertThat(variable.numberEvaluation(OperatorEnum.INCR, new TestIntegerOperand("R", Long.valueOf(8)))).isEqualTo(new Long(9));
 	}
 	
     @Test 
     public void test_cities() throws Exception
     {
-    	AxiomList axiomList = new AxiomList("city_height_list", "city");
+    	AxiomList axiomList = new AxiomList(QualifiedName.parseName("city_height_list"), "city");
     	final List<Axiom> cityList = new ArrayList<Axiom>();
 		cityList.add(new Axiom("city", "bilene", 1718));
 		cityList.add(new Axiom("city", "addis ababa", 8000));
@@ -412,13 +428,13 @@ public class AxiomListVariableTest
 		int index = 0;
 		for (Axiom axiom: cityList)
 		{
-			AxiomTermList axiomListOperand = new AxiomTermList(axiom.getName(), axiom.getName());
+			AxiomTermList axiomListOperand = new AxiomTermList(QNAME, axiom.getName());
 			axiomListOperand.setAxiom(axiom);
 			axiomList.assignItem(index, axiomListOperand);
 			++index;
 		}
-		IntegerOperand x = new IntegerOperand("x", Integer.valueOf(0));
-		Operand axiomExpression = new Evaluator("y ", x, "++", null);
+		IntegerOperand x = new TestIntegerOperand("x", Integer.valueOf(0));
+		Operand axiomExpression = new TestEvaluator("y ", x, "++", null);
 		ItemListVariable<AxiomTermList> variable = axiomList.newVariableInstance(axiomExpression, "y", 1);
     	index = 0;
     	while (index < cityList.size())

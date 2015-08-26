@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import java.util.Date;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.query.Calculator;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -50,7 +51,7 @@ public class LoopEvaluator extends BooleanOperand
 
 	public LoopEvaluator(Template template, boolean runOnce) 
 	{
-		super(template.getName());
+		super(new QualifiedName("loop", template.getQualifiedName()));
 		this.template = template;
 		this.runOnce = runOnce; 
 	}

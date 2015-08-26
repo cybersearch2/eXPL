@@ -24,6 +24,7 @@ import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.ScopeContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
@@ -84,11 +85,13 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
         final String templateName = getCalculatorKeyName(querySpec).getTemplateName();
         Scope scope = queryParams.getScope();
         ParserAssembler parserAssembler = scope.getGlobalParserAssembler();
-        Template template = parserAssembler.getTemplate(templateName);
+        QualifiedName qualifiedTemplateName = new QualifiedName(templateName, QualifiedName.ANONYMOUS);
+        Template template = parserAssembler.getTemplate(qualifiedTemplateName);
         if (template == null)
         {
+            qualifiedTemplateName = new QualifiedName(scope.getName(), templateName, QualifiedName.EMPTY);
             parserAssembler = scope.getParserAssembler();
-            template = parserAssembler.getTemplate(templateName);
+            template = parserAssembler.getTemplate(qualifiedTemplateName);
         }
         // Marshall arguments provided as a list of Variables into a properties container 
         if (argumentList.size() > 0)

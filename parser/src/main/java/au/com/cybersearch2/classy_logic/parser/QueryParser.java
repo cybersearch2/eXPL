@@ -56,6 +56,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 
 
 
@@ -336,33 +337,7 @@ public class QueryParser implements QueryParserConstants
       jj_la1[7] = jj_gen;
       ;
     }
-       String templateName = firstKeyname.getTemplateName();
-       Template firstTemplate = scope.getTemplate(templateName);
-       if (!firstTemplate.isCalculator())
-           {if (true) return querySpec;}
-       if (keynameCount > 1)
-          {if (true) throw new ParseException("Calculator " + templateName + " can only have one query step");}
-       querySpec.setQueryType(QueryType.calculator);
-       if (properties.size() > 0)
-          querySpec.putProperties(firstKeyname, properties);
-       String axiomName = firstKeyname.getAxiomKey();
-       if (!querySpec.isHeadQuery() || axiomName.isEmpty())
-          {if (true) return querySpec;}
-       QuerySpec headQuerySpec = new QuerySpec(querySpec.getName());
-       headQuerySpec.addKeyName(new KeyName(axiomName, axiomName));
-       QuerySpec chainQuerySpec = headQuerySpec.chain();
-       chainQuerySpec.addKeyName(firstKeyname);
-       chainQuerySpec.setQueryType(QueryType.calculator);
-       if (properties.size() > 0)
-          chainQuerySpec.putProperties(firstKeyname, properties);
-       firstTemplate.setKey(axiomName);
-       Template logicTemplate = scope.findTemplate(axiomName);
-       if (logicTemplate != null)
-           {if (true) return headQuerySpec;}
-       logicTemplate = scope.getParserAssembler().createTemplate(axiomName, false);
-       logicTemplate.setKey(axiomName);
-       {if (true) return headQuerySpec;}
-    throw new Error("Missing return statement in function");
+    return scope.buildQuerySpec(querySpec, firstKeyname, keynameCount, properties);
   }
 
   final public QuerySpec Query() throws ParseException
@@ -436,7 +411,7 @@ public class QueryParser implements QueryParserConstants
     Token keywordToken;
     Token nameToken;
     VariableType varType = null;
-    String axiomKey = null;
+    QualifiedName qualifiedAxiomName = null;
     AxiomProvider axiomProvider = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
@@ -467,12 +442,12 @@ public class QueryParser implements QueryParserConstants
     {
     case LPAREN:
       jj_consume_token(LPAREN);
-      axiomKey = Name();
+      qualifiedAxiomName = Axiom(parserAssembler);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case COLON:
         jj_consume_token(COLON);
-        axiomProvider = ResourceDeclaration(axiomKey, parserAssembler);
+        axiomProvider = ResourceDeclaration(qualifiedAxiomName, parserAssembler);
         break;
       default:
         jj_la1[11] = jj_gen;
@@ -485,18 +460,18 @@ public class QueryParser implements QueryParserConstants
       ;
     }
     String listName = nameToken.image;
-    if ((varType == null) && (axiomKey == null))
-        {if (true) throw new ParseException("Invalid declaration for list \u005c"" + listName + "\u005c". Missing type or axiom name.");}
+    if ((varType == null) && (qualifiedAxiomName == null))
+        throw new ParseException("Invalid declaration for list \"" + listName + "\". Missing type or axiom name.");
     if ((varType != null) && (keywordToken.kind == QueryParserConstants.LOCAL))
-        {if (true) throw new ParseException("Invalid declaration for local \u005c"" + listName + "\u005c". Type in declaration not allowed.");}
+        throw new ParseException("Invalid declaration for local \"" + listName + "\". Type in declaration not allowed.");
     if (varType == null)
         varType = keywordToken.kind == QueryParserConstants.LIST ? new VariableType(OperandType.AXIOM) : new VariableType(OperandType.LOCAL);
-    if (axiomKey != null)
-        varType.setProperty(VariableType.AXIOM_KEY, axiomKey);
-    ItemList<?> ItemList = varType.getItemListInstance(parserAssembler, listName);
-    parserAssembler.getOperandMap().addItemList(listName, ItemList);
+    if (qualifiedAxiomName != null)
+        varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName.getName());
+    ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
+    parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
     if (axiomProvider != null)
-        parserAssembler.registerAxiomListener(axiomKey, axiomProvider.getAxiomListener());
+        parserAssembler.registerAxiomListener(qualifiedAxiomName, axiomProvider.getAxiomListener());
   }
 
   final public VariableType Type(OperandMap operandMap) throws ParseException
@@ -599,7 +574,9 @@ public class QueryParser implements QueryParserConstants
   {
     Token templateToken;
     templateToken = jj_consume_token(IDENTIFIER);
-     {if (true) return parserAssembler.createTemplate(templateToken.image, isCalculator);}
+    QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), templateToken.image, QualifiedName.EMPTY);
+    parserAssembler.getOperandMap().setQualifiedContextname(qualifiedTemplateName);
+     {if (true) return parserAssembler.createTemplate(new QualifiedName(parserAssembler.getScope().getAlias(), templateToken.image, QualifiedName.EMPTY), isCalculator);}
     throw new Error("Missing return statement in function");
   }
 
@@ -608,6 +585,7 @@ public class QueryParser implements QueryParserConstants
     Template template;
     Map<String, Object> properties = new HashMap<String, Object>();
     int loopNumber = 0;
+    QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
     jj_consume_token(CALC);
     template = Template(parserAssembler, true);
     jj_consume_token(LPAREN);
@@ -723,6 +701,7 @@ public class QueryParser implements QueryParserConstants
     }
       if (properties.size() > 0)
           template.addProperties(properties);
+      parserAssembler.getOperandMap().setQualifiedContextname(contextName);
   }
 
   final public void InitialiserList(Map<String, Object> properties) throws ParseException
@@ -953,7 +932,7 @@ public class QueryParser implements QueryParserConstants
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
         {
         case LBRACE:
-          group = GroupDeclaration(template.getName(), name, parserAssembler);
+          group = GroupDeclaration(template, name, parserAssembler);
           break;
         default:
           jj_la1[30] = jj_gen;
@@ -976,7 +955,7 @@ public class QueryParser implements QueryParserConstants
      Operand assignExpression = (assignToken != null) ? expression : null;
      Operand regexOp = null;
      if (regexLit != null)
-         regexOp = new StringOperand(Term.ANONYMOUS, getText(regexLit));
+         regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
      else if (regexId != null)
          regexOp = operandMap.addOperand(regexId.image, null);
      if (assignToken != null)
@@ -986,21 +965,21 @@ public class QueryParser implements QueryParserConstants
      if (index !=null)
        var = parserAssembler.setListVariable(name, index, null);
      else if (regexOp != null)
-       var = new RegExOperand(name, regexOp, 0, group);
+       var = new RegExOperand(parserAssembler.getContextName(name), regexOp, 0, group);
      else if (scToken != null)
-       var = new Evaluator(name, expression, (scToken.image == "?" ? "&&" : "||"));
+       var = new Evaluator(parserAssembler.getContextName(name), expression, (scToken.image == "?" ? "&&" : "||"));
      else if (!operandMap.hasOperand(name))
        var = varType.getInstance(parserAssembler, name);
      else if (!template.isInnerTemplate())
        var = operandMap.addOperand(name, expression);
      else
-       var = new Variable(name, expression);
+       var = new Variable(parserAssembler.getContextName(name), expression);
      if ((index ==null) && (!operandMap.hasOperand(name)) && !template.isInnerTemplate())
         operandMap.addOperand(var);
      if (assignToken != null)
-        var = new Evaluator(name, var, assignToken.image, assignExpression);
+        var = new Evaluator(parserAssembler.getContextName(name), var, assignToken.image, assignExpression);
      if ((index !=null) && (equalsToken != null))
-        var = new Evaluator(expression.getName(), var, "=", expression);
+        var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
      template.addTerm(var);
   }
 
@@ -1009,13 +988,13 @@ public class QueryParser implements QueryParserConstants
   Token scToken = null;
   Operand expression = null;
   Operand innerLoop = null;
-  String axiomName;
+  QualifiedName qualifiedAxiomName;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case AXIOM:
       jj_consume_token(AXIOM);
-      axiomName = Axiom(parserAssembler);
-      expression = AxiomVariable(axiomName, parserAssembler);
+      qualifiedAxiomName = Axiom(parserAssembler);
+      expression = AxiomVariable(qualifiedAxiomName, parserAssembler);
     parserAssembler.getOperandMap().addOperand(expression);
     template.addTerm(expression);
       break;
@@ -1086,7 +1065,8 @@ public class QueryParser implements QueryParserConstants
   {
   Operand calcExpression;
   String loopName = templateName + loop_number;
-  Template template = parserAssembler.chainTemplate(templateName, loopName);
+  QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), templateName, QualifiedName.EMPTY);
+  Template template = parserAssembler.chainTemplate(qualifiedTemplateName, loopName);
     jj_consume_token(LBRACE);
     CalculatorExpression(loop_number, template, templateName, parserAssembler);
     label_8:
@@ -1117,7 +1097,7 @@ public class QueryParser implements QueryParserConstants
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case TEMPLATE:
-      innerTemplate = InnerTemplateDeclaration(template.getName(), parserAssembler);
+      innerTemplate = InnerTemplateDeclaration(template.getQualifiedName(), parserAssembler);
       break;
     default:
       jj_la1[39] = jj_gen;
@@ -1160,7 +1140,8 @@ public class QueryParser implements QueryParserConstants
       ;
     }
     jj_consume_token(RPAREN);
-    Operand queryOperand = parserAssembler.getQueryOperand(queryName, params, innerTemplate);
+    QualifiedName qname = QualifiedName.parseName(queryName);
+    Operand queryOperand = parserAssembler.getQueryOperand(qname, params, innerTemplate);
     template.addTerm(queryOperand);
     if (innerTemplate != null)
         parserAssembler.addInnerTemplate(innerTemplate);
@@ -1206,15 +1187,15 @@ public class QueryParser implements QueryParserConstants
       ;
     }
     jj_consume_token(RPAREN);
-    {if (true) return parserAssembler.getCallOperand(fnName, params);}
+    {if (true) return parserAssembler.getCallOperand(parserAssembler.getContextName(fnName), params);}
     throw new Error("Missing return statement in function");
   }
 
-  final public Template InnerTemplateDeclaration(String ownerName, ParserAssembler parserAssembler) throws ParseException
+  final public Template InnerTemplateDeclaration(QualifiedName ownerQualifiedName, ParserAssembler parserAssembler) throws ParseException
   {
     Template template;
     jj_consume_token(TEMPLATE);
-    template = InnerTemplate(ownerName, parserAssembler);
+    template = InnerTemplate(ownerQualifiedName, parserAssembler);
     jj_consume_token(LPAREN);
     TemplateExpression(template, parserAssembler);
     label_9:
@@ -1237,19 +1218,19 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public Template InnerTemplate(String ownerName, ParserAssembler parserAssembler) throws ParseException
+  final public Template InnerTemplate(QualifiedName ownerQualifiedName, ParserAssembler parserAssembler) throws ParseException
   {
     Token templateToken;
     templateToken = jj_consume_token(IDENTIFIER);
-    String templateName = ownerName + "." + templateToken.image;
-    Template innerTemplate = parserAssembler.createTemplate(templateName, false);
+    QualifiedName qualifiedTemplateName = new QualifiedName(templateToken.image, ownerQualifiedName);
+    Template innerTemplate = parserAssembler.createTemplate(qualifiedTemplateName, false);
     innerTemplate.setInnerTemplate(true);
     innerTemplate.setKey(templateToken.image);
     {if (true) return innerTemplate;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand AxiomVariable(String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public Operand AxiomVariable(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
     Operand expression = null;
     Operand axiomList = null;
@@ -1277,7 +1258,7 @@ public class QueryParser implements QueryParserConstants
       expression = Expression(parserAssembler);
       break;
     case LBRACE:
-      axiomList = AxiomList(axiomName, parserAssembler);
+      axiomList = AxiomList(qualifiedAxiomName, parserAssembler);
       break;
     default:
       jj_la1[43] = jj_gen;
@@ -1286,15 +1267,16 @@ public class QueryParser implements QueryParserConstants
     }
      VariableType varType = new VariableType(OperandType.AXIOM);
      varType.setProperty(VariableType.EXPRESSION, axiomList == null ? expression : axiomList);
-     Operand operand = varType.getInstance(parserAssembler, axiomName);
+     Operand operand = varType.getInstance(parserAssembler, qualifiedAxiomName);
      if (expression != null)
-         parserAssembler.setParameter(axiomName);
+         parserAssembler.setParameter(operand.getQualifiedName());
      {if (true) return operand;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand AxiomList(String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public Operand AxiomList(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
+  String axiomName = qualifiedAxiomName.getName();
   String listName = axiomName + "_list";
   Operand[] params = new Operand[2];
   int count = 0;
@@ -1359,13 +1341,13 @@ public class QueryParser implements QueryParserConstants
      VariableType varType = new VariableType(OperandType.AXIOM);
      varType.setProperty(VariableType.AXIOM_KEY, axiomName);
      if (initializeList != null)
-        varType.setProperty(VariableType.EXPRESSION, new AxiomParameterOperand(listName + "_params", axiomName, initializeList));
+        varType.setProperty(VariableType.EXPRESSION, initializeList);
      Operand operand = varType.getInstance(parserAssembler, listName);
      {if (true) return operand;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Group GroupDeclaration(String template, String name, ParserAssembler parserAssembler) throws ParseException
+  final public Group GroupDeclaration(Template template, String name, ParserAssembler parserAssembler) throws ParseException
   {
   Group group = new Group(name);
     jj_consume_token(LBRACE);
@@ -1390,29 +1372,29 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public void Group(Group group, String template, String name, ParserAssembler parserAssembler) throws ParseException
+  final public void Group(Group group, Template template, String name, ParserAssembler parserAssembler) throws ParseException
   {
   Token groupToken;
     groupToken = jj_consume_token(IDENTIFIER);
     Operand var = parserAssembler.getOperandMap().addOperand(groupToken.image, null);
-    parserAssembler.addTemplate(template, var);
+    template.addTerm(var);
     group.addGroup(var);
   }
 
   final public void AxiomDeclaration(ParserAssembler parserAssembler) throws ParseException
   {
-    String axiomName;
+    QualifiedName qualifiedAxiomName;
     Operand operand = null;
     jj_consume_token(AXIOM);
-    axiomName = Axiom(parserAssembler);
+    qualifiedAxiomName = Axiom(parserAssembler);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LPAREN:
     case COLON:
-      AxiomSpecification(axiomName, parserAssembler);
+      AxiomSpecification(qualifiedAxiomName, parserAssembler);
       break;
     case ASSIGN:
-      operand = AxiomVariable(axiomName, parserAssembler);
+      operand = AxiomVariable(qualifiedAxiomName, parserAssembler);
       break;
     default:
       jj_la1[47] = jj_gen;
@@ -1423,14 +1405,14 @@ public class QueryParser implements QueryParserConstants
             parserAssembler.getOperandMap().addOperand(operand);
   }
 
-  final public void AxiomSpecification(String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public void AxiomSpecification(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
-    parserAssembler.createAxiom(axiomName);
+    parserAssembler.createAxiom(qualifiedAxiomName);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LPAREN:
       jj_consume_token(LPAREN);
-      TermName(axiomName, parserAssembler);
+      TermName(qualifiedAxiomName, parserAssembler);
       label_12:
       while (true) 
       {
@@ -1444,7 +1426,7 @@ public class QueryParser implements QueryParserConstants
           break label_12;
         }
         jj_consume_token(COMMA);
-        TermName(axiomName, parserAssembler);
+        TermName(qualifiedAxiomName, parserAssembler);
       }
       jj_consume_token(RPAREN);
       break;
@@ -1456,7 +1438,7 @@ public class QueryParser implements QueryParserConstants
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LPAREN:
-      AxiomItem(axiomName, parserAssembler);
+      AxiomItem(qualifiedAxiomName, parserAssembler);
       label_13:
       while (true) 
       {
@@ -1470,14 +1452,14 @@ public class QueryParser implements QueryParserConstants
           break label_13;
         }
         jj_consume_token(COMMA);
-        AxiomItem(axiomName, parserAssembler);
+        AxiomItem(qualifiedAxiomName, parserAssembler);
       }
       break;
     case RESOURCE:
-      ResourceDeclaration(axiomName, parserAssembler);
+      ResourceDeclaration(qualifiedAxiomName, parserAssembler);
       break;
     case PARAMETER:
-      ParameterDeclaration(axiomName, parserAssembler);
+      ParameterDeclaration(qualifiedAxiomName, parserAssembler);
       break;
     default:
       jj_la1[51] = jj_gen;
@@ -1488,12 +1470,12 @@ public class QueryParser implements QueryParserConstants
 
   final public void ChoiceDeclaration(ParserAssembler parserAssembler) throws ParseException
   {
-    String axiomName;
+      QualifiedName qualifiedAxiomName;
     int selection = 0;
     jj_consume_token(CHOICE);
-    axiomName = Choice(parserAssembler);
+    qualifiedAxiomName = Choice(parserAssembler);
     jj_consume_token(LPAREN);
-    TermName(axiomName, parserAssembler);
+    TermName(qualifiedAxiomName, parserAssembler);
     label_14:
     while (true) 
     {
@@ -1507,11 +1489,11 @@ public class QueryParser implements QueryParserConstants
         break label_14;
       }
       jj_consume_token(COMMA);
-      TermName(axiomName, parserAssembler);
+      TermName(qualifiedAxiomName, parserAssembler);
     }
     jj_consume_token(RPAREN);
     jj_consume_token(COLON);
-    ChoiceItem(selection, axiomName, parserAssembler);
+    ChoiceItem(selection, qualifiedAxiomName, parserAssembler);
     label_15:
     while (true) 
     {
@@ -1525,44 +1507,45 @@ public class QueryParser implements QueryParserConstants
         break label_15;
       }
       jj_consume_token(COMMA);
-      ChoiceItem(++selection, axiomName, parserAssembler);
+      ChoiceItem(++selection, qualifiedAxiomName, parserAssembler);
     }
-    List<String> termNameList = parserAssembler.getAxiomTermNameList(axiomName);
+    List<String> termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
     for (String termName: termNameList)
         parserAssembler.getOperandMap().addOperand(termName, null);
   }
 
-  final public String Axiom(ParserAssembler parserAssembler) throws ParseException
+  final public QualifiedName Axiom(ParserAssembler parserAssembler) throws ParseException
   {
     Token axiomToken;
     axiomToken = jj_consume_token(IDENTIFIER);
-    {if (true) return axiomToken.image;}
+    {if (true) return parserAssembler.getContextName(axiomToken.image);}
     throw new Error("Missing return statement in function");
   }
 
-  final public String Choice(ParserAssembler parserAssembler) throws ParseException
+  final public QualifiedName Choice(ParserAssembler parserAssembler) throws ParseException
   {
     Token choiceToken;
     choiceToken = jj_consume_token(IDENTIFIER);
-    String name = choiceToken.image;
-    parserAssembler.createAxiom(name);
-    Template template = parserAssembler.createTemplate(name, true);
+    QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
+    parserAssembler.createAxiom(qualifiedChoiceName);
+    QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), qualifiedChoiceName.getName(), QualifiedName.EMPTY);
+    Template template = parserAssembler.createTemplate(qualifiedTemplateName, true);
     template.setChoice(true);
-    {if (true) return name;}
+    {if (true) return qualifiedChoiceName;}
     throw new Error("Missing return statement in function");
   }
 
-  final public void TermName(String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public void TermName(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
     Token nameToken;
     nameToken = jj_consume_token(IDENTIFIER);
-      parserAssembler.addAxiomTermName(axiomName, nameToken.image);
+      parserAssembler.addAxiomTermName(qualifiedAxiomName, nameToken.image);
   }
 
-  final public void AxiomItem(String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public void AxiomItem(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
     jj_consume_token(LPAREN);
-    Fact(axiomName, parserAssembler);
+    Fact(qualifiedAxiomName, parserAssembler);
     label_16:
     while (true) 
     {
@@ -1576,17 +1559,17 @@ public class QueryParser implements QueryParserConstants
         break label_16;
       }
       jj_consume_token(COMMA);
-      Fact(axiomName, parserAssembler);
+      Fact(qualifiedAxiomName, parserAssembler);
     }
     jj_consume_token(RPAREN);
-      parserAssembler.saveAxiom(axiomName);
+      parserAssembler.saveAxiom(qualifiedAxiomName);
   }
 
-  final public void ChoiceItem(int selection, String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
     Operand operand;
-    String name = parserAssembler.getAxiomTermName(axiomName, 0);
-    parserAssembler.addAxiom(axiomName, new Parameter(Term.ANONYMOUS, new Null()));
+    String name = parserAssembler.getAxiomTermName(qualifiedAxiomName, 0);
+    parserAssembler.addAxiom(qualifiedAxiomName, new Parameter(Term.ANONYMOUS, new Null()));
     jj_consume_token(LPAREN);
     operand = ChoiceExpression(name, parserAssembler);
     label_17:
@@ -1602,30 +1585,31 @@ public class QueryParser implements QueryParserConstants
         break label_17;
       }
       jj_consume_token(COMMA);
-      Fact(axiomName, parserAssembler);
+      Fact(qualifiedAxiomName, parserAssembler);
     }
     jj_consume_token(RPAREN);
-       parserAssembler.saveAxiom(axiomName);
-       parserAssembler.getTemplate(axiomName);
-       parserAssembler.addTemplate(axiomName, operand);
+       parserAssembler.saveAxiom(qualifiedAxiomName);
+       QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
+       parserAssembler.addTemplate(qualifiedTemplateName, operand);
   }
 
   final public Operand ChoiceExpression(String name, ParserAssembler parserAssembler) throws ParseException
   {
     Operand expression;
+    QualifiedName qname = parserAssembler.getContextName(name);
     expression = Expression(parserAssembler);
       if (expression instanceof StringOperand)
-          {if (true) return new RegExOperand(name, expression, 0, null);}
+          {if (true) return new RegExOperand(qname, expression, 0, null);}
       else if ((expression instanceof Variable) ||
                (expression instanceof ExpressionParameter) ||
                (expression instanceof ItemListVariable) ||
                (expression instanceof AxiomListVariable))
-          {if (true) return new MatchOperand(name, expression);}
-      {if (true) return new Evaluator(name, expression, "&&" );}
+          {if (true) return new MatchOperand(qname, expression);}
+      {if (true) return new Evaluator(qname, expression, "&&" );}
     throw new Error("Missing return statement in function");
   }
 
-  final public AxiomProvider ResourceDeclaration(String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public AxiomProvider ResourceDeclaration(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
   Token nameToken;
   Map<String, Object> properties = new HashMap<String, Object>();
@@ -1642,17 +1626,17 @@ public class QueryParser implements QueryParserConstants
       jj_la1[56] = jj_gen;
       ;
     }
-    {if (true) return parserAssembler.setResourceProperties(getText(nameToken), axiomName, properties);}
+    {if (true) return parserAssembler.setResourceProperties(getText(nameToken), qualifiedAxiomName, properties);}
     throw new Error("Missing return statement in function");
   }
 
-  final public void ParameterDeclaration(String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public void ParameterDeclaration(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
     jj_consume_token(PARAMETER);
-    parserAssembler.setParameter(axiomName);
+    parserAssembler.setParameter(qualifiedAxiomName);
   }
 
-  final public void Fact(String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public void Fact(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
   Parameter param = null;
   Token lit = null;
@@ -1665,15 +1649,15 @@ public class QueryParser implements QueryParserConstants
     case FALSE:
     case NULL:
       param = LiteralTerm();
-    parserAssembler.addAxiom(axiomName, param);
+    parserAssembler.addAxiom(qualifiedAxiomName, param);
       break;
     case NUMBER_LITERAL:
       lit = jj_consume_token(NUMBER_LITERAL);
-    parserAssembler.addAxiom(axiomName, new NumberTerm(getText(lit), parserAssembler.getScopeLocale()));
+    parserAssembler.addAxiom(qualifiedAxiomName, new NumberTerm(getText(lit), parserAssembler.getScopeLocale()));
       break;
     case NAN:
       jj_consume_token(NAN);
-    parserAssembler.addAxiom(axiomName, new DoubleTerm("NaN"));
+    parserAssembler.addAxiom(qualifiedAxiomName, new DoubleTerm("NaN"));
       break;
     default:
       jj_la1[57] = jj_gen;
@@ -2241,7 +2225,8 @@ public class QueryParser implements QueryParserConstants
 
   final public Operand PrimaryExpression(ParserAssembler parserAssembler) throws ParseException
   {
-  String name = null;;
+  String name = null;
+  QualifiedName qname;
   Token literal = null;
   Operand param1 = null;
   Operand param2 = null;
@@ -2260,7 +2245,7 @@ public class QueryParser implements QueryParserConstants
     case NUMBER_LITERAL:
       literal = jj_consume_token(NUMBER_LITERAL);
     NumberTerm numberTerm = new NumberTerm(getText(literal), parserAssembler.getScopeLocale());
-    Variable var = new Variable(Term.ANONYMOUS);
+    Variable var = new Variable(QualifiedName.ANONYMOUS);
     var.assign(numberTerm.getValue());
     {if (true) return var;}
       break;
@@ -2291,22 +2276,23 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(LPAREN);
       name = Name();
       jj_consume_token(RPAREN);
-    Operand listOperand = parserAssembler.getOperandMap().get(name);
-    if (listOperand != null)
-        {if (true) return new ListLength(name, listOperand);}
-    else
-        {if (true) return new ListLength(name, parserAssembler.getItemList(name));}
-      break;
+      qname = parserAssembler.getContextName(name);
+      Operand listOperand = parserAssembler.findOperandByName(name);
+      if (listOperand != null)
+          return new ListLength(qname, listOperand);
+      else 
+          return new ListLength(qname, parserAssembler.getItemList(name));
     case FORMAT:
       jj_consume_token(FORMAT);
       jj_consume_token(LPAREN);
       name = Name();
       jj_consume_token(RPAREN);
-    Operand operand = operandMap.getOperand(name);
+    qname = parserAssembler.getContextName(name + "_format");
+    Operand operand = parserAssembler.findOperandByName(name);
     if (operand == null)
         {if (true) throw new ParseException("Variable \u005c"" + name + "\u005c" not found");}
     Scope scope = parserAssembler.getScope();
-    FormatterOperand formatter = new FormatterOperand(name, operand, parserAssembler.getScopeLocale());
+    FormatterOperand formatter = new FormatterOperand(qname, operand, parserAssembler.getScopeLocale());
     if (scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
         parserAssembler.registerLocaleListener(formatter);
     {if (true) return formatter;}
@@ -2316,7 +2302,8 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(LPAREN);
       name = Name();
       jj_consume_token(RPAREN);
-    Operand factOperand = parserAssembler.getOperandMap().get(name);
+    qname = QualifiedName.parseName(name);
+    Operand factOperand = parserAssembler.getOperandMap().get(qname);
     if (factOperand != null)
         {if (true) return new FactOperand(factOperand);}
     else
@@ -2335,6 +2322,7 @@ public class QueryParser implements QueryParserConstants
   Operand param1 = null;
   Operand param2 = null;
   Operand params = null;
+  QualifiedName qname;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LBRACKET:
@@ -2384,7 +2372,8 @@ public class QueryParser implements QueryParserConstants
         ;
       }
       jj_consume_token(RPAREN);
-    {if (true) return parserAssembler.getCallOperand(name, params);}
+      qname = QualifiedName.parseName(name);
+    {if (true) return parserAssembler.getCallOperand(qname, params);}
       break;
     default:
       jj_la1[82] = jj_gen;
@@ -2541,20 +2530,20 @@ public class QueryParser implements QueryParserConstants
     case INTEGER_LITERAL:
       lit = jj_consume_token(INTEGER_LITERAL);
     Long litValue = Long.decode(lit.image);
-    {if (true) return new IntegerOperand(Term.ANONYMOUS, litValue);}
+    {if (true) return new IntegerOperand(QualifiedName.ANONYMOUS, litValue);}
       break;
     case FLOATING_POINT_LITERAL:
       lit = jj_consume_token(FLOATING_POINT_LITERAL);
-    {if (true) return new DoubleOperand(Term.ANONYMOUS, Double.valueOf(lit.image));}
+    {if (true) return new DoubleOperand(QualifiedName.ANONYMOUS, Double.valueOf(lit.image));}
       break;
     case STRING_LITERAL:
       lit = jj_consume_token(STRING_LITERAL);
-    {if (true) return new StringOperand(Term.ANONYMOUS, getText(lit));}
+    {if (true) return new StringOperand(QualifiedName.ANONYMOUS, getText(lit));}
       break;
     case TRUE:
     case FALSE:
       flag = BooleanLiteral();
-    {if (true) return new BooleanOperand(Term.ANONYMOUS, flag);}
+    {if (true) return new BooleanOperand(QualifiedName.ANONYMOUS, flag);}
       break;
     case NULL:
       NullLiteral();

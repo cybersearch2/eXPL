@@ -20,6 +20,7 @@ import java.util.List;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -33,7 +34,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 public class AxiomListSpec
 {
     /** Name of axiom list */
-    protected String listName;
+    protected QualifiedName qualifiedListName;
     /** Backing axiom list */
     protected AxiomList axiomList;
     /** Axiom selection index. Value of -1 means not used */
@@ -62,20 +63,20 @@ public class AxiomListSpec
         this.axiomList = axiomList;
         this.axiomExpression = axiomExpression;
         this.termExpression = termExpression;
-        this.listName = axiomList.getName();
+        this.qualifiedListName = axiomList.getQualifiedName();
         init();
     }
 
     /**
     * Construct AxiomListSpec object for case backing AxiomList needs to be evaluated
-     * @param listName Name of axiom list
+     * @param qualifiedListName Qualified nName of axiom list
      * @param axiomListVariable Compiler operand to supply AxiomList object on evaluation
      * @param axiomExpression Compiler operand for axiom selection
      * @param termExpression Compiler operand for term selection
      */
-    public AxiomListSpec(String listName, Operand axiomListVariable, Operand axiomExpression, Operand termExpression)
+    public AxiomListSpec(QualifiedName qualifiedListName, Operand axiomListVariable, Operand axiomExpression, Operand termExpression)
     {
-        this.listName = listName;
+        this.qualifiedListName = qualifiedListName;
         this.axiomListVariable = axiomListVariable;
         this.axiomExpression = axiomExpression;
         this.termExpression = termExpression;
@@ -88,16 +89,7 @@ public class AxiomListSpec
      */
     public String getListName()
     {
-        return listName;
-    }
-
-    /**
-     * Sets name of axiom list
-     * @param listName
-     */
-    public void setListName(String listName)
-    {
-        this.listName = listName;
+        return qualifiedListName.getName();
     }
 
     /**
@@ -206,7 +198,7 @@ public class AxiomListSpec
         {
             AxiomTermList axiomTermList = (AxiomTermList)itemListVariable;
             String axiomKey = axiomTermList.getKey();
-            String axiomName = axiomTermList.getName();
+            QualifiedName axiomName = axiomTermList.getQualifiedName();
             if ((axiomList == null) || 
                  !axiomList.getName().equals(axiomTermList.getName()) ||
                  !axiomList.getKey().equals(axiomTermList.getKey()))
@@ -251,7 +243,7 @@ public class AxiomListSpec
         {
             termIndex = getIndexForName(suffix, axiomTermNameList);
             if (termIndex == -1)
-                 throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + suffix + "\"");
+                 throw new ExpressionException("List \"" + qualifiedListName.toString() + "\" does not have term named \"" + suffix + "\"");
             termExpression = null;
         }
         else // Note the following has no effect when called from update()

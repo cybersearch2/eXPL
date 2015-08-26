@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 
 /**
@@ -71,8 +72,8 @@ public abstract class ChainQuery
 
 	/**
 	 * Set axiom listener to receive each solution as it is produced
-	 * @param key Reference to axiom by name
+	 * @param qname Reference to axiom by qualified name
 	 * @param axiomListener The axiom listener object
 	 */
-	abstract void setAxiomListener(String key, AxiomListener axiomListener); 
+	abstract void setAxiomListener(QualifiedName qname, AxiomListener axiomListener); 
 }

@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -30,9 +31,9 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 public class Result 
 {
     /** Empty collection */
-    static Map<String, Iterable<Axiom>> EMPTY_LIST_MAP;
+    static Map<QualifiedName, Iterable<Axiom>> EMPTY_LIST_MAP;
     /** Container of result lists accessible by Iterable interface */
-	protected Map<String, Iterable<Axiom>> listMap;
+	protected Map<QualifiedName, Iterable<Axiom>> listMap;
     /** Container of result axioms */
     protected Map<String, Axiom> axiomMap;
 
@@ -45,7 +46,7 @@ public class Result
 	 * Create Result object
 	 * @param listMap Container of result axiom lists accessible by Iterable interface or null if none available
 	 */
-	public Result(Map<String, Iterable<Axiom>> listMap, Map<String, Axiom> axiomMap) 
+	public Result(Map<QualifiedName, Iterable<Axiom>> listMap, Map<String, Axiom> axiomMap) 
 	{
 		this.listMap = listMap == null ? EMPTY_LIST_MAP : listMap;
 		this.axiomMap = axiomMap;

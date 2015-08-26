@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -36,7 +37,7 @@ public class Solution
 	/** Axioms referenced by key */
 	protected Map<String, Axiom> axiomMap;
 	/** Optional axiom listeners referenced by key */
-	protected Map<String, List<AxiomListener>> axiomListenerMap;
+	protected Map<QualifiedName, List<AxiomListener>> axiomListenerMap;
 
 	/**
 	 * Construct a Solution object
@@ -66,16 +67,30 @@ public class Solution
 
 	/**
 	 * Add axiom to this object and notify listener if present
-	 * @param key
+	 * @param qname QualifiedName of axiom
 	 * @param axiom Axiom
 	 */
-	public void put(String key, Axiom axiom) 
+	public void put(QualifiedName qname, Axiom axiom) 
 	{
-		axiomMap.put(key, axiom);
-		if ((axiomListenerMap != null) && axiomListenerMap.containsKey(key))
-			for (AxiomListener axiomListener: axiomListenerMap.get(key))
+		axiomMap.put(qname.toString(), axiom);
+		if ((axiomListenerMap != null) && axiomListenerMap.containsKey(qname))
+			for (AxiomListener axiomListener: axiomListenerMap.get(qname))
 				axiomListener.onNextAxiom(axiom);
 	}
+
+    /**
+     * Add axiom to this object and notify listener if present
+     * @param key Name of axiom
+     * @param axiom Axiom
+     */
+    public void put(String key, Axiom axiom) 
+    {
+        axiomMap.put(key.toString(), axiom);
+        QualifiedName qname = QualifiedName.parseGlobalName(key);
+        if ((axiomListenerMap != null) && axiomListenerMap.containsKey(qname))
+            for (AxiomListener axiomListener: axiomListenerMap.get(qname))
+                axiomListener.onNextAxiom(axiom);
+    }
 
 	/**
 	 * Returns set of axiom keys
@@ -139,11 +154,11 @@ public class Solution
 	 * @param key
 	 * @param axiomListener AxiomListener object
 	 */
-	void setAxiomListener(String key, AxiomListener axiomListener) 
+	void setAxiomListener(QualifiedName key, AxiomListener axiomListener) 
 	{
 		List<AxiomListener> axiomListenerList = null;
 		if (axiomListenerMap == null)
-			axiomListenerMap = new HashMap<String, List<AxiomListener>>();
+			axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
 		else
 			axiomListenerList = axiomListenerMap.get(key);
 		if (axiomListenerList == null)

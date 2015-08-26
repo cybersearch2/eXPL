@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -35,8 +36,8 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  */
 public class AxiomTermList implements ItemList<Object> 
 {
-	/** Name of list */
-	protected String name;
+	/** Qualified name of list */
+	protected QualifiedName qname;
     /** Axiom key */
     protected String key;
     /** The Axiom being wrapped */
@@ -56,12 +57,12 @@ public class AxiomTermList implements ItemList<Object>
 	
 	/**
 	 * Construct an AxiomTermList object. The initial axiom is empty until axiomListener is notified.
-	 * @param name Name of list
+	 * @param name Qualified name of list
 	 * @param key Axiom key
 	 */
-	public AxiomTermList(String name, String key) 
+	public AxiomTermList(QualifiedName qname, String key) 
 	{
-		this.name = name;
+		this.qname = qname;
 		this.key = key;
 		axiom = EMPTY_AXIOM;
 		axiomListener = new AxiomListener(){
@@ -137,12 +138,23 @@ public class AxiomTermList implements ItemList<Object>
 
 	/**
 	 * 
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getQualifiedName()
+	 */
+    @Override
+    public QualifiedName getQualifiedName()
+    {
+        return qname;
+    }
+
+
+	/**
+	 * 
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getName()
 	 */
 	@Override
 	public String getName() 
 	{
-		return name;
+		return qname.getName();
 	}
 
 	/**
@@ -223,7 +235,7 @@ public class AxiomTermList implements ItemList<Object>
 	public void verify(int index) 
 	{
 		if (index >= axiom.getTermCount() || (index < 0))
-			throw new IllegalStateException("AxiomTermList \"" + name +"\" index " + index + " out of bounds");
+			throw new IllegalStateException("AxiomTermList \"" + qname.toString() +"\" index " + index + " out of bounds");
 	}
 
 	@Override
@@ -269,12 +281,20 @@ public class AxiomTermList implements ItemList<Object>
 		};
 	}
 
+	/**
+	 * 
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#clear()
+	 */
 	@Override
 	public void clear() 
 	{
 		axiom = EMPTY_AXIOM;
 	}
 
+	/**
+	 * 
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getItemClass()
+	 */
     @Override
     public Class<?> getItemClass()
     {

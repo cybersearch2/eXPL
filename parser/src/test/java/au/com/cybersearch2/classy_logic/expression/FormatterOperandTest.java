@@ -18,10 +18,8 @@ package au.com.cybersearch2.classy_logic.expression;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -31,6 +29,7 @@ import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 
 /**
  * FormatterOperandTest
@@ -50,8 +49,8 @@ public class FormatterOperandTest
 			if (!locale.getCountry().isEmpty() && 
 					 locale.getScript().isEmpty())
 			{
-		    	DoubleOperand targetOperand = new DoubleOperand("Number", Double.parseDouble("1234567.89"));
-	 	        FormatterOperand formatOperand = new FormatterOperand(locale.getCountry(), targetOperand, locale);
+		    	DoubleOperand targetOperand = new TestDoubleOperand("Number", Double.parseDouble("1234567.89"));
+	 	        FormatterOperand formatOperand = new FormatterOperand(QualifiedName.parseName(locale.getCountry()), targetOperand, locale);
 	 	        assertThat(formatOperand.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 	 	        //System.out.println(formatOperand.getValue().toString() + " " + locale.toString());
 	 	        assertThat(formatOperand.getValue().toString() + " " + locale.toString()).isEqualTo(reader.readLine());
@@ -72,9 +71,9 @@ public class FormatterOperandTest
 			{
 				Calendar date = GregorianCalendar.getInstance();
 				date.setTime(new Date());
-		    	Variable targetOperand = new Variable("Date");
+		    	Variable targetOperand = new TestVariable("Date");
 		    	targetOperand.assign(date);
-	 	        FormatterOperand formatOperand = new FormatterOperand(locale.getCountry(), targetOperand, locale);
+	 	        FormatterOperand formatOperand = new FormatterOperand(QualifiedName.parseName(locale.getCountry()), targetOperand, locale);
 	 	        assertThat(formatOperand.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 	 	        System.out.println(formatOperand.getValue().toString() + " " + locale.toString());
 	 	        //assertThat(formatOperand.getValue().toString() + " " + locale.toString()).isEqualTo(reader.readLine());

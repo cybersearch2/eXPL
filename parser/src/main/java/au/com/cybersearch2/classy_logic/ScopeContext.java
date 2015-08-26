@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
@@ -36,9 +37,9 @@ public class ScopeContext
 	/** Map of global operands and values used to save and restore initial state */
     protected Map<Operand, Object> globalOperandValueMap;
     /** Names of lists which are empty at time of object construction */
-    protected List<String> emptyListNames;
+    protected List<QualifiedName> emptyListNames;
     /** Names of global lists which are empty at time of object construction */
-    protected List<String> emptyGlobalListNames;
+    protected List<QualifiedName> emptyGlobalListNames;
     /** Flag to indicate function scope */
     protected boolean isFunctionScope;
 

@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -28,31 +29,31 @@ public class DoubleOperand extends ExpressionParameter<Double>
 
 	/**
 	 * Construct named DoubleOperand object
-	 * @param name
+     * @param qname Qualified name
 	 */
-	public DoubleOperand(String name) 
+	public DoubleOperand(QualifiedName qname) 
 	{
-		super(name);
+		super(qname);
 	}
 
 	/**
 	 * Construct named, non empty DoubleOperand object
-	 * @param name 
+     * @param qname Qualified name
 	 * @param value Double object
 	 */
-	public DoubleOperand(String name, Double value) 
+	public DoubleOperand(QualifiedName qname, Double value) 
 	{
-		super(name, value);
+		super(qname, value);
 	}
 
 	/**
 	 * Construct named DoubleOperand object which delegates to an expression to set value
-	 * @param name
+     * @param qname Qualified name
 	 * @param expression Operand which evaluates value
 	 */
-	public DoubleOperand(String name, Operand expression) 
+	public DoubleOperand(QualifiedName qname, Operand expression) 
 	{
-		super(name, expression);
+		super(qname, expression);
 
 	}
 

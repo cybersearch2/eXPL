@@ -25,13 +25,17 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Mockito.*;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
-import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
-import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
+import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;
+import au.com.cybersearch2.classy_logic.expression.TestEvaluator;
+import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.TestVariable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -104,7 +108,7 @@ public class CalculatorTest
         when(template.toAxiom()).thenReturn(axiom);
         when(template.getId()).thenReturn(1);
         assertThat(calculator.completeSolution(solution, template)).isTrue();
-        verify(solution).put(TEMPLATE_NAME, axiom);
+        verify(solution).put(QualifiedName.parseTemplateName(TEMPLATE_NAME), axiom);
        
 	}
 	
@@ -183,7 +187,7 @@ public class CalculatorTest
         when(template.toAxiom()).thenReturn(solutionAxiom);
         when(template.getId()).thenReturn(1);
         calculator.execute(axiom, template, solution);
-        verify(solution).put(TEMPLATE_NAME, solutionAxiom);
+        verify(solution).put(QualifiedName.parseTemplateName(TEMPLATE_NAME), solutionAxiom);
 	}
 	
 	@Test
@@ -217,25 +221,25 @@ public class CalculatorTest
         when(template.toAxiom()).thenReturn(solutionAxiom);
         when(template.getId()).thenReturn(1);
         calculator.execute(template, solution);
-        verify(solution).put(TEMPLATE_NAME, solutionAxiom);
+        verify(solution).put(QualifiedName.parseTemplateName(TEMPLATE_NAME), solutionAxiom);
 	}
 	
     @Test
 	public void test_simple() 
 	{
-    	IntegerOperand n = new IntegerOperand("n");
-    	IntegerOperand limit = new IntegerOperand("limit");
+    	IntegerOperand n = new TestIntegerOperand("n");
+    	IntegerOperand limit = new TestIntegerOperand("limit");
     	List<Operand> operandList = new ArrayList<Operand>();
-    	Evaluator calcExpression = new Evaluator("n", "++", n);
-	    Evaluator testExpression = new Evaluator(n, "<", limit);
-	    Evaluator shortCircuit = new Evaluator(testExpression, "&&");
+    	Evaluator calcExpression = new TestEvaluator("n", "++", n);
+	    Evaluator testExpression = new TestEvaluator(n, "<", limit);
+	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(calcExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template("loop");
+	    Template template = new Template(parseTemplateName("loop"));
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template("calc", n, loopy, limit);
+        Template calcTemplate = new Template(parseTemplateName("calc"), n, loopy, limit);
         calcTemplate.putInitData("n", Long.valueOf(1));
         calcTemplate.putInitData("limit", Long.valueOf(3));
         Solution solution = new Solution();
@@ -247,21 +251,21 @@ public class CalculatorTest
     @Test
 	public void test_factorial() 
 	{
-    	IntegerOperand n = new IntegerOperand("n");
-    	BigDecimalOperand factorial = new BigDecimalOperand("factorial");
-    	IntegerOperand i = new IntegerOperand("i");
+    	IntegerOperand n = new TestIntegerOperand("n");
+    	BigDecimalOperand factorial = new TestBigDecimalOperand("factorial");
+    	IntegerOperand i = new TestIntegerOperand("i");
     	List<Operand> operandList = new ArrayList<Operand>();
-    	Evaluator factorialExpression = new Evaluator("factorial", factorial, "*=", i);
-       	Evaluator iExpression = new Evaluator(i, "++");
- 	    Evaluator testExpression = new Evaluator(iExpression, "<", n);
-	    Evaluator shortCircuit = new Evaluator(testExpression, "&&");
+    	Evaluator factorialExpression = new TestEvaluator("factorial", factorial, "*=", i);
+       	Evaluator iExpression = new TestEvaluator(i, "++");
+ 	    Evaluator testExpression = new TestEvaluator(iExpression, "<", n);
+	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(factorialExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template("loop");
+	    Template template = new Template(parseTemplateName("loop"));
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template("factorial", n, factorialExpression, i, loopy);
+        Template calcTemplate = new Template(parseTemplateName("factorial"), n, factorialExpression, i, loopy);
         calcTemplate.putInitData("factorial", Integer.valueOf(1));
         calcTemplate.putInitData("n", Long.valueOf(4));
         calcTemplate.putInitData("i", Long.valueOf(1));
@@ -274,21 +278,21 @@ public class CalculatorTest
     @Test
     public void test_axiom_listener()
     {
-    	IntegerOperand n = new IntegerOperand("n");
-    	BigDecimalOperand factorial = new BigDecimalOperand("factorial");
-    	IntegerOperand i = new IntegerOperand("i");
+    	IntegerOperand n = new TestIntegerOperand("n");
+    	BigDecimalOperand factorial = new TestBigDecimalOperand("factorial");
+    	IntegerOperand i = new TestIntegerOperand("i");
     	List<Operand> operandList = new ArrayList<Operand>();
-    	Evaluator factorialExpression = new Evaluator("factorial", factorial, "*=", i);
-       	Evaluator iExpression = new Evaluator(i, "++");
- 	    Evaluator testExpression = new Evaluator(iExpression, "<", n);
-	    Evaluator shortCircuit = new Evaluator(testExpression, "&&");
+    	Evaluator factorialExpression = new TestEvaluator("factorial", factorial, "*=", i);
+       	Evaluator iExpression = new TestEvaluator(i, "++");
+ 	    Evaluator testExpression = new TestEvaluator(iExpression, "<", n);
+	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(factorialExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template("loop");
+	    Template template = new Template(parseTemplateName("loop"));
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template("factorial", n, factorialExpression, i, loopy);
+        Template calcTemplate = new Template(parseTemplateName("factorial"), n, factorialExpression, i, loopy);
         calcTemplate.putInitData("factorial", Long.valueOf(1));
         calcTemplate.putInitData("i", Long.valueOf(1));
         Solution solution = new Solution();
@@ -330,13 +334,13 @@ public class CalculatorTest
     	ArrayList<Axiom> choiceAxiomList = new ArrayList<Axiom>();
     	choiceAxiomList.add(axiom0);
     	choiceAxiomList.add(axiom1);
-    	Template template = new Template(CHOICE_NAME);
+    	Template template = new Template(parseTemplateName(CHOICE_NAME));
     	template.setChoice(true);
-    	Operand expression = new Evaluator(new Variable("amount"), "<", new IntegerOperand(Term.ANONYMOUS, Integer.valueOf(12000)));
-    	Evaluator evaluator0 = new Evaluator("amount", expression, "&&"); 
+    	Operand expression = new TestEvaluator(new TestVariable("amount"), "<", new TestIntegerOperand(Term.ANONYMOUS, Integer.valueOf(12000)));
+    	Evaluator evaluator0 = new TestEvaluator("amount", expression, "&&"); 
     	template.addTerm(evaluator0);
-    	expression = new BooleanOperand(Term.ANONYMOUS, Boolean.TRUE);
-    	Evaluator evaluator1 = new Evaluator("amount", expression, "&&"); 
+    	expression = new TestBooleanOperand(Term.ANONYMOUS, Boolean.TRUE);
+    	Evaluator evaluator1 = new TestEvaluator("amount", expression, "&&"); 
     	template.addTerm(evaluator1);
 		Calculator calculator = new Calculator();
 		Choice choice = mock(Choice.class);
@@ -358,5 +362,10 @@ public class CalculatorTest
 		//System.out.println(solution.getAxiom(CHOICE_NAME).toString());
 		assertThat(solution.getAxiom(CHOICE_NAME).toString()).isEqualTo("ChoiceName(amount = 11999, threshold = 0, threshold = 0, percent = 1.0)");
 		*/
+    }
+
+    protected static QualifiedName parseTemplateName(String name)
+    {
+        return new QualifiedName(QualifiedName.EMPTY, name, QualifiedName.EMPTY);
     }
 }

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -39,7 +40,7 @@ public class LogicChainQuery extends ChainQuery
 	/** A set of AxiomSource objects referenced by name */
  	protected AxiomCollection axiomCollection;
 	/** Optional axiom listener to receive each solution as it is produced */
-	protected Map<String, List<AxiomListener>> axiomListenerMap;
+	protected Map<QualifiedName, List<AxiomListener>> axiomListenerMap;
 
 	/**
 	 * Create LogicChainQuery object
@@ -109,21 +110,21 @@ public class LogicChainQuery extends ChainQuery
 
 	/**
 	 * Set axiom listener to receive each solution as it is produced
-	 * @param key Reference to axiom by name
+	 * @param qname Reference to axiom by qualified name
 	 * @param axiomListener The axiom listener object
 	 */
 	@Override
-	void setAxiomListener(String key, AxiomListener axiomListener) 
+	void setAxiomListener(QualifiedName qname, AxiomListener axiomListener) 
 	{
 		List<AxiomListener> axiomListenerList = null;
 		if (axiomListenerMap == null)
-			axiomListenerMap = new HashMap<String, List<AxiomListener>>();
+			axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
 		else
-			axiomListenerList = axiomListenerMap.get(key);
+			axiomListenerList = axiomListenerMap.get(qname);
 		if (axiomListenerList == null)
 		{
 			axiomListenerList = new ArrayList<AxiomListener>();
-			axiomListenerMap.put(key, axiomListenerList);
+			axiomListenerMap.put(qname, axiomListenerList);
 		}
 		axiomListenerList.add(axiomListener);
 	}

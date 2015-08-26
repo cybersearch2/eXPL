@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.list;
 
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
@@ -28,8 +29,8 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
  */
 public class ListLength extends Variable 
 {
-	/** List name. This operand's name has ".length" appended */
-	protected String listName;
+	/** List name. This operand's name has "_length" appended */
+	protected QualifiedName qualifiedListName;
 	/** The list object */
     protected ItemList<?> itemList;
     /** Operand containing a list value */
@@ -40,10 +41,10 @@ public class ListLength extends Variable
 	 * @param listName
 	 * @param itemList The list object
 	 */
-	public ListLength(String listName, ItemList<?> itemList) 
+	public ListLength(QualifiedName qname, ItemList<?> itemList) 
 	{
-		super(listName + "." + "length");
-		this.listName = listName;
+		super(getLengthName(qname));
+		this.qualifiedListName = qname;
         this.itemList = itemList;
 	}
 
@@ -52,10 +53,10 @@ public class ListLength extends Variable
      * @param listName
      * @param itemListOperand The operand to contain a list object after evaluation
      */
-    public ListLength(String listName, Operand itemListOperand) 
+    public ListLength(QualifiedName qname, Operand itemListOperand) 
     {
-        super(listName + "." + "length");
-        this.listName = listName;
+        super(getLengthName(qname));
+        this.qualifiedListName = qname;
         this.itemListOperand = itemListOperand;
     }
 
@@ -76,5 +77,10 @@ public class ListLength extends Variable
 		this.id = id;
 		return EvaluationStatus.COMPLETE;
 	}
+
+    protected static QualifiedName getLengthName(QualifiedName qname)
+    {
+        return new QualifiedName(qname.toString() + "_length", qname);
+    }
 
 }

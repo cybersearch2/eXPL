@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 
@@ -164,6 +165,16 @@ public class ArrayItemList<T> implements ItemList<T>
 	}
 
 	/**
+	 * getQualifiedName
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getQualifiedName()
+	 */
+    @Override
+    public QualifiedName getQualifiedName()
+    {
+        return proxy.getQualifiedName();
+    }
+
+	/**
 	 * 
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getName()
 	 */
@@ -295,4 +306,5 @@ public class ArrayItemList<T> implements ItemList<T>
     {
         return clazz;
     }
+
 }

@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
@@ -32,14 +33,14 @@ public class ParameterOperand<R> extends Variable
     
     /**
      * Construct a ParameterOperand object
-     * @param name Name of Variable
+     * @param qname Qualified name
      * @param parameters Root of Operand parameter tree or null if no parameters
      * @param callEvaluator Executes function using parameters and returns object of generic type
      */
-    public ParameterOperand(String name, Operand parameters, CallEvaluator<R> callEvaluator) 
+    public ParameterOperand(QualifiedName qname, Operand parameters, CallEvaluator<R> callEvaluator) 
     {
         // Note the value set when the super class evaluates will be subsequently overriden.
-        super(name, parameters);
+        super(qname, parameters);
         parameterList = new ParameterList<R>(parameters, callEvaluator);
     }
 

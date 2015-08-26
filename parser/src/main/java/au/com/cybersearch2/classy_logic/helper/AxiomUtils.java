@@ -71,7 +71,7 @@ public class AxiomUtils
             else
             {
                 AxiomTermList rightAxiomTermList = (AxiomTermList)rightOperand.getValue();
-                rightAxiomList = new AxiomList(rightAxiomTermList.getName(), rightAxiomTermList.getKey());
+                rightAxiomList = new AxiomList(rightAxiomTermList.getQualifiedName(), rightAxiomTermList.getKey());
                 rightAxiomList.setAxiomTermNameList(getTermNames(rightAxiomTermList.getAxiom()));
                 rightAxiomList.assignItem(0, rightAxiomTermList);
             }
@@ -103,7 +103,7 @@ public class AxiomUtils
      * @param argumentList List of terms
      * @return AxiomList object containing marshalled axiom
      */
-    public static AxiomList marshallAxiomTerms(String listName, String axiomKey, List<Term> argumentList)
+    public static AxiomList marshallAxiomTerms(QualifiedName qualifiedListName, String axiomKey, List<Term> argumentList)
     {
         // Give axiom same name as operand
         Axiom axiom = new Axiom(axiomKey);
@@ -114,10 +114,10 @@ public class AxiomUtils
         }
         List<String> axiomTermNameList = getTermNames(axiom);
         // Wrap axiom in AxiomList object to allow interaction with other AxiomLists
-        AxiomTermList axiomTermList = new AxiomTermList(axiomKey, axiomKey);
+        AxiomTermList axiomTermList = new AxiomTermList(qualifiedListName, axiomKey);
         axiomTermList.setAxiom(axiom);
         axiomTermList.setAxiomTermNameList(axiomTermNameList);
-        AxiomList axiomList = new AxiomList(listName, axiomKey);
+        AxiomList axiomList = new AxiomList(qualifiedListName, axiomKey);
         axiomList.assignItem(0, axiomTermList);
         axiomList.setAxiomTermNameList(axiomTermNameList);
         return axiomList;
@@ -152,10 +152,11 @@ public class AxiomUtils
     public static void marshallAxioms(AxiomList axiomList, List<Axiom> axioms)
     {
         List<String> axiomTermNameList = axiomList.getAxiomTermNameList();
+        QualifiedName axiomName = axiomList.getQualifiedName();
         String axiomKey = axiomList.getKey();
         for (int i = 0; i < axioms.size(); i++)
         {   // Each axiom is wrapped in an AxiomTermList to allow access from script
-            AxiomTermList axiomTermList = new AxiomTermList(axiomKey, axiomKey);
+            AxiomTermList axiomTermList = new AxiomTermList(axiomName, axiomKey);
             axiomTermList.setAxiom(axioms.get(i));
             if (axiomTermNameList != null)
                 axiomTermList.setAxiomTermNameList(axiomTermNameList);
@@ -171,12 +172,12 @@ public class AxiomUtils
     public static AxiomList duplicateAxiomList(AxiomList axiomList)
     {
         List<Axiom> dupAxioms = AxiomUtils.copyItemList(axiomList.getName(), axiomList);
-        AxiomList dupAxiomList = new AxiomList(axiomList.getName(), axiomList.getName());
+        AxiomList dupAxiomList = new AxiomList(axiomList.getQualifiedName(), axiomList.getName());
         dupAxiomList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
         int index = 0;
         for (Axiom dupAxiom: dupAxioms)
         {
-            AxiomTermList axiomTermList = new AxiomTermList(axiomList.getName(), axiomList.getName());
+            AxiomTermList axiomTermList = new AxiomTermList(axiomList.getQualifiedName(), axiomList.getName());
             axiomTermList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
             axiomTermList.setAxiom(dupAxiom);
             dupAxiomList.assignItem(index++, axiomTermList);
@@ -272,7 +273,7 @@ public class AxiomUtils
             if (term.getValueClass() == AxiomList.class)
             {
                 AxiomList axiomList = (AxiomList)itemList;
-                AxiomList copyAxiomList = new AxiomList(axiomList.getName(), axiomList.getKey());
+                AxiomList copyAxiomList = new AxiomList(axiomList.getQualifiedName(), axiomList.getKey());
                 copyAxiomList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
                 int index = 0;
                 for (int i = 0; i < axiomList.getLength(); )
@@ -299,7 +300,7 @@ public class AxiomUtils
      */
     public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, int index, String suffix, int id) 
     {
-        Variable variable = new Variable(axiomTermList.getName() + "." + suffix);
+        Variable variable = new Variable(ItemListVariable.getVariableName(axiomTermList, suffix));
         Axiom axiom = axiomTermList.getAxiom();
         if (axiom.getTermCount() > 0)
         {
@@ -316,15 +317,14 @@ public class AxiomUtils
      */
     public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, Operand expression, String suffix, int id) 
     {
-        Variable itemOperand = new Variable(axiomTermList.getName() + "." + suffix);
+        Variable itemOperand = new Variable(ItemListVariable.getVariableName(axiomTermList, suffix));
         // Assign a value to set the delegate must be delayed until the expression is evaluated
         return new AxiomTermListVariable(axiomTermList, itemOperand, expression, suffix, id);
     }
     
-    public static void copyList(String listName, AxiomList axiomList, String prefix, Map<String, Iterable<Axiom>> listMap)
+    public static void copyList(QualifiedName qualifiedListName, AxiomList axiomList, Map<QualifiedName, Iterable<Axiom>> listMap)
     {
             // Use fully qualified key to avoid name collisions
-            String key = prefix.isEmpty() ? listName : (prefix + "." + listName);
             final Iterable<AxiomTermList> axiomTermListIterble = axiomList.getIterable(); 
             Iterable<Axiom> axiomIterable = new Iterable<Axiom>(){
 
@@ -350,6 +350,6 @@ public class AxiomUtils
                         {
                         }};
                 }};
-            listMap.put(key, axiomIterable);
+            listMap.put(qualifiedListName, axiomIterable);
     }
 }

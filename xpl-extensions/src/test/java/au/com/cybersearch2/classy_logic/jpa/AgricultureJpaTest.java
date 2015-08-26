@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
@@ -79,7 +80,7 @@ public class AgricultureJpaTest
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
-        	    AxiomSource agriSource = parserAssembler.getAxiomSource("Data");
+        	    AxiomSource agriSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("Data"));
         	    Iterator<Axiom> iterator = agriSource.iterator();
         	    while (iterator.hasNext())
         	    {
@@ -139,7 +140,7 @@ public class AgricultureJpaTest
     {
         ParserAssembler parserAssembler = null;
         parserAssembler = openScript("include \"agriculture-land.xpl\";");
-        AxiomSource agriSource = parserAssembler.getAxiomSource("Data");
+        AxiomSource agriSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("Data"));
         Iterator<Axiom> dataIterator = agriSource.iterator();
         AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME);
         List<NameMap> termNameList = new ArrayList<NameMap>();

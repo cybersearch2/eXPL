@@ -22,6 +22,7 @@ import java.util.List;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -67,7 +68,7 @@ public class Choice
 		variableList = new ArrayList<Operand>();
 		termNameList = choiceAxiomSource.getAxiomTermNameList();
 	    for (String termName: termNameList)
-	    	variableList.add(parserAssembler.getOperandMap().get(termName));
+	    	variableList.add(parserAssembler.getOperandMap().get(QualifiedName.parseGlobalName(termName)));
 	}
 
 	/**
@@ -108,7 +109,7 @@ public class Choice
                 value = defaultTerm.getValue();
         }
         // Create solution axiom using Template toAxiom() method
-		Template solutionTemplate = new Template(template.getName());
+		Template solutionTemplate = new Template(template.getQualifiedName());
 		int index = 0;
 		Operand operand = variableList.get(index++);
 		operand.assign(value);
@@ -120,7 +121,7 @@ public class Choice
 			solutionTemplate.addTerm(operand);
 			++index;
 		}
-		solution.put(template.getName(), solutionTemplate.toAxiom());
+		solution.put(template.getQualifiedName(), solutionTemplate.toAxiom());
 		return true;
 	}
 }

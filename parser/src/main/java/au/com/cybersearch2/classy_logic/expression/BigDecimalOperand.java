@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import java.math.BigDecimal;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -31,34 +32,31 @@ public class BigDecimalOperand extends ExpressionParameter<BigDecimal>
     
 	/**
 	 * Construct named, empty BigDecimalOperand object
-	 * @param name 
+     * @param qname Qualified name
 	 */
-	public BigDecimalOperand(String name) 
+	public BigDecimalOperand(QualifiedName qname) 
 	{
-		super(name);
-		
+		super(qname);
 	}
 
 	/**
 	 * Construct named, non-empty BigDecimalOperand object
-	 * @param name
+     * @param qname Qualified name
 	 * @param value BigDecimal
 	 */
-	public BigDecimalOperand(String name, BigDecimal value) 
+	public BigDecimalOperand(QualifiedName qname, BigDecimal value) 
 	{
-		super(name, value);
-
+		super(qname, value);
 	}
 
 	/**
 	 * Construct named BigDecimalOperand object which delegates to an expression to set value
-	 * @param name
+     * @param qname Qualified name
 	 * @param expression Operand which evaluates value
 	 */
-	public BigDecimalOperand(String name, Operand expression) 
+	public BigDecimalOperand(QualifiedName qname, Operand expression) 
 	{
-		super(name, expression);
-
+		super(qname, expression);
 	}
 
 	/**

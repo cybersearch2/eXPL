@@ -22,6 +22,7 @@ import java.util.List;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionFinder;
@@ -114,7 +115,7 @@ public class LogicQuery implements SolutionFinder
 	            {
 	                Term term = axiom.getTermByIndex(i);
 	                if (!term.getName().equals(Term.ANONYMOUS))
-	                    template.addTerm(new Variable(term.getName()));
+	                    template.addTerm(new Variable(new QualifiedName(term.getName(), QualifiedName.ANONYMOUS)));
 	            }
 	            emptyTemplate = false;
 	        }
@@ -170,7 +171,7 @@ public class LogicQuery implements SolutionFinder
 			// isfact() flags true if each term of the template is non-empty
 			if ((template.evaluate() == EvaluationStatus.COMPLETE) && template.isFact())
 			{
-				solution.put(template.getName(), template.toAxiom());
+				solution.put(template.getQualifiedName(), template.toAxiom());
 				if ((solutionHandler == null) ||
 				     solutionHandler.onSolution(solution))
 					return true;

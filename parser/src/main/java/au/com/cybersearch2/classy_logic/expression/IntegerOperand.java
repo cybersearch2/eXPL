@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -28,45 +29,46 @@ public class IntegerOperand extends ExpressionParameter<Long>
 
 	/**
 	 * Construct a variable LongOperand object
-	 * @param name
+     * @param qname Qualified name
 	 */
-	public IntegerOperand(String name) 
+	public IntegerOperand(QualifiedName qname) 
 	{
-		super(name);
+		super(qname);
 	}
 
     /**
      * Construct a literal LongOperand object
-     * @param name
+     * @param qname Qualified name
      * @param value Long object
      */
-    public IntegerOperand(String name, Integer value) 
+    public IntegerOperand(QualifiedName qname, Integer value) 
     {
-        super(name, value.longValue());
+        super(qname, value.longValue());
     }
 
 	/**
 	 * Construct a literal LongOperand object
-	 * @param name
+     * @param qname Qualified name
 	 * @param value Long object
 	 */
-	public IntegerOperand(String name, Long value) 
+	public IntegerOperand(QualifiedName qname, Long value) 
 	{
-		super(name, value);
+		super(qname, value);
 	}
 
 	/**
 	 * Long Expression
-	 * @param name
+     * @param qname Qualified name
 	 * @param expression Operand which evaluates value
 	 */
-	public IntegerOperand(String name, Operand expression) 
+	public IntegerOperand(QualifiedName qname, Operand expression) 
 	{
-		super(name, expression);
+		super(qname, expression);
 
 	}
 
 	/**
+	 * getRightOperandOps
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
 	 */
 	@Override
@@ -104,6 +106,7 @@ public class IntegerOperand extends ExpressionParameter<Long>
 	}
 
 	/**
+	 * getLeftOperandOps
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
 	 */
 	@Override
@@ -140,7 +143,7 @@ public class IntegerOperand extends ExpressionParameter<Long>
 	}
 
 	/**
-	 * 
+	 * Unary numberEvaluation
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
 	 */
 	@Override
@@ -161,7 +164,7 @@ public class IntegerOperand extends ExpressionParameter<Long>
 	}
 
 	/**
-	 * 
+	 * Binary numberEvaluation
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
 	 */
 	@Override
@@ -220,7 +223,7 @@ public class IntegerOperand extends ExpressionParameter<Long>
 	}
 
 	/**
-	 * 
+	 * assign
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
 	 */
 	@Override

@@ -18,6 +18,8 @@ package au.com.cybersearch2.classy_logic.list;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -37,6 +39,7 @@ import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrow
 public class AxiomTermListTest 
 {
 	private static final String NAME = "ListOperandName";
+    static QualifiedName QNAME = QualifiedName.parseName(NAME);
 	private static final String KEY = "AxiomKey";
 	private static final String OUT_OF_BOUNDS_MESSAGE = "AxiomTermList \"ListOperandName\" index 0 out of bounds";
 	
@@ -44,7 +47,7 @@ public class AxiomTermListTest
 	@Test
 	public void test_constructor()
 	{
-		AxiomTermList axiomTermList = new AxiomTermList(NAME, KEY);
+		AxiomTermList axiomTermList = new AxiomTermList(QNAME, KEY);
 		assertThat(axiomTermList.getName()).isEqualTo(NAME);
 		assertThat(axiomTermList.getKey()).isEqualTo(KEY);
 		assertThat(axiomTermList.getLength()).isEqualTo(0);
@@ -62,7 +65,7 @@ public class AxiomTermListTest
 		}
 		for (int i = 0; i < axiom.getTermCount(); i++)
 		{
-			IntegerOperand expression = new IntegerOperand("" + i);
+			IntegerOperand expression = new TestIntegerOperand("" + i);
 			expression.assign(Long.valueOf(i));
 			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(expression, Long.toString(i), 1);
 			listVariable.evaluate(1);
@@ -73,7 +76,7 @@ public class AxiomTermListTest
 	@Test
 	public void test_verify()
 	{
-		AxiomTermList axiomOperandList = new AxiomTermList(NAME, KEY);
+		AxiomTermList axiomOperandList = new AxiomTermList(QNAME, KEY);
 		try
 		{
 			axiomOperandList.assignItem(0, new Object());
@@ -84,7 +87,7 @@ public class AxiomTermListTest
 			assertThat(e.getMessage()).isEqualTo(OUT_OF_BOUNDS_MESSAGE);
 		}
 		axiomOperandList.newVariableInstance(0, "0", 1);
-		ItemListVariable<Object> variable1 = axiomOperandList.newVariableInstance(new IntegerOperand("x"), "x", 1);
+		ItemListVariable<Object> variable1 = axiomOperandList.newVariableInstance(new TestIntegerOperand("x"), "x", 1);
 		assertThat(variable1).isInstanceOf(AxiomTermListVariable.class);
 		axiomOperandList.setAxiom(new Axiom(KEY));
 		try
@@ -97,7 +100,7 @@ public class AxiomTermListTest
 			assertThat(e.getMessage()).isEqualTo(OUT_OF_BOUNDS_MESSAGE);
 		}
 		axiomOperandList.newVariableInstance(0, "0", 1);
-		ItemListVariable<Object> variable2 = axiomOperandList.newVariableInstance(new IntegerOperand("x"), "x", 1);
+		ItemListVariable<Object> variable2 = axiomOperandList.newVariableInstance(new TestIntegerOperand("x"), "x", 1);
 		assertThat(variable2).isInstanceOf(AxiomTermListVariable.class);
 		assertThat(variable1).isNotEqualTo(variable2);
 	}

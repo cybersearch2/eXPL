@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
@@ -30,12 +31,12 @@ public class MatchOperand extends Variable
     
     /**
      * Construct MatchOperand object
-     * @param name Term name
+     * @param qname Qualified name
      * @param literal The literal value to match on
      */
-    public MatchOperand(String name, Operand expression)
+    public MatchOperand(QualifiedName qname, Operand expression)
     {
-        super(name, expression);
+        super(qname, expression);
     }
 
     /**

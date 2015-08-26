@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
@@ -60,7 +61,7 @@ public class PersistenceAgricultureTest
         {
             throw new IllegalStateException("Error compiling \"agriculture-land.xpl\"", e);
         }
-        AxiomSource agriSource = parserAssembler.getAxiomSource("Data");
+        AxiomSource agriSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("Data"));
         Iterator<Axiom> dataIterator = agriSource.iterator();
         Iterator<Axiom>  aricultureIterator = ariculture.testDataQuery();
         while ( aricultureIterator.hasNext())

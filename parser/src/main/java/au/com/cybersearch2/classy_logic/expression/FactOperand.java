@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -30,7 +31,7 @@ public class FactOperand extends BooleanOperand
 
     public FactOperand(Operand expression)
     {
-        super("is_" + expression.getName() + "_fact", expression);
+        super(getFactName(expression), expression);
         
     }
 
@@ -61,4 +62,9 @@ public class FactOperand extends BooleanOperand
         return EvaluationStatus.COMPLETE;
     }
     
+    protected static QualifiedName getFactName(Operand expression)
+    {
+        return new QualifiedName("is_" + expression.getName() + "_fact", expression.getQualifiedName());
+    }
+
 }

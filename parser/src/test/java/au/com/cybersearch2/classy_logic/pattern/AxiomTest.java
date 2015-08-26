@@ -23,6 +23,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -65,16 +67,16 @@ public class AxiomTest
 
 	protected Template createChargeUnificationTarget(String name)
 	{
-	    StringOperand city = new StringOperand("city");
-	    StringOperand fee = new StringOperand("fee");
-		return new Template(name, city, fee);
+	    StringOperand city = new TestStringOperand("city");
+	    StringOperand fee = new TestStringOperand("fee");
+		return new Template(parseTemplateName(name), city, fee);
 	}
 	
 	protected Template createCustomerUnificationTarget()
 	{
-	    StringOperand name = new StringOperand("name");
-	    StringOperand city = new StringOperand("city");
-		return new Template("customer", name, city);
+	    StringOperand name = new TestStringOperand("name");
+	    StringOperand city = new TestStringOperand("city");
+		return new Template(parseTemplateName("customer"), name, city);
 	}
 
     @Test
@@ -105,7 +107,7 @@ public class AxiomTest
 	{
     	String TEMPLATE_NAME = "myTemplate";
     	String TEMPLATE_KEY = "templateKey";
-    	Template template = new Template(TEMPLATE_KEY, TEMPLATE_NAME);
+    	Template template = new Template(TEMPLATE_KEY, parseTemplateName(TEMPLATE_NAME));
     	Parameter term = new Parameter("x", new Integer(2));
     	template.addTerm(term);
     	Axiom axiom = template.toAxiom();
@@ -249,7 +251,7 @@ public class AxiomTest
         testAxiom.addTerm(term1);
 		assertThat(testAxiom.pairByPosition).isFalse();
         testAxiom.addTerm(term2);
-        Template template = new Template(NAME, "Template");
+        Template template = new Template(NAME, parseTemplateName("Template"));
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
         when(operand1.getLeftOperand()).thenReturn(null);
@@ -286,7 +288,7 @@ public class AxiomTest
         testAxiom.addTerm(term1);
         testAxiom.addTerm(term2);
 		assertThat(testAxiom.pairByPosition).isTrue();
-        Template template = new Template(NAME, "Template");
+        Template template = new Template(NAME, parseTemplateName("Template"));
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
         when(operand1.getLeftOperand()).thenReturn(null);
@@ -324,7 +326,7 @@ public class AxiomTest
         when(term1.getName()).thenReturn("");
          testAxiom.addTerm(term1);
 		assertThat(testAxiom.pairByPosition).isTrue();
-        Template template = new Template(NAME, "Template");
+        Template template = new Template(NAME, parseTemplateName("Template"));
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
         when(operand1.getLeftOperand()).thenReturn(null);
@@ -360,7 +362,7 @@ public class AxiomTest
         testAxiom.addTerm(term1);
         testAxiom.addTerm(term2);
 		assertThat(testAxiom.pairByPosition).isTrue();
-        Template template = new Template(NAME, "Template");
+        Template template = new Template(NAME, parseTemplateName("Template"));
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
         when(operand1.getLeftOperand()).thenReturn(null);
@@ -392,7 +394,7 @@ public class AxiomTest
         testAxiom.addTerm(term1);
         testAxiom.addTerm(term2);
 		assertThat(testAxiom.pairByPosition).isTrue();
-        Template template = new Template(NAME, "Template");
+        Template template = new Template(NAME, parseTemplateName("Template"));
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
         when(operand1.getLeftOperand()).thenReturn(null);
@@ -424,7 +426,7 @@ public class AxiomTest
         when(term2.getName()).thenReturn("term2");   
         testAxiom.addTerm(term1);
         testAxiom.addTerm(term2);
-        Template template = new Template(NAME, "Template");
+        Template template = new Template(NAME, parseTemplateName("Template"));
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
         when(operand1.getLeftOperand()).thenReturn(null);
@@ -456,7 +458,7 @@ public class AxiomTest
         when(term1.getName()).thenReturn("term1");
         Term term2 = mock(Term.class);
         when(term2.getName()).thenReturn("term2");   
-        Template template = new Template(NAME, "Template");
+        Template template = new Template(NAME, parseTemplateName("Template"));
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
         when(operand1.getLeftOperand()).thenReturn(null);
@@ -475,7 +477,7 @@ public class AxiomTest
         axiomPairs.add(new TermPair(term2, operand2));
 		when(solutionPairer.getPairList()).thenReturn(axiomPairs );
 		Solution solution = new Solution();
-		solution.put(NAME + 1, new Axiom(NAME + 1));
+		solution.put(QualifiedName.parseTemplateName(NAME + 1), new Axiom(NAME + 1));
         testAxiom.unifyTemplate(template, solution);
         verify(term1).unifyTerm(operand1, template.getId());
         verify(term2).unifyTerm(operand2, template.getId());
@@ -501,4 +503,9 @@ public class AxiomTest
        	axiom.addTerm(term3, nameList);
        	assertThat(axiom.getTermCount()).isEqualTo(3);
    }
+    
+    protected static QualifiedName parseTemplateName(String name)
+    {
+        return new QualifiedName(QualifiedName.EMPTY, name, QualifiedName.EMPTY);
+    }
 }

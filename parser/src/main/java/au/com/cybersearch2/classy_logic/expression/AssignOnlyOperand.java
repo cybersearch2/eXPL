@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+
 /**
  * AssignOnlyOperand
  * Delegate for variables which only allow assignment and equality comparisons
@@ -25,16 +27,16 @@ public class AssignOnlyOperand extends NullOperand
 {
 	/**
 	 * Construct AssignOnlyOperand object
-	 * @param name 
+     * @param qname Qualified name
 	 */
-	public AssignOnlyOperand(String name) 
+	public AssignOnlyOperand(QualifiedName qname) 
 	{
-		super(name);
+		super(qname);
 
 	}
 
 	/**
-	 * 
+	 * getRightOperandOps
 	 * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getRightOperandOps()
 	 */
 	@Override
@@ -49,7 +51,7 @@ public class AssignOnlyOperand extends NullOperand
 	}
 
 	/**
-	 * 
+	 * getLeftOperandOps
 	 * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getLeftOperandOps()
 	 */
 	@Override

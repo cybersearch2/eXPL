@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.tutorial2;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -67,7 +68,7 @@ public class GreekConstruction2
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 		// The first unification fills in variables "city" and "charge".
 		// These are read in the second unification as solution terms using "freight.city" and "freight.charge" notations.
-		parserAssembler.registerAxiomListener("freight", new AxiomListener(){
+		parserAssembler.registerAxiomListener(QualifiedName.parseGlobalName("freight"), new AxiomListener(){
 
 			@Override
 			public void onNextAxiom(Axiom axiom) {

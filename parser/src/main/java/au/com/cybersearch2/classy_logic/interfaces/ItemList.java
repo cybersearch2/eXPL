@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 
 /**
@@ -37,6 +38,12 @@ public interface ItemList<T> extends Iterable<T>
      * @return String
      */
     String getName();
+
+    /**
+     * Returns qualified name
+     * @return QualifiedName object
+     */
+    QualifiedName getQualifiedName();
 
     /**
      * Returns true if list is empty

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -171,6 +172,7 @@ public class QueryExecuter extends ChainQueryExecuter
 		{   // Use the template key to reference the corresponding axiom source
 			Template template = templateList.get(i);
 			String key = template.getKey();
+            QualifiedName qname = QualifiedName.parseGlobalName(key);
 			LogicQuery logicQuery = null;
 			if (i < templateList.size() - 1)
 			{   // Create solution handler which causes the next LogicQuery object in the chain
@@ -184,20 +186,20 @@ public class QueryExecuter extends ChainQueryExecuter
 			logicQueryList.add(logicQuery);
 			if (axiomListenerMap != null)
 			{
-                if (axiomListenerMap.containsKey(key))
+                if (axiomListenerMap.containsKey(qname))
                 {
-    	        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
+    	        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
             		for (AxiomListener axiomListener: axiomListenerList)
             			logicQuery.setAxiomListener(axiomListener);
-	        		axiomListenerMap.remove(key);
+	        		axiomListenerMap.remove(qname);
                 }
-            	key = template.getName();
-            	if (axiomListenerMap.containsKey(key))
+                qname = template.getQualifiedName();
+            	if (axiomListenerMap.containsKey(qname))
             	{
-    	        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
+    	        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
             		for (AxiomListener axiomListener: axiomListenerList)
-            			solution.setAxiomListener(key, axiomListener);
-	        		axiomListenerMap.remove(key);
+            			solution.setAxiomListener(qname, axiomListener);
+	        		axiomListenerMap.remove(qname);
             	}
 			}
 		}

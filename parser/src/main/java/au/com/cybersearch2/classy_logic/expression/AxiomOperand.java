@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -36,33 +37,33 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     
     /**
      * Axiom Variable
-     * @param name
+     * @param qname Qualified name
      */
-    public AxiomOperand(String name, String axiomKey) 
+    public AxiomOperand(QualifiedName qname, String axiomKey) 
     {
-        super(name);
+        super(qname);
         this.axiomKey = axiomKey;
     }
 
     /**
      * Axiom Literal
-     * @param name
+     * @param qname Qualified name
      * @param value
      */
-    public AxiomOperand(String name, AxiomList value) 
+    public AxiomOperand(QualifiedName qname, AxiomList value) 
     {
-        super(name, value);
+        super(qname, value);
         axiomKey = value.getKey();
     }
 
     /**
      * Axiom Expression
-     * @param name
+     * @param qname Qualified name
      * @param expression Operand which evaluates value
      */
-    public AxiomOperand(String name, String axiomKey, Operand expression) 
+    public AxiomOperand(QualifiedName qname, String axiomKey, Operand expression) 
     {
-        super(name, expression);
+        super(qname, expression);
         this.axiomKey = axiomKey;
     }
 
@@ -144,7 +145,7 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     {
         EvaluationStatus status = super.evaluate(id);
         if (isEmpty())
-            setValue(new AxiomList(axiomKey, axiomKey));
+            setValue(new AxiomList(qname, axiomKey));
         return status;
     }
 

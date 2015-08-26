@@ -51,6 +51,7 @@ import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.LexiconSource;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -423,14 +424,13 @@ public class QueryParserTest
 
     static final String MEGA_CITY3 = 
             "include \"mega_city.xpl\";\n" +
-            "template city (Rank, Megacity, Continent, Country, decimal Population);\n" +
             "choice population_group\n" +
             "(Population,              Group):\n" +
             "(Population >= {30,000,000}, \"Mega\"),\n" +
             "(Population >= {20,000,000}, \"Huge\"),\n" +
             "(Population <  {20,000,000}, \"Large\");\n" +
             "list city_group_list(population_group);\n" +
-            "query group_query (mega_city:city) >> (city:population_group);";
+            "query group_query (mega_city:population_group);";
 
             /** Named query to find all cities */
     static public final String ALL_CITIES = "all_cities";
@@ -649,10 +649,10 @@ public class QueryParserTest
  	    while (highCitiesQuery.execute())
  	    {
  	    	//System.out.println(highCitiesQuery.toString());
- 	    	//System.out.println(parserAssembler.getOperandMap().getItemList("city_list").toString());
+ 	    	//System.out.println(parserAssembler.getOperandMap().getItemList(QualifiedName.parseGlobalName("city_list")).toString());
  	    	//System.out.println();
  	    }
- 	    ItemList<?> cityList = parserAssembler.getOperandMap().getItemList("city_list");
+ 	    ItemList<?> cityList = parserAssembler.getOperandMap().getItemList(QualifiedName.parseGlobalName("city_list"));
  	    assertThat(cityList.getItem(0).toString()).isEqualTo("high_city(name = denver, altitude = 5280)");
  	    assertThat(cityList.getItem(1).toString()).isEqualTo("high_city(name = flagstaff, altitude = 6970)");
  	    assertThat(cityList.getItem(2).toString()).isEqualTo("high_city(name = addis ababa, altitude = 8000)");
@@ -669,7 +669,7 @@ public class QueryParserTest
 		queryExecuter.chainCalculator(null, calcTemplate);
 		queryExecuter.setSolution(new Solution());
 		queryExecuter.execute();
-		Axiom unsortedAxiom = parserAssembler.getAxiomSource("unsorted").iterator().next();
+		Axiom unsortedAxiom = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("unsorted")).iterator().next();
 		assertThat(queryExecuter.getSolution().getString("insert_sort", "i")).isEqualTo("5");
 		assertThat(unsortedAxiom.toString()).isEqualTo("unsorted(1, 3, 5, 8, 12)");
     }
@@ -684,7 +684,7 @@ public class QueryParserTest
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
-        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 3, limit = 3, increment_n1 = true)");
+        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 3, limit = 3)");
     }
     
     @Test
@@ -700,7 +700,7 @@ public class QueryParserTest
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
         //System.out.println(solution.getAxiom("increment_n").toString());
-        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, limit = 3, increment_n1 = true)");
+        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, limit = 3)");
     }
     
     @Test
@@ -714,7 +714,7 @@ public class QueryParserTest
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
         //System.out.println(solution.getAxiom("increment_n").toString());
-        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, i = 3, limit = 3, increment_n1 = true)");
+        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, i = 3, limit = 3)");
     }
         
     @Test
@@ -730,7 +730,7 @@ public class QueryParserTest
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
         //System.out.println(solution.getAxiom("increment_n").toString());
-        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, i = 3, limit = 3, increment_n1 = true)");
+        assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n = 4, i = 3, limit = 3)");
     }
     
     @Test
@@ -744,7 +744,7 @@ public class QueryParserTest
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
         //System.out.println(solution.getAxiom("factorial").toString());
-        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i = 5, n = 4, factorial = 24, factorial1 = true)");
+        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i = 5, n = 4, factorial = 24)");
     }
     
     @Test
@@ -767,12 +767,12 @@ public class QueryParserTest
 	{
 		ParserAssembler parserAssembler = openScript(SCRIPT1);
 		OperandMap operandMap = parserAssembler.getOperandMap();
-        IntegerOperand twoFlip = (IntegerOperand) operandMap.get("twoFlip");
+        IntegerOperand twoFlip = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("twoFlip"));
         twoFlip.evaluate(1);
 	    assertThat(twoFlip.getValue()).isEqualTo(-3);
-        IntegerOperand mask = (IntegerOperand) operandMap.get("mask");
+        IntegerOperand mask = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("mask"));
         mask.evaluate(1);
-        IntegerOperand maskFlip = (IntegerOperand) operandMap.get("maskFlip");
+        IntegerOperand maskFlip = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("maskFlip"));
         maskFlip.evaluate(1);
 	    assertThat(maskFlip.getValue()).isEqualTo(-3);
 	}
@@ -795,28 +795,28 @@ public class QueryParserTest
 	{
 	    ParserAssembler parserAssembler = openScript(SCRIPT4);
 		OperandMap operandMap = parserAssembler.getOperandMap();
-        IntegerOperand x = (IntegerOperand) operandMap.get("x");
+        IntegerOperand x = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("x"));
         x.evaluate(1);
 	    assertThat(x.getValue()).isEqualTo(1);
-        IntegerOperand y = (IntegerOperand) operandMap.get("y");
+        IntegerOperand y = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("y"));
         y.evaluate(1);
 	    assertThat(y.getValue()).isEqualTo(2);
-        IntegerOperand x_y = (IntegerOperand) operandMap.get("x_y");
+        IntegerOperand x_y = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("x_y"));
         x_y.evaluate(1);
 	    assertThat(x_y.getValue()).isEqualTo(3);
-        IntegerOperand a = (IntegerOperand) operandMap.get("a");
+        IntegerOperand a = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("a"));
         a.evaluate(1);
 	    assertThat(a.getValue()).isEqualTo(2);
-        IntegerOperand b = (IntegerOperand) operandMap.get("b");
+        IntegerOperand b = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("b"));
         b.evaluate(1);
 	    assertThat(b.getValue()).isEqualTo(14);
-        BooleanOperand c = (BooleanOperand) operandMap.get("c");
+        BooleanOperand c = (BooleanOperand) operandMap.get(QualifiedName.parseGlobalName("c"));
         c.evaluate(1);
 	    assertThat(c.getValue()).isTrue();
-        BigDecimalOperand d = (BigDecimalOperand) operandMap.get("d");
+        BigDecimalOperand d = (BigDecimalOperand) operandMap.get(QualifiedName.parseGlobalName("d"));
         d.evaluate(1);
 	    assertThat(d.getValue()).isEqualTo(BigDecimal.valueOf((long)1234));
-        BigDecimalOperand e = (BigDecimalOperand) operandMap.get("e");
+        BigDecimalOperand e = (BigDecimalOperand) operandMap.get(QualifiedName.parseGlobalName("e"));
         e.evaluate(1);
 	    assertThat(e.getValue()).isEqualTo(BigDecimal.valueOf((long)1248));
 	}
@@ -832,15 +832,15 @@ public class QueryParserTest
 	{
 	    ParserAssembler parserAssembler = openScript(SCRIPT5);
 		OperandMap operandMap = parserAssembler.getOperandMap();
-        IntegerOperand x = (IntegerOperand) operandMap.get("x");
+        IntegerOperand x = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("x"));
         x.evaluate(1);
 	    assertThat(x.toString()).isEqualTo("x = y");
-        IntegerOperand z = (IntegerOperand) operandMap.get("z");
+        IntegerOperand z = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("z"));
         z.evaluate(1);
 	    assertThat(z.toString()).isEqualTo("z = 10");
-        Operand y = operandMap.get("y");
+        Operand y = operandMap.get(QualifiedName.parseGlobalName("y"));
 	    assertThat(y.toString()).isEqualTo("y = 6");
-        IntegerOperand a = (IntegerOperand) operandMap.get("a");
+        IntegerOperand a = (IntegerOperand) operandMap.get(QualifiedName.parseGlobalName("a"));
         a.evaluate(1);
 	    assertThat(a.toString()).isEqualTo("a = 16");
 	    assertThat(y.toString()).isEqualTo("y = 16");
@@ -895,9 +895,9 @@ public class QueryParserTest
 			public AxiomSource getAxiomSource(String name) 
 			{
 				if (name.equals("charge"))
-					return parserAssembler.getAxiomSource(name);
+					return parserAssembler.getAxiomSource(QualifiedName.parseGlobalName(name));
 				else if (name.equals("customer"))
-				    return parserAssembler.getAxiomSource(name);
+				    return parserAssembler.getAxiomSource(QualifiedName.parseGlobalName(name));
 
 				return null;
 			}
@@ -930,9 +930,9 @@ public class QueryParserTest
 			public AxiomSource getAxiomSource(String name) 
 			{
 				if (name.equals("charge"))
-					return parserAssembler.getAxiomSource(name);
+					return parserAssembler.getAxiomSource(QualifiedName.parseGlobalName(name));
 				else if (name.equals("customer"))
-				    return parserAssembler.getAxiomSource(name);
+				    return parserAssembler.getAxiomSource(QualifiedName.parseGlobalName(name));
 
 				return null;
 			}
@@ -956,7 +956,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(AGRICULTURAL_LAND);
 	    Template more_agriculture_y1990_y2010 = parserAssembler.getTemplate("agri_10y");
 	    more_agriculture_y1990_y2010.setKey("Data");
-	    AxiomSource agriSource = parserAssembler.getAxiomSource("Data");
+	    AxiomSource agriSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("Data"));
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(agriSource, Collections.singletonList(more_agriculture_y1990_y2010));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
@@ -996,7 +996,7 @@ public class QueryParserTest
 	    more_agriculture_y1990_y2010.backup(false);
 	    Template surface_area = parserAssembler.getTemplate("surface_area_increase");
 	    surface_area.setKey("surface_area");
-	    agriculturalQuery.chain(QueryExecuterAdapter.ensembleFromSource(parserAssembler.getAxiomSource("surface_area")), Collections.singletonList(surface_area));
+	    agriculturalQuery.chain(QueryExecuterAdapter.ensembleFromSource(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("surface_area"))), Collections.singletonList(surface_area));
 		while (agriculturalQuery.execute())
 		{
 			if (!solutionHandler.onSolution(agriculturalQuery.getSolution()))
@@ -1086,7 +1086,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(MEGA_CITY1);
 		Template asia_top_ten = parserAssembler.getTemplate("asia_top_ten");
 		asia_top_ten.setKey("mega_city");
-	    AxiomSource megacitySource = parserAssembler.getAxiomSource("mega_city");
+	    AxiomSource megacitySource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("mega_city"));
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(megacitySource, Collections.singletonList(asia_top_ten));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
@@ -1103,7 +1103,7 @@ public class QueryParserTest
 		parserAssembler = openScript(MEGA_CITY2);
 		Template american_megacities = parserAssembler.getTemplate("america_megacities");
 		american_megacities.setKey("mega_city");
-		megacitySource = parserAssembler.getAxiomSource("mega_city");
+		megacitySource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("mega_city"));
         QueryExecuterAdapter adapter2 = new QueryExecuterAdapter(megacitySource, Collections.singletonList(american_megacities));
         QueryParams queryParams2 = new QueryParams(adapter2.getScope(), adapter2.getQuerySpec());
         queryParams2.initialize();
@@ -1146,7 +1146,7 @@ public class QueryParserTest
 		Set<String> birdSet = new TreeSet<String>();
 		Map<String, List<Axiom>> promptMap = new HashMap<String, List<Axiom>>();
 		ParserAssembler parserAssembler = openScript(BIRDS);
-		AxiomSource orderSource = parserAssembler.getAxiomSource("order");
+		AxiomSource orderSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("order"));
 		Axiom orderAxiom1 = orderSource.iterator().next();
 		for (int i = 0; i < orderAxiom1.getTermCount(); i++)
 		{
@@ -1155,7 +1155,7 @@ public class QueryParserTest
 				orderSet.add(keyword);
 			keywordSet.add(keyword);
 		}
-		AxiomSource familySource = parserAssembler.getAxiomSource("family");
+		AxiomSource familySource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("family"));
 		Axiom familyAxiom1 = familySource.iterator().next();
 		for (int i = 0; i < familyAxiom1.getTermCount(); i++)
 		{
@@ -1164,7 +1164,7 @@ public class QueryParserTest
 				familySet.add(keyword);
 			keywordSet.add(keyword);
 		}
-		AxiomSource birdSource = parserAssembler.getAxiomSource("bird");
+		AxiomSource birdSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("bird"));
 		Axiom birdAxiom1 = birdSource.iterator().next();
 		for (int i = 0; i < birdAxiom1.getTermCount(); i++)
 		{
@@ -1183,7 +1183,7 @@ public class QueryParserTest
 					String templateName = "order_" + keyword;
 					Template template = parserAssembler.getTemplate(templateName);
 					template.setKey("order");
-				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource("order"), Collections.singletonList(template));
+				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("order")), Collections.singletonList(template));
 				    QueryExecuter orderQuery = new QueryExecuter(adapter.getQueryParams());
 					while (orderQuery.execute())
 						promptMap.get(keyword).add(orderQuery.getSolution().getAxiom(templateName));
@@ -1193,7 +1193,7 @@ public class QueryParserTest
 					String templateName = "family_" + keyword;
 					Template template = parserAssembler.getTemplate(templateName);
 					template.setKey("family");
-				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource("family"), Collections.singletonList(template));
+				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("family")), Collections.singletonList(template));
 				    QueryExecuter orderQuery = new QueryExecuter(adapter.getQueryParams());
 					while (orderQuery.execute())
 						promptMap.get(keyword).add(orderQuery.getSolution().getAxiom(templateName));
@@ -1203,7 +1203,7 @@ public class QueryParserTest
 					String templateName = "bird_" + keyword;
 					Template template = parserAssembler.getTemplate(templateName);
 					template.setKey("bird");
-				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource("bird"), Collections.singletonList(template));
+				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("bird")), Collections.singletonList(template));
 				    QueryExecuter orderQuery = new QueryExecuter(adapter.getQueryParams());
 					while (orderQuery.execute())
 						promptMap.get(keyword).add(orderQuery.getSolution().getAxiom(templateName));
@@ -1256,20 +1256,20 @@ public class QueryParserTest
 				birdsResultsChecker.checkNextResult(axiom.getTermByName("bird").getValue().toString() + " " + keyword + " " + attribute);
 			else if (("family_" + keyword).equals(axiom.getName()))
 			{
-				Template template = new Template("bird");
-				template.addTerm(new StringOperand("bird"));
+				Template template = new Template(QualifiedName.parseTemplateName("bird"));
+				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("bird")));
 				template.addTerm(new Parameter("family", axiom.getTermByName("family").getValue().toString()));
-			    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource("bird"), Collections.singletonList(template));
+			    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("bird")), Collections.singletonList(template));
 			    QueryExecuter query = new QueryExecuter(adapter.getQueryParams());
 				while (query.execute())
 					birdsResultsChecker.checkNextResult(query.getSolution().getString("bird", "bird") + " " + keyword + " " + attribute);
 			}
 			else
 			{
-				Template template = new Template("family");
-				template.addTerm(new StringOperand("family"));
+				Template template = new Template(QualifiedName.parseTemplateName("family"));
+				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("family")));
 				template.addTerm(new Parameter("order", axiom.getTermByName("order").getValue().toString()));
-			    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource("family"), Collections.singletonList(template));
+			    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("family")), Collections.singletonList(template));
 			    QueryExecuter query = new QueryExecuter(adapter.getQueryParams());
 				while (query.execute())
 					birdsResultsChecker.checkNextResult("family " + query.getSolution().getString("family", "family") + " " + keyword + " " + attribute);

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
@@ -36,7 +37,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public abstract class DelegateParameter extends Parameter implements Operand, Concaten<Object> 
 {
-	static final String DELEGATE_NAME = "delegate";
+	static final QualifiedName DELEGATE_NAME = new QualifiedName("delegate", QualifiedName.ANONYMOUS);
 	static final AssignOnlyOperand ASSIGN_ONLY_DELEGATE;
 	
     /** Constant value for no operators permited */
@@ -48,6 +49,8 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
   
 	/** Operand delegate to support Operand interface */
 	protected Operand delegate;
+	/** Qualified name of operand */
+	protected QualifiedName qname;
 
 	static
 	{
@@ -66,23 +69,35 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 	
 
 	/**
-	 * @param name
-	 * @param value
+	 * Construct DelegateParameter object
+     * @param qname Qualified name of variable
+	 * @param value Value to set
 	 */
-	protected DelegateParameter(String name, Object value) 
+	protected DelegateParameter(QualifiedName qname, Object value) 
 	{
-		super(name, value);
-
+		super(qname.toString(), value);
+		this.qname = qname;
 	}
 
 	/**
 	 * @param name
 	 */
-	protected DelegateParameter(String name) 
+	protected DelegateParameter(QualifiedName qname) 
 	{
-		super(name);
+		super(qname.toString());
+		this.qname = qname;
         delegate = ASSIGN_ONLY_DELEGATE;
 	}
+
+    /**
+     * Returns qualified name
+     * @return QualifiedName object
+     */
+    @Override
+    public QualifiedName getQualifiedName()
+    {
+        return qname;
+    }
 
 	/**
 	 * Returns permited operations for this Variable as a right hand term
@@ -157,7 +172,7 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 		{
 			if (delegate.getClass() != AssignOnlyOperand.class)
 				//throw new ExpressionException("Unknown value class: " + getValueClass().toString());
-				delegate = new AssignOnlyOperand(name);
+				delegate = new AssignOnlyOperand(new QualifiedName(name, QualifiedName.ANONYMOUS));
 		}
 		else
 			delegate = newDelegate;

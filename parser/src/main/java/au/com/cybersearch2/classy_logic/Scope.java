@@ -25,13 +25,16 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
+import au.com.cybersearch2.classy_logic.query.QueryType;
 
 /**
  * Scope
@@ -105,6 +108,37 @@ public class Scope
 		this.locale = locale;
 	}
 
+	public QuerySpec buildQuerySpec(QuerySpec querySpec, KeyName firstKeyname, int keynameCount, Map<String, Object> properties)
+    {
+	       String templateName = firstKeyname.getTemplateName();
+	       Template firstTemplate = getTemplate(templateName);
+	       if (!firstTemplate.isCalculator())
+	           return querySpec;
+	       if (keynameCount > 1)
+	          throw new ExpressionException("Calculator " + templateName + " can only have one query step");
+	       querySpec.setQueryType(QueryType.calculator);
+	       if (properties.size() > 0)
+	          querySpec.putProperties(firstKeyname, properties);
+	       String axiomName = firstKeyname.getAxiomKey();
+	       if (!querySpec.isHeadQuery() || axiomName.isEmpty())
+	          return querySpec;
+	       QuerySpec headQuerySpec = new QuerySpec(querySpec.getName());   
+	       headQuerySpec.addKeyName(new KeyName(axiomName, axiomName));
+	       QuerySpec chainQuerySpec = headQuerySpec.chain();
+	       chainQuerySpec.addKeyName(firstKeyname);
+	       chainQuerySpec.setQueryType(QueryType.calculator);
+	       if (properties.size() > 0)
+	          chainQuerySpec.putProperties(firstKeyname, properties);
+	       firstTemplate.setKey(axiomName);
+	       Template logicTemplate = findTemplate(axiomName);
+	       if (logicTemplate != null)
+	           return headQuerySpec;
+           QualifiedName qualifiedAxiomName = new QualifiedName(getAlias(), axiomName, QualifiedName.EMPTY);
+	       logicTemplate = parserAssembler.createTemplate(qualifiedAxiomName, false);
+	       logicTemplate.setKey(axiomName);
+	       return headQuerySpec;
+	    }
+	
 	/**
 	 * Add specification of query Axiom(s) and Template(s) names
 	 * @param querySpec QuerySpec object
@@ -123,6 +157,15 @@ public class Scope
 		return name;
 	}
 
+	/**
+	 * Returns name of scope or alias if global scope
+	 * @return
+	 */
+	public String getAlias()
+	{
+	    return name.equals(QueryProgram.GLOBAL_SCOPE) ? QualifiedName.EMPTY : name;
+	}
+	
 	/**
      * Returns scope specified by name.
      * @param name
@@ -196,9 +239,13 @@ public class Scope
      */
     public AxiomSource findAxiomSource(String axiomKey)
     {
-        AxiomSource axiomSource = parserAssembler.getAxiomSource(axiomKey);
+        QualifiedName qname = QualifiedName.parseName(axiomKey, parserAssembler.getOperandMap().getQualifiedContextname());
+        AxiomSource axiomSource = parserAssembler.getAxiomSource(qname);
         if ((axiomSource == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
-            axiomSource = getGlobalParserAssembler().getAxiomSource(axiomKey);
+        {
+            qname.clearScope();
+            axiomSource = getGlobalParserAssembler().getAxiomSource(qname);
+        }
         return axiomSource;
     }
 
@@ -217,14 +264,19 @@ public class Scope
 
     /**
      * Returns template with specified name
-     * @param name
+     * @param templateName
      * @return Template object or null if template not found
      */
-    public Template findTemplate(String name)
+    public Template findTemplate(String templateName)
     {
-        Template template = parserAssembler.getTemplate(name);
-        if ((template == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
-            template = getGlobalParserAssembler().getTemplate(name);
+        String scopeName = name.equals(QueryProgram.GLOBAL_SCOPE) ? QualifiedName.EMPTY : name;
+        QualifiedName qualifiedTemplateName = new QualifiedName(scopeName, templateName, QualifiedName.EMPTY);
+        Template template = parserAssembler.getTemplate(qualifiedTemplateName);
+        if ((template == null) && !scopeName.isEmpty())
+        {
+            qualifiedTemplateName = new QualifiedName(QualifiedName.EMPTY, templateName, QualifiedName.EMPTY);
+            template = getGlobalParserAssembler().getTemplate(qualifiedTemplateName);
+        }
         return template;
     }
 
@@ -232,16 +284,16 @@ public class Scope
      * Returns object containing all axiom listeners belonging to this scope
      * @return  Unmodifiable AxiomListener map object
      */
-	public Map<String, List<AxiomListener>> getAxiomListenerMap()
+	public Map<QualifiedName, List<AxiomListener>> getAxiomListenerMap()
 	{
-		Map<String, List<AxiomListener>> axiomListenerMap = null;
+		Map<QualifiedName, List<AxiomListener>> axiomListenerMap = null;
 		if ((!name.equals(QueryProgram.GLOBAL_SCOPE)) && (getGlobalParserAssembler().getAxiomListenerMap().size() > 0))
 			axiomListenerMap = getGlobalParserAssembler().getAxiomListenerMap();
 		if (parserAssembler.getAxiomListenerMap().size() > 0)
 		{
 			if (axiomListenerMap != null)
 			{
-				Map<String, List<AxiomListener>> newAxiomListenerMap = new HashMap<String, List<AxiomListener>>();
+				Map<QualifiedName, List<AxiomListener>> newAxiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
 				newAxiomListenerMap.putAll(axiomListenerMap);
 				axiomListenerMap = newAxiomListenerMap;
 				axiomListenerMap.putAll(parserAssembler.getAxiomListenerMap());
@@ -260,9 +312,14 @@ public class Scope
 	public ItemList<?> getItemList(String listName) 
 	{
 	    // Look first in local scope, then if not found, try global scope
-		ItemList<?> itemList = parserAssembler.getOperandMap().getItemList(listName);
-		if ((itemList == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
-			itemList = getGlobalParserAssembler().getOperandMap().getItemList(listName);	
+        String scopeName = name.equals(QueryProgram.GLOBAL_SCOPE) ? QualifiedName.EMPTY : name;
+        QualifiedName qualifiedListName = new QualifiedName(scopeName, QualifiedName.EMPTY, listName);
+		ItemList<?> itemList = parserAssembler.getOperandMap().getItemList(qualifiedListName);
+		if ((itemList == null) && !scopeName.isEmpty())
+		{
+		    qualifiedListName = new QualifiedName(QualifiedName.EMPTY, QualifiedName.EMPTY, listName);
+			itemList = getGlobalParserAssembler().getOperandMap().getItemList(qualifiedListName);
+		}
 		return itemList;
 	}
 
@@ -289,9 +346,9 @@ public class Scope
 	 * Returns map which provides access to result lists as iterables
 	 * @return Container which maps fully qualified name to list iterable
 	 */
-	public Map<String, Iterable<Axiom>> getListMap() 
+	public Map<QualifiedName, Iterable<Axiom>> getListMap() 
 	{
-		Map<String, Iterable<Axiom>> listMap = new HashMap<String, Iterable<Axiom>>();
+		Map<QualifiedName, Iterable<Axiom>> listMap = new HashMap<QualifiedName, Iterable<Axiom>>();
     	parserAssembler.copyLists(listMap);
 		return listMap;
 	}
@@ -359,7 +416,7 @@ public class Scope
 	 * @param key Local axiom id
 	 * @param axiomListener The local axiom listener
 	 */
-	public void addLocalAxiomListener(final String key, final AxiomListener axiomListener) 
+	public void addLocalAxiomListener(final QualifiedName qualifiedAxiomName, final AxiomListener axiomListener) 
 	{
 		// Register locale listener with Global scope in which all local axioms must be declared
 		final ParserAssembler parserAssembler = getGlobalScope().getParserAssembler();
@@ -368,7 +425,7 @@ public class Scope
 			@Override
 			public void onScopeChange(Scope scope) 
 			{
-				AxiomSource axiomSource = parserAssembler.getAxiomSource(key);
+				AxiomSource axiomSource = parserAssembler.getAxiomSource(qualifiedAxiomName);
 				Iterator<Axiom> iterator = axiomSource.iterator();
 				Axiom defaultAxiom = null;
 				Axiom localAxiom = null;
@@ -384,7 +441,7 @@ public class Scope
 					}
 				}
 				if (defaultAxiom == null)
-					throw new ExpressionException("Axiom source \"" + key + "\" is empty");
+					throw new ExpressionException("Axiom source \"" + qualifiedAxiomName.getName() + "\" is empty");
 				if (localAxiom == null)
 					localAxiom = defaultAxiom;
 				axiomListener.onNextAxiom(localAxiom);

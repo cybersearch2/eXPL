@@ -22,6 +22,7 @@ import java.util.regex.PatternSyntaxException;
 
 import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -50,26 +51,26 @@ public class RegExOperand extends StringOperand
 	
 	/**
 	 * Construct RegExOperand object
-	 * @param name Term name
+     * @param qname Qualified name
 	 * @param regex Regular expression
 	 * @param flags Optional flags to modify regular expression behavior
 	 * @param group Group object or null if grouping not used
 	 */
-	public RegExOperand(String name, String regex, int flags, Group group) 
+	public RegExOperand(QualifiedName qname, String regex, int flags, Group group) 
 	{
-		this(name, (Operand)null, flags, group);
+		this(qname, (Operand)null, flags, group);
 		this.regex = regex;
 	}
 
 	/**
-	 * @param name Term name
+     * @param qname Qualified name
 	 * @param regexOp Regular expression operand
 	 * @param flags Optional flags to modify regular expression behavior
 	 * @param group Group object or null if grouping not used
 	 */
-	public RegExOperand(String name, Operand regexOp, int flags, Group group) 
+	public RegExOperand(QualifiedName qname, Operand regexOp, int flags, Group group) 
 	{
-		super(name);
+		super(qname);
 		this.flags = flags;
 		this.group = group;
 		this.regexOp = regexOp;

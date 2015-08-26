@@ -1,4 +1,3 @@
-package au.com.cybersearch2.classy_logic.expression;
 /**
     Copyright (C) 2015  www.cybersearch2.com.au
 
@@ -14,30 +13,46 @@ package au.com.cybersearch2.classy_logic.expression;
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
+package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
- * CallOperand
- * Performs function according to generic CallEvaluator interface.
- * Call arguments are collected by super class.
+ * TestStringOperand
  * @author Andrew Bowley
- * 30 Jul 2015
+ * 24 Aug 2015
  */
-public class CallOperand<R> extends ParameterOperand<R>
+public class TestStringOperand extends StringOperand
 {
-   
+
     /**
-     * Construct CallOperand object
-     * @param qname Qualified name
-     * @param callEvaluator Executes function using parameters and returns object of generic type
-     * @param parameters Root of Operand parameter tree or null if no parameters
+     * @param QualifiedName.parseName(name)
+     * @param expression
      */
-    public CallOperand(QualifiedName qname, CallEvaluator<R> callEvaluator, Operand parameters)
+    public TestStringOperand(String name, Operand expression)
     {
-        super(qname, parameters, callEvaluator);
+        super(QualifiedName.parseName(name), expression);
+
+    }
+
+    /**
+     * @param QualifiedName.parseName(name)
+     * @param value
+     */
+    public TestStringOperand(String name, String value)
+    {
+        super(QualifiedName.parseName(name), value);
+
+    }
+
+    /**
+     * @param QualifiedName.parseName(name)
+     */
+    public TestStringOperand(String name)
+    {
+        super(QualifiedName.parseName(name));
+
     }
 
 }

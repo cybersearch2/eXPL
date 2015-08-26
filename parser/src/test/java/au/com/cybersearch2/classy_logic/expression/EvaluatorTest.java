@@ -150,7 +150,7 @@ public class EvaluatorTest
 	public void test_postfix_unary_constructor()
 	{
 		Operand leftTerm = mock(Operand.class);
-		Evaluator unaryPostfix = new Evaluator(leftTerm, "++");
+		Evaluator unaryPostfix = new TestEvaluator(leftTerm, "++");
 		assertThat(unaryPostfix.left).isEqualTo(leftTerm);
 		assertThat(unaryPostfix.right).isNull();
 		assertThat(unaryPostfix.getName()).isEmpty();
@@ -162,7 +162,7 @@ public class EvaluatorTest
 	public void test_named_postfix_unary_constructor()
 	{
 		Operand leftTerm = mock(Operand.class);
-		Evaluator unaryPostfix = new Evaluator(EVAL_NAME, leftTerm, "++");
+		Evaluator unaryPostfix = new TestEvaluator(EVAL_NAME, leftTerm, "++");
 		assertThat(unaryPostfix.left).isEqualTo(leftTerm);
 		assertThat(unaryPostfix.right).isNull();
 		assertThat(unaryPostfix.getName()).isEqualTo(EVAL_NAME);
@@ -174,7 +174,7 @@ public class EvaluatorTest
 	public void test_prefix_unary_constructor()
 	{
 		Operand rightTerm = mock(Operand.class);
-		Evaluator unaryPrefix = new Evaluator("++", rightTerm);
+		Evaluator unaryPrefix = new TestEvaluator("++", rightTerm);
 		assertThat(unaryPrefix.right).isEqualTo(rightTerm);
 		assertThat(unaryPrefix.left).isNull();
 		assertThat(unaryPrefix.getName()).isEmpty();
@@ -186,7 +186,7 @@ public class EvaluatorTest
 	public void test_named_prefix_unary_constructor()
 	{
 		Operand rightTerm = mock(Operand.class);
-		Evaluator unaryPrefix = new Evaluator(EVAL_NAME, "++", rightTerm);
+		Evaluator unaryPrefix = new TestEvaluator(EVAL_NAME, "++", rightTerm);
 		assertThat(unaryPrefix.right).isEqualTo(rightTerm);
 		assertThat(unaryPrefix.left).isNull();
 		assertThat(unaryPrefix.getName()).isEqualTo(EVAL_NAME);
@@ -199,7 +199,7 @@ public class EvaluatorTest
 	{
 		Operand leftTerm = mock(Operand.class);
 		Operand rightTerm = mock(Operand.class);
-		Evaluator binary = new Evaluator(leftTerm, "+", rightTerm);
+		Evaluator binary = new TestEvaluator(leftTerm, "+", rightTerm);
 		assertThat(binary.right).isEqualTo(rightTerm);
 		assertThat(binary.left).isEqualTo(leftTerm);
 		assertThat(binary.getName()).isEmpty();
@@ -212,15 +212,15 @@ public class EvaluatorTest
 	{
 		Operand leftTerm = mock(Operand.class);
 		Operand rightTerm = mock(Operand.class);
-		Evaluator binaryPrefix = new Evaluator(EVAL_NAME, leftTerm, "+", rightTerm);
+		Evaluator binaryPrefix = new TestEvaluator(EVAL_NAME, leftTerm, "+", rightTerm);
 		assertThat(binaryPrefix.right).isEqualTo(rightTerm);
 		assertThat(binaryPrefix.left).isEqualTo(leftTerm);;
 		assertThat(binaryPrefix.getName()).isEqualTo(EVAL_NAME);
 		assertThat(binaryPrefix.shortCircuitOnFalse).isFalse();
 		assertThat(binaryPrefix.shortCircuitOnTrue).isFalse();
-		binaryPrefix = new Evaluator(EVAL_NAME, leftTerm, "||", rightTerm);
+		binaryPrefix = new TestEvaluator(EVAL_NAME, leftTerm, "||", rightTerm);
 		assertThat(binaryPrefix.shortCircuitOnTrue).isTrue();
-		binaryPrefix = new Evaluator(EVAL_NAME, leftTerm, "&&", rightTerm);
+		binaryPrefix = new TestEvaluator(EVAL_NAME, leftTerm, "&&", rightTerm);
 		assertThat(binaryPrefix.shortCircuitOnFalse).isTrue();
 	}
 
@@ -231,14 +231,14 @@ public class EvaluatorTest
 		Operand rightTerm = mock(Operand.class);
 		Long value = Long.valueOf(76);
 		when(rightTerm.getValue()).thenReturn(value);
-		Evaluator evaluator = new Evaluator(leftTerm, "=", rightTerm);
+		Evaluator evaluator = new TestEvaluator(leftTerm, "=", rightTerm);
 		assertThat(evaluator.assign(leftTerm, rightTerm)).isEqualTo(value);
 		verify(leftTerm).assign(value);
 		leftTerm = mock(Operand.class);
 		rightTerm = mock(Operand.class);
 		Float floatValue = Float.valueOf(63.0f);
 		when(rightTerm.getValue()).thenReturn(floatValue);
-		evaluator = new Evaluator(leftTerm, "=", rightTerm);
+		evaluator = new TestEvaluator(leftTerm, "=", rightTerm);
 		assertThat(evaluator.assign(leftTerm, rightTerm)).isInstanceOf(Null.class);
 		verify(leftTerm).assign(floatValue);
 	}
@@ -344,7 +344,7 @@ public class EvaluatorTest
 		when(rightTerm.getValue()).thenReturn(rightValue);
 		when(leftTerm.toString()).thenReturn(leftToString);
 		when(rightTerm.toString()).thenReturn(rightToString);
-		Evaluator evaluator = new Evaluator("evaluator", leftTerm, "!=", rightTerm);
+		Evaluator evaluator = new TestEvaluator("evaluator", leftTerm, "!=", rightTerm);
 		assertThat(evaluator.toString()).isEqualTo(expectedText);
 	}
 	
@@ -361,7 +361,7 @@ public class EvaluatorTest
 		when(leftTerm.getName()).thenReturn(leftName);
 		when(leftTerm.getValue()).thenReturn(leftValue);
 		when(leftTerm.toString()).thenReturn(leftToString);
-		Evaluator evaluator = new Evaluator("evaluator", leftTerm, operator, null);
+		Evaluator evaluator = new TestEvaluator("evaluator", leftTerm, operator, null);
 		assertThat(evaluator.toString()).isEqualTo(expectedText);
 	}
 	
@@ -378,7 +378,7 @@ public class EvaluatorTest
 		when(rightTerm.getName()).thenReturn(rightName);
 		when(rightTerm.getValue()).thenReturn(rightValue);
 		when(rightTerm.toString()).thenReturn(rightToString);
-		Evaluator evaluator = new Evaluator("evaluator", null, operator, rightTerm);
+		Evaluator evaluator = new TestEvaluator("evaluator", null, operator, rightTerm);
 		assertThat(evaluator.toString()).isEqualTo(expectedText);
 	}
 	
@@ -405,11 +405,11 @@ public class EvaluatorTest
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
 			if (datum.operand instanceof Long)
-				operand = new IntegerOperand(NAME, ((Long)datum.operand).longValue());
+				operand = new TestIntegerOperand(NAME, ((Long)datum.operand).longValue());
 			else if (datum.operand instanceof BigDecimal)
-				operand = new BigDecimalOperand(NAME, ((BigDecimal)datum.operand));
+				operand = new TestBigDecimalOperand(NAME, ((BigDecimal)datum.operand));
 			else if (datum.operand instanceof Boolean)
-				operand = new BooleanOperand(NAME, ((Boolean)datum.operand));
+				operand = new TestBooleanOperand(NAME, ((Boolean)datum.operand));
 			Evaluator evaluator = doUnaryPrefixEvaluationTest(datum.operator, operand);
 			assertThat(evaluator.toString()).isEqualTo(datum.result);
 			if (datum.assign)
@@ -432,7 +432,7 @@ public class EvaluatorTest
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
 			if (datum.operand instanceof Long)
-				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
+				operand = new TestIntegerOperand(NAME, ((Long)datum.operand).intValue());
 			Evaluator evaluator = doUnaryPostfixEvaluationTest(datum.operator, operand);
 			assertThat(evaluator.toString()).isEqualTo(datum.result);
 			int adjust = -1;
@@ -441,20 +441,20 @@ public class EvaluatorTest
 			Object evalValue = evaluator.getValue();
 			assertThat(operand.toString()).isEqualTo(NAME + " = " + (((Long)evalValue).intValue() + adjust));
 		}
-		Evaluator evaluator = new Evaluator(NAME, new BooleanOperand("isTrue", Boolean.TRUE), "&&");
+		Evaluator evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isTrue", Boolean.TRUE), "&&");
 		StringTerm testTerm = new StringTerm("Hello world");
 		evaluator.unifyTerm(testTerm, 1);
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		assertThat(evaluator.getValue()).isEqualTo(testTerm.getValue());
-		evaluator = new Evaluator(NAME, new BooleanOperand("isFalse", Boolean.FALSE), "&&");
+		evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isFalse", Boolean.FALSE), "&&");
 		evaluator.unifyTerm(testTerm, 1);
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.SHORT_CIRCUIT);
 		assertThat(evaluator.getValue()).isEqualTo(testTerm.getValue());
-		evaluator = new Evaluator(NAME, new BooleanOperand("isFalse", Boolean.FALSE), "||");
+		evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isFalse", Boolean.FALSE), "||");
 		evaluator.unifyTerm(testTerm, 1);
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		assertThat(evaluator.getValue()).isEqualTo(testTerm.getValue());
-		evaluator = new Evaluator(NAME, new BooleanOperand("isTrue", Boolean.TRUE), "||");
+		evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isTrue", Boolean.TRUE), "||");
 		evaluator.unifyTerm(testTerm, 1);
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.SHORT_CIRCUIT);
 		assertThat(evaluator.getValue()).isEqualTo(testTerm.getValue());
@@ -465,47 +465,47 @@ public class EvaluatorTest
 	{
 		BinaryTestData[] testData = new BinaryTestData[]
 		{
-			new BinaryTestData(new Null(), new IntegerOperand("weight", 5), "==", NAME + " = false"),
+			new BinaryTestData(new Null(), new TestIntegerOperand("weight", 5), "==", NAME + " = false"),
 			new BinaryTestData(2, null, "=", NAME + " = 2", true),
-			new BinaryTestData(101, new IntegerOperand("height", 102), "<", NAME + " = true"),
-			new BinaryTestData(101, new IntegerOperand("height", 100), ">", NAME + " = true"),
-			new BinaryTestData(101, new IntegerOperand("height", 101), "==", NAME + " = true"),
-			new BinaryTestData(101, new IntegerOperand("height", 102), "<=", NAME + " = true"),
-			new BinaryTestData(101, new IntegerOperand("height", 101), "<=", NAME + " = true"),
-			new BinaryTestData(101, new IntegerOperand("height", 100), ">=", NAME + " = true"),
-			new BinaryTestData(101, new IntegerOperand("height", 101), ">=", NAME + " = true"),
-			new BinaryTestData(101, new IntegerOperand("height", 101), "!=", NAME + " = false"),
-			new BinaryTestData(101, new IntegerOperand("height", 102), "!=", NAME + " = true"),
-			new BinaryTestData(24, new IntegerOperand("weight", 7), "+", NAME + " = 31"),
-			new BinaryTestData(76, new IntegerOperand("weight", 32), "-", NAME + " = 44"),
-			new BinaryTestData(5, new IntegerOperand("weight", 5), "*", NAME + " = 25"),
-			new BinaryTestData(12, new IntegerOperand("weight", 4), "/", NAME + " = 3"),
-			new BinaryTestData(7, new IntegerOperand("mask", 15), "&", NAME + " = 7"),
-			new BinaryTestData(1, new IntegerOperand("mask", 4), "|", NAME + " = 5"),
-			new BinaryTestData(15, new IntegerOperand("mask", 7), "^", NAME + " = 8"),
-			new BinaryTestData(82, new IntegerOperand("remainder", 9), "%", NAME + " = 1"),
-			new BinaryTestData(24, new IntegerOperand("weight", 7), "+=", NAME + " = 31", true),
-			new BinaryTestData(76, new IntegerOperand("weight", 32), "-=", NAME + " = 44", true),
-			new BinaryTestData(5, new IntegerOperand("weight", 5), "*=", NAME + " = 25", true),
-			new BinaryTestData(12, new IntegerOperand("weight", 4), "/=", NAME + " = 3", true),
-			new BinaryTestData(7, new IntegerOperand("mask", 15), "&=", NAME + " = 7", true),
-			new BinaryTestData(1, new IntegerOperand("mask", 4), "|=", NAME + " = 5", true),
-			new BinaryTestData(15, new IntegerOperand("mask", 7), "^=", NAME + " = 8", true),
-			new BinaryTestData(82, new IntegerOperand("remainder", 9), "%=", NAME + " = 1", true)
+			new BinaryTestData(101, new TestIntegerOperand("height", 102), "<", NAME + " = true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 100), ">", NAME + " = true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 101), "==", NAME + " = true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 102), "<=", NAME + " = true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 101), "<=", NAME + " = true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 100), ">=", NAME + " = true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 101), ">=", NAME + " = true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 101), "!=", NAME + " = false"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 102), "!=", NAME + " = true"),
+			new BinaryTestData(24, new TestIntegerOperand("weight", 7), "+", NAME + " = 31"),
+			new BinaryTestData(76, new TestIntegerOperand("weight", 32), "-", NAME + " = 44"),
+			new BinaryTestData(5, new TestIntegerOperand("weight", 5), "*", NAME + " = 25"),
+			new BinaryTestData(12, new TestIntegerOperand("weight", 4), "/", NAME + " = 3"),
+			new BinaryTestData(7, new TestIntegerOperand("mask", 15), "&", NAME + " = 7"),
+			new BinaryTestData(1, new TestIntegerOperand("mask", 4), "|", NAME + " = 5"),
+			new BinaryTestData(15, new TestIntegerOperand("mask", 7), "^", NAME + " = 8"),
+			new BinaryTestData(82, new TestIntegerOperand("remainder", 9), "%", NAME + " = 1"),
+			new BinaryTestData(24, new TestIntegerOperand("weight", 7), "+=", NAME + " = 31", true),
+			new BinaryTestData(76, new TestIntegerOperand("weight", 32), "-=", NAME + " = 44", true),
+			new BinaryTestData(5, new TestIntegerOperand("weight", 5), "*=", NAME + " = 25", true),
+			new BinaryTestData(12, new TestIntegerOperand("weight", 4), "/=", NAME + " = 3", true),
+			new BinaryTestData(7, new TestIntegerOperand("mask", 15), "&=", NAME + " = 7", true),
+			new BinaryTestData(1, new TestIntegerOperand("mask", 4), "|=", NAME + " = 5", true),
+			new BinaryTestData(15, new TestIntegerOperand("mask", 7), "^=", NAME + " = 8", true),
+			new BinaryTestData(82, new TestIntegerOperand("remainder", 9), "%=", NAME + " = 1", true)
 		};
 		for (BinaryTestData datum: testData)
 		{
 			if (datum.operand2 == null)
 			{
 				System.out.println("?" + datum.operand + datum.operator);
-				Operand operand = new IntegerOperand("x");
+				Operand operand = new TestIntegerOperand("x");
 				Operand operand2 = null;
 				if (datum.operand instanceof Long)
-					operand2 = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
+					operand2 = new TestIntegerOperand(NAME, ((Long)datum.operand).intValue());
 				else if (datum.operand instanceof BigDecimal)
-					operand2 = new BigDecimalOperand(NAME, ((BigDecimal)datum.operand));
+					operand2 = new TestBigDecimalOperand(NAME, ((BigDecimal)datum.operand));
 				else if (datum.operand instanceof Boolean)
-					operand2 = new BooleanOperand(NAME, ((Boolean)datum.operand));
+					operand2 = new TestBooleanOperand(NAME, ((Boolean)datum.operand));
 				Evaluator evaluator = doBinaryEvaluationTest(operand, datum.operator, operand2);
 				assertThat(evaluator.toString()).isEqualTo(datum.result);
 				if (datum.assign)
@@ -519,13 +519,13 @@ public class EvaluatorTest
 				Operand operand = null;
 				Operand operand2 = (Operand) datum.operand2;
 				if (datum.operand instanceof Long)
-					operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
+					operand = new TestIntegerOperand(NAME, ((Long)datum.operand).intValue());
 				else if (datum.operand instanceof BigDecimal)
-					operand = new BigDecimalOperand(NAME, ((BigDecimal)datum.operand));
+					operand = new TestBigDecimalOperand(NAME, ((BigDecimal)datum.operand));
 				else if (datum.operand instanceof Boolean)
-					operand = new BooleanOperand(NAME, ((Boolean)datum.operand));
+					operand = new TestBooleanOperand(NAME, ((Boolean)datum.operand));
 				else if (datum.operand instanceof Null)
-					operand = new NullOperand("L");
+					operand = new TestNullOperand("L");
 				Evaluator evaluator = doBinaryEvaluationTest(operand, datum.operator, operand2);
 				assertThat(evaluator.toString()).isEqualTo(datum.result);
 				if (datum.operand instanceof Null)
@@ -537,39 +537,39 @@ public class EvaluatorTest
 			}
 		}
 		System.out.println("x==null");
-		Evaluator evaluator = new Evaluator(NAME, new IntegerOperand("x", Long.MAX_VALUE), "==", new NullOperand("y"));
+		Evaluator evaluator = new TestEvaluator(NAME, new TestIntegerOperand("x", Long.MAX_VALUE), "==", new TestNullOperand("y"));
 		evaluator.evaluate(1);
 		assertThat(evaluator.toString()).isEqualTo(NAME + " = false");
 		System.out.println("x!=null");
-		evaluator = new Evaluator(NAME, new IntegerOperand("x", Long.MAX_VALUE), "!=", new NullOperand("y"));
+		evaluator = new TestEvaluator(NAME, new TestIntegerOperand("x", Long.MAX_VALUE), "!=", new TestNullOperand("y"));
 		evaluator.evaluate(1);
 		assertThat(evaluator.toString()).isEqualTo(NAME + " = true");
 		System.out.println("null!=null");
-		evaluator = new Evaluator(NAME, new NullOperand("x"), "!=", new NullOperand("y"));
+		evaluator = new TestEvaluator(NAME, new TestNullOperand("x"), "!=", new TestNullOperand("y"));
 		evaluator.evaluate(1);
 		assertThat(evaluator.toString()).isEqualTo(NAME + " = false");
 		System.out.println("null==null");
-		evaluator = new Evaluator(NAME, new NullOperand("x"), "==", new NullOperand("y"));
+		evaluator = new TestEvaluator(NAME, new TestNullOperand("x"), "==", new TestNullOperand("y"));
 		evaluator.evaluate(1);
 		assertThat(evaluator.toString()).isEqualTo(NAME + " = true");
 		System.out.println("NaN==null");
-		evaluator = new Evaluator(NAME, new DoubleOperand("x", new Double(Double.NaN)), "==", new NullOperand("y"));
+		evaluator = new TestEvaluator(NAME, new TestDoubleOperand("x", new Double(Double.NaN)), "==", new TestNullOperand("y"));
 		evaluator.evaluate(1);
 		assertThat(evaluator.toString()).isEqualTo(NAME + " = false");
 		System.out.println("NaN!=null");
-		evaluator = new Evaluator(NAME, new DoubleOperand("x", new Double(Double.NaN)), "!=", new NullOperand("y"));
+		evaluator = new TestEvaluator(NAME, new TestDoubleOperand("x", new Double(Double.NaN)), "!=", new TestNullOperand("y"));
 		evaluator.evaluate(1);
 		assertThat(evaluator.toString()).isEqualTo(NAME + " = true");
-		evaluator = new Evaluator(NAME, new BooleanOperand("isTrue", Boolean.TRUE), "&&", new BooleanOperand("isTrue", Boolean.TRUE));
+		evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isTrue", Boolean.TRUE), "&&", new TestBooleanOperand("isTrue", Boolean.TRUE));
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		assertThat(evaluator.getValue()).isEqualTo(Boolean.TRUE);
-		evaluator = new Evaluator(NAME, new BooleanOperand("isFalse", Boolean.FALSE), "&&", new BooleanOperand("isTrue", Boolean.TRUE));
+		evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isFalse", Boolean.FALSE), "&&", new TestBooleanOperand("isTrue", Boolean.TRUE));
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		assertThat(evaluator.getValue()).isEqualTo(Boolean.FALSE);
-		evaluator = new Evaluator(NAME, new BooleanOperand("isTrue", Boolean.TRUE), "||", new BooleanOperand("isTrue", Boolean.TRUE));
+		evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isTrue", Boolean.TRUE), "||", new TestBooleanOperand("isTrue", Boolean.TRUE));
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		assertThat(evaluator.getValue()).isEqualTo(Boolean.TRUE);
-		evaluator = new Evaluator(NAME, new BooleanOperand("isFalse", Boolean.FALSE), "||", new BooleanOperand("isFalse", Boolean.FALSE));
+		evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isFalse", Boolean.FALSE), "||", new TestBooleanOperand("isFalse", Boolean.FALSE));
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		assertThat(evaluator.getValue()).isEqualTo(Boolean.FALSE);
 	}
@@ -577,7 +577,7 @@ public class EvaluatorTest
 	@Test
 	public void test_isNaN()
 	{
-		Evaluator evaluator = new Evaluator(NAME, "++", new IntegerOperand("R"));
+		Evaluator evaluator = new TestEvaluator(NAME, "++", new TestIntegerOperand("R"));
 		assertThat(evaluator.isNaN((Object)null)).isTrue();
 		assertThat(evaluator.isNaN(new Null())).isTrue();
 		assertThat(evaluator.isNaN(Double.valueOf(Double.NaN))).isTrue();
@@ -596,15 +596,15 @@ public class EvaluatorTest
 		when(rightOperand.unifyTerm(otherTerm, 1)).thenReturn(1);
 		when(rightOperand.getValue()).thenReturn(Long.MAX_VALUE);
 		when(rightOperand.getRightOperandOps()).thenReturn(new OperatorEnum[] { OperatorEnum.INCR, OperatorEnum.PLUS  });
-		Evaluator evaluator = new Evaluator(NAME, "++", rightOperand);
+		Evaluator evaluator = new TestEvaluator(NAME, "++", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		assertThat(evaluator.getValue()).isEqualTo(Long.MAX_VALUE);
 		assertThat(evaluator.isEmpty()).isFalse();
-		evaluator = new Evaluator(NAME, leftOperand, "++");
+		evaluator = new TestEvaluator(NAME, leftOperand, "++");
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		assertThat(evaluator.getValue()).isEqualTo(Long.MAX_VALUE);
 		assertThat(evaluator.isEmpty()).isFalse();
-		evaluator = new Evaluator(NAME, leftOperand, "+", rightOperand);
+		evaluator = new TestEvaluator(NAME, leftOperand, "+", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		assertThat(evaluator.getValue()).isEqualTo(Long.MAX_VALUE);
 		assertThat(evaluator.isEmpty()).isFalse();
@@ -624,13 +624,13 @@ public class EvaluatorTest
 		when(rightOperand.getValue()).thenReturn(Long.MAX_VALUE);
 		when(rightOperand.getRightOperandOps()).thenReturn(new OperatorEnum[] { OperatorEnum.INCR, OperatorEnum.PLUS  });
 		when(rightOperand.backup(anyInt())).thenReturn(true);
-		Evaluator evaluator = new Evaluator(NAME, "++", rightOperand);
+		Evaluator evaluator = new TestEvaluator(NAME, "++", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		evaluator.assign(Long.MAX_VALUE);
 		assertThat(evaluator.backup(0)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
-		evaluator = new Evaluator(NAME, "++", rightOperand);
+		evaluator = new TestEvaluator(NAME, "++", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		when(rightOperand.backup(2)).thenReturn(false);
 		evaluator.assign(Long.MAX_VALUE);
@@ -639,13 +639,13 @@ public class EvaluatorTest
 		assertThat(evaluator.backup(1)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
-		evaluator = new Evaluator(NAME, leftOperand, "++");
+		evaluator = new TestEvaluator(NAME, leftOperand, "++");
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		evaluator.assign(Long.MAX_VALUE);
 		assertThat(evaluator.backup(0)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
-		evaluator = new Evaluator(NAME, leftOperand, "++");
+		evaluator = new TestEvaluator(NAME, leftOperand, "++");
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		when(leftOperand.backup(2)).thenReturn(false);
 		evaluator.assign(Long.MAX_VALUE);
@@ -654,13 +654,13 @@ public class EvaluatorTest
 		assertThat(evaluator.backup(1)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
-		evaluator = new Evaluator(NAME, leftOperand, "+", rightOperand);
+		evaluator = new TestEvaluator(NAME, leftOperand, "+", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		evaluator.assign(Long.MAX_VALUE);
 		assertThat(evaluator.backup(0)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
-		evaluator = new Evaluator(NAME, leftOperand, "+", rightOperand);
+		evaluator = new TestEvaluator(NAME, leftOperand, "+", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		when(leftOperand.backup(2)).thenReturn(false);
 		when(rightOperand.backup(2)).thenReturn(false);
@@ -688,11 +688,11 @@ public class EvaluatorTest
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
 			if (datum.operand instanceof Long)
-				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
+				operand = new TestIntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
-				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
+				operand = new TestDoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof Null)
-				operand = new NullOperand("R");
+				operand = new TestNullOperand("R");
 			try
 			{
 			    doUnaryPrefixEvaluationTest(datum.operator, operand);
@@ -720,9 +720,9 @@ public class EvaluatorTest
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
 			if (datum.operand instanceof Long)
-				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
+				operand = new TestIntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Null)
-				operand = new NullOperand("R");
+				operand = new TestNullOperand("R");
 			try
 			{
 			    doUnaryPostfixEvaluationTest(datum.operator, operand);
@@ -740,16 +740,16 @@ public class EvaluatorTest
 	{
 		BinaryTestData[] testData = new BinaryTestData[]
 		{                      
-			new BinaryTestData("15", new IntegerOperand("mask", 7), "^", EVALUATION_FAIL + "15^7"),
-			new BinaryTestData(15, new BigDecimalOperand("mask", new BigDecimal("7")), "^", EVALUATION_FAIL + "15^7"),
-			new BinaryTestData(2, new IntegerOperand("height", 102), "||", EVALUATION_FAIL + "2||102"),
-			new BinaryTestData(new IntegerOperand("height", 102), "+", "Left term is empty"),
-			new BinaryTestData(2, new IntegerOperand("height"), "+", "Right term is empty"),
-			new BinaryTestData(new Null(),new IntegerOperand("height", 102), "+", EVALUATION_FAIL + "null+102"),
-			new BinaryTestData(102, new NullOperand("height"), "+", EVALUATION_FAIL + "102+null"),
-			new BinaryTestData(new Double("NaN"), new IntegerOperand("height", 102), "||", EVALUATION_FAIL + "NaN||102"),
-			new BinaryTestData(new DoubleOperand("height", new Double("NaN")), "+", "Left term is empty"),
-			new BinaryTestData(new Double("NaN"), new IntegerOperand("height"), "+", "Right term is empty")
+			new BinaryTestData("15", new TestIntegerOperand("mask", 7), "^", EVALUATION_FAIL + "15^7"),
+			new BinaryTestData(15, new TestBigDecimalOperand("mask", new BigDecimal("7")), "^", EVALUATION_FAIL + "15^7"),
+			new BinaryTestData(2, new TestIntegerOperand("height", 102), "||", EVALUATION_FAIL + "2||102"),
+			new BinaryTestData(new TestIntegerOperand("height", 102), "+", "Left term is empty"),
+			new BinaryTestData(2, new TestIntegerOperand("height"), "+", "Right term is empty"),
+			new BinaryTestData(new Null(),new TestIntegerOperand("height", 102), "+", EVALUATION_FAIL + "null+102"),
+			new BinaryTestData(102, new TestNullOperand("height"), "+", EVALUATION_FAIL + "102+null"),
+			new BinaryTestData(new Double("NaN"), new TestIntegerOperand("height", 102), "||", EVALUATION_FAIL + "NaN||102"),
+			new BinaryTestData(new TestDoubleOperand("height", new Double("NaN")), "+", "Left term is empty"),
+			new BinaryTestData(new Double("NaN"), new TestIntegerOperand("height"), "+", "Right term is empty")
 		};
 		for (BinaryTestData datum: testData)
 		{
@@ -757,13 +757,13 @@ public class EvaluatorTest
 			Operand operand = null;
 			Operand operand2 = (Operand) datum.operand2;
 			if (datum.operand instanceof Long)
-				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
+				operand = new TestIntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
-				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
+				operand = new TestDoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof BigDecimal)
-				operand = new BigDecimalOperand(NAME, ((BigDecimal)datum.operand));
+				operand = new TestBigDecimalOperand(NAME, ((BigDecimal)datum.operand));
 			else if (datum.operand instanceof Null)
-				operand = new NullOperand("R");
+				operand = new TestNullOperand("R");
 			try
 			{
 				doBinaryEvaluationTest(operand, datum.operator, operand2);
@@ -792,11 +792,11 @@ public class EvaluatorTest
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
 			if (datum.operand instanceof Long)
-				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
+				operand = new TestIntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
-				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
+				operand = new TestDoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof Null)
-				operand = new NullOperand("R");
+				operand = new TestNullOperand("R");
 			Evaluator evaluator = doUnaryPrefixEvaluationTest(datum.operator, operand);
 			assertThat(evaluator.toString()).isEqualTo(datum.result);
 		}
@@ -805,21 +805,21 @@ public class EvaluatorTest
 			System.out.println(datum.operator + datum.operand);
 			Operand operand = null;
 			if (datum.operand instanceof Long)
-				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
+				operand = new TestIntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
-				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
+				operand = new TestDoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof Null)
-				operand = new NullOperand("R");
+				operand = new TestNullOperand("R");
 			Evaluator evaluator = doUnaryPostfixEvaluationTest(datum.operator, operand);
 			assertThat(evaluator.toString()).isEqualTo(datum.result);
 		}
 		BinaryTestData[] binaryTestData = new BinaryTestData[]
 		{                      
-			new BinaryTestData(new Double("NaN"), new IntegerOperand("mask", 7), "^", NAME + " = NaN"),
-			new BinaryTestData(new Double("NaN"), new BigDecimalOperand("mask", new BigDecimal("7")), "^", NAME + " = NaN"),
-			new BinaryTestData(new Double("NaN"), new BigDecimalOperand("mask", new BigDecimal("7")), "^", NAME + " = NaN"),
-			new BinaryTestData(new Double("NaN"), new NullOperand("height"), "+", NAME + " = NaN"),
-			new BinaryTestData(new Null(), new DoubleOperand("height", new Double("NaN")), "+", NAME + " = NaN")
+			new BinaryTestData(new Double("NaN"), new TestIntegerOperand("mask", 7), "^", NAME + " = NaN"),
+			new BinaryTestData(new Double("NaN"), new TestBigDecimalOperand("mask", new BigDecimal("7")), "^", NAME + " = NaN"),
+			new BinaryTestData(new Double("NaN"), new TestBigDecimalOperand("mask", new BigDecimal("7")), "^", NAME + " = NaN"),
+			new BinaryTestData(new Double("NaN"), new TestNullOperand("height"), "+", NAME + " = NaN"),
+			new BinaryTestData(new Null(), new TestDoubleOperand("height", new Double("NaN")), "+", NAME + " = NaN")
 		};
 		for (BinaryTestData datum: binaryTestData)
 		{
@@ -827,13 +827,13 @@ public class EvaluatorTest
 			Operand operand = null;
 			Operand operand2 = (Operand) datum.operand2;
 			if (datum.operand instanceof Long)
-				operand = new IntegerOperand(NAME, ((Long)datum.operand).intValue());
+				operand = new TestIntegerOperand(NAME, ((Long)datum.operand).intValue());
 			else if (datum.operand instanceof Double)
-				operand = new DoubleOperand(NAME, ((Double)datum.operand).doubleValue());
+				operand = new TestDoubleOperand(NAME, ((Double)datum.operand).doubleValue());
 			else if (datum.operand instanceof BigDecimal)
-				operand = new BigDecimalOperand(NAME, ((BigDecimal)datum.operand));
+				operand = new TestBigDecimalOperand(NAME, ((BigDecimal)datum.operand));
 			else if (datum.operand instanceof Null)
-				operand = new NullOperand("R");
+				operand = new TestNullOperand("R");
 			Evaluator evaluator = doBinaryEvaluationTest(operand, datum.operator, operand2);
 			assertThat(evaluator.toString()).isEqualTo(datum.result);
 		}
@@ -843,8 +843,8 @@ public class EvaluatorTest
 	protected Evaluator doUnaryPrefixEvaluationTest(String operator, Operand term)
 	{
 		if (term == null)
-			term = new IntegerOperand("R");
-		Evaluator evaluator = new Evaluator(NAME, operator, term);
+			term = new TestIntegerOperand("R");
+		Evaluator evaluator = new TestEvaluator(NAME, operator, term);
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		return evaluator;
 	}
@@ -852,8 +852,8 @@ public class EvaluatorTest
 	protected Evaluator doUnaryPostfixEvaluationTest(String operator, Operand term)
 	{
 		if (term == null)
-			term = new IntegerOperand("L");
-		Evaluator evaluator = new Evaluator(NAME, term, operator);
+			term = new TestIntegerOperand("L");
+		Evaluator evaluator = new TestEvaluator(NAME, term, operator);
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		return evaluator;
 	}
@@ -861,10 +861,10 @@ public class EvaluatorTest
 	protected Evaluator doBinaryEvaluationTest(Operand left, String operator, Operand right)
 	{
 		if (left == null)
-			left = new IntegerOperand("L");
+			left = new TestIntegerOperand("L");
 		if (right == null)
-			right = new IntegerOperand("R");
-		Evaluator evaluator = new Evaluator(NAME, left, operator, right	);
+			right = new TestIntegerOperand("R");
+		Evaluator evaluator = new TestEvaluator(NAME, left, operator, right	);
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		return evaluator;
 	}

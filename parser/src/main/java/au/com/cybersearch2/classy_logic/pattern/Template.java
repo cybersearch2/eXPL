@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -76,6 +77,8 @@ public class Template extends Structure
             }};
         EMPTY_NAMES_LIST = Collections.emptyList();
     }
+    /** Qualified name of operand */
+    protected QualifiedName qname;
     /** Key to match with Axiom name for unification */
 	protected String key;
     /** Identity used in backup to allow partial backup to last unifying agent */
@@ -97,11 +100,12 @@ public class Template extends Structure
     
 	/**
 	 * Construct Template object
-	 * @param name Template name and also, by default, axiom key 
+	 * @param qname Template qualifed name. The axiom key is set to the name part as a default.
 	 */
-	public Template(String name) 
+	public Template(QualifiedName qname) 
 	{
-		super(name);
+		super(qname.getName().isEmpty() ? qname.getTemplate() : qname.getName());
+		this.qname = qname;
 		this.key = name;
 		id = referenceCount.incrementAndGet();
 	}
@@ -109,23 +113,23 @@ public class Template extends Structure
 	/**
 	 * Construct Template object
 	 * @param key Axiom name to unify with 
-	 * @param name Template name
+	 * @param qname Template qualified name
 	 */
-	public Template(String key, String name) 
+	public Template(String key, QualifiedName qname) 
 	{
-		super(name);
+		super(qname.getName().isEmpty() ? qname.getTemplate() : qname.getName());
 		this.key = key;
 		id = referenceCount.incrementAndGet();
 	}
 
 	/**
 	 * Construct Template object
-	 * @param name Template name
+	 * @param qname Template qualifed name
 	 * @param termList One or more Variables
 	 */
-	public Template(String name, List<Term> termList) 
+	public Template(QualifiedName qname, List<Term> termList) 
 	{
-		this(name);
+		this(qname);
 		if (termList.size() == 0)
 			throw new IllegalArgumentException("Parameter \"termList\" is empty");
 		setTerms(termList);
@@ -134,23 +138,23 @@ public class Template extends Structure
 	/**
 	 * Construct Template object
 	 * @param key Axiom name to unify with 
-	 * @param name Template name
+     * @param qname Template qualified name
 	 * @param termList One or more Variables
 	 */
-	public Template(String key, String name, List<Term> termList) 
+	public Template(String key, QualifiedName qname, List<Term> termList) 
 	{
-		this(name, termList);
+		this(qname, termList);
 		this.key = key;
 	}
 
 	/**
 	 * Construct Template object
-	 * @param name Template name
+     * @param qname Template qualified name
 	 * @param terms One or more Variables
 	 */
-	public Template(String name, Term... terms) 
+	public Template(QualifiedName qname, Term... terms) 
 	{
-		this(name);
+		this(qname);
 		if (terms.length== 0)
 			throw new IllegalArgumentException("Parameter \"terms\" is empty");
 		setTerms(terms);
@@ -159,12 +163,12 @@ public class Template extends Structure
 	/**
 	 * Construct Template object with key different to name
 	 * @param key Axiom name to unify with 
-	 * @param name Template name
+     * @param qname Template qualified name
 	 * @param terms One or more Variables
 	 */
-	public Template(String key, String name, Term... terms) 
+	public Template(String key, QualifiedName qname, Term... terms) 
 	{
-		this(name, terms);
+		this(qname, terms);
 		this.key = key;
 	}
 
@@ -242,6 +246,15 @@ public class Template extends Structure
 	}
 
 	/**
+	 * Returns template qualified name
+	 * @return QualifiedName object
+	 */
+    public QualifiedName getQualifiedName()
+    {
+        return qname;
+    }
+
+	/**
 	 * Evaluate Terms of this Template
 	 * @return EvaluationStatus
 	 */
@@ -317,7 +330,7 @@ public class Template extends Structure
         Axiom axiom = new Axiom(name);
 		for (Term term: termList)
 		{
-			if (!term.isEmpty() && !term.getName().isEmpty() && (term.getName().indexOf('.') == -1))
+			if (!term.isEmpty() && !term.getName().isEmpty() && qname.inSameSpace(term.getName()))
 			{
 				String termName = NameParser.getNamePart(term.getName());
 				Parameter param = new Parameter(termName, term.getValue());
@@ -375,7 +388,7 @@ public class Template extends Structure
 		{
 			for (String name: initData.keySet())
 			{
-				Term term = getTermByName(name);
+				Term term = getTermByName(QualifiedName.parseName(name, qname).toString());
 				if (term == null)
 					throw new QueryExecutionException("Template \"" + getName() + "\" does not have term \"" + name + "\"");
 				term.assign(initData.get(name));

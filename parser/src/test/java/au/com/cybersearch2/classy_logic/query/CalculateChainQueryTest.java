@@ -28,6 +28,10 @@ import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
+import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
+import au.com.cybersearch2.classy_logic.expression.TestEvaluator;
+import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 
@@ -45,19 +49,19 @@ public class CalculateChainQueryTest
 	    Map<String,Object> props = new HashMap<String,Object>(); 
 	    props.put("n", Long.valueOf(1));
 	    props.put("limit", Long.valueOf(3));
-    	IntegerOperand n = new IntegerOperand("n");
-    	IntegerOperand limit = new IntegerOperand("limit");
+    	IntegerOperand n = new TestIntegerOperand("n");
+    	IntegerOperand limit = new TestIntegerOperand("limit");
     	List<Operand> operandList = new ArrayList<Operand>();
-    	Evaluator calcExpression = new Evaluator("n", "++", n);
-	    Evaluator testExpression = new Evaluator(n, "!=", limit);
-	    Evaluator shortCircuit = new Evaluator(testExpression, "&&");
+    	Evaluator calcExpression = new TestEvaluator("n", "++", n);
+	    Evaluator testExpression = new TestEvaluator(n, "!=", limit);
+	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(calcExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template("loop");
+	    Template template = new Template(parseTemplateName("loop"));
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template("calc", n, loopy, limit);
+        Template calcTemplate = new Template(parseTemplateName("calc"), n, loopy, limit);
         calcTemplate.addProperties(props);
         Solution solution = new Solution();
         
@@ -73,21 +77,21 @@ public class CalculateChainQueryTest
     	props.put("factorial", Long.valueOf(1));
     	props.put("n", Long.valueOf(4));
     	props.put("i", Long.valueOf(1));
-    	IntegerOperand n = new IntegerOperand("n");
-    	BigDecimalOperand factorial = new BigDecimalOperand("factorial");
-    	IntegerOperand i = new IntegerOperand("i");
+    	IntegerOperand n = new TestIntegerOperand("n");
+    	BigDecimalOperand factorial = new TestBigDecimalOperand("factorial");
+    	IntegerOperand i = new TestIntegerOperand("i");
     	List<Operand> operandList = new ArrayList<Operand>();
-    	Evaluator factorialExpression = new Evaluator("factorial", factorial, "*=", i);
-       	Evaluator iExpression = new Evaluator(i, "++");
- 	    Evaluator testExpression = new Evaluator(iExpression, "!=", n);
-	    Evaluator shortCircuit = new Evaluator(testExpression, "&&");
+    	Evaluator factorialExpression = new TestEvaluator("factorial", factorial, "*=", i);
+       	Evaluator iExpression = new TestEvaluator(i, "++");
+ 	    Evaluator testExpression = new TestEvaluator(iExpression, "!=", n);
+	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(factorialExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template("loop");
+	    Template template = new Template(parseTemplateName("loop"));
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template("factorial", n, factorial, i, loopy);
+        Template calcTemplate = new Template(parseTemplateName("factorial"), n, factorial, i, loopy);
         calcTemplate.addProperties(props);
 
         Solution solution = new Solution();
@@ -105,4 +109,8 @@ public class CalculateChainQueryTest
         assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n = 4, factorial = 24, i = 5, loop = true)");
 	}
 
+    protected static QualifiedName parseTemplateName(String name)
+    {
+        return new QualifiedName(QualifiedName.EMPTY, name, QualifiedName.EMPTY);
+    }
 }

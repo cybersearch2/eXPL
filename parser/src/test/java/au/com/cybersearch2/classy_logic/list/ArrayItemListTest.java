@@ -19,12 +19,13 @@ import java.math.BigDecimal;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
-import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
-import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
+import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;
+import au.com.cybersearch2.classy_logic.expression.TestDoubleOperand;
+import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
@@ -44,7 +45,7 @@ public class ArrayItemListTest
 	@Test
 	public void test_constructor()
 	{
-		IntegerOperand proxy = new IntegerOperand(NAME);
+		IntegerOperand proxy = new TestIntegerOperand(NAME);
 		ArrayItemList<Integer> listOperand = new ArrayItemList<Integer>(Integer.class, proxy);
 		assertThat(listOperand.getName()).isEqualTo(NAME);
 		assertThat(listOperand.isEmpty()).isTrue();
@@ -62,7 +63,7 @@ public class ArrayItemListTest
 	@Test
 	public void test_assign()
 	{
-		IntegerOperand proxy = new IntegerOperand(NAME);
+		IntegerOperand proxy = new TestIntegerOperand(NAME);
 		ArrayItemList<Long> listOperand = new ArrayItemList<Long>(Long.class, proxy);
 		listOperand.assignItem(0, Long.valueOf(17));
 		assertThat(listOperand.getItem(0)).isEqualTo(17);
@@ -100,17 +101,17 @@ public class ArrayItemListTest
 	@Test
 	public void test_new_variable_instance()
 	{
-		ArrayItemList<Long> intOperandList = new ArrayItemList<Long>(Long.class, new IntegerOperand(NAME));
+		ArrayItemList<Long> intOperandList = new ArrayItemList<Long>(Long.class, new TestIntegerOperand(NAME));
 		intOperandList.assignItem(0, Long.valueOf(21));
 		ItemListVariable<Long> intListVariable = intOperandList.newVariableInstance(0, "0", 1);
 		intListVariable.evaluate(1);
 		assertThat(intListVariable.getValue()).isEqualTo(21);
 		intOperandList.assignItem(0, Long.valueOf(72));
-		Operand expression = new IntegerOperand("test", Long.valueOf(0));
+		Operand expression = new TestIntegerOperand("test", Long.valueOf(0));
 		intListVariable = intOperandList.newVariableInstance(expression, "test", 1);
 		intListVariable.evaluate(1);
 		assertThat(intListVariable.getValue()).isEqualTo(72);
-		ArrayItemList<Double> doubOperandList = new ArrayItemList<Double>(Double.class, new DoubleOperand(NAME));
+		ArrayItemList<Double> doubOperandList = new ArrayItemList<Double>(Double.class, new TestDoubleOperand(NAME));
 		doubOperandList.assignItem(0, Double.valueOf(5.23));
 		ItemListVariable<Double> doubListVariable = doubOperandList.newVariableInstance(0, "0", 1);
 		doubListVariable.evaluate(1);
@@ -119,7 +120,7 @@ public class ArrayItemListTest
 		doubListVariable = doubOperandList.newVariableInstance(expression, "test", 1);
 		doubListVariable.evaluate(1);
 		assertThat(doubListVariable.getValue()).isEqualTo(97.34);
-		ArrayItemList<String> sOperandList = new ArrayItemList<String>(String.class, new StringOperand(NAME));
+		ArrayItemList<String> sOperandList = new ArrayItemList<String>(String.class, new TestStringOperand(NAME));
 		sOperandList.assignItem(0, "testing123");
 		ItemListVariable<String> sListVariable = sOperandList.newVariableInstance(0, "0", 1);
 		sListVariable.evaluate(1);
@@ -128,7 +129,7 @@ public class ArrayItemListTest
 		sListVariable = sOperandList.newVariableInstance(expression, "test", 1);
 		sListVariable.evaluate(1);
 		assertThat(sListVariable.getValue()).isEqualTo("xmas2014");
-		ArrayItemList<Boolean> boolOperandList = new ArrayItemList<Boolean>(Boolean.class, new BooleanOperand(NAME));
+		ArrayItemList<Boolean> boolOperandList = new ArrayItemList<Boolean>(Boolean.class, new TestBooleanOperand(NAME));
 		boolOperandList.assignItem(0, Boolean.TRUE);
 		ItemListVariable<Boolean> boolListVariable = boolOperandList.newVariableInstance(0, "0", 1);
 		boolListVariable.evaluate(1);
@@ -137,7 +138,7 @@ public class ArrayItemListTest
 		boolListVariable = boolOperandList.newVariableInstance(expression, "test", 1);
 		boolListVariable.evaluate(1);
 		assertThat(boolListVariable.getValue()).isFalse();
-		ArrayItemList<BigDecimal> decOperandList = new ArrayItemList<BigDecimal>(BigDecimal.class, new BigDecimalOperand(NAME));
+		ArrayItemList<BigDecimal> decOperandList = new ArrayItemList<BigDecimal>(BigDecimal.class, new TestBigDecimalOperand(NAME));
 		decOperandList.assignItem(0, BigDecimal.TEN);
 		ItemListVariable<BigDecimal> decListVariable = decOperandList.newVariableInstance(0, "0", 1);
 		decListVariable.evaluate(1);

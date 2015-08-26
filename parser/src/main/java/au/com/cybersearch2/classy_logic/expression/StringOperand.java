@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -28,26 +29,39 @@ public class StringOperand  extends ExpressionParameter<String> implements Conca
 {
 
 	/**
-	 * String Expression
-	 * @param name
-	 * @param expression Parameter which evaluates value
+	 * Construct StringOperand with given expression Operand
+     * @param qname Qualified name
+	 * @param expression The Operand which evaluates value
 	 */
-	public StringOperand(String name, Operand expression) 
+	public StringOperand(QualifiedName qname, Operand expression) 
 	{
-		super(name, expression);
+		super(qname, expression);
 		
 	}
 
-	public StringOperand(String name, String value) 
+	/**
+     * Construct StringOperand with given value
+     * @param qname Qualified name
+	 * @param value The value
+	 */
+	public StringOperand(QualifiedName qname, String value) 
 	{
-		super(name, value);
+		super(qname, value);
 	}
 
-	public StringOperand(String name) 
+	/**
+     * Construct StringOperand
+     * @param qname Qualified name
+	 */
+	public StringOperand(QualifiedName qname) 
 	{
-		super(name);
+		super(qname);
 	}
 
+	/**
+	 * getRightOperandOps
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
+	 */
 	@Override
 	public OperatorEnum[] getRightOperandOps() 
 	{
@@ -59,6 +73,10 @@ public class StringOperand  extends ExpressionParameter<String> implements Conca
 		};
 	}
 
+	/**
+	 * getLeftOperandOps
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
+	 */
 	@Override
 	public OperatorEnum[] getLeftOperandOps() 
 	{
@@ -70,6 +88,10 @@ public class StringOperand  extends ExpressionParameter<String> implements Conca
 		};
 	}
 
+	/**
+	 * getStringOperandOps
+	 * @see au.com.cybersearch2.classy_logic.expression.ExpressionParameter#getStringOperandOps()
+	 */
 	 @Override
      public OperatorEnum[] getStringOperandOps()
      {
@@ -91,12 +113,20 @@ public class StringOperand  extends ExpressionParameter<String> implements Conca
 	    return new Integer(0);
 	}
 
+	/**
+	 * Binary numberEvaluation
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+	 */
 	@Override
 	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
 	{
 	    return new Integer(0);
 	}
 
+	/**
+	 * booleanEvaluation
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+	 */
 	@Override
 	public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
 	{
@@ -110,12 +140,20 @@ public class StringOperand  extends ExpressionParameter<String> implements Conca
 		return calc;
 	}
 
+	/**
+	 * assign
+	 * @see au.com.cybersearch2.classy_logic.terms.Parameter#assign(java.lang.Object)
+	 */
 	@Override
 	public void assign(Object value) 
 	{
 		setValue(value.toString());
 	}
 
+	/**
+	 * concatenate
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
+	 */
     @Override
     public String concatenate(Operand rightOperand)
     {

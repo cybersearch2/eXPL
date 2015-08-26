@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
 
@@ -28,40 +29,58 @@ public abstract class ExpressionParameter<T> extends GenericParameter<T> impleme
 {
 	/** Optional Parameter which evaluates value */
 	protected Operand expression;
+    /** Qualified name of operand */
+    protected QualifiedName qname;
 	
 	/**
 	 * Construct a ExpressionParameter object using given name 
-	 * @param name String
+     * @param qname Qualified name
 	 * @throws IllegalArgumentException if name is empty
 	 */
-	protected ExpressionParameter(String name)
+	protected ExpressionParameter(QualifiedName qname)
 	{
-		super(name);
+		super(qname.toString());
 		if (name.isEmpty())
 			throw new IllegalArgumentException("Param \"name\" is empty");
+		this.qname = qname;
 	}
 
 	/**
 	 * Construct a non-empty named Variable object, callable only from sub class.
-	 * @param name String
+     * @param qname Qualified name
 	 * @param value Object of generic type T 
 	 */
-	protected ExpressionParameter(String name, T value) 
+	protected ExpressionParameter(QualifiedName qname, T value) 
 	{
-		super(name, value);
+		super(qname.toString(), value);
 	}
 
 	/**
 	 * Construct a non-empty named Variable object
-	 * @param name String
+     * @param qname Qualified name
 	 * @param expression Operand which evaluates value 
 	 */
-	protected ExpressionParameter(String name, Operand expression) 
+	protected ExpressionParameter(QualifiedName qname, Operand expression) 
 	{
-		super(name);
+		super(qname.toString());
+		this.qname = qname;
 		this.expression = expression;
 	}
 
+    /**
+     * Returns qualified name
+     * @return QualifiedName object
+     */
+	@Override
+    public QualifiedName getQualifiedName()
+    {
+        return qname;
+    }
+
+	/**
+	 * Returns flag set true if has expression Operand
+	 * @return boolean
+	 */
 	public boolean hasExpression()
 	{
 	    return expression != null;

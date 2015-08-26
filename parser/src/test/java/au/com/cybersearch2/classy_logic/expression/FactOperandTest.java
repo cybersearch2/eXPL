@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -32,10 +33,12 @@ public class FactOperandTest
 {
     static final String AXIOM_KEY = "key";
     static final String AXIOM_NAME = "axiom.key";
+    static QualifiedName QNAME = QualifiedName.parseName(AXIOM_NAME);
+    
     @Test 
     public void test_types()
     {
-        BooleanOperand booleanOperand = new BooleanOperand("BooleanOperand");
+        BooleanOperand booleanOperand = new TestBooleanOperand("BooleanOperand");
         FactOperand factOperand = new FactOperand(booleanOperand);
         factOperand.evaluate(1);
         assertThat((Boolean)factOperand.getValue()).isFalse();
@@ -50,10 +53,10 @@ public class FactOperandTest
         assertThat(factOperand.getId()).isEqualTo(3);
 
         // Create AxiomTermList to contain query result. 
-        AxiomTermList axiomTermList = new AxiomTermList(AXIOM_KEY, AXIOM_KEY);
+        AxiomTermList axiomTermList = new AxiomTermList(QNAME, AXIOM_KEY);
         // Create Variable to be axiomTermList container. Give it the same name as the inner Template 
         // so it is qualified by the name of the enclosing Template
-        Variable listVariable = new Variable(AXIOM_NAME);
+        Variable listVariable = new Variable(QNAME);
         listVariable.assign(axiomTermList);
         factOperand = new FactOperand(listVariable);
         factOperand.evaluate(1);

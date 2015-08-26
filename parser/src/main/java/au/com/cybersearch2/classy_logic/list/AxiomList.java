@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.list;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -40,9 +41,9 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 	 * Construct an AxiomList object
 	 * @param name Name of axiom list
 	 */
-	public AxiomList(String name, String key) 
+	public AxiomList(QualifiedName qname, String key) 
 	{
-		super(AxiomTermList.class, new Variable(name));
+		super(AxiomTermList.class, new Variable(qname));
 		this.key = key;
 	}
 
@@ -113,7 +114,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 			@Override
 			public void onNextAxiom(Axiom axiom) 
 			{
-				AxiomTermList axiomListOperand = new AxiomTermList(getName(), axiom.getName());
+				AxiomTermList axiomListOperand = new AxiomTermList(getQualifiedName(), axiom.getName());
 				axiomListOperand.setAxiom(axiom);
 				assignItem(getLength(), axiomListOperand);
 			}};

@@ -24,6 +24,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Mockito.*;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -43,7 +44,7 @@ public class TemplateTest
 	@Test
 	public void test_Constructor_terms_list()
 	{
-		Template testTemplate = new Template(NAME, getTermList());
+		Template testTemplate = new Template(parseTemplateName(NAME), getTermList());
 		int id = testTemplate.getId();
 		assertThat(testTemplate.getName()).isEqualTo(NAME);
 		assertThat(testTemplate.getKey()).isEqualTo(NAME);
@@ -58,7 +59,7 @@ public class TemplateTest
 	@Test
 	public void test_Constructor_terms_list_key()
 	{
-		Template testTemplate = new Template(KEY, NAME, getTermList());
+		Template testTemplate = new Template(KEY, parseTemplateName(NAME), getTermList());
 		int id = testTemplate.getId();
 		assertThat(testTemplate.getName()).isEqualTo(NAME);
 		assertThat(testTemplate.getKey()).isEqualTo(KEY);
@@ -73,7 +74,7 @@ public class TemplateTest
 	@Test
 	public void test_Constructor_terms_array()
 	{
-		Template testTemplate = new Template(NAME, getParameterArray());
+		Template testTemplate = new Template(parseTemplateName(NAME), getParameterArray());
 		int id = testTemplate.getId();
 		assertThat(testTemplate.getName()).isEqualTo(NAME);
 		assertThat(testTemplate.getKey()).isEqualTo(NAME);
@@ -88,7 +89,7 @@ public class TemplateTest
 	@Test
 	public void test_Constructor_terms_array_key()
 	{
-		Template testTemplate = new Template(KEY, NAME, getParameterArray());
+		Template testTemplate = new Template(KEY, parseTemplateName(NAME), getParameterArray());
 		int id = testTemplate.getId();
 		assertThat(testTemplate.getName()).isEqualTo(NAME);
 		assertThat(testTemplate.getKey()).isEqualTo(KEY);
@@ -106,7 +107,7 @@ public class TemplateTest
 		List<Term> paramList = new ArrayList<Term>();
 		try
 		{
-			new Template(NAME, paramList);
+			new Template(parseTemplateName(NAME), paramList);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch (IllegalArgumentException e)
@@ -115,7 +116,7 @@ public class TemplateTest
 	    }
 		try
 		{
-			new Template(NAME, new Parameter[0]);
+			new Template(parseTemplateName(NAME), new Parameter[0]);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch (IllegalArgumentException e)
@@ -131,7 +132,7 @@ public class TemplateTest
 		Parameter parameter = mock(Parameter.class);
 		when(parameter.getName()).thenReturn("test-parameter1");
 		paramList.add(parameter);
-		Template testTemplate = new Template(NAME, paramList);	
+		Template testTemplate = new Template(parseTemplateName(NAME), paramList);	
 		when(parameter.backup(Template.referenceCount.get())).thenReturn(true);
 		assertThat(testTemplate.backup(true)).isTrue();
 		when(parameter.backup(Template.referenceCount.get())).thenReturn(false);
@@ -143,7 +144,7 @@ public class TemplateTest
 		Parameter parameter2 = mock(Parameter.class);
 		when(parameter2.getName()).thenReturn("test-parameter2");
 		paramList.add(parameter2);
-		testTemplate = new Template(NAME,paramList);	
+		testTemplate = new Template(parseTemplateName(NAME) ,paramList);	
 		when(parameter2.backup(Template.referenceCount.get())).thenReturn(false);
 		when(parameter.backup(Template.referenceCount.get())).thenReturn(true);
 		assertThat(testTemplate.backup(true)).isTrue();
@@ -159,7 +160,7 @@ public class TemplateTest
 	@Test
 	public void test_setKey()
 	{
-		Template testTemplate = new Template(KEY, NAME, getTermList());
+		Template testTemplate = new Template(KEY, parseTemplateName(NAME), getTermList());
 		testTemplate.setKey(KEY +"!");
 		assertThat(testTemplate.getKey()).isEqualTo(KEY+"!");
 	}
@@ -192,4 +193,8 @@ public class TemplateTest
 		return paramArray;
 	}
 
+    protected static QualifiedName parseTemplateName(String name)
+    {
+        return new QualifiedName(QualifiedName.EMPTY, name, QualifiedName.EMPTY);
+    }
 }

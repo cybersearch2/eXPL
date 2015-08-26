@@ -36,6 +36,7 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
@@ -70,11 +71,11 @@ public class RegExTest
 	public void test_RegEx_query() throws IOException 
 	{
 		LexiconSource lexiconSource = new LexiconSource();
-		Template inWordsTemplate = new Template("in_words");
+		Template inWordsTemplate = new Template(new QualifiedName(QualifiedName.EMPTY, "in_words", QualifiedName.EMPTY));
 		inWordsTemplate.setKey("Lexicon");
-		RegExOperand regExOperand = new RegExOperand("Word", "^in[^ ]+", 0, null);
+		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Word"), "^in[^ ]+", 0, null);
 		inWordsTemplate.addTerm(regExOperand);
-		inWordsTemplate.addTerm(new StringOperand("Definition"));
+		inWordsTemplate.addTerm(new TestStringOperand("Definition"));
 		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(\"^in[^ ]+\", Definition)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
@@ -94,15 +95,15 @@ public class RegExTest
 	public void test_groups()
 	{
 		LexiconSource lexiconSource = new LexiconSource();
-		Template dictionaryTemplate = new Template("dictionary");
+		Template dictionaryTemplate = new Template(new QualifiedName(QualifiedName.EMPTY, "dictionary", QualifiedName.EMPTY));
 		dictionaryTemplate.setKey("Lexicon");
 		Group group = new Group("dictionary");
 		Operand g1 = mock(Operand.class);
 		Operand g2 = mock(Operand.class);
 		group.addGroup(g1);
 		group.addGroup(g2);
-		RegExOperand regExOperand = new RegExOperand("Definition", "^(.)\\. (.*+)", 0, group);
-		dictionaryTemplate.addTerm(new StringOperand("Word"));
+		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Definition"), "^(.)\\. (.*+)", 0, group);
+		dictionaryTemplate.addTerm(new TestStringOperand("Word"));
 		dictionaryTemplate.addTerm(regExOperand);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(dictionaryTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());

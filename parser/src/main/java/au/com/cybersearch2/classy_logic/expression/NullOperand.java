@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -27,16 +28,27 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class NullOperand extends ExpressionParameter<Null> implements Operand
 {
+    /**
+     * Construct anonymous NullOperand object
+     */
 	public NullOperand()
 	{
-		super(Term.ANONYMOUS, new Null());
+		super(QualifiedName.ANONYMOUS, new Null());
 	}
 
-	public NullOperand(String name)
+	/**
+     * Construct named NullOperand object
+     * @param qname Qualified name
+	 */
+	public NullOperand(QualifiedName qname)
 	{
-		super(name, new Null());
+		super(qname, new Null());
 	}
-	
+
+	/**
+	 * getRightOperandOps
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
+	 */
 	@Override
 	public OperatorEnum[] getRightOperandOps() 
 	{
@@ -48,6 +60,10 @@ public class NullOperand extends ExpressionParameter<Null> implements Operand
 		};
 	}
 
+	/**
+	 * getLeftOperandOps
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
+	 */
 	@Override
 	public OperatorEnum[] getLeftOperandOps() 
 	{
@@ -60,7 +76,7 @@ public class NullOperand extends ExpressionParameter<Null> implements Operand
 	}
 
 	/**
-	 * 
+	 * Unary numberEvaluation - invalid
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
 	 */
 	@Override
@@ -70,7 +86,7 @@ public class NullOperand extends ExpressionParameter<Null> implements Operand
 	}
 
 	/**
-	 * 
+	 * Binary numberEvaluation - invalid
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
 	 */
 	@Override
@@ -80,7 +96,7 @@ public class NullOperand extends ExpressionParameter<Null> implements Operand
 	}
 
 	/**
-	 * 
+	 * booleanEvaluation - compare to another NullOperand
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
 	 */
 	@Override

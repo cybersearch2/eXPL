@@ -58,8 +58,11 @@ public class AxiomPairer implements UnificationPairer
 	{
 		if (!term.getName().isEmpty())
 		{
-			// Pair by name. 
-			Term otherTerm = owner.getTermByName(term.getName());
+			// Pair by name.
+		    String termName = term.getName();
+		    int pos = termName.lastIndexOf('.');
+		    String matchName = pos == -1 ? termName : termName.substring(pos + 1);
+			Term otherTerm = owner.getTermByName(matchName);
 		    if ((otherTerm != null) && !pairTerms(term, otherTerm))
 		        return false;
 		}

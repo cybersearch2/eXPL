@@ -21,6 +21,7 @@ import java.util.Locale;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.TextFormat;
@@ -38,13 +39,13 @@ public class FormatterOperand extends StringOperand implements LocaleListener
 	protected Locale locale;
 	
 	/**
-	 * @param name The name of this operand
+     * @param qname Qualified name
 	 * @param operand The Operand containing the value to format
 	 * @param locale Initial locale - can be updated through LocaleListener interface
 	 */
-	public FormatterOperand(String name, Operand operand, Locale locale) 
+	public FormatterOperand(QualifiedName qname, Operand operand, Locale locale) 
 	{
-		super(name);
+		super(qname);
         this.operand = operand;
         this.locale = locale;
 	}

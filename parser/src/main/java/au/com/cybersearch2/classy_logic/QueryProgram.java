@@ -22,6 +22,7 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
@@ -186,7 +187,7 @@ public class QueryProgram extends QueryLauncher
 	{
 		Scope scope = queryParams.getScope();
 		ScopeContext scopeContext = scope.getContext(false);
-		Map<String, Iterable<Axiom>> listMap = null;
+		Map<QualifiedName, Iterable<Axiom>> listMap = null;
 		Map<String, Axiom> axiomMap = null;
 		try
 		{

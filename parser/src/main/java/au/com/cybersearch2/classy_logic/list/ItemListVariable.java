@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.list;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -35,6 +36,8 @@ import au.com.cybersearch2.classy_logic.terms.GenericParameter;
  */
 public class ItemListVariable<T> extends GenericParameter<T> implements Operand 
 {
+    /** Qualified name of operand */
+    protected QualifiedName qname;
 	/** The backing operand list */
     protected ItemList<?> itemList;
     /** Proxy to provide Operand evaluation */
@@ -53,15 +56,16 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 	 */
 	public ItemListVariable(ItemList<?> itemList, Operand proxy, int index, String suffix) 
 	{   // Use convention list name appended with '.' + index
-		super(itemList.getName() + "." + suffix);
+		super(getVariableName(itemList.getName(), suffix));
 		this.itemList = itemList;
         this.proxy = proxy;
         this.index = index;
+        this.qname = getVariableName(itemList, suffix);
         if (itemList.hasItem(index))
 			onIndexSet(index);
 	}
 
-	/**
+    /**
 	 * Construct an evaluated index ItemListVariable object
 	 * @param itemList The backing operand list
 	 * @param proxy Proxy to provide Operand evaluation
@@ -70,13 +74,23 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 	 */
 	public ItemListVariable(ItemList<?> itemList, Operand proxy, Operand indexExpression, String suffix) 
 	{
-		super(itemList.getName() + "." + suffix);
+		super(getVariableName(itemList.getName(), suffix));
 		this.itemList = itemList;
         this.proxy = proxy;
         this.indexExpression = indexExpression;
+        this.qname = getVariableName(itemList, suffix);
         index = -1; // Set index to invalid value to avoid accidental uninitialised list access
 	}
 
+    /**
+     * Returns qualified name of this operamd
+     * @return QualifiedName object
+     */
+    @Override
+    public QualifiedName getQualifiedName()
+    {
+        return qname;
+    }
 	/**
 	 * Assign a value and set the delegate
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
@@ -280,5 +294,15 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 	{
 		return null;
 	}
+
+    protected static String getVariableName(String listName, String suffix)
+    {
+        return listName + "_" + suffix;
+    }
+
+    public static QualifiedName getVariableName(ItemList<?> itemList2, String suffix)
+    {
+        return new QualifiedName(getVariableName(itemList2.getName(), suffix), itemList2.getQualifiedName());
+    }
 
 }

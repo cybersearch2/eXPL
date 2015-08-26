@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.LocaleCurrencyTest;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -39,11 +40,12 @@ public class CurrencyOperandTest
 {
 
 	final static String NAME = "CurrencyOp";
+	static QualifiedName QNAME = QualifiedName.parseName(NAME);
 	
 	@Test
 	public void test_unify_text()
 	{
-		CurrencyOperand currencyOperand = new CurrencyOperand(NAME, Locale.getDefault(Category.FORMAT));
+		CurrencyOperand currencyOperand = new CurrencyOperand(QNAME, Locale.getDefault(Category.FORMAT));
 		Parameter localAmount = new Parameter(Term.ANONYMOUS, NumberFormat.getCurrencyInstance().format(12345.67));
 		assertThat(currencyOperand.unifyTerm(localAmount, 1)).isEqualTo(1);
 		assertThat(currencyOperand.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
@@ -97,7 +99,7 @@ public class CurrencyOperandTest
 				String country = locale.getCountry();
 				if (locale.getCountry().equals("LU")) // Luxenburg has French and German formats
 					country = locale.getLanguage() + "_" + country;
-				CurrencyOperand currencyOperand = new CurrencyOperand(NAME, testAmount, Locale.getDefault(Category.FORMAT));
+				CurrencyOperand currencyOperand = new CurrencyOperand(QNAME, testAmount, Locale.getDefault(Category.FORMAT));
 				currencyOperand.setCountry(country);
 				assertThat(currencyOperand.formatValue().contains(Currency.getInstance(locale).getCurrencyCode())).isTrue();
 			}
@@ -106,14 +108,14 @@ public class CurrencyOperandTest
 	
 	private void testOperand(Locale locale, String amount, BigDecimal expectedResult, boolean useCountryOperand)
 	{
-		CurrencyOperand currencyOperand = new CurrencyOperand(NAME, Locale.getDefault(Category.FORMAT));
+		CurrencyOperand currencyOperand = new CurrencyOperand(QNAME, Locale.getDefault(Category.FORMAT));
 		String country = locale.getCountry();
 		if (locale.getCountry().equals("LU")) // Luxenburg has French and German formats
 			country = locale.getLanguage() + "_" + country;
 		Variable countryOperand = null;
 		if (useCountryOperand)
 		{
-			countryOperand = new Variable("CC", new StringOperand("EvalCC", country));
+			countryOperand = new TestVariable("CC", new TestStringOperand("EvalCC", country));
 			currencyOperand.setCountryOperand(countryOperand);
 		}
 		else

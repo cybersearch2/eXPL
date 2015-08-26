@@ -22,9 +22,9 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomListSpec;
 import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
@@ -40,14 +40,16 @@ public class OperandMapTest
 {
 
 	static public final String LIST_NAME = "ListName";
+	static final QualifiedName QNAME = QualifiedName.parseName(LIST_NAME);
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void test_item_list_getListVariable()
 	{
-		OperandMap operandMap = new OperandMap();
+		OperandMap operandMap = new OperandMap(QualifiedName.ANONYMOUS);
 		@SuppressWarnings("rawtypes")
 		ItemList itemList = mock(ItemList.class);
+		when(itemList.getQualifiedName()).thenReturn(QNAME);
 		@SuppressWarnings("rawtypes")
 		ItemListVariable itemListVariable = mock(ItemListVariable.class);
 		when(itemList.newVariableInstance(0, "0", 0)).thenReturn(itemListVariable);
@@ -58,10 +60,13 @@ public class OperandMapTest
 	public void test_axiom_list_getListVariable()
 	{
         String LIST_VAR_NAME = LIST_NAME + ".0.0";
-		OperandMap operandMap = new OperandMap();
+        QualifiedName Q_LIST_VAR_NAME = new QualifiedName(LIST_VAR_NAME, QualifiedName.ANONYMOUS);
+		OperandMap operandMap = new OperandMap(QualifiedName.ANONYMOUS);
 		AxiomList axiomList = mock(AxiomList.class);
+	    when(axiomList.getQualifiedName()).thenReturn(QNAME);
 		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomListVariable.getName()).thenReturn(LIST_VAR_NAME);
+		when(axiomListVariable.getQualifiedName()).thenReturn(Q_LIST_VAR_NAME);
 		when(axiomList.newVariableInstance(eq(0), eq(0), isA(String.class))).thenReturn(axiomListVariable);
 		AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
 		when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
@@ -71,7 +76,7 @@ public class OperandMapTest
         when(axiomListSpec.getSuffix()).thenReturn("0");
 		assertThat(operandMap.getListVariable(axiomListSpec)).isEqualTo(axiomListVariable);
 		operandMap.addOperand(axiomListVariable);
-        assertThat(operandMap.operandMap.get(LIST_VAR_NAME)).isEqualTo(axiomListVariable);
+        assertThat(operandMap.operandMap.get(Q_LIST_VAR_NAME)).isEqualTo(axiomListVariable);
 		assertThat(operandMap.getListVariable(axiomListSpec)).isEqualTo(axiomListVariable);
 	}
 
@@ -79,11 +84,11 @@ public class OperandMapTest
 	@Test
 	public void test_item_list_newListVariableInstance()
 	{
-		OperandMap operandMap = new OperandMap();
+		OperandMap operandMap = new OperandMap(QualifiedName.ANONYMOUS);
 		@SuppressWarnings("rawtypes")
 		ItemList itemList = mock(ItemList.class);
         when(itemList.getName()).thenReturn(LIST_NAME);
-		operandMap.listMap.put(LIST_NAME, itemList);
+		//operandMap.listMap.put(LIST_NAME, itemList);
 		@SuppressWarnings("rawtypes")
 		ItemListVariable itemListVariable = mock(ItemListVariable.class);
 		Operand expression = mock(Operand.class);
@@ -96,7 +101,7 @@ public class OperandMapTest
 	@Test
 	public void test_axiom_list_newListVariableInstance_ee()
 	{
-		OperandMap operandMap = new OperandMap();
+		OperandMap operandMap = new OperandMap(QualifiedName.ANONYMOUS);
 		AxiomList axiomList = mock(AxiomList.class);
         AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
         when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
@@ -118,9 +123,9 @@ public class OperandMapTest
 	@Test
 	public void test_axiom_list_newListVariableInstance_ie()
 	{
-		OperandMap operandMap = new OperandMap();
+		OperandMap operandMap = new OperandMap(QualifiedName.ANONYMOUS);
 		AxiomList axiomList = mock(AxiomList.class);
-		Operand axiomExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
+		Operand axiomExpression = new IntegerOperand(QualifiedName.ANONYMOUS, Long.valueOf(0));
         AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
         when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
         when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
@@ -139,9 +144,9 @@ public class OperandMapTest
 	@Test
 	public void test_axiom_list_newListVariableInstance_ei()
 	{
-		OperandMap operandMap = new OperandMap();
+		OperandMap operandMap = new OperandMap(QualifiedName.ANONYMOUS);
 		AxiomList axiomList = mock(AxiomList.class);
-		Operand termExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
+		Operand termExpression = new IntegerOperand(QualifiedName.ANONYMOUS, Long.valueOf(0));
         AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
         when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
         when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
@@ -160,10 +165,11 @@ public class OperandMapTest
 	@Test
 	public void test_axiom_list_newListVariableInstance_ii()
 	{
-		OperandMap operandMap = new OperandMap();
+		OperandMap operandMap = new OperandMap(QualifiedName.ANONYMOUS);
 		AxiomList axiomList = mock(AxiomList.class);
-		Operand axiomExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
-		Operand termExpression = new IntegerOperand(Term.ANONYMOUS, Long.valueOf(0));
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
+		Operand axiomExpression = new IntegerOperand(QualifiedName.ANONYMOUS, Long.valueOf(0));
+		Operand termExpression = new IntegerOperand(QualifiedName.ANONYMOUS, Long.valueOf(0));
         AxiomListSpec axiomListSpec = mock(AxiomListSpec.class);
         when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
         when(axiomListSpec.getAxiomList()).thenReturn(axiomList);

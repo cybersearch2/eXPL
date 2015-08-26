@@ -15,22 +15,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.query;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
-import static org.mockito.Mockito.*;
-import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
-import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
-import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
+import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;
+import au.com.cybersearch2.classy_logic.expression.TestDoubleOperand;
+import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
@@ -38,10 +43,10 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.UnificationPairer;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
 import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
 import au.com.cybersearch2.classy_logic.terms.BigDecimalTerm;
 import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
@@ -500,7 +505,7 @@ public class LogicQueryTest
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
-		solution.put(NAME, solutionAxiom);
+		solution.put(QualifiedName.parseTemplateName(NAME), solutionAxiom);
 		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
 		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
@@ -512,13 +517,13 @@ public class LogicQueryTest
 	@Test 
 	public void test_axiom_listener()
 	{
-		Template template = new Template("template_name");
+		Template template = new Template(new QualifiedName(QualifiedName.EMPTY, "template_name", QualifiedName.EMPTY));
 		template.setKey(KEY);
-		template.addTerm(new StringOperand("string"));
-		template.addTerm(new IntegerOperand("integer"));
-		template.addTerm(new DoubleOperand("string"));
-		template.addTerm(new BooleanOperand("boolean"));
-		template.addTerm(new BigDecimalOperand("decimal"));
+		template.addTerm(new TestStringOperand("string"));
+		template.addTerm(new TestIntegerOperand("integer"));
+		template.addTerm(new TestDoubleOperand("string"));
+		template.addTerm(new TestBooleanOperand("boolean"));
+		template.addTerm(new TestBigDecimalOperand("decimal"));
 		Solution solution = new Solution();
 		final Axiom[] axioms = getTestAxioms();
 		List<Axiom> axiomList = new ArrayList<Axiom>();

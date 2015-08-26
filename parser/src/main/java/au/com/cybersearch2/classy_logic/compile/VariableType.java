@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
+import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
@@ -28,6 +29,7 @@ import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
@@ -90,12 +92,23 @@ public class VariableType
 	/**
 	 * Return new Operand instance of this type
 	 * @param parserAssembler ParserAssembler object
-	 * @param name Name of new variable
+     * @param name Name of new variable
 	 * @return Operand object
 	 */
 	public Operand getInstance(ParserAssembler parserAssembler, String name)
 	{
-		Operand expression = (Operand)getProperty(EXPRESSION);
+	    return getInstance(parserAssembler, parserAssembler.getContextName(name));
+	}
+
+    /**
+     * Return new Operand instance of this type
+     * @param parserAssembler ParserAssembler object
+     * @param qname Qualified name of new variable
+     * @return Operand object
+     */
+    public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname)
+    {
+        Operand expression = (Operand)getProperty(EXPRESSION);
 		boolean hasExpression = 
 				(expression != null) &&
 				(expression.isEmpty() || (expression instanceof Evaluator));
@@ -103,34 +116,36 @@ public class VariableType
 	    switch (operandType)
 	    {
 	    case INTEGER:
-	    	operand = !hasExpression ? new IntegerOperand(name) : new IntegerOperand(name, expression);
+	    	operand = !hasExpression ? new IntegerOperand(qname) : new IntegerOperand(qname, expression);
 	    	break;
         case DOUBLE:
-        	operand = !hasExpression ? new DoubleOperand(name) : new DoubleOperand(name, expression);
+        	operand = !hasExpression ? new DoubleOperand(qname) : new DoubleOperand(qname, expression);
 	    	break;
         case BOOLEAN:
-        	operand = !hasExpression ? new BooleanOperand(name) : new BooleanOperand(name, expression);
+        	operand = !hasExpression ? new BooleanOperand(qname) : new BooleanOperand(qname, expression);
 	    	break;
         case STRING:
-        	operand = !hasExpression ? new StringOperand(name) : new StringOperand(name, expression);
+        	operand = !hasExpression ? new StringOperand(qname) : new StringOperand(qname, expression);
 	    	break;
         case DECIMAL:
-        	operand = !hasExpression ? new BigDecimalOperand(name) : new BigDecimalOperand(name, expression);
+        	operand = !hasExpression ? new BigDecimalOperand(qname) : new BigDecimalOperand(qname, expression);
 	    	break;
         case AXIOM:
             String axiomKey = getPropertyString(AXIOM_KEY);
             if (axiomKey == null)
-                axiomKey = name;
-            operand = !hasExpression ? new AxiomOperand(name, axiomKey) : new AxiomOperand(name, axiomKey, expression);
-            parserAssembler.addAxiomOperand(operand.getName());
+                axiomKey = qname.getName();
+            // Expression is an initializer list Operand. Wrap in AxiomParameterOperand object.
+            expression = new AxiomParameterOperand(new QualifiedName(qname.getName() + "_params", qname), axiomKey, expression);
+            operand = !hasExpression ? new AxiomOperand(qname, axiomKey) : new AxiomOperand(qname, axiomKey, expression);
+            //parserAssembler.addAxiomOperand(operand.getQualifiedName());
             break;
         case CURRENCY:
         	operand = !hasExpression ? 
-        			  new CurrencyOperand(name, parserAssembler.getScopeLocale()) : 
-        		      new CurrencyOperand(name, expression, parserAssembler.getScopeLocale());
+        			  new CurrencyOperand(qname, parserAssembler.getScopeLocale()) : 
+        		      new CurrencyOperand(qname, expression, parserAssembler.getScopeLocale());
 	    	break;
         default:
-        	operand = !hasExpression ? new Variable(name) : new Variable(name, expression);
+        	operand = !hasExpression ? new Variable(qname) : new Variable(qname, expression);
 	    }
 	    if (operandType == OperandType.CURRENCY)
 	    {
@@ -151,56 +166,70 @@ public class VariableType
     }
 
 	/**
-	 * Returns ItemList object for this type. 
+	 * Returns ItemList object for this type in current scope. 
 	 * NOTE: AxiomKey proptery must be set for Term, Axiom or Local type
      * @param parserAssembler ParserAssembler object
-     * @param name Name of new variable
+     * @param listname Name of new variable
 	 * @return ItemList object
 	 * @throws ParseException
 	 */
-  	public ItemList<?> getItemListInstance(ParserAssembler parserAssembler, String name) throws ParseException
+  	public ItemList<?> getItemListInstance(ParserAssembler parserAssembler, String listName) throws ParseException
 	{
+        QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getOperandMap().getQualifiedContextname());
+  	    return getItemListInstance(parserAssembler, qualifiedListName);
+	}
+  	
+  	 /**
+     * Returns ItemList object for this type. 
+     * NOTE: AxiomKey proptery must be set for Term, Axiom or Local type
+     * @param parserAssembler ParserAssembler object
+     * @param qname Qualified name of new variable
+     * @return ItemList object
+     * @throws ParseException
+     */
+    public ItemList<?> getItemListInstance(ParserAssembler parserAssembler, QualifiedName qname) throws ParseException
+    {
 		String axiomKey = getPropertyString(AXIOM_KEY);
 		if ((operandType == OperandType.TERM) || 
 			(operandType == OperandType.AXIOM) || 
 			(operandType == OperandType.LOCAL))
 		{
 			if (axiomKey == null)
-	            throw new ParseException("List " + name + " missing axiom key");
+	            throw new ParseException("List " + qname.toString() + " missing axiom key");
 		}
 		else
 		{
 	        if (axiomKey != null)
-	           throw new ParseException("List " + name + " axiom key (" + axiomKey + ") is not valid for this type of list");
+	           throw new ParseException("List " + qname.toString() + " axiom key (" + axiomKey + ") is not valid for this type of list");
 		}
 	    switch (operandType)
 	    {
         case INTEGER:
-            return new ArrayItemList<Long>(Long.class, new IntegerOperand(name));
+            return new ArrayItemList<Long>(Long.class, new IntegerOperand(qname));
         case DOUBLE:
-            return new ArrayItemList<Double>(Double.class, new DoubleOperand(name));
+            return new ArrayItemList<Double>(Double.class, new DoubleOperand(qname));
         case BOOLEAN:
-            return new ArrayItemList<Boolean>(Boolean.class, new BooleanOperand(name));
+            return new ArrayItemList<Boolean>(Boolean.class, new BooleanOperand(qname));
         case STRING:
-            return new ArrayItemList<String>(String.class, new StringOperand(name));
+            return new ArrayItemList<String>(String.class, new StringOperand(qname));
         case DECIMAL:
-            return new ArrayItemList<BigDecimal>(BigDecimal.class, new BigDecimalOperand(name));
+            return new ArrayItemList<BigDecimal>(BigDecimal.class, new BigDecimalOperand(qname));
         case CURRENCY:
-            return new ArrayItemList<BigDecimal>(BigDecimal.class, getInstance(parserAssembler, name));
+            return new ArrayItemList<BigDecimal>(BigDecimal.class, getInstance(parserAssembler, qname));
         case TERM:
-            AxiomTermList itemList = new AxiomTermList(name, axiomKey);
+            AxiomTermList itemList = new AxiomTermList(qname, axiomKey);
             parserAssembler.registerAxiomTermList(itemList);
             return itemList;
         case LOCAL:
-        	AxiomTermList localList = new AxiomTermList(name, axiomKey);
+        	AxiomTermList localList = new AxiomTermList(qname, axiomKey);
         	parserAssembler.registerLocalList(localList);
         	return localList;
         case AXIOM:
-            AxiomList axiomList = new AxiomList(name, axiomKey);
+            AxiomList axiomList = new AxiomList(qname, axiomKey);
             parserAssembler.registerAxiomList(axiomList);
             return axiomList;
         default:
-            throw new ParseException("List " + name + " type unknown");
+            throw new ParseException("List " + qname.toString() + " type unknown");
        }
     }
   	

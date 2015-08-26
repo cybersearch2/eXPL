@@ -5,10 +5,12 @@ package au.com.cybersearch2.classy_logic.compile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -18,6 +20,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -40,20 +43,36 @@ import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 public class OperandMap
 {
 	/** Tree map of operands for efficient lookup */
-    protected Map<String, Operand> operandMap;
+    protected Map<QualifiedName, Operand> operandMap;
+    /** Names only for quick existence test */
+    protected Set<String> nameSet;
     /** Tree Map of item lists, which create instances of variables, some of which need to be added to the operand map */
-	protected Map<String, ItemList<?>> listMap;
+	protected Map<QualifiedName, ItemList<?>> listMap;
+    /** Qualified name of operand context */
+    protected QualifiedName qualifiedContextname;
     
 	/**
 	 * Construct OperandMap object
 	 */
-	public OperandMap()
+	public OperandMap(QualifiedName qualifiedContextname)
 	{
-		operandMap = new TreeMap<String, Operand>();
-		listMap = new TreeMap<String, ItemList<?>>();
+		operandMap = new TreeMap<QualifiedName, Operand>();
+		nameSet = new HashSet<String>();
+		listMap = new TreeMap<QualifiedName, ItemList<?>>();
+		this.qualifiedContextname = qualifiedContextname;
 	}
 
-	/**
+	public QualifiedName getQualifiedContextname()
+    {
+        return qualifiedContextname;
+    }
+
+    public void setQualifiedContextname(QualifiedName qualifiedContextname)
+    {
+        this.qualifiedContextname = qualifiedContextname;
+    }
+
+    /**
 	 * Returns all operand values in a map container
 	 * @return Map with key of type Operand and value of type Object
 	 */
@@ -80,7 +99,7 @@ public class OperandMap
 			else
 			   entry.getKey().assign(entry.getValue());
 		// Clear operands not included in operandValueMap
-		for (Entry<String, Operand> entry: operandMap.entrySet())
+		for (Entry<QualifiedName, Operand> entry: operandMap.entrySet())
 		{
 			if (!operandValueMap.containsKey(entry.getValue()))
 				((Parameter)entry.getValue()).clearValue();
@@ -89,25 +108,39 @@ public class OperandMap
 
 	public void duplicateOperandCheck(String name)
 	{
-	    if (operandMap.containsKey(name))
+	    if (hasOperand(name))
 	        throw new ExpressionException("Duplicate Operand name \"" + name + "\" encountered");
 	}
+
     /**
      * Add new Variable operand of specified name, unless it already exists
-     * @param name
+     * @param name Name of new Opernand
      * @param expression Optional expression
      * @return New or existing Operand object
      */
-	public Operand addOperand(String name, Operand expression)
+    public Operand addOperand(String name, Operand expression)
     {
-		Operand param = operandMap.get(name);
+        Operand operand = addOperand(QualifiedName.parseName(name, qualifiedContextname), expression);
+        return operand;
+    }
+    
+    /**
+     * Add new Variable operand of specified name, unless it already exists
+     * @param qname Qualified name of new Operand
+     * @param expression Optional expression
+     * @return New or existing Operand object
+     */
+	public Operand addOperand(QualifiedName qname, Operand expression)
+    {
+		Operand param = operandMap.get(qname);
 		if (param == null)
 		{
-			param = expression == null ? new Variable(name) : new Variable(name, expression);
-			operandMap.put(name, param);
+			param = expression == null ? new Variable(qname) : new Variable(qname, expression);
+			operandMap.put(qname, param);
+	        nameSet.add(qname.getName());
 		}
 		else if (expression != null)
-			param = new Evaluator(name, param, "=", expression);
+			param = new Evaluator(qname, param, "=", expression);
 		return param;
     }
 
@@ -121,7 +154,9 @@ public class OperandMap
 		if (operand.getName().isEmpty())
 			throw new ExpressionException("addOperand() passed annonymous object");
 		duplicateOperandCheck(operand.getName());
-		operandMap.put(operand.getName(), operand);
+		QualifiedName qname = operand.getQualifiedName();
+		operandMap.put(qname, operand);
+        nameSet.add(qname.getName());
     }
 
 	/**
@@ -131,39 +166,42 @@ public class OperandMap
 	 */
 	public boolean hasOperand(String name)
 	{
-		return operandMap.containsKey(name);
+        if (!nameSet.contains(name) ||
+            !operandMap.containsKey(QualifiedName.parseName(name, qualifiedContextname)))
+                return false;
+		return true;
 	}
 
 	/**
 	 * Returns operand of specified name or null if not found
-	 * @param name
+     * @param qname Qualified name
 	 * @return Operand
 	 */
-	public Operand getOperand(String name)
+	public Operand getOperand(QualifiedName qname)
 	{
-		return operandMap.get(name);
+		return operandMap.get(qname);
 	}
 	
 	/**
 	 * Add ItemList object to this container and it's name to the list Set
-	 * @param name Name of list
+	 * @param qname Qualified name of list
 	 * @param itemList ItemList object 
 	 */
-	public void addItemList(String name, ItemList<?> itemList)
+	public void addItemList(QualifiedName qname, ItemList<?> itemList)
 	{
-		if ((operandMap.get(name) != null) || listMap.containsKey(name))
-			throw new ExpressionException("ItemList name \"" + name + "\" clashes with existing Operand");
-		listMap.put(name, itemList);
+		if ((operandMap.get(qname) != null) || listMap.containsKey(qname))
+			throw new ExpressionException("ItemList name \"" + qname.toString() + "\" clashes with existing Operand");
+		listMap.put(qname, itemList);
 	}
 
 	/** 
 	 * Returns Operand list referenced by name
-	 * @param name
+     * @param qname Qualified name
 	 * @return ItemList object or null if not exists
 	 */
-	public ItemList<?> getItemList(String name)
+	public ItemList<?> getItemList(QualifiedName qname)
 	{
-		return listMap.get(name);
+		return listMap.get(qname);
 	}
 	
 	/**
@@ -201,7 +239,7 @@ public class OperandMap
 			}
 			else // Interpret identifier as a variable name for any primitive list
 			{
-				expression = new Variable(expression.getName());
+				expression = new Variable(expression.getQualifiedName());
 				suffix = expression.getName();
 			}
 		}
@@ -224,9 +262,11 @@ public class OperandMap
 	 */
 	protected int getIndexForName(String listName, String item, List<String> axiomTermNameList) 
 	{
+	    int pos = item.lastIndexOf('.');
+	    String name = pos == -1 ? item : item.substring(pos + 1);
 		for (int i = 0; i < axiomTermNameList.size(); i++)
 		{
-			if (item.equals(axiomTermNameList.get(i)))
+			if (name.equals(axiomTermNameList.get(i)))
 				return i;
 		}
 		throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + item + "\"");
@@ -265,9 +305,9 @@ public class OperandMap
 	 * @param name
 	 * @return Operand object or null if not exists
 	 */
-	public Operand get(String name)
+	public Operand get(QualifiedName qname)
 	{
-		return operandMap.get(name);
+		return operandMap.get(qname);
 	}
 
 	/**
@@ -279,7 +319,7 @@ public class OperandMap
     {
     	StringBuilder builder = new StringBuilder();
     	boolean firstTime = true;
-		for (String name: operandMap.keySet())
+		for (QualifiedName name: operandMap.keySet())
 		{
 			if (firstTime)
 				firstTime = false;
@@ -312,8 +352,8 @@ public class OperandMap
 	 */
 	protected ItemListVariable<?> getListVariable(ItemList<?> itemList, String name, int index, String suffix)
 	{
-		// Variable name is list name with dot index suffix
-		String listVarName = name + "." + suffix;
+		// Variable name is list name with '_' index suffix
+		QualifiedName listVarName = new QualifiedName(name + "_" + suffix, itemList.getQualifiedName());
 		ItemListVariable<?> listVariable = (ItemListVariable<?>) get(listVarName);
 		if (listVariable != null)
 			return listVariable;
@@ -335,9 +375,10 @@ public class OperandMap
 	 */
 	protected AxiomListVariable getListVariable(AxiomListSpec axiomListSpec) 
 	{
-		// Variable name is list name with dot index suffix
-		String listVarName = axiomListSpec.getListName() + "." + axiomListSpec.getAxiomIndex() + "." + axiomListSpec.getSuffix();
-		AxiomListVariable listVariable = (AxiomListVariable) get(listVarName);
+		// Variable name is list name with '_' index suffix
+	    String varName = axiomListSpec.getListName() + "_" + axiomListSpec.getAxiomIndex() + "_" + axiomListSpec.getSuffix();
+		QualifiedName qualifiedtVarName = new QualifiedName(varName, axiomListSpec.getAxiomList().getQualifiedName());
+		AxiomListVariable listVariable = (AxiomListVariable) get(qualifiedtVarName);
 		if (listVariable != null)
 			return listVariable;
 		// Use axiomList object to create new ItemListVariable instance
@@ -355,13 +396,12 @@ public class OperandMap
 	 */
 	public Operand setListVariable(ItemList<?> itemList, Operand index, Operand expression) 
 	{
-		String name = itemList.getName();
 		ItemListVariable<?> variable = newListVariableInstance(itemList, index);
 		if (expression != null)
 		{
 			if (expression.isEmpty() || (expression instanceof Evaluator))
 			    // Expression needs evaluation
-				return new Evaluator(name, variable, "=", expression);
+				return new Evaluator(itemList.getQualifiedName(), variable, "=", expression);
 			// Expression has a value which will be assigned to the list item
 			variable.assign(expression.getValue());
 		}
@@ -373,15 +413,13 @@ public class OperandMap
 	 * @param prefix Scope name or empty if global scope
 	 * @param listMap2 Container to receive lists
 	 */
-	public void copyLists(String prefix, Map<String, Iterable<Axiom>> listMap2) 
+	public void copyLists(Map<QualifiedName, Iterable<Axiom>> listMap2) 
 	{
-		if (prefix == null)
-			prefix = "";
-		for (Entry<String, ItemList<?>> entry: listMap.entrySet())
+		for (Entry<QualifiedName, ItemList<?>> entry: listMap.entrySet())
 		{
 		    ItemList<?> itemList = entry.getValue();
 		    if (itemList.getItemClass().equals(Axiom.class))
-		        AxiomUtils.copyList(entry.getKey(), (AxiomList) itemList, prefix, listMap2);
+		        AxiomUtils.copyList(entry.getKey(), (AxiomList)itemList, listMap2);
 		}
 	}
 
@@ -394,7 +432,7 @@ public class OperandMap
     {
         if (prefix == null)
             prefix = "";
-        for (Entry<String, ItemList<?>> entry: listMap.entrySet())
+        for (Entry<QualifiedName, ItemList<?>> entry: listMap.entrySet())
         {
             ItemList<?> itemList = entry.getValue();
             // Create deep copy in case item list is cleared
@@ -402,14 +440,14 @@ public class OperandMap
             if (itemList.getItemClass().equals(Term.class))
             {   // AxiomTermList contains backing axiom
                 AxiomTermList axiomTermList = (AxiomTermList)itemList;
-                axiom = new Axiom(entry.getKey());
+                axiom = new Axiom(entry.getKey().getName());
                 Axiom source = axiomTermList.getAxiom();
                 for (int i = 0; i < source.getTermCount(); i++)
                     axiom.addTerm(source.getTermByIndex(i));
             }
             else if (!itemList.getItemClass().equals(Axiom.class))
             {   // Regular ItemList contains objects which are packed into axiom to return
-                axiom = new Axiom(entry.getKey());
+                axiom = new Axiom(entry.getKey().getName());
                 Iterator<?> iterator = itemList.getIterable().iterator();
                 while (iterator.hasNext())
                     axiom.addTerm(new Parameter(Term.ANONYMOUS, iterator.next()));
@@ -417,7 +455,7 @@ public class OperandMap
             if (axiom != null)
             {
                 // Use fully qualified key to avoid name collisions
-                String key = prefix.isEmpty() ? entry.getKey() : (prefix + "." + entry.getKey());
+                String key = prefix.isEmpty() ? entry.getKey().getName() : (prefix + "_" + entry.getKey().getName());
                 axiomMap.put(key, axiom);
             }
         }
@@ -426,21 +464,25 @@ public class OperandMap
 	/**
 	 * Clear result lists
 	 */
-	public void clearLists(List<String> listNames) 
+	public void clearLists(List<QualifiedName> listNames) 
 	{
-	    for (String listName: listNames)
+	    for (QualifiedName listName: listNames)
 	    {
 		    ItemList<?> itemList= listMap.get(listName);
 			itemList.clear();
 	    }
 	}
 
-	public List<String> getEmptyListNames()
+	/**
+	 * Returns collection of the names of lists that are empty
+	 * @return List of names
+	 */
+	public List<QualifiedName> getEmptyListNames()
 	{
-	    List<String> listNames = new ArrayList<String>();
+	    List<QualifiedName> listNames = new ArrayList<QualifiedName>();
 	    for (ItemList<?> itemList: listMap.values())
 	        if (itemList.isEmpty())
-	            listNames.add(itemList.getName());
+	            listNames.add(itemList.getQualifiedName());
 	    return listNames;
 	}
 

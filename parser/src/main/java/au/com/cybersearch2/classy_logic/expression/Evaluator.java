@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -51,13 +52,13 @@ public class Evaluator extends DelegateParameter
 
 	/**
 	 * Create named Evaluator object for postfix unary expression 
-	 * @param name Name of this term
+     * @param qname Qualified name of variable
 	 * @param leftTerm Left operand
 	 * @param operator Text representation of operator
 	 */
-	public Evaluator(String name, Operand leftTerm, String operator)
+	public Evaluator(QualifiedName qname, Operand leftTerm, String operator)
 	{
-		this(name, leftTerm, operator, (Operand)null);
+		this(qname, leftTerm, operator, (Operand)null);
 	}
 
 	/**
@@ -72,13 +73,13 @@ public class Evaluator extends DelegateParameter
 
 	/**
 	 * Create named Evaluator object for prefix unary expression 
-	 * @param name
+     * @param qname Qualified name of variable
 	 * @param rightTerm Operand
 	 * @param operator 
 	 */
-	public Evaluator(String name, String operator, Operand rightTerm)
+	public Evaluator(QualifiedName qname, String operator, Operand rightTerm)
 	{
-		this(name, (Operand)null, operator, rightTerm);
+		this(qname, (Operand)null, operator, rightTerm);
 	}
 
 	/**
@@ -89,19 +90,19 @@ public class Evaluator extends DelegateParameter
 	 */
 	public Evaluator(Operand leftTerm, String operator, Operand rightTerm)
 	{
-		this(Term.ANONYMOUS, leftTerm, operator, rightTerm);
+		this(QualifiedName.ANONYMOUS, leftTerm, operator, rightTerm);
 	}
 
 	/**
 	 * Create named Evaluator object for binary expression 
-	 * @param name
+     * @param qname Qualified name of variable
 	 * @param leftTerm Operand
 	 * @param operator 
 	 * @param rightTerm Operand
 	 */
-	public Evaluator(String name, Operand leftTerm, String operator, Operand rightTerm)
+	public Evaluator(QualifiedName qname, Operand leftTerm, String operator, Operand rightTerm)
 	{
-		super(name);
+		super(qname);
 	    this.right = rightTerm;
 	    this.left = leftTerm;
 	    operatorEnum = OperatorEnum.convertOperator(operator);

@@ -21,6 +21,7 @@ import java.util.Locale;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.LocaleCurrency;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.TextFormat;
@@ -32,42 +33,51 @@ import au.com.cybersearch2.classy_logic.interfaces.TextFormat;
  */
 public class CurrencyOperand extends BigDecimalOperand implements TextFormat, LocaleListener
 {
+    /** Currency implementation for specific locale */
 	protected LocaleCurrency localeCurrency;
+	/** Operand to evaluate currency country */
 	protected Operand countryOperand;
 	
 	/**
-	 * @param name
+	 * Construct CurrencyOperand object for specified locale
+     * @param qname Qualified name
+     * @param locale The locale
 	 */
-	public CurrencyOperand(String name, Locale locale) 
+	public CurrencyOperand(QualifiedName qname, Locale locale) 
 	{
-		super(name);
+		super(qname);
 		this.localeCurrency = new LocaleCurrency();
 		localeCurrency.setLocale(locale);
 	}
 
 	/**
-	 * @param name
-	 * @param value
+     * Construct CurrencyOperand object for specified value and locale
+     * @param qname Qualified name
+	 * @param value The value
+	 * @param locale The locale
 	 */
-	public CurrencyOperand(String name, BigDecimal value, Locale locale) 
+	public CurrencyOperand(QualifiedName qname, BigDecimal value, Locale locale) 
 	{
-		super(name, value);
+		super(qname, value);
 		this.localeCurrency = new LocaleCurrency();
 		localeCurrency.setLocale(locale);
 	}
 
 	/**
-	 * @param name
-	 * @param expression
+     * Construct CurrencyOperand object with given expression Operand and specified locale
+     * @param qname Qualified name
+	 * @param expression Operand to evaluate value
+     * @param locale The locale
 	 */
-	public CurrencyOperand(String name, Operand expression, Locale locale) 
+	public CurrencyOperand(QualifiedName qname, Operand expression, Locale locale) 
 	{
-		super(name, expression);
+		super(qname, expression);
 		this.localeCurrency = new LocaleCurrency();
 		localeCurrency.setLocale(locale);
 	}
 
 	/**
+	 * Set Operand to evaluate currency country
 	 * @param countryOperand the countryOperand to set
 	 */
 	public void setCountryOperand(Operand countryOperand) 
@@ -75,9 +85,13 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 		this.countryOperand = countryOperand;
 	}
 
+	/**
+	 * formatValue
+	 * @see au.com.cybersearch2.classy_logic.interfaces.TextFormat#formatValue()
+	 */
 	@Override
 	public String formatValue()
-	{
+	{   // Refresh locale-dependent currency component in case it has changed
 	    if ((countryOperand != null)  && !countryOperand.isEmpty())
 	        setCountry(countryOperand.getValue().toString());
 		return localeCurrency.format(getValue());
@@ -194,6 +208,10 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 		return left.divide(right, BigDecimal.ROUND_HALF_EVEN);
 	}
 
+	/**
+	 * onScopeChange
+	 * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(au.com.cybersearch2.classy_logic.Scope)
+	 */
 	@Override
 	public void onScopeChange(Scope scope) 
 	{

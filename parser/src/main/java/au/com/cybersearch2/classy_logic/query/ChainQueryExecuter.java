@@ -24,6 +24,7 @@ import java.util.Set;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -46,7 +47,7 @@ public class ChainQueryExecuter
     /** The solution is a collection of axioms referenced by name */
     protected Solution solution;
 	/** Set of axiom listeners referenced by name */
-	protected Map<String, List<AxiomListener>> axiomListenerMap;
+	protected Map<QualifiedName, List<AxiomListener>> axiomListenerMap;
 
 	/**
 	 * Construct ChainQueryExecuter object
@@ -57,7 +58,7 @@ public class ChainQueryExecuter
 		this.scope = scope;
 		if ((scope != null) && (scope.getAxiomListenerMap() != null))
 		{   // Create a copy of the axiom listener map and remove entries as axiom listeners are bound to processors
-			axiomListenerMap = new HashMap<String, List<AxiomListener>>();
+			axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
 			axiomListenerMap.putAll(scope.getAxiomListenerMap());
 		}
 	}
@@ -96,10 +97,10 @@ public class ChainQueryExecuter
 	 */
 	protected void bindAxiomListeners()
 	{
-		Set<String> keys = axiomListenerMap.keySet();
-		for (String key: keys)
+		Set<QualifiedName> keys = axiomListenerMap.keySet();
+		for (QualifiedName key: keys)
 		{
-        	AxiomSource axiomSource = scope.findAxiomSource(key);
+        	AxiomSource axiomSource = scope.findAxiomSource(key.getName());
         	// TODO - Log warning if axiom source not found
         	if (axiomSource !=null)
         	{
@@ -126,26 +127,27 @@ public class ChainQueryExecuter
 			for (Template template: templateList2)
 			{
 				String key = template.getKey();
-		        if (axiomListenerMap.containsKey(key))
+				QualifiedName qname = QualifiedName.parseGlobalName(key);
+		        if (axiomListenerMap.containsKey(qname))
 		        {
 		        	AxiomSource axiomSource = axiomEnsemble2.getAxiomSource(key);
-		        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
+		        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
 		        	if (axiomSource != null)
 		        	{
 		        		for (AxiomListener axiomListener: axiomListenerList)
-		        			chainQuery.setAxiomListener(key, axiomListener);
-		        		axiomListenerMap.remove(key);
+		        			chainQuery.setAxiomListener(qname, axiomListener);
+		        		axiomListenerMap.remove(qname);
 		        	}
 		        }
 	        	else
 	        	{
-	        		key = template.getName();
-			        if (axiomListenerMap.containsKey(key))
+	        	    qname = template.getQualifiedName();
+			        if (axiomListenerMap.containsKey(qname))
 			        {
-			        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
+			        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
 		        		for (AxiomListener axiomListener: axiomListenerList)
-		        			solution.setAxiomListener(key, axiomListener);
-		        		axiomListenerMap.remove(key);
+		        			solution.setAxiomListener(qname, axiomListener);
+		        		axiomListenerMap.remove(qname);
 			        }
 	        	}
 
@@ -175,13 +177,13 @@ public class ChainQueryExecuter
 		}
 		if (axiomListenerMap != null)
 		{
-			String key = template.getName();
-	        if (axiomListenerMap.containsKey(key))
+			QualifiedName qname = template.getQualifiedName();
+	        if (axiomListenerMap.containsKey(qname))
 	        {
-	        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
+	        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
         		for (AxiomListener axiomListener: axiomListenerList)
-        			solution.setAxiomListener(key, axiomListener);
-        		axiomListenerMap.remove(key);
+        			solution.setAxiomListener(qname, axiomListener);
+        		axiomListenerMap.remove(qname);
 	        }
 		}
 		addChainQuery(chainQuery);

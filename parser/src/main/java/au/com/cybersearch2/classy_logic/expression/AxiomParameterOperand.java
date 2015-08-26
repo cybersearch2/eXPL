@@ -19,6 +19,7 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -35,18 +36,19 @@ public class AxiomParameterOperand extends AxiomOperand
 {
     /** Collects parameters from an Operand tree and passes them to a supplied function object */
     protected ParameterList<AxiomList> parameterList;
-    protected String axiomName;
+    /** Name of axiom list to be generated */
+    protected QualifiedName axiomName;
 
     /**
      * Construct an AxiomParameterOperand object
-     * @param name Name of operand
-     * @param axiomName Name of axiom list to be generated
+     * @param qname Qualified name
+     * @param axiomKey Key of axiom list to be generated
      * @param argumentExpression Operand containing parameters as a tree of operands
      */
-    public AxiomParameterOperand(String name, String axiomName, Operand argumentExpression)
+    public AxiomParameterOperand(QualifiedName qname, String axiomKey, Operand argumentExpression)
     {
-        super(name, axiomName, argumentExpression);
-        this.axiomName = axiomName;
+        super(qname, axiomKey, argumentExpression);
+        this.axiomName = new QualifiedName(axiomKey, qname);
         parameterList = new ParameterList<AxiomList>(argumentExpression, axiomGenerator());
     }
 
@@ -68,7 +70,7 @@ public class AxiomParameterOperand extends AxiomOperand
             @Override
             public AxiomList evaluate(List<Term> argumentList)
             {
-                return AxiomUtils.marshallAxiomTerms(axiomName, axiomName, argumentList);
+                return AxiomUtils.marshallAxiomTerms(axiomName, axiomName.getName(), argumentList);
             }};
     }
 

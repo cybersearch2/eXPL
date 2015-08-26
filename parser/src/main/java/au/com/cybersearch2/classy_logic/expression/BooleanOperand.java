@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -28,32 +29,32 @@ public class BooleanOperand extends ExpressionParameter<Boolean>
 
 	/**
 	 * Boolean Variable
-	 * @param name
+     * @param qname Qualified name
 	 */
-	public BooleanOperand(String name) 
+	public BooleanOperand(QualifiedName qname) 
 	{
-		super(name);
+		super(qname);
 	}
 
 	/**
 	 * Boolean Literal
-	 * @param name
+     * @param qname Qualified name
 	 * @param value
 	 */
-	public BooleanOperand(String name, Boolean value) 
+	public BooleanOperand(QualifiedName qname, Boolean value) 
 	{
-		super(name, value);
+		super(qname, value);
 
 	}
 
 	/**
 	 * Boolean Expression
-	 * @param name
+     * @param qname Qualified name
 	 * @param expression Operand which evaluates value
 	 */
-	public BooleanOperand(String name, Operand expression) 
+	public BooleanOperand(QualifiedName qname, Operand expression) 
 	{
-		super(name, expression);
+		super(qname, expression);
 
 	}
 

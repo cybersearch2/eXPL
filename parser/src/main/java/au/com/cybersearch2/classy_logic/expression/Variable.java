@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
@@ -34,19 +35,19 @@ public class Variable extends DelegateParameter
 
 	/**
 	 * Construct a Variable object
-	 * @param name Name of variable
+	 * @param qname Qualified name
 	 */
-	public Variable(String name) 
+	public Variable(QualifiedName qname) 
 	{
-		super(name);
+		super(qname);
 	}
 
 	/**
 	 * Construct a Variable object which uses an Expression operand to evaluate it's value
-	 * @param name Name of variable
+     * @param qname Qualified name of variable
 	 * @param expression Operand to initialize this Variable upon evaluation
 	 */
-	public Variable(String name, Operand expression) 
+	public Variable(QualifiedName name, Operand expression) 
 	{
 		super(name);
 		this.expression = expression;

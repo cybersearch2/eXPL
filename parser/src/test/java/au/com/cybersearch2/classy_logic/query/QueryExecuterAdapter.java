@@ -24,6 +24,7 @@ import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -124,14 +125,15 @@ public class QueryExecuterAdapter
             {
                 Axiom axiom = iterator.next();
                 String axiomName = axiom.getName();
+                QualifiedName qname = QualifiedName.parseName(axiomName);
                 if (firstTime)
                 {
                     firstTime = false;
-                    parserAssembler.createAxiom(axiomName);
+                    parserAssembler.createAxiom(qname);
                 }
                 for (int i = 0; i < axiom.getTermCount(); i++)
-                    parserAssembler.addAxiom(axiomName, axiom.getTermByIndex(i));
-                parserAssembler.saveAxiom(axiomName);
+                    parserAssembler.addAxiom(qname, axiom.getTermByIndex(i));
+                parserAssembler.saveAxiom(qname);
             }
         }
     }
@@ -146,13 +148,14 @@ public class QueryExecuterAdapter
         for (Template template: templateList)
         {
             String templateName = template.getName();
+            QualifiedName qname = new QualifiedName(QualifiedName.EMPTY, templateName, QualifiedName.EMPTY);
             String templateKey = template.getKey();
             Map<String, Object> props = template.getProperties();
-            parserAssembler.createTemplate(templateName, false);
-            parserAssembler.getTemplate(templateName).setKey(templateKey);
+            parserAssembler.createTemplate(qname, false);
+            parserAssembler.getTemplate(qname).setKey(templateKey);
             if (props != null)
-                parserAssembler.addTemplate(templateName, props);
-            Template newTemplate = parserAssembler.getTemplate(templateName);
+                parserAssembler.addTemplate(qname, props);
+            Template newTemplate = parserAssembler.getTemplate(qname);
             for (int i = 0; i < template.getTermCount(); i++)
                 newTemplate.addTerm(template.getTermByIndex(i));
         }
