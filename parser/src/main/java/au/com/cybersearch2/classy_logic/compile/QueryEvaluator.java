@@ -28,6 +28,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -85,7 +86,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
         final String templateName = getCalculatorKeyName(querySpec).getTemplateName();
         Scope scope = queryParams.getScope();
         ParserAssembler parserAssembler = scope.getGlobalParserAssembler();
-        QualifiedName qualifiedTemplateName = new QualifiedName(templateName, QualifiedName.ANONYMOUS);
+        QualifiedName qualifiedTemplateName = QualifiedName.parseTemplateName(templateName);
         Template template = parserAssembler.getTemplate(qualifiedTemplateName);
         if (template == null)
         {
@@ -100,12 +101,18 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
             int index = 0; // Map unnamed arguments to template term names
             for (Term argument: argumentList)
             {
-                String argName = argument.getName();
+                // All parameters are Operands. Use name part of qualified name to get true name
+                Operand operand = (Operand)argument;
+                String argName = operand.getQualifiedName().getName();
                 if (argName.isEmpty())
                 {
                     if (index == template.getTermCount())
                         throw new ExpressionException("Unnamed argument at position " + index + " out of bounds");
                     argName = template.getTermByIndex(index++).getName();
+                    // Strip down to name-only for unification
+                    int pos = argName.lastIndexOf('.');
+                    if (pos != -1)
+                        argName = argName.substring(pos + 1);
                 }
                 properties.put(argName, argument.getValue());
             }
@@ -127,11 +134,17 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
                     {
                         if (innerTemplate.evaluate() == EvaluationStatus.COMPLETE);
                         {
-                            AxiomTermList axiomTermList = (AxiomTermList)(innerTemplate.getTermByName(innerTemplate.getName()).getValue());
+                            String innerTemplateName = innerTemplate.getQualifiedName().toString();
+                            Term innerTerm = innerTemplate.getTermByName(innerTemplateName);
+                            AxiomTermList axiomTermList = (AxiomTermList)(innerTerm.getValue());
                             Axiom innerAxiom = new Axiom(innerTemplate.getKey());
                             for (int i = 0; i < (innerTemplate.getTermCount() -1); i++)
                             {
                                 String termName = innerTemplate.getTermByIndex(i).getName();
+                                // Strip down to name-only to match axiom
+                                int pos = termName.lastIndexOf('.');
+                                if (pos != -1)
+                                    termName = termName.substring(pos + 1);
                                 Term term = axiom.getTermByName(termName);
                                 if (term == null)
                                     term = new Parameter(termName);

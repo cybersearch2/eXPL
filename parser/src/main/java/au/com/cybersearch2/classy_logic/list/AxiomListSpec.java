@@ -177,7 +177,9 @@ public class AxiomListSpec
         }
         else if (termExpression.isEmpty())/* && (termExpression instanceof Variable))*/
         {
-            suffix = termExpression.getName();
+            String termName = termExpression.getName();
+            int pos = termName.lastIndexOf('.');
+            suffix =pos == -1 ? termName : termName.substring(pos + 1);
             if (axiomList != null)
                 setTermIndex();
         }
@@ -218,6 +220,11 @@ public class AxiomListSpec
                     termIndex = -1;
                     termExpression = axiomExpression;
                     suffix = termExpression.getName();
+                    // Strip down to name-only for term name indexing
+                    int pos = suffix.lastIndexOf('.');
+                    if (pos != -1)
+                        suffix = suffix.substring(pos + 1);
+                    setTermIndex();
                 }
                 axiomIndex = 0;
                 axiomExpression = null;
@@ -227,7 +234,7 @@ public class AxiomListSpec
             axiomList = (AxiomList)itemListVariable;
         else
             throw new ExpressionException("Value has incompatible type. Expecting " + (isTermList ? "AxiomTermList" : "AxiomList"));
-        if ((termExpression != null) && suffix.equals(termExpression.getName()))
+        if (termExpression != null)
             setTermIndex();
         return true;
     }

@@ -547,7 +547,7 @@ public class ParserAssembler implements LocaleListener
 	public void registerAxiomList(AxiomList axiomList) 
 	{
 		AxiomListener axiomListener = axiomList.getAxiomListener();
-        QualifiedName qualifiedAxiomName = axiomList.getQualifiedName();
+        QualifiedName qualifiedAxiomName = getQualifiedAxiomName(axiomList.getKey());
         QualifiedName qualifiedTemplateName = new QualifiedName(qualifiedAxiomName.getScope(), axiomList.getKey(), QualifiedName.EMPTY);
         boolean isChoice = templateMap.containsKey(qualifiedTemplateName) &&
                             templateMap.get(qualifiedTemplateName).isChoice();
@@ -572,7 +572,38 @@ public class ParserAssembler implements LocaleListener
 		setAxiomTermNameList(qualifiedTemplateName, axiomList);
 	}
 
-	/**
+	public QualifiedName getQualifiedAxiomName(String key)
+    {
+        QualifiedName qname = getContextName(key);
+        if (isQualifiedAxiomName(qname))
+            return qname;
+        if (!qname.getTemplate().isEmpty())
+        {
+            qname.clearTemplate();
+            if (isQualifiedAxiomName(qname))
+                return qname;
+        }
+        if (!qname.getScope().isEmpty())
+        {
+            qname.clearScope();
+            if (isQualifiedAxiomName(qname))
+                return qname;
+        }
+        throw new ExpressionException("No axiom source found matching key \"" + key + "\"");
+    }
+	
+	public boolean isQualifiedAxiomName(QualifiedName qname)
+    {
+        if ((scopeAxiomMap != null) && (scopeAxiomMap.get(qname) != null))
+            return true;
+        if (axiomListMap.get(qname) != null)
+            return true;
+        if (axiomResourceMap.get(qname) != null)
+            return true;
+        return false;
+    }
+
+    /**
 	 * Set axiom term name list from template
 	 * @param templateName Name of template
 	 * @param axiomList Axiom list to be updated
@@ -663,20 +694,17 @@ public class ParserAssembler implements LocaleListener
 	@SuppressWarnings({ "unchecked", "rawtypes" })
     public Operand getCallOperand(QualifiedName qname, Operand argumentExpression)
 	{
-        String library = null;
+        String library = qname.getTemplate();
         String name = qname.getName();
-        String[] parts = name.split("\\.");
-        if (parts.length != 2)
-            throw new ExpressionException("Call name \"" + name + "\" is invalid");
-        final String function = parts[1];
-        library = parts[0];
-        String callName = library + "." + function;
+        if (library.isEmpty())
+            throw new ExpressionException("Call name \"" + qname.toString() + "\" is invalid");
+        String callName = library + "." + name;
 	    if (externalFunctionProvider == null)
 	        externalFunctionProvider = new ExternalFunctionProvider();
 	    FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
-	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(function);
+	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
 	    if (callEvaluator == null)
-	        throw new ExpressionException("Function \"" + function + "\" not supported");
+	        throw new ExpressionException("Function \"" + name + "\" not supported");
         return new CallOperand(QualifiedName.parseName(callName, qname), callEvaluator, argumentExpression);
 	}
 
@@ -742,16 +770,7 @@ public class ParserAssembler implements LocaleListener
     {
         ItemList<?> itemList = findItemList(qname);
         if (itemList == null)
-        {
-            Operand operand = operandMap.getOperand(qname);
-            if ((operand == null) || 
-                 operand.isEmpty() || 
-                 (operand.getValueClass() != AxiomList.class))
-                throw new ExpressionException("List not found with name \"" + qname.toString() + "\"");
-            AxiomList axiomList = (AxiomList)operand.getValue();
-            axiomTermNameMap.put(qname, axiomList.getAxiomTermNameList());
-            return axiomList;
-        }
+            throw new ExpressionException("List not found with name \"" + qname.toString() + "\"");
         return itemList;
     }
 
@@ -762,11 +781,24 @@ public class ParserAssembler implements LocaleListener
      */
     public ItemList<?> findItemList(QualifiedName qname)
     {
-        Scope globalScope = scope.getGlobalScope();
-        ItemList<?> itemList = globalScope.getParserAssembler().getOperandMap().getItemList(qname);
-        if ((itemList == null) && (scope != globalScope))
-            itemList = scope.getParserAssembler().getOperandMap().getItemList(qname);
-        return itemList;
+        Scope nameScope = qname.getScope().isEmpty() ? scope.getGlobalScope() : scope.findScope(qname.getScope());
+        if (nameScope == null)
+            return null;
+        OperandMap operandMap = nameScope.getParserAssembler().getOperandMap();
+        ItemList<?> itemList = operandMap.getItemList(qname);
+        if (itemList == null)
+        {
+            Operand operand = operandMap.getOperand(qname);
+            if ((operand != null) && 
+                 !operand.isEmpty() &&
+                 (operand.getValueClass() == AxiomTermList.class))
+            {
+                AxiomTermList axiomTermList = (AxiomTermList)operand.getValue();
+                axiomTermNameMap.put(qname, axiomTermList.getAxiomTermNameList());
+                return axiomTermList;
+            }
+       }
+       return itemList;
     }
 
     /**
@@ -804,11 +836,14 @@ public class ParserAssembler implements LocaleListener
         ItemList<?> itemList = findItemList(listName);
         if (itemList != null)
             qualifiedListName = itemList.getQualifiedName(); 
-        else
+        else 
         {
-            qualifiedListName = QualifiedName.parseName(listName);
-            itemList = getItemList(qualifiedListName);
+            Operand operand = findOperandByName(listName);
+            if (operand != null)
+                 qualifiedListName = operand.getQualifiedName();
         }
+        if (qualifiedListName == null)
+            throw new ExpressionException("List \"" + listName + "\" cannot be found");
         return newListVariableInstance(qualifiedListName, param1, param2);
     }
 
