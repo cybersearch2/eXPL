@@ -55,6 +55,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 
 /** Token Manager. */
 public class QueryParserTokenManager implements QueryParserConstants

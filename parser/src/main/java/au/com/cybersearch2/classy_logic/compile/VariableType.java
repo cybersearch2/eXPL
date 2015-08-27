@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.compile;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
@@ -27,11 +28,14 @@ import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.ParameterList;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
@@ -113,6 +117,13 @@ public class VariableType
 				(expression != null) &&
 				(expression.isEmpty() || (expression instanceof Evaluator));
 		Operand operand = null;
+        String axiomKey = null;
+        if (operandType == OperandType.AXIOM || operandType == OperandType.LIST || operandType == OperandType.TERM)
+        {
+            getPropertyString(AXIOM_KEY);
+            if (axiomKey == null)
+                axiomKey = qname.getName();
+        }
 	    switch (operandType)
 	    {
 	    case INTEGER:
@@ -130,14 +141,22 @@ public class VariableType
         case DECIMAL:
         	operand = !hasExpression ? new BigDecimalOperand(qname) : new BigDecimalOperand(qname, expression);
 	    	break;
+        case TERM:
+            // Expression is an initializer list Operand. 
+            operand = new AxiomParameterOperand(new QualifiedName(qname.getName() + "_params", qname), axiomKey, expression);
+            hasExpression = true;
+            break;
         case AXIOM:
-            String axiomKey = getPropertyString(AXIOM_KEY);
-            if (axiomKey == null)
-                axiomKey = qname.getName();
-            // Expression is an initializer list Operand. Wrap in AxiomParameterOperand object.
-            expression = new AxiomParameterOperand(new QualifiedName(qname.getName() + "_params", qname), axiomKey, expression);
             operand = !hasExpression ? new AxiomOperand(qname, axiomKey) : new AxiomOperand(qname, axiomKey, expression);
             //parserAssembler.addAxiomOperand(operand.getQualifiedName());
+            break;
+        case LIST:
+            // Expression is an initializer list 
+            ParameterList<AxiomList> parameterList = new ParameterList<AxiomList>(expression, axiomListGenerator(qname, axiomKey));
+            expression = new AxiomOperand(qname, axiomKey, parameterList);
+             operand = !hasExpression ? new AxiomOperand(qname, axiomKey) : new AxiomOperand(qname, axiomKey, parameterList);
+            //parserAssembler.addAxiomOperand(operand.getQualifiedName());
+             hasExpression = true;
             break;
         case CURRENCY:
         	operand = !hasExpression ? 
@@ -255,5 +274,39 @@ public class VariableType
 	{
 		return properties == null ? null : properties.get(key);
 	}
+
+    /**
+     * Returns an object which implements CallEvaluator interface returning an AxiomList
+     * given a list of axioms to marshall into an axiom list
+     * @return CallEvaluator object of generic return type AxiomList
+     */
+    protected CallEvaluator<AxiomList> axiomListGenerator(final QualifiedName qname, final String axiomKey) 
+    {
+        return new CallEvaluator<AxiomList>(){
+
+            @Override
+            public String getName()
+            {
+                return qname.toString();
+            }
+
+            @Override
+            public AxiomList evaluate(List<Term> argumentList)
+            {
+                AxiomList axiomList = new AxiomList(qname, axiomKey);
+                int index = 0;
+                for (Term term: argumentList)
+                {
+                    AxiomTermList axiomTermList = (AxiomTermList) term.getValue();
+                    // Do not add empty axioms to list
+                    if (!axiomTermList.isEmpty())
+                        axiomList.assignItem(index++, axiomTermList);
+                    if (!axiomTermList.isEmpty())
+                        axiomList.setAxiomTermNameList(axiomTermList.getAxiomTermNameList());
+                }
+                return axiomList;
+            }
+        };
+    }
 
 }

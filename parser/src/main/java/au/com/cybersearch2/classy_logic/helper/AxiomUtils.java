@@ -56,7 +56,7 @@ public class AxiomUtils
     {
         if (rightOperand.isEmpty()) // Add empty list means no change
             return (AxiomList)leftOperand.getValue();
-        if (leftOperand.isEmpty()) // Just assign left to right if this operand is empty
+        if (leftOperand.isEmpty() && rightOperand.getValueClass() == AxiomList.class) // Just assign left to right if this operand is empty
             return (AxiomList)rightOperand.getValue();
         // Check for congruence. Both Operands must be AxiomOperands with
         // AxiomLists containing matching Axioms
@@ -103,13 +103,16 @@ public class AxiomUtils
      * @param argumentList List of terms
      * @return AxiomList object containing marshalled axiom
      */
-    public static AxiomList marshallAxiomTerms(QualifiedName qualifiedListName, String axiomKey, List<Term> argumentList)
+    public static AxiomTermList marshallAxiomTerms(QualifiedName qualifiedListName, String axiomKey, List<Term> argumentList)
     {
         // Give axiom same name as operand
         Axiom axiom = new Axiom(axiomKey);
         for (Term arg: argumentList)
         {   // Copy value to Parameter to make it immutable
-            Parameter param = new Parameter(arg.getName(), arg.getValue());
+            String termName = arg.getName();
+            int pos = termName.lastIndexOf('.');
+            String paramName = pos == -1 ? termName : termName.substring(pos + 1); 
+            Parameter param = new Parameter(paramName, arg.getValue());
             axiom.addTerm(param);
         }
         List<String> axiomTermNameList = getTermNames(axiom);
@@ -117,10 +120,11 @@ public class AxiomUtils
         AxiomTermList axiomTermList = new AxiomTermList(qualifiedListName, axiomKey);
         axiomTermList.setAxiom(axiom);
         axiomTermList.setAxiomTermNameList(axiomTermNameList);
-        AxiomList axiomList = new AxiomList(qualifiedListName, axiomKey);
-        axiomList.assignItem(0, axiomTermList);
-        axiomList.setAxiomTermNameList(axiomTermNameList);
-        return axiomList;
+        return axiomTermList;
+        //AxiomList axiomList = new AxiomList(qualifiedListName, axiomKey);
+        //axiomList.assignItem(0, axiomTermList);
+        //axiomList.setAxiomTermNameList(axiomTermNameList);
+        //return axiomList;
     }
 
     public static boolean isCongruent(AxiomList leftAxiomList, AxiomList rightAxiomList)

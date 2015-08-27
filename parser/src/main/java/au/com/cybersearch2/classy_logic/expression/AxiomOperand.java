@@ -22,6 +22,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 
 /**
  * AxiomOperand
@@ -34,6 +35,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
 public class AxiomOperand extends ExpressionParameter<AxiomList>implements Concaten<AxiomList>
 {
     protected String axiomKey;
+    protected ParameterList<AxiomList> parameterList;
     
     /**
      * Axiom Variable
@@ -65,6 +67,18 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     {
         super(qname, expression);
         this.axiomKey = axiomKey;
+    }
+
+    /**
+     * Axiom List
+     * @param qname Qualified name
+     * @param expression Operand which evaluates value
+     */
+    public AxiomOperand(QualifiedName qname, String axiomKey, ParameterList<AxiomList> parameterList) 
+    {
+        super(qname, parameterList.getParameters());
+        this.axiomKey = axiomKey;
+        this.parameterList = parameterList;
     }
 
     /**
@@ -141,10 +155,13 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
      * @param id Identity of caller, which must be provided for backup()
      * @return Flag set true if evaluation is to continue
      */
+    @Override
     public EvaluationStatus evaluate(int id)
     {
         EvaluationStatus status = super.evaluate(id);
-        if (isEmpty())
+        if (parameterList != null)
+            setValue(parameterList.evaluate());
+        else if (isEmpty())
             setValue(new AxiomList(qname, axiomKey));
         return status;
     }

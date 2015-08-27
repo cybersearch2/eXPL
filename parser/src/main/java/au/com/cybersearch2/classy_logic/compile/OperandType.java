@@ -31,5 +31,6 @@ public enum OperandType
 	AXIOM,
 	LOCAL,
 	CURRENCY,
+	LIST,
 	NULL
 }

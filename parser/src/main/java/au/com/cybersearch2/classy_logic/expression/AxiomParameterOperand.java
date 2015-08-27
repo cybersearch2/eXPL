@@ -23,7 +23,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 
 /**
  * AxiomParameterOperand
@@ -32,12 +32,14 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
  * @author Andrew Bowley
  * 9 Aug 2015
  */
-public class AxiomParameterOperand extends AxiomOperand
+public class AxiomParameterOperand extends ExpressionParameter<AxiomTermList>
 {
     /** Collects parameters from an Operand tree and passes them to a supplied function object */
-    protected ParameterList<AxiomList> parameterList;
+    protected ParameterList<AxiomTermList> parameterList;
     /** Name of axiom list to be generated */
     protected QualifiedName axiomName;
+    /** The axiom key */  
+    protected String axiomKey;
 
     /**
      * Construct an AxiomParameterOperand object
@@ -47,9 +49,11 @@ public class AxiomParameterOperand extends AxiomOperand
      */
     public AxiomParameterOperand(QualifiedName qname, String axiomKey, Operand argumentExpression)
     {
-        super(qname, axiomKey, argumentExpression);
+        super(qname, argumentExpression);
         this.axiomName = new QualifiedName(axiomKey, qname);
-        parameterList = new ParameterList<AxiomList>(argumentExpression, axiomGenerator());
+        this.axiomKey = axiomKey;
+        if (argumentExpression != null)
+            parameterList = new ParameterList<AxiomTermList>(argumentExpression, axiomGenerator());
     }
 
     /**
@@ -57,9 +61,9 @@ public class AxiomParameterOperand extends AxiomOperand
      * given a list of terms to marshall into an axiom
      * @return CallEvaluator object of generic return type AxiomList
      */
-    protected CallEvaluator<AxiomList> axiomGenerator() 
+    protected CallEvaluator<AxiomTermList> axiomGenerator() 
     {
-        return new CallEvaluator<AxiomList>(){
+        return new CallEvaluator<AxiomTermList>(){
 
             @Override
             public String getName()
@@ -68,7 +72,7 @@ public class AxiomParameterOperand extends AxiomOperand
             }
 
             @Override
-            public AxiomList evaluate(List<Term> argumentList)
+            public AxiomTermList evaluate(List<Term> argumentList)
             {
                 return AxiomUtils.marshallAxiomTerms(axiomName, axiomName.getName(), argumentList);
             }};
@@ -79,11 +83,63 @@ public class AxiomParameterOperand extends AxiomOperand
      * @param id Identity of caller, which must be provided for backup()
      * @return EvaluationStatus
      */
+    @Override
     public EvaluationStatus evaluate(int id)
     {
-        EvaluationStatus status = super.evaluate(id);
+        if (expression == null)
+        {
+            AxiomTermList axiomTermList = new AxiomTermList(axiomName, axiomKey);
+            setValue(axiomTermList);
+            return EvaluationStatus.COMPLETE;
+        }
+        EvaluationStatus status = expression.evaluate(id);
         if (status == EvaluationStatus.COMPLETE)
             setValue(parameterList.evaluate());
         return status;
     }
+    /**
+     * 
+     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getRightOperandOps()
+     */
+    @Override
+    public OperatorEnum[] getRightOperandOps() 
+    {
+        return  new OperatorEnum[]
+        { 
+            OperatorEnum.ASSIGN,
+         };
+    }
+
+    /**
+     * 
+     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getLeftOperandOps()
+     */
+    @Override
+    public OperatorEnum[] getLeftOperandOps() 
+    {
+        return  new OperatorEnum[]
+        { 
+                OperatorEnum.ASSIGN,
+        };
+    }
+
+    @Override
+    public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm)
+    {   // There is no valid evaluation involving an axiom resulting in a number
+        return new Integer(0);
+    }
+
+    @Override
+    public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
+    {   // There is no valid evaluation involving an axiom resulting in a number
+        return new Integer(0);
+    }
+
+    @Override
+    public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
+    {   // There is no valid evaluation involving an axiom resulting in a boolean
+        return Boolean.FALSE;
+    }
+
+
 }

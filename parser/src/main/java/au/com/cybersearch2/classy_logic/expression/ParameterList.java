@@ -42,10 +42,15 @@ public class ParameterList<R>
      * @param parameters Root of Operand parameter tree or null if no parameters
      * @param callEvaluator Executes function using parameters and returns object of generic type
      */
-    protected ParameterList(Operand parameters, CallEvaluator<R> callEvaluator) 
+    public ParameterList(Operand parameters, CallEvaluator<R> callEvaluator) 
     {
         this.parameters = parameters;
         this.callEvaluator = callEvaluator;
+    }
+
+    public Operand getParameters()
+    {
+        return parameters;
     }
 
     /**

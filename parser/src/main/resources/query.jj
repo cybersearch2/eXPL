@@ -75,7 +75,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.helper.Null;
-import au.com.cybersearch2.classy_logic.helper.QualifierName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 
 
 
@@ -637,13 +637,13 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
      else if (!template.isInnerTemplate())
        var = operandMap.addOperand(name, expression);
      else
-       var = new Variable(name, expression);
+       var = new Variable(parserAssembler.getContextName(name), expression);
      if ((index ==null) && (!operandMap.hasOperand(name)) && !template.isInnerTemplate())
         operandMap.addOperand(var);
      if (assignToken != null) 
         var = new Evaluator(parserAssembler.getContextName(name), var, assignToken.image, assignExpression);
      if ((index !=null) && (equalsToken != null)) 
-        var = new Evaluator(parserAssembler.getContextName(expression.getName(), var, "=", expression);
+        var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
      template.addTerm(var);
   }
 }
@@ -781,7 +781,7 @@ Operand AxiomVariable(QualifiedName qualifiedAxiomName, ParserAssembler parserAs
      axiomList=AxiomList(qualifiedAxiomName, parserAssembler) 
   )
   {
-     VariableType varType = new VariableType(OperandType.AXIOM);
+     VariableType varType = new VariableType(axiomList == null ? OperandType.AXIOM : OperandType.LIST);
      varType.setProperty(VariableType.EXPRESSION, axiomList == null ? expression : axiomList);
      Operand operand = varType.getInstance(parserAssembler, qualifiedAxiomName);
      if (expression != null)
@@ -802,7 +802,7 @@ Operand AxiomList(QualifiedName qualifiedAxiomName, ParserAssembler parserAssemb
   ( 
     params[1] = AxiomInitializer(listName + ++count, axiomName, parserAssembler)
     {
-      params[0] = new Evaluator(params[0], "+=", params[1]);
+      params[0] = new Evaluator(params[0], ",", params[1]);
     }
   )*
   {
@@ -817,7 +817,7 @@ Operand AxiomInitializer(String listName, String axiomName, ParserAssembler pars
 {
   <LBRACE> ( initializeList = ParameterList(parserAssembler) )? <RBRACE>
   {
-     VariableType varType = new VariableType(OperandType.AXIOM);
+     VariableType varType = new VariableType(OperandType.TERM);
      varType.setProperty(VariableType.AXIOM_KEY, axiomName);
      if (initializeList != null)
         varType.setProperty(VariableType.EXPRESSION, initializeList);
@@ -1407,6 +1407,7 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
   Token literal = null;
   Operand param1 = null;
   Operand param2 = null;
+  Operand operand;
   OperandMap operandMap = parserAssembler.getOperandMap();
 }
 {
@@ -1438,9 +1439,9 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
   <LENGTH> "("  name=Name() ")"
   {
     qname = parserAssembler.getContextName(name);
-    Operand listOperand = parserAssembler.findOperandByName(name);
-    if (listOperand != null)
-        return new ListLength(qname, listOperand);
+    operand = parserAssembler.findOperandByName(name);
+    if (operand != null)
+        return new ListLength(qname, operand);
     else 
         return new ListLength(qname, parserAssembler.getItemList(name));
   }
@@ -1448,7 +1449,7 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
   <FORMAT> "("  name=Name() ")"
   {
     qname = parserAssembler.getContextName(name + "_format");
-    Operand listOperand = parserAssembler.findOperandByName(name);
+    operand = parserAssembler.findOperandByName(name);
     if (operand == null)
         throw new ParseException("Variable \"" + name + "\" not found");
     Scope scope = parserAssembler.getScope();
