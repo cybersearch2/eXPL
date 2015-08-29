@@ -105,10 +105,6 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
                     if (index == template.getTermCount())
                         throw new ExpressionException("Unnamed argument at position " + index + " out of bounds");
                     argName = template.getTermByIndex(index++).getName();
-                    // Strip down to name-only for unification
-                    int pos = argName.lastIndexOf('.');
-                    if (pos != -1)
-                        argName = argName.substring(pos + 1);
                 }
                 properties.put(argName, argument.getValue());
             }
@@ -137,10 +133,6 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
                             for (int i = 0; i < (innerTemplate.getTermCount()); i++)
                             {
                                 String termName = innerTemplate.getTermByIndex(i).getName();
-                                // Strip down to name-only to match axiom
-                                int pos = termName.lastIndexOf('.');
-                                if (pos != -1)
-                                    termName = termName.substring(pos + 1);
                                 Term term = axiom.getTermByName(termName);
                                 if (term == null)
                                     term = new Parameter(termName);

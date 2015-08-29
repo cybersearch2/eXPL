@@ -109,10 +109,7 @@ public class AxiomUtils
         Axiom axiom = new Axiom(axiomKey);
         for (Term arg: argumentList)
         {   // Copy value to Parameter to make it immutable
-            String termName = arg.getName();
-            int pos = termName.lastIndexOf('.');
-            String paramName = pos == -1 ? termName : termName.substring(pos + 1); 
-            Parameter param = new Parameter(paramName, arg.getValue());
+            Parameter param = new Parameter(arg.getName(), arg.getValue());
             axiom.addTerm(param);
         }
         List<String> axiomTermNameList = getTermNames(axiom);

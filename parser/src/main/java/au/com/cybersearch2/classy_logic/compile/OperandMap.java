@@ -288,25 +288,6 @@ public class OperandMap
 	}
 
 	/**
-	 * Returns index of item identified by name
-	 * @param listName Name of list - used only for error reporting
-	 * @param item Item name
-	 * @param axiomTermNameList Term names of axiom source
-	 * @return Index
-	 */
-	protected int getIndexForName(String listName, String item, List<String> axiomTermNameList) 
-	{
-	    int pos = item.lastIndexOf('.');
-	    String name = pos == -1 ? item : item.substring(pos + 1);
-		for (int i = 0; i < axiomTermNameList.size(); i++)
-		{
-			if (name.equals(axiomTermNameList.get(i)))
-				return i;
-		}
-		throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + item + "\"");
-	}
-
-	/**
 	 * Returns a list variable for a term in an axiom in a axiom list. 
 	 * Both the axiom and the term are referenced by index.
 	 * There is only one variable instance for any specific index combination.
@@ -372,52 +353,6 @@ public class OperandMap
 	{
 		operandMap.putAll(operandMap2.operandMap);
 		listMap.putAll(operandMap2.listMap);
-	}
-
-	/**
-	 * Returns ItemListVariable object with specified name and index. 
-	 * There is only one variable instance for any specific index.
-	 * Will create object if it does not already exist.
-	 * @param itemList The owner list
-	 * @param name List name
-	 * @param index int
-	 * @param suffix To append to name
-	 * @return ItemListVariable object
-	 */
-	protected ItemListVariable<?> getListVariable(ItemList<?> itemList, String name, int index, String suffix)
-	{
-		// Variable name is list name with '_' index suffix
-		QualifiedName listVarName = new QualifiedName(name + "_" + suffix, itemList.getQualifiedName());
-		ItemListVariable<?> listVariable = (ItemListVariable<?>) get(listVarName);
-		if (listVariable != null)
-			return listVariable;
-		// Use ItemList object to create new ItemListVariable instance
-		listVariable = itemList.newVariableInstance(index, suffix, 0);
-		return listVariable;
-	}
-
-	/**
-	 * Returns a list variable for a term in an axiom in a axiom list. 
-	 * Both the axiom and the term are referenced by index.
-	 * There is only one variable instance for any specific index combination.
-	 * @param axiomList The owner list
-	 * @param name List name
-	 * @param axiomIndex int
-	 * @param termIndex int
-	 * @param suffix To append to name
-	 * @return AxiomListVariable object
-	 */
-	protected AxiomListVariable getListVariable(AxiomListSpec axiomListSpec) 
-	{
-		// Variable name is list name with '_' index suffix
-	    String varName = axiomListSpec.getListName() + "_" + axiomListSpec.getAxiomIndex() + "_" + axiomListSpec.getSuffix();
-		QualifiedName qualifiedtVarName = new QualifiedName(varName, axiomListSpec.getAxiomList().getQualifiedName());
-		AxiomListVariable listVariable = (AxiomListVariable) get(qualifiedtVarName);
-		if (listVariable != null)
-			return listVariable;
-		// Use axiomList object to create new ItemListVariable instance
-		listVariable = axiomListSpec.getAxiomList().newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getTermIndex(), axiomListSpec.getSuffix());
-		return listVariable;
 	}
 
 	/**
@@ -519,5 +454,68 @@ public class OperandMap
 	            listNames.add(itemList.getQualifiedName());
 	    return listNames;
 	}
+
+    /**
+     * Returns index of item identified by name
+     * @param listName Name of list - used only for error reporting
+     * @param item Item name
+     * @param axiomTermNameList Term names of axiom source
+     * @return Index
+     */
+    protected int getIndexForName(String listName, String item, List<String> axiomTermNameList) 
+    {
+        for (int i = 0; i < axiomTermNameList.size(); i++)
+        {
+            if (item.equals(axiomTermNameList.get(i)))
+                return i;
+        }
+        throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + item + "\"");
+    }
+
+    /**
+     * Returns a list variable for a term in an axiom in a axiom list. 
+     * Both the axiom and the term are referenced by index.
+     * There is only one variable instance for any specific index combination.
+     * @param axiomList The owner list
+     * @param name List name
+     * @param axiomIndex int
+     * @param termIndex int
+     * @param suffix To append to name
+     * @return AxiomListVariable object
+     */
+    protected AxiomListVariable getListVariable(AxiomListSpec axiomListSpec) 
+    {
+        // Variable name is list name with '_' index suffix
+        String varName = axiomListSpec.getListName() + "_" + axiomListSpec.getAxiomIndex() + "_" + axiomListSpec.getSuffix();
+        QualifiedName qualifiedtVarName = new QualifiedName(varName, axiomListSpec.getAxiomList().getQualifiedName());
+        AxiomListVariable listVariable = (AxiomListVariable) get(qualifiedtVarName);
+        if (listVariable != null)
+            return listVariable;
+        // Use axiomList object to create new ItemListVariable instance
+        listVariable = axiomListSpec.getAxiomList().newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getTermIndex(), axiomListSpec.getSuffix());
+        return listVariable;
+    }
+
+    /**
+     * Returns ItemListVariable object with specified name and index. 
+     * There is only one variable instance for any specific index.
+     * Will create object if it does not already exist.
+     * @param itemList The owner list
+     * @param name List name
+     * @param index int
+     * @param suffix To append to name
+     * @return ItemListVariable object
+     */
+    protected ItemListVariable<?> getListVariable(ItemList<?> itemList, String name, int index, String suffix)
+    {
+        // Variable name is list name with '_' index suffix
+        QualifiedName listVarName = new QualifiedName(name + "_" + suffix, itemList.getQualifiedName());
+        ItemListVariable<?> listVariable = (ItemListVariable<?>) get(listVarName);
+        if (listVariable != null)
+            return listVariable;
+        // Use ItemList object to create new ItemListVariable instance
+        listVariable = itemList.newVariableInstance(index, suffix, 0);
+        return listVariable;
+    }
 
 }

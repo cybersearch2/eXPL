@@ -55,7 +55,7 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 	 * @param suffix To append to name
 	 */
 	public ItemListVariable(ItemList<?> itemList, Operand proxy, int index, String suffix) 
-	{   // Use convention list name appended with '.' + index
+	{   // Use convention list name appended with '_' + suffix, where suffix depends on type of index
 		super(getVariableName(itemList.getName(), suffix));
 		this.itemList = itemList;
         this.proxy = proxy;

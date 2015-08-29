@@ -177,9 +177,7 @@ public class AxiomListSpec
         }
         else if (termExpression.isEmpty())/* && (termExpression instanceof Variable))*/
         {
-            String termName = termExpression.getName();
-            int pos = termName.lastIndexOf('.');
-            suffix =pos == -1 ? termName : termName.substring(pos + 1);
+            suffix = termExpression.getName();
             if (axiomList != null)
                 setTermIndex();
         }
@@ -220,10 +218,6 @@ public class AxiomListSpec
                     termIndex = -1;
                     termExpression = axiomExpression;
                     suffix = termExpression.getName();
-                    // Strip down to name-only for term name indexing
-                    int pos = suffix.lastIndexOf('.');
-                    if (pos != -1)
-                        suffix = suffix.substring(pos + 1);
                     setTermIndex();
                 }
                 axiomIndex = 0;
@@ -278,8 +272,7 @@ public class AxiomListSpec
         {
             // Strip term name down to name only
             String termName = axiomTermNameList.get(i);
-            int pos = termName.lastIndexOf('.');
-            if (itemName.equals((pos == -1 ? termName : termName.substring(pos + 1))))
+            if (itemName.equals(termName))
                 return i;
         }
         return -1;
