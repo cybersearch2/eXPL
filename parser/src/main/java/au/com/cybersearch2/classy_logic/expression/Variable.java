@@ -88,12 +88,15 @@ public class Variable extends DelegateParameter
 		EvaluationStatus status = EvaluationStatus.COMPLETE;
 		if (expression != null)
 		{
-			status = expression.evaluate(id);
+		    if (expression.isEmpty())
+		        status =  expression.evaluate(id);
 			if (!expression.isEmpty())
 			{
 				setValue(expression.getValue());
 			    this.id = id;
 			}
+			else
+			    throw new ExpressionException("Evaluation failed for " + expression.getQualifiedName().toString());
 		}
 		return status;
 	}

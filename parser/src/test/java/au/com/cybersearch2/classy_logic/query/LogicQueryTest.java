@@ -147,6 +147,7 @@ public class LogicQueryTest
 		when(axiom.getName()).thenReturn(KEY);
 		Template template = mock(Template.class);
 		when(template.getName()).thenReturn(NAME);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getKey()).thenReturn(KEY);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
@@ -179,10 +180,11 @@ public class LogicQueryTest
 	}
 
 	@Test
-	public void test_iterate_soution_found_with_handler()
+	public void test_iterate_solution_with_handler()
 	{
 		Solution solution = new Solution();
 		SolutionHandler solutionHandler = mock(SolutionHandler.class);
+        // SolutionHandler returns true, so retain solution
 		when(solutionHandler.onSolution(solution)).thenReturn(true);
 		AxiomSource axiomSource = mock(AxiomSource.class);
 		final Axiom axiom = mock(Axiom.class);
@@ -191,6 +193,7 @@ public class LogicQueryTest
 		Template template = mock(Template.class);
 		when(template.getKey()).thenReturn(KEY);
 		when(template.getName()).thenReturn(NAME);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
@@ -221,23 +224,25 @@ public class LogicQueryTest
 	}
 	
 	@Test
-	public void test_iterate_no_soution_found_with_handler()
+	public void test_iterate_no_solution_with_handler()
 	{
 		Solution solution = new Solution();
 		SolutionHandler solutionHandler = mock(SolutionHandler.class);
+		// SolutionHandler returns false, so discard solution
 		when(solutionHandler.onSolution(solution)).thenReturn(false);
 		AxiomSource axiomSource = mock(AxiomSource.class);
 		final Axiom axiom = mock(Axiom.class);
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
         when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
-		final Iterator<Axiom> iterator = 	new Iterator<Axiom>(){
+		final Iterator<Axiom> iterator = new Iterator<Axiom>(){
             int count = 0;
 			@Override
 			public boolean hasNext() {
@@ -272,6 +277,7 @@ public class LogicQueryTest
 		final Axiom axiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
         when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
@@ -313,6 +319,7 @@ public class LogicQueryTest
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
         when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
@@ -354,6 +361,7 @@ public class LogicQueryTest
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
@@ -394,6 +402,7 @@ public class LogicQueryTest
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
         when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.isFact()).thenReturn(true);
@@ -433,6 +442,7 @@ public class LogicQueryTest
 		LogicQuery logicQuery = new LogicQuery(axiomSource);
 		Solution solution = new Solution();
 		Template template = mock(Template.class);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
         when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenThrow(new ExpressionException("Syntax error"));
@@ -477,6 +487,7 @@ public class LogicQueryTest
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
@@ -499,13 +510,14 @@ public class LogicQueryTest
 		Template template = mock(Template.class);
 		OperandWalker operandWalker = mock(OperandWalker.class);
 		when(operandWalker.visitAllNodes(isA(OperandVisitor.class))).thenReturn(true);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getOperandWalker()).thenReturn(operandWalker);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
-		solution.put(QualifiedName.parseTemplateName(NAME), solutionAxiom);
+		solution.put(NAME, solutionAxiom);
 		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
 		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);

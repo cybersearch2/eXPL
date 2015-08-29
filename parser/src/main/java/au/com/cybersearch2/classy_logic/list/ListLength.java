@@ -80,7 +80,7 @@ public class ListLength extends Variable
 
     protected static QualifiedName getLengthName(QualifiedName qname)
     {
-        return new QualifiedName(qname.toString() + "_length", qname);
+        return new QualifiedName(qname.getName().toString() + "_length", qname);
     }
 
 }

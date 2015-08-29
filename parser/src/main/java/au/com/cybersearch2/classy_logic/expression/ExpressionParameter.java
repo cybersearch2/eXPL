@@ -39,7 +39,7 @@ public abstract class ExpressionParameter<T> extends GenericParameter<T> impleme
 	 */
 	protected ExpressionParameter(QualifiedName qname)
 	{
-		super(qname.toString());
+		super(qname.getName());
 		if (name.isEmpty())
 			throw new IllegalArgumentException("Param \"name\" is empty");
 		this.qname = qname;
@@ -53,6 +53,7 @@ public abstract class ExpressionParameter<T> extends GenericParameter<T> impleme
 	protected ExpressionParameter(QualifiedName qname, T value) 
 	{
 		super(qname.toString(), value);
+        this.qname = qname;
 	}
 
 	/**
@@ -62,7 +63,7 @@ public abstract class ExpressionParameter<T> extends GenericParameter<T> impleme
 	 */
 	protected ExpressionParameter(QualifiedName qname, Operand expression) 
 	{
-		super(qname.toString());
+		super(qname.getName());
 		this.qname = qname;
 		this.expression = expression;
 	}

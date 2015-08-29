@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -108,7 +109,7 @@ public class AxiomTest
     	String TEMPLATE_NAME = "myTemplate";
     	String TEMPLATE_KEY = "templateKey";
     	Template template = new Template(TEMPLATE_KEY, parseTemplateName(TEMPLATE_NAME));
-    	Parameter term = new Parameter("x", new Integer(2));
+    	IntegerOperand term = new IntegerOperand(QualifiedName.parseGlobalName("x"), new Integer(2));
     	template.addTerm(term);
     	Axiom axiom = template.toAxiom();
     	assertThat(axiom.getName()).isEqualTo(TEMPLATE_NAME);
@@ -477,7 +478,7 @@ public class AxiomTest
         axiomPairs.add(new TermPair(term2, operand2));
 		when(solutionPairer.getPairList()).thenReturn(axiomPairs );
 		Solution solution = new Solution();
-		solution.put(QualifiedName.parseTemplateName(NAME + 1), new Axiom(NAME + 1));
+		solution.put(NAME + 1, new Axiom(NAME + 1));
         testAxiom.unifyTemplate(template, solution);
         verify(term1).unifyTerm(operand1, template.getId());
         verify(term2).unifyTerm(operand2, template.getId());

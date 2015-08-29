@@ -67,7 +67,7 @@ public class CalculateChainQueryTest
         
         CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate);
         calculateChainQuery.executeQuery(solution);
-        assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n = 3, loop = true, limit = 3)");
+        assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n = 3, limit = 3)");
 	}
 
     @Test
@@ -97,7 +97,7 @@ public class CalculateChainQueryTest
         Solution solution = new Solution();
         CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate);
         calculateChainQuery.executeQuery(solution);
-        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n = 4, factorial = 24, i = 5, loop = true)");
+        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n = 4, factorial = 24, i = 5)");
         calculateChainQuery.backupToStart();
         assertThat(n.isEmpty()).isFalse();
         assertThat(factorial.isEmpty()).isFalse();
@@ -106,7 +106,7 @@ public class CalculateChainQueryTest
         assertThat(iExpression.isEmpty()).isTrue();
         assertThat(testExpression.isEmpty()).isTrue();
         calculateChainQuery.executeQuery(solution);
-        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n = 4, factorial = 24, i = 5, loop = true)");
+        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n = 4, factorial = 24, i = 5)");
 	}
 
     protected static QualifiedName parseTemplateName(String name)

@@ -268,7 +268,7 @@ public class ParserAssembler implements LocaleListener
 	    // Add variable to OperandMap so it can be referenced from script
 	    operandMap.addOperand(listVariable);
 	    // Add variable to inner template so it can be referenced by QueryEvaluator
-	    innerTemplate.addTerm(listVariable);
+	    //innerTemplate.addTerm(listVariable);
 	}
 	
 	/**
@@ -547,7 +547,10 @@ public class ParserAssembler implements LocaleListener
 	public void registerAxiomList(AxiomList axiomList) 
 	{
 		AxiomListener axiomListener = axiomList.getAxiomListener();
-        QualifiedName qualifiedAxiomName = getQualifiedAxiomName(axiomList.getKey());
+        QualifiedName qualifiedAxiomName = findQualifiedAxiomName(axiomList.getKey());
+        if (qualifiedAxiomName == null)
+            // Assume key is for template
+            qualifiedAxiomName = QualifiedName.parseGlobalName(axiomList.getKey());
         QualifiedName qualifiedTemplateName = new QualifiedName(qualifiedAxiomName.getScope(), axiomList.getKey(), QualifiedName.EMPTY);
         boolean isChoice = templateMap.containsKey(qualifiedTemplateName) &&
                             templateMap.get(qualifiedTemplateName).isChoice();
@@ -572,7 +575,7 @@ public class ParserAssembler implements LocaleListener
 		setAxiomTermNameList(qualifiedTemplateName, axiomList);
 	}
 
-	public QualifiedName getQualifiedAxiomName(String key)
+	public QualifiedName findQualifiedAxiomName(String key)
     {
         QualifiedName qname = getContextName(key);
         if (isQualifiedAxiomName(qname))
@@ -589,7 +592,8 @@ public class ParserAssembler implements LocaleListener
             if (isQualifiedAxiomName(qname))
                 return qname;
         }
-        throw new ExpressionException("No axiom source found matching key \"" + key + "\"");
+        return null; 
+        //throw new ExpressionException("No axiom source found matching key \"" + key + "\"");
     }
 	
 	public boolean isQualifiedAxiomName(QualifiedName qname)
@@ -744,7 +748,7 @@ public class ParserAssembler implements LocaleListener
         }
         QueryParams queryParams = new QueryParams(functionScope, querySpec);
         QueryEvaluator queryEvaluator = 
-                new QueryEvaluator(queryParams, functionScope == scope, innerTemplate);
+                new QueryEvaluator(queryParams, scope, innerTemplate);
         QualifiedName qualifiedCallName = new QualifiedName(library, QualifiedName.EMPTY, queryName);
         return new CallOperand<Void>(qualifiedCallName, queryEvaluator, params);
     }

@@ -276,7 +276,10 @@ public class AxiomListSpec
     {
         for (int i = 0; i < axiomTermNameList.size(); i++)
         {
-            if (itemName.equals(axiomTermNameList.get(i)))
+            // Strip term name down to name only
+            String termName = axiomTermNameList.get(i);
+            int pos = termName.lastIndexOf('.');
+            if (itemName.equals((pos == -1 ? termName : termName.substring(pos + 1))))
                 return i;
         }
         return -1;

@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -119,6 +120,7 @@ public class Template extends Structure
 	{
 		super(qname.getName().isEmpty() ? qname.getTemplate() : qname.getName());
 		this.key = key;
+        this.qname = qname;
 		id = referenceCount.incrementAndGet();
 	}
 
@@ -330,10 +332,10 @@ public class Template extends Structure
         Axiom axiom = new Axiom(name);
 		for (Term term: termList)
 		{
-			if (!term.isEmpty() && !term.getName().isEmpty() && qname.inSameSpace(term.getName()))
+		    Operand operand = (Operand)term;
+			if (!operand.isEmpty() && !operand.getName().isEmpty() && qname.inSameSpace(operand.getQualifiedName()))
 			{
-				String termName = NameParser.getNamePart(term.getName());
-				Parameter param = new Parameter(termName, term.getValue());
+				Parameter param = new Parameter(operand.getQualifiedName().getName(), operand.getValue());
 				axiom.addTerm(param);
 			}
 		}
@@ -388,7 +390,18 @@ public class Template extends Structure
 		{
 			for (String name: initData.keySet())
 			{
-				Term term = getTermByName(QualifiedName.parseName(name, qname).toString());
+			    QualifiedName qualifiedTermName = QualifiedName.parseName(name, qname);
+                Term term = getTermByName(qualifiedTermName.toString());
+                if ((term == null) && (!qualifiedTermName.getTemplate().isEmpty()))
+                {
+                    qualifiedTermName.clearTemplate();
+                    term = getTermByName(qualifiedTermName.toString());
+                }
+                if ((term == null) && (!qualifiedTermName.getScope().isEmpty()))
+                {
+                    qualifiedTermName.clearScope();
+                    term = getTermByName(qualifiedTermName.toString());
+                }
 				if (term == null)
 					throw new QueryExecutionException("Template \"" + getName() + "\" does not have term \"" + name + "\"");
 				term.assign(initData.get(name));

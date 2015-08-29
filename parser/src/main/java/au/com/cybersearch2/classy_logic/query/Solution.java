@@ -65,19 +65,6 @@ public class Solution
 		axiomMap.remove(key);
 	}
 
-	/**
-	 * Add axiom to this object and notify listener if present
-	 * @param qname QualifiedName of axiom
-	 * @param axiom Axiom
-	 */
-	public void put(QualifiedName qname, Axiom axiom) 
-	{
-		axiomMap.put(qname.toString(), axiom);
-		if ((axiomListenerMap != null) && axiomListenerMap.containsKey(qname))
-			for (AxiomListener axiomListener: axiomListenerMap.get(qname))
-				axiomListener.onNextAxiom(axiom);
-	}
-
     /**
      * Add axiom to this object and notify listener if present
      * @param key Name of axiom
@@ -86,7 +73,7 @@ public class Solution
     public void put(String key, Axiom axiom) 
     {
         axiomMap.put(key.toString(), axiom);
-        QualifiedName qname = QualifiedName.parseGlobalName(key);
+        QualifiedName qname = QualifiedName.parseTemplateName(key);
         if ((axiomListenerMap != null) && axiomListenerMap.containsKey(qname))
             for (AxiomListener axiomListener: axiomListenerMap.get(qname))
                 axiomListener.onNextAxiom(axiom);

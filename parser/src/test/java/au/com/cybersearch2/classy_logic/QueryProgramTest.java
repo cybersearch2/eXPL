@@ -61,9 +61,9 @@ public class QueryProgramTest
 	}
 	
 	private static final String AXIOM_KEY = "AxiomKey";
-	protected QualifiedName Q_AXIOM_NAME = QualifiedName.parseName(AXIOM_KEY);
+	protected QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, AXIOM_KEY);
 	private static final String AXIOM_KEY2 = "AxiomKey2";
-    protected QualifiedName Q_AXIOM_NAME2 = QualifiedName.parseName(AXIOM_KEY2);
+    protected QualifiedName Q_AXIOM_NAME2 = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, AXIOM_KEY2);
 	private static final String TEMPLATE_NAME = "TemplateName";
 	protected QualifiedName Q_TEMPLATE_NAME = new QualifiedName(SCOPE_NAME ,TEMPLATE_NAME, QualifiedName.EMPTY);
 	private static final String TEMPLATE_NAME2 = "TemplateName2";
@@ -72,7 +72,7 @@ public class QueryProgramTest
 	private static final String SCOPE_NAME = "ScopeName";
 	private static final String QUERY_SPEC_NAME = "QuerySpec";
 	private static final String VARIABLE_NAME = "VariableName";
-    protected QualifiedName Q_VARIABLE_NAME = QualifiedName.parseName(VARIABLE_NAME);
+    protected QualifiedName Q_VARIABLE_NAME = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, VARIABLE_NAME);
 
 	@Before
 	public void setUp()
@@ -91,17 +91,20 @@ public class QueryProgramTest
 	@Test
 	public void test_globalScope()
 	{
+	    QualifiedName GLOBAL_Q_AXIOM_NAME = QualifiedName.parseGlobalName(AXIOM_KEY);
+	    QualifiedName GLOBAL_Q_TEMPLATE_NAME = QualifiedName.parseTemplateName(TEMPLATE_NAME);
 		QueryProgram queryProgram = new QueryProgram();
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
-		parserAssembler.createAxiom(Q_AXIOM_NAME);
-		parserAssembler.addAxiom(Q_AXIOM_NAME, new Parameter("x", Integer.valueOf(3)));
-		parserAssembler.saveAxiom(Q_AXIOM_NAME);
-		parserAssembler.createTemplate(Q_TEMPLATE_NAME, false);
-		Template template = parserAssembler.getTemplate(Q_TEMPLATE_NAME);
-		OperandMap operandMap = parserAssembler.getOperandMap();
+		parserAssembler.createAxiom(GLOBAL_Q_AXIOM_NAME);
+		parserAssembler.addAxiom(GLOBAL_Q_AXIOM_NAME, new Parameter("x", Integer.valueOf(3)));
+		parserAssembler.saveAxiom(GLOBAL_Q_AXIOM_NAME);
+        OperandMap operandMap = parserAssembler.getOperandMap();
+		parserAssembler.createTemplate(GLOBAL_Q_TEMPLATE_NAME, false);
+        operandMap.setQualifiedContextname(GLOBAL_Q_TEMPLATE_NAME);
+		Template template = parserAssembler.getTemplate(GLOBAL_Q_TEMPLATE_NAME);
 		operandMap.addOperand(OPERAND_NAME, null);
-		assertThat(parserAssembler.getAxiomSource(Q_AXIOM_NAME)).isNotNull();
-		assertThat(parserAssembler.getTemplate(Q_TEMPLATE_NAME)).isEqualTo(template);
+		assertThat(parserAssembler.getAxiomSource(GLOBAL_Q_AXIOM_NAME)).isNotNull();
+		assertThat(parserAssembler.getTemplate(GLOBAL_Q_TEMPLATE_NAME)).isEqualTo(template);
 		assertThat(parserAssembler.getOperandMap().get(QualifiedName.parseGlobalName(TEMPLATE_NAME + "." + OPERAND_NAME))).isNotNull();
 	}
 	
@@ -151,7 +154,9 @@ public class QueryProgramTest
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
 		parserAssembler.addAxiom(Q_AXIOM_NAME, param);
 		parserAssembler.saveAxiom(Q_AXIOM_NAME);
-		parserAssembler.getOperandMap().addOperand(OPERAND_NAME, null);
+        OperandMap operandMap = parserAssembler.getOperandMap();
+        operandMap.setQualifiedContextname(Q_TEMPLATE_NAME);
+		operandMap.addOperand(OPERAND_NAME, null);
 		querySpec.addKeyName(keyname);
 		scope.addQuerySpec(querySpec);
 		SolutionHandler solutionHandler = new SolutionHandler(){
@@ -159,7 +164,7 @@ public class QueryProgramTest
 			@Override
 			public boolean onSolution(Solution solution) 
 			{
-				assertThat(solution.getString(TEMPLATE_NAME, VARIABLE_NAME)).isEqualTo("eureka!");
+				assertThat(solution.getString(Q_TEMPLATE_NAME.toString(), VARIABLE_NAME)).isEqualTo("eureka!");
 				return true;
 			}};
 		queryProgram.executeQuery(SCOPE_NAME, QUERY_SPEC_NAME, solutionHandler);
@@ -203,8 +208,8 @@ public class QueryProgramTest
 			@Override
 			public boolean onSolution(Solution solution) 
 			{
-				assertThat(solution.getString(TEMPLATE_NAME, VARIABLE_NAME)).isEqualTo("eureka!");
-				assertThat(solution.getString(TEMPLATE_NAME2, VARIABLE_NAME)).isEqualTo("eureka2!");
+				assertThat(solution.getString(Q_TEMPLATE_NAME.toString(), VARIABLE_NAME)).isEqualTo("eureka!");
+				assertThat(solution.getString(Q_TEMPLATE_NAME2.toString(), VARIABLE_NAME)).isEqualTo("eureka2!");
 				return true;
 			}};
 		queryProgram.executeQuery(SCOPE_NAME, QUERY_SPEC_NAME, solutionHandler);
@@ -248,8 +253,8 @@ public class QueryProgramTest
 			@Override
 			public boolean onSolution(Solution solution) 
 			{
-				assertThat(solution.getString(TEMPLATE_NAME, VARIABLE_NAME)).isEqualTo("eureka!");
-				assertThat(solution.getString(TEMPLATE_NAME2, VARIABLE_NAME)).isEqualTo("eureka2!");
+				assertThat(solution.getString(Q_TEMPLATE_NAME.toString(), VARIABLE_NAME)).isEqualTo("eureka!");
+				assertThat(solution.getString(Q_TEMPLATE_NAME2.toString(), VARIABLE_NAME)).isEqualTo("eureka2!");
 				return true;
 			}};
 		queryProgram.executeQuery(SCOPE_NAME, QUERY_SPEC_NAME, solutionHandler);
@@ -270,6 +275,7 @@ public class QueryProgramTest
 		parserAssembler.createAxiom(Q_AXIOM_NAME);
 		parserAssembler.createTemplate(Q_TEMPLATE_NAME, false);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
+		variable.assign(Integer.valueOf(0));
 		parserAssembler.addTemplate(Q_TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
 		parserAssembler.addAxiom(Q_AXIOM_NAME, param);
@@ -292,12 +298,11 @@ public class QueryProgramTest
 			@Override
 			public boolean onSolution(Solution solution) 
 			{
-				assertThat(solution.getString(TEMPLATE_NAME, VARIABLE_NAME)).isEqualTo("eureka!");
-				assertThat(solution.getString(TEMPLATE_NAME2, VARIABLE_NAME + "3")).isEqualTo("eureka!");
+				assertThat(solution.getString(Q_TEMPLATE_NAME.toString(), VARIABLE_NAME)).isEqualTo("eureka!");
+				assertThat(solution.getString(Q_TEMPLATE_NAME2.toString(), VARIABLE_NAME + "3")).isEqualTo("eureka!");
 				return true;
 			}};
 		queryProgram.executeQuery(SCOPE_NAME, QUERY_SPEC_NAME, solutionHandler);
-		assertThat(variable.isEmpty()).isTrue();
 		
 	}
 

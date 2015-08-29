@@ -51,6 +51,8 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
     protected boolean isCallInScope;
     /** Optional inner Template to receive query results */
     protected Template innerTemplate;
+    /** Caller's scope */
+    protected Scope callerScope;
 
     /**
      * Construct a QueryEvaluator object for a query specified by query parameters
@@ -58,10 +60,11 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
      * @param isCallInScope Flag set true if call to query in same scope
      * @param innerTemplate Optional inner Template to receive query results
      */
-    public QueryEvaluator(QueryParams queryParams, boolean isCallInScope, Template innerTemplate)
+    public QueryEvaluator(QueryParams queryParams, Scope scope, Template innerTemplate)
     {
         this.queryParams = queryParams;
-        this.isCallInScope = isCallInScope;
+        this.callerScope = scope;
+        this.isCallInScope = queryParams.getScope() == scope;
         this.innerTemplate = innerTemplate;
     }
     
@@ -83,17 +86,10 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
     public Void evaluate(List<Term> argumentList)
     {
         QuerySpec querySpec = queryParams.getQuerySpec();
-        final String templateName = getCalculatorKeyName(querySpec).getTemplateName();
+        String templateName = getCalculatorKeyName(querySpec).getTemplateName();
         Scope scope = queryParams.getScope();
-        ParserAssembler parserAssembler = scope.getGlobalParserAssembler();
-        QualifiedName qualifiedTemplateName = QualifiedName.parseTemplateName(templateName);
-        Template template = parserAssembler.getTemplate(qualifiedTemplateName);
-        if (template == null)
-        {
-            qualifiedTemplateName = new QualifiedName(scope.getName(), templateName, QualifiedName.EMPTY);
-            parserAssembler = scope.getParserAssembler();
-            template = parserAssembler.getTemplate(qualifiedTemplateName);
-        }
+        Template template = scope.findTemplate(templateName);
+        final String solutionName =  template.getQualifiedName().toString();
         // Marshall arguments provided as a list of Variables into a properties container 
         if (argumentList.size() > 0)
         {
@@ -125,7 +121,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
             @Override
             public boolean onSolution(Solution solution)
             {
-                Axiom axiom = solution.getAxiom(templateName);
+                Axiom axiom = solution.getAxiom(solutionName);
                 if ((axiom != null) && (innerTemplate != null))
                 {
                     // No backup, so reset before unification
@@ -134,11 +130,11 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
                     {
                         if (innerTemplate.evaluate() == EvaluationStatus.COMPLETE);
                         {
-                            String innerTemplateName = innerTemplate.getQualifiedName().toString();
-                            Term innerTerm = innerTemplate.getTermByName(innerTemplateName);
+                            QualifiedName innerTemplateName = innerTemplate.getQualifiedName();
+                            Term innerTerm = callerScope.getParserAssembler().getOperandMap().get(innerTemplateName);
                             AxiomTermList axiomTermList = (AxiomTermList)(innerTerm.getValue());
                             Axiom innerAxiom = new Axiom(innerTemplate.getKey());
-                            for (int i = 0; i < (innerTemplate.getTermCount() -1); i++)
+                            for (int i = 0; i < (innerTemplate.getTermCount()); i++)
                             {
                                 String termName = innerTemplate.getTermByIndex(i).getName();
                                 // Strip down to name-only to match axiom

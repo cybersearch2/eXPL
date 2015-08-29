@@ -75,7 +75,7 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 	 */
 	protected DelegateParameter(QualifiedName qname, Object value) 
 	{
-		super(qname.toString(), value);
+		super(qname.getName(), value);
 		this.qname = qname;
 	}
 
@@ -84,7 +84,7 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 	 */
 	protected DelegateParameter(QualifiedName qname) 
 	{
-		super(qname.toString());
+		super(qname.getName());
 		this.qname = qname;
         delegate = ASSIGN_ONLY_DELEGATE;
 	}

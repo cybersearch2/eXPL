@@ -171,11 +171,12 @@ public class LogicQuery implements SolutionFinder
 			// isfact() flags true if each term of the template is non-empty
 			if ((template.evaluate() == EvaluationStatus.COMPLETE) && template.isFact())
 			{
-				solution.put(template.getQualifiedName(), template.toAxiom());
+			    String solutionKey = template.getQualifiedName().toString();
+				solution.put(solutionKey, template.toAxiom());
 				if ((solutionHandler == null) ||
 				     solutionHandler.onSolution(solution))
 					return true;
-				solution.remove(template.getName());
+				solution.remove(solutionKey);
 			}
 		}
 		catch (ExpressionException e)

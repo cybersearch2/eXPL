@@ -60,9 +60,10 @@ public class ScopeTest
 	static Map<QualifiedName, List<AxiomListener>> EMPTY_AXIOM_LISTENER_MAP = Collections.emptyMap();
 	
 	private static final String AXIOM_KEY = "AxiomKey";
-	static QualifiedName Q_AXIOM_NAME = QualifiedName.parseName(AXIOM_KEY);
 	private static final String TEMPLATE_NAME = "TemplateName";
 	private static final String SCOPE_NAME = "ScopeName";
+    static QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, AXIOM_KEY);
+    static QualifiedName GLOBAL_Q_AXIOM_NAME = new QualifiedName(QualifiedName.EMPTY, QualifiedName.EMPTY, AXIOM_KEY);
 
 	@Before
 	public void setUp()
@@ -79,7 +80,7 @@ public class ScopeTest
 		ParserAssembler globalParserAssembler = mock(ParserAssembler.class);
 		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
 		AxiomSource axiomSource = mock(AxiomSource.class);
-		when(globalParserAssembler.getAxiomSource(Q_AXIOM_NAME)).thenReturn(axiomSource);
+		when(globalParserAssembler.getAxiomSource(GLOBAL_Q_AXIOM_NAME)).thenReturn(axiomSource);
 		Template template = mock(Template.class);
 		when(globalParserAssembler.getTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME))).thenReturn(template);
 		assertThat(scope.getAxiomSource(AXIOM_KEY)).isEqualTo(axiomSource);

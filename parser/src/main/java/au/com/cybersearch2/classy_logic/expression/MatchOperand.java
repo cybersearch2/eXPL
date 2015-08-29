@@ -32,7 +32,7 @@ public class MatchOperand extends Variable
     /**
      * Construct MatchOperand object
      * @param qname Qualified name
-     * @param literal The literal value to match on
+     * @param expression Operand containing value to match on
      */
     public MatchOperand(QualifiedName qname, Operand expression)
     {
@@ -51,7 +51,7 @@ public class MatchOperand extends Variable
         Object selectionValue = value;
         clearValue();
         // Evaluate match value
-        super.evaluate(id);
+        evaluateExpression(id);
         // Retain value on match
         boolean isMatch = value.equals(selectionValue);
         if (!isMatch)
@@ -68,4 +68,21 @@ public class MatchOperand extends Variable
         return isMatch ? EvaluationStatus.COMPLETE : EvaluationStatus.SHORT_CIRCUIT;
     }
 
+    /**
+     * Execute operation for expression
+     * @param id Identity of caller, which must be provided for backup()
+     * @return EvaluationStatus
+     */
+    public EvaluationStatus evaluateExpression(int id)
+    {
+        EvaluationStatus status = EvaluationStatus.COMPLETE;
+        if (expression != null)
+        {
+            if (expression.isEmpty())
+                status =  expression.evaluate(id);
+            setValue(expression.getValue());
+            this.id = id;
+        }
+        return status;
+    }
 }

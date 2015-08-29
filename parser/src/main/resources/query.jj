@@ -435,7 +435,7 @@ void ListDeclaration(ParserAssembler parserAssembler) :
 VariableType Type(OperandMap operandMap) :
 {
     Token qualifierLit = null;
-    Token qualifierId = null;
+    String qualifierId = null;
 }
 {
     <INTEGER>
@@ -462,13 +462,13 @@ VariableType Type(OperandMap operandMap) :
     { 
       return new VariableType(OperandType.TERM); 
     }
-|   <CURRENCY> ( "(" ( qualifierLit=<STRING_LITERAL> | qualifierId=<IDENTIFIER> ) ")" )?
+|   <CURRENCY> ( "(" ( qualifierLit=<STRING_LITERAL> | qualifierId=Name() ) ")" )?
     { 
       VariableType varType = new VariableType(OperandType.CURRENCY);
       if (qualifierLit != null)
          varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
       else if (qualifierId != null)
-         varType.setProperty(VariableType.QUALIFIER_OPERAND, operandMap.addOperand(qualifierId.image, null));
+         varType.setProperty(VariableType.QUALIFIER_OPERAND, operandMap.addOperand(qualifierId, null));
       return varType; 
     }
 

@@ -112,6 +112,12 @@ public class OperandMap
 	        throw new ExpressionException("Duplicate Operand name \"" + name + "\" encountered");
 	}
 
+    public void duplicateOperandCheck(QualifiedName qname)
+    {
+        if (operandMap.containsKey(qname))
+            throw new ExpressionException("Duplicate Operand name \"" + qname.toString() + "\" encountered");
+    }
+
     /**
      * Add new Variable operand of specified name, unless it already exists
      * @param name Name of new Opernand
@@ -167,8 +173,8 @@ public class OperandMap
     {
 		if (operand.getName().isEmpty())
 			throw new ExpressionException("addOperand() passed annonymous object");
-		duplicateOperandCheck(operand.getName());
 		QualifiedName qname = operand.getQualifiedName();
+        duplicateOperandCheck(qname);
 		operandMap.put(qname, operand);
         nameSet.add(qname.getName());
     }
@@ -180,10 +186,24 @@ public class OperandMap
 	 */
 	public boolean hasOperand(String name)
 	{
-        if (!nameSet.contains(name) ||
-            !operandMap.containsKey(QualifiedName.parseName(name, qualifiedContextname)))
-                return false;
-		return true;
+        if (!nameSet.contains(name)) 
+            return false;
+        QualifiedName qname = QualifiedName.parseName(name, qualifiedContextname);
+        if (operandMap.containsKey(qname))
+            return true;
+        if (!qname.getTemplate().isEmpty())
+        {
+            qname.clearTemplate();
+            if (operandMap.containsKey(qname))
+                return true;
+        }
+        if (!qname.getScope().isEmpty())
+        {
+            qname.clearScope();
+            if (operandMap.containsKey(qname))
+                return true;
+        }
+		return false;
 	}
 
 	/**

@@ -98,23 +98,23 @@ public class ScopeQueryParserTest
 	static final String GREEK_CONSTRUCTION =
 	
 	    QueryExecuterTest.GREEK_CONSTRUCTION + 
-		"template charge(city,  charge);\n" +
 		"template customer(name, city);\n" +
+        "template charge(city = customer.city,  charge);\n" +
 		"template account(name ? customer.name == name, fee);\n" +
 		"template delivery(city ? charge.city == city, freight);\n" +
 		"scope greek_construction\n" +
 	    "{\n" +
-	    "  query greek_business(charge:charge, customer:customer)\n" + 
+	    "  query greek_business(customer:customer, charge:charge)\n" + 
 		"  >> (fee:account) >> (freight:delivery);" +
 		"}\n"
 	;
 
 	static final String[] FEE_AND_FREIGHT =
 	{
+        "account(name = Marathon Marble, fee = 61)",
+        "delivery(city = Sparta, freight = 16)",
 		"account(name = Acropolis Construction, fee = 47)",
 		"delivery(city = Athens, freight = 5)",
-		"account(name = Marathon Marble, fee = 61)",
-		"delivery(city = Sparta, freight = 16)",
 		"account(name = Agora Imports, fee = 49)",
 		"delivery(city = Sparta, freight = 16)",
 		"account(name = Spiros Theodolites, fee = 57)",
@@ -498,6 +498,8 @@ public class ScopeQueryParserTest
 			@Override
 			public boolean onSolution(Solution solution) 
 			{
+			    //System.out.println(solution.getAxiom("account").toString());
+			    //System.out.println(solution.getAxiom("delivery").toString());
 				assertThat(solution.getAxiom("account").toString()).isEqualTo(FEE_AND_FREIGHT[index++]);
 				assertThat(solution.getAxiom("delivery").toString()).isEqualTo(FEE_AND_FREIGHT[index++]);
 				return true;

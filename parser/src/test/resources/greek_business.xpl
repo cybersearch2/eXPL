@@ -1,5 +1,5 @@
 axiom charge: 
-  ("Athens", 23),
+  ( "Athens", 23),
   ( "Sparta", 13),
   ( "Milos", 17);
   
@@ -9,6 +9,6 @@ axiom customer:
   ("Agora Imports", "Sparta"),
   ("Spiros Theodolites", "Milos");
   
-template charge(city, fee);  
+template charge(city = customer.city, fee);  
 template customer(name, city);
   

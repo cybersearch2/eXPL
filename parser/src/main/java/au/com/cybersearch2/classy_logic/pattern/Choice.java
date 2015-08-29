@@ -68,7 +68,17 @@ public class Choice
 		variableList = new ArrayList<Operand>();
 		termNameList = choiceAxiomSource.getAxiomTermNameList();
 	    for (String termName: termNameList)
-	    	variableList.add(parserAssembler.getOperandMap().get(QualifiedName.parseGlobalName(termName)));
+	    {
+	        QualifiedName qualifiedTermName = new QualifiedName(scope.getAlias(), name, termName);
+	        Operand operand = parserAssembler.getOperandMap().get(qualifiedTermName);
+	        if (operand == null)
+	        {
+	            qualifiedTermName.clearTemplate();
+	            // Variables are placed in global scope
+	            operand = parserAssembler.getOperandMap().get(qualifiedTermName);
+	        }
+	    	variableList.add(operand);
+	    }
 	}
 
 	/**
@@ -121,7 +131,7 @@ public class Choice
 			solutionTemplate.addTerm(operand);
 			++index;
 		}
-		solution.put(template.getQualifiedName(), solutionTemplate.toAxiom());
+		solution.put(template.getQualifiedName().toString(), solutionTemplate.toAxiom());
 		return true;
 	}
 }

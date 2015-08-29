@@ -241,9 +241,14 @@ public class Scope
     {
         QualifiedName qname = QualifiedName.parseName(axiomKey, parserAssembler.getOperandMap().getQualifiedContextname());
         AxiomSource axiomSource = parserAssembler.getAxiomSource(qname);
+        if ((axiomSource == null) && !qname.getTemplate().isEmpty())
+        {
+            qname.clearTemplate();
+            axiomSource = parserAssembler.getAxiomSource(qname);
+        }
         if ((axiomSource == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
         {
-            qname.clearScope();
+            qname = QualifiedName.parseGlobalName(axiomKey);
             axiomSource = getGlobalParserAssembler().getAxiomSource(qname);
         }
         return axiomSource;
@@ -269,10 +274,9 @@ public class Scope
      */
     public Template findTemplate(String templateName)
     {
-        String scopeName = name.equals(QueryProgram.GLOBAL_SCOPE) ? QualifiedName.EMPTY : name;
-        QualifiedName qualifiedTemplateName = new QualifiedName(scopeName, templateName, QualifiedName.EMPTY);
+        QualifiedName qualifiedTemplateName = new QualifiedName(getAlias(), templateName, QualifiedName.EMPTY);
         Template template = parserAssembler.getTemplate(qualifiedTemplateName);
-        if ((template == null) && !scopeName.isEmpty())
+        if ((template == null) && !qualifiedTemplateName.getScope().isEmpty())
         {
             qualifiedTemplateName = new QualifiedName(QualifiedName.EMPTY, templateName, QualifiedName.EMPTY);
             template = getGlobalParserAssembler().getTemplate(qualifiedTemplateName);

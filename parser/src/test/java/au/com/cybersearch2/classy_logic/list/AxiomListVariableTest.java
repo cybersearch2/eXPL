@@ -76,7 +76,7 @@ public class AxiomListVariableTest
 		when(axiomList.hasItem(5)).thenReturn(false, true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "0");
-		assertThat(variable.getName()).isEqualTo(NAME + ".5.0");
+		assertThat(variable.getName()).isEqualTo(NAME + "_5_0");
 		assertThat(variable.axiomIndex).isEqualTo(5);
 		assertThat(variable.isEmpty()).isTrue();
 		AxiomTermListVariable axiomTermListVariable = mock(AxiomTermListVariable.class);
@@ -104,7 +104,7 @@ public class AxiomListVariableTest
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "0");
-		assertThat(variable.getName()).isEqualTo(NAME + ".5.0");
+		assertThat(variable.getName()).isEqualTo(NAME + "_5_0");
 		assertThat(variable.axiomIndex).isEqualTo(5);
 		assertThat(variable.isEmpty()).isTrue();
 		AxiomTermListVariable axiomTermListVariable = mock(AxiomTermListVariable.class);
@@ -139,7 +139,7 @@ public class AxiomListVariableTest
 		IntegerOperand x = new TestIntegerOperand("x", Integer.valueOf(5));
 		Operand indexExpression = new TestEvaluator("y ", x, "++", null);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, indexExpression, "0");
-		assertThat(variable.getName()).isEqualTo(NAME + ".index.0");
+		assertThat(variable.getName()).isEqualTo(NAME + "_index_0");
 		assertThat(variable.axiomIndex).isEqualTo(-1);
 		assertThat(variable.isEmpty()).isTrue();
 		AxiomTermListVariable axiomTermListVariable = mock(AxiomTermListVariable.class);
@@ -171,7 +171,7 @@ public class AxiomListVariableTest
 		IntegerOperand x = new TestIntegerOperand("x", Integer.valueOf(5));
 		Operand axiomExpression = new TestEvaluator("y ", x, "++", null);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, axiomExpression, "item");
-		assertThat(variable.getName()).isEqualTo(NAME + ".index.item");
+		assertThat(variable.getName()).isEqualTo(NAME + "_index_item");
 		assertThat(variable.axiomIndex).isEqualTo(-1);
 		assertThat(variable.isEmpty()).isTrue();
 		AxiomTermListVariable axiomTermListVariable = mock(AxiomTermListVariable.class);
@@ -204,7 +204,7 @@ public class AxiomListVariableTest
 		when(axiomList.hasItem(5)).thenReturn(true);
 		when(axiomList.getItem(5)).thenReturn(axiomTermList);
 		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "item");
-		assertThat(variable.getName()).isEqualTo(NAME + ".5.item");
+		assertThat(variable.getName()).isEqualTo(NAME + "_5_item");
 		assertThat(variable.axiomIndex).isEqualTo(5);
 		assertThat(variable.isEmpty()).isTrue();
 		AxiomTermListVariable axiomTermListVariable = mock(AxiomTermListVariable.class);
@@ -363,7 +363,7 @@ public class AxiomListVariableTest
 		when(axiomTermList.newVariableInstance(isA(Operand.class), isA(String.class), eq(1))).thenReturn(axiomTermListVariable);
 		variable.setTermExpression(termExpression, 1);
 		assertThat(variable.isEmpty()).isTrue();
-		assertThat(variable.toString()).isEqualTo(NAME + ".5.item = <empty>");
+		assertThat(variable.toString()).isEqualTo(NAME + "_5_item = <empty>");
 		assertThat(variable.getValue()).isInstanceOf(Null.class);
 		assertThat(variable.getLeftOperand()).isEqualTo(axiomTermListVariable);
 		assertThat(variable.getRightOperand()).isNull();
@@ -385,7 +385,7 @@ public class AxiomListVariableTest
 		Operand termExpression = new TestEvaluator("b ", a, "++", null);
 		variable.setTermExpression(termExpression, 0);
 		assertThat(variable.isEmpty()).isTrue();
-		assertThat(variable.toString()).isEqualTo(NAME + ".index.item = <empty>");
+		assertThat(variable.toString()).isEqualTo(NAME + "_index_item = <empty>");
 		assertThat(variable.getValue()).isInstanceOf(Null.class);
 		assertThat(variable.getLeftOperand()).isNull();
 		assertThat(variable.getRightOperand()).isNull();

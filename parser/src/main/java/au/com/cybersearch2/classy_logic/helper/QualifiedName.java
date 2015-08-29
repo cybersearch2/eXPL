@@ -196,10 +196,10 @@ public class QualifiedName implements Comparable<QualifiedName>
         return qname;
     }
 
-    public boolean inSameSpace(String text)
+    public boolean inSameSpace(QualifiedName qname)
     {
-        // If in template context, assume 2-part name is template name
-        QualifiedName qname = template.isEmpty() ? parseName(text) : parseGlobalName(text);
+        if (qname == null)
+            throw new IllegalArgumentException("Parameter qname is null");
         // Unqualified name is always in same space
         if (qname.scope.isEmpty() && qname.template.isEmpty())
             return true;

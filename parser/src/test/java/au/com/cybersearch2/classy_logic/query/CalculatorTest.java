@@ -103,12 +103,13 @@ public class CalculatorTest
         when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
         when(template.getKey()).thenReturn(KEY);
         when(template.getName()).thenReturn(TEMPLATE_NAME);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(TEMPLATE_NAME));
         Axiom axiom = mock(Axiom.class);
         when(axiom.getName()).thenReturn(TEMPLATE_NAME);
         when(template.toAxiom()).thenReturn(axiom);
         when(template.getId()).thenReturn(1);
         assertThat(calculator.completeSolution(solution, template)).isTrue();
-        verify(solution).put(QualifiedName.parseTemplateName(TEMPLATE_NAME), axiom);
+        verify(solution).put(TEMPLATE_NAME, axiom);
        
 	}
 	
@@ -179,6 +180,7 @@ public class CalculatorTest
         when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
         when(template.getKey()).thenReturn(KEY);
         when(template.getName()).thenReturn(TEMPLATE_NAME);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(TEMPLATE_NAME));
         Axiom axiom = mock(Axiom.class);
         when(axiom.getName()).thenReturn(KEY);
         when(axiom.unifyTemplate(template, solution)).thenReturn(true);
@@ -187,7 +189,7 @@ public class CalculatorTest
         when(template.toAxiom()).thenReturn(solutionAxiom);
         when(template.getId()).thenReturn(1);
         calculator.execute(axiom, template, solution);
-        verify(solution).put(QualifiedName.parseTemplateName(TEMPLATE_NAME), solutionAxiom);
+        verify(solution).put(TEMPLATE_NAME, solutionAxiom);
 	}
 	
 	@Test
@@ -213,6 +215,7 @@ public class CalculatorTest
         when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
         when(template.getKey()).thenReturn(KEY);
         when(template.getName()).thenReturn(TEMPLATE_NAME);
+        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(TEMPLATE_NAME));
 		OperandWalker walker = mock(OperandWalker.class);
 		when(walker.visitAllNodes(pairer)).thenReturn(true);
 		when(template.getOperandWalker()).thenReturn(walker);
@@ -221,7 +224,7 @@ public class CalculatorTest
         when(template.toAxiom()).thenReturn(solutionAxiom);
         when(template.getId()).thenReturn(1);
         calculator.execute(template, solution);
-        verify(solution).put(QualifiedName.parseTemplateName(TEMPLATE_NAME), solutionAxiom);
+        verify(solution).put(TEMPLATE_NAME, solutionAxiom);
 	}
 	
     @Test
@@ -245,7 +248,7 @@ public class CalculatorTest
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
-        assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n = 3, loop = true, limit = 3)");
+        assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n = 3, limit = 3)");
 	}
     
     @Test
@@ -272,7 +275,7 @@ public class CalculatorTest
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
-        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n = 4, factorial = 24, i = 5, loop = true)");
+        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n = 4, factorial = 24, i = 5)");
 	}
 
     @Test
