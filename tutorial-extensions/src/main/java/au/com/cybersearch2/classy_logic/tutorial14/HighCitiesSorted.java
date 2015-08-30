@@ -24,6 +24,7 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -93,7 +94,7 @@ public class HighCitiesSorted
 	{
 		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities");
-		return result.getIterator("city_list");
+		return result.getIterator(QualifiedName.parseGlobalName("city_list"));
 	}
 
 	public static void main(String[] args) throws SQLException

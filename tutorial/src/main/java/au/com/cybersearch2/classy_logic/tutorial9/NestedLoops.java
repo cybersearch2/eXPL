@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.tutorial9;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -61,7 +62,7 @@ public class NestedLoops
 	{
 		QueryProgram queryProgram = new QueryProgram(INSERT_SORT);
 		Result result = queryProgram.executeQuery("sort_axiom");
-		Axiom axiom = result.getAxiom("sorted");
+		Axiom axiom = result.getAxiom(QualifiedName.parseGlobalName("sorted"));
 		System.out.println(axiom.toString());
 	}
 

@@ -188,7 +188,7 @@ public class QueryProgram extends QueryLauncher
 		Scope scope = queryParams.getScope();
 		ScopeContext scopeContext = scope.getContext(false);
 		Map<QualifiedName, Iterable<Axiom>> listMap = null;
-		Map<String, Axiom> axiomMap = null;
+		Map<QualifiedName, Axiom> axiomMap = null;
 		try
 		{
 		    launch(queryParams);

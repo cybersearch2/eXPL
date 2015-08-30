@@ -20,6 +20,7 @@ import java.util.Iterator;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -83,7 +84,7 @@ public class HighCitiesSorted
 	{
 		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities");
-		Iterator<Axiom> iterator = result.getIterator("city_list");
+		Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("city_list"));
         while(iterator.hasNext())
 		    System.out.println(iterator.next().toString());
 	}

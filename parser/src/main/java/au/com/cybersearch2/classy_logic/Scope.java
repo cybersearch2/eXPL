@@ -357,16 +357,16 @@ public class Scope
 		return listMap;
 	}
 
-    public Map<String, Axiom> getAxiomMap()
+    public Map<QualifiedName, Axiom> getAxiomMap()
     {
-        Map<String, Axiom> axiomMap = new HashMap<String, Axiom>();
+        Map<QualifiedName, Axiom> axiomMap = new HashMap<QualifiedName, Axiom>();
         if (!name.equals(QueryProgram.GLOBAL_SCOPE))
         {
-            getGlobalParserAssembler().getOperandMap().copyAxioms("", axiomMap);
-            parserAssembler.getOperandMap().copyAxioms(name, axiomMap);
+            getGlobalParserAssembler().getOperandMap().copyAxioms(axiomMap);
+            parserAssembler.getOperandMap().copyAxioms(axiomMap);
         }
         else
-            parserAssembler.getOperandMap().copyAxioms("", axiomMap);
+            parserAssembler.getOperandMap().copyAxioms(axiomMap);
         return axiomMap;
     }
 

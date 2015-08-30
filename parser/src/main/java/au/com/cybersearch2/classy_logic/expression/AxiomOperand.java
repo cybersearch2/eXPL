@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -35,15 +36,17 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
 {
     protected String axiomKey;
     protected ParameterList<AxiomList> parameterList;
+    protected AxiomListListener axiomListListener;
     
     /**
      * Axiom Variable
      * @param qname Qualified name
      */
-    public AxiomOperand(QualifiedName qname, String axiomKey) 
+    public AxiomOperand(QualifiedName qname, String axiomKey, AxiomListListener axiomListListener) 
     {
         super(qname);
         this.axiomKey = axiomKey;
+        this.axiomListListener = axiomListListener;
     }
 
     /**
@@ -51,10 +54,11 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
      * @param qname Qualified name
      * @param value
      */
-    public AxiomOperand(QualifiedName qname, AxiomList value) 
+    public AxiomOperand(QualifiedName qname, AxiomList value, AxiomListListener axiomListListener) 
     {
         super(qname, value);
         axiomKey = value.getKey();
+        this.axiomListListener = axiomListListener;
     }
 
     /**
@@ -62,10 +66,11 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
      * @param qname Qualified name
      * @param expression Operand which evaluates value
      */
-    public AxiomOperand(QualifiedName qname, String axiomKey, Operand expression) 
+    public AxiomOperand(QualifiedName qname, String axiomKey, Operand expression, AxiomListListener axiomListListener) 
     {
         super(qname, expression);
         this.axiomKey = axiomKey;
+        this.axiomListListener = axiomListListener;
     }
 
     /**
@@ -73,11 +78,12 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
      * @param qname Qualified name
      * @param expression Operand which evaluates value
      */
-    public AxiomOperand(QualifiedName qname, String axiomKey, ParameterList<AxiomList> parameterList) 
+    public AxiomOperand(QualifiedName qname, String axiomKey, ParameterList<AxiomList> parameterList, AxiomListListener axiomListListener) 
     {
         super(qname, parameterList.getParameters());
         this.axiomKey = axiomKey;
         this.parameterList = parameterList;
+        this.axiomListListener = axiomListListener;
     }
 
     /**
@@ -90,6 +96,7 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     {
         AxiomList axiomList = (AxiomList)value;
         setValue(axiomList);
+        axiomListListener.addAxiomList(qname, axiomList);
     }
 
     /**
@@ -166,9 +173,15 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
                 setValue(parameterList.evaluate());
                 // Do not set id as the change is permanent unlees
                 // a subsequent evaluation overrides this initialisation
+                axiomListListener.addAxiomList(qname, getValue());
             }
             else 
+            {
+                boolean firstTime = empty;
                 status = super.evaluate(id);
+                if (firstTime && !empty)
+                    axiomListListener.addAxiomList(qname, getValue());
+            }
             if (isEmpty())
                 // If an error occurs populate with an empty list for graceful handling
                 setValue(new AxiomList(qname, axiomKey));

@@ -347,7 +347,7 @@ public class ScopeQueryParserTest
         //      return true;
         //  }});
         Result result = queryProgram.executeQuery("german.group_query");
-        Iterator<Axiom> iterator = result.getIterator("german.city_group_list");
+        Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseName("german.city_group_list"));
         File worldCurrencyList = new File("src/test/resources", "cities-group.lst");
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(worldCurrencyList), "UTF-8"));
         while(iterator.hasNext())

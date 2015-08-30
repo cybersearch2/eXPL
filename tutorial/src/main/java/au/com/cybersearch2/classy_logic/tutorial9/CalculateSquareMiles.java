@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
@@ -45,15 +46,14 @@ public class CalculateSquareMiles
 		    "  >> calc(km2_to_mi2);";
 
 	public CalculateSquareMiles()
-	{
-		new DI(new QueryParserModule()).validate();
+	{		new DI(new QueryParserModule()).validate();
 	}
 	
 	public Iterator<Axiom> getSurfaceAreas()
 	{
 		QueryProgram queryProgram = new QueryProgram(COUNTRY_SURFACE_AREA);
 		Result result = queryProgram.executeQuery("surface_area_mi2");
-		return  result.getIterator("surface_area");
+		return  result.getIterator(QualifiedName.parseGlobalName("km2_to_mi2.surface_area"));
 	}
 
 	public static void main(String[] args)

@@ -23,6 +23,7 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -93,7 +94,7 @@ public class IncreasedAgriculture
 			}});
 		QueryProgram queryProgram2 = new QueryProgram(AGRI_10_YEAR);
 		Result result = queryProgram2.executeQuery("increased_query");
-		return result.getIterator("increased_list");
+		return result.getIterator(QualifiedName.parseGlobalName("increased_list"));
 	}
 
 	/**

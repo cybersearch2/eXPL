@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyinject.DI;
@@ -73,7 +74,7 @@ public class MultiCurrency
 		//		return true;
 		//	}});
 		Result result = queryProgram.executeQuery("price_query");
-		return result.getIterator("world_list");
+		return result.getIterator(QualifiedName.parseGlobalName("world_list"));
 	}
 	
     /**

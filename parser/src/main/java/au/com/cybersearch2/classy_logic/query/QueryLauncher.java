@@ -87,17 +87,12 @@ public class QueryLauncher
     {   // Calculator uses a single template
         Template calculatorTemplate = getCalculatorTemplate(scope, chainQuerySpec);
         Axiom calculatorAxiom = null;
-        if (calculatorTemplate.isChoice())
-            calculatorAxiom = getCalculatorAxiom(scope, chainQuerySpec);
-        if (calculatorAxiom == null)
+        Map<String, Object> properties = queryParams.getProperties(calculatorTemplate.getName());
+        if (properties != null)
         {
-            Map<String, Object> properties = queryParams.getProperties(calculatorTemplate.getName());
-            if (properties != null)
-            {
-                calculatorAxiom = new Axiom(calculatorTemplate.getName());
-                for (Map.Entry<String, Object> entry: properties.entrySet())
-                    calculatorAxiom.addTerm(new Parameter(entry.getKey(), entry.getValue()));
-            }
+            calculatorAxiom = new Axiom(calculatorTemplate.getName());
+            for (Map.Entry<String, Object> entry: properties.entrySet())
+                calculatorAxiom.addTerm(new Parameter(entry.getKey(), entry.getValue()));
         }
         headQuery.chainCalculator(calculatorAxiom, calculatorTemplate);
     }

@@ -32,6 +32,7 @@ import au.com.cybersearch2.classy_logic.expression.ParameterList;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -118,11 +119,13 @@ public class VariableType
 				(expression.isEmpty() || (expression instanceof Evaluator));
 		Operand operand = null;
         String axiomKey = null;
+        AxiomListListener axiomListListener = null;
         if (operandType == OperandType.AXIOM || operandType == OperandType.LIST || operandType == OperandType.TERM)
         {
             getPropertyString(AXIOM_KEY);
             if (axiomKey == null)
                 axiomKey = qname.getName();
+            axiomListListener = axiomListListener(parserAssembler.getOperandMap());
         }
 	    switch (operandType)
 	    {
@@ -147,16 +150,15 @@ public class VariableType
             hasExpression = true;
             break;
         case AXIOM:
-            operand = !hasExpression ? new AxiomOperand(qname, axiomKey) : new AxiomOperand(qname, axiomKey, expression);
-            //parserAssembler.addAxiomOperand(operand.getQualifiedName());
+            operand = !hasExpression ? 
+                          new AxiomOperand(qname, axiomKey, axiomListListener) : 
+                          new AxiomOperand(qname, axiomKey, expression, axiomListListener);
             break;
         case LIST:
             // Expression is an initializer list 
             ParameterList<AxiomList> parameterList = new ParameterList<AxiomList>(expression, axiomListGenerator(qname, axiomKey));
-            expression = new AxiomOperand(qname, axiomKey, parameterList);
-             operand = !hasExpression ? new AxiomOperand(qname, axiomKey) : new AxiomOperand(qname, axiomKey, parameterList);
-            //parserAssembler.addAxiomOperand(operand.getQualifiedName());
-             hasExpression = true;
+            operand = new AxiomOperand(qname, axiomKey, parameterList, axiomListListener);
+            hasExpression = true;
             break;
         case CURRENCY:
         	operand = !hasExpression ? 
@@ -309,4 +311,16 @@ public class VariableType
         };
     }
 
+    protected AxiomListListener axiomListListener(final OperandMap operandMap)
+    {
+        return new AxiomListListener(){
+
+            @Override
+            public void addAxiomList(QualifiedName qname, AxiomList axiomList)
+            {
+                if (operandMap.getItemList(qname) == null)
+                    operandMap.addItemList(qname, axiomList);
+            }
+        };
+    }
 }

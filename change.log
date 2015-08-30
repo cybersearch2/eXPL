@@ -51,6 +51,7 @@ eXPL v1.12
 48. Update AxiomUtils.marshallAxiomTerms() to copy each term value to Parameter to make it immutable
 49. ParserAssembler getQueryOperand() method split off from getCallOperand() as function and query invocations are now different
 50. Allow an AxiomTermList object to be assigned to an AxiomListVariable object
+51. Add AxiomListListener interface to AxiomOperand to add AxiomLists to query results
 
 
 

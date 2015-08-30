@@ -21,7 +21,6 @@ import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
-import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
@@ -129,8 +128,6 @@ public class ParserAssembler implements LocaleListener
 	protected Map<QualifiedName, Axiom> scopeAxiomMap;
 	/** Axioms used as parameters */
 	protected List<QualifiedName> parameterList;
-    /** Axiom Operands */
-    protected List<QualifiedName> axiomOperandList;
 
 	/** Axiom provider connects to persistence back end */
 	ExternalAxiomSource externalAxiomSource;
@@ -153,7 +150,6 @@ public class ParserAssembler implements LocaleListener
 	    axiomResourceMap = new HashMap<QualifiedName, String>();
 	    localeListenerList = new ArrayList<LocaleListener>();
 	    parameterList = new ArrayList<QualifiedName>();
-	    axiomOperandList = new ArrayList<QualifiedName>(); 
 	}
 	
 	/**
@@ -197,7 +193,6 @@ public class ParserAssembler implements LocaleListener
 		axiomListenerMap.putAll(parserAssembler.getAxiomListenerMap());
 		axiomResourceMap.putAll(parserAssembler.axiomResourceMap);
 		parameterList.addAll(parserAssembler.parameterList);
-		axiomOperandList.addAll(parserAssembler.axiomOperandList);
 	}
 
 	/**
@@ -902,35 +897,15 @@ public class ParserAssembler implements LocaleListener
             return operandMap.setListVariable(itemList, index, expression);
         return newListVariableInstance(listName, index, expression);
     }
-/*
-    public void addAxiomOperand(String axiomOperandName)
-    {
-        axiomOperandList.add(axiomOperandName);
-    }
 
-    public List<String> getAxiomOperandList()
-    {
-        return axiomOperandList;
-    }
-*/ 
     /**
      * Copy result axiom lists as iterables to supplied container
      * @param listMap2 Container to receive lists
      */
     public void copyLists(Map<QualifiedName, Iterable<Axiom>> listMap) 
     {
-        String prefix = scope.getName().equals(QueryProgram.GLOBAL_SCOPE) ? "" : scope.getName();
         operandMap.copyLists(listMap);    
-        for (QualifiedName qname: axiomOperandList)
-        {
-            Operand axiomOperand = operandMap.get(qname);
-            if ((axiomOperand != null) && !axiomOperand.isEmpty() && (axiomOperand.getValueClass() == AxiomList.class))
-            {
-                AxiomList axiomList = (AxiomList) axiomOperand.getValue();
-                AxiomUtils.copyList(qname, axiomList, listMap);
-            }
-        }
-        if (!prefix.isEmpty())
+        if (!scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
             scope.getGlobalParserAssembler().copyLists(listMap);
     }
 

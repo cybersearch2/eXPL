@@ -246,7 +246,7 @@ public class OperandMap
 	 */
 	public void addItemList(QualifiedName qname, ItemList<?> itemList)
 	{
-		if ((operandMap.get(qname) != null) || listMap.containsKey(qname))
+		if (listMap.containsKey(qname))
 			throw new ExpressionException("ItemList name \"" + qname.toString() + "\" clashes with existing Operand");
 		listMap.put(qname, itemList);
 	}
@@ -417,13 +417,10 @@ public class OperandMap
 
     /**
      * Copy result axioms to supplied container
-     * @param prefix Scope name or empty if global scope
-     * @param listMap2 Container to receive lists
+     * @param listMap2 Container to receive axioms
      */
-    public void copyAxioms(String prefix, Map<String, Axiom> axiomMap)
+    public void copyAxioms(Map<QualifiedName, Axiom> axiomMap)
     {
-        if (prefix == null)
-            prefix = "";
         for (Entry<QualifiedName, ItemList<?>> entry: listMap.entrySet())
         {
             ItemList<?> itemList = entry.getValue();
@@ -447,8 +444,7 @@ public class OperandMap
             if (axiom != null)
             {
                 // Use fully qualified key to avoid name collisions
-                String key = prefix.isEmpty() ? entry.getKey().getName() : (prefix + "_" + entry.getKey().getName());
-                axiomMap.put(key, axiom);
+                axiomMap.put(itemList.getQualifiedName(), axiom);
             }
         }
     }
