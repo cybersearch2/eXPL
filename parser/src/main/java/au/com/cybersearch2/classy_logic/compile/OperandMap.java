@@ -35,7 +35,9 @@ import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 
 /**
  * OperandMap
- * Operand and ItemList container. Items are referenced by name. 
+ * Operand and ItemList container. 
+ * Items are referenced by qualified name. 
+ * Provides a context qualified name for creation of intem qualified names
  * @author Andrew Bowley
  *
  * @since 19/10/2010
@@ -48,11 +50,12 @@ public class OperandMap
     protected Set<String> nameSet;
     /** Tree Map of item lists, which create instances of variables, some of which need to be added to the operand map */
 	protected Map<QualifiedName, ItemList<?>> listMap;
-    /** Qualified name of operand context */
+    /** Qualified name of enclosing scope/template context */
     protected QualifiedName qualifiedContextname;
     
 	/**
-	 * Construct OperandMap object
+	 * Construct OperandMap object.
+	 * @param qualifiedContextname Qualified name of the enclosing scope
 	 */
 	public OperandMap(QualifiedName qualifiedContextname)
 	{
@@ -62,11 +65,19 @@ public class OperandMap
 		this.qualifiedContextname = qualifiedContextname;
 	}
 
+	/**
+	 * Returns qualified name of enclosing scope/template
+	 * @return QualifiedName ovject 
+	 */
 	public QualifiedName getQualifiedContextname()
     {
         return qualifiedContextname;
     }
 
+	/**
+	 * Set qualified name of enclosing scope/template context  
+	 * @param qualifiedContextname
+	 */
     public void setQualifiedContextname(QualifiedName qualifiedContextname)
     {
         this.qualifiedContextname = qualifiedContextname;
@@ -106,12 +117,23 @@ public class OperandMap
 		}
 	}
 
+	/**
+	 * Throws exception for 'Duplicate Operand name' if operand name is a duplicat
+	 * @param name Name of operand in text format
+	 * @see hasOperand(java.lang.String)
+     * @throws ExpressionException
+	 */
 	public void duplicateOperandCheck(String name)
 	{
 	    if (hasOperand(name))
 	        throw new ExpressionException("Duplicate Operand name \"" + name + "\" encountered");
 	}
 
+	/**
+     * Throws exception for 'Duplicate Operand name' if operand name is a duplicat
+     * @param qname Qulaified name of operand
+     * @throws ExpressionException
+	 */
     public void duplicateOperandCheck(QualifiedName qname)
     {
         if (operandMap.containsKey(qname))
@@ -168,6 +190,7 @@ public class OperandMap
 	 * Add supplied operand to map. Assumes operand is not annonymous.
 	 * Note this will replace an existing operand with the same name
 	 * @param operand Operand object
+	 * @throws ExpressionException
 	 */
 	public void addOperand(Operand operand)
     {
@@ -432,6 +455,7 @@ public class OperandMap
 
 	/**
 	 * Clear result lists
+	 * @param listNames List of qualified list names
 	 */
 	public void clearLists(List<QualifiedName> listNames) 
 	{
@@ -476,11 +500,7 @@ public class OperandMap
      * Returns a list variable for a term in an axiom in a axiom list. 
      * Both the axiom and the term are referenced by index.
      * There is only one variable instance for any specific index combination.
-     * @param axiomList The owner list
-     * @param name List name
-     * @param axiomIndex int
-     * @param termIndex int
-     * @param suffix To append to name
+     * @param axiomListSpec AxiomList data, includine The owner list, list name and indexes
      * @return AxiomListVariable object
      */
     protected AxiomListVariable getListVariable(AxiomListSpec axiomListSpec) 

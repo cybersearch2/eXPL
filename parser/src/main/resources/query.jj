@@ -87,7 +87,6 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
  */
 public class QueryParser 
 {
-  static int INNER_TEMPLATE = -1;
   
   /** 
    * Main entry point reads from System.in. Generates console output only. Use for validation. 

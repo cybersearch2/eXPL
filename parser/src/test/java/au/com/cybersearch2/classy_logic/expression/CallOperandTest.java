@@ -433,8 +433,7 @@ public class CallOperandTest
             ;
     static final String SORTED_CITIES = CITY_EVELATIONS +
             "// Calculator to perform insert sort on any list\n" +
-            "axiom city_list = {};\n" +
-            "calc list_sort (\n" +
+             "calc list_sort (\n" +
             "  // This calculator takes 2 parameters, an axiom list\n" +
             "  // and the name of the column to sort on\n " +
             "  sort_list,\n" +
@@ -458,8 +457,10 @@ public class CallOperandTest
             "  // Insert saved axiom in correct position\n" +
             "  sort_list[j + 1] = temp\n" +
             ");\n" +
+            "axiom city_list = {};\n" +
             "calc sort_cities(\n" +
             "  axiom sort_city = { name, altitude },\n" +
+            "  system.print(\"sort_city = \" + sort_city),\n" +
             "  city_list += sort_city,\n" +
             "  << list_sort(city_list, \"altitude\"),\n" +
              " system.print(\"Sorted cities\"),\n" +

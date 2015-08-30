@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;

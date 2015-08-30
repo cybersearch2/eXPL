@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 
 /**
  * AxiomOperand
@@ -158,11 +157,22 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     @Override
     public EvaluationStatus evaluate(int id)
     {
-        EvaluationStatus status = super.evaluate(id);
-        if (parameterList != null)
-            setValue(parameterList.evaluate());
-        else if (isEmpty())
-            setValue(new AxiomList(qname, axiomKey));
+        EvaluationStatus status = EvaluationStatus.COMPLETE;
+        if (expression != null)
+        {    
+            if (parameterList != null)
+            {   // Perform static intialisation to a list of axioms
+                status = expression.evaluate(id);
+                setValue(parameterList.evaluate());
+                // Do not set id as the change is permanent unlees
+                // a subsequent evaluation overrides this initialisation
+            }
+            else 
+                status = super.evaluate(id);
+            if (isEmpty())
+                // If an error occurs populate with an empty list for graceful handling
+                setValue(new AxiomList(qname, axiomKey));
+        } 
         return status;
     }
 
