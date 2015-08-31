@@ -313,12 +313,12 @@ public class Template extends Structure
 	}
 
     /**
-     * Exposes super addTerm()
-     * @param term Term object
+     * Add Operand term. Parameters not allowed.
+     * @param operand Operand object
      */
-    public void addTerm(Term term)
+    public void addTerm(Operand operand)
     {
-        super.addTerm(term);
+        super.addTerm(operand);
     }
 
 	/**

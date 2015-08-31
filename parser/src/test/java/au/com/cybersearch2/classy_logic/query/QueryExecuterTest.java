@@ -27,7 +27,6 @@ import java.util.Map;
 import javax.inject.Singleton;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import dagger.Module;
@@ -367,7 +366,6 @@ public class QueryExecuterTest
 	    	//System.out.println(query.toString());
 	}
 
-    // TODO - Fix this test
     @Test
 	public void test_two_ChainQuery() throws Exception
 	{
@@ -397,8 +395,8 @@ public class QueryExecuterTest
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
         QueryExecuter query = new QueryExecuter(queryParams);
-	    Evaluator expression = new TestEvaluator(new TestStringOperand("customer.name"), "!=", new TestStringOperand("name"));
-	    Evaluator nameMatch = new TestEvaluator("name", expression, "||");
+	    Evaluator expression = new TestEvaluator(new TestStringOperand("name"), "==", name);
+	    Evaluator nameMatch = new TestEvaluator("name", expression, "&&");
 	    Variable fee = new TestVariable("fee");
 	    Template account = new Template(parseTemplateName("account"), nameMatch, fee);
 	    account.setKey("fee");
@@ -415,8 +413,8 @@ public class QueryExecuterTest
 			}};
 
 	    query.chain(axiomEnsemble, Collections.singletonList(account));
-	    Evaluator expression2 = new TestEvaluator(new TestStringOperand("charge.city"), "!=", new TestStringOperand("city"));
-	    Evaluator cityMatch = new TestEvaluator("city", expression2, "||");
+	    Evaluator expression2 = new TestEvaluator(new TestStringOperand("city"), "==", city);
+	    Evaluator cityMatch = new TestEvaluator("city", expression2, "&&");
 	    Variable freight = new TestVariable("freight");
 	    Template delivery = new Template(parseTemplateName("delivery"), cityMatch, freight);
 	    delivery.setKey("freight");
@@ -424,15 +422,13 @@ public class QueryExecuterTest
        	int index = 0;
 	    while (query.execute())
 	    {
-	    	System.out.println(query.getSolution().getAxiom("account").toString());
-	    	System.out.println(query.getSolution().getAxiom("delivery").toString());
-			//assertThat(query.getSolution().getAxiom("account").toString()).isEqualTo(FEE_AND_FREIGHT[index++]);
-			//assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(FEE_AND_FREIGHT[index++]);
+	    	//System.out.println(query.getSolution().getAxiom("account").toString());
+	    	//System.out.println(query.getSolution().getAxiom("delivery").toString());
+			assertThat(query.getSolution().getAxiom("account").toString()).isEqualTo(FEE_AND_FREIGHT[index++]);
+			assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(FEE_AND_FREIGHT[index++]);
 	    }
 	}
 
-    // TODO - Fix this test
-    @Ignore
     @Test
 	public void test_two_ChainQuery_multi_Test() throws Exception
 	{
@@ -456,12 +452,15 @@ public class QueryExecuterTest
 			public boolean isEmpty() {
 				return false;
 			}};
-	    Variable city = new TestVariable("city");
-	    Variable charge = new TestVariable("charge");
-	    Variable name = new TestVariable("name");
-	    Template s1 = new Template(parseTemplateName("charge"), city, charge);
-	    s1.setKey(charges.get(0).getName());
-	    Template s2 = new Template(parseTemplateName("customer"), name, city);
+        QualifiedName chargeTemplateName = parseTemplateName("charge");
+        Variable city = new Variable(QualifiedName.parseName("city", chargeTemplateName));
+        Variable charge = new Variable(QualifiedName.parseName("charge", chargeTemplateName));
+        Template s1 = new Template(chargeTemplateName, city, charge);
+        s1.setKey(charges.get(0).getName());
+        QualifiedName customerTemplateName = parseTemplateName("customer");
+        Variable name = new Variable(QualifiedName.parseName("name", customerTemplateName));
+        Variable city2 = new Variable(QualifiedName.parseName("city", customerTemplateName));
+        Template s2 = new Template(customerTemplateName, name, city2);
 	    s2.setKey(customers.get(0).getName());
 	    List<Template> templateList = new ArrayList<Template>();
 	    templateList.add(s1);
@@ -470,27 +469,32 @@ public class QueryExecuterTest
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
         QueryExecuter query = new QueryExecuter(queryParams);
-	    Evaluator expression = new TestEvaluator(new TestStringOperand("customer.name"), "!=", new TestStringOperand("name"));
-	    Evaluator nameMatch = new TestEvaluator("name", expression, "||");
-	    Variable fee = new TestVariable("fee");
-	    Template account = new Template(parseTemplateName("account"), nameMatch, fee);
-	    account.setKey("fee");
-	    Evaluator expression2 = new TestEvaluator(new TestStringOperand("charge.city"), "!=", new TestStringOperand("city"));
-	    Evaluator cityMatch = new TestEvaluator("city", expression2, "||");
-	    Variable freight = new TestVariable("freight");
-	    Template delivery = new Template(parseTemplateName("delivery"), cityMatch, freight);
+        QualifiedName accountTemplateName = parseTemplateName("account");
+        Evaluator expression = new Evaluator(new StringOperand(QualifiedName.parseName("name", accountTemplateName)), "==", name);
+        Evaluator nameMatch = new Evaluator(QualifiedName.parseName("name", accountTemplateName), expression, "&&");
+        Variable fee = new Variable(QualifiedName.parseName("fee", accountTemplateName));
+        Template account = new Template(accountTemplateName, nameMatch, fee);
+        account.setKey("fee");
+        QualifiedName deliveryTemplateName = parseTemplateName("delivery");
+        Evaluator expression2 = new Evaluator(new StringOperand(QualifiedName.parseName("city", deliveryTemplateName)), "==", city2);
+        Evaluator cityMatch = new Evaluator(QualifiedName.parseName("city", deliveryTemplateName), expression2, "&&");
+        Variable freight = new Variable(QualifiedName.parseName("freight", deliveryTemplateName));
+        Template delivery = new Template(deliveryTemplateName, cityMatch, freight);
 	    delivery.setKey("freight");
 	    List<Template> chainTemplateList = new ArrayList<Template>(2);
 	    chainTemplateList.add(account);
 	    chainTemplateList.add(delivery);
 	    query.chain(ensemble, chainTemplateList);
-	    Template spartaOnly = new Template(parseTemplateName("sparta_only"), new Parameter("charge.city", "Sparta"));
+	    QualifiedName qualifiedChargeCityName = new QualifiedName("city", chargeTemplateName);
+	    Template spartaOnly = new Template(parseTemplateName("sparta_only"), new StringOperand(qualifiedChargeCityName, "Sparta"));
 	    spartaOnly.setKey("spartaOnly");
 	    query.chain(ensemble, Collections.singletonList(spartaOnly));
 	    //System.out.println(query.toString());
     	assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
 	    Iterator<ChainQuery> it = query.chainQueryIterator();
-	    assertThat(it.next().toString()).isEqualTo("account(name:name!=name, fee), delivery(city:city!=city, freight)");
+        //System.out.println(it.next().toString());
+	    assertThat(it.next().toString()).isEqualTo("account(name?name==name, fee), delivery(city?city==city, freight)");
+        //System.out.println(it.next().toString());
 	    assertThat(it.next().toString()).isEqualTo("sparta_only(charge.city = Sparta)");
 	    //while (it.hasNext())
 		//    System.out.println(">>" + it.next().toString());
@@ -526,7 +530,8 @@ public class QueryExecuterTest
 	    Variable city = new TestVariable("city");
 	    Variable charge = new TestVariable("charge");
 	    Variable name = new TestVariable("name");
-	    Template s1 = new Template(parseTemplateName("charge"), city, charge);
+        QualifiedName chargeTemplateName = parseTemplateName("charge");
+	    Template s1 = new Template(chargeTemplateName, city, charge);
 	    s1.setKey(charges.get(0).getName());
 	    Template s2 = new Template(parseTemplateName("customer"), name, city);
 	    s2.setKey(customers.get(0).getName());
@@ -585,8 +590,7 @@ public class QueryExecuterTest
 	    	assertThat(query.toString()).isEqualTo(CITY_NAME_HEIGHT[index++]);
 	    assertThat(query.execute()).isFalse();
     }
-    // TODO - Fix this test
-    @Ignore
+
     @Test
 	public void test_two_ChainQuery_multi_axiom_listener_Test() throws Exception
 	{
@@ -610,12 +614,15 @@ public class QueryExecuterTest
 			public boolean isEmpty() {
 				return false;
 			}};
-	    Variable city = new TestVariable("city");
-	    Variable charge = new TestVariable("charge");
-	    Variable name = new TestVariable("name");
-	    Template s1 = new Template(parseTemplateName("charge"), city, charge);
+	    QualifiedName chargeTemplateName = parseTemplateName("charge");
+	    Variable city = new Variable(QualifiedName.parseName("city", chargeTemplateName));
+	    Variable charge = new Variable(QualifiedName.parseName("charge", chargeTemplateName));
+	    Template s1 = new Template(chargeTemplateName, city, charge);
 	    s1.setKey(charges.get(0).getName());
-	    Template s2 = new Template(parseTemplateName("customer"), name, city);
+        QualifiedName customerTemplateName = parseTemplateName("customer");
+        Variable name = new Variable(QualifiedName.parseName("name", customerTemplateName));
+        Variable city2 = new Variable(QualifiedName.parseName("city", customerTemplateName));
+	    Template s2 = new Template(customerTemplateName, name, city2);
 	    s2.setKey(customers.get(0).getName());
 	    List<Template> templateList = new ArrayList<Template>();
 	    templateList.add(s1);
@@ -676,27 +683,30 @@ public class QueryExecuterTest
         QueryParams queryParams = new QueryParams(scope, querySpec);
         queryParams.initialize();
         QueryExecuter query = new QueryExecuter(queryParams);
-	    Evaluator expression = new TestEvaluator(new StringOperand(QualifiedName.parseGlobalName("customer.name")), "!=", new TestStringOperand("name"));
-	    Evaluator nameMatch = new TestEvaluator("name", expression, "||");
-	    Variable fee = new TestVariable("fee");
-	    Template account = new Template(parseTemplateName("account"), nameMatch, fee);
+        QualifiedName accountTemplateName = parseTemplateName("account");
+	    Evaluator expression = new Evaluator(new StringOperand(QualifiedName.parseName("name", accountTemplateName)), "==", name);
+	    Evaluator nameMatch = new Evaluator(QualifiedName.parseName("name", accountTemplateName), expression, "&&");
+	    Variable fee = new Variable(QualifiedName.parseName("fee", accountTemplateName));
+	    Template account = new Template(accountTemplateName, nameMatch, fee);
 	    account.setKey("fee");
-	    Evaluator expression2 = new TestEvaluator(new StringOperand(QualifiedName.parseGlobalName("charge.city")), "!=", new TestStringOperand("city"));
-	    Evaluator cityMatch = new TestEvaluator("city", expression2, "||");
-	    Variable freight = new TestVariable("freight");
-	    Template delivery = new Template(parseTemplateName("delivery"), cityMatch, freight);
+	    QualifiedName deliveryTemplateName = parseTemplateName("delivery");
+	    Evaluator expression2 = new Evaluator(new StringOperand(QualifiedName.parseName("city", deliveryTemplateName)), "==", city2);
+	    Evaluator cityMatch = new Evaluator(QualifiedName.parseName("city", deliveryTemplateName), expression2, "&&");
+	    Variable freight = new Variable(QualifiedName.parseName("freight", deliveryTemplateName));
+	    Template delivery = new Template(deliveryTemplateName, cityMatch, freight);
 	    delivery.setKey("freight");
 	    List<Template> chainTemplateList = new ArrayList<Template>(2);
 	    chainTemplateList.add(account);
 	    chainTemplateList.add(delivery);
 	    query.chain(ensemble, chainTemplateList);
-	    Template spartaOnly = new Template(parseTemplateName("sparta_only"), new StringOperand(QualifiedName.parseGlobalName("charge.city"), "Sparta"));
+        QualifiedName qualifiedChargeCityName = new QualifiedName("city", chargeTemplateName);
+	    Template spartaOnly = new Template(parseTemplateName("sparta_only"), new StringOperand(qualifiedChargeCityName, "Sparta"));
 	    spartaOnly.setKey("spartaOnly");
 	    query.chain(ensemble, Collections.singletonList(spartaOnly));
 	    //System.out.println(query.toString());
     	assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
 	    Iterator<ChainQuery> it = query.chainQueryIterator();
-	    assertThat(it.next().toString()).isEqualTo("account(name:name!=name, fee), delivery(city:city!=city, freight)");
+	    assertThat(it.next().toString()).isEqualTo("account(name?name==name, fee), delivery(city?city==city, freight)");
 	    assertThat(it.next().toString()).isEqualTo("sparta_only(charge.city = Sparta)");
 	    //while (it.hasNext())
 		//    System.out.println(">>" + it.next().toString());

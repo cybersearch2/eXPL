@@ -29,11 +29,11 @@ public interface UnificationPairer extends OperandVisitor
 	/**
 	 * Process two terms, matched by name or list order, according to their status.
 	 * Both terms will be added the internal pair list if the first term is empty. 
-	 * @param term Term belonging to a Template 
+	 * @param operand Operand term belonging to a Template 
 	 * @param otherTerm Term belonging to an Axiom - must be non-empty
 	 * @return Flag set true unless exit condition detected, which depends on implementation
 	 */
-	boolean pairTerms(Term term, Term otherTerm);
+	boolean pairTerms(Operand operand, Term otherTerm);
 	
 	/**
 	 * Returns list of Term pairs to be unified

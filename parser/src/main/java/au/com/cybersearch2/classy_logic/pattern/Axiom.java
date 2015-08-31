@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
@@ -132,11 +134,11 @@ public class Axiom extends Structure
 		Set<String> keySet = solution.keySet();
 		List<TermPair> pairList = new ArrayList<TermPair>(termList != null ? termList.size() : other.termList.size());
 		OperandWalker walker = new OperandWalker(other.termList);
-		// Ensure term list is not null. When the list is empty, unification will be restricted to solution only.
-		if (termList != null)
+		// If term list is not empty, unification will be restricted to solution only.
+		if (!termList.isEmpty())
 		{
 			if (axiomPairer == null)
-				axiomPairer = new AxiomPairer(this);
+				axiomPairer = new AxiomPairer(this, other.getQualifiedName());
 			else
 				axiomPairer.reset();
 			if (pairByPosition)
@@ -145,19 +147,21 @@ public class Axiom extends Structure
 				for (Term templateTerm: other.termList)
 				{   // Match by position
 					Term axiomTerm = getTermByIndex(index++);
-					if (index <= getTermCount())
-					{
-						if (!axiomPairer.pairTerms(templateTerm, axiomTerm))
-							return false;
-						KeyName keyName = axiomPairer.parseKeyName(templateTerm.getName());
-						String templateName = keyName.getTemplateName();
-						if (axiomTerm.getName().isEmpty() && !templateName.isEmpty())
-						{   // Name axiom term for Operand navigation
-							axiomTerm.setName(templateName);
-							termMap.put(templateName.toUpperCase(), axiomTerm);
-						}
+					if (index > getTermCount())
+					    break;
+                    if (!axiomTerm.getName().isEmpty())
+                        continue;
+					if (!axiomPairer.pairTerms((Operand)templateTerm, axiomTerm))
+						return false;
+					QualifiedName qname = ((Operand)templateTerm).getQualifiedName();
+					boolean isLocalTerm = qname.getTemplate() == other.getQualifiedName().getTemplate();
+					if (isLocalTerm && !qname.getName().isEmpty())
+					{   // Name axiom term for Operand navigation
+						axiomTerm.setName(qname.getName());
+						termMap.put(qname.getName().toUpperCase(), axiomTerm);
 					}
 				}
+				pairByPosition = false;
 			}
 			if (!walker.visitAllNodes(axiomPairer))
 				return false;
@@ -166,7 +170,7 @@ public class Axiom extends Structure
 		if (keySet.size() > 0)
 		{
 			if (solutionPairer == null)
-				solutionPairer = new SolutionPairer(this, solution);
+				solutionPairer = new SolutionPairer(this, solution, other.getQualifiedName());
 			else
 				solutionPairer.setSolution(solution);
 			if (!walker.visitAllNodes(solutionPairer))

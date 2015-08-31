@@ -20,11 +20,9 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
-import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -68,16 +66,24 @@ public class AxiomTest
 
 	protected Template createChargeUnificationTarget(String name)
 	{
-	    StringOperand city = new TestStringOperand("city");
-	    StringOperand fee = new TestStringOperand("fee");
-		return new Template(parseTemplateName(name), city, fee);
+        QualifiedName contextName = parseTemplateName(name);
+        Template template = new Template(name, contextName);
+	    StringOperand city = new StringOperand(QualifiedName.parseName("city", contextName));
+	    template.addTerm(city);
+	    StringOperand fee = new StringOperand(QualifiedName.parseName("fee", contextName));
+	    template.addTerm(fee);
+		return template;
 	}
 	
 	protected Template createCustomerUnificationTarget()
 	{
-	    StringOperand name = new TestStringOperand("name");
-	    StringOperand city = new TestStringOperand("city");
-		return new Template(parseTemplateName("customer"), name, city);
+        QualifiedName contextName = parseTemplateName("customer");
+        Template template = new Template("customer", contextName);
+	    StringOperand name = new StringOperand(QualifiedName.parseName("name", contextName));
+	    template.addTerm(name);
+	    StringOperand city = new StringOperand(QualifiedName.parseName("city", contextName));
+	    template.addTerm(city);
+		return template;
 	}
 
     @Test
@@ -252,13 +258,16 @@ public class AxiomTest
         testAxiom.addTerm(term1);
 		assertThat(testAxiom.pairByPosition).isFalse();
         testAxiom.addTerm(term2);
-        Template template = new Template(NAME, parseTemplateName("Template"));
+        QualifiedName contextName = parseTemplateName("Template");
+        Template template = new Template(NAME, contextName);
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
+        when(operand1.getQualifiedName()).thenReturn(QualifiedName.parseName("term1", contextName));
         when(operand1.getLeftOperand()).thenReturn(null);
         when(operand1.getRightOperand()).thenReturn(null);
         Operand operand2 = mock(Operand.class);
         when(operand2.getName()).thenReturn("term2");
+        when(operand2.getQualifiedName()).thenReturn(QualifiedName.parseName("term2", contextName));
         when(operand2.getLeftOperand()).thenReturn(null);
         when(operand2.getRightOperand()).thenReturn(null);
         template.addTerm(operand1);
@@ -289,30 +298,29 @@ public class AxiomTest
         testAxiom.addTerm(term1);
         testAxiom.addTerm(term2);
 		assertThat(testAxiom.pairByPosition).isTrue();
-        Template template = new Template(NAME, parseTemplateName("Template"));
+		QualifiedName contextName = parseTemplateName("Template");
+        Template template = new Template(NAME, contextName);
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
+        when(operand1.getQualifiedName()).thenReturn(QualifiedName.parseName("term1", contextName));
         when(operand1.getLeftOperand()).thenReturn(null);
         when(operand1.getRightOperand()).thenReturn(null);
         Operand operand2 = mock(Operand.class);
         when(operand2.getName()).thenReturn("term2");
+        when(operand2.getQualifiedName()).thenReturn(QualifiedName.parseName("term2", contextName));
         when(operand2.getLeftOperand()).thenReturn(null);
         when(operand2.getRightOperand()).thenReturn(null);
         template.addTerm(operand1);
         template.addTerm(operand2);
         when(axiomPairer.next(isA(Operand.class), eq(1))).thenReturn(true);
-        when(axiomPairer.pairTerms(isA(Term.class), isA(Term.class))).thenReturn(true);
-        when(axiomPairer.parseKeyName(isA(String.class))).thenReturn(new KeyName("", "term1"), new KeyName("", "term2"));
-        List<TermPair> axiomPairs = new ArrayList<TermPair>(2);
+        when(axiomPairer.pairTerms(isA(Operand.class), isA(Term.class))).thenReturn(true);
+         List<TermPair> axiomPairs = new ArrayList<TermPair>(2);
         axiomPairs.add(new TermPair(term1, operand1));
         axiomPairs.add(new TermPair(term2, operand2));
 		when(axiomPairer.getPairList()).thenReturn(axiomPairs );
         assertThat(testAxiom.unifyTemplate(template, new Solution())).isTrue();
         verify(term1).unifyTerm(operand1, template.getId());
         verify(term2).unifyTerm(operand2, template.getId());
-        ArgumentCaptor<String> termName = ArgumentCaptor.forClass(String.class);
-        verify(axiomPairer, times(2)).parseKeyName(termName.capture());
-        assertThat(termName.getAllValues()).containsSequence("term1", "term2");
     }
 
     @Test 
@@ -327,20 +335,22 @@ public class AxiomTest
         when(term1.getName()).thenReturn("");
          testAxiom.addTerm(term1);
 		assertThat(testAxiom.pairByPosition).isTrue();
-        Template template = new Template(NAME, parseTemplateName("Template"));
+        QualifiedName contextName = parseTemplateName("Template");
+        Template template = new Template(NAME, contextName);
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
+        when(operand1.getQualifiedName()).thenReturn(QualifiedName.parseName("term1", contextName));
         when(operand1.getLeftOperand()).thenReturn(null);
         when(operand1.getRightOperand()).thenReturn(null);
         Operand operand2 = mock(Operand.class);
         when(operand2.getName()).thenReturn("term2");
+        when(operand2.getQualifiedName()).thenReturn(QualifiedName.parseName("term2", contextName));
         when(operand2.getLeftOperand()).thenReturn(null);
         when(operand2.getRightOperand()).thenReturn(null);
         template.addTerm(operand1);
         template.addTerm(operand2);
         when(axiomPairer.next(isA(Operand.class), eq(1))).thenReturn(true);
-        when(axiomPairer.pairTerms(isA(Term.class), isA(Term.class))).thenReturn(true);
-        when(axiomPairer.parseKeyName(isA(String.class))).thenReturn(new KeyName("", "term1"), new KeyName("", "term2"));
+        when(axiomPairer.pairTerms(isA(Operand.class), isA(Term.class))).thenReturn(true);
         List<TermPair> axiomPairs = new ArrayList<TermPair>(2);
         axiomPairs.add(new TermPair(term1, operand1));
  		when(axiomPairer.getPairList()).thenReturn(axiomPairs );
@@ -395,23 +405,26 @@ public class AxiomTest
         testAxiom.addTerm(term1);
         testAxiom.addTerm(term2);
 		assertThat(testAxiom.pairByPosition).isTrue();
-        Template template = new Template(NAME, parseTemplateName("Template"));
+        QualifiedName contextName = parseTemplateName("Template");
+        Template template = new Template(NAME, contextName);
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
+        when(operand1.getQualifiedName()).thenReturn(QualifiedName.parseName("term1", contextName));
         when(operand1.getLeftOperand()).thenReturn(null);
         when(operand1.getRightOperand()).thenReturn(null);
         Operand operand2 = mock(Operand.class);
         when(operand2.getName()).thenReturn("term2");
+        when(operand2.getQualifiedName()).thenReturn(QualifiedName.parseName("term2", contextName));
         when(operand2.getLeftOperand()).thenReturn(null);
         when(operand2.getRightOperand()).thenReturn(null);
         template.addTerm(operand1);
         template.addTerm(operand2);
         when(axiomPairer.next(isA(Operand.class), eq(1))).thenReturn(true);
-        when(axiomPairer.pairTerms(isA(Term.class), isA(Term.class))).thenReturn(false);
+        when(axiomPairer.pairTerms(isA(Operand.class), isA(Term.class))).thenReturn(false);
         assertThat(testAxiom.unifyTemplate(template, new Solution())).isFalse();
         verify(term1, never()).unifyTerm(operand1, template.getId());
         verify(term2, never()).unifyTerm(operand2, template.getId());
-    }
+    } 
 
    @Test 
     public void test_unification_AxiomPairer_exit()
@@ -427,13 +440,16 @@ public class AxiomTest
         when(term2.getName()).thenReturn("term2");   
         testAxiom.addTerm(term1);
         testAxiom.addTerm(term2);
-        Template template = new Template(NAME, parseTemplateName("Template"));
+        QualifiedName contextName = parseTemplateName("Template");
+        Template template = new Template(NAME, contextName);
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
+        when(operand1.getQualifiedName()).thenReturn(QualifiedName.parseName("term1", contextName));
         when(operand1.getLeftOperand()).thenReturn(null);
         when(operand1.getRightOperand()).thenReturn(null);
         Operand operand2 = mock(Operand.class);
         when(operand2.getName()).thenReturn("term2");
+        when(operand2.getQualifiedName()).thenReturn(QualifiedName.parseName("term2", contextName));
         when(operand2.getLeftOperand()).thenReturn(null);
         when(operand2.getRightOperand()).thenReturn(null);
         template.addTerm(operand1);
@@ -459,13 +475,16 @@ public class AxiomTest
         when(term1.getName()).thenReturn("term1");
         Term term2 = mock(Term.class);
         when(term2.getName()).thenReturn("term2");   
-        Template template = new Template(NAME, parseTemplateName("Template"));
+        QualifiedName contextName = parseTemplateName("Template");
+        Template template = new Template(NAME, contextName);
         Operand operand1 = mock(Operand.class);
         when(operand1.getName()).thenReturn("term1");
+        when(operand1.getQualifiedName()).thenReturn(QualifiedName.parseName("term1", contextName));
         when(operand1.getLeftOperand()).thenReturn(null);
         when(operand1.getRightOperand()).thenReturn(null);
         Operand operand2 = mock(Operand.class);
         when(operand2.getName()).thenReturn("term2");
+        when(operand2.getQualifiedName()).thenReturn(QualifiedName.parseName("term2", contextName));
         when(operand2.getLeftOperand()).thenReturn(null);
         when(operand2.getRightOperand()).thenReturn(null);
         template.addTerm(operand1);

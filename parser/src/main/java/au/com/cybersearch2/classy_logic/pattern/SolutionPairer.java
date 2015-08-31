@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -34,9 +36,9 @@ public class SolutionPairer extends AxiomPairer
 	 * @param owner Structure which is performing unification
      * @param solution Map of Axioms selectable by Axiom name
 	 */
-	public SolutionPairer(Structure owner, Solution solution) 
+	public SolutionPairer(Structure owner, Solution solution, QualifiedName localContext) 
 	{
-		super(owner);
+		super(owner, localContext);
 		this.solution = solution;
 	}
 
@@ -44,9 +46,9 @@ public class SolutionPairer extends AxiomPairer
 	 * Construct SolutionPairer object
      * @param solution Map of Axioms selectable by Axiom name
 	 */
-	public SolutionPairer(Solution solution) 
+	public SolutionPairer(Solution solution, QualifiedName localContext) 
 	{
-		this(null, solution);
+		this(null, solution, localContext);
 	}
 
 	/**
@@ -64,30 +66,31 @@ public class SolutionPairer extends AxiomPairer
 	 * @see au.com.cybersearch2.classy_logic.pattern.AxiomPairer#next(au.com.cybersearch2.classy_logic.interfaces.Term, int)
 	 */
 	@Override
-	public boolean next(Term term, int depth) 
+	public boolean next(Operand operand, int depth) 
 	{
-		// Test for compound name
-		// Compound name has format "<key>.<name>"
-		KeyName keyName = parseKeyName(term.getName());
-		if (!keyName.getAxiomKey().isEmpty() && !keyName.getTemplateName().isEmpty() && solution.keySet().contains(keyName.getAxiomKey()))
+	    QualifiedName qname = operand.getQualifiedName();
+	    if (qname.getTemplate().isEmpty() || qname.getName().isEmpty())
+	        return true;
+	    String templateKey = new QualifiedName(qname.getScope(), qname.getTemplate(), QualifiedName.EMPTY).toString();
+		if (solution.keySet().contains(templateKey))
 		{   
 			// Solution has Axiom with key name
-			Term otherTerm = solution.getAxiom(keyName.getAxiomKey()).getTermByName(keyName.getTemplateName());
+			Term otherTerm = solution.getAxiom(templateKey).getTermByName(qname.getName());
 			if ((otherTerm != null) && !otherTerm.isEmpty())
 			{ 
 			    // Check for exit case: Axiom term contains different value to matching Solution term
 				Term axiomTerm = null;
 				if (owner == null) 
-					axiomTerm = term;
+					axiomTerm = operand;
 				else
-					axiomTerm = owner.getTermByName(keyName.getTemplateName());
+					axiomTerm = owner.getTermByName(qname.getName());
                 if ((axiomTerm != null) && 
-                	!axiomTerm.isEmpty() && 
+                	!axiomTerm.isEmpty() && localContext.inSameSpace(operand.getQualifiedName()) &&
                 	!axiomTerm.getValue().equals(otherTerm.getValue()))
                 	return false;
-                else if (term.isEmpty())
+                else if (operand.isEmpty())
                 	// Unify with Solution term
-                	pairList.add(new TermPair(term, otherTerm));
+                	pairList.add(new TermPair(operand, otherTerm));
 			}
 		}
 		return true;

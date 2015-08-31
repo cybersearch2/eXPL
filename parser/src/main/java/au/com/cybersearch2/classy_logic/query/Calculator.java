@@ -193,7 +193,7 @@ public class Calculator implements SolutionFinder
 		if (solution.size() > 0)
 		{
 			if (pairer == null)
-				pairer = new SolutionPairer(solution);
+				pairer = new SolutionPairer(solution, template.getQualifiedName());
 			else
 				pairer.setSolution(solution);
 			Template chainTemplate = template;

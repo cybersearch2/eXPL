@@ -267,9 +267,9 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
         OperandVisitor visitor = new OperandVisitor(){
 
             @Override
-            public boolean next(Term term, int depth)
+            public boolean next(Operand operand, int depth)
             {
-                term.backup(0);
+                operand.backup(0);
                 return true;
             }};
         Operand leftOperand = getLeftOperand();
@@ -285,15 +285,14 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
     
     /**
      * Visit a node of the Operand tree. Recursively navigates left and right operands, if any.
-     * @param term The term being visited
+     * @param operand The Operand being visited
      * @param visitor Object implementing OperandVisitor interface
      * @param depth Depth in tree. The root has depth 1.
      * @return flag set true if entire tree formed by this term is navigated. 
      */
-    public boolean visit(Term term, OperandVisitor visitor, int depth)
+    public boolean visit(Operand operand, OperandVisitor visitor, int depth)
     {
-        visitor.next(term, depth);
-        Operand operand = (Operand)term;
+        visitor.next(operand, depth);
         if (operand.getLeftOperand() != null)
             visit(operand.getLeftOperand(), visitor, depth + 1);
         if (operand.getRightOperand() != null)

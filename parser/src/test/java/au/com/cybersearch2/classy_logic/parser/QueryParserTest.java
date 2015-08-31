@@ -54,7 +54,6 @@ import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
-import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -113,6 +112,7 @@ public class QueryParserTest
 		"template high_city(string name, integer altitude, boolean is_high = altitude > 5000);";
 
 	static final String GREEK_BUSINESS = "include \"greek_business.xpl\";";
+    static final String GREEK_BUSINESS2 = "include \"greek_business2.xpl\";";
 	static final String NAMED_GREEK_BUSINESS = "include \"named_greek_business.xpl\";";
 	static final String LEXICAL_SEARCH = "template in_words (Word regex(\"^in[^ ]+\"), string Definition);";
 	static final String NOUN_LEXICAL_SEARCH = "template in_words (Word regex(\"^in[^ ]+\"), Definition regex(\"^n\"));";
@@ -122,7 +122,7 @@ public class QueryParserTest
 		"include \"agriculture-land.xpl\";" +
 		"include \"surface-land.xpl\";" +
 	    "template agri_10y (country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);" +
-		"template surface_area_increase (country = agri_10y.country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);";
+		"template surface_area_increase (country? country == agri_10y.country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);";
 
 	static final String[] GREEK_BUSINESS_LIST =
 	{
@@ -131,6 +131,14 @@ public class QueryParserTest
 	    "customer(name = Agora Imports, city = Sparta), charge(city = Sparta, fee = 13)",
 	    "customer(name = Spiros Theodolites, city = Milos), charge(city = Milos, fee = 17)" 	};
 	
+    static final String[] GREEK_BUSINESS_LIST2 =
+    {
+        "charge(city = Athens, fee = 23), customer(name = Acropolis Construction, city = Athens)",
+        "charge(city = Sparta, fee = 13), customer(name = Marathon Marble, city = Sparta)",
+        "charge(city = Sparta, fee = 13), customer(name = Agora Imports, city = Sparta)",
+        "charge(city = Milos, fee = 17), customer(name = Spiros Theodolites, city = Milos)"
+    };
+    
 	static final String[] CITY_NAME_HEIGHT =
 	{
 		"city(name = \"bilene\", altitude = 1718)",
@@ -910,13 +918,49 @@ public class QueryParserTest
 			}};
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
 	    QueryExecuter greekChargeCustomerQuery = new QueryExecuter(adapter.getQueryParams());
-	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city = city, fee)");
+	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city?city==city, fee)");
     	int index = 0;
  	    while (greekChargeCustomerQuery.execute())
  	        //System.out.println(greekChargeCustomerQuery.toString());
   	    	assertThat(greekChargeCustomerQuery.toString()).isEqualTo(GREEK_BUSINESS_LIST[index++]);
 	}
 	
+    @Test
+    public void test_GreekBusiness2() throws Exception
+    {
+        final ParserAssembler parserAssembler = openScript(GREEK_BUSINESS2);
+        Template charge = parserAssembler.getTemplate("charge");
+        Template customer = parserAssembler.getTemplate("customer");
+        List<Template> templateList = new ArrayList<Template>();
+        templateList.add(charge);
+        templateList.add(customer);
+        AxiomCollection ensemble = new AxiomCollection(){
+
+            @Override
+            public AxiomSource getAxiomSource(String name) 
+            {
+                if (name.equals("charge"))
+                    return parserAssembler.getAxiomSource(QualifiedName.parseGlobalName(name));
+                else if (name.equals("customer"))
+                    return parserAssembler.getAxiomSource(QualifiedName.parseGlobalName(name));
+
+                return null;
+            }
+
+            @Override
+            public boolean isEmpty() 
+            {
+                return false;
+            }};
+        QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
+        QueryExecuter greekChargeCustomerQuery = new QueryExecuter(adapter.getQueryParams());
+        assertThat(greekChargeCustomerQuery.toString()).isEqualTo("charge(city, fee), customer(name, city?city==city)");
+        int index = 0;
+        while (greekChargeCustomerQuery.execute())
+            //System.out.println(greekChargeCustomerQuery.toString());
+            assertThat(greekChargeCustomerQuery.toString()).isEqualTo(GREEK_BUSINESS_LIST2[index++]);
+    }
+    
 	@Test
 	public void test_NamedGreekBusiness() throws Exception
 	{
@@ -946,7 +990,7 @@ public class QueryParserTest
 			}};
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
 	    QueryExecuter greekChargeCustomerQuery = new QueryExecuter(adapter.getQueryParams());
-	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city = city, fee)");
+	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city?city==city, fee)");
     	int index = 0;
  	    while (greekChargeCustomerQuery.execute())
  	        //System.out.println(greekChargeCustomerQuery.toString());

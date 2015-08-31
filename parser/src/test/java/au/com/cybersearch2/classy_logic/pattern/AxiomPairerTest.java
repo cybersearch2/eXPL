@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.pattern;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
@@ -30,18 +31,23 @@ import static org.mockito.Mockito.*;
  */
 public class AxiomPairerTest 
 {
-
+    static final String TEMPLATE_NAME = "TemplateName";
+    static final String OPERAND_NAME = "x";
+    
 	@Test
 	public void test_next()
 	{
 		// Pairing case
+	    QualifiedName contextName = QualifiedName.parseTemplateName(TEMPLATE_NAME);
+	    QualifiedName operandName = QualifiedName.parseName(OPERAND_NAME, contextName);
 		Axiom owner = mock(Axiom.class);
 		Operand operand = mock(Operand.class);
 		Term term1 = mock(Term.class);
-		when(operand.getName()).thenReturn("x");
-		when(owner.getTermByName("x")).thenReturn(term1);
+		when(operand.getName()).thenReturn(OPERAND_NAME);
+		when(operand.getQualifiedName()).thenReturn(operandName);
+		when(owner.getTermByName(OPERAND_NAME)).thenReturn(term1);
 		when(operand.isEmpty()).thenReturn(true);
-		AxiomPairer axiomPairer= new AxiomPairer(owner);
+		AxiomPairer axiomPairer= new AxiomPairer(owner, contextName);
 		assertThat(axiomPairer.next(operand, 1)).isTrue();
 		assertThat(axiomPairer.getPairList().size()).isEqualTo(1);
 		TermPair pair = axiomPairer.getPairList().get(0);
@@ -53,33 +59,35 @@ public class AxiomPairerTest
 		when(operand.getValue()).thenReturn(new Integer(2));
 		when(term1.isEmpty()).thenReturn(false);
 		when(term1.getValue()).thenReturn(new Integer(2));
-		axiomPairer= new AxiomPairer(owner);
+		axiomPairer= new AxiomPairer(owner, contextName);
 		assertThat(axiomPairer.next(operand, 1)).isTrue();
 		assertThat(axiomPairer.getPairList().size()).isEqualTo(0);
 		
 		// Axiom parameter is empty - should never happen
 		when(term1.isEmpty()).thenReturn(true);
-		axiomPairer= new AxiomPairer(owner);
+		axiomPairer= new AxiomPairer(owner, contextName);
 		assertThat(axiomPairer.next(operand, 1)).isTrue();
 		assertThat(axiomPairer.getPairList().size()).isEqualTo(0);
 
 		// Axiom value != Template value
 		when(term1.isEmpty()).thenReturn(false);
 		when(term1.getValue()).thenReturn(new Integer(3));
-		axiomPairer= new AxiomPairer(owner);
+		axiomPairer= new AxiomPairer(owner, contextName);
 		assertThat(axiomPairer.next(operand, 1)).isFalse();
 		assertThat(axiomPairer.getPairList().size()).isEqualTo(0);
          
 		// Template term is anonymous
 		when(operand.getName()).thenReturn("");
-		axiomPairer= new AxiomPairer(owner);
+        when(operand.getQualifiedName()).thenReturn(contextName);
+		axiomPairer= new AxiomPairer(owner, contextName);
 		assertThat(axiomPairer.next(operand, 1)).isTrue();
 		assertThat(axiomPairer.getPairList().size()).isEqualTo(0);
 
 	    // Matching term not found by name 
-		when(operand.getName()).thenReturn("x");
-		when(owner.getTermByName("x")).thenReturn(null);
+		when(operand.getName()).thenReturn(OPERAND_NAME);
+        when(operand.getQualifiedName()).thenReturn(operandName);
+		when(owner.getTermByName(OPERAND_NAME)).thenReturn(null);
 		assertThat(axiomPairer.next(operand, 1)).isTrue();
 		assertThat(axiomPairer.getPairList().size()).isEqualTo(0);
-    }
+    } 
 }

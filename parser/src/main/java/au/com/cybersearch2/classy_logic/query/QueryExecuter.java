@@ -59,7 +59,13 @@ public class QueryExecuter extends ChainQueryExecuter
 		{
 			// Execute the next query in the chain
     		LogicQuery nextQuery = logicQueryList.get(index+1);
-    		if (nextQuery.iterate(solution, templateList.get(index + 1)))
+    		Template nextTemplate = templateList.get(index + 1);
+    		if (nextQuery.getQueryStatus() == QueryStatus.in_progress)
+    		{
+    		    nextTemplate.backup(true);
+    		    solution.remove(nextTemplate.getQualifiedName().toString());
+    		}
+    		if (nextQuery.iterate(solution, nextTemplate))
     			return true;
     		// Backup when query further down the chain fails to find a solution
 			backupToStart(index);

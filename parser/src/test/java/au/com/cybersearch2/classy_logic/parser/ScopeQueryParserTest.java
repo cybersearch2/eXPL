@@ -86,7 +86,7 @@ public class ScopeQueryParserTest
 		"include \"agriculture-land.xpl\";\n" +
 		"include \"surface-land.xpl\";\n" +
 		"template agri_10y(country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);\n" +
-		"template surface_area_increase(country = agri_10y.country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);\n" +
+		"template surface_area_increase(country ? country == agri_10y.country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);\n" +
 		"calc km2_to_mi2 (decimal mi2, mi2 = surface_area_increase.surface_area * 0.3861);" +
         "scope countries\n" +
 	    "{\n" +
@@ -99,9 +99,9 @@ public class ScopeQueryParserTest
 	
 	    QueryExecuterTest.GREEK_CONSTRUCTION + 
 		"template customer(name, city);\n" +
-        "template charge(city = customer.city,  charge);\n" +
-		"template account(name ? customer.name == name, fee);\n" +
-		"template delivery(city ? charge.city == city, freight);\n" +
+        "template charge(city ? city == customer.city,  charge);\n" +
+		"template account(name ? name == customer.name, fee);\n" +
+		"template delivery(city ? city == charge.city, freight);\n" +
 		"scope greek_construction\n" +
 	    "{\n" +
 	    "  query greek_business(customer:customer, charge:charge)\n" + 

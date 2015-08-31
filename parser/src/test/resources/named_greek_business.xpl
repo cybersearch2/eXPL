@@ -9,5 +9,5 @@ axiom customer(name,city):
   ("Agora Imports", "Sparta"),
   ("Spiros Theodolites", "Milos");
   
-template charge(city = customer.city, fee);  
+template charge(city ? city == customer.city, fee);  
 template customer(name, city);

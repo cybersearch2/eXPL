@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.TermVisitor;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -242,7 +242,7 @@ public class Structure
 	 * Add a parameter
 	 * @param param Term object
 	 */
-	public void addTerm(Term param)
+	protected void addTerm(Term param)
 	{
 		if (termList.isEmpty()) // First time after name-only constructor invoked
 			termList = new ArrayList<Term>();
@@ -250,8 +250,8 @@ public class Structure
 		// If the parameter is named, add it to the term map as well
 		if (termMap == null)
 			termMap = new HashMap<String, Term>();
-		OperandWalker operandWalker = new OperandWalker(param);
-		OperandVisitor visitor = new OperandVisitor()
+		TermWalker termWalker = new TermWalker(param);
+		TermVisitor visitor = new TermVisitor()
 		{
 
 			@Override
@@ -262,6 +262,6 @@ public class Structure
 				return true;
 			}
 		};
-		operandWalker.visitAllNodes(visitor);
+		termWalker.visitAllNodes(visitor);
 	}
 }

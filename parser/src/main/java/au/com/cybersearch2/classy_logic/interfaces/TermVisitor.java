@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2015  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,17 +16,18 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 /**
- * OperandVisitor
+ * TermVisitor
  * @author Andrew Bowley
- * 16 Dec 2014
+ * 31 Aug 2015
  */
-public interface OperandVisitor 
+public interface TermVisitor
 {
-	/**
-	 * Visit next term
-	 * @param operand Operand object
-	 * @param depth Depth in Operand tree
-	 * @return Flag set true to continue
-	 */
-	boolean next(Operand operand, int depth);
+    /**
+     * Visit next term
+     * @param term Object implementing Term interface
+     * @param depth Depth in Operand tree
+     * @return Flag set true to continue
+     */
+    boolean next(Term term, int depth);
+
 }

@@ -143,7 +143,7 @@ public class LogicQuery implements SolutionFinder
 		{
 			OperandWalker walker = template.getOperandWalker();
 			if (pairer == null)
-				pairer = new SolutionPairer(solution);
+				pairer = new SolutionPairer(solution, template.getQualifiedName());
 			else
 				pairer.setSolution(solution);
 			if (walker.visitAllNodes(pairer))

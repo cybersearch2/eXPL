@@ -36,27 +36,28 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class OperandWalker 
 {
-	/** Single term */
-    protected Term term;
+	/** Single operand */
+    protected Operand operand;
     /** Term list */
-    protected List<Term> termList;
+    protected List<Term> operandList;
 
     /**
-     * Construct OperandWalker object
+     * Construct OperandWalker object to navigate a list of terms.
+     * Note Term interface applied to items for compatibility with Template super class Structure, which contains Template terms.
      * @param termList List of terms to navigate
      */
-	public OperandWalker(List<Term> termList) 
+	public OperandWalker(List<Term> operandList) 
 	{
-		this.termList = termList;
+		this.operandList = operandList;
 	}
 
     /**
      * Construct OperandWalker object
      * @param term Single term to navigate
      */
-	public OperandWalker(Term term) 
+	public OperandWalker(Operand operand) 
 	{
-		this.term = term;
+		this.operand = operand;
 	}
 
 	/**
@@ -68,11 +69,11 @@ public class OperandWalker
 	 */
 	public boolean visitAllNodes(OperandVisitor visitor)
 	{
-		if (term != null)
-			return visit(term, visitor, 1);
-		for (Term term: termList)
+		if (operand != null)
+			return visit(operand, visitor, 1);
+		for (Term operandItem: operandList)
 		{
-			if (!visit(term, visitor, 1))
+			if (!visit((Operand)operandItem, visitor, 1))
 				return false;
 		}
 		return true;
@@ -85,14 +86,10 @@ public class OperandWalker
 	 * @param depth Depth in tree. The root has depth 1.
 	 * @return flag set true if entire tree formed by this term is navigated. 
 	 */
-	public boolean visit(Term term, OperandVisitor visitor, int depth)
+	public boolean visit(Operand operand, OperandVisitor visitor, int depth)
 	{
-		if (!visitor.next(term, depth))
+		if (!visitor.next(operand, depth))
 			return false;
-		// Only Terms which also implement Operand interface will have left and right Operands
-		if (!(term instanceof Operand))
-			return true;
-		Operand operand = (Operand)term;
 		if ((operand.getLeftOperand() != null) &&
 		     !visit(operand.getLeftOperand(), visitor, depth + 1))
 			return false;

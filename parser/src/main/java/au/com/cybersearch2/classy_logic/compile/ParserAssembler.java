@@ -218,7 +218,7 @@ public class ParserAssembler implements LocaleListener
     public void addTemplate(QualifiedName qualifiedTemplateName, Operand term)
     {
         Template template = templateMap.get(qualifiedTemplateName);
-        template.addTerm((Term)term);
+        template.addTerm(term);
     }
 
 	/**

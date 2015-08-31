@@ -198,7 +198,8 @@ public class CalculatorTest
         Calculator calculator = new Calculator();
 		Solution solution = mock(Solution.class);
 		when(solution.size()).thenReturn(2);
-        SolutionPairer pairer = new SolutionPairer(solution);
+		QualifiedName qualifiedTemplateName = QualifiedName.parseTemplateName(TEMPLATE_NAME);
+        SolutionPairer pairer = new SolutionPairer(solution, qualifiedTemplateName);
         calculator.pairer = pairer;
 		List<TermPair> pairList = pairer.getPairList();
 		Term term1 = mock(Term.class);
@@ -215,7 +216,7 @@ public class CalculatorTest
         when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
         when(template.getKey()).thenReturn(KEY);
         when(template.getName()).thenReturn(TEMPLATE_NAME);
-        when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(TEMPLATE_NAME));
+        when(template.getQualifiedName()).thenReturn(qualifiedTemplateName);
 		OperandWalker walker = mock(OperandWalker.class);
 		when(walker.visitAllNodes(pairer)).thenReturn(true);
 		when(template.getOperandWalker()).thenReturn(walker);

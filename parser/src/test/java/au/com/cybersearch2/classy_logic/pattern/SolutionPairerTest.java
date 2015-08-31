@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.pattern;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
@@ -31,7 +32,13 @@ import static org.mockito.Mockito.*;
  */
 public class SolutionPairerTest 
 {
-
+    static final String TEMPLATE_NAME = "TemplateName";
+    static final String ONE = "one";
+    static final String TWO = "two";
+    static QualifiedName CONTEXT_NAME = QualifiedName.parseTemplateName(TEMPLATE_NAME);
+    static QualifiedName ONE_QNAME = QualifiedName.parseName(ONE, CONTEXT_NAME);
+    static QualifiedName TWO_QNAME = QualifiedName.parseName(TWO, CONTEXT_NAME);
+    
 	@Test
 	public void test_next()
 	{
@@ -42,16 +49,16 @@ public class SolutionPairerTest
 		Operand templateOperand = mock(Operand.class);
 		Operand solutionOperand = mock(Operand.class);
 		when(solutionOperand.isEmpty()).thenReturn(false);
-		when(oneAxiom.getTermByName("two")).thenReturn(solutionOperand);
+		when(oneAxiom.getTermByName(TWO)).thenReturn(solutionOperand);
 		Term term1 = mock(Term.class);
 		when(term1.isEmpty()).thenReturn(true);
-		when(templateOperand.getName()).thenReturn("one.two");
-		when(solutionOperand.getName()).thenReturn("two");
-		when(owner.getTermByName("two")).thenReturn(term1);
+		when(templateOperand.getQualifiedName()).thenReturn(TWO_QNAME);
+		when(solutionOperand.getName()).thenReturn(TWO);
+		when(owner.getTermByName(TWO)).thenReturn(term1);
 		when(templateOperand.isEmpty()).thenReturn(true);
 		Solution solution = new Solution();
-		solution.put("one", oneAxiom);
-		SolutionPairer solutionPairer = new SolutionPairer(owner, solution);
+		solution.put(CONTEXT_NAME.toString(), oneAxiom);
+		SolutionPairer solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
 		assertThat(solutionPairer.getPairList().size()).isEqualTo(1);
 		TermPair pair = solutionPairer.getPairList().get(0);
@@ -65,21 +72,20 @@ public class SolutionPairerTest
 	{
 		// Pairing case
 		Axiom owner = mock(Axiom.class);
-		//when(owner.getNamePattern()).thenReturn(Pattern.compile("([^.]*)\\.([^.]*)"));
 		Axiom oneAxiom = mock(Axiom.class);
 		Operand templateOperand = mock(Operand.class);
 		Operand solutionOperand = mock(Operand.class);
 		when(solutionOperand.isEmpty()).thenReturn(false);
-		when(oneAxiom.getTermByName("two")).thenReturn(solutionOperand);
+		when(oneAxiom.getTermByName(TWO)).thenReturn(solutionOperand);
 		Term term1 = mock(Term.class);
 		when(term1.isEmpty()).thenReturn(true);
-		when(templateOperand.getName()).thenReturn("one.two");
-		when(solutionOperand.getName()).thenReturn("two");
-		when(owner.getTermByName("two")).thenReturn(null);
+		when(templateOperand.getQualifiedName()).thenReturn(TWO_QNAME);
+		when(solutionOperand.getName()).thenReturn(TWO);
+		when(owner.getTermByName(TWO)).thenReturn(null);
 		when(templateOperand.isEmpty()).thenReturn(true);
 		Solution solution = new Solution();
-		solution.put("one", oneAxiom);
-		SolutionPairer solutionPairer = new SolutionPairer(owner, solution);
+		solution.put(CONTEXT_NAME.toString(), oneAxiom);
+		SolutionPairer solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
 		assertThat(solutionPairer.getPairList().size()).isEqualTo(1);
 		TermPair pair = solutionPairer.getPairList().get(0);
@@ -93,21 +99,20 @@ public class SolutionPairerTest
 	{
 		// Pairing case
 		Axiom owner = mock(Axiom.class);
-		//when(owner.getNamePattern()).thenReturn(Pattern.compile("([^.]*)\\.([^.]*)"));
 		Axiom oneAxiom = mock(Axiom.class);
 		Operand templateOperand = mock(Operand.class);
 		Operand solutionOperand = mock(Operand.class);
 		when(solutionOperand.isEmpty()).thenReturn(true);
-		when(oneAxiom.getTermByName("two")).thenReturn(solutionOperand);
+		when(oneAxiom.getTermByName(TWO)).thenReturn(solutionOperand);
 		Term term1 = mock(Term.class);
 		when(term1.isEmpty()).thenReturn(true);
-		when(templateOperand.getName()).thenReturn("one.two");
-		when(solutionOperand.getName()).thenReturn("two");
-		when(owner.getTermByName("two")).thenReturn(term1);
+		when(templateOperand.getQualifiedName()).thenReturn(TWO_QNAME);
+		when(solutionOperand.getName()).thenReturn(TWO);
+		when(owner.getTermByName(TWO)).thenReturn(term1);
 		when(templateOperand.isEmpty()).thenReturn(true);
 		Solution solution = new Solution();
-		solution.put("one", oneAxiom);
-		SolutionPairer solutionPairer = new SolutionPairer(owner, solution);
+		solution.put(CONTEXT_NAME.toString(), oneAxiom);
+		SolutionPairer solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
 		assertThat(solutionPairer.getPairList().size()).isEqualTo(0);
 	}
@@ -117,49 +122,46 @@ public class SolutionPairerTest
 	{
 		// Pairing case
 		Axiom owner = mock(Axiom.class);
-		//when(owner.getNamePattern()).thenReturn(Pattern.compile("([^.]*)\\.([^.]*)"));
 		Axiom oneAxiom = mock(Axiom.class);
 		Operand templateOperand = mock(Operand.class);
 		Operand solutionOperand = mock(Operand.class);
 		when(solutionOperand.isEmpty()).thenReturn(false);
-		when(oneAxiom.getTermByName("two")).thenReturn(solutionOperand);
+		when(oneAxiom.getTermByName(TWO)).thenReturn(solutionOperand);
 		Term term1 = mock(Term.class);
 		when(term1.isEmpty()).thenReturn(true);
-		when(templateOperand.getName()).thenReturn("one.two");
-		when(solutionOperand.getName()).thenReturn("two");
-		when(owner.getTermByName("two")).thenReturn(term1);
+		when(templateOperand.getQualifiedName()).thenReturn(TWO_QNAME);
+		when(solutionOperand.getName()).thenReturn(TWO);
+		when(owner.getTermByName(TWO)).thenReturn(term1);
 		when(templateOperand.isEmpty()).thenReturn(false);
 		Solution solution = new Solution();
-		solution.put("one", oneAxiom);
-		SolutionPairer solutionPairer = new SolutionPairer(owner, solution);
+		solution.put(CONTEXT_NAME.toString(), oneAxiom);
+		SolutionPairer solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
 		assertThat(solutionPairer.getPairList().size()).isEqualTo(0);
 		
 	}
-
 
 	@Test
 	public void test_next_non_empty_Axiom_term()
 	{
 		// Pairing case
 		Axiom owner = mock(Axiom.class);
-		//when(owner.getNamePattern()).thenReturn(Pattern.compile("([^.]*)\\.([^.]*)"));
 		Axiom oneAxiom = mock(Axiom.class);
 		Operand templateOperand = mock(Operand.class);
 		Operand solutionOperand = mock(Operand.class);
 		when(solutionOperand.isEmpty()).thenReturn(false);
-		when(oneAxiom.getTermByName("two")).thenReturn(solutionOperand);
+		when(oneAxiom.getTermByName(TWO)).thenReturn(solutionOperand);
 		Term term1 = mock(Term.class);
 		when(term1.isEmpty()).thenReturn(false);
 		when(term1.getValue()).thenReturn(new Integer(2));
-		when(templateOperand.getName()).thenReturn("one.two");
-		when(solutionOperand.getName()).thenReturn("two");
+		when(templateOperand.getQualifiedName()).thenReturn(TWO_QNAME);
+		when(solutionOperand.getName()).thenReturn(TWO);
 		when(solutionOperand.getValue()).thenReturn(new Integer(2));
-		when(owner.getTermByName("two")).thenReturn(term1);
+		when(owner.getTermByName(TWO)).thenReturn(term1);
 		when(templateOperand.isEmpty()).thenReturn(true);
 		Solution solution = new Solution();
-		solution.put("one", oneAxiom);
-		SolutionPairer solutionPairer = new SolutionPairer(owner, solution);
+		solution.put(CONTEXT_NAME.toString(), oneAxiom);
+		SolutionPairer solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
 		assertThat(solutionPairer.getPairList().size()).isEqualTo(1);
 		TermPair pair = solutionPairer.getPairList().get(0);
@@ -173,23 +175,22 @@ public class SolutionPairerTest
 	{
 		// Pairing case
 		Axiom owner = mock(Axiom.class);
-		//when(owner.getNamePattern()).thenReturn(Pattern.compile("([^.]*)\\.([^.]*)"));
 		Axiom oneAxiom = mock(Axiom.class);
 		Operand templateOperand = mock(Operand.class);
 		Operand solutionOperand = mock(Operand.class);
 		when(solutionOperand.isEmpty()).thenReturn(false);
-		when(oneAxiom.getTermByName("two")).thenReturn(solutionOperand);
+		when(oneAxiom.getTermByName(TWO)).thenReturn(solutionOperand);
 		Term term1 = mock(Term.class);
 		when(term1.isEmpty()).thenReturn(false);
 		when(term1.getValue()).thenReturn(new Integer(2));
-		when(templateOperand.getName()).thenReturn("one.two");
-		when(solutionOperand.getName()).thenReturn("two");
+		when(templateOperand.getQualifiedName()).thenReturn(TWO_QNAME);
+		when(solutionOperand.getName()).thenReturn(TWO);
 		when(solutionOperand.getValue()).thenReturn(new Integer(3));
-		when(owner.getTermByName("two")).thenReturn(term1);
+		when(owner.getTermByName(TWO)).thenReturn(term1);
 		when(templateOperand.isEmpty()).thenReturn(true);
 		Solution solution = new Solution();
-		solution.put("one", oneAxiom);
-		SolutionPairer solutionPairer = new SolutionPairer(owner, solution);
+		solution.put(CONTEXT_NAME.toString(), oneAxiom);
+		SolutionPairer solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isFalse();
 		
 	}
@@ -198,27 +199,26 @@ public class SolutionPairerTest
 	public void test_next_bad_name()
 	{
 		Axiom owner = mock(Axiom.class);
-		//when(owner.getNamePattern()).thenReturn(Pattern.compile("([^.]*)\\.([^.]*)"));
 		Operand templateOperand = mock(Operand.class);
-		when(templateOperand.getName()).thenReturn(".two");
+		when(templateOperand.getQualifiedName()).thenReturn(QualifiedName.parseGlobalName(".two"));
 		Solution solution = new Solution();
-		SolutionPairer solutionPairer = new SolutionPairer(owner, solution);
+		SolutionPairer solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
 		templateOperand = mock(Operand.class);
-		when(templateOperand.getName()).thenReturn("one.");
-		solutionPairer = new SolutionPairer(owner, solution);
+		when(templateOperand.getQualifiedName()).thenReturn(QualifiedName.parseGlobalName("one."));
+		solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
 		templateOperand = mock(Operand.class);
-		when(templateOperand.getName()).thenReturn("one.three");
-		solutionPairer = new SolutionPairer(owner, solution);
+		when(templateOperand.getQualifiedName()).thenReturn(QualifiedName.parseGlobalName("one.three"));
+		solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
 		templateOperand = mock(Operand.class);
-		when(templateOperand.getName()).thenReturn("one");
-		solutionPairer = new SolutionPairer(owner, solution);
+		when(templateOperand.getQualifiedName()).thenReturn(QualifiedName.parseGlobalName("one"));
+		solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
-		when(templateOperand.getName()).thenReturn("one.two");
-		solutionPairer = new SolutionPairer(owner, solution);
+		when(templateOperand.getQualifiedName()).thenReturn(QualifiedName.parseGlobalName("one.two"));
+		solutionPairer = new SolutionPairer(owner, solution, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
-	}
+	} 
 
 }

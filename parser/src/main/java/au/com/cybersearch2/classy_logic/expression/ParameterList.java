@@ -65,9 +65,9 @@ public class ParameterList<R>
             OperandVisitor visitor = new OperandVisitor(){
     
                 @Override
-                public boolean next(Term term, int depth)
+                public boolean next(Operand operand, int depth)
                 {
-                    argumentList.add(term);
+                    argumentList.add(operand);
                     return true;
                 }};
                 visit(parameters, visitor, 1);
@@ -82,15 +82,14 @@ public class ParameterList<R>
      * @param depth Depth in tree. The root has depth 1.
      * @return flag set true if entire tree formed by this term is navigated. 
      */
-    protected boolean visit(Term term, OperandVisitor visitor, int depth)
+    protected boolean visit(Operand operand, OperandVisitor visitor, int depth)
     {
         // Only Evaluator terms will have left and right Operands containing parameters
-        if (!(term instanceof Evaluator))
+        if (!(operand instanceof Evaluator))
         {   // Collect paramater 
-            visitor.next(term, depth);
+            visitor.next(operand, depth);
             return true;
         }
-        Operand operand = (Operand)term;
         Operand left = operand.getLeftOperand();
         if (left != null)
         {

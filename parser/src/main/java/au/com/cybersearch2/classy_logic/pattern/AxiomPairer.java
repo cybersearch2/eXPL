@@ -17,9 +17,9 @@ package au.com.cybersearch2.classy_logic.pattern;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.UnificationPairer;
 import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
@@ -35,18 +35,18 @@ public class AxiomPairer implements UnificationPairer
 	protected Structure owner;
 	/** List of paired terms collected by this object */
 	protected List<TermPair> pairList;
-	/** Compiled regular expresson to extract name components */
-	protected Pattern namePattern;
+	/** Qualified name for local context */
+	protected QualifiedName localContext;
 
 	/**
 	 * Construct an AxiomPairer object
 	 * @param owner Structure which is performing unification
 	 */
-	public AxiomPairer(Structure owner) 
+	public AxiomPairer(Structure owner, QualifiedName localContext) 
 	{
 		this.owner = owner;
+		this.localContext = localContext;
 		pairList = new ArrayList<TermPair>();
-		namePattern = Pattern.compile("([^.]*)\\.([^.]*)");
 	}
 
 	/**
@@ -54,13 +54,13 @@ public class AxiomPairer implements UnificationPairer
 	 * @see au.com.cybersearch2.classy_logic.interfaces.OperandVisitor#next(au.com.cybersearch2.classy_logic.interfaces.Term, int)
 	 */
 	@Override
-	public boolean next(Term term, int depth) 
+	public boolean next(Operand operand, int depth) 
 	{
-		if (!term.getName().isEmpty())
+		if (!operand.getName().isEmpty())
 		{
 			// Pair by name. 
-			Term otherTerm = owner.getTermByName(term.getName());
-		    if ((otherTerm != null) && !pairTerms(term, otherTerm))
+			Term otherTerm = owner.getTermByName(operand.getName());
+		    if ((otherTerm != null) && !pairTerms(operand, otherTerm))
 		        return false;
 		}
 		return true;
@@ -71,14 +71,14 @@ public class AxiomPairer implements UnificationPairer
 	 * @see au.com.cybersearch2.classy_logic.interfaces.UnificationPairer#pairTerms(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.interfaces.Term)
 	 */
 	@Override
-	public boolean pairTerms(Term term, Term otherTerm)
+	public boolean pairTerms(Operand operand, Term otherTerm)
 	{
 		// Pair first term to other term if first term is empty
-        if (term.isEmpty())
-			pairList.add(new TermPair(term, otherTerm));
+        if (operand.isEmpty())
+			pairList.add(new TermPair(operand, otherTerm));
         // Check for exit case: both terms non-empty and containing different values
-        else if (!otherTerm.isEmpty() && 
-        		  !term.getValue().equals(otherTerm.getValue()))
+        else if (!otherTerm.isEmpty() && localContext.inSameSpace(operand.getQualifiedName()) &&
+        		  !operand.getValue().equals(otherTerm.getValue()))
         	return false;
         return true;
 		
@@ -102,14 +102,4 @@ public class AxiomPairer implements UnificationPairer
 		pairList.clear();
 	}
 	
-	public KeyName parseKeyName(String name)
-	{
-		// Test for compound name
-		Matcher matcher = namePattern.matcher(name);
-		if (matcher.find())
-		{   // Compound name has format "<key>.<name>"
-			return new KeyName(matcher.group(1), matcher.group(2));
-		}
-		return new KeyName("", name);
-	}
 }

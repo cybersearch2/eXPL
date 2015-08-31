@@ -9,6 +9,6 @@ axiom customer:
   ("Agora Imports", "Sparta"),
   ("Spiros Theodolites", "Milos");
   
-template charge(city ? city == customer.city, fee);  
-template customer(name, city);
+template charge(city, fee);  
+template customer(name, city ? city == charge.city);
   
