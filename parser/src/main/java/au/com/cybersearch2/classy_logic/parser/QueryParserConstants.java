@@ -75,7 +75,7 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int FALSE = 37;
   /** RegularExpression Id. */
-  int NULL = 38;
+  int UNKNOWN = 38;
   /** RegularExpression Id. */
   int NAN = 39;
   /** RegularExpression Id. */
@@ -200,7 +200,7 @@ public interface QueryParserConstants {
     "<STRING_LITERAL>",
     "\"true\"",
     "\"false\"",
-    "\"null\"",
+    "\"unknown\"",
     "\"NaN\"",
     "<IDENTIFIER>",
     "\"(\"",

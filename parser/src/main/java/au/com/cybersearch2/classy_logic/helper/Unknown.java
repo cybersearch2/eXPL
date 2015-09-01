@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2015  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,43 +15,41 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.helper;
 
-
 /**
- * Type of empty Term 
+ * Unknown
+ * Class to represent no information available
  * @author Andrew Bowley
- *
- * @since 17/10/2010
+ * 1 Sep 2015
  */
-public class Null implements Comparable<Null>
+public class Unknown implements Comparable<Unknown>
 {
+    /**
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @Override
+    public int compareTo(Unknown o)
+    {
+        // All empty objects are equal
+        return 0;
+    }
 
-	/**
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	@Override
-	public int compareTo(Null o)
-	{
-		// All empty objects are equal
-		return 0;
-	}
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object other)
+    {
+        if (other == null)
+            return true;
+        if (other instanceof Unknown)
+            return true;
+        return false;
+    }
 
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object other)
-	{
-		if (other == null)
-			return true;
-		if (other instanceof Null)
-			return true;
-		return false;
-	}
+    @Override
+    public String toString() 
+    {
+        return "unknown";
+    }
 
-	@Override
-	public String toString() 
-	{
-		return "null";
-	}
-	
 }

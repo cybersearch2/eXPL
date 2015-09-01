@@ -1140,7 +1140,7 @@ public class QueryParserTest
         QueryExecuter asiaTopTenQuery = new QueryExecuter(queryParams);
     	File megaCityList = new File("src/test/resources", "mega_city1.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(megaCityList));
-		while(asiaTopTenQuery.execute())
+		while (asiaTopTenQuery.execute())
 		{
  	 	    String line = reader.readLine();
 			assertThat(asiaTopTenQuery.toString()).isEqualTo(line);

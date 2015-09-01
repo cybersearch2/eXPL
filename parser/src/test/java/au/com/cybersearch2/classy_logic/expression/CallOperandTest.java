@@ -461,19 +461,25 @@ public class CallOperandTest
             "axiom city_list = {};\n" +
             "calc sort_cities(\n" +
             "  axiom sort_city = { name, altitude },\n" +
-            "  system.print(\"sort_city = \" + sort_city),\n" +
             "  city_list += sort_city,\n" +
-            "  << list_sort(city_list, \"altitude\"),\n" +
-             " system.print(\"Sorted cities\"),\n" +
-            "  integer i = 0,\n" +
-            "  {\n" +
-            "      system.print(city_list[i++]),\n" +
-            "      ? i < length(city_list)\n" +
-            "  },\n" +
-            "  i = 0\n" +
+            "  << list_sort(city_list, \"altitude\")\n" +
             ");\n" +
             "query sort_cities (city : sort_cities);\n"; 
 
+    static String[] SORTED_CITIES_LIST =
+    {
+        "sort_city_list0(name = jacksonville, altitude = 8)",
+        "sort_city_list0(name = richmond, altitude = 19)",
+        "sort_city_list0(name = madrid, altitude = 1305)",
+        "sort_city_list0(name = wichita, altitude = 1305)",
+        "sort_city_list0(name = bilene, altitude = 1718)",
+        "sort_city_list0(name = spokane, altitude = 1909)",
+        "sort_city_list0(name = denver, altitude = 5280)",
+        "sort_city_list0(name = flagstaff, altitude = 6970)",
+        "sort_city_list0(name = addis ababa, altitude = 8000)",
+        "sort_city_list0(name = leadville, altitude = 10200)"
+    };
+    
     static final String PERFECT_MATCH = 
             " axiom person (name, sex, age, starsign):\n" +
             "              (\"John\", \"m\", 23, \"gemini\"),\n" + 
@@ -512,13 +518,20 @@ public class CallOperandTest
             "  integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(candidate_list),\n" +
-            "    gemini = candidate_list[i++],\n" +
-            "    system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign])\n" +
+            "    gemini = candidate_list[i++]\n" +
+            "    //system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign])\n" +
             "  }\n" +
             " );\n" +
             " query match(match);";
+    
 
-
+    static String[] GEMINIS = 
+    {
+        "person(name = John, sex = m, age = 23, starsign = gemini)",
+        "person(name = Jenny, sex = f, age = 21, starsign = gemini)",
+        "person(name = Sonia, sex = f, age = 33, starsign = gemini)",
+        "person(name = Fiona, sex = f, age = 29, starsign = gemini)"
+    };
 
     @Before
     public void setUp()
@@ -533,8 +546,11 @@ public class CallOperandTest
         Result result = queryProgram.executeQuery("match");
         QualifiedName qname = QualifiedName.parseGlobalName("match.candidate_list");
         Iterator<Axiom> iterator = result.getIterator(qname);
+        int index = 0;
         while(iterator.hasNext())
-            System.out.println(iterator.next().toString());
+            //System.out.println(iterator.next().toString());
+            assertThat(iterator.next().toString()).isEqualTo(GEMINIS[index++]);
+        assertThat(index).isEqualTo(4);
     }
     
     @Test
@@ -543,8 +559,11 @@ public class CallOperandTest
         QueryProgram queryProgram = new QueryProgram(SORTED_CITIES);
         Result result = queryProgram.executeQuery("sort_cities");
         Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("city_list"));
+        int index = 0;
         while(iterator.hasNext())
-            System.out.println(iterator.next().toString());
+            //System.out.println(iterator.next().toString());
+            assertThat(iterator.next().toString()).isEqualTo(SORTED_CITIES_LIST[index++]);
+        assertThat(index).isEqualTo(SORTED_CITIES_LIST.length);
     }
     
     @Test

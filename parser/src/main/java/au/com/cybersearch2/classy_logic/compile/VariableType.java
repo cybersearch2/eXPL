@@ -59,6 +59,8 @@ public class VariableType
 	public final static String AXIOM_KEY = "AxiomKey";
     /** Key value for variable initialization property */
 	public final static String EXPRESSION = "Expression";
+    /** Key value for literal initialization property */
+    public final static String LITERAL = "Literal";
     /** Key value for Currency country property */
 	public final static String QUALIFIER_STRING = "QualifierString";
     /** Key value for Currency country evaluation operand property */
@@ -114,9 +116,6 @@ public class VariableType
     public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname)
     {
         Operand expression = (Operand)getProperty(EXPRESSION);
-		boolean hasExpression = 
-				(expression != null) &&
-				(expression.isEmpty() || (expression instanceof Evaluator));
 		Operand operand = null;
         String axiomKey = null;
         AxiomListListener axiomListListener = null;
@@ -127,6 +126,7 @@ public class VariableType
                 axiomKey = qname.getName();
             axiomListListener = axiomListListener(parserAssembler.getOperandMap());
         }
+        boolean hasExpression = expression != null;
 	    switch (operandType)
 	    {
 	    case INTEGER:
@@ -180,9 +180,10 @@ public class VariableType
 	    	else
 	    		parserAssembler.registerLocaleListener(currencyOperand);
 	    }
-	    if ((expression != null) && !hasExpression)
+	    Operand literal = (Operand) getProperty(LITERAL);
+	    if (literal != null)
 	        // Expression is a literal
-	        operand.assign(expression.getValue());
+	        operand.assign(literal.getValue());
 	    return operand;
     }
 

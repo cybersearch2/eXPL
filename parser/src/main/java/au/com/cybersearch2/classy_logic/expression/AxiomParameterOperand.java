@@ -95,6 +95,7 @@ public class AxiomParameterOperand extends ExpressionParameter<AxiomTermList>
         EvaluationStatus status = expression.evaluate(id);
         if (status == EvaluationStatus.COMPLETE)
             setValue(parameterList.evaluate());
+        this.id = id;
         return status;
     }
     /**

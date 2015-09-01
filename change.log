@@ -52,7 +52,9 @@ eXPL v1.12
 49. ParserAssembler getQueryOperand() method split off from getCallOperand() as function and query invocations are now different
 50. Allow an AxiomTermList object to be assigned to an AxiomListVariable object
 51. Add AxiomListListener interface to AxiomOperand to add AxiomLists to query results
-
+52. Prevent literal value assignment being converted to simply a literal operand
+53. Fix AxiomParameterOperand id not being updated on evaluation
+54. Add Unknown helper class and replace complilier NULL literal with UNKNOWN literal.
 
 
 eXPL v1.11
