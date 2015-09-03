@@ -90,6 +90,10 @@ public class FormatterOperand extends StringOperand implements LocaleListener
 		return operand;
 	}
 
+	/**
+	 * onScopeChange
+	 * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(au.com.cybersearch2.classy_logic.Scope)
+	 */
 	@Override
 	public void onScopeChange(Scope scope) 
 	{

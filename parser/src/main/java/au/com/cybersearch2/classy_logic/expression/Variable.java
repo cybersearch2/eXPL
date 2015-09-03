@@ -28,7 +28,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
  * @author Andrew Bowley
  * 11 Dec 2014
  */
-public class Variable extends DelegateParameter
+public class Variable extends DelegateOperand
 {
 	/** Optional Parameter which evaluates value */
 	protected Operand expression;
@@ -102,23 +102,6 @@ public class Variable extends DelegateParameter
 	}
 	
 	/**
-	 * Override toString() to report &lt;empty&gt;, null or value
-	 * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
-	 */
-	@Override
-	public String toString()
-	{
-		if (empty)
-		{
-			if (expression != null)
-				return (!name.isEmpty() ? name + " = " : "") + (expression.toString());
-			return name;
-		}
-		String valueText = ( value == null ? "null" : value.toString());
-		return (!name.isEmpty() ? name + " = " : "") + valueText;
-	}
-
-	/**
 	 * Returns expression Operand to an operand visitor
 	 * @return Operand object or null if expression not set
 	 */
@@ -137,5 +120,22 @@ public class Variable extends DelegateParameter
 	{
 		return null;
 	}
+
+    /**
+     * Override toString() to report &lt;empty&gt;, null or value
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
+     */
+    @Override
+    public String toString()
+    {
+        if (empty)
+        {
+            if (expression != null)
+                return (!name.isEmpty() ? name + " = " : "") + (expression.toString());
+            return name;
+        }
+        String valueText = ( value == null ? "null" : value.toString());
+        return (!name.isEmpty() ? name + " = " : "") + valueText;
+    }
 
 }

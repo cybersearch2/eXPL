@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.TermVisitor;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -124,7 +125,7 @@ public class Structure
 	public boolean isFact()
 	{
 		for (Term param: termList)
-			if (param.isEmpty())
+			if (param.isEmpty() || (param.getValueClass() == Unknown.class))
 				return false;
 		return true;
 	}

@@ -55,6 +55,10 @@ eXPL v1.12
 52. Prevent literal value assignment being converted to simply a literal operand
 53. Fix AxiomParameterOperand id not being updated on evaluation
 54. Add Unknown helper class and replace complilier NULL literal with UNKNOWN literal.
+55. Change QueryParams properties to parameters - Axioms mapped to template qualified names
+56. New OperandParam helper class is now used to pass parameters to calls.
+57. Compilier now collects call parameters and axiom terms into lists containing OperandParam objects
+58. Applicable Operand classes updated to to use OperandParam objects
 
 
 eXPL v1.11

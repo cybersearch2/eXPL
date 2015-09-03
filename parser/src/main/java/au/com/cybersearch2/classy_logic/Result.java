@@ -65,7 +65,7 @@ public class Result
 
     /**
      * Returns axiom result specified by key
-     * @param key
+     * @param qname Qualified name of axiom
      * @return Axiom object
      */
     public Axiom getAxiom(QualifiedName qname)

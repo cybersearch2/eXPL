@@ -29,7 +29,6 @@ import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryLauncher;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * QueryProgram
@@ -220,11 +219,7 @@ public class QueryProgram extends QueryLauncher
 	 */
 	public Result executeQuery(String queryName) 
 	{
-		return executeQuery(queryName, new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				return true;
-			}});
+		return executeQuery(queryName, QueryParams.DO_NOTHING);
 	}
 
 	/**
@@ -234,11 +229,7 @@ public class QueryProgram extends QueryLauncher
 	 */
 	public Result executeQuery(String scopeName, String queryName)
 	{
-		return executeQuery(scopeName, queryName, new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				return true;
-			}});
+		return executeQuery(scopeName, queryName, QueryParams.DO_NOTHING);
 
 	}
 

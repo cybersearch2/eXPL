@@ -25,7 +25,6 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * QueryLauncher
@@ -86,14 +85,7 @@ public class QueryLauncher
     protected void chainCalculator(QueryParams queryParams, Scope scope, QuerySpec chainQuerySpec, ChainQueryExecuter headQuery)
     {   // Calculator uses a single template
         Template calculatorTemplate = getCalculatorTemplate(scope, chainQuerySpec);
-        Axiom calculatorAxiom = null;
-        Map<String, Object> properties = queryParams.getProperties(calculatorTemplate.getName());
-        if (properties != null)
-        {
-            calculatorAxiom = new Axiom(calculatorTemplate.getName());
-            for (Map.Entry<String, Object> entry: properties.entrySet())
-                calculatorAxiom.addTerm(new Parameter(entry.getKey(), entry.getValue()));
-        }
+        Axiom calculatorAxiom = queryParams.getParameter(calculatorTemplate.getQualifiedName());
         headQuery.chainCalculator(calculatorAxiom, calculatorTemplate);
     }
 

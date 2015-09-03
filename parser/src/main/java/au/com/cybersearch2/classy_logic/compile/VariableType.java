@@ -26,11 +26,11 @@ import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
-import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.ParameterList;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
@@ -57,8 +57,10 @@ public class VariableType
 	
 	/** Key value for axiom name property */
 	public final static String AXIOM_KEY = "AxiomKey";
-    /** Key value for variable initialization property */
+    /** Key value for operand initialization property */
 	public final static String EXPRESSION = "Expression";
+    /** Key value for parameter initialization property */
+    public final static String PARAMS = "Params";
     /** Key value for literal initialization property */
     public final static String LITERAL = "Literal";
     /** Key value for Currency country property */
@@ -113,11 +115,14 @@ public class VariableType
      * @param qname Qualified name of new variable
      * @return Operand object
      */
+    @SuppressWarnings("unchecked")
     public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname)
     {
         Operand expression = (Operand)getProperty(EXPRESSION);
 		Operand operand = null;
         String axiomKey = null;
+        List<OperandParam> initializeList = null;
+
         AxiomListListener axiomListListener = null;
         if (operandType == OperandType.AXIOM || operandType == OperandType.LIST || operandType == OperandType.TERM)
         {
@@ -126,6 +131,8 @@ public class VariableType
                 axiomKey = qname.getName();
             axiomListListener = axiomListListener(parserAssembler.getOperandMap());
         }
+        if (operandType == OperandType.LIST || operandType == OperandType.TERM)
+            initializeList = (List<OperandParam>)getProperty(PARAMS);
         boolean hasExpression = expression != null;
 	    switch (operandType)
 	    {
@@ -146,7 +153,7 @@ public class VariableType
 	    	break;
         case TERM:
             // Expression is an initializer list Operand. 
-            operand = new AxiomParameterOperand(new QualifiedName(qname.getName() + "_params", qname), axiomKey, expression);
+            operand = new AxiomParameterOperand(new QualifiedName(qname.getName() + "_params", qname), axiomKey, initializeList);
             hasExpression = true;
             break;
         case AXIOM:
@@ -156,7 +163,7 @@ public class VariableType
             break;
         case LIST:
             // Expression is an initializer list 
-            ParameterList<AxiomList> parameterList = new ParameterList<AxiomList>(expression, axiomListGenerator(qname, axiomKey));
+            ParameterList<AxiomList> parameterList = new ParameterList<AxiomList>(initializeList, axiomListGenerator(qname, axiomKey));
             operand = new AxiomOperand(qname, axiomKey, parameterList, axiomListListener);
             hasExpression = true;
             break;
@@ -165,6 +172,7 @@ public class VariableType
         			  new CurrencyOperand(qname, parserAssembler.getScopeLocale()) : 
         		      new CurrencyOperand(qname, expression, parserAssembler.getScopeLocale());
 	    	break;
+        case UNKNOWN: 	
         default:
         	operand = !hasExpression ? new Variable(qname) : new Variable(qname, expression);
 	    }
@@ -250,6 +258,7 @@ public class VariableType
             AxiomList axiomList = new AxiomList(qname, axiomKey);
             parserAssembler.registerAxiomList(axiomList);
             return axiomList;
+        case UNKNOWN:   
         default:
             throw new ParseException("List " + qname.toString() + " type unknown");
        }
@@ -281,7 +290,9 @@ public class VariableType
     /**
      * Returns an object which implements CallEvaluator interface returning an AxiomList
      * given a list of axioms to marshall into an axiom list
-     * @return CallEvaluator object of generic return type AxiomList
+     * @param qname Qualified name of list to be created
+     * @param axiomKey Key of list to be created
+     * @return CallEvaluator object of generic type AxiomList
      */
     protected CallEvaluator<AxiomList> axiomListGenerator(final QualifiedName qname, final String axiomKey) 
     {
@@ -312,6 +323,11 @@ public class VariableType
         };
     }
 
+    /**
+     * Returns axiom list listener which adds the list to a given operand container
+     * @param operandMap OperandMap object
+     * @return AxiomListListener object
+     */
     protected AxiomListListener axiomListListener(final OperandMap operandMap)
     {
         return new AxiomListListener(){

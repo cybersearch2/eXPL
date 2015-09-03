@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.EvaluationUtils;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -231,15 +232,15 @@ public class EvaluatorTest
 		Operand rightTerm = mock(Operand.class);
 		Long value = Long.valueOf(76);
 		when(rightTerm.getValue()).thenReturn(value);
-		Evaluator evaluator = new TestEvaluator(leftTerm, "=", rightTerm);
-		assertThat(evaluator.assign(leftTerm, rightTerm)).isEqualTo(value);
+		//Evaluator evaluator = new TestEvaluator(leftTerm, "=", rightTerm);
+		assertThat(EvaluationUtils.assignRightToLeft(leftTerm, rightTerm)).isEqualTo(value);
 		verify(leftTerm).assign(value);
 		leftTerm = mock(Operand.class);
 		rightTerm = mock(Operand.class);
 		Float floatValue = Float.valueOf(63.0f);
 		when(rightTerm.getValue()).thenReturn(floatValue);
-		evaluator = new TestEvaluator(leftTerm, "=", rightTerm);
-		assertThat(evaluator.assign(leftTerm, rightTerm)).isInstanceOf(Null.class);
+		//Evaluator evaluator = new TestEvaluator(leftTerm, "=", rightTerm);
+		assertThat(EvaluationUtils.assignRightToLeft(leftTerm, rightTerm)).isInstanceOf(Null.class);
 		verify(leftTerm).assign(floatValue);
 	}
 
@@ -577,11 +578,11 @@ public class EvaluatorTest
 	@Test
 	public void test_isNaN()
 	{
-		Evaluator evaluator = new TestEvaluator(NAME, "++", new TestIntegerOperand("R"));
-		assertThat(evaluator.isNaN((Object)null)).isTrue();
-		assertThat(evaluator.isNaN(new Null())).isTrue();
-		assertThat(evaluator.isNaN(Double.valueOf(Double.NaN))).isTrue();
-		assertThat(evaluator.isNaN(Long.MAX_VALUE)).isFalse();
+		//Evaluator evaluator = new TestEvaluator(NAME, "++", new TestIntegerOperand("R"));
+		assertThat(EvaluationUtils.isNaN((Object)null)).isTrue();
+		assertThat(EvaluationUtils.isNaN(new Null())).isTrue();
+		assertThat(EvaluationUtils.isNaN(Double.valueOf(Double.NaN))).isTrue();
+		assertThat(EvaluationUtils.isNaN(Long.MAX_VALUE)).isFalse();
 	}
 	
 	@Test 

@@ -25,7 +25,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 8 Dec 2014
  */
-public class StringOperand  extends ExpressionParameter<String> implements Concaten<String>
+public class StringOperand  extends ExpressionOperand<String> implements Concaten<String>
 {
 
 	/**
@@ -90,7 +90,7 @@ public class StringOperand  extends ExpressionParameter<String> implements Conca
 
 	/**
 	 * getStringOperandOps
-	 * @see au.com.cybersearch2.classy_logic.expression.ExpressionParameter#getStringOperandOps()
+	 * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#getStringOperandOps()
 	 */
 	 @Override
      public OperatorEnum[] getStringOperandOps()

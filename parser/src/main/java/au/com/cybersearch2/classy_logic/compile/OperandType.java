@@ -17,6 +17,8 @@ package au.com.cybersearch2.classy_logic.compile;
 
 /**
  * OperandType
+ * eXPL types used for variables and lists.
+ * Note there is no LOCAL variable, only a LOCAL list.
  * @author Andrew Bowley
  * 10 Mar 2015
  */
@@ -27,10 +29,10 @@ public enum OperandType
 	DOUBLE,
 	STRING,
 	DECIMAL,
-	TERM,
-	AXIOM,
-	LOCAL,
+	TERM,   // AxiomParameterOperand or AxiomTermList created and passed to registerAxiomList()
+	AXIOM,  // AxiomOperand or  AxiomList
+	LOCAL,  // AxiomTermList created and passed to registerLocalList()
 	CURRENCY,
-	LIST,
-	NULL
+	LIST,   // AxiomOperand with ParameterList<AxiomList> to populate it
+	UNKNOWN
 }

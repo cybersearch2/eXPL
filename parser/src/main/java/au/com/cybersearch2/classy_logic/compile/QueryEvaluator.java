@@ -28,7 +28,6 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -92,58 +91,9 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
         final String solutionName =  template.getQualifiedName().toString();
         // Marshall arguments provided as a list of Variables into a properties container 
         if (argumentList.size() > 0)
-        {
-            Map<String, Object> properties = new HashMap<String, Object>();
-            int index = 0; // Map unnamed arguments to template term names
-            for (Term argument: argumentList)
-            {
-                // All parameters are Operands. Use name part of qualified name to get true name
-                Operand operand = (Operand)argument;
-                String argName = operand.getQualifiedName().getName();
-                if (argName.isEmpty())
-                {
-                    if (index == template.getTermCount())
-                        throw new ExpressionException("Unnamed argument at position " + index + " out of bounds");
-                    argName = template.getTermByIndex(index++).getName();
-                }
-                properties.put(argName, argument.getValue());
-            }
-            // TODO - Do not use just template name as can cause accidental unification
-            // when query axiom is employed
-            queryParams.putProperties(templateName, properties);
-        }
+            prepareArguments(argumentList, template);
         // Set SolutionHander to collect results
-        SolutionHandler solutionHandler = new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution)
-            {
-                Axiom axiom = solution.getAxiom(solutionName);
-                if ((axiom != null) && (innerTemplate != null))
-                {
-                    // No backup, so reset before unification
-                    innerTemplate.reset();
-                    if (axiom.unifyTemplate(innerTemplate, solution))
-                    {
-                        if (innerTemplate.evaluate() == EvaluationStatus.COMPLETE);
-                        {
-                            QualifiedName innerTemplateName = innerTemplate.getQualifiedName();
-                            Term innerTerm = callerScope.getParserAssembler().getOperandMap().get(innerTemplateName);
-                            AxiomTermList axiomTermList = (AxiomTermList)(innerTerm.getValue());
-                            Axiom innerAxiom = new Axiom(innerTemplate.getKey());
-                            for (int i = 0; i < (innerTemplate.getTermCount()); i++)
-                            {
-                                String termName = innerTemplate.getTermByIndex(i).getName();
-                                Term term = axiom.getTermByName(termName);
-                                if (term == null)
-                                    term = new Parameter(termName);
-                                innerAxiom.addTerm(term);
-                            }
-                            axiomTermList.setAxiom(innerAxiom);
-                        }
-                    }
-                }
-                return true;
-            }};
+        SolutionHandler solutionHandler = getSolutionHandler(solutionName);
         queryParams.setSolutionHandler(solutionHandler);
         // Do query using QueryLauncher utility class
         ScopeContext scopeContext = isCallInScope ? null : scope.getContext(true);
@@ -155,7 +105,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
         }
         finally
         {   // Clear call properties so query params can be recycled
-            queryParams.clearProperties(templateName);
+            queryParams.clearParameters(templateName);
             if (scopeContext != null)
                // Scope restored to original state
                 scopeContext.resetScope();
@@ -165,4 +115,58 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
         return null;
     }
 
+    protected void prepareArguments(List<Term> argumentList, Template template)
+    {
+        int index = 0; // Map unnamed arguments to template term names
+        Axiom axiom = new Axiom(template.getKey());
+        for (Term argument: argumentList)
+        {
+            // All parameters are Parameters with names set by caller and possibly empty for match by position.
+            String argName = argument.getName();
+            if (argName.isEmpty())
+            {
+                if (index == template.getTermCount())
+                    throw new ExpressionException("Unnamed argument at position " + index + " out of bounds");
+                argName = template.getTermByIndex(index).getName();
+            }
+            axiom.addTerm(new Parameter(argName, argument.getValue()));
+            ++index;
+        }
+        queryParams.putParameters(template.getQualifiedName(), axiom);
+    }
+
+    protected SolutionHandler getSolutionHandler(final String solutionName)
+    {
+        return new SolutionHandler(){
+        @Override
+        public boolean onSolution(Solution solution)
+        {
+            Axiom axiom = solution.getAxiom(solutionName);
+            if ((axiom != null) && (innerTemplate != null))
+            {
+                // No backup, so reset before unification
+                innerTemplate.reset();
+                if (axiom.unifyTemplate(innerTemplate, solution))
+                {
+                    if (innerTemplate.evaluate() == EvaluationStatus.COMPLETE);
+                    {
+                        QualifiedName innerTemplateName = innerTemplate.getQualifiedName();
+                        Term innerTerm = callerScope.getParserAssembler().getOperandMap().get(innerTemplateName);
+                        AxiomTermList axiomTermList = (AxiomTermList)(innerTerm.getValue());
+                        Axiom innerAxiom = new Axiom(innerTemplate.getKey());
+                        for (int i = 0; i < (innerTemplate.getTermCount()); i++)
+                        {
+                            String termName = innerTemplate.getTermByIndex(i).getName();
+                            Term term = axiom.getTermByName(termName);
+                            if (term == null)
+                                term = new Parameter(termName);
+                            innerAxiom.addTerm(term);
+                        }
+                        axiomTermList.setAxiom(innerAxiom);
+                    }
+                }
+            }
+            return true;
+        }};
+    }
 }

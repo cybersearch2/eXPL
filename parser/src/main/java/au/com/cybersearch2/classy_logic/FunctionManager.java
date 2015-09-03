@@ -23,6 +23,7 @@ import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 
 /**
  * FunctionManager
+ * Contains function libraries
  * @author Andrew Bowley
  * 30 Jul 2015
  */
@@ -30,17 +31,31 @@ public class FunctionManager
 {
     /** Map Function Providers to their names */
     protected Map<String, FunctionProvider<?>> functionProviderMap;
-    
+
+    /**
+     * Construct FunctionManager object
+     */
     public FunctionManager()
     {
         functionProviderMap = new HashMap<String, FunctionProvider<?>>();
     }
-    
+
+    /**
+     * Put function library io container
+     * @param name Name of library
+     * @param functionProvider The library object which implements FunctionProvider interface
+     * @see au.com.cybersearch2.classy_logic.interfaces.FunctionProvider
+     */
     public void putFunctionProvider(String name, FunctionProvider<?> functionProvider)
     {
         functionProviderMap.put(name, functionProvider);
     }
-    
+
+    /**
+     * Returns function library specified by name
+     * @param name The library name
+     * @return FunctionProvider implementation
+     */
     public FunctionProvider<?> getFunctionProvider(String name)
     {
         FunctionProvider<?> functionProvider = functionProviderMap.get(name);

@@ -46,7 +46,9 @@ public class RegExOperand extends StringOperand
 	protected Pattern pattern;
 	/** Optional object to assign group values on evaluation */
 	protected Group group;
+	/** Optional flags to modify regular expression behavior */
 	protected int flags;
+	/** Regular expression operand */
 	protected Operand regexOp;
 	
 	/**

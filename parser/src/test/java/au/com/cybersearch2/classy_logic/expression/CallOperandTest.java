@@ -89,7 +89,8 @@ public class CallOperandTest
                     public Void evaluate(List<Term> argumentList)
                     {
                         for (Term term: argumentList)
-                            System.out.println(term.toString());
+                            System.out.print(term.getValue().toString());
+                        System.out.println();
                         return null;
                     }
                     
@@ -524,13 +525,73 @@ public class CallOperandTest
             " );\n" +
             " query match(match);";
     
+    static final String FACTUAL_MATCH = 
+            " axiom person (name, sex, age, starsign):\n" +
+            "              (\"John\", \"m\", 23, \"gemini\"),\n" + 
+            "              (\"Sue\", \"f\", 19, \"cancer\"),\n" + 
+            "              (\"Sam\", \"m\", 24, \"scorpio\"),\n" + 
+            "              (\"Jenny\", \"f\", 21, \"gemini\"),\n" + 
+            "              (\"Andrew\", \"m\", 26, \"virgo\"),\n" + 
+            "              (\"Alice\", \"f\", 20, \"pices\"),\n" + 
+            "              (\"Ingrid\", \"f\", 23, \"cancer\"),\n" + 
+            "              (\"Jack\", \"m\", 32, \"pices\"),\n" + 
+            "              (\"Sonia\", \"f\", 0, \"gemini\"),\n" + 
+            "              (\"Alex\", \"m\", 22, \"aquarius\"),\n" + 
+            "              (\"Jill\", \"f\", 33, \"cancer\"),\n" + 
+            "              (\"Fiona\", \"f\", 29, \"gemini\"),\n" + 
+            "              (\"melissa\", \"f\", 30, \"virgo\"),\n" + 
+            "              (\"Tom\", \"m\", 22, \"cancer\"),\n" + 
+            "              (\"Bill\", \"m\", 19, \"virgo\");\n" + 
+            "list person_list(person);\n" +
+            "calc people_by_starsign(\n" +
+            "  string starsign,\n" +
+            "  axiom candidate = {},\n" +
+            "  integer i = 0,\n" +
+            "  {\n" +
+            "    ? i < length(person_list),\n" +
+            "    ? person_list[i][starsign] == starsign\n" +
+            "    {\n" +
+            "       age = person_list[i][age],\n" +
+            "       ? age < 18\n" +
+            "       { age = unknown },\n" +
+            "       axiom person = { name = person_list[i][name], sex = person_list[i][sex], age, starsign =  person_list[i][starsign] },\n" +
+            "       candidate += person\n" +
+            "    },\n" +
+            "    ++i\n" +
+            "  }\n" +
+            ");\n" +
+            "calc match(\n" +
+            "  axiom eligible = {},\n" +
+            "  template perfect(candidate) << people_by_starsign(\"gemini\"),\n" +
+            "  axiom candidate_list = match.perfect[candidate],\n" +
+            "  //system.print(candidate_list),\n" +
+            "  integer i = 0,\n" +
+            "  {\n" +
+            "    ? i < length(candidate_list),\n" +
+            "    gemini = candidate_list[i++],\n" +
+            "    ? fact(gemini)\n" +
+            "    {\n" +
+            "      // system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign]) }\n" +
+            "      axiom person = { name = gemini[name] , sex = gemini[sex], age = gemini[age] , starsign = gemini[starsign] },\n" +
+            "      eligible += person\n" +
+            "    }\n" +
+            "  }\n" +
+            " );\n" +
+            " query match(match);";
 
-    static String[] GEMINIS = 
+    static String[] PERFECT_GEMINIS = 
     {
         "person(name = John, sex = m, age = 23, starsign = gemini)",
         "person(name = Jenny, sex = f, age = 21, starsign = gemini)",
         "person(name = Sonia, sex = f, age = 33, starsign = gemini)",
         "person(name = Fiona, sex = f, age = 29, starsign = gemini)"
+    };
+    
+    static String[] FACTUAL_GEMINIS = 
+    {
+        "person_list0(name = John, sex = m, age = 23, starsign = gemini)",
+        "person_list0(name = Jenny, sex = f, age = 21, starsign = gemini)",
+        "person_list0(name = Fiona, sex = f, age = 29, starsign = gemini)"
     };
 
     @Before
@@ -549,8 +610,22 @@ public class CallOperandTest
         int index = 0;
         while(iterator.hasNext())
             //System.out.println(iterator.next().toString());
-            assertThat(iterator.next().toString()).isEqualTo(GEMINIS[index++]);
+            assertThat(iterator.next().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
         assertThat(index).isEqualTo(4);
+    }
+    
+    @Test
+    public void test_factual_people()
+    {
+        QueryProgram queryProgram = new QueryProgram(FACTUAL_MATCH);
+        Result result = queryProgram.executeQuery("match");
+        QualifiedName qname = QualifiedName.parseGlobalName("match.eligible");
+        Iterator<Axiom> iterator = result.getIterator(qname);
+        int index = 0;
+        while(iterator.hasNext())
+            //System.out.println(iterator.next().toString());
+            assertThat(iterator.next().toString()).isEqualTo(FACTUAL_GEMINIS[index++]);
+        assertThat(index).isEqualTo(3);
     }
     
     @Test
@@ -686,11 +761,11 @@ public class CallOperandTest
                 while (subjects.hasNext())
                 {
                     Axiom subject = subjects.next().getAxiom();
-                    System.out.println(subject.toString());
-                    //assertThat(subject.getTermByIndex(0).toString() + " " + subject.getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
+                    //System.out.println(subject.toString());
+                    assertThat(subject.getTermByIndex(0).toString() + " " + subject.getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
                 }
-                System.out.println(item.getAxiom().getTermByIndex(1).getValue());
-                //assertThat(item.getAxiom().getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
+                //System.out.println(item.getAxiom().getTermByIndex(1).getValue());
+                assertThat(item.getAxiom().getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
                 return true;
             }});
     }

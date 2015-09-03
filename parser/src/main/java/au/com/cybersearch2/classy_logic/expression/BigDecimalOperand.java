@@ -27,7 +27,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 3 Dec 2014
  */
-public class BigDecimalOperand extends ExpressionParameter<BigDecimal> 
+public class BigDecimalOperand extends ExpressionOperand<BigDecimal> 
 {
     
 	/**

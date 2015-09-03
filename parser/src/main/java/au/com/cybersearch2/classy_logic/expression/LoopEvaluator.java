@@ -105,7 +105,7 @@ public class LoopEvaluator extends BooleanOperand
 	}
 
 	/**
-	 * @see au.com.cybersearch2.classy_logic.expression.ExpressionParameter#toString()
+	 * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#toString()
 	 */
 	@Override
 	public String toString() 

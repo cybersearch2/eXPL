@@ -19,11 +19,13 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.terms.GenericParameter;
 
 /**
  * AxiomParameterOperand
@@ -32,14 +34,18 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
  * @author Andrew Bowley
  * 9 Aug 2015
  */
-public class AxiomParameterOperand extends ExpressionParameter<AxiomTermList>
+public class AxiomParameterOperand extends GenericParameter<AxiomTermList> implements Operand
 {
+    /** Qualified name of operand */
+    protected QualifiedName qname;
     /** Collects parameters from an Operand tree and passes them to a supplied function object */
     protected ParameterList<AxiomTermList> parameterList;
     /** Name of axiom list to be generated */
     protected QualifiedName axiomName;
     /** The axiom key */  
     protected String axiomKey;
+    /** Root of Operand tree for unification */
+    protected Operand paramsTreeRoot;
 
     /**
      * Construct an AxiomParameterOperand object
@@ -47,35 +53,23 @@ public class AxiomParameterOperand extends ExpressionParameter<AxiomTermList>
      * @param axiomKey Key of axiom list to be generated
      * @param argumentExpression Operand containing parameters as a tree of operands
      */
-    public AxiomParameterOperand(QualifiedName qname, String axiomKey, Operand argumentExpression)
+    public AxiomParameterOperand(QualifiedName qname, String axiomKey, List<OperandParam> initializeList)
     {
-        super(qname, argumentExpression);
-        this.axiomName = new QualifiedName(axiomKey, qname);
+        super(qname.getName());
+        this.qname = qname;
         this.axiomKey = axiomKey;
-        if (argumentExpression != null)
-            parameterList = new ParameterList<AxiomTermList>(argumentExpression, axiomGenerator());
+        this.axiomName = new QualifiedName(axiomKey, qname);
+        if ((initializeList != null) && !initializeList.isEmpty())
+        {
+            parameterList = new ParameterList<AxiomTermList>(initializeList, axiomGenerator());
+            paramsTreeRoot = OperandParam.buildOperandTree(initializeList);
+        }
     }
 
-    /**
-     * Returns an object which implements CallEvaluator interface returning an AxiomList
-     * given a list of terms to marshall into an axiom
-     * @return CallEvaluator object of generic return type AxiomList
-     */
-    protected CallEvaluator<AxiomTermList> axiomGenerator() 
+    @Override
+    public QualifiedName getQualifiedName()
     {
-        return new CallEvaluator<AxiomTermList>(){
-
-            @Override
-            public String getName()
-            {
-                return name;
-            }
-
-            @Override
-            public AxiomTermList evaluate(List<Term> argumentList)
-            {
-                return AxiomUtils.marshallAxiomTerms(axiomName, axiomName.getName(), argumentList);
-            }};
+        return qname;
     }
 
     /**
@@ -86,18 +80,32 @@ public class AxiomParameterOperand extends ExpressionParameter<AxiomTermList>
     @Override
     public EvaluationStatus evaluate(int id)
     {
-        if (expression == null)
+        if (parameterList == null)
         {
             AxiomTermList axiomTermList = new AxiomTermList(axiomName, axiomKey);
             setValue(axiomTermList);
             return EvaluationStatus.COMPLETE;
         }
-        EvaluationStatus status = expression.evaluate(id);
-        if (status == EvaluationStatus.COMPLETE)
-            setValue(parameterList.evaluate());
+        setValue(parameterList.evaluate(id));
         this.id = id;
-        return status;
+        return EvaluationStatus.COMPLETE;
     }
+
+    /**
+     * Backup to intial state if given id matches id assigned on unification or given id = 0. 
+     * @param id Identity of caller. 
+     * @return boolean true if backup occurred
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#unify(Term otherParam, int id)
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#evaluate(int id)
+     */
+    @Override
+    public boolean backup(int id)
+    {
+        if (paramsTreeRoot != null)
+            paramsTreeRoot.backup(id);
+        return super.backup(id);
+    }
+    
     /**
      * 
      * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getRightOperandOps()
@@ -124,6 +132,16 @@ public class AxiomParameterOperand extends ExpressionParameter<AxiomTermList>
         };
     }
 
+    /**
+     * Returns Value for no concatenation operations
+     * @return OperatorEnum[]
+     */
+    @Override
+    public OperatorEnum[] getStringOperandOps()
+    {
+        return Operand.EMPTY_OPERAND_OPS;
+    }
+ 
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm)
     {   // There is no valid evaluation involving an axiom resulting in a number
@@ -142,5 +160,42 @@ public class AxiomParameterOperand extends ExpressionParameter<AxiomTermList>
         return Boolean.FALSE;
     }
 
+    /**
+     * Returns operand tree fur parameter unification     
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperand()
+     */
+    @Override
+    public Operand getRightOperand() 
+    {
+        return paramsTreeRoot;
+    }
+    
+    @Override
+    public Operand getLeftOperand()
+    {
+        return null;
+    }
+
+    /**
+     * Returns an object which implements CallEvaluator interface returning an AxiomList
+     * given a list of terms to marshall into an axiom
+     * @return CallEvaluator object of generic return type AxiomList
+     */
+    protected CallEvaluator<AxiomTermList> axiomGenerator() 
+    {
+        return new CallEvaluator<AxiomTermList>(){
+
+            @Override
+            public String getName()
+            {
+                return name;
+            }
+
+            @Override
+            public AxiomTermList evaluate(List<Term> argumentList)
+            {
+                return AxiomUtils.marshallAxiomTerms(axiomName, axiomName.getName(), argumentList);
+            }};
+    }
 
 }

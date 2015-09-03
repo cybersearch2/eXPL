@@ -15,9 +15,11 @@ package au.com.cybersearch2.classy_logic.expression;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 
+import java.util.List;
+
+import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
  * CallOperand
@@ -33,11 +35,11 @@ public class CallOperand<R> extends ParameterOperand<R>
      * Construct CallOperand object
      * @param qname Qualified name
      * @param callEvaluator Executes function using parameters and returns object of generic type
-     * @param parameters Root of Operand parameter tree or null if no parameters
+     * @param operandParamList List of Operand arguments or null for no arguments
      */
-    public CallOperand(QualifiedName qname, CallEvaluator<R> callEvaluator, Operand parameters)
+    public CallOperand(QualifiedName qname, CallEvaluator<R> callEvaluator, List<OperandParam> operandParamList)
     {
-        super(qname, parameters, callEvaluator);
+        super(qname, operandParamList, callEvaluator);
     }
 
 }

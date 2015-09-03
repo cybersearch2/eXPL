@@ -24,7 +24,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 1 Dec 2014
  */
-public class IntegerOperand extends ExpressionParameter<Long> 
+public class IntegerOperand extends ExpressionOperand<Long> 
 {
 
 	/**

@@ -66,6 +66,7 @@ public class Scope
 	 * Construct a Scope object with access to the global scope
 	 * @param scopeMap Scopes container
 	 * @param name Scope name - must be unique to all scopes
+	 * @param properties Scope properties 
 	 */
 	public Scope(Map<String, Scope> scopeMap, String name, Map<String, Object> properties) 
 	{
@@ -93,7 +94,8 @@ public class Scope
 	}
 	
 	/**
-	 * @return the locale
+	 * Returns locale of scopet
+	 * @return Locale object
 	 */
 	public Locale getLocale() 
 	{
@@ -101,38 +103,59 @@ public class Scope
 	}
 
 	/**
-	 * @param locale the locale to set
+	 * Set locale of this scope
+	 * @param locale Locale objedt
 	 */
 	public void setLocale(Locale locale) 
 	{
 		this.locale = locale;
 	}
 
+	/**
+	 * Complete construction of a query specification according to type of query and position in chain. 
+	 * If the need is detected, a new head query specification will be return. This is used when a 
+	 * calculator is found as the head query and a logic query needs to be inserted before it to feed
+	 * the calculator axioms one by one.
+	 * Intended only for use by compiler. 
+	 * @param querySpec Query specification under construction
+	 * @param firstKeyname Keyname object at head of query chain
+	 * @param keynameCount Number of keynames in chain so far
+	 * @param properties Query parameters. Optional, so may be empty
+	 * @return QuerySpec The query specification object passed as a parameter or a new head query specifiection object  
+	 */
 	public QuerySpec buildQuerySpec(QuerySpec querySpec, KeyName firstKeyname, int keynameCount, Map<String, Object> properties)
     {
 	       String templateName = firstKeyname.getTemplateName();
 	       Template firstTemplate = getTemplate(templateName);
 	       if (!firstTemplate.isCalculator())
+	           // If the head query is not a calculator, then the build is complete
 	           return querySpec;
-	       if (keynameCount > 1)
-	          throw new ExpressionException("Calculator " + templateName + " can only have one query step");
+	       // Now deal with the specifics of a calculator query
+	       // Query type
 	       querySpec.setQueryType(QueryType.calculator);
+	       // Query parameters specified as properties
 	       if (properties.size() > 0)
 	          querySpec.putProperties(firstKeyname, properties);
 	       String axiomName = firstKeyname.getAxiomKey();
+	       // Check if logic query needs to be inserted in front of head calculator
 	       if (!querySpec.isHeadQuery() || axiomName.isEmpty())
 	          return querySpec;
+	       // Create new head logic query where axiom and template key names are same
+	       // The original query specification will be discarded
 	       QuerySpec headQuerySpec = new QuerySpec(querySpec.getName());   
 	       headQuerySpec.addKeyName(new KeyName(axiomName, axiomName));
+	       // Append new calculator query spec to head query spec.
 	       QuerySpec chainQuerySpec = headQuerySpec.chain();
 	       chainQuerySpec.addKeyName(firstKeyname);
 	       chainQuerySpec.setQueryType(QueryType.calculator);
 	       if (properties.size() > 0)
 	          chainQuerySpec.putProperties(firstKeyname, properties);
 	       firstTemplate.setKey(axiomName);
+	       // Check for logic query template already exists. Not expected to exist.
 	       Template logicTemplate = findTemplate(axiomName);
 	       if (logicTemplate != null)
 	           return headQuerySpec;
+	       // Create new logic query template which will populated with terms to match axiom terms at start of query
            QualifiedName qualifiedAxiomName = new QualifiedName(getAlias(), axiomName, QualifiedName.EMPTY);
 	       logicTemplate = parserAssembler.createTemplate(qualifiedAxiomName, false);
 	       logicTemplate.setKey(axiomName);
@@ -255,8 +278,8 @@ public class Scope
     }
 
 	/**
-	 * Returns template with specified name
-	 * @param name
+	 * Returns template with specified name. Will search first in own scope and then in global scope if not found
+	 * @param name Name of template
 	 * @return Template object or null if template not found
 	 */
 	public Template getTemplate(String name)

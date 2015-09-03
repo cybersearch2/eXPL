@@ -16,100 +16,75 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
  * ParameterList
- * Collects parameters from an Operand tree and passes them to a supplied function object.
+ * Contains named parameters which are passed to a function which creates an object dependent on these parameters.
+ * Note that the ower of the parameter list is responsible for performing unification on the Operand objects it contains.
  * @author Andrew Bowley
  * 7 Aug 2015
  */
 public class ParameterList<R>
 {
+    protected static List<Term> EMPTY_TERM_LIST;
     /** Performs function using parameters collected after query evaluation and returns value */
     protected CallEvaluator<R> callEvaluator;
-    /** Root of Operand parameter tree or null if no parameters */
-    protected Operand parameters;
+    /** List of Operand arguments or null for no arguments */
+    protected List<OperandParam> operandParamList;
+ 
+    static
+    {
+        EMPTY_TERM_LIST = Collections.emptyList();
+    }
     
     /**
      * Construct a ParameterList object which uses parameters in an an Expression operand 
      * and a supplied evaluator object to create it's value
-     * @param parameters Root of Operand parameter tree or null if no parameters
+     * @param operandParamList List of Operand arguments or null for no arguments
      * @param callEvaluator Executes function using parameters and returns object of generic type
      */
-    public ParameterList(Operand parameters, CallEvaluator<R> callEvaluator) 
+    public ParameterList(List<OperandParam> operandParamList, CallEvaluator<R> callEvaluator) 
     {
-        this.parameters = parameters;
+        this.operandParamList = operandParamList;
         this.callEvaluator = callEvaluator;
     }
 
-    public Operand getParameters()
+    /**
+     * Returns list of parameters
+     * @return
+     */
+    public List<OperandParam> getOperandParamList()
     {
-        return parameters;
+        return operandParamList;
     }
 
     /**
      * Perform function using parameters
      * @return Object of generic type
      */
-    public R evaluate()
+    public R evaluate(int id)
     {
-        final List<Term> argumentList = new ArrayList<Term>();
-        if ((parameters != null) && !parameters.isEmpty())
-        {   // Collect parameters using visitor
-            OperandVisitor visitor = new OperandVisitor(){
-    
-                @Override
-                public boolean next(Operand operand, int depth)
-                {
-                    argumentList.add(operand);
-                    return true;
-                }};
-                visit(parameters, visitor, 1);
+        if ((operandParamList == null) || operandParamList.isEmpty())
+            return callEvaluator.evaluate(EMPTY_TERM_LIST);
+        final List<Term> argumentList = new ArrayList<Term>(operandParamList.size());
+        if ((operandParamList != null) && !operandParamList.isEmpty())
+        {   
+            for (OperandParam operandParam: operandParamList)
+            {
+                Operand operand = operandParam.getOperand();
+                if (operand.isEmpty())
+                    operand.evaluate(id);
+                argumentList.add(operandParam);
+            }
         }
         return callEvaluator.evaluate(argumentList);
     }
  
-    /**
-     * Visit a node of the Operand tree. Recursively navigates left and right operands, if any.
-     * @param term The term being visited
-     * @param visitor Object implementing OperandVisitor interface
-     * @param depth Depth in tree. The root has depth 1.
-     * @return flag set true if entire tree formed by this term is navigated. 
-     */
-    protected boolean visit(Operand operand, OperandVisitor visitor, int depth)
-    {
-        // Only Evaluator terms will have left and right Operands containing parameters
-        if (!(operand instanceof Evaluator))
-        {   // Collect paramater 
-            visitor.next(operand, depth);
-            return true;
-        }
-        Operand left = operand.getLeftOperand();
-        if (left != null)
-        {
-            if (!(left instanceof Evaluator))
-                // Collect paramater 
-                visitor.next(left, depth);
-            else
-                // Keep walking
-                visit(left, visitor, depth + 1);
-        }
-        Operand right = operand.getRightOperand();
-        if (right != null)
-        {
-            if (!(right instanceof Evaluator))
-                // Collect paramater 
-                visitor.next(right, depth);
-            else
-                // Keep walking
-                visit(right, visitor, depth + 1);
-        }
-        return true;
-    }
 }

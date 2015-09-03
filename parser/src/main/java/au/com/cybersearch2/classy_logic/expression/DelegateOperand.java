@@ -31,17 +31,20 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
- * DelegateParameter
+ * DelegateOperand
  * @author Andrew Bowley
  * 25 Dec 2014
  */
-public abstract class DelegateParameter extends Parameter implements Operand, Concaten<Object> 
+public abstract class DelegateOperand extends Parameter implements Operand, Concaten<Object> 
 {
-	static final QualifiedName DELEGATE_NAME = new QualifiedName("delegate", QualifiedName.ANONYMOUS);
+    /** Qualified name shared by all delegates and need not be referenced by queries */
+	static final QualifiedName DELEGATE_NAME = new QualifiedName("*delegate*", QualifiedName.ANONYMOUS);
+	/** Default delegate only allows assignment */
 	static final AssignOnlyOperand ASSIGN_ONLY_DELEGATE;
 	
-    /** Constant value for no operators permited */
+    /** Constant value for no operators permitted */
 	protected static OperatorEnum[] EMPTY_OPERAND_OPS = new OperatorEnum[0];
+    /** Constant value for only assignment permited */
 	protected static OperatorEnum[] ASSIGN_OPERAND_OP = { OperatorEnum.ASSIGN };
 	
 	/** Map value class to Operand class */
@@ -55,7 +58,7 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 	static
 	{
 	    ASSIGN_ONLY_DELEGATE = new AssignOnlyOperand(DELEGATE_NAME);
-		delegateClassMap = new HashMap<Class<?>,  Operand>();
+		delegateClassMap = new HashMap<Class<?>,  Operand>(9);
 		delegateClassMap.put(String.class, new StringOperand(DELEGATE_NAME));
 		delegateClassMap.put(Integer.class, new IntegerOperand(DELEGATE_NAME));
         delegateClassMap.put(Long.class, new IntegerOperand(DELEGATE_NAME));
@@ -69,23 +72,25 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 	
 
 	/**
-	 * Construct DelegateParameter object
+	 * Construct DelegateOperand object with specified value
      * @param qname Qualified name of variable
 	 * @param value Value to set
 	 */
-	protected DelegateParameter(QualifiedName qname, Object value) 
+	protected DelegateOperand(QualifiedName qname, Object value) 
 	{
 		super(qname.getName(), value);
 		this.qname = qname;
 	}
 
 	/**
-	 * @param name
+     * Construct empty DelegateOperand object
+     * @param qname Qualified name of variable
 	 */
-	protected DelegateParameter(QualifiedName qname) 
+	protected DelegateOperand(QualifiedName qname) 
 	{
 		super(qname.getName());
 		this.qname = qname;
+		// Default to only assignment allowed
         delegate = ASSIGN_ONLY_DELEGATE;
 	}
 
@@ -228,9 +233,13 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
 		return result;
 	}
 
+    /**
+     * concatenate
+     * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
+     */
     @Override
     public Object concatenate(Operand rightOperand)
-    {
+    {   // Axioms are special case
         if (delegate.getClass() == AxiomOperand.class)
             return AxiomUtils.concatenate(this, rightOperand);
         return value.toString() + rightOperand.getValue().toString();
@@ -257,10 +266,9 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
         return backupOccurred;
     }
 
-
-
 	/**
-     * Set value to null, mark Parameter as empty and set id to 0
+     * Set value to null, mark Parameter as empty and set id to 0. 
+     * Do full backup for left and right operands to allow re-evaluation.
      */
     public void clearValue()
     {
@@ -273,11 +281,9 @@ public abstract class DelegateParameter extends Parameter implements Operand, Co
                 return true;
             }};
         Operand leftOperand = getLeftOperand();
-        // Use unifyTerm as substitute for clearValue() in case it is overriden
         if (leftOperand != null)
             visit(leftOperand, visitor, 1);
         Operand rightOperand = getRightOperand();
-        // Use unifyTerm as substitute for clearValue() in case it is overriden
         if (rightOperand != null)
             visit(rightOperand, visitor, 1);
         super.clearValue();

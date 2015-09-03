@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -15,6 +16,7 @@ import au.com.cybersearch2.classy_logic.query.AxiomMapCollection;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * QueryParams
@@ -25,6 +27,8 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class QueryParams 
 {
+    public static SolutionHandler DO_NOTHING;
+    
     /** Query specification */
 	protected QuerySpec querySpec;
     /** 1st query parameter - AxiomCollection object */
@@ -37,10 +41,20 @@ public class QueryParams
 	protected SolutionHandler solutionHandler;
 	/** Solution (optional). Source of initialization axioms */
 	protected Solution initialSolution;
-    /** Properties for calculations referenced by template name */
-    protected Map<String, Map<String, Object>> propertiesMap;
+    /** Container for template axiom parameters */
+    protected Map<QualifiedName, Axiom> parametersMap;
 
+    static
+    {
+        DO_NOTHING = new SolutionHandler(){
 
+            @Override
+            public boolean onSolution(Solution solution)
+            {
+                return true;
+            }};
+    }
+    
 	/**
 	 * Construct QueryParams object
 	 * @param scope Specified scope
@@ -50,7 +64,6 @@ public class QueryParams
 	{
 		this.scope = scope;
 		this.querySpec = querySpec;
-        propertiesMap = new HashMap<String, Map<String, Object>>();
 	}
 
 	/**
@@ -130,13 +143,7 @@ public class QueryParams
 	 */
 	public SolutionHandler getSolutionHandler() 
 	{
-		return solutionHandler != null ? solutionHandler : new SolutionHandler(){
-
-            @Override
-            public boolean onSolution(Solution solution)
-            {
-                return true;
-            }};
+		return solutionHandler != null ? solutionHandler : DO_NOTHING;
 	}
 
 	/**
@@ -168,42 +175,71 @@ public class QueryParams
 
     /**
      * Add axiom key / template name pair for calculator query, along with optional properties
-     * @param templateName Name of template to which the properties apply
+     * @param qualifiedTemplateName Qualified name of template to which the properties apply
+     * @param parametersAxiom Calculator parameters contained in a axiom object
+     */
+    public void putParameters(QualifiedName qualifiedTemplateName, Axiom parametersAxiom) 
+    {
+        if ((parametersAxiom != null) && (parametersAxiom.getTermCount() > 0))
+        {
+            if (parametersMap == null)
+                parametersMap = new HashMap<QualifiedName, Axiom>();
+            parametersMap.put(qualifiedTemplateName, parametersAxiom);
+        }
+    }
+
+    /**
+     * Add axiom key / template name pair for calculator query, along with optional properties
+     * @param qualifiedTemplateName Qualified name of template to which the properties apply
      * @param properties Calculator properties
      */
-    public void putProperties(String templateName, Map<String, Object> properties) 
+    public void putProperties(QualifiedName qualifiedTemplateName, Map<String, Object> properties) 
     {
         if ((properties != null) && (properties.size() > 0))
-            propertiesMap.put(templateName, properties);
+        {
+            Axiom calculatorAxiom = new Axiom(qualifiedTemplateName.getName());
+            for (Map.Entry<String, Object> entry: properties.entrySet())
+                calculatorAxiom.addTerm(new Parameter(entry.getKey(), entry.getValue()));
+            if (parametersMap == null)
+                parametersMap = new HashMap<QualifiedName, Axiom>();
+            parametersMap.put(qualifiedTemplateName, calculatorAxiom);
+        }
     }
 
     /**
      * Returns properties referenced by template name or null if no properties found
-     * @param templateName Template name of calculator
+     * @param qualifiedTemplateName Qualified name of template to which the properties apply
      * @return Properties object
      */
-    public Map<String, Object> getProperties(String templateName) 
+    public Axiom getParameter(QualifiedName qualifiedTemplateNam) 
     {
-        return propertiesMap.get(templateName);
+        return parametersMap == null ? null : parametersMap.get(qualifiedTemplateNam);
     }
 
     /**
-     * Clears properties referenced by template name or null if no properties found
+     * Clears parameters referenced by template name
      * @param templateName Template name of calculator
-     * @return Properties object
      */
-    public void clearProperties(String templateName) 
+    public void clearParameters(String templateName) 
     {
-        Map<String, Object> properties = propertiesMap.get(templateName);
-        if (properties != null)
-            properties.clear();
+        if ((parametersMap != null) && parametersMap.containsKey(templateName))
+            
+            parametersMap.remove(templateName);
     }
 
+    /**
+     * Returns flag set true if an initial solution has been provided
+     * @return boolean
+     */
     public boolean hasInitialSolution()
     {
         return initialSolution != null;
     }
-    
+ 
+    /**
+     * Returns initial solution, creating one if it does not exist
+     * @return Solution object
+     */
     public Solution getInitialSolution()
     {
         if (initialSolution == null)

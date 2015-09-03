@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
+import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
@@ -687,11 +688,11 @@ public class ParserAssembler implements LocaleListener
 	 * If the first part is a library name, then the second part is the name of a function in that library.
 	 * The type of object returned from the call depends on the library.
 	 * @param qname Qualified function name
-	 * @param argumentExpression Operand with one or more arguments contained in it or null for no arguments
+	 * @param operandParamList List of Operand arguments or null for no arguments
 	 * @return CallOperand object
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-    public Operand getCallOperand(QualifiedName qname, Operand argumentExpression)
+    public Operand getCallOperand(QualifiedName qname, List<OperandParam> operandParamList)
 	{
         String library = qname.getTemplate();
         String name = qname.getName();
@@ -704,18 +705,18 @@ public class ParserAssembler implements LocaleListener
 	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
 	    if (callEvaluator == null)
 	        throw new ExpressionException("Function \"" + name + "\" not supported");
-        return new CallOperand(QualifiedName.parseName(callName, qname), callEvaluator, argumentExpression);
+        return new CallOperand(QualifiedName.parseName(callName, qname), callEvaluator, operandParamList);
 	}
 
 	/**
 	 * Returns operand which invokes a query call.
 	 * @param qualifiedQueryName Qualified query name - can be qualified by the name of a scope
-	 * @param params Optional query parameters
+     * @param operandParamList List of Operand arguments null for no arguments
 	 * @param innerTemplate Optional template to recieve query results
 	 * @return CallOperand object containing a QueryEvaluator object
 	 * @see QueryEvaluator
 	 */
-    public Operand getQueryOperand(QualifiedName qualifiedQueryName, Operand params, Template innerTemplate)
+    public Operand getQueryOperand(QualifiedName qualifiedQueryName, List<OperandParam> operandParamList, Template innerTemplate)
     {
         Scope functionScope = null;
         String library = qualifiedQueryName.getScope();
@@ -745,7 +746,7 @@ public class ParserAssembler implements LocaleListener
         QueryEvaluator queryEvaluator = 
                 new QueryEvaluator(queryParams, scope, innerTemplate);
         QualifiedName qualifiedCallName = new QualifiedName(library, QualifiedName.EMPTY, queryName);
-        return new CallOperand<Void>(qualifiedCallName, queryEvaluator, params);
+        return new CallOperand<Void>(qualifiedCallName, queryEvaluator, operandParamList);
     }
 
 	/**

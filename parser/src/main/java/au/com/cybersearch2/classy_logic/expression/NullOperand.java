@@ -26,7 +26,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 8 Dec 2014
  */
-public class NullOperand extends ExpressionParameter<Null> implements Operand
+public class NullOperand extends ExpressionOperand<Null> implements Operand
 {
     /**
      * Construct anonymous NullOperand object

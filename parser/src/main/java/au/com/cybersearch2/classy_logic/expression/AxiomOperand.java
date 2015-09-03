@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
@@ -32,15 +33,22 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
  * @author Andrew Bowley
  * 5 Aug 2015
  */
-public class AxiomOperand extends ExpressionParameter<AxiomList>implements Concaten<AxiomList>
+public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concaten<AxiomList>
 {
+    /** Axiom key to use when an empty list is created */
     protected String axiomKey;
+    /** Parameter container which creates an AxiomList object on evaluation */
     protected ParameterList<AxiomList> parameterList;
+    /** Axiom listener to notify when an axiom list is created/assigned */
     protected AxiomListListener axiomListListener;
+    /** Root of Operand tree for unification */
+    protected Operand paramsTreeRoot;
     
     /**
      * Axiom Variable
      * @param qname Qualified name
+     * @param axiomKey Axiom key to use when an empty list is created
+     * @param axiomListListener Axiom listener to notify when an axiom list is created/assigned
      */
     public AxiomOperand(QualifiedName qname, String axiomKey, AxiomListListener axiomListListener) 
     {
@@ -52,19 +60,20 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     /**
      * Axiom Literal
      * @param qname Qualified name
-     * @param value
+     * @param value Axiom list literal value
      */
-    public AxiomOperand(QualifiedName qname, AxiomList value, AxiomListListener axiomListListener) 
+    public AxiomOperand(QualifiedName qname, AxiomList value) 
     {
         super(qname, value);
         axiomKey = value.getKey();
-        this.axiomListListener = axiomListListener;
     }
 
     /**
-     * Axiom Expression
+     * Axiom Variable with Expression operand to evaluate value
+     * @param axiomKey Axiom key to use when an empty list is created
      * @param qname Qualified name
      * @param expression Operand which evaluates value
+     * @param axiomListListener Axiom listener to notify when an axiom list is created
      */
     public AxiomOperand(QualifiedName qname, String axiomKey, Operand expression, AxiomListListener axiomListListener) 
     {
@@ -76,16 +85,65 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     /**
      * Axiom List
      * @param qname Qualified name
-     * @param expression Operand which evaluates value
+     * @param axiomKey Axiom key to use when an empty list is created
+     * @param parameterList Parameter container which creates an AxiomList object on evaluation
+     * @param axiomListListener Axiom listener to notify when an axiom list is created
      */
     public AxiomOperand(QualifiedName qname, String axiomKey, ParameterList<AxiomList> parameterList, AxiomListListener axiomListListener) 
     {
-        super(qname, parameterList.getParameters());
+        super(qname);
         this.axiomKey = axiomKey;
         this.parameterList = parameterList;
         this.axiomListListener = axiomListListener;
+        if ((parameterList.getOperandParamList() != null) && 
+                !parameterList.getOperandParamList().isEmpty())
+            paramsTreeRoot = OperandParam.buildOperandTree(parameterList.getOperandParamList());
     }
 
+    /**
+     * Execute operation for expression
+     * @param id Identity of caller, which must be provided for backup()
+     * @return Flag set true if evaluation is to continue
+     */
+    @Override
+    public EvaluationStatus evaluate(int id)
+    {
+        EvaluationStatus status = EvaluationStatus.COMPLETE;
+        if (expression != null)
+        {   // Evaluate value using expression operand  
+            boolean firstTime = empty;
+            status = super.evaluate(id);
+            if (firstTime && !empty)
+                axiomListListener.addAxiomList(qname, getValue());
+        }
+        else if (parameterList != null)
+        {   // Perform static intialisation to a list of axioms
+            setValue(parameterList.evaluate(id));
+            // Do not set id as the change is permanent unlees
+            // a subsequent evaluation overrides this initialisation
+            axiomListListener.addAxiomList(qname, getValue());
+        }
+        if (isEmpty())
+            // If an error occurs populate with an empty list for graceful handling
+            setValue(new AxiomList(qname, axiomKey));
+        return status;
+    }
+
+    /**
+     * Backup to intial state if given id matches id assigned on unification or given id = 0. 
+     * @param id Identity of caller. 
+     * @return boolean true if backup occurred
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#unify(Term otherParam, int id)
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#evaluate(int id)
+     */
+    @Override
+    public boolean backup(int id)
+    {
+        if (paramsTreeRoot != null)
+            paramsTreeRoot.backup(id);
+        return super.backup(id);
+    }
+    
     /**
      * Update Parameter value - use for assignment operation
      * @param value Object containing new value. Must be AxiomList or sub class
@@ -96,7 +154,8 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     {
         AxiomList axiomList = (AxiomList)value;
         setValue(axiomList);
-        axiomListListener.addAxiomList(qname, axiomList);
+        if (axiomListListener != null)
+            axiomListListener.addAxiomList(qname, axiomList);
     }
 
     /**
@@ -125,6 +184,10 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
         };
     }
 
+    /**
+     * 
+     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#getStringOperandOps()
+     */
     @Override
     public OperatorEnum[] getStringOperandOps()
     {  // Allow concatenation like String
@@ -137,56 +200,34 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
        };
     }
 
-
+    /**
+     * 
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     */
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm)
     {   // There is no valid evaluation involving an axiom resulting in a number
         return new Integer(0);
     }
 
+    /**
+     * 
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     */
     @Override
     public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
     {   // There is no valid evaluation involving an axiom resulting in a number
         return new Integer(0);
     }
 
+    /**
+     * 
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     */
     @Override
     public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
     {   // There is no valid evaluation involving an axiom resulting in a boolean
         return Boolean.FALSE;
-    }
-
-    /**
-     * Execute operation for expression
-     * @param id Identity of caller, which must be provided for backup()
-     * @return Flag set true if evaluation is to continue
-     */
-    @Override
-    public EvaluationStatus evaluate(int id)
-    {
-        EvaluationStatus status = EvaluationStatus.COMPLETE;
-        if (expression != null)
-        {    
-            if (parameterList != null)
-            {   // Perform static intialisation to a list of axioms
-                status = expression.evaluate(id);
-                setValue(parameterList.evaluate());
-                // Do not set id as the change is permanent unlees
-                // a subsequent evaluation overrides this initialisation
-                axiomListListener.addAxiomList(qname, getValue());
-            }
-            else 
-            {
-                boolean firstTime = empty;
-                status = super.evaluate(id);
-                if (firstTime && !empty)
-                    axiomListListener.addAxiomList(qname, getValue());
-            }
-            if (isEmpty())
-                // If an error occurs populate with an empty list for graceful handling
-                setValue(new AxiomList(qname, axiomKey));
-        } 
-        return status;
     }
 
     /**
@@ -198,5 +239,16 @@ public class AxiomOperand extends ExpressionParameter<AxiomList>implements Conca
     {
         return AxiomUtils.concatenate(this, rightOperand);
     }
+
+    /**
+     * Returns operand tree fur parameter unification     
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperand()
+     */
+    @Override
+    public Operand getRightOperand() 
+    {
+        return paramsTreeRoot;
+    }
+ 
 
 }

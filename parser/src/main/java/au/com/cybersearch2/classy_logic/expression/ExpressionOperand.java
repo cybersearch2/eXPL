@@ -21,11 +21,11 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
 
 /**
- * ExpressionParameter - Named typed Parameter, with optional expression to assign a value
+ * ExpressionOperand - Named typed Parameter, with optional expression to assign a value
  * @author Andrew Bowley
  * @since 28/09/2010
  */
-public abstract class ExpressionParameter<T> extends GenericParameter<T> implements Operand
+public abstract class ExpressionOperand<T> extends GenericParameter<T> implements Operand
 {
 	/** Optional Parameter which evaluates value */
 	protected Operand expression;
@@ -33,11 +33,11 @@ public abstract class ExpressionParameter<T> extends GenericParameter<T> impleme
     protected QualifiedName qname;
 	
 	/**
-	 * Construct a ExpressionParameter object using given name 
+	 * Construct a ExpressionOperand object using given name 
      * @param qname Qualified name
 	 * @throws IllegalArgumentException if name is empty
 	 */
-	protected ExpressionParameter(QualifiedName qname)
+	protected ExpressionOperand(QualifiedName qname)
 	{
 		super(qname.getName());
 		if (name.isEmpty())
@@ -50,7 +50,7 @@ public abstract class ExpressionParameter<T> extends GenericParameter<T> impleme
      * @param qname Qualified name
 	 * @param value Object of generic type T 
 	 */
-	protected ExpressionParameter(QualifiedName qname, T value) 
+	protected ExpressionOperand(QualifiedName qname, T value) 
 	{
 		super(qname.toString(), value);
         this.qname = qname;
@@ -61,7 +61,7 @@ public abstract class ExpressionParameter<T> extends GenericParameter<T> impleme
      * @param qname Qualified name
 	 * @param expression Operand which evaluates value 
 	 */
-	protected ExpressionParameter(QualifiedName qname, Operand expression) 
+	protected ExpressionOperand(QualifiedName qname, Operand expression) 
 	{
 		super(qname.getName());
 		this.qname = qname;

@@ -22,7 +22,7 @@ import java.util.List;
 
 import com.googlecode.openbeans.PropertyDescriptor;
 
-import au.com.cybersearch2.classy_logic.expression.DelegateParameter;
+import au.com.cybersearch2.classy_logic.expression.DelegateOperand;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.DataCollector;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -125,7 +125,7 @@ public class JpaSourceIterator implements Iterator<Axiom>
 			else 
 			{
                 value = invoke(entity, descriptor); 
-			    if ((value != null) && DelegateParameter.isDelegateClass(value.getClass()))
+			    if ((value != null) && DelegateOperand.isDelegateClass(value.getClass()))
 			    {
                     // By default, all fields of expression-capable type are added as terms to the axiom
     				if ("id".equals(key))
