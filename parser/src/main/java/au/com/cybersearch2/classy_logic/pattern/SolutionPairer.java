@@ -34,7 +34,7 @@ public class SolutionPairer extends AxiomPairer
 	/**
 	 * Construct SolutionPairer object
 	 * @param owner Structure which is performing unification
-     * @param solution Map of Axioms selectable by Axiom name
+     * @param solution Container to aggregate results
 	 */
 	public SolutionPairer(Structure owner, Solution solution, QualifiedName localContext) 
 	{
@@ -44,7 +44,8 @@ public class SolutionPairer extends AxiomPairer
 
 	/**
 	 * Construct SolutionPairer object
-     * @param solution Map of Axioms selectable by Axiom name
+     * @param solution Container to aggregate results
+     * @param localContext Qualified name of enclosing context
 	 */
 	public SolutionPairer(Solution solution, QualifiedName localContext) 
 	{
@@ -53,7 +54,7 @@ public class SolutionPairer extends AxiomPairer
 
 	/**
 	 * Update solution and reset pair list
-	 * @param solution
+	 * @param solution Container to aggregate results
 	 */
 	public void setSolution(Solution solution)
 	{

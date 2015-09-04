@@ -20,6 +20,8 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
  * QualifiedName
+ * Three-part name consisting of scope, template and name.
+ * QualifiedName objects are ordered according to scope, template and name.
  * @author Andrew Bowley
  * 22 Aug 2015
  */
@@ -38,21 +40,41 @@ public class QualifiedName implements Comparable<QualifiedName>
     protected String template;
     protected String name;
 
+    /**
+     * Construct name-only QualifiedName in global namespace
+     * @param name
+     */
     public QualifiedName(String name)
     {
         this(EMPTY, EMPTY, name);
     }
 
+    /**
+     * Construct QualifiedName object from name and qualified context name  
+     * @param name Name-only part of new qualified name
+     * @param contextName Context qualified name supplying scope and template parts of new qualified name
+     */
     public QualifiedName(String name, QualifiedName contextName)
     {
         this(contextName.scope, contextName.template, name);
     }
 
+    /**
+     * Construct QualifiedName object from template and name parts in global namespace
+     * @param template
+     * @param name
+     */
     public QualifiedName(String template, String name)
     {
         this(EMPTY, template, name);
     }
-    
+
+    /**
+     * Construct QualifiedName object from separate components
+     * @param scope
+     * @param template
+     * @param name
+     */
     public QualifiedName(String scope, String template, String name)
     {
         this.scope = scope;
@@ -60,16 +82,26 @@ public class QualifiedName implements Comparable<QualifiedName>
         this.name = name;
     }
 
+    /** 
+     * Clear template component so qualified name is changed to scope namespace
+     */
     public void clearTemplate()
     {
         template = EMPTY;
     }
     
+    /** 
+     * Clear scope component so qualified name is changed to global scope namespace
+     */
     public void clearScope()
     {
         scope = EMPTY;
     }
-    
+ 
+    /**
+     * compareTo
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
     @Override
     public int compareTo(QualifiedName anotherQualifiedName)
     {
@@ -84,12 +116,20 @@ public class QualifiedName implements Comparable<QualifiedName>
         return scopeComp;
     }
 
+    /**
+     * hashCode
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode()
     {
         return scope.hashCode() ^ template.hashCode() ^ name.hashCode();
     }
 
+    /**
+     * equals
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object obj)
     {
@@ -103,6 +143,10 @@ public class QualifiedName implements Comparable<QualifiedName>
                 name.equals(qualifiedName.name);
     }
 
+    /**
+     * toString - Display qualified name with non-empty parts separated with dot character
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString()
     {
@@ -119,21 +163,38 @@ public class QualifiedName implements Comparable<QualifiedName>
         return builder.toString();
     }
 
+    /**
+     * Returns scope
+     * @return String
+     */
     public String getScope()
     {
         return scope;
     }
 
+    /**
+     * Returns template
+     * @return String
+     */
     public String getTemplate()
     {
         return template;
     }
 
+    /**
+     * Returns name
+     * @return String
+     */
     public String getName()
     {
         return name;
     }
 
+    /**
+     * Converts text to QualifiedName. Two part names are placed in scope namespace.  
+     * @param text
+     * @return
+     */
     public static QualifiedName parseName(String text)
     {
         String[] parts = text.split("\\.");
@@ -185,6 +246,12 @@ public class QualifiedName implements Comparable<QualifiedName>
         return new QualifiedName(QualifiedName.EMPTY , parts[0], name);
     }
 
+    /**
+     * Returns QualifiedName for text using context qualified name to supply missing parts
+     * @param text 1 or 2-part name in text format
+     * @param contextName Context qualified name supplying scope and template parts of new qualified name
+     * @return
+     */
     public static QualifiedName parseName(String text, QualifiedName qualifiedContextname)
     {
         // If in template context, assume 2-part name is template name
@@ -196,6 +263,11 @@ public class QualifiedName implements Comparable<QualifiedName>
         return qname;
     }
 
+    /**
+     * Returns flag set true if supplied specified qualified name is in same namespace as this one
+     * @param qname Context qualified name - only scope and template parts are relevant.
+     * @return boolean
+     */
     public boolean inSameSpace(QualifiedName qname)
     {
         if (qname == null)

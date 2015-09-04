@@ -16,13 +16,13 @@
 package au.com.cybersearch2.classy_logic.helper;
 
 /**
- * ChainStatus
+ * EvaluationStatus
  * @author Andrew Bowley
  * 26 Dec 2014
  */
 public enum EvaluationStatus 
 {
-	COMPLETE,
-	SHORT_CIRCUIT,
-	SKIP
+	COMPLETE,      // Continue evaluation to completion
+	SHORT_CIRCUIT, // Abort evaluation because outcome determined
+	SKIP            // Proceed directly to next stage of evaluation
 }

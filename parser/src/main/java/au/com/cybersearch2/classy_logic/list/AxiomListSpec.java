@@ -195,7 +195,7 @@ public class AxiomListSpec
             return false;
         Object itemListVariable = axiomListVariable.getValue();
         if (itemListVariable instanceof AxiomTermList)
-        {
+        {   //Adjust variable parameters to index terms of axiom
             AxiomTermList axiomTermList = (AxiomTermList)itemListVariable;
             String axiomKey = axiomTermList.getKey();
             QualifiedName axiomName = axiomTermList.getQualifiedName();
@@ -266,6 +266,12 @@ public class AxiomListSpec
         return index;
     }
 
+    /**
+     * Returns item index given name of item
+     * @param itemName
+     * @param axiomTermNameList List of axiom term names
+     * @return int
+     */
     protected int getIndexByName(String itemName, List<String> axiomTermNameList)
     {
         for (int i = 0; i < axiomTermNameList.size(); i++)

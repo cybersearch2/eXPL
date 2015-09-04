@@ -47,17 +47,17 @@ public class Calculator implements SolutionFinder
     protected Choice choice;
  
 	/**
+	 * Set choice when template is part of a choice
 	 * @param choice Choice object
 	 */
 	public void setChoice(Choice choice) 
 	{
 		this.choice = choice;
 	}
-
 	
 	/**
 	 * Find a solution for specified template
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Container to aggregate results  
 	 * @param template Template used on each iteration
      * @return Always true to indicate the query is resolved
 	 */
@@ -97,7 +97,7 @@ public class Calculator implements SolutionFinder
 	 * Execute calculation using specified solution and template.
 	 * An axiom to seed the calculation is optional, but it will be set if this is called from iterate().
 	 * @param template Template used on each iteration
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Container to aggregate results  
 	 */
 	public void execute(Template template, Solution solution)
 	{
@@ -107,7 +107,7 @@ public class Calculator implements SolutionFinder
 	/**
 	 * Execute calculation using specified solution and template.
 	 * An axiom to seed the calculation is optional, but it will be set if this is called from iterate().
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Container to aggregate results  
 	 * @param template Template used on each iteration
      * @return Flag to indicate whether or not the query is resolved
 	 */
@@ -127,7 +127,7 @@ public class Calculator implements SolutionFinder
 			if (!axiom.unifyTemplate(template, solution))
 				unificationSuccess = false;
 			else
-			{
+			{   // Unify enclosed templates which will participate in ensuing evaluation
 				Template chainTemplate = template.getNext();
 				while (chainTemplate != null)
 				{
@@ -150,7 +150,7 @@ public class Calculator implements SolutionFinder
 
 	/**
 	 * Complete finding solution following successful unification
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Container to aggregate results  
 	 * @param template Template used on each iteration
 	 * @return Flag to indicate if the query is resolved
 	 */
@@ -184,7 +184,7 @@ public class Calculator implements SolutionFinder
 	
 	/**
 	 * Unify template with solution.
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Container to aggregate results  
 	 * @param template Structure to pair with axiom sequence
 	 * @return Flag to indicate if the query is resolved
 	 */

@@ -27,26 +27,42 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 
 /**
  * LocaleCurrency
+ * Support locale-specific currency operations
  * @author Andrew Bowley
  * 8 Mar 2015
  */
 public class LocaleCurrency
 {
+    /** The locale */
     protected Locale locale;
+    /** The currency as specified by the platform */
     protected Currency currency;
     /** Currency fraction digit count */
     protected int numberOfDecimals;
 
+    /**
+     * Construct LocaleCurrency object for default locale
+     */
 	public LocaleCurrency() 
     {
     	this(Locale.getDefault());
 	}
 
+    /**
+     * Construct LocaleCurrency object for specified locale
+     * @param locale The locale
+     */
 	public LocaleCurrency(Locale locale) 
     {
     	setLocale(locale);
 	}
 
+	/**
+	 * Returns BigDecimal representation of an amount specified as text.
+	 * Relaxes Java's strict format requirements to allow reasonable variations.
+	 * @param currencyAsText
+	 * @return BigDecimal object
+	 */
     public BigDecimal parse(String currencyAsText)
     {
     	String originalCurrencyAsText = currencyAsText;
@@ -95,6 +111,11 @@ public class LocaleCurrency
     	return new BigDecimal(amount.toString());
     }
 
+    /**
+     * Returns text representation of amount specified in text
+     * @param amount BigDecial currency value
+     * @return String
+     */
     public String format(BigDecimal amount)
     {
     	DecimalFormat numberFormat = (DecimalFormat)NumberFormat.getCurrencyInstance(locale);
@@ -103,13 +124,21 @@ public class LocaleCurrency
     	numberFormat.setDecimalFormatSymbols(symbols);
     	return numberFormat.format(amount);
     }
-    
+
+    /**
+     * Set locale
+     * @param locale The locale
+     */
 	public void setLocale(Locale locale) 
 	{
 		this.locale = locale;
     	currency = Currency.getInstance(locale);
 	}
-	
+
+	/**
+	 * Returns fraction digits for locale currency
+	 * @return
+	 */
 	public int getFractionDigits()
 	{
 		return currency.getDefaultFractionDigits();

@@ -35,7 +35,6 @@ import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
-import au.com.cybersearch2.classy_logic.expression.ExpressionOperand;
 import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;

@@ -667,14 +667,9 @@ void CalculatorExpression(int loop_number, Template template, String templateNam
     template.addTerm(expression);
   }
   |
-  LOOKAHEAD(3) expression=CalculatorFunction(parserAssembler) 
-  {
-    template.addTerm(expression);
-  }
+  TemplateExpression(template, parserAssembler)
   |
-  LOOKAHEAD(3) TemplateExpression(template, parserAssembler)
-  |
-  LOOKAHEAD(3) ( scToken=":" | scToken="?" )? expression=Expression(parserAssembler) 
+  ( scToken=":" | scToken="?" )? expression=Expression(parserAssembler) 
     ( innerLoop=InnerCalculator(loop_number + 1, templateName, parserAssembler, scToken != null) )?  
   {
     if (scToken != null)
@@ -904,7 +899,8 @@ void ChoiceDeclaration(ParserAssembler parserAssembler) :
                                              ChoiceItem(selection, qualifiedAxiomName, parserAssembler) ( "," ChoiceItem(++selection, qualifiedAxiomName, parserAssembler) )*  
   {
       QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
-      QualifiedName qualifiedTemplateName = new QualifiedName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
+      // Choice variables are in the scope namespace
+      QualifiedName qualifiedTemplateName = new QualifiedName(qualifiedAxiomName.getScope(), QualifiedName.EMPTY, QualifiedName.EMPTY);
       parserAssembler.getOperandMap().setQualifiedContextname(qualifiedTemplateName);
       List<String> termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
       for (String termName: termNameList)

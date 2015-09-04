@@ -130,7 +130,8 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 	}
 
 	/**
-	 * @return the axiomTermNameList
+	 * Returns axiom term name list
+	 * @return List of axiom term names
 	 */
 	public List<String> getAxiomTermNameList() 
 	{
@@ -138,13 +139,18 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 	}
 
 	/**
-	 * @param axiomTermNameList the axiomTermNameList to set
+	 * Set  axiom term name list
+	 * @param axiomTermNameList The axiomTermNameList to set
 	 */
 	public void setAxiomTermNameList(List<String> axiomTermNameList) 
 	{
 		this.axiomTermNameList = axiomTermNameList;
 	}
 
+	/**
+	 * getItemClass
+	 * @see au.com.cybersearch2.classy_logic.list.ArrayItemList#getItemClass()
+	 */
     @Override
     public Class<?> getItemClass()
     {

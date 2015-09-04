@@ -238,12 +238,20 @@ public class AxiomTermList implements ItemList<Object>
 			throw new IllegalStateException("AxiomTermList \"" + qname.toString() +"\" index " + index + " out of bounds");
 	}
 
+	/**
+	 * 
+	 * @see java.lang.Iterable#iterator()
+	 */
 	@Override
 	public Iterator<Object> iterator() 
 	{
 		return getIterable().iterator();
 	}
 
+	/**
+	 * 
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getIterable()
+	 */
 	@Override
 	public Iterable<Object> getIterable() 
 	{

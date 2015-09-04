@@ -128,7 +128,7 @@ public class Template extends Structure
 	 * @param qname Template qualifed name
 	 * @param termList One or more Variables
 	 */
-	public Template(QualifiedName qname, List<Term> termList) 
+	public Template(QualifiedName qname, List<Operand> termList) 
 	{
 		this(qname);
 		if (termList.size() == 0)
@@ -142,7 +142,7 @@ public class Template extends Structure
      * @param qname Template qualified name
 	 * @param termList One or more Variables
 	 */
-	public Template(String key, QualifiedName qname, List<Term> termList) 
+	public Template(String key, QualifiedName qname, List<Operand> termList) 
 	{
 		this(qname, termList);
 		this.key = key;
@@ -153,7 +153,7 @@ public class Template extends Structure
      * @param qname Template qualified name
 	 * @param terms One or more Variables
 	 */
-	public Template(QualifiedName qname, Term... terms) 
+	public Template(QualifiedName qname, Operand... terms) 
 	{
 		this(qname);
 		if (terms.length== 0)
@@ -167,7 +167,7 @@ public class Template extends Structure
      * @param qname Template qualified name
 	 * @param terms One or more Variables
 	 */
-	public Template(String key, QualifiedName qname, Term... terms) 
+	public Template(String key, QualifiedName qname, Operand... terms) 
 	{
 		this(qname, terms);
 		this.key = key;
@@ -227,11 +227,19 @@ public class Template extends Structure
 		this.isChoice = isChoice;
 	}
 
+	/**
+	 * Returns flag set true if this is an inner template
+	 * @return
+	 */
 	public boolean isInnerTemplate()
     {
         return isInnerTemplate;
     }
 
+	/**
+	 * Set flag to indicate this is an inner template
+	 * @param isInnerTemplate
+	 */
     public void setInnerTemplate(boolean isInnerTemplate)
     {
         this.isInnerTemplate = isInnerTemplate;
@@ -274,7 +282,7 @@ public class Template extends Structure
 	}
 
 	/**
-	 * Evaluate Terms of this Template until status COMPLET is returned 
+	 * Evaluate Terms of this Template until status COMPLETE is returned 
 	 * @return Position of first term to return status COMPLETE
 	 */
 	public int select()

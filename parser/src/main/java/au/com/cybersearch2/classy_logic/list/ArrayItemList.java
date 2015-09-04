@@ -215,7 +215,7 @@ public class ArrayItemList<T> implements ItemList<T>
 	}
 
 	/**
-	 * 
+	 * newVariableInstance
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String)
 	 */
 	@SuppressWarnings("unchecked")
@@ -226,7 +226,7 @@ public class ArrayItemList<T> implements ItemList<T>
 	}
 
 	/**
-	 * 
+	 * newVariableInstance
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String)
 	 */
 	@SuppressWarnings("unchecked")
@@ -237,7 +237,7 @@ public class ArrayItemList<T> implements ItemList<T>
 	}
 
 	/**
-	 * 
+	 * getItem
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getItem(int)
 	 */
 	@SuppressWarnings("unchecked")
@@ -251,7 +251,7 @@ public class ArrayItemList<T> implements ItemList<T>
 	}
 
 	/**
-	 * 
+	 * hasItem
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#hasItem(int)
 	 */
 	@Override
@@ -262,6 +262,10 @@ public class ArrayItemList<T> implements ItemList<T>
 		return index < valueList.size() ? valueList.get(index) != null : false;
 	}
 
+	/**
+	 * iterator
+	 * @see java.lang.Iterable#iterator()
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Iterator<T> iterator() 
@@ -269,6 +273,10 @@ public class ArrayItemList<T> implements ItemList<T>
 		return (Iterator<T>) valueList.iterator();
 	}
 
+	/**
+	 * getIterable
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getIterable()
+	 */
 	@Override
 	public Iterable<T> getIterable() 
 	{
@@ -295,12 +303,20 @@ public class ArrayItemList<T> implements ItemList<T>
 		};
 	}
 
+	/**
+	 * clear
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#clear()
+	 */
 	@Override
 	public void clear() 
 	{
 		valueList.clear();
 	}
 
+	/**
+	 * getItemClass
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getItemClass()
+	 */
     @Override
     public Class<?> getItemClass()
     {

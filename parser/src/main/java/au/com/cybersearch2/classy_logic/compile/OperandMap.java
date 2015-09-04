@@ -209,7 +209,7 @@ public class OperandMap
 	 */
 	public boolean hasOperand(String name)
 	{
-        if (!nameSet.contains(name)) 
+        if (!nameSet.contains(name) && (name.indexOf('.') == -1)) 
             return false;
         QualifiedName qname = QualifiedName.parseName(name, qualifiedContextname);
         if (operandMap.containsKey(qname))

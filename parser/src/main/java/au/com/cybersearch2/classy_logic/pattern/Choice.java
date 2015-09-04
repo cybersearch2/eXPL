@@ -69,7 +69,8 @@ public class Choice
 		termNameList = choiceAxiomSource.getAxiomTermNameList();
 	    for (String termName: termNameList)
 	    {
-	        QualifiedName qualifiedTermName = new QualifiedName(scope.getAlias(), name, termName);
+	        // Choice variables are in the scope namespace
+	        QualifiedName qualifiedTermName = new QualifiedName(scope.getAlias(), QualifiedName.EMPTY, termName);
 	        Operand operand = parserAssembler.getOperandMap().get(qualifiedTermName);
 	        if (operand == null)
 	        {

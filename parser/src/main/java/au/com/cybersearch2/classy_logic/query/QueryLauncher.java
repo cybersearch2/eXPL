@@ -36,7 +36,7 @@ public class QueryLauncher
 
     /**
      * Execute query by specification
-     * @param queryParams QueryParams
+     * @param queryParams Query parameters
      */
     public void launch(QueryParams queryParams)
     {
@@ -55,14 +55,14 @@ public class QueryLauncher
                 headQuery.setSolution(queryParams.getInitialSolution());
             else
                 headQuery.setSolution(new Solution());
-            chainCalculator(queryParams, scope, querySpec, headQuery);
+            chainCalculator(queryParams, querySpec, headQuery);
         }
         // Chained queries are optional
         if (querySpec.getQueryChainList() != null)
             for (QuerySpec chainQuerySpec: querySpec.getQueryChainList())
             {
                 if (chainQuerySpec.getQueryType() == QueryType.calculator)
-                    chainCalculator(queryParams, scope, chainQuerySpec, headQuery);
+                    chainCalculator(queryParams, chainQuerySpec, headQuery);
                 else
                 {
                     QueryParams chainQueryParams = new QueryParams(scope, chainQuerySpec);
@@ -81,11 +81,31 @@ public class QueryLauncher
         else
             headQuery.reset();
     }
-    
-    protected void chainCalculator(QueryParams queryParams, Scope scope, QuerySpec chainQuerySpec, ChainQueryExecuter headQuery)
+
+    /**
+     * Returns key name from Calculator query specification
+     * @param querySpec
+     * @return KyeName object
+     * @throws IllegalArgumentException if not exactly 1 key name specified
+     */
+    public KeyName getCalculatorKeyName(QuerySpec querySpec)
+    {
+        List<KeyName> keyNameList = querySpec.getKeyNameList();
+        return keyNameList.get(keyNameList.size() - 1);
+    }
+
+    /**
+     * Add calculator to query chain
+     * @param queryParams Query parameters
+     * @param chainQuerySpec Query specification
+     * @param headQuery Head of query chain
+     */
+    protected void chainCalculator(QueryParams queryParams, QuerySpec chainQuerySpec, ChainQueryExecuter headQuery)
     {   // Calculator uses a single template
-        Template calculatorTemplate = getCalculatorTemplate(scope, chainQuerySpec);
+        Template calculatorTemplate = getCalculatorTemplate(queryParams.getScope(), chainQuerySpec);
         Axiom calculatorAxiom = queryParams.getParameter(calculatorTemplate.getQualifiedName());
+        if (calculatorAxiom == null)
+            calculatorAxiom = getCalculatorAxiom(queryParams.getScope(), chainQuerySpec);
         headQuery.chainCalculator(calculatorAxiom, calculatorTemplate);
     }
 
@@ -127,15 +147,4 @@ public class QueryLauncher
         return null;
     }
 
-    /**
-     * Returns key name from Calculator query specification
-     * @param querySpec
-     * @return KyeName object
-     * @throws IllegalArgumentException if not exactly 1 key name specified
-     */
-    public KeyName getCalculatorKeyName(QuerySpec querySpec)
-    {
-        List<KeyName> keyNameList = querySpec.getKeyNameList();
-        return keyNameList.get(keyNameList.size() - 1);
-    }
 }

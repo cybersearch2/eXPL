@@ -196,7 +196,7 @@ public class Structure
 	 * Set Terms from supplied Term list
 	 * @param terms2 Term list
 	 */
-	protected void setTerms(List<Term> terms2) 
+	protected void setTerms(List<? extends Term> terms2) 
 	{
 		if (terms2.size() > 0)
 		{
@@ -258,7 +258,7 @@ public class Structure
 			@Override
 			public boolean next(Term term, int depth) 
 			{
-				if (!Term.ANONYMOUS.equals(term.getName()))
+				if (!term.getName().isEmpty())
 					termMap.put(term.getName().toUpperCase(), term);
 				return true;
 			}

@@ -25,8 +25,7 @@ import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrow
 import static org.mockito.Mockito.*;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
  * TemplateTest
@@ -38,8 +37,8 @@ public class TemplateTest
 	final static String NAME = "myStruct";
 	final static String KEY = "myKey";
 	
-	Parameter parameter1;
-	Parameter parameter2;
+	Operand parameter1;
+	Operand parameter2;
 
 	@Test
 	public void test_Constructor_terms_list()
@@ -104,7 +103,7 @@ public class TemplateTest
 	@Test
 	public void test_Constructor_no_terms()
 	{
-		List<Term> paramList = new ArrayList<Term>();
+		List<Operand> paramList = new ArrayList<Operand>();
 		try
 		{
 			new Template(parseTemplateName(NAME), paramList);
@@ -116,7 +115,7 @@ public class TemplateTest
 	    }
 		try
 		{
-			new Template(parseTemplateName(NAME), new Parameter[0]);
+			new Template(parseTemplateName(NAME), new Operand[0]);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch (IllegalArgumentException e)
@@ -128,8 +127,8 @@ public class TemplateTest
 	@Test
 	public void test_backup()
 	{
-		List<Term> paramList = new ArrayList<Term>();
-		Parameter parameter = mock(Parameter.class);
+		List<Operand> paramList = new ArrayList<Operand>();
+		Operand parameter = mock(Operand.class);
 		when(parameter.getName()).thenReturn("test-parameter1");
 		paramList.add(parameter);
 		Template testTemplate = new Template(parseTemplateName(NAME), paramList);	
@@ -141,7 +140,7 @@ public class TemplateTest
 		assertThat(testTemplate.backup(false)).isTrue();
 		when(parameter.backup(0)).thenReturn(false);
 		assertThat(testTemplate.backup(false)).isFalse();
-		Parameter parameter2 = mock(Parameter.class);
+		Operand parameter2 = mock(Operand.class);
 		when(parameter2.getName()).thenReturn("test-parameter2");
 		paramList.add(parameter2);
 		testTemplate = new Template(parseTemplateName(NAME) ,paramList);	
@@ -165,13 +164,13 @@ public class TemplateTest
 		assertThat(testTemplate.getKey()).isEqualTo(KEY+"!");
 	}
 	
-	protected List<Term> getTermList()
+	protected List<Operand> getTermList()
 	{
-		List<Term> paramList = new ArrayList<Term>();
-		parameter1 = mock(Parameter.class);
+		List<Operand> paramList = new ArrayList<Operand>();
+		parameter1 = mock(Operand.class);
 		when(parameter1.getName()).thenReturn("parameter1");
 		when(parameter1.evaluate(anyInt())).thenReturn(EvaluationStatus.COMPLETE);
-		parameter2 = mock(Parameter.class);
+		parameter2 = mock(Operand.class);
 		when(parameter2.getName()).thenReturn("parameter2");
 		when(parameter2.evaluate(anyInt())).thenReturn(EvaluationStatus.COMPLETE);
 		paramList.add(parameter1);
@@ -179,13 +178,13 @@ public class TemplateTest
 		return paramList;
 	}
 	
-	protected Parameter[] getParameterArray()
+	protected Operand[] getParameterArray()
 	{
-		Parameter[] paramArray = new Parameter[2];
-		parameter1 = mock(Parameter.class);
+	    Operand[] paramArray = new Operand[2];
+		parameter1 = mock(Operand.class);
 		when(parameter1.getName()).thenReturn("parameter1");
 		when(parameter1.evaluate(anyInt())).thenReturn(EvaluationStatus.COMPLETE);
-		parameter2 = mock(Parameter.class);
+		parameter2 = mock(Operand.class);
 		when(parameter2.getName()).thenReturn("parameter2");
 		when(parameter2.evaluate(anyInt())).thenReturn(EvaluationStatus.COMPLETE);
 		paramArray[0] = parameter1;

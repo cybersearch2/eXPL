@@ -124,6 +124,12 @@ public class AxiomUtils
         //return axiomList;
     }
 
+    /**
+     * Returns flag set true if two aciom lists are size-wise congruent. 
+     * @param leftAxiomList
+     * @param rightAxiomList
+     * @return
+     */
     public static boolean isCongruent(AxiomList leftAxiomList, AxiomList rightAxiomList)
     {
         if (leftAxiomList.isEmpty())
@@ -135,6 +141,7 @@ public class AxiomUtils
         {
             if (leftTermNames.size() != rightTermNames.size())
                 return false;
+// TODO - Allow for strict comparison ie. matching term names            
 //            int index = 0;
 //            for (String termName: rightTermNames)
 //                if (!termName.equalsIgnoreCase(leftTermNames.get(index++)))
@@ -296,7 +303,7 @@ public class AxiomUtils
     }
 
     /**
-     * 
+     * newVariableInstance for AxiomTermList - integer position index
      * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String)
      */
     public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, int index, String suffix, int id) 
@@ -313,7 +320,7 @@ public class AxiomUtils
     }
 
     /**
-     * 
+     * newVariableInstance for AxiomTermList - operand variable index
      * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String)
      */
     public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, Operand expression, String suffix, int id) 
@@ -322,7 +329,13 @@ public class AxiomUtils
         // Assign a value to set the delegate must be delayed until the expression is evaluated
         return new AxiomTermListVariable(axiomTermList, itemOperand, expression, suffix, id);
     }
-    
+ 
+    /**
+     * Copy AxiomList to container holding iterable objects
+     * @param qualifiedListName Qualified name of list
+     * @param axiomList Axiomlist source
+     * @param listMap Container destination
+     */
     public static void copyList(QualifiedName qualifiedListName, AxiomList axiomList, Map<QualifiedName, Iterable<Axiom>> listMap)
     {
             // Use fully qualified key to avoid name collisions

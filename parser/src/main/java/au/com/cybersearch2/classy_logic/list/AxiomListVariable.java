@@ -336,7 +336,6 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	protected void updateAxiomTermListVariable(int modifierId)
 	{
 		// Get currently selected item in owning axiom list
-	    
 		AxiomTermList axiomTermList = null;
 		if (!axiomList.isEmpty())
 		    axiomTermList = axiomList.getItem(axiomIndex);
@@ -463,15 +462,24 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 		return null;
 	}
 
+	/**
+	 * 
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
+	 */
     @Override
     public String concatenate(Operand rightOperand)
     {
         return getItemValue().toString() + rightOperand.getValue().toString();
     }
 
+    /**
+     * Returns default qualified name for axiom term list
+     * @param axiomList2 The containing axiom list
+     * @return QualifiedName object
+     */
     protected QualifiedName getItemListName(AxiomList axiomList2)
     {
-        return new QualifiedName(axiomList2.getName() + ".item", axiomList2.getQualifiedName());
+        return new QualifiedName(axiomList2.getName() + "_item", axiomList2.getQualifiedName());
     }
 
 }

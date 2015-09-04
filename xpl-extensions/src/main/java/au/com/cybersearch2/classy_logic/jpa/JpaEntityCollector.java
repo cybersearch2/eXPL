@@ -149,7 +149,8 @@ public class JpaEntityCollector implements DataCollector, PersistenceWork
         if (!success)
         {
         	moreExpected = false;
-        	data.clear();
+            if (data != null)
+        	    data.clear();
         }
 	}
 
@@ -161,7 +162,8 @@ public class JpaEntityCollector implements DataCollector, PersistenceWork
 	public void onRollback(Throwable rollbackException) 
 	{
     	moreExpected = false;
-    	data.clear();
+    	if (data != null)
+    	    data.clear();
 	}
 
 	/**

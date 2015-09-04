@@ -295,11 +295,23 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 		return null;
 	}
 
+	/**
+	 * Returns variable name given list name and suffix
+	 * @param listName
+	 * @param suffix
+	 * @return String
+	 */
     protected static String getVariableName(String listName, String suffix)
     {
         return listName + "_" + suffix;
     }
 
+    /**
+     * Returns qualified variable name given item list and suffix
+     * @param itemList2 The item list
+     * @param suffix
+     * @return QualifiedName object
+     */
     public static QualifiedName getVariableName(ItemList<?> itemList2, String suffix)
     {
         return new QualifiedName(getVariableName(itemList2.getName(), suffix), itemList2.getQualifiedName());

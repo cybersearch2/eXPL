@@ -44,7 +44,7 @@ public class OperandWalker
     /**
      * Construct OperandWalker object to navigate a list of terms.
      * Note Term interface applied to items for compatibility with Template super class Structure, which contains Template terms.
-     * @param termList List of terms to navigate
+     * @param operandList List of terms to navigate
      */
 	public OperandWalker(List<Term> operandList) 
 	{
@@ -53,7 +53,7 @@ public class OperandWalker
 
     /**
      * Construct OperandWalker object
-     * @param term Single term to navigate
+     * @param operand Single term to navigate
      */
 	public OperandWalker(Operand operand) 
 	{
@@ -81,7 +81,7 @@ public class OperandWalker
 
 	/**
 	 * Visit a node of the Operand tree. Recursively navigates left and right operands, if any.
-	 * @param term The term being visited
+	 * @param operand The term being visited
 	 * @param visitor Object implementing OperandVisitor interface
 	 * @param depth Depth in tree. The root has depth 1.
 	 * @return flag set true if entire tree formed by this term is navigated. 

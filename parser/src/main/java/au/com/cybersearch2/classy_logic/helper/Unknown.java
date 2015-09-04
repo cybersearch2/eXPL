@@ -46,6 +46,9 @@ public class Unknown implements Comparable<Unknown>
         return false;
     }
 
+    /**
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() 
     {

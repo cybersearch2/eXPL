@@ -24,5 +24,9 @@ import au.com.cybersearch2.classy_logic.Scope;
  */
 public interface LocaleListener 
 {
+    /**  
+     * Handle notification of change of scope
+     * @param scope The new scope which will assigned a particular locale
+     */
 	void onScopeChange(Scope scope);
 }

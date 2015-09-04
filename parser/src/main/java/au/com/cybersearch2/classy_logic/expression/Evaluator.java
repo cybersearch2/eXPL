@@ -136,7 +136,7 @@ public class Evaluator extends DelegateOperand
     		if (evaluationStatus == EvaluationStatus.SHORT_CIRCUIT)
     			return shortCircuitOnTrue || shortCircuitOnFalse ? EvaluationStatus.SHORT_CIRCUIT : EvaluationStatus.SKIP;
     		// Remember if left is not a number
-    		leftIsNaN = isNaN(left);
+    		leftIsNaN = isNaN(left, operatorEnum);
     	}
     	if (right != null)
     	{
@@ -147,7 +147,7 @@ public class Evaluator extends DelegateOperand
     		if (right.isEmpty())
 	   			throw new ExpressionException("Right term is empty");
     		// Remember if right is not a number
-   			rightIsNaN = isNaN(right);
+   			rightIsNaN = isNaN(right, operatorEnum);
     		if ((!isValidRightOperand(right, operatorEnum) || isInvalidRightUnaryOp(left, operatorEnum)) &&
     			 !((left != null) && isValidStringOperation(left, operatorEnum))) 
     		{   
@@ -329,7 +329,7 @@ public class Evaluator extends DelegateOperand
         if (!isValidLeftOperand(left, right, operatorEnum) || isInvalidLeftUnaryOp(right, operatorEnum))
         {   // Operation not permited for type of Term value
             // NaN has precedence if operation has Numeric result
-            if (!isNaN(left) && ((right == null) || !isNaN(right)))
+            if (!isNaN(left, operatorEnum) && ((right == null) || !isNaN(right, operatorEnum)))
                 throw new ExpressionException("Cannot evaluate " + (right == null ? unaryLeftToString() : binaryToString()));
         }
         // Short circuit logic applies only to left term

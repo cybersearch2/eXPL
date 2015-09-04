@@ -58,6 +58,7 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 		super(axiomTermList, proxy, indexExpression, suffix);
 		this.id = id;
 	}
+	
 	/**
 	 * Set value from term in backing axiom	at specified position and update proxy with this term if 
 	 * class of value has changed.
@@ -102,6 +103,10 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 	    return itemValue;
 	}
 
+	/**
+	 * concatenate
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
+	 */
     @Override
     public String concatenate(Operand rightOperand)
     {

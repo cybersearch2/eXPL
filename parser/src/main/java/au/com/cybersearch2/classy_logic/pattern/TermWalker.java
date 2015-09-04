@@ -81,7 +81,7 @@ public class TermWalker
     {
         if (!visitor.next(term, depth))
             return false;
-        // Only Terms which also implement Term interface will have left and right Terms
+        // Only Terms which also implement Operand interface will have left and right Terms
         if (!(term instanceof Operand))
             return true;
         Operand operand = (Operand)term;

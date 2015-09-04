@@ -80,7 +80,7 @@ public class LogicQuery implements SolutionFinder
 
 	/**
 	 * Find a solution for specified template
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Container to aggregate results  
 	 * @param template Structure to pair with axiom sequence
 	 * @return Flag to indicate if another solution may be available
 	 */
@@ -133,7 +133,7 @@ public class LogicQuery implements SolutionFinder
 
 	/**
 	 * Unify template with solution.
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Container to aggregate results  
 	 * @param template Structure to pair with axiom sequence
 	 * @return Flag to indicate if the query is resolved
 	 */
@@ -159,7 +159,7 @@ public class LogicQuery implements SolutionFinder
 
 	/**
 	 * Complete finding solution following successful unification
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Container to aggregate results  
 	 * @param template Structure to pair with axiom sequence
 	 * @return Flag to indicate if the query is resolved
 	 */

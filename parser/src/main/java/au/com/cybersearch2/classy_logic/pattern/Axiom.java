@@ -112,6 +112,10 @@ public class Axiom extends Structure
 		pairByPosition = true;
 	}
 
+	/**
+	 * Set flag to indicate unification term pairing to be performed sequentially
+	 * @param value PairByPosition flag 
+	 */
 	public void setPairByPosition(boolean value)
 	{
 		pairByPosition = value;
@@ -154,13 +158,14 @@ public class Axiom extends Structure
 					if (!axiomPairer.pairTerms((Operand)templateTerm, axiomTerm))
 						return false;
 					QualifiedName qname = ((Operand)templateTerm).getQualifiedName();
-					boolean isLocalTerm = qname.getTemplate() == other.getQualifiedName().getTemplate();
+					boolean isLocalTerm = other.getQualifiedName().inSameSpace(qname);
 					if (isLocalTerm && !qname.getName().isEmpty())
 					{   // Name axiom term for Operand navigation
 						axiomTerm.setName(qname.getName());
 						termMap.put(qname.getName().toUpperCase(), axiomTerm);
 					}
 				}
+				// Only needs to be done once
 				pairByPosition = false;
 			}
 			if (!walker.visitAllNodes(axiomPairer))
