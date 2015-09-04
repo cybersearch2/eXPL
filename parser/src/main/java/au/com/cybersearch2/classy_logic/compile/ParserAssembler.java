@@ -647,7 +647,8 @@ public class ParserAssembler implements LocaleListener
 	 * @param axiomListener The axiom listener
 	 */
 	public void registerAxiomListener(QualifiedName qualifiedAxiomName, AxiomListener axiomListener) 
-	{
+	{   // Convert axiom name to template name to listen for solution notifications
+        //QualifiedName qualifiedTemplateName = new QualifiedName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
 		List<AxiomListener> axiomListenerList = getAxiomListenerList(qualifiedAxiomName);
 		axiomListenerList.add(axiomListener);
 	}

@@ -146,10 +146,12 @@ public class Scope
 	       headQuerySpec.addKeyName(new KeyName(axiomName, axiomName));
 	       // Append new calculator query spec to head query spec.
 	       QuerySpec chainQuerySpec = headQuerySpec.chain();
-	       chainQuerySpec.addKeyName(firstKeyname);
+	       // Create new keyname with empty axiom key to indicate get axiom from solution
+	       KeyName calculateKeyname = new KeyName("", firstKeyname.getTemplateName());
+	       chainQuerySpec.addKeyName(calculateKeyname);
 	       chainQuerySpec.setQueryType(QueryType.calculator);
 	       if (properties.size() > 0)
-	          chainQuerySpec.putProperties(firstKeyname, properties);
+	          chainQuerySpec.putProperties(calculateKeyname, properties);
 	       firstTemplate.setKey(axiomName);
 	       // Check for logic query template already exists. Not expected to exist.
 	       Template logicTemplate = findTemplate(axiomName);
