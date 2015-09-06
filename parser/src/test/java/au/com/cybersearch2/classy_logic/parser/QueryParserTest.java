@@ -504,7 +504,7 @@ public class QueryParserTest
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                assertThat(solution.getAxiom("swatch")).isNull();
+                assertThat(solution.getAxiom("swatch").getTermCount()).isEqualTo(0);
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
@@ -544,7 +544,7 @@ public class QueryParserTest
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                assertThat(solution.getAxiom("swatch")).isNull();
+                assertThat(solution.getAxiom("swatch").getTermCount()).isEqualTo(0);
                 return true;
             }});
         queryProgram.executeQuery(queryParams);

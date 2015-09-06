@@ -31,6 +31,7 @@ import java.util.HashMap;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.QueryType;
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -57,6 +58,7 @@ import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
+import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
@@ -659,6 +661,7 @@ void CalculatorExpression(int loop_number, Template template, String templateNam
   Operand expression = null;
   Operand innerLoop = null;
   QualifiedName qualifiedAxiomName;
+  QualifiedName qualifiedTemplateName;
 }
 {
   <AXIOM> qualifiedAxiomName=Axiom(parserAssembler) expression = AxiomVariable(qualifiedAxiomName, parserAssembler) 
@@ -680,6 +683,16 @@ void CalculatorExpression(int loop_number, Template template, String templateNam
   innerLoop=InnerCalculator(loop_number + 1, templateName, parserAssembler, false)
   {
     template.addTerm(innerLoop);
+  }
+  |
+  qualifiedTemplateName = ChoiceDeclaration(parserAssembler)
+  {
+    Template choiceTemplate = parserAssembler.getTemplate(qualifiedTemplateName);
+    QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
+    QualifiedName qname = QualifiedName.parseName(choiceTemplate.getName(), contextName); 
+ 	Choice choice = new Choice(choiceTemplate.getName(), parserAssembler.getScope());
+    Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
+    template.addTerm(choiceOperand);
   }
 }
 
@@ -888,24 +901,27 @@ void AxiomSpecification(QualifiedName qualifiedAxiomName, ParserAssembler parser
      ParameterDeclaration(qualifiedAxiomName, parserAssembler) )
 }
 
-void ChoiceDeclaration(ParserAssembler parserAssembler) :
+QualifiedName ChoiceDeclaration(ParserAssembler parserAssembler) :
 {
     QualifiedName qualifiedAxiomName;
     int selection = 0;
+    OperandMap operandMap = parserAssembler.getOperandMap();
 }
 {
   <CHOICE> qualifiedAxiomName=Choice(parserAssembler) "(" TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )*  ")" 
                                              ":"  
-                                             ChoiceItem(selection, qualifiedAxiomName, parserAssembler) ( "," ChoiceItem(++selection, qualifiedAxiomName, parserAssembler) )*  
+                                             ChoiceItem(selection, qualifiedAxiomName, parserAssembler) (LOOKAHEAD(2) "," ChoiceItem(++selection, qualifiedAxiomName, parserAssembler) )*  
   {
       QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
-      // Choice variables are in the scope namespace
-      QualifiedName qualifiedTemplateName = new QualifiedName(qualifiedAxiomName.getScope(), QualifiedName.EMPTY, QualifiedName.EMPTY);
-      parserAssembler.getOperandMap().setQualifiedContextname(qualifiedTemplateName);
+      QualifiedName qualifiedTemplateName = new QualifiedName(contextName.getScope(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
+      if (contextName.getTemplate().isEmpty())
+          return qualifiedTemplateName;
+      parserAssembler.getOperandMap().setQualifiedContextname(contextName);
       List<String> termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
       for (String termName: termNameList)
           parserAssembler.getOperandMap().addOperand(termName, null);
-      parserAssembler.getOperandMap().setQualifiedContextname(contextName);
+      operandMap.setQualifiedContextname(contextName);
+      return qualifiedTemplateName;
   }
 } 
 

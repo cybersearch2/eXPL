@@ -600,6 +600,8 @@ public class CallOperandTest
         new DI(new CallOperandTestModule());
     }
 
+    
+
     @Test
     public void test_gemini_people()
     {
@@ -703,6 +705,7 @@ public class CallOperandTest
     {
         QueryProgram queryProgram = new QueryProgram(MARKS_CALC);
         queryProgram.executeQuery("marks", new SolutionHandler(){
+            int index = 0;  
             @Override
             public boolean onSolution(Solution solution)
             {
@@ -804,7 +807,7 @@ public class CallOperandTest
     }
 
     @Test
-    public void test_choice_string_colors()
+    public void test_choice_german_colors()
     {
         QueryProgram queryProgram = new QueryProgram(GERMAN_COLORS);
         queryProgram.executeQuery("german_colors", new SolutionHandler(){
@@ -830,7 +833,7 @@ public class CallOperandTest
                 Axiom germanOrange = solution.getAxiom("german_orange");
                 AxiomList colorsList = (AxiomList)germanOrange.getTermByName("orange_color").getValue();
                 Iterator<AxiomTermList> iterator = colorsList.iterator();
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("orange_color_list0(Orange, orange = *())");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("orange_color_list0(Orange, orange = orange(red = <empty>, green = <empty>, blue = <empty>))");
                 assertThat(iterator.hasNext()).isFalse();
                 assertThat(colorsList.getAxiomTermNameList()).isEmpty();
                 return true;

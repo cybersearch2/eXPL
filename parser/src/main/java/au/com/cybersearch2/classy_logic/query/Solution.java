@@ -95,7 +95,8 @@ public class Solution
 	 */
 	public Axiom getAxiom(String key)
 	{
-		return axiomMap.get(key);
+	    Axiom axiom = axiomMap.get(key);
+		return axiom == null ? new Axiom(key) : axiom;
 	}
 
 	/**

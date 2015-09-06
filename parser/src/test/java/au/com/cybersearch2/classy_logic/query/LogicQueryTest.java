@@ -263,7 +263,8 @@ public class LogicQueryTest
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource, solutionHandler);
 		assertThat(logicQuery.iterate(solution, template)).isFalse();
-		assertThat(solution.getAxiom(NAME)).isNull();
+        Axiom blankAxiom = solution.getAxiom(NAME);
+		assertThat(blankAxiom.getTermCount()).isEqualTo(0);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 		verify(template).backup(true);
 	}
@@ -304,7 +305,8 @@ public class LogicQueryTest
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource, solutionHandler);
 		assertThat(logicQuery.iterate(solution, template)).isFalse();
-		assertThat(solution.getAxiom(NAME)).isNull();
+		Axiom blankAxiom = solution.getAxiom(NAME);
+		assertThat(blankAxiom.getTermCount()).isEqualTo(0);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 		verify(template).backup(true);
 	}
@@ -497,7 +499,8 @@ public class LogicQueryTest
 		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 		assertThat(logicQuery.iterate(solution, template)).isFalse();
-		assertThat(solution.getAxiom(NAME)).isNull();
+        Axiom blankAxiom = solution.getAxiom(NAME);
+		assertThat(blankAxiom.getTermCount()).isEqualTo(0);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 	}
 

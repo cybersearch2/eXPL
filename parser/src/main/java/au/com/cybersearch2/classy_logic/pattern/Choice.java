@@ -21,6 +21,7 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -37,7 +38,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class Choice 
 {
     /** Constant returned from Template select() when no match found */
-    protected static final int NO_MATCH = -1;
+    public static final int NO_MATCH = -1;
     /** List of axioms, with each axiom representing one row of the choice */
     protected List<Axiom> choiceAxiomList;
     /** List of operands, with each operand representing the selection term of one row */
@@ -69,15 +70,25 @@ public class Choice
 		termNameList = choiceAxiomSource.getAxiomTermNameList();
 	    for (String termName: termNameList)
 	    {
-	        // Choice variables are in the scope namespace
-	        QualifiedName qualifiedTermName = new QualifiedName(scope.getAlias(), QualifiedName.EMPTY, termName);
+	        QualifiedName qualifiedContextname = parserAssembler.getOperandMap().getQualifiedContextname();
+	        QualifiedName qualifiedTermName = QualifiedName.parseName(termName, qualifiedContextname);
 	        Operand operand = parserAssembler.getOperandMap().get(qualifiedTermName);
 	        if (operand == null)
+	            operand = new Variable(qualifiedTermName);
+	        /*
+	        if ((operand == null) && !qualifiedTermName.getTemplate().isEmpty())
 	        {
 	            qualifiedTermName.clearTemplate();
 	            // Variables are placed in global scope
 	            operand = parserAssembler.getOperandMap().get(qualifiedTermName);
 	        }
+            if ((operand == null) && !qualifiedTermName.getScope().isEmpty())
+            {
+                qualifiedTermName.clearScope();
+                // Variables are placed in global scope
+                operand = parserAssembler.getOperandMap().get(qualifiedTermName);
+            }
+            */
 	    	variableList.add(operand);
 	    }
 	}
@@ -135,4 +146,44 @@ public class Choice
 		solution.put(template.getQualifiedName().toString(), solutionTemplate.toAxiom());
 		return true;
 	}
+	
+    /**
+     * Complete solution for given parameters
+     * @param template Template used to calculate choice
+     * @return Flag set true if selection match was found
+     */
+    public boolean completeSolution(Template template, int id)
+    {
+        int index = 0;
+        // Get selection operand
+        Operand operand = variableList.get(index++);
+        // Unifiy template terms if this has not already happened
+        for (int i = 0; i < template.getTermCount(); i++)
+        {   // Every term in the choice template has the same name
+            // abd all terms are set to the same value
+            Term term = template.getTermByIndex(i);
+            if (!term.isEmpty())
+                break; // Term is already populated so proceed to selection
+            term.unifyTerm(operand, id);
+        }
+        int position = template.select();
+        if (position == NO_MATCH)
+            return false;
+        // Get selected axiom, default being last one in choice axiom list
+        Axiom choiceAxiom = choiceAxiomList.get(position);
+        operand.unifyTerm(template.getTermByIndex(position), id);
+        while (index < choiceAxiom.getTermCount())
+        {
+            operand = variableList.get(index);
+            operand.unifyTerm(choiceAxiom.getTermByIndex(index), id);
+            ++index;
+        }
+        return true;
+    }
+
+    public void backup(int id)
+    {
+        for (Operand operand: variableList)
+            operand.backup(id);
+    }
 }

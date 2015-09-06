@@ -106,7 +106,11 @@ public class ChainQueryExecuter
         	{
         	    List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
         	    for (AxiomListener axiomListener: axiomListenerList)
-        	        axiomListener.onNextAxiom(axiomSource.iterator().next());
+        	    {
+        	        Axiom axiom = axiomSource.iterator().next();
+        	        if (axiom != null)
+                        axiomListener.onNextAxiom(axiom);
+        	    }
         	}
 		}
 		// Delete the axiom listener map as binding is complete

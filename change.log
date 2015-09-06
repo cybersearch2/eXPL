@@ -59,6 +59,7 @@ eXPL v1.12
 56. New OperandParam helper class is now used to pass parameters to calls.
 57. Compilier now collects call parameters and axiom terms into lists containing OperandParam objects
 58. Applicable Operand classes updated to to use OperandParam objects
+59. Add inner Choice which uses local variables
 
 
 eXPL v1.11

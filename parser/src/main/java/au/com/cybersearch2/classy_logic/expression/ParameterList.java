@@ -86,5 +86,16 @@ public class ParameterList<R>
         }
         return callEvaluator.evaluate(argumentList);
     }
- 
+
+    public void backup(int id)
+    {
+        if ((operandParamList != null) && !operandParamList.isEmpty())
+        {   
+            for (OperandParam operandParam: operandParamList)
+            {
+                Operand operand = operandParam.getOperand();
+                operand.backup(id);
+            }
+        }
+    }
 }
