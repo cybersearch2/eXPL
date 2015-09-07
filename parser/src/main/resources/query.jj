@@ -630,7 +630,7 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
          expression = null;
      boolean isLiteral = (expression != null) && 
                           !expression.isEmpty() && !(expression instanceof Evaluator) && 
-                          (equalsToken == null);
+                          (equalsToken != null);
      if (expression != null)
          varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
      if (index !=null)

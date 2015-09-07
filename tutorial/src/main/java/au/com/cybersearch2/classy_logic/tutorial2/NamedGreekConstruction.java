@@ -26,24 +26,24 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 22 Feb 2015
  */
-public class GreekConstruction 
+public class NamedGreekConstruction 
 {
 
 	static final String GREEK_CONSTRUCTION =
 			
-		"axiom charge : \n" +
+		"axiom charge (city, charge) :\n" +
 		"  (\"Athens\", 23 ),\n" +
 		"  (\"Sparta\", 13 ),\n" +
 		"  (\"Milos\", 17);\n" +
 		
-		"axiom customer :\n" +
+		"axiom customer (name, city) :\n" +
 		"  (\"Marathon Marble\", \"Sparta\"),\n" +
 		"  (\"Acropolis Construction\", \"Athens\"),\n" +
 		"  (\"Agora Imports\", \"Sparta\"),\n" +
 		"  (\"Spiros Theodolites\", \"Milos\");\n" +
 		
-		"template freight(city,  charge);\n" +
-		"template customer_freight(name, city ? city == freight.city, charge);\n" +
+		"template freight(charge, city);\n" +
+		"template customer_freight(name, city ? city == freight.city, charge = freight.charge);\n" +
 		
 	    "query customer_charge(charge:freight, customer:customer_freight);";
 
@@ -52,6 +52,8 @@ public class GreekConstruction
 	 * Compiles the GREEK_CONSTRUCTION script and runs the "customer_charge" query, displaying the solution on the console.<br/>
 	 * The query has 2 unification steps. The first unifies "charge" axiom with "freight" template.<br/>
 	 * The second unifies "customer" axiom with "customer_freight" template.
+	 * Unlike the first version, this sample declares the names of the axiom terms so they can be matched to template terms by name.
+	 * The customer_freight template also explicitly assigns a value to it's "charge" term, rather than relying on unification to do the trick.
 	 * The expected "customer_freight" result:<br/>
 	 * customer_freight(name = Acropolis Construction, city = Athens, charge = 23)<br/>
 	 * customer_freight(name = Marathon Marble, city = Sparta, charge = 13)<br/>
@@ -77,7 +79,7 @@ public class GreekConstruction
 	{
 		try 
 		{
-	        GreekConstruction greekConstruction = new GreekConstruction();
+		    NamedGreekConstruction greekConstruction = new NamedGreekConstruction();
 			greekConstruction.displayCustomerCharges();
 		} 
 		catch (ExpressionException e) 

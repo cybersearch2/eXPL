@@ -72,7 +72,9 @@ public class SolutionPairer extends AxiomPairer
 	    QualifiedName qname = operand.getQualifiedName();
 	    if (qname.getTemplate().isEmpty() || qname.getName().isEmpty())
 	        return true;
-	    String templateKey = new QualifiedName(qname.getScope(), qname.getTemplate(), QualifiedName.EMPTY).toString();
+	    String templateKey = solution.getCurrentKey();
+	    if (!localContext.inSameSpace(qname)) 
+	        templateKey = new QualifiedName(qname.getScope(), qname.getTemplate(), QualifiedName.EMPTY).toString();
 		if (solution.keySet().contains(templateKey))
 		{   
 			// Solution has Axiom with key name

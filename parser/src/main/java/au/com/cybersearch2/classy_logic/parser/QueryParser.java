@@ -970,7 +970,7 @@ public class QueryParser implements QueryParserConstants
          expression = null;
      boolean isLiteral = (expression != null) &&
                           !expression.isEmpty() && !(expression instanceof Evaluator) &&
-                          (equalsToken == null);
+                          (equalsToken != null);
      if (expression != null)
          varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
      if (index !=null)
@@ -3139,7 +3139,7 @@ public class QueryParser implements QueryParserConstants
     for (int i = 0; i < 86; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
-        jj_2_rtns[i] = new JJCalls();
+        jj_2_rtns[i]= new JJCalls();
   }
 
   /** Constructor with generated Token Manager. */

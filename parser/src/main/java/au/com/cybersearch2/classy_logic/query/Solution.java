@@ -34,35 +34,38 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  */
 public class Solution 
 {
+    protected static String EMPTY_KEY = "";
+    
 	/** Axioms referenced by key */
 	protected Map<String, Axiom> axiomMap;
 	/** Optional axiom listeners referenced by key */
 	protected Map<QualifiedName, List<AxiomListener>> axiomListenerMap;
-
+    /** Key used for last put() */
+	protected String[] keyStack;
+	
 	/**
 	 * Construct a Solution object
 	 */
 	public Solution() 
 	{
 		axiomMap = new HashMap<String, Axiom>();
+		keyStack = new String[2];
+		keyStack[0] = EMPTY_KEY;
+		keyStack[1] = EMPTY_KEY;
 	}
 
-	/**
+	public String getCurrentKey()
+    {
+        return keyStack[0];
+    }
+
+    /**
 	 * Returns count of axioms
 	 * @return int
 	 */
 	public int size() 
 	{
 		return axiomMap.size();
-	}
-
-	/**
-	 * Remove axiom referenced by key
-	 * @param key
-	 */
-	public void remove(String key) 
-	{
-		axiomMap.remove(key);
 	}
 
     /**
@@ -77,6 +80,24 @@ public class Solution
         if ((axiomListenerMap != null) && axiomListenerMap.containsKey(qname))
             for (AxiomListener axiomListener: axiomListenerMap.get(qname))
                 axiomListener.onNextAxiom(axiom);
+        keyStack[1] = keyStack[0];
+        keyStack[0] = key;
+    }
+
+    /**
+     * Remove axiom referenced by key
+     * @param key
+     */
+    public void remove(String key) 
+    {
+        axiomMap.remove(key);
+        if (key.equals(keyStack[0]))
+        {
+            keyStack[0] = keyStack[1];
+            keyStack[1] = EMPTY_KEY;
+        }
+        else if (key.equals(keyStack[1]))
+            keyStack[1] = EMPTY_KEY;
     }
 
 	/**
@@ -105,6 +126,8 @@ public class Solution
 	public void reset() 
 	{
 		axiomMap.clear();
+        keyStack[0] = EMPTY_KEY;
+        keyStack[1] = EMPTY_KEY;
 	}
 
 	/**
