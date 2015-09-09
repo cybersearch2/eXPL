@@ -42,7 +42,7 @@ public class Gaming {
 	 * The sample demonstrates enclosing a variable in parentheses to avoid it being interpreted as a term name.<br/>
 	 * Class StudentScores2 provides another example of parentheses.<\br>
 	 * The expected result:<br/>
-	 * spin(combo.r1 = lemon, combo.r2 = banana, combo.r3 = apple, combo.r4 = orange)<br/>
+	 * spin(combo_r1 = lemon, combo_r2 = banana, combo_r3 = apple, combo_r4 = orange)<br/>
 	 */
 	public void displayFruit()
 	{

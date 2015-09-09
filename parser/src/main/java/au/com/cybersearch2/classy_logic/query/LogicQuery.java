@@ -90,17 +90,19 @@ public class LogicQuery implements SolutionFinder
 	    boolean emptyTemplate = false;
 		if (queryStatus == QueryStatus.start)
 		{   // Start from beginning of axiom sequence
-			axiomIterator = axiomSource.iterator();
-			if ((axiomIterator.hasNext()))
-			{    
-				queryStatus = QueryStatus.in_progress; 
-				emptyTemplate = (template.getTermCount() == 0);
-			}
-			else
-			   // When AxiomSource is empty, allow unification solely with solution
+		    if (axiomSource != null)
+		    {
+			    axiomIterator = axiomSource.iterator();
+    			if ((axiomIterator.hasNext()))
+    			{    
+    				queryStatus = QueryStatus.in_progress; 
+    				emptyTemplate = (template.getTermCount() == 0);
+    			}
+		    }
+			if (queryStatus == QueryStatus.start)
+			   // When AxiomSource is absent or empty, allow unification solely with solution
 				return unifySolution(solution, template) &&
 					    completeSolution(solution, template);
-			
 		}
 		// Iterate through axioms to find solution
 		while (axiomIterator.hasNext())

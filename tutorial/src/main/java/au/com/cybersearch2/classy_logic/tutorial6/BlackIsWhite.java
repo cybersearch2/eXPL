@@ -45,11 +45,11 @@ public class BlackIsWhite {
 	 * Here each color is reversed by xor with 255, which turns black into white etc.
 	 * A separate Axiom Term list for the same axiom proves the swatch terms have been modified, not just the color list variables.
 	 * The expected result:<br/>
-		shade(name = aqua, color.red = 255, color.green = 0, color.blue = 0,<br/> 
+		shade(name = aqua, color_red = 255, color_green = 0, color_blue = 0,<br/> 
 		      r = 255, g = 0, b = 0)<br/>
-		shade(name = black, color.red = 255, color.green = 255, color.blue = 255,<br/> 
+		shade(name = black, color_red = 255, color_green = 255, color_blue = 255,<br/> 
 		      r = 255, g = 255, b = 255)<br/>
-		shade(name = blue, color.red = 255, color.green = 255, color.blue = 0,<br/> 
+		shade(name = blue, color_red = 255, color_green = 255, color_blue = 0,<br/> 
 		      r = 255, g = 255, b = 0)<br/>	 
 	 */
 	public void displayShades()

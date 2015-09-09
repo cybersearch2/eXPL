@@ -141,7 +141,8 @@ public class Evaluator extends DelegateOperand
     	if (right != null)
     	{
     		// Only evaluate once between backups
-    		if (right.isEmpty())
+    	    // Assume non-empty with id == 0 implies static intialization
+    		if (right.isEmpty() || (right.getId() == 0))
     		    right.evaluate(id);
     		// If right hand term is empty, then cannot proceed. Maybe unification failed for this term.
     		if (right.isEmpty())

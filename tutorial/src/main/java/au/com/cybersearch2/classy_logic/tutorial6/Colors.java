@@ -41,9 +41,9 @@ public class Colors {
 	/**
 	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
-		shade(name = aqua, color.red = 0, color.green = 255, color.blue = 255)<br/>
-		shade(name = black, color.red = 0, color.green = 0, color.blue = 0)<br/>
-		shade(name = blue, color.red = 0, color.green = 0, color.blue = 255)<br/>
+		shade(name = aqua, color_red = 0, color_green = 255, color_blue = 255)<br/>
+		shade(name = black, color_red = 0, color_green = 0, color_blue = 0)<br/>
+		shade(name = blue, color_red = 0, color_green = 0, color_blue = 255)<br/>
 	 */
 	public void displayShades()
 	{

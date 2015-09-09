@@ -18,7 +18,7 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population):
 (17,"Moscow","Russia","Europe",16900000),
 (18,"Buenos Aires","Argentina","South America",16500000),
 (19,"Kolkata","India","Asia",16240000),
-(20,"London","United,Kingdom","Europe",15800000),
+(20,"London","UK","Europe",15800000),
 (21,"Bangkok","Thailand","Asia",15350000),
 (22,"Lagos","Nigeria","Africa",15210000),
 (23,"Istanbul","Turkey","Europe",14800000),

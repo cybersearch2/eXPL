@@ -65,9 +65,9 @@ public class StudentScores
 	 * Compiles the LISTS script and runs the "marks" query, displaying the solution on the console.<br/>
 	 * Demonstrates a values list. See StudentScores2 for perhaps a better alternative to using a values list.
 	 * The expected result:<br/>
-	 * 	score(student = George, mark.english = a-, mark.maths = b, mark.history = a)<br/>
-	 *	score(student = Sarah, mark.english = b-, mark.maths = a+, mark.history = a-)<br/>
-	 *	score(student = Amy, mark.english = b+, mark.maths = a, mark.history = d-)<br/>
+	 * 	score(student = George, mark_english = a-, mark_maths = b, mark_history = a)<br/>
+	 *	score(student = Sarah, mark_english = b-, mark_maths = a+, mark_history = a-)<br/>
+	 *	score(student = Amy, mark_english = b+, mark_maths = a, mark_history = d-)<br/>
 	 */
 	public void displayLists()
 	{

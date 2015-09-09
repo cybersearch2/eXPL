@@ -60,6 +60,10 @@ eXPL v1.12
 57. Compilier now collects call parameters and axiom terms into lists containing OperandParam objects
 58. Applicable Operand classes updated to to use OperandParam objects
 59. Add inner Choice which uses local variables
+60. Update Evaluator to evaluate non-empty right hand term if id == 0, indicating static initialization
+61. Add LiteralListOperand for matching template term to list of literal values
+62. Add unnamed Axiom List Literal assignment and concatenation
+63. Add HighCityAxioms example to tutorial 7
 
 
 eXPL v1.11

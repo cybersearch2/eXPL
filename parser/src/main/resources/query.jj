@@ -59,6 +59,7 @@ import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
+import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
@@ -598,10 +599,18 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
     Operand expression = null;
     Group group = null;
     OperandMap operandMap = parserAssembler.getOperandMap();
+    List<Parameter> literalList = null;
+    List<OperandParam> axiomList = null;
+    QualifiedName qname = null;
 }
 {
-   ( varType=Type(operandMap) )? name=Name() ( index=IndexExpression(parserAssembler) )? 
-   (     
+   ( varType=Type(operandMap) )? name=Name() 
+   {
+       qname = parserAssembler.getContextName(name);
+   }
+   ( index=IndexExpression(parserAssembler) )? 
+   (
+    (     
       ( 
         scToken=":" | scToken="?" | equalsToken="=" |
         ( assignToken=<PLUSASSIGN>
@@ -613,10 +622,22 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
         | assignToken=<XORASSIGN>
         | assignToken=<REMASSIGN>)
       ) 
-      expression=Expression(parserAssembler) 
-      |
-      <REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(template, name, parserAssembler) )? ")"
-  )?
+      (
+        <AXIOM> axiomList=AxiomList(qname, parserAssembler) 
+        {
+          VariableType axiomListVarType = new VariableType(OperandType.LIST);
+          axiomListVarType.setProperty(VariableType.PARAMS, axiomList);
+          expression = axiomListVarType.getInstance(parserAssembler, qname);
+        } 
+        |
+        expression=Expression(parserAssembler) 
+        |
+        <LBRACE> literalList = LiteralList() <RBRACE> 
+      )
+     )
+     |
+        <REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(template, name, parserAssembler) )? ")"
+    )?
   {
      if (varType == null)
          varType = new VariableType(OperandType.UNKNOWN);
@@ -628,29 +649,29 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
          regexOp = operandMap.addOperand(regexId.image, null);
      if (assignToken != null)
          expression = null;
-     boolean isLiteral = (expression != null) && 
-                          !expression.isEmpty() && !(expression instanceof Evaluator) && 
-                          (equalsToken != null);
+     boolean isLiteral = (expression != null) && !expression.isEmpty() && (equalsToken != null);
      if (expression != null)
          varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
      if (index !=null)
-       var = parserAssembler.setListVariable(name, index, null);
+         var = parserAssembler.setListVariable(name, index, null);
      else if (regexOp != null)
-       var = new RegExOperand(parserAssembler.getContextName(name), regexOp, 0, group);
+         var = new RegExOperand(qname, regexOp, 0, group);
      else if (scToken != null) 
-       var = new Evaluator(parserAssembler.getContextName(name), expression, (scToken.image == "?" ? "&&" : "||"));
+         var = new Evaluator(qname, expression, (scToken.image == "?" ? "&&" : "||"));
+     else if (literalList != null)
+         var = new LiteralListOperand(qname, literalList);
      else if (!operandMap.hasOperand(name))
-       var = varType.getInstance(parserAssembler, name);
+         var = varType.getInstance(parserAssembler, name);
      else if (!template.isInnerTemplate())
-       var = operandMap.addOperand(name, expression);
+         var = operandMap.addOperand(name, expression);
      else
-       var = new Variable(parserAssembler.getContextName(name), expression);
-     if ((index ==null) && (!operandMap.hasOperand(name)) && !template.isInnerTemplate())
-        operandMap.addOperand(var);
+         var = new Variable(qname, expression);
+     if ((index == null) && (!operandMap.hasOperand(name)) && !template.isInnerTemplate())
+         operandMap.addOperand(var);
      if (assignToken != null) 
-        var = new Evaluator(parserAssembler.getContextName(name), var, assignToken.image, assignExpression);
-     if ((index !=null) && (equalsToken != null)) 
-        var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
+         var = new Evaluator(qname, var, assignToken.image, assignExpression);
+     if ((index !=null) && (equalsToken != null) && !isLiteral) 
+         var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
      template.addTerm(var);
   }
 }
@@ -809,18 +830,16 @@ Operand AxiomVariable(QualifiedName qualifiedAxiomName, ParserAssembler parserAs
 List<OperandParam> AxiomList(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
 {
   String axiomName = qualifiedAxiomName.getName();
-  String listName = axiomName + "_list";
   List<OperandParam> operandParamList = new ArrayList<OperandParam>();
   Operand operand;
-  int count = 0;
 }
 {
-  operand = AxiomInitializer(listName + "0", axiomName, parserAssembler)
+  operand = AxiomInitializer(axiomName, axiomName, parserAssembler)
   {
     operandParamList.add(new OperandParam(axiomName, operand));
   }
   ( 
-    operand = AxiomInitializer(listName + ++count, axiomName, parserAssembler)
+    operand = AxiomInitializer(axiomName, axiomName, parserAssembler)
     {
       operandParamList.add(new OperandParam(axiomName, operand));
     }
@@ -1640,6 +1659,30 @@ Parameter LiteralTerm() :
     return new Parameter(Term.ANONYMOUS, new Unknown());
   }
 }
+
+List<Parameter> LiteralList() :
+{
+  List<Parameter>  literalList = new ArrayList<Parameter>();
+  Parameter parameter;
+  Token op;
+}
+{
+  parameter=LiteralTerm()
+  {
+    literalList.add(parameter);
+  }
+  ( 
+    op="," 
+    parameter = LiteralTerm() 
+    {
+      literalList.add(parameter);
+    }
+  )*
+  {
+    return literalList;
+  }
+}
+
 
 boolean BooleanLiteral() :
 {}

@@ -235,7 +235,7 @@ public class ParserAssembler implements LocaleListener
 	}
 
 	/**
-	 * Returns template with specified name
+	 * Returns template with specified qualified name
 	 * @param textName Template name
 	 * @return Template object or null if template not found
 	 */
@@ -244,6 +244,11 @@ public class ParserAssembler implements LocaleListener
 	    return templateMap.get(qualifiedTemplateName);
     }
 
+	/**
+	 * Returns template with specified name
+	 * @param textName
+	 * @return Template object or null if template not found
+	 */
     public Template getTemplate(String textName)
     {
         return templateMap.get(QualifiedName.parseTemplateName(textName));
@@ -571,6 +576,11 @@ public class ParserAssembler implements LocaleListener
 		setAxiomTermNameList(qualifiedTemplateName, axiomList);
 	}
 
+	/**
+	 * Returns qualified name of axiom source specified by key
+	 * @param key
+	 * @return QualifiedName object or null if axiom source not found
+	 */
 	public QualifiedName findQualifiedAxiomName(String key)
     {
         QualifiedName qname = getContextName(key);
@@ -589,9 +599,13 @@ public class ParserAssembler implements LocaleListener
                 return qname;
         }
         return null; 
-        //throw new ExpressionException("No axiom source found matching key \"" + key + "\"");
     }
-	
+
+	/**
+	 * Returns flag set true if given qualified name identifies an axiom source
+	 * @param qname Qualified axiom name
+	 * @return boolean
+	 */
 	public boolean isQualifiedAxiomName(QualifiedName qname)
     {
         if ((scopeAxiomMap != null) && (scopeAxiomMap.get(qname) != null))
@@ -776,6 +790,20 @@ public class ParserAssembler implements LocaleListener
     }
 
     /**
+     * Returns item list identified by name
+     * @param listName
+     * @return ItemList
+     * @throws ExpressionException if item list not found
+     */
+    public ItemList<?> getItemList(String listName)
+    {
+        ItemList<?> itemList = findItemList(listName);
+        if (itemList == null)
+            itemList = getItemList(QualifiedName.parseName(listName));
+        return itemList;
+    }
+    
+    /**
      * Returns item list specified by qualified name.
      * @param qname Qualified name of list
      * @return ItemList object or null if not found
@@ -911,6 +939,11 @@ public class ParserAssembler implements LocaleListener
             scope.getGlobalParserAssembler().copyLists(listMap);
     }
 
+    /**
+     * Returns operand identified by name
+     * @param operandName
+     * @return Operand object from same scope or global scope or null if not found
+     */
     public Operand findOperandByName(String operandName)
     {
         QualifiedName qualifiedOperandName = QualifiedName.parseName(operandName, operandMap.getQualifiedContextname());
@@ -928,11 +961,4 @@ public class ParserAssembler implements LocaleListener
         return operand;
     }
 
-    public ItemList<?> getItemList(String listName)
-    {
-        ItemList<?> itemList = findItemList(listName);
-        if (itemList == null)
-            itemList = getItemList(QualifiedName.parseName(listName));
-        return itemList;
-    }
 }

@@ -37,8 +37,7 @@ public class EuropeanMegaCities
 			"// 	(1,\"Tokyo\",\"Japan\",\"Asia\",37900000),\n" + 
 			"// 	(2,\"Delhi\",\"India\",\"Asia\",26580000)...\n" + 
 			"include \"mega_city.xpl\";\n" +
-			"integer count = 0;\n" +
-			"template euro_megacities (Megacity, Country, Pop = Population, Continent = \"Europe\" );\n" + 
+			"template euro_megacities (Megacity, Country, Continent { \"Europe\" } );\n" + 
             "query euro_megacities (mega_city : euro_megacities);\n"; 
 
 	public EuropeanMegaCities()
@@ -49,11 +48,11 @@ public class EuropeanMegaCities
 	/**
 	 * Compiles the MEGA_CITY script and runs the "asia_top_ten" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
-		euro_megacities(Megacity = Moscow, Country = Russia, Pop. = 16900000, Continent = Europe)<br/>
-		euro_megacities(Megacity = London, Country = United,Kingdom, Pop. = 15800000, Continent = Europe)<br/>
-		euro_megacities(Megacity = Istanbul, Country = Turkey, Pop. = 14800000, Continent = Europe)<br/>
-		euro_megacities(Megacity = Rhine-Ruhr, Country = Germany, Pop. = 11350000, Continent = Europe)<br/>
-		euro_megacities(Megacity = Paris, Country = France, Pop. = 10770000, Continent = Europe)<br/>
+		euro_megacities(Megacity = Moscow, Country = Russia, Continent = Europe)<br/>
+		euro_megacities(Megacity = London, Country = UK, Continent = Europe)<br/>
+		euro_megacities(Megacity = Istanbul, Country = Turkey, Continent = Europe)<br/>
+		euro_megacities(Megacity = Rhine-Ruhr, Country = Germany, Continent = Europe)<br/>
+		euro_megacities(Megacity = Paris, Country = France, Continent = Europe)<br/>
 	 */
 	public void displayEuropeanCities()
 	{

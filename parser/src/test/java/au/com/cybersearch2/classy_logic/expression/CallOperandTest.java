@@ -469,16 +469,16 @@ public class CallOperandTest
 
     static String[] SORTED_CITIES_LIST =
     {
-        "sort_city_list0(name = jacksonville, altitude = 8)",
-        "sort_city_list0(name = richmond, altitude = 19)",
-        "sort_city_list0(name = madrid, altitude = 1305)",
-        "sort_city_list0(name = wichita, altitude = 1305)",
-        "sort_city_list0(name = bilene, altitude = 1718)",
-        "sort_city_list0(name = spokane, altitude = 1909)",
-        "sort_city_list0(name = denver, altitude = 5280)",
-        "sort_city_list0(name = flagstaff, altitude = 6970)",
-        "sort_city_list0(name = addis ababa, altitude = 8000)",
-        "sort_city_list0(name = leadville, altitude = 10200)"
+        "sort_city(name = jacksonville, altitude = 8)",
+        "sort_city(name = richmond, altitude = 19)",
+        "sort_city(name = madrid, altitude = 1305)",
+        "sort_city(name = wichita, altitude = 1305)",
+        "sort_city(name = bilene, altitude = 1718)",
+        "sort_city(name = spokane, altitude = 1909)",
+        "sort_city(name = denver, altitude = 5280)",
+        "sort_city(name = flagstaff, altitude = 6970)",
+        "sort_city(name = addis ababa, altitude = 8000)",
+        "sort_city(name = leadville, altitude = 10200)"
     };
     
     static final String PERFECT_MATCH = 
@@ -589,9 +589,9 @@ public class CallOperandTest
     
     static String[] FACTUAL_GEMINIS = 
     {
-        "person_list0(name = John, sex = m, age = 23, starsign = gemini)",
-        "person_list0(name = Jenny, sex = f, age = 21, starsign = gemini)",
-        "person_list0(name = Fiona, sex = f, age = 29, starsign = gemini)"
+        "person(name = John, sex = m, age = 23, starsign = gemini)",
+        "person(name = Jenny, sex = f, age = 21, starsign = gemini)",
+        "person(name = Fiona, sex = f, age = 29, starsign = gemini)"
     };
 
     @Before
@@ -818,8 +818,8 @@ public class CallOperandTest
                 Axiom germanColors = solution.getAxiom("german_colors");
                 AxiomList colorsList = (AxiomList)germanColors.getTermByName("colors").getValue();
                 Iterator<AxiomTermList> iterator = colorsList.iterator();
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors_list0(Aqua, aqua = aqua(red = 0, green = 255, blue = 255))");
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors_list1(Blue, blue = blue(red = 0, green = 0, blue = 255))");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors(Aqua, aqua = aqua(red = 0, green = 255, blue = 255))");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors(Blue, blue = blue(red = 0, green = 0, blue = 255))");
                 assertThat(iterator.hasNext()).isFalse();
                 assertThat(colorsList.getAxiomTermNameList()).isEmpty();
                 return true;
@@ -833,7 +833,7 @@ public class CallOperandTest
                 Axiom germanOrange = solution.getAxiom("german_orange");
                 AxiomList colorsList = (AxiomList)germanOrange.getTermByName("orange_color").getValue();
                 Iterator<AxiomTermList> iterator = colorsList.iterator();
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("orange_color_list0(Orange, orange = orange(red = <empty>, green = <empty>, blue = <empty>))");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("orange_color(Orange, orange = orange(red = <empty>, green = <empty>, blue = <empty>))");
                 assertThat(iterator.hasNext()).isFalse();
                 assertThat(colorsList.getAxiomTermNameList()).isEmpty();
                 return true;

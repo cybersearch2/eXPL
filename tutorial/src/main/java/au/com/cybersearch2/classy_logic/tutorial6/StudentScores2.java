@@ -43,7 +43,7 @@ public class StudentScores2
 		" \"a-\", \"a\", \"a+\"\n" +
 		");\n" +
 		" list<term> mark(alpha_marks);\n" +
-		" template score(student, mark[(english)-1], mark[(maths)-1], mark[(history)-1]);\n" +
+		" template score(student, english = mark[(english)-1], maths = mark[(maths)-1], history = mark[(history)-1]);\n" +
 		" query marks(grades : score);"
 		;
 
@@ -51,9 +51,9 @@ public class StudentScores2
 	 * Compiles the LISTS script and runs the "marks" query, displaying the solution on the console.<br/>
 	 * This sample demonstrates using an Axiom Term list as a value list.
 	 * The expected result:<br/>
-	 * 	score(student = George, mark.english = b+, mark.maths = b-, mark.history = a-)<br/>
-	 *	score(student = Sarah, mark.english = c+, mark.maths = a, mark.history = b+)<br/>
-	 *	score(student = Amy, mark.english = b, mark.maths = a-, mark.history = e+)<br/>
+	 * 	score(student = George, english = b+, maths = b-, history = a-)<br/>
+	 *	score(student = Sarah, english = c+, maths = a, history = b+)<br/>
+	 *	score(student = Amy, english = b, maths = a-, history = e+)<br/>
 	 */
 	public void displayLists()
 	{

@@ -18,7 +18,7 @@ package au.com.cybersearch2.classy_logic.tutorial4;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
@@ -32,8 +32,7 @@ public class Expressions
 	static final String EXPRESSIONS =
        "integer x = 1;\n" +
        "integer y = 2;\n" +
-       "axiom to_prove(can_evaluate) : (false);\n" +
-       "template evaluate(\n" +
+       "calc evaluate(\n" +
        "  boolean can_add = x + y == 3,\n" +
        "  boolean can_subtract = y - x == 1,\n" +
        "  boolean can_multiply = x * y == 2,\n" +
@@ -42,16 +41,23 @@ public class Expressions
        "  boolean can_assign = (y *= 3) == 6 && y == 6,\n" +
        "  boolean can_evaluate = can_add && can_subtract && can_multiply && can_divide && can_override_precedence && can_assign\n" +
         ");\n" +
-       "query expressions (to_prove:evaluate);";
+       "query expressions (evaluate);";
 
+    /**
+     * Compiles the EXPRESSIONS script and runs the "evaluate" query, displaying a success summary flag on the console.
+     * Note this sample uses a calculator instead of a template, as it does not require an axiom source in order to do a unification+evaluation step.
+     * <br/>
+     * The expected result:<br/>
+        can_evaluate = true<br/>
+	 */
 	public void displayEvaluations()
 	{
 		QueryProgram queryProgram = new QueryProgram(EXPRESSIONS);
 		queryProgram.executeQuery("expressions", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
-				Axiom evaluateAxiom = solution.getAxiom("evaluate");
-					System.out.println(evaluateAxiom.toString());
+				Term evaluateTerm = solution.getAxiom("evaluate").getTermByName("can_evaluate");
+					System.out.println(evaluateTerm.toString());
 				return true;
 			}});
 	}

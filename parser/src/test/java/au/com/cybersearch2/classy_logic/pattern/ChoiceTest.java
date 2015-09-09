@@ -44,9 +44,9 @@ public class ChoiceTest
 
     static final String[] CHOICE_COLORS_LIST =
     {
-        "rgb = rgb_list0(red = 0, green = 255, blue = 255)",
-        "rgb = rgb_list0(red = 0, green = 0, blue = 255)",
-        "rgb = rgb_list0(red = null, green = null, blue = null)"
+        "rgb = rgb(red = 0, green = 255, blue = 255)",
+        "rgb = rgb(red = 0, green = 0, blue = 255)",
+        "rgb = rgb(red = null, green = null, blue = null)"
     };
 
     static final String STAMP_DUTY =
