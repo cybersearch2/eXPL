@@ -29,6 +29,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.DI;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 
 /**
  * IncreasedAgriculture demonstrates Axiom Provider writing query results to a database.
@@ -44,7 +45,7 @@ public class IncreasedAgriculture
 		"axiom Data : resource \"agriculture\";\n" +
 		"include \"surface-land.xpl\";\n" +
 	    "template agri_10y (country ? y2010 - y1990 > 1.0, double y1990, double y2010);\n" +
-		"template surface_area_increase (country = agri_10y.country, double surface_area = (y2010 - y1990)/100 * surface_area_Km2);\n" +
+		"template surface_area_increase (country ? country == agri_10y.country, double surface_area = (agri_10y.y2010 - agri_10y.y1990)/100 * surface_area_Km2);\n" +
 	    "// Specify term list which writes to persistence resource 'agriculture'\n" +
 		"list<term> surface_area_axiom(surface_area_increase : resource \"agriculture\");\n" +
 	    "query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);"; 
@@ -67,6 +68,8 @@ public class IncreasedAgriculture
 		// Configure dependency injection to get resource "agriculture"
 		new DI(new AgriModule()).validate();
 		DI.inject(this);
+	    PersistenceContext persistenceContext = new PersistenceContext();
+	    persistenceContext.initializeAllDatabases();
 		providerManager.putAxiomProvider(new AgriAxiomProvider());
 	}
 	
@@ -86,12 +89,12 @@ public class IncreasedAgriculture
 		QueryProgram queryProgram1 = new QueryProgram(AGRICULTURAL_LAND);
 		queryProgram1.executeQuery("more_agriculture"
         // Uncomment following SolutionHandler parameter to see intermediate result 
-		, new SolutionHandler(){
+		/*, new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
 				System.out.println(solution.getAxiom("surface_area_increase").toString());
 				return true;
-			}});
+			}}*/);
 		QueryProgram queryProgram2 = new QueryProgram(AGRI_10_YEAR);
 		Result result = queryProgram2.executeQuery("increased_query");
 		return result.getIterator(QualifiedName.parseGlobalName("increased_list"));

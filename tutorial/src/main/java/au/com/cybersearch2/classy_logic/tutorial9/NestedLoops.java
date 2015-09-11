@@ -48,7 +48,7 @@ public class NestedLoops
     		"  ? ++i < length(sorted)\n" +
     		"}\n" +
             ")\n;" +
-    	    "query sort_axiom calc(insert_sort);\n" 
+    	    "query sort_axiom (insert_sort);\n" 
     		;
 
 	/**

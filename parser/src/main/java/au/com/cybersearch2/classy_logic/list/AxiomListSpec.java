@@ -45,6 +45,8 @@ public class AxiomListSpec
     protected Operand axiomExpression;
     /** Compiler operand for term selection */
     protected Operand termExpression;
+    /** Variable for term selection */
+    protected Operand termVariable;
     /** Text to append to name of variable */
     protected String suffix;
     /** Compiler operand to supply AxiomList object on evaluation */
@@ -187,26 +189,52 @@ public class AxiomListSpec
 
     /**
      * Complete any initialization dependent on completion of evaluation
-     * @return Flag set true if update occurred
+     * @param modifierId Identity of caller, which must be provided for backup()
+    * @return Flag set true if update occurred
      */
-    public boolean update()
+    public boolean update(int modifierId)
     {
-        if ((axiomListVariable == null) || axiomListVariable.isEmpty())
+        if (axiomListVariable == null)
             return false;
+        if (axiomListVariable.isEmpty())
+            axiomListVariable.evaluate(modifierId);
+        if (axiomListVariable.isEmpty())
+            return false;
+        if (termVariable != null)
+        {
+            termExpression = termVariable;
+            setTermIndex();
+            return true;
+        }
         Object itemListVariable = axiomListVariable.getValue();
+        AxiomTermList axiomTermList = null;
         if (itemListVariable instanceof AxiomTermList)
-        {   //Adjust variable parameters to index terms of axiom
-            AxiomTermList axiomTermList = (AxiomTermList)itemListVariable;
-            String axiomKey = axiomTermList.getKey();
-            QualifiedName axiomName = axiomTermList.getQualifiedName();
-            if ((axiomList == null) || 
-                 !axiomList.getName().equals(axiomTermList.getName()) ||
-                 !axiomList.getKey().equals(axiomTermList.getKey()))
+            axiomTermList = (AxiomTermList)itemListVariable;
+        else if (itemListVariable instanceof AxiomList)
+        {
+            axiomList = (AxiomList)itemListVariable;
+            boolean axiomOnly = (termExpression == null) && (termIndex < 0);
+            if (axiomOnly && (axiomList.getLength() == 1) && (axiomExpression.getValueClass() == String.class))
             {
-                axiomList = new AxiomList(axiomName, axiomKey);
-                axiomList.setAxiomTermNameList(AxiomUtils.getTermNames(axiomTermList.getAxiom()));
+                axiomTermList = axiomList.getItem(0);
+                termVariable = axiomExpression;
             }
-            axiomList.assignItem(0, axiomTermList);
+        }
+        if (axiomTermList != null)
+        {   //Adjust variable parameters to index terms of axiom
+            if (termVariable == null)
+            {
+                String axiomKey = axiomTermList.getKey();
+                QualifiedName axiomName = axiomTermList.getQualifiedName();
+                if ((axiomList == null) || 
+                     !axiomList.getName().equals(axiomTermList.getName()) ||
+                     !axiomList.getKey().equals(axiomTermList.getKey()))
+                {
+                    axiomList = new AxiomList(axiomName, axiomKey);
+                    axiomList.setAxiomTermNameList(AxiomUtils.getTermNames(axiomTermList.getAxiom()));
+                }
+                axiomList.assignItem(0, axiomTermList);
+            }
             if (isTermList)
                 return true; // Ready to reference term in list
             {   // Adjust index values for AxiomTermList
@@ -224,15 +252,24 @@ public class AxiomListSpec
                 axiomExpression = null;
             }
         }
-        else if (!isTermList & (itemListVariable instanceof AxiomList))
-            axiomList = (AxiomList)itemListVariable;
-        else
+        else if (axiomList == null)
             throw new ExpressionException("Value has incompatible type. Expecting " + (isTermList ? "AxiomTermList" : "AxiomList"));
         if (termExpression != null)
             setTermIndex();
         return true;
     }
 
+    /**
+     * Set term index for case it is specifed by name. 
+     * @param itemName
+     * Requires axiom term name list to be available. 
+     */
+    public void setTermIndex(String itemName)
+    {
+        suffix = itemName;
+        setTermIndex();
+    }
+    
     /**
      * Set term index for case it is specifed by name. 
      * Requires axiom term name list to be available. 

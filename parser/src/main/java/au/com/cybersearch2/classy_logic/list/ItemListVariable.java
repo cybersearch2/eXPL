@@ -116,9 +116,13 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 			indexExpression.evaluate(id);
 			if (indexExpression.isEmpty())
 				throw new ExpressionException("Index for list \"" +itemList.getName() + "\" is empty" );
-			if (!(indexExpression.getValue() instanceof Number))
+			index = -1;
+			if (indexExpression.getValueClass() == String.class)
+			    index = getIndexForName(indexExpression.getValue().toString());
+			else if (indexExpression.getValue() instanceof Number)
+	            index = ((Number)(indexExpression.getValue())).intValue();
+			if (index == -1)    
 				throw new ExpressionException("\"" +itemList.getName() + "[" + indexExpression.getValue().toString() + "]\" is not a valid value" );
-			index = ((Number)(indexExpression.getValue())).intValue();
 			onIndexSet(index);
 			this.id = id;
 		}
@@ -132,6 +136,16 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 	}
 
 	/**
+	 * Returns index for item referenced by name. Default return value is -1 for no match. 
+	 * @param itemName
+	 * @return Index of item or -1 for no match or feature not supported
+	 */
+	protected int getIndexForName(String itemName)
+    {
+        return -1;
+    }
+
+    /**
 	 * Handle index evaluation event. Set value to list item selected by index.
 	 * @param index int
 	 */

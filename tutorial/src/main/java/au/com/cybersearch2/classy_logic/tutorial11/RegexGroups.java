@@ -26,8 +26,10 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
+import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -45,24 +47,18 @@ public class RegexGroups
 		"string wordRegex = \"^in[^ ]+\";\n" +
 	    "string defRegex = \"^(.)\\. (.*+)\";\n" +
 	    "// Convert single letter part of speech to word\n" +
-	    "axiom part(letter, word): \n" +
-		" (\"n\", \"noun\"),\n" +
-		" (\"v\", \"verb\"),\n" +
-		" (\"j\", \"adj.\"),\n" +
-		" (\"v\", \"adv.\");\n" +
+	    "axiom expand =  \n" +
+		" { n = \"noun\",  \n" +
+		"   v = \"verb\",  \n" +
+        "   a = \"adv.\",  \n" +
+		"   j = \"adj.\" };\n" +
 		"// Collect words starting with 'in' along with other details\n" +
-		"template in_words (Word regex(wordRegex), Definition regex(defRegex { part, def }));\n" +
-		"// Expand part letter to word in chain query\n" +
-		"template part_expand(letter ? letter == in_words.part, word);" +
-		"// Use calculator to create list items\n" +
-		"calc word_def(\n" +
-		"  word = in_words.Word, \n" +
-		"  part = part_expand.word,\n" +
-		"  def = in_words.def);\n" +
-		"// Send result to a list\n" +
-	    "list word_definitions(word_def);\n" +
-		"query query_in_words(lexicon : in_words) >> (part : part_expand) >> (word_def);";
-
+		"template in_words (\n" +
+		"  word regex(wordRegex), definition regex(defRegex { part, def }),\n" +
+        "  word = word + \", \" + expand[part] + \"- \" + def\n" +
+		");\n" +
+		"query query_in_words(lexicon : in_words);";
+ 
 	/** ProviderManager object wihich is axiom source for the compiler */
 	@Inject
 	ProviderManager providerManager;
@@ -93,7 +89,15 @@ public class RegexGroups
 		// Here is the first solution: 
 		// word = inadequate, part = adj., def = not sufficient to meet a need
 		QueryProgram queryProgram = new QueryProgram(LEXICAL_SEARCH);
-		Result result = queryProgram.executeQuery("query_in_words");
+		Result result = queryProgram.executeQuery("query_in_words", new SolutionHandler(){
+
+            @Override
+            public boolean onSolution(Solution solution)
+            {
+                //System.out.println(solution.keySet());
+                System.out.println(solution.getAxiom("in_words").getTermByName("word").toString());
+                return true;
+            }});
 		return result.getIterator(QualifiedName.parseGlobalName("word_definitions"));
  	}
 	

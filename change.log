@@ -64,6 +64,9 @@ eXPL v1.12
 61. Add LiteralListOperand for matching template term to list of literal values
 62. Add unnamed Axiom List Literal assignment and concatenation
 63. Add HighCityAxioms example to tutorial 7
+64. Adapt AxiomListVariable to allow access to the terms of a singleton by name
+65. Add Choice pass-thru variables
+66. Add 2 Choice samples to tutorial 10
 
 
 eXPL v1.11

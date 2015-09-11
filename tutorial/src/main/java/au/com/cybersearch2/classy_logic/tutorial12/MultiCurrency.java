@@ -41,11 +41,13 @@ public class MultiCurrency
 {
 	static final String WORLD_CURRENCY =
 			"include \"world_currency.xpl\";\n" +
-			"template charge(currency(country) amount);\n" +
-	        "calc charge_plus_gst(currency(country) total = amount * 1.1);\n" +
-	        "calc format_total(string total_text = country + \" Total + gst: \" + format(total));\n" +
-	        "list world_list(format_total);\n" +
-			"query price_query(price : charge) >> (charge_plus_gst) >> (format_total);";
+			"template charge(country, currency(country) amount);\n" +
+	        "calc charge_plus_gst(\n" +
+			"  country, currency(country) total = amount * 1.1,\n" +
+			"  string total_text = country + \" Total + gst: \" + format(total)\n" +
+	        ");\n" +
+	        "list world_list(charge_plus_gst);\n" +
+			"query price_query(price : charge) >> (charge_plus_gst);";
 
 	/**
 	 * Construct MultiCurrency object
@@ -56,7 +58,7 @@ public class MultiCurrency
 	}
 
 	/**
-	 * Compiles the WORLD_CURRENCY script and runs the "price_query" query, displaying the solution on the console.<br/>
+	 * Compiles the WORLD_CURRENCY script and runs the "price_query" query.<br/>
 	 * The first of 104 expected results:<br/>
 	 * format_total(total_text = MY Total + gst: MYR10,682.12)<br/><br/>
 	 * To view full expected result, see src/main/resource/multi-currency-list.txt
@@ -67,12 +69,6 @@ public class MultiCurrency
 		QueryProgram queryProgram = new QueryProgram(WORLD_CURRENCY);
 		// Use this query to see the total amount before it is formatted
 		// Note adjustment of decimal places to suite currency.
-		//queryProgram.executeQuery("price_query", new SolutionHandler(){
-		//	@Override
-		//	public boolean onSolution(Solution solution) {
-		//		System.out.println(solution.getAxiom("format_total").toString());
-		//		return true;
-		//	}});
 		Result result = queryProgram.executeQuery("price_query");
 		return result.getIterator(QualifiedName.parseGlobalName("world_list"));
 	}
@@ -89,7 +85,7 @@ public class MultiCurrency
 	        Iterator<Axiom> iterator = multiCurrency.getFormatedAmounts();
 	        while(iterator.hasNext())
 	        {
-	            System.out.println(iterator.next().toString());
+	            System.out.println(iterator.next().getTermByName("total_text").toString());
 	        }
 		} 
 		catch (ExpressionException e) 

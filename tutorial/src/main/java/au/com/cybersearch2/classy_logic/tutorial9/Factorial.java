@@ -40,7 +40,7 @@ public class Factorial
  		"  ? i++ < n\n" +
 	    "}\n" +
 		")(factorial = 1, i = 1);\n" +
-	    "query factorial calc(factorial)(n = 4);\n" 
+	    "query factorial (factorial)(n = 4);\n" 
 	    ;
 
 	/**

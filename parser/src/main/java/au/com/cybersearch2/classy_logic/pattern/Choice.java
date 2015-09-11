@@ -102,6 +102,10 @@ public class Choice
 		return choiceAxiomList;
 	}
 
+	/**
+	 * Returns the term names
+	 * @return List of names
+	 */
 	public List<String> getTermNameList()
     {
         return termNameList;
@@ -109,39 +113,56 @@ public class Choice
 
     /**
 	 * Complete solution for given parameters
-     * @param axiom Initializer axiom
 	 * @param solution Solution containing query results so far
 	 * @param template Template used to calculate choice
+     * @param axiom Unification axiom
 	 * @return Flag set true if selection match was found
 	 */
 	public boolean completeSolution(Solution solution, Template template, Axiom axiom)
 	{
-	    // Get template to perform selection
+	    // The emplate performs selection
 		int position = template.select();
 		if (position == NO_MATCH)
 		    return false;
-		// Get selected axiom, default being last one in choice axiom list
+		// Get selected axiom
         Axiom choiceAxiom = choiceAxiomList.get(position);
-        // Get value to assign as result, default being match value
-        Object value = template.getTermByIndex(position).getValue();
-        if (value instanceof Null) // Ensure value is valid
+        // Get selection value
+        Term term = template.getTermByIndex(position);
+        if (term.getValue() instanceof Null) // Ensure value is valid
         {   // Use initializer axiom term as fallback
-            Term defaultTerm = axiom.getTermByName(choiceAxiom.getTermByIndex(0).getName());
-            if (defaultTerm != null)
-                value = defaultTerm.getValue();
+            Term selectionTerm = axiom.getTermByName(choiceAxiom.getTermByIndex(0).getName());
+            if (selectionTerm != null)
+                term = selectionTerm;
         }
         // Create solution axiom using Template toAxiom() method
 		Template solutionTemplate = new Template(template.getQualifiedName());
+		// Selection term
 		int index = 0;
 		Operand operand = variableList.get(index++);
-		operand.assign(value);
+        operand.backup(0);
+        term.unifyTerm(operand, template.getId());
 		solutionTemplate.addTerm(operand);
+		// Constants
 		while (index < choiceAxiom.getTermCount())
 		{
 			operand = variableList.get(index);
-			operand.assign(choiceAxiom.getTermByIndex(index).getValue());
+            operand.backup(0);
+			choiceAxiom.getTermByIndex(index).unifyTerm(operand, template.getId());
 			solutionTemplate.addTerm(operand);
 			++index;
+		}
+		// Add pass-thru variables, if any, to solution
+		while (index < variableList.size())
+		{
+		    term = axiom.getTermByName(termNameList.get(index));
+		    if (term != null)
+		    {
+	            operand = variableList.get(index);
+	            operand.backup(0);
+		        term.unifyTerm(operand, template.getId());
+	            solutionTemplate.addTerm(operand);
+		    }
+            ++index;
 		}
 		solution.put(template.getQualifiedName().toString(), solutionTemplate.toAxiom());
 		return true;
@@ -181,6 +202,10 @@ public class Choice
         return true;
     }
 
+    /**
+     * Backup Choice variables
+     * @param id Modification id
+     */
     public void backup(int id)
     {
         for (Operand operand: variableList)

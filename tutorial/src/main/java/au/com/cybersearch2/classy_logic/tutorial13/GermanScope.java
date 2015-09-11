@@ -40,8 +40,8 @@ public class GermanScope
 	        "  (\"german\", \"Gesamtkosten\");\n" +
 	        "local translate(lexicon);" +
 			"template charge(currency amount);\n" +
-			"calc charge_plus_gst(currency total = amount * 1.1);\n" +
-			"calc format_total(string total_text = translate[Total] + \" + gst: \" + format(total));\n" +
+			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +
+			"calc format_total(string total_text = translate[Total] + \" + gst: \" + format(charge_plus_gst.total));\n" +
 			"scope german (language=\"de\", region=\"DE\")\n" +
 			"{\n" +
 			"  query item_query(item : charge) >> (charge_plus_gst) >> (format_total);\n" +

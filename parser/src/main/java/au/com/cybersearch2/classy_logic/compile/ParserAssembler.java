@@ -398,6 +398,8 @@ public class ParserAssembler implements LocaleListener
 		// Note resource references axiom by qualified name, which prepends scope name
 		AxiomProvider axiomProvider = getAxiomProvider(resourceName);
 		axiomProvider.setResourceProperties(qualifiedAxiomName.getName(), properties);
+	    registerAxiomListener(qualifiedAxiomName, axiomProvider.getAxiomListener());
+
 		// Preserve mapping of qualified axiom name to resource name
 		axiomResourceMap.put(qualifiedAxiomName, resourceName);
 		// Remove entry from axiomListMap so the axiom is not regarded as internal
@@ -657,13 +659,17 @@ public class ParserAssembler implements LocaleListener
 
 	/**
 	 * Register axiom list by adding it's axiom listener to this ParserAssembler object
-	 * @param qualifiedAxiomName The qualified name of the axioms inserted into the list
+	 * @param qname The qualified name of the axioms inserted into the list
 	 * @param axiomListener The axiom listener
 	 */
-	public void registerAxiomListener(QualifiedName qualifiedAxiomName, AxiomListener axiomListener) 
+	public void registerAxiomListener(QualifiedName qname, AxiomListener axiomListener) 
 	{   // Convert axiom name to template name to listen for solution notifications
         //QualifiedName qualifiedTemplateName = new QualifiedName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
-		List<AxiomListener> axiomListenerList = getAxiomListenerList(qualifiedAxiomName);
+	    if (!isQualifiedAxiomName(qname))
+	    {
+	        qname = new QualifiedName(qname.getScope(), qname.getName(), QualifiedName.EMPTY);
+	    }
+		List<AxiomListener> axiomListenerList = getAxiomListenerList(qname);
 		axiomListenerList.add(axiomListener);
 	}
 
@@ -906,6 +912,11 @@ public class ParserAssembler implements LocaleListener
         return operandMap.newListVariableInstance(axiomListSpec);
     }
 
+    /**
+     * Returns qualified name for name in current context
+     * @param name
+     * @return QualifiedName object
+     */
     public QualifiedName getContextName(String name)
     {
         return QualifiedName.parseName(name, operandMap.getQualifiedContextname());

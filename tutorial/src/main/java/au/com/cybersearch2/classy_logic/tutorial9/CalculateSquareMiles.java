@@ -22,8 +22,10 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
+import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -43,17 +45,32 @@ public class CalculateSquareMiles
 			"list surface_area(km2_to_mi2);\n" +
             "// Chained query with calculator performing conversion:\n" +
 		    "query surface_area_mi2(surface_area : surface_area)\n" + 
-		    "  >> calc(km2_to_mi2);";
+		    "  >> (km2_to_mi2);";
 
 	public CalculateSquareMiles()
 	{		new DI(new QueryParserModule()).validate();
 	}
 	
+    /**
+     * Compiles the COUNTRY_SURFACE_AREA script and runs the "surface_area_mi2" query, displaying the solution on the console.<br/>
+     * The expected first 3 results:<br/>
+        km2_to_mi2(country = Afghanistan, surface_area_mi2 = 251826.003)<br/>
+        km2_to_mi2(country = Albania, surface_area_mi2 = 11100.375)<br/>
+        km2_to_mi2(country = Algeria, surface_area_mi2 = 919589.814)<br/>
+     */
 	public Iterator<Axiom> getSurfaceAreas()
 	{
 		QueryProgram queryProgram = new QueryProgram(COUNTRY_SURFACE_AREA);
-		Result result = queryProgram.executeQuery("surface_area_mi2");
-		return  result.getIterator(QualifiedName.parseGlobalName("km2_to_mi2.surface_area"));
+		Result result = queryProgram.executeQuery("surface_area_mi2", new SolutionHandler(){
+
+            @Override
+            public boolean onSolution(Solution solution)
+            {
+                //System.out.println(solution.getAxiom("surface_area"));
+                //System.out.println(solution.getAxiom("km2_to_mi2"));
+                return true;
+            }});
+		return  result.getIterator(QualifiedName.parseGlobalName("surface_area"));
 	}
 
 	public static void main(String[] args)

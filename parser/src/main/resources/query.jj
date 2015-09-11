@@ -430,8 +430,6 @@ void ListDeclaration(ParserAssembler parserAssembler) :
         varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName.getName());
     ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
     parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
-    if (axiomProvider != null)
-        parserAssembler.registerAxiomListener(qualifiedAxiomName, axiomProvider.getAxiomListener());
   }
 }
 
@@ -631,12 +629,12 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
         } 
         |
         expression=Expression(parserAssembler) 
-        |
-        <LBRACE> literalList = LiteralList() <RBRACE> 
       )
      )
      |
         <REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(template, name, parserAssembler) )? ")"
+     |
+        <LBRACE> literalList = LiteralList() <RBRACE> 
     )?
   {
      if (varType == null)

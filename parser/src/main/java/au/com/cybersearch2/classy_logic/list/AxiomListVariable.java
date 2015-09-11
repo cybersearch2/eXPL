@@ -269,7 +269,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	@Override
 	public EvaluationStatus evaluate(int modifierId)
 	{
-	    if ((axiomListSpec != null) && axiomListSpec.update())
+	    if ((axiomListSpec != null) && axiomListSpec.update(modifierId))
 	    {   // Dynamic AxiomList should now exist, so initialization of
 	        // of this object can be completed
 	        axiomList = axiomListSpec.getAxiomList();
@@ -289,10 +289,12 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 			axiomExpression.evaluate(modifierId);
 			if (axiomExpression.isEmpty())
 				throw new ExpressionException("Axiom index for list \"" + axiomList.getName() + "\" is empty" );
-			if (!(axiomExpression.getValue() instanceof Number))
+			int index = -1;
+			if (axiomExpression.getValue() instanceof Number)
+	            index = ((Number)(axiomExpression.getValue())).intValue();
+			if (index == -1)
 				throw new ExpressionException("\"" + axiomList.getName() + "[" + axiomExpression.getValue().toString() + "]\" is not a valid value" );
 			
-			int index = ((Number)(axiomExpression.getValue())).intValue();
 			if (!axiomList.hasItem(index))
 				throw new ExpressionException("\"" + axiomList.getName() +"\" index " + index + " out of bounds");
 			if (isEmpty() || (index != axiomIndex))

@@ -35,41 +35,44 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 public class HighCitiesSorted 
 {
 	static final String CITY_EVELATIONS =
-	    "axiom city:\n" + 
-	        "    (\"bilene\", 1718),\n" +
-	        "    (\"addis ababa\", 8000),\n" +
-	        "    (\"denver\", 5280),\n" +
-	        "    (\"flagstaff\", 6970),\n" +
-	        "    (\"jacksonville\", 8),\n" +
-	        "    (\"leadville\", 10200),\n" +
-	        "    (\"madrid\", 1305),\n" +
-	        "    (\"richmond\",19),\n" +
-	        "    (\"spokane\", 1909),\n" +
-	        "    (\"wichita\", 1305);\n" +
-            "// Template for name and altitude of a high city\n" +
-            "template high_city(string name, altitude ? altitude > 5000);\n" +
-            "// Solution is a list named 'city_list' which receives 'high_city' axioms\n" +
-            "list city_list(high_city);\n" +
-            "// Calculator to perform insert sort on city_list\n" +
-            "calc insert_sort (\n" +
-            "// i is index to last item appended to the list\n" +
-            "integer i = length(city_list) - 1,\n" +
-            "// Skip first time when only one item in list\n" +
-            ": i < 1,\n" +
-            "// j is the swap index\n" + 
-            "integer j = i - 1,\n" +
-            "// Get last altitude for sort comparison\n" + 
-            "integer altitude = city_list[i][altitude],\n" +
-            "// Save axiom to swap\n" +
-            "temp = city_list[i],\n" +
-            "// Shuffle list until sort order restored\n" + 
-            "{\n" +
-            "  ? altitude < city_list[j][altitude],\n" +
-            "  city_list[j + 1] = city_list[j],\n" +
-            "  ? --j >= 0\n" +
-            "},\n" +
-            "// Insert saved axiom in correct position\n" +
-            "city_list[j + 1] = temp);\n" +
+	    "axiom city (name, altitude) :\n" + 
+        "    (\"bilene\", 1718),\n" +
+        "    (\"addis ababa\", 8000),\n" +
+        "    (\"denver\", 5280),\n" +
+        "    (\"flagstaff\", 6970),\n" +
+        "    (\"jacksonville\", 8),\n" +
+        "    (\"leadville\", 10200),\n" +
+        "    (\"madrid\", 1305),\n" +
+        "    (\"richmond\",19),\n" +
+        "    (\"spokane\", 1909),\n" +
+        "    (\"wichita\", 1305);\n" +
+        "// Solution is a list named 'high_cities'\n" +
+        "axiom high_cities = {};\n" +
+        "// Template to filter high cities\n" +
+        "template high_city(\n" +
+        "  altitude ? altitude > 5000,\n" +
+        "  high_cities += axiom { name, altitude }\n" +
+        ");\n" +
+        "// Calculator to perform insert sort on high_cities\n" +
+        "calc insert_sort (\n" +
+        "// i is index to last item appended to the list\n" +
+        "integer i = length(high_cities) - 1,\n" +
+        "// Skip first time when only one item in list\n" +
+        ": i < 1,\n" +
+        "// j is the swap index\n" + 
+        "integer j = i - 1,\n" +
+        "// Get last altitude for sort comparison\n" + 
+        "integer altitude = high_cities[i][altitude],\n" +
+        "// Save axiom to swap\n" +
+        "temp = high_cities[i],\n" +
+        "// Shuffle list until sort order restored\n" + 
+        "{\n" +
+        "  ? altitude < high_cities[j][altitude],\n" +
+        "  high_cities[j + 1] = high_cities[j],\n" +
+        "  ? --j >= 0\n" +
+        "},\n" +
+        "// Insert saved axiom in correct position\n" +
+        "high_cities[j + 1] = temp);\n" +
 	    "query high_cities (city : high_city) >> (insert_sort);\n"; 
 
 	/**
@@ -84,7 +87,7 @@ public class HighCitiesSorted
 	{
 		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities");
-		Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("city_list"));
+		Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("high_cities"));
         while(iterator.hasNext())
 		    System.out.println(iterator.next().toString());
 	}

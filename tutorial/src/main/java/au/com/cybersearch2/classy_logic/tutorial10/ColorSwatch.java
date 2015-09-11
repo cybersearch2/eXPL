@@ -34,14 +34,13 @@ public class ColorSwatch
 {
     static final String CHOICE_COLORS =
             "// Uninitialized variable matches to any value\n" +
-            "double unknown_rgb;\n" +
             "// Choice selects on hex color value to get color name and rgb values\n" +
             "choice swatch (rgb, color, red, green, blue) :\n" +
             "(0x00FFFF, \"aqua\", 0, 255, 255),\n" +
             "(0x000000, \"black\", 0, 0, 0),\n" +
             "(0x0000FF, \"blue\", 0, 0, 255),\n" +
             "(0xFFFFFF, \"white\", 255, 255, 255),\n" +
-            "(unknown_rgb,  \"unknown\", 0, 0, 0);\n" +
+            "(unknown,  \"unknown\", 0, 0, 0);\n" +
             "axiom shade (rgb) : parameter;\n" +
             "query color_query (shade : swatch);\n";
             ;

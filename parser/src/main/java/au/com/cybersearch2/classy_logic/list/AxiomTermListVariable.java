@@ -103,6 +103,18 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 	    return itemValue;
 	}
 
+    /**
+     * Returns index for item referenced by name. Default return value is -1 for no match. 
+     * @param itemName
+     * @return Index of item or -1 for no match or feature not supported
+     */
+    @Override
+    protected int getIndexForName(String itemName)
+    {
+        return -1;
+    }
+
+
 	/**
 	 * concatenate
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)

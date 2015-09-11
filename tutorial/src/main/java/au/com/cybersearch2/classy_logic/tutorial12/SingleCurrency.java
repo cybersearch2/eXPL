@@ -36,23 +36,24 @@ public class SingleCurrency
 	static final String CURRENCY =
 		"axiom item: (\"$1234.56\");\n" +
 		"template charge(currency(\"AU\") amount);\n" +
-	    "calc charge_plus_gst(currency(\"AU\") total = amount * 1.1);\n" +
-	    "calc format_total(string total_text = \"Total + gst: \" + format(total));\n" +
-		"query item_query(item : charge) >> (charge_plus_gst) >> (format_total);";
+	    "calc charge_plus_gst(\n" +
+	    "  currency(\"AU\") total = amount * 1.1,\n" +
+	    "  string total_text = \"Total + gst: \" + format(total));\n" +
+		"query item_query(item : charge) >> (charge_plus_gst);";
 
 	/**
 	 * Compiles the CURRENCY script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
 	 * format_total(total_text = Total + gst: AUD1,358.02)<br/>
 	 */
-	public Axiom getFormatedTotalAmount()
+	public String getFormatedTotalAmount()
 	{
 		QueryProgram queryProgram = new QueryProgram(CURRENCY);
-		final Axiom[] formatedTotalAmountHolder = new Axiom[1];
+		final String[] formatedTotalAmountHolder = new String[1];
 		queryProgram.executeQuery("item_query", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
-			    formatedTotalAmountHolder[0] = solution.getAxiom("format_total");
+			    formatedTotalAmountHolder[0] = solution.getString("charge_plus_gst", "total_text");
 				return true;
 			}});
 		return formatedTotalAmountHolder[0];
@@ -67,8 +68,7 @@ public class SingleCurrency
 		try 
 		{
 	        SingleCurrency singleCurrency = new SingleCurrency();
-			Axiom formatedTotalAmount = singleCurrency.getFormatedTotalAmount();
-            System.out.println(formatedTotalAmount.toString());
+            System.out.println(singleCurrency.getFormatedTotalAmount());
 
 		} 
 		catch (ExpressionException e) 

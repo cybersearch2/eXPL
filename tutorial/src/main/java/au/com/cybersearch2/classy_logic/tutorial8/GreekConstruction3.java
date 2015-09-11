@@ -49,8 +49,8 @@ public class GreekConstruction3
 		"  (\"Milos\", 22);\n" +
 		
 		"template customer(name, city);\n" +
-		"template account(name ? customer.name == name, fee);\n" +
-		"template delivery(city ? customer.city == city, freight);\n" +
+		"template account(name ? name == customer.name, fee);\n" +
+		"template delivery(city ? city == customer.city, freight);\n" +
 		
 	    "  query greek_business(customer:customer)\n" + 
 		"  >> (fee:account) >> (freight:delivery);";
