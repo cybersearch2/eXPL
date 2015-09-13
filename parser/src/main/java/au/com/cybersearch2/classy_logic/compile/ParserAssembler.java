@@ -256,9 +256,10 @@ public class ParserAssembler implements LocaleListener
 
 	/**
 	 * Create Variable to contain inner Tempate values and add to OperandMap
+	 * @param template The outer template
 	 * @param innerTemplate The inner Template
 	 */
-	public void addInnerTemplate(Template innerTemplate)
+	public void addInnerTemplate(Template template, Template innerTemplate)
 	{
 	    // Create AxiomTermList to contain query result. 
 	    AxiomTermList axiomTermList = new AxiomTermList(innerTemplate.getQualifiedName(), innerTemplate.getKey());
@@ -268,8 +269,11 @@ public class ParserAssembler implements LocaleListener
 	    listVariable.assign(axiomTermList);
 	    // Add variable to OperandMap so it can be referenced from script
 	    operandMap.addOperand(listVariable);
-	    // Add variable to inner template so it can be referenced by QueryEvaluator
-	    //innerTemplate.addTerm(listVariable);
+	    operandMap.addItemList(innerTemplate.getQualifiedName(), axiomTermList);
+	    // Add inner template to outer template so it will be included in unification
+        while (template.getNext() != null)
+            template = template.getNext();
+        template.setNext(innerTemplate);
 	}
 	
 	/**

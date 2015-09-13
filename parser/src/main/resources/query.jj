@@ -665,11 +665,9 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
          var = new LiteralListOperand(qname, literalList);
      else if (!operandMap.hasOperand(name))
          var = varType.getInstance(parserAssembler, name);
-     else if (!template.isInnerTemplate())
-         var = operandMap.addOperand(name, expression);
      else
-         var = new Variable(qname, expression);
-     if ((index == null) && (!operandMap.hasOperand(name)) && !template.isInnerTemplate())
+         var = operandMap.addOperand(name, expression);
+     if ((index == null) && (!operandMap.hasOperand(name)))
          operandMap.addOperand(var);
      if (assignToken != null) 
          var = new Evaluator(qname, var, assignToken.image, assignExpression);
@@ -753,7 +751,7 @@ void CalculatorQuery(Template template, ParserAssembler parserAssembler) :
     Operand queryOperand = parserAssembler.getQueryOperand(qname, operandParamList, innerTemplate);
     template.addTerm(queryOperand);
     if (innerTemplate != null)
-        parserAssembler.addInnerTemplate(innerTemplate);
+        parserAssembler.addInnerTemplate(template, innerTemplate);
   }
 }
 

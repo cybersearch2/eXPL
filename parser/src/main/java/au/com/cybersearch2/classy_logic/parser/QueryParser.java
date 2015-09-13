@@ -291,14 +291,14 @@ public class QueryParser implements QueryParserConstants
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
-      case 79:
+      case 78:
         ;
         break;
       default:
         jj_la1[5] = jj_gen;
         break label_3;
       }
-      jj_consume_token(79);
+      jj_consume_token(78);
       QueryDeclaration(querySpec.chain(), scope);
     }
     jj_consume_token(SEMICOLON);
@@ -622,12 +622,12 @@ public class QueryParser implements QueryParserConstants
     case DECR:
     case PLUS:
     case MINUS:
-    case 80:
-    case 82:
+    case 79:
+    case 81:
       CalculatorExpression(loopNumber, template, template.getName(), parserAssembler);
       break;
     case TEMPLATE:
-    case 81:
+    case 80:
       CalculatorQuery(template, parserAssembler);
       break;
     default:
@@ -678,12 +678,12 @@ public class QueryParser implements QueryParserConstants
       case DECR:
       case PLUS:
       case MINUS:
-      case 80:
-      case 82:
+      case 79:
+      case 81:
         CalculatorExpression(loopNumber, template, template.getName(), parserAssembler);
         break;
       case TEMPLATE:
-      case 81:
+      case 80:
         CalculatorQuery(template, parserAssembler);
         break;
       default:
@@ -813,6 +813,7 @@ public class QueryParser implements QueryParserConstants
     List<Parameter> literalList = null;
     List<OperandParam> axiomList = null;
     QualifiedName qname = null;
+    List<OperandParam> operandParamList = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case INTEGER:
@@ -842,6 +843,7 @@ public class QueryParser implements QueryParserConstants
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case REGEX:
+    case LPAREN:
     case LBRACE:
     case ASSIGN:
     case COLON:
@@ -853,7 +855,7 @@ public class QueryParser implements QueryParserConstants
     case ORASSIGN:
     case XORASSIGN:
     case REMASSIGN:
-    case 80:
+    case 79:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case ASSIGN:
@@ -866,14 +868,14 @@ public class QueryParser implements QueryParserConstants
       case ORASSIGN:
       case XORASSIGN:
       case REMASSIGN:
-      case 80:
+      case 79:
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
         {
         case COLON:
           scToken = jj_consume_token(COLON);
           break;
-        case 80:
-          scToken = jj_consume_token(80);
+        case 79:
+          scToken = jj_consume_token(79);
           break;
         case ASSIGN:
           equalsToken = jj_consume_token(ASSIGN);
@@ -949,7 +951,7 @@ public class QueryParser implements QueryParserConstants
         case DECR:
         case PLUS:
         case MINUS:
-        case 82:
+        case 81:
           expression = Expression(parserAssembler);
           break;
         default:
@@ -990,14 +992,52 @@ public class QueryParser implements QueryParserConstants
         literalList = LiteralList();
         jj_consume_token(RBRACE);
         break;
+      case LPAREN:
+        jj_consume_token(LPAREN);
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+        {
+        case INTEGER:
+        case DOUBLE:
+        case DECIMAL:
+        case BOOLEAN:
+        case STRING:
+        case FACT:
+        case LENGTH:
+        case TERM:
+        case CURRENCY:
+        case FORMAT:
+        case INTEGER_LITERAL:
+        case FLOATING_POINT_LITERAL:
+        case NUMBER_LITERAL:
+        case STRING_LITERAL:
+        case TRUE:
+        case FALSE:
+        case UNKNOWN:
+        case IDENTIFIER:
+        case LPAREN:
+        case BANG:
+        case INCR:
+        case DECR:
+        case PLUS:
+        case MINUS:
+        case 81:
+          operandParamList = ArgumentList(parserAssembler, true);
+          break;
+        default:
+          jj_la1[32] = jj_gen;
+          ;
+        }
+        jj_consume_token(RPAREN);
+             template.addTerm(parserAssembler.getCallOperand(qname, operandParamList));
+        break;
       default:
-        jj_la1[32] = jj_gen;
+        jj_la1[33] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[33] = jj_gen;
+      jj_la1[34] = jj_gen;
       ;
     }
      if (varType == null)
@@ -1023,11 +1063,9 @@ public class QueryParser implements QueryParserConstants
          var = new LiteralListOperand(qname, literalList);
      else if (!operandMap.hasOperand(name))
          var = varType.getInstance(parserAssembler, name);
-     else if (!template.isInnerTemplate())
-         var = operandMap.addOperand(name, expression);
      else
-         var = new Variable(qname, expression);
-     if ((index == null) && (!operandMap.hasOperand(name)) && !template.isInnerTemplate())
+         var = operandMap.addOperand(name, expression);
+     if ((index == null) && (!operandMap.hasOperand(name)))
          operandMap.addOperand(var);
      if (assignToken != null)
          var = new Evaluator(qname, var, assignToken.image, assignExpression);
@@ -1079,28 +1117,28 @@ public class QueryParser implements QueryParserConstants
     case DECR:
     case PLUS:
     case MINUS:
-    case 80:
-    case 82:
+    case 79:
+    case 81:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case COLON:
-      case 80:
+      case 79:
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
         {
         case COLON:
           scToken = jj_consume_token(COLON);
           break;
-        case 80:
-          scToken = jj_consume_token(80);
+        case 79:
+          scToken = jj_consume_token(79);
           break;
         default:
-          jj_la1[34] = jj_gen;
+          jj_la1[35] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
         break;
       default:
-        jj_la1[35] = jj_gen;
+        jj_la1[36] = jj_gen;
         ;
       }
       expression = Expression(parserAssembler);
@@ -1110,7 +1148,7 @@ public class QueryParser implements QueryParserConstants
         innerLoop = InnerCalculator(loop_number + 1, templateName, parserAssembler, scToken != null);
         break;
       default:
-        jj_la1[36] = jj_gen;
+        jj_la1[37] = jj_gen;
         ;
       }
     if (scToken != null)
@@ -1131,7 +1169,7 @@ public class QueryParser implements QueryParserConstants
     template.addTerm(choiceOperand);
       break;
     default:
-      jj_la1[37] = jj_gen;
+      jj_la1[38] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1154,7 +1192,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[38] = jj_gen;
+        jj_la1[39] = jj_gen;
         break label_8;
       }
       jj_consume_token(COMMA);
@@ -1176,10 +1214,10 @@ public class QueryParser implements QueryParserConstants
       innerTemplate = InnerTemplateDeclaration(template.getQualifiedName(), parserAssembler);
       break;
     default:
-      jj_la1[39] = jj_gen;
+      jj_la1[40] = jj_gen;
       ;
     }
-    jj_consume_token(81);
+    jj_consume_token(80);
     queryName = Name();
     jj_consume_token(LPAREN);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -1208,11 +1246,11 @@ public class QueryParser implements QueryParserConstants
     case DECR:
     case PLUS:
     case MINUS:
-    case 82:
+    case 81:
       operandParamList = ArgumentList(parserAssembler, false);
       break;
     default:
-      jj_la1[40] = jj_gen;
+      jj_la1[41] = jj_gen;
       ;
     }
     jj_consume_token(RPAREN);
@@ -1220,7 +1258,7 @@ public class QueryParser implements QueryParserConstants
     Operand queryOperand = parserAssembler.getQueryOperand(qname, operandParamList, innerTemplate);
     template.addTerm(queryOperand);
     if (innerTemplate != null)
-        parserAssembler.addInnerTemplate(innerTemplate);
+        parserAssembler.addInnerTemplate(template, innerTemplate);
   }
 
   final public Operand CalculatorFunction(ParserAssembler parserAssembler) throws ParseException
@@ -1255,11 +1293,11 @@ public class QueryParser implements QueryParserConstants
     case DECR:
     case PLUS:
     case MINUS:
-    case 82:
+    case 81:
       operandParamList = ArgumentList(parserAssembler, true);
       break;
     default:
-      jj_la1[41] = jj_gen;
+      jj_la1[42] = jj_gen;
       ;
     }
     jj_consume_token(RPAREN);
@@ -1283,7 +1321,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[42] = jj_gen;
+        jj_la1[43] = jj_gen;
         break label_9;
       }
       jj_consume_token(COMMA);
@@ -1330,14 +1368,14 @@ public class QueryParser implements QueryParserConstants
     case DECR:
     case PLUS:
     case MINUS:
-    case 82:
+    case 81:
       expression = Expression(parserAssembler);
       break;
     case LBRACE:
       axiomList = AxiomList(qualifiedAxiomName, parserAssembler);
       break;
     default:
-      jj_la1[43] = jj_gen;
+      jj_la1[44] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1369,7 +1407,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[44] = jj_gen;
+        jj_la1[45] = jj_gen;
         break label_10;
       }
       operand = AxiomInitializer(axiomName, axiomName, parserAssembler);
@@ -1409,11 +1447,11 @@ public class QueryParser implements QueryParserConstants
     case DECR:
     case PLUS:
     case MINUS:
-    case 82:
+    case 81:
       initializeList = ArgumentList(parserAssembler, true);
       break;
     default:
-      jj_la1[45] = jj_gen;
+      jj_la1[46] = jj_gen;
       ;
     }
     jj_consume_token(RBRACE);
@@ -1440,7 +1478,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[46] = jj_gen;
+        jj_la1[47] = jj_gen;
         break label_11;
       }
       jj_consume_token(COMMA);
@@ -1476,7 +1514,7 @@ public class QueryParser implements QueryParserConstants
       operand = AxiomVariable(qualifiedAxiomName, parserAssembler);
       break;
     default:
-      jj_la1[47] = jj_gen;
+      jj_la1[48] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1501,7 +1539,7 @@ public class QueryParser implements QueryParserConstants
           ;
           break;
         default:
-          jj_la1[48] = jj_gen;
+          jj_la1[49] = jj_gen;
           break label_12;
         }
         jj_consume_token(COMMA);
@@ -1510,7 +1548,7 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(RPAREN);
       break;
     default:
-      jj_la1[49] = jj_gen;
+      jj_la1[50] = jj_gen;
       ;
     }
     jj_consume_token(COLON);
@@ -1527,7 +1565,7 @@ public class QueryParser implements QueryParserConstants
           ;
           break;
         default:
-          jj_la1[50] = jj_gen;
+          jj_la1[51] = jj_gen;
           break label_13;
         }
         jj_consume_token(COMMA);
@@ -1541,7 +1579,7 @@ public class QueryParser implements QueryParserConstants
       ParameterDeclaration(qualifiedAxiomName, parserAssembler);
       break;
     default:
-      jj_la1[51] = jj_gen;
+      jj_la1[52] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1565,7 +1603,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[52] = jj_gen;
+        jj_la1[53] = jj_gen;
         break label_14;
       }
       jj_consume_token(COMMA);
@@ -1641,7 +1679,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[53] = jj_gen;
+        jj_la1[54] = jj_gen;
         break label_16;
       }
       jj_consume_token(COMMA);
@@ -1667,7 +1705,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[54] = jj_gen;
+        jj_la1[55] = jj_gen;
         break label_17;
       }
       jj_consume_token(COMMA);
@@ -1706,7 +1744,7 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(RPAREN);
       break;
     default:
-      jj_la1[55] = jj_gen;
+      jj_la1[56] = jj_gen;
       ;
     }
     {if (true) return parserAssembler.setResourceProperties(getText(nameToken), qualifiedAxiomName, properties);}
@@ -1743,7 +1781,7 @@ public class QueryParser implements QueryParserConstants
     parserAssembler.addAxiom(qualifiedAxiomName, new DoubleTerm("NaN"));
       break;
     default:
-      jj_la1[56] = jj_gen;
+      jj_la1[57] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1764,7 +1802,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[57] = jj_gen;
+        jj_la1[58] = jj_gen;
         break label_18;
       }
       jj_consume_token(DOT);
@@ -1841,14 +1879,14 @@ public class QueryParser implements QueryParserConstants
         assignToken = jj_consume_token(REMASSIGN);
         break;
       default:
-        jj_la1[58] = jj_gen;
+        jj_la1[59] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       assignOperand = Expression(parserAssembler);
       break;
     default:
-      jj_la1[59] = jj_gen;
+      jj_la1[60] = jj_gen;
       ;
     }
     if (assignOperand == null)
@@ -1871,7 +1909,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[60] = jj_gen;
+        jj_la1[61] = jj_gen;
         break label_19;
       }
       op = jj_consume_token(SC_OR);
@@ -1896,7 +1934,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[61] = jj_gen;
+        jj_la1[62] = jj_gen;
         break label_20;
       }
       op = jj_consume_token(SC_AND);
@@ -1921,7 +1959,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[62] = jj_gen;
+        jj_la1[63] = jj_gen;
         break label_21;
       }
       op = jj_consume_token(BIT_OR);
@@ -1946,7 +1984,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[63] = jj_gen;
+        jj_la1[64] = jj_gen;
         break label_22;
       }
       op = jj_consume_token(XOR);
@@ -1971,7 +2009,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[64] = jj_gen;
+        jj_la1[65] = jj_gen;
         break label_23;
       }
       op = jj_consume_token(BIT_AND);
@@ -1997,7 +2035,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[65] = jj_gen;
+        jj_la1[66] = jj_gen;
         break label_24;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2009,7 +2047,7 @@ public class QueryParser implements QueryParserConstants
         op = jj_consume_token(NE);
         break;
       default:
-        jj_la1[66] = jj_gen;
+        jj_la1[67] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2037,7 +2075,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[67] = jj_gen;
+        jj_la1[68] = jj_gen;
         break label_25;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2055,7 +2093,7 @@ public class QueryParser implements QueryParserConstants
         op = jj_consume_token(GE);
         break;
       default:
-        jj_la1[68] = jj_gen;
+        jj_la1[69] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2081,7 +2119,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[69] = jj_gen;
+        jj_la1[70] = jj_gen;
         break label_26;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2093,7 +2131,7 @@ public class QueryParser implements QueryParserConstants
         op = jj_consume_token(MINUS);
         break;
       default:
-        jj_la1[70] = jj_gen;
+        jj_la1[71] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2120,7 +2158,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[71] = jj_gen;
+        jj_la1[72] = jj_gen;
         break label_27;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2135,7 +2173,7 @@ public class QueryParser implements QueryParserConstants
         op = jj_consume_token(REM);
         break;
       default:
-        jj_la1[72] = jj_gen;
+        jj_la1[73] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2156,7 +2194,7 @@ public class QueryParser implements QueryParserConstants
     {
     case PLUS:
     case MINUS:
-    case 82:
+    case 81:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case PLUS:
@@ -2167,12 +2205,12 @@ public class QueryParser implements QueryParserConstants
         jj_consume_token(MINUS);
     minus = true;
         break;
-      case 82:
-        jj_consume_token(82);
+      case 81:
+        jj_consume_token(81);
     tilde = true;
         break;
       default:
-        jj_la1[73] = jj_gen;
+        jj_la1[74] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2210,7 +2248,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return param;}
       break;
     default:
-      jj_la1[74] = jj_gen;
+      jj_la1[75] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2261,7 +2299,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return param;}
       break;
     default:
-      jj_la1[75] = jj_gen;
+      jj_la1[76] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2289,13 +2327,13 @@ public class QueryParser implements QueryParserConstants
     decr = true;
         break;
       default:
-        jj_la1[76] = jj_gen;
+        jj_la1[77] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[77] = jj_gen;
+      jj_la1[78] = jj_gen;
       ;
     }
     if (incr)
@@ -2342,7 +2380,7 @@ public class QueryParser implements QueryParserConstants
         param1 = NamedExpression(name, parserAssembler);
         break;
       default:
-        jj_la1[78] = jj_gen;
+        jj_la1[79] = jj_gen;
         ;
       }
     if (param1 == null)
@@ -2394,7 +2432,7 @@ public class QueryParser implements QueryParserConstants
         {if (true) throw new ParseException("Operand " + name + " not found");}
       break;
     default:
-      jj_la1[79] = jj_gen;
+      jj_la1[80] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2448,11 +2486,11 @@ public class QueryParser implements QueryParserConstants
       case DECR:
       case PLUS:
       case MINUS:
-      case 82:
+      case 81:
         operandParamList = ArgumentList(parserAssembler, true);
         break;
       default:
-        jj_la1[80] = jj_gen;
+        jj_la1[81] = jj_gen;
         ;
       }
       jj_consume_token(RPAREN);
@@ -2460,7 +2498,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return parserAssembler.getCallOperand(qname, operandParamList);}
       break;
     default:
-      jj_la1[81] = jj_gen;
+      jj_la1[82] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2493,7 +2531,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[82] = jj_gen;
+        jj_la1[83] = jj_gen;
         break label_28;
       }
       op = jj_consume_token(COMMA);
@@ -2525,7 +2563,7 @@ public class QueryParser implements QueryParserConstants
         varType = Type(operandMap);
         break;
       default:
-        jj_la1[83] = jj_gen;
+        jj_la1[84] = jj_gen;
         ;
       }
       nameToken = jj_consume_token(IDENTIFIER);
@@ -2579,7 +2617,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return unknownLiteral;}
       break;
     default:
-      jj_la1[84] = jj_gen;
+      jj_la1[85] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2614,7 +2652,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return new Parameter(Term.ANONYMOUS, new Unknown());}
       break;
     default:
-      jj_la1[85] = jj_gen;
+      jj_la1[86] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2637,7 +2675,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[86] = jj_gen;
+        jj_la1[87] = jj_gen;
         break label_29;
       }
       op = jj_consume_token(COMMA);
@@ -2661,7 +2699,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return false;}
       break;
     default:
-      jj_la1[87] = jj_gen;
+      jj_la1[88] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2701,21 +2739,16 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(3, xla); }
   }
 
-  private boolean jj_3R_44() {
-    if (jj_scan_token(CURRENCY)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_46()) jj_scanpos = xsp;
-    return false;
-  }
-
   private boolean jj_3R_78() {
     if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
     return false;
   }
 
-  private boolean jj_3R_43() {
-    if (jj_scan_token(TERM)) return true;
+  private boolean jj_3R_44() {
+    if (jj_scan_token(CURRENCY)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_46()) jj_scanpos = xsp;
     return false;
   }
 
@@ -2749,8 +2782,8 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_42() {
-    if (jj_scan_token(DECIMAL)) return true;
+  private boolean jj_3R_43() {
+    if (jj_scan_token(TERM)) return true;
     return false;
   }
 
@@ -2769,8 +2802,8 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_41() {
-    if (jj_scan_token(STRING)) return true;
+  private boolean jj_3R_42() {
+    if (jj_scan_token(DECIMAL)) return true;
     return false;
   }
 
@@ -2814,8 +2847,8 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_40() {
-    if (jj_scan_token(DOUBLE)) return true;
+  private boolean jj_3R_41() {
+    if (jj_scan_token(STRING)) return true;
     return false;
   }
 
@@ -2824,13 +2857,37 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_39() {
-    if (jj_scan_token(BOOLEAN)) return true;
+  private boolean jj_3R_40() {
+    if (jj_scan_token(DOUBLE)) return true;
     return false;
   }
 
   private boolean jj_3R_35() {
     if (jj_3R_37()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_39() {
+    if (jj_scan_token(BOOLEAN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_74() {
+    if (jj_scan_token(FORMAT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_63() {
+    if (jj_scan_token(DECR)) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_33()) jj_scanpos = xsp;
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(ASSIGN)) return true;
     return false;
   }
 
@@ -2861,25 +2918,6 @@ public class QueryParser implements QueryParserConstants
     }
     }
     }
-    return false;
-  }
-
-  private boolean jj_3R_74() {
-    if (jj_scan_token(FORMAT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_63() {
-    if (jj_scan_token(DECR)) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_33()) jj_scanpos = xsp;
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(ASSIGN)) return true;
     return false;
   }
 
@@ -3010,7 +3048,7 @@ public class QueryParser implements QueryParserConstants
   }
 
   private boolean jj_3R_61() {
-    if (jj_scan_token(82)) return true;
+    if (jj_scan_token(81)) return true;
     return false;
   }
 
@@ -3026,17 +3064,17 @@ public class QueryParser implements QueryParserConstants
   }
 
   private boolean jj_3R_81() {
-    if (jj_scan_token(38)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_46() {
-    if (jj_scan_token(LPAREN)) return true;
+    if (jj_scan_token(37)) return true;
     return false;
   }
 
   private boolean jj_3R_59() {
     if (jj_scan_token(PLUS)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_46() {
+    if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 
@@ -3105,7 +3143,7 @@ public class QueryParser implements QueryParserConstants
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[88];
+  final private int[] jj_la1 = new int[89];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -3117,15 +3155,15 @@ public class QueryParser implements QueryParserConstants
   }
   private static void jj_la1_init_0() 
   {
-    jj_la1_0 = new int[] { 0x6a7dfc0,0x6a7dfc0,0x6a75fc0,0x6a75fc0,0x0,0x0,0x0,0x0,0x6a65fc0,0x2040000,0x0,0x0,0x0,0x0,0x0,0xa007c0,0x0,0x25b81fc0,0x0,0x25b81fc0,0x0,0x0,0xa007c0,0x0,0x0,0xa007c0,0x0,0x0,0x0,0x21181000,0x0,0x0,0x2000,0x2000,0x0,0x0,0x0,0x25b817c0,0x0,0x800,0x21b807c0,0x21b807c0,0x0,0x21180000,0x0,0x21b807c0,0x0,0x0,0x0,0x0,0x0,0x8400000,0x0,0x0,0x0,0x0,0x20000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x21180000,0x21180000,0x0,0x0,0x0,0x21180000,0x21b807c0,0x0,0x0,0xa007c0,0x20000000,0x20000000,0x0,0x0, };
+    jj_la1_0 = new int[] { 0x6a7dfc0,0x6a7dfc0,0x6a75fc0,0x6a75fc0,0x0,0x0,0x0,0x0,0x6a65fc0,0x2040000,0x0,0x0,0x0,0x0,0x0,0xa007c0,0x0,0x95b81fc0,0x0,0x95b81fc0,0x0,0x0,0xa007c0,0x0,0x0,0xa007c0,0x0,0x0,0x0,0x91181000,0x0,0x0,0x91b807c0,0x2000,0x2000,0x0,0x0,0x0,0x95b817c0,0x0,0x800,0x91b807c0,0x91b807c0,0x0,0x91180000,0x0,0x91b807c0,0x0,0x0,0x0,0x0,0x0,0x8400000,0x0,0x0,0x0,0x0,0x90000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x91180000,0x91180000,0x0,0x0,0x0,0x91180000,0x91b807c0,0x0,0x0,0xa007c0,0x90000000,0x90000000,0x0,0x0, };
   }
   private static void jj_la1_init_1() 
   {
-    jj_la1_1 = new int[] { 0x100,0x100,0x100,0x100,0x200,0x0,0x10000,0x200,0x100,0x0,0x100000,0x400000,0x200,0x108,0x200,0x0,0x10000,0xe0600b7b,0x10000,0xe0600b7b,0x200,0x10000,0x0,0x2000,0x40000,0x0,0x2000,0x0,0x440000,0xe020037b,0x108,0x800,0x440800,0x440800,0x400000,0x400000,0x800,0xe0600b7b,0x10000,0x0,0xe020037b,0xe020037b,0x10000,0xe0200b7b,0x800,0xe020037b,0x10000,0x440200,0x10000,0x200,0x10000,0x200,0x10000,0x10000,0x10000,0x200,0xfb,0x20000,0x40000,0x40000,0x8000000,0x10000000,0x0,0x0,0x0,0x4800000,0x4800000,0x3180000,0x3180000,0x80000000,0x80000000,0x0,0x0,0x80000000,0xe020037b,0x20037b,0x60000000,0x60000000,0x2200,0x37b,0xe020037b,0x2200,0x10000,0x0,0x79,0x79,0x10000,0x30, };
+    jj_la1_1 = new int[] { 0x80,0x80,0x80,0x80,0x100,0x0,0x8000,0x100,0x80,0x0,0x80000,0x200000,0x100,0x84,0x100,0x0,0x8000,0xf03005bd,0x8000,0xf03005bd,0x100,0x8000,0x0,0x1000,0x20000,0x0,0x1000,0x0,0x220000,0xf01001bd,0x84,0x400,0xf01001bd,0x220500,0x220500,0x200000,0x200000,0x400,0xf03005bd,0x8000,0x0,0xf01001bd,0xf01001bd,0x8000,0xf01005bd,0x400,0xf01001bd,0x8000,0x220100,0x8000,0x100,0x8000,0x100,0x8000,0x8000,0x8000,0x100,0x7d,0x10000,0x20000,0x20000,0x4000000,0x8000000,0x0,0x0,0x0,0x2400000,0x2400000,0x18c0000,0x18c0000,0xc0000000,0xc0000000,0x0,0x0,0xc0000000,0xf01001bd,0x1001bd,0x30000000,0x30000000,0x1100,0x1bd,0xf01001bd,0x1100,0x8000,0x0,0x3c,0x3c,0x8000,0x18, };
   }
   private static void jj_la1_init_2() 
   {
-    jj_la1_2 = new int[] { 0x0,0x0,0x0,0x0,0x0,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x70001,0x0,0x70001,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7f80,0x17f80,0x40001,0x0,0x0,0x17f80,0x17f80,0x10000,0x10000,0x0,0x50001,0x0,0x0,0x40001,0x40001,0x0,0x40001,0x0,0x40001,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7f80,0x7f80,0x0,0x0,0x10,0x20,0x8,0x0,0x0,0x0,0x0,0x1,0x1,0x46,0x46,0x40001,0x40001,0x0,0x0,0x0,0x0,0x0,0x40001,0x0,0x0,0x0,0x0,0x0,0x0,0x0, };
+    jj_la1_2 = new int[] { 0x0,0x0,0x0,0x0,0x0,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x38000,0x0,0x38000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fc0,0xbfc0,0x20000,0x0,0x0,0x20000,0xbfc0,0xbfc0,0x8000,0x8000,0x0,0x28000,0x0,0x0,0x20000,0x20000,0x0,0x20000,0x0,0x20000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fc0,0x3fc0,0x0,0x0,0x8,0x10,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x23,0x23,0x20000,0x20000,0x0,0x0,0x0,0x0,0x0,0x20000,0x0,0x0,0x0,0x0,0x0,0x0,0x0, };
   }
   final private JJCalls[] jj_2_rtns = new JJCalls[4];
   private boolean jj_rescan = false;
@@ -3151,7 +3189,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 88; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 89; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -3175,7 +3213,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 88; i++)
+    for (int i = 0; i < 89; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3189,7 +3227,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 88; i++)
+    for (int i = 0; i < 89; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3203,10 +3241,10 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 88; i++)
+    for (int i = 0; i < 89; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
-        jj_2_rtns[i]  = new JJCalls();
+        jj_2_rtns[i] = new JJCalls();
   }
 
   /** Constructor with generated Token Manager. */
@@ -3216,7 +3254,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 88; i++)
+    for (int i = 0; i < 89; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3229,7 +3267,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 88; i++)
+    for (int i = 0; i < 89; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3373,13 +3411,13 @@ public class QueryParser implements QueryParserConstants
   public ParseException generateParseException() 
   {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[83];
+    boolean[] la1tokens = new boolean[82];
     if (jj_kind >= 0) 
     {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 88; i++) 
+    for (int i = 0; i < 89; i++) 
     {
       if (jj_la1[i] == jj_gen) 
       {
@@ -3400,7 +3438,7 @@ public class QueryParser implements QueryParserConstants
         }
       }
     }
-    for (int i = 0; i < 83; i++) 
+    for (int i = 0; i < 82; i++) 
     {
       if (la1tokens[i]) 
       {

@@ -45,7 +45,7 @@ public class Result
 	/**
 	 * Create Result object
 	 * @param listMap Container of result axiom lists accessible by Iterable interface or null if none available
-	 * Qparam axiomMap Container of result axioms
+	 * @param axiomMap Container of result axioms
 	 */
 	public Result(Map<QualifiedName, Iterable<Axiom>> listMap, Map<QualifiedName, Axiom> axiomMap) 
 	{

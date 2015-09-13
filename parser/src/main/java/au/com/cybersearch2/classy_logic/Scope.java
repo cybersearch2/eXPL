@@ -382,6 +382,10 @@ public class Scope
 		return listMap;
 	}
 
+	/** 
+	 * Returns container with axioms in scope 
+	 * @return Container which maps QualifiedName to Axiom
+	 */
     public Map<QualifiedName, Axiom> getAxiomMap()
     {
         Map<QualifiedName, Axiom> axiomMap = new HashMap<QualifiedName, Axiom>();

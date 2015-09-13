@@ -55,107 +55,105 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int PARAMETER = 27;
   /** RegularExpression Id. */
-  int CALL = 28;
+  int INTEGER_LITERAL = 28;
   /** RegularExpression Id. */
-  int INTEGER_LITERAL = 29;
+  int DECIMAL_LITERAL = 29;
   /** RegularExpression Id. */
-  int DECIMAL_LITERAL = 30;
+  int HEX_LITERAL = 30;
   /** RegularExpression Id. */
-  int HEX_LITERAL = 31;
+  int FLOATING_POINT_LITERAL = 31;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 32;
+  int NUMBER_LITERAL = 32;
   /** RegularExpression Id. */
-  int NUMBER_LITERAL = 33;
+  int EXPONENT = 33;
   /** RegularExpression Id. */
-  int EXPONENT = 34;
+  int STRING_LITERAL = 34;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 35;
+  int TRUE = 35;
   /** RegularExpression Id. */
-  int TRUE = 36;
+  int FALSE = 36;
   /** RegularExpression Id. */
-  int FALSE = 37;
+  int UNKNOWN = 37;
   /** RegularExpression Id. */
-  int UNKNOWN = 38;
+  int NAN = 38;
   /** RegularExpression Id. */
-  int NAN = 39;
+  int IDENTIFIER = 39;
   /** RegularExpression Id. */
-  int IDENTIFIER = 40;
+  int LPAREN = 40;
   /** RegularExpression Id. */
-  int LPAREN = 41;
+  int RPAREN = 41;
   /** RegularExpression Id. */
-  int RPAREN = 42;
+  int LBRACE = 42;
   /** RegularExpression Id. */
-  int LBRACE = 43;
+  int RBRACE = 43;
   /** RegularExpression Id. */
-  int RBRACE = 44;
+  int LBRACKET = 44;
   /** RegularExpression Id. */
-  int LBRACKET = 45;
+  int RBRACKET = 45;
   /** RegularExpression Id. */
-  int RBRACKET = 46;
+  int SEMICOLON = 46;
   /** RegularExpression Id. */
-  int SEMICOLON = 47;
+  int COMMA = 47;
   /** RegularExpression Id. */
-  int COMMA = 48;
+  int DOT = 48;
   /** RegularExpression Id. */
-  int DOT = 49;
+  int ASSIGN = 49;
   /** RegularExpression Id. */
-  int ASSIGN = 50;
+  int GT = 50;
   /** RegularExpression Id. */
-  int GT = 51;
+  int LT = 51;
   /** RegularExpression Id. */
-  int LT = 52;
+  int BANG = 52;
   /** RegularExpression Id. */
-  int BANG = 53;
+  int COLON = 53;
   /** RegularExpression Id. */
-  int COLON = 54;
+  int EQ = 54;
   /** RegularExpression Id. */
-  int EQ = 55;
+  int LE = 55;
   /** RegularExpression Id. */
-  int LE = 56;
+  int GE = 56;
   /** RegularExpression Id. */
-  int GE = 57;
+  int NE = 57;
   /** RegularExpression Id. */
-  int NE = 58;
+  int SC_OR = 58;
   /** RegularExpression Id. */
-  int SC_OR = 59;
+  int SC_AND = 59;
   /** RegularExpression Id. */
-  int SC_AND = 60;
+  int INCR = 60;
   /** RegularExpression Id. */
-  int INCR = 61;
+  int DECR = 61;
   /** RegularExpression Id. */
-  int DECR = 62;
+  int PLUS = 62;
   /** RegularExpression Id. */
-  int PLUS = 63;
+  int MINUS = 63;
   /** RegularExpression Id. */
-  int MINUS = 64;
+  int STAR = 64;
   /** RegularExpression Id. */
-  int STAR = 65;
+  int SLASH = 65;
   /** RegularExpression Id. */
-  int SLASH = 66;
+  int BIT_AND = 66;
   /** RegularExpression Id. */
-  int BIT_AND = 67;
+  int BIT_OR = 67;
   /** RegularExpression Id. */
-  int BIT_OR = 68;
+  int XOR = 68;
   /** RegularExpression Id. */
-  int XOR = 69;
+  int REM = 69;
   /** RegularExpression Id. */
-  int REM = 70;
+  int PLUSASSIGN = 70;
   /** RegularExpression Id. */
-  int PLUSASSIGN = 71;
+  int MINUSASSIGN = 71;
   /** RegularExpression Id. */
-  int MINUSASSIGN = 72;
+  int STARASSIGN = 72;
   /** RegularExpression Id. */
-  int STARASSIGN = 73;
+  int SLASHASSIGN = 73;
   /** RegularExpression Id. */
-  int SLASHASSIGN = 74;
+  int ANDASSIGN = 74;
   /** RegularExpression Id. */
-  int ANDASSIGN = 75;
+  int ORASSIGN = 75;
   /** RegularExpression Id. */
-  int ORASSIGN = 76;
+  int XORASSIGN = 76;
   /** RegularExpression Id. */
-  int XORASSIGN = 77;
-  /** RegularExpression Id. */
-  int REMASSIGN = 78;
+  int REMASSIGN = 77;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -190,7 +188,6 @@ public interface QueryParserConstants {
     "\"local\"",
     "\"choice\"",
     "\"parameter\"",
-    "\"call\"",
     "<INTEGER_LITERAL>",
     "<DECIMAL_LITERAL>",
     "<HEX_LITERAL>",

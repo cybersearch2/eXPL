@@ -501,26 +501,24 @@ public class CallOperandTest
             "list person_list(person);\n" +
             "calc people_by_starsign(\n" +
             "  string starsign,\n" +
-            "  axiom candidate = {},\n" +
+            "  axiom candidates = {},\n" +
             "  integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(person_list),\n" +
             "    ? person_list[i][starsign] == starsign\n" +
             "    {\n" +
-            "       candidate += person_list[i]\n" +
+            "       candidates += person_list[i]\n" +
             "    },\n" +
             "    ++i\n" +
             "  }\n" +
             ");\n" +
             "calc match(\n" +
-            "  template perfect(candidate) << people_by_starsign(\"gemini\"),\n" +
-            "  axiom candidate_list = match.perfect[candidate],\n" +
-            "  //system.print(candidate_list),\n" +
-            "  integer i = 0,\n" +
+            "  template perfect(candidates) << people_by_starsign(\"gemini\"),\n" +
+             " integer i = 0,\n" +
             "  {\n" +
-            "    ? i < length(candidate_list),\n" +
-            "    gemini = candidate_list[i++]\n" +
-            "    //system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign])\n" +
+            "    ? i < length(candidates),\n" +
+            "    gemini = candidates[i++],\n" +
+            "    system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign])\n" +
             "  }\n" +
             " );\n" +
             " query match(match);";
@@ -539,13 +537,13 @@ public class CallOperandTest
             "              (\"Alex\", \"m\", 22, \"aquarius\"),\n" + 
             "              (\"Jill\", \"f\", 33, \"cancer\"),\n" + 
             "              (\"Fiona\", \"f\", 29, \"gemini\"),\n" + 
-            "              (\"melissa\", \"f\", 30, \"virgo\"),\n" + 
+            "              (\"Melissa\", \"f\", 30, \"virgo\"),\n" + 
             "              (\"Tom\", \"m\", 22, \"cancer\"),\n" + 
             "              (\"Bill\", \"m\", 19, \"virgo\");\n" + 
             "list person_list(person);\n" +
             "calc people_by_starsign(\n" +
             "  string starsign,\n" +
-            "  axiom candidate = {},\n" +
+            "  axiom candidates = {},\n" +
             "  integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(person_list),\n" +
@@ -555,20 +553,20 @@ public class CallOperandTest
             "       ? age < 18\n" +
             "       { age = unknown },\n" +
             "       axiom person = { name = person_list[i][name], sex = person_list[i][sex], age, starsign =  person_list[i][starsign] },\n" +
-            "       candidate += person\n" +
+            "       candidates += person\n" +
             "    },\n" +
             "    ++i\n" +
             "  }\n" +
             ");\n" +
             "calc match(\n" +
             "  axiom eligible = {},\n" +
-            "  template perfect(candidate) << people_by_starsign(\"gemini\"),\n" +
-            "  axiom candidate_list = match.perfect[candidate],\n" +
-            "  //system.print(candidate_list),\n" +
+            "  template perfect(candidates) << people_by_starsign(\"gemini\"),\n" +
+            "  system.print(\"Perfect is fact = \" + fact(perfect)),\n" +
+            "  system.print(perfect[candidates]),\n" +
             "  integer i = 0,\n" +
             "  {\n" +
-            "    ? i < length(candidate_list),\n" +
-            "    gemini = candidate_list[i++],\n" +
+            "    ? i < length(candidates),\n" +
+            "    gemini = candidates[i++],\n" +
             "    ? fact(gemini)\n" +
             "    {\n" +
             "      // system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign]) }\n" +
@@ -607,8 +605,10 @@ public class CallOperandTest
     {
         QueryProgram queryProgram = new QueryProgram(PERFECT_MATCH);
         Result result = queryProgram.executeQuery("match");
-        QualifiedName qname = QualifiedName.parseGlobalName("match.candidate_list");
-        Iterator<Axiom> iterator = result.getIterator(qname);
+        QualifiedName qname = QualifiedName.parseGlobalName("match.perfect");
+        
+        AxiomList candidates = (AxiomList) result.getAxiom(qname).getTermByName("candidates").getValue();
+        Iterator<AxiomTermList> iterator = candidates.iterator();
         int index = 0;
         while(iterator.hasNext())
             //System.out.println(iterator.next().toString());
