@@ -185,7 +185,6 @@ TOKEN :
 | < LOCAL: "local" >
 | < CHOICE: "choice" >
 | < PARAMETER: "parameter" >
-| < CALL: "call" >
 }
 
 /* LITERALS */
@@ -600,6 +599,7 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
     List<Parameter> literalList = null;
     List<OperandParam> axiomList = null;
     QualifiedName qname = null;
+    List<OperandParam> operandParamList = null;
 }
 {
    ( varType=Type(operandMap) )? name=Name() 
@@ -635,6 +635,11 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
         <REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(template, name, parserAssembler) )? ")"
      |
         <LBRACE> literalList = LiteralList() <RBRACE> 
+     |
+     "(" ( operandParamList = ArgumentList(parserAssembler, true) )? ")"
+	 {
+	     template.addTerm(parserAssembler.getCallOperand(qname, operandParamList));
+	 }
     )?
   {
      if (varType == null)
