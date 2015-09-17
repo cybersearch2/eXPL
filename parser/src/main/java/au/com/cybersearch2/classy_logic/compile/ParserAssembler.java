@@ -173,7 +173,7 @@ public class ParserAssembler implements LocaleListener
  
     /**
      * Returns Locale of enclosing scope
-     * @return
+     * @return Locale object
      */
     public Locale getScopeLocale()
     {
@@ -236,7 +236,7 @@ public class ParserAssembler implements LocaleListener
 
 	/**
 	 * Returns template with specified qualified name
-	 * @param textName Template name
+	 * @param qualifiedTemplateName Qualified template name
 	 * @return Template object or null if template not found
 	 */
 	public Template getTemplate(QualifiedName qualifiedTemplateName)
@@ -256,24 +256,15 @@ public class ParserAssembler implements LocaleListener
 
 	/**
 	 * Create Variable to contain inner Tempate values and add to OperandMap
-	 * @param template The outer template
 	 * @param innerTemplate The inner Template
 	 */
-	public void addInnerTemplate(Template template, Template innerTemplate)
+	public void addInnerTemplate(Template innerTemplate)
 	{
-	    // Create AxiomTermList to contain query result. 
-	    AxiomTermList axiomTermList = new AxiomTermList(innerTemplate.getQualifiedName(), innerTemplate.getKey());
 	    // Create Variable to be axiomTermList container. Give it the same name as the inner Template 
 	    // so it is qualified by the name of the enclosing Template
 	    Variable listVariable = new Variable(innerTemplate.getQualifiedName());
-	    listVariable.assign(axiomTermList);
 	    // Add variable to OperandMap so it can be referenced from script
 	    operandMap.addOperand(listVariable);
-	    operandMap.addItemList(innerTemplate.getQualifiedName(), axiomTermList);
-	    // Add inner template to outer template so it will be included in unification
-        while (template.getNext() != null)
-            template = template.getNext();
-        template.setNext(innerTemplate);
 	}
 	
 	/**
@@ -316,9 +307,9 @@ public class ParserAssembler implements LocaleListener
 	 * All scope-bound axioms are removed on scope context reset at the
 	 * conclusion of a query.
 	 * @param axiom Axiom object
-	 * @see au.com.cybersearch2.classy_logic.QueryParams.initialize()
-	 * @see setParameter(au.com.cybersearch2.classy_logic.pattern.Axiom)
-	 */
+	 * @see au.com.cybersearch2.classy_logic.QueryParams#initialize()
+	 * @see #setParameter(au.com.cybersearch2.classy_logic.helper.QualifiedName)
+     */
 	public void addScopeAxiom(Axiom axiom)
 	{
 		if (scopeAxiomMap == null)
@@ -436,7 +427,7 @@ public class ParserAssembler implements LocaleListener
 	
 	/**
 	 * Returns axiom source for specified axiom name
-	 * @param axiomName
+	 * @param qualifiedAxiomName Qualified axiom name
 	 * @return AxiomSource object
 	 */
     public AxiomSource getAxiomSource(QualifiedName qualifiedAxiomName)
@@ -625,7 +616,7 @@ public class ParserAssembler implements LocaleListener
 
     /**
 	 * Set axiom term name list from template
-	 * @param templateName Name of template
+	 * @param qualifiedTemplateName Qualified name of template
 	 * @param axiomList Axiom list to be updated
 	 * @return List of term names
 	 */
@@ -693,13 +684,11 @@ public class ParserAssembler implements LocaleListener
 	 * Create new template and add to head template chain
 	 * @param qualifiedTemplateName Qualified name of head template
 	 * @param chainName Name of template to add to chain
-	 * @returns Template object
+	 * @return Template object
 	 */
 	public Template chainTemplate(QualifiedName qualifiedTemplateName, String chainName) 
 	{
 		Template template = getTemplate(qualifiedTemplateName);
-		while (template.getNext() != null)
-			template = template.getNext();
 		Template chainTemplate = new Template(new QualifiedName(qualifiedTemplateName.getScope(), chainName, QualifiedName.EMPTY));
 		template.setNext(chainTemplate);
 		templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
@@ -768,10 +757,12 @@ public class ParserAssembler implements LocaleListener
             querySpec.setQueryType(QueryType.calculator);
         }
         QueryParams queryParams = new QueryParams(functionScope, querySpec);
+        if (innerTemplate != null)
+            addInnerTemplate(innerTemplate);
         QueryEvaluator queryEvaluator = 
                 new QueryEvaluator(queryParams, scope, innerTemplate);
         QualifiedName qualifiedCallName = new QualifiedName(library, QualifiedName.EMPTY, queryName);
-        return new CallOperand<Void>(qualifiedCallName, queryEvaluator, operandParamList);
+        return new CallOperand<AxiomTermList>(qualifiedCallName, queryEvaluator, operandParamList);
     }
 
 	/**
@@ -945,7 +936,7 @@ public class ParserAssembler implements LocaleListener
 
     /**
      * Copy result axiom lists as iterables to supplied container
-     * @param listMap2 Container to receive lists
+     * @param listMap Container to receive lists
      */
     public void copyLists(Map<QualifiedName, Iterable<Axiom>> listMap) 
     {

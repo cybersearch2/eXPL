@@ -92,15 +92,16 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
         return qname;
     }
 	/**
-	 * Assign a value and set the delegate
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
+     * Assign a value and id to this Term from another term 
+     * @param term Term containing non-null value and id to set
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void assign(Object value2) 
+	public void assign(Term term) 
 	{
-        setValue((T)value2);
-	    itemList.assignItem(index, value2);
+        setValue((T)term.getValue());
+        id = term.getId();
+	    itemList.assignItem(index, term.getValue());
 	}
 
 	/**

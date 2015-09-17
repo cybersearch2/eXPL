@@ -41,6 +41,7 @@ import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * VariableType
@@ -119,6 +120,8 @@ public class VariableType
     public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname)
     {
         Operand expression = (Operand)getProperty(EXPRESSION);
+        if (expression == null)
+            expression = (Operand)getProperty(LITERAL);
 		Operand operand = null;
         String axiomKey = null;
         List<OperandParam> initializeList = null;
@@ -191,7 +194,7 @@ public class VariableType
 	    Operand literal = (Operand) getProperty(LITERAL);
 	    if (literal != null)
 	        // Expression is a literal
-	        operand.assign(literal.getValue());
+	        operand.assign(new Parameter(Term.ANONYMOUS, literal.getValue()));
 	    return operand;
     }
 
@@ -199,7 +202,7 @@ public class VariableType
 	 * Returns ItemList object for this type in current scope. 
 	 * NOTE: AxiomKey proptery must be set for Term, Axiom or Local type
      * @param parserAssembler ParserAssembler object
-     * @param listname Name of new variable
+     * @param listName Name of new variable
 	 * @return ItemList object
 	 * @throws ParseException
 	 */

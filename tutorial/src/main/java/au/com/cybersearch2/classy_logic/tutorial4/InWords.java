@@ -39,8 +39,8 @@ public class InWords
 	static final String LEXICAL_SEARCH = 
 		// Use an external axiom source which is bound in TestAxiomProvider dependency class
 	    // to AxiomSource class LexiconSource
-		"axiom lexicon (Word, Definition) : resource \"lexicon\";\n" +
-		"template in_words (Word regex(\"^in[^ ]+\"), string Definition);\n" +
+		"axiom lexicon (word, definition) : resource \"lexicon\";\n" +
+		"template in_words (word regex(\"^in[^ ]+\"), string definition);\n" +
 		"query query_in_words(lexicon : in_words);";
 
 	@Inject

@@ -31,16 +31,16 @@ public class NamedGreekConstruction
 
 	static final String GREEK_CONSTRUCTION =
 			
-		"axiom charge (city, charge) :\n" +
-		"  (\"Athens\", 23 ),\n" +
-		"  (\"Sparta\", 13 ),\n" +
-		"  (\"Milos\", 17);\n" +
+		"axiom charge (city, charge)\n" +
+		"  {\"Athens\", 23 }\n" +
+		"  {\"Sparta\", 13 }\n" +
+		"  {\"Milos\", 17};\n" +
 		
-		"axiom customer (name, city) :\n" +
-		"  (\"Marathon Marble\", \"Sparta\"),\n" +
-		"  (\"Acropolis Construction\", \"Athens\"),\n" +
-		"  (\"Agora Imports\", \"Sparta\"),\n" +
-		"  (\"Spiros Theodolites\", \"Milos\");\n" +
+		"axiom customer (name, city)\n" +
+		"  {\"Marathon Marble\", \"Sparta\"}\n" +
+		"  {\"Acropolis Construction\", \"Athens\"}\n" +
+		"  {\"Agora Imports\", \"Sparta\"}\n" +
+		"  {\"Spiros Theodolites\", \"Milos\"};\n" +
 		
 		"template freight(charge, city);\n" +
 		"template customer_freight(name, city ? city == freight.city, charge = freight.charge);\n" +

@@ -3,7 +3,6 @@ package au.com.cybersearch2.classy_logic.parser;
 
 import java.io.InputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
-import au.com.cybersearch2.classy_logic.query.QueryType;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserResources;
@@ -21,7 +19,6 @@ import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.VariableType;
-import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
@@ -32,20 +29,11 @@ import au.com.cybersearch2.classy_logic.expression.MatchOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
 import au.com.cybersearch2.classy_logic.expression.Variable;
-import au.com.cybersearch2.classy_logic.expression.CallOperand;
-import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
-import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
-import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
-import au.com.cybersearch2.classy_logic.list.ArrayItemList;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.ListLength;
-import au.com.cybersearch2.classy_logic.list.ItemListVariable;
-import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
@@ -81,8 +69,6 @@ private final int jjStopStringLiteralDfa_0(int pos, long active0, long active1)
             jjmatchedKind = 39;
             return 26;
          }
-         if ((active0 & 0x40000000000L) != 0L)
-            return 15;
          if ((active0 & 0x1000000000000L) != 0L)
             return 9;
          return -1;
@@ -252,7 +238,7 @@ private int jjMoveStringLiteralDfa0_0()
       case 117:
          return jjMoveStringLiteralDfa1_0(0x2000000000L, 0x0L);
       case 123:
-         return jjStartNfaWithStates_0(0, 42, 15);
+         return jjStopAtPos(0, 42);
       case 124:
          jjmatchedKind = 67;
          return jjMoveStringLiteralDfa1_0(0x400000000000000L, 0x800L);
@@ -664,6 +650,8 @@ private int jjMoveNfa_0(int startState, int curPos)
                      jjCheckNAddStates(0, 6);
                   else if (curChar == 34)
                      jjCheckNAddStates(7, 9);
+                  else if (curChar == 39)
+                     jjCheckNAdd(15);
                   else if (curChar == 46)
                      jjCheckNAdd(9);
                   else if (curChar == 47)
@@ -737,6 +725,10 @@ private int jjMoveNfa_0(int startState, int curPos)
                      kind = 31;
                   jjCheckNAddTwoStates(12, 13);
                   break;
+               case 14:
+                  if (curChar == 39)
+                     jjCheckNAdd(15);
+                  break;
                case 15:
                   if ((0x3ff000000000000L & l) != 0L)
                      jjCheckNAddTwoStates(15, 16);
@@ -752,6 +744,10 @@ private int jjMoveNfa_0(int startState, int curPos)
                case 18:
                   if ((0x3ff000000000000L & l) != 0L)
                      jjCheckNAddTwoStates(18, 19);
+                  break;
+               case 19:
+                  if (curChar == 39 && kind > 32)
+                     kind = 32;
                   break;
                case 20:
                   if (curChar == 34)
@@ -862,14 +858,11 @@ private int jjMoveNfa_0(int startState, int curPos)
             switch(jjstateSet[--i])
             {
                case 5:
-                  if ((0x7fffffe07fffffeL & l) != 0L)
-                  {
-                     if (kind > 39)
-                        kind = 39;
-                     jjCheckNAdd(26);
-                  }
-                  else if (curChar == 123)
-                     jjstateSet[jjnewStateCnt++] = 15;
+                  if ((0x7fffffe07fffffeL & l) == 0L)
+                     break;
+                  if (kind > 39)
+                     kind = 39;
+                  jjCheckNAdd(26);
                   break;
                case 1:
                   jjAddStates(10, 12);
@@ -882,14 +875,6 @@ private int jjMoveNfa_0(int startState, int curPos)
                   if ((0x1000000010L & l) != 0L && kind > 31)
                      kind = 31;
                   break;
-               case 14:
-                  if (curChar == 123)
-                     jjstateSet[jjnewStateCnt++] = 15;
-                  break;
-               case 19:
-                  if (curChar == 125 && kind > 32)
-                     kind = 32;
-                  break;
                case 21:
                   if ((0xffffffffefffffffL & l) != 0L)
                      jjCheckNAddStates(7, 9);
@@ -901,13 +886,6 @@ private int jjMoveNfa_0(int startState, int curPos)
                case 23:
                   if ((0x14404410000000L & l) != 0L)
                      jjCheckNAddStates(7, 9);
-                  break;
-               case 25:
-                  if ((0x7fffffe07fffffeL & l) == 0L)
-                     break;
-                  if (kind > 39)
-                     kind = 39;
-                  jjCheckNAdd(26);
                   break;
                case 26:
                   if ((0x7fffffe87fffffeL & l) == 0L)

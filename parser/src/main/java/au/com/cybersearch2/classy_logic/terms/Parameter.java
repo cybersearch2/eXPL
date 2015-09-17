@@ -119,6 +119,15 @@ public class Parameter implements Term
 		return id;
 	}
 
+    /**
+     * Set id
+     * @param id
+     */
+    public void setId(int id)
+    {
+        this.id = id;
+    }
+    
 	/**
 	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 
 	 * @param id Identity of caller. 
@@ -191,7 +200,7 @@ public class Parameter implements Term
 		if (obj instanceof Parameter)
 		{
 			Parameter other =  (Parameter)obj;
-			if (other.value.equals(null))
+			if (other.value == null)
 				return false;
 			return value.equals(other.value);
 		}
@@ -214,10 +223,10 @@ public class Parameter implements Term
 
 	/**
 	 * Set Parameter value
-	 * GenericParameter has a protected type-specific setValue()
 	 * @param value
 	 */
-	private void setValue(Object value)
+	@Override
+	public void setValue(Object value)
 	{
 		if (value == null)
 			value = new Null();
@@ -251,14 +260,14 @@ public class Parameter implements Term
 	}
 
 	/**
-	 * Update Parameter value - use for assignment operation
-     * @param value Object containing new value.
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Term#assign(java.lang.Object)
+     * Assign a value and id to this Term from another term 
+     * @param term Term containing non-null value and id to set
 	 */
 	@Override
-	public void assign(Object value) 
+	public void assign(Term term) 
 	{
-		setValue(value);
+		setValue(term.getValue());
+		id = term.getId();
 	}
 
 	/**
@@ -267,7 +276,7 @@ public class Parameter implements Term
 	@Override
 	public int hashCode() 
 	{
-		return value == null ? 0 : value.hashCode();
+		return empty ? super.hashCode() : value.hashCode();
 	}
 
 }

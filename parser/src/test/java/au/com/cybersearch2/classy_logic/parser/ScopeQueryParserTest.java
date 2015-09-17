@@ -204,7 +204,7 @@ public class ScopeQueryParserTest
     };
 
 	static final String INSERT_SORT_XPL =
-	   		"axiom unsorted : (12, 3, 1, 5, 8);\n" +
+	   		"axiom unsorted() {12, 3, 1, 5, 8};\n" +
 	        "scope sort_example\n" +
 		    "{\n" +
              "  list<term> sort_list(unsorted);\n" +
@@ -243,29 +243,29 @@ public class ScopeQueryParserTest
 		    ;
  
 	static final String GERMAN_CURRENCY_XPL =
-			"axiom lexicon (language, Total):\n" +
-	        "  (\"english\", \"Total\"),\n" +
-	        "  (\"german\", \"Gesamtkosten\");\n" +
+			"axiom lexicon (language, Total)\n" +
+	        "  {\"english\", \"Total\"}\n" +
+	        "  {\"german\", \"Gesamtkosten\"};\n" +
 	        "local translate(lexicon);" +
 			"template charge(currency amount);\n" +
 			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +
 			"calc format_total(string total_text = translate[Total] + \" + gst: \" + format(charge_plus_gst.total));\n" +
 			"scope german (language=\"de\", region=\"DE\")\n" +
 			"{\n" +
-			"  axiom item: (\"12.345,67 €\");\n" +
+			"  axiom item() {\"12.345,67 €\"};\n" +
 			"  query item_query(item : charge) >> (charge_plus_gst) >> (format_total);\n" +
 	        "}";
 
     static final String GERMAN_COLORS =
-            "axiom lexicon (language, aqua, black, blue, white):\n" +
-            "  (\"english\", \"aqua\", \"black\", \"blue\", \"white\"),\n" +
-            "  (\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\");\n" +
+            "axiom lexicon (language, aqua, black, blue, white)\n" +
+            "  {\"english\", \"aqua\", \"black\", \"blue\", \"white\"}\n" +
+            "  {\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);" +
-            "choice swatch (name, red, green, blue) :\n" +
-            "(colors[aqua], 0, 255, 255),\n" +
-            "(colors[black], 0, 0, 0),\n" +
-            "(colors[blue], 0, 0, 255),\n" +
-            "(colors[white], 255, 255, 255);\n" +
+            "choice swatch (name, red, green, blue)\n" +
+            "{colors[aqua], 0, 255, 255}\n" +
+            "{colors[black], 0, 0, 0}\n" +
+            "{colors[blue], 0, 0, 255}\n" +
+            "{colors[white], 255, 255, 255};\n" +
             "axiom shade (name) : parameter;\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
@@ -278,10 +278,10 @@ public class ScopeQueryParserTest
             "scope german (language=\"de\", region=\"DE\")\n" +        
             "{\n" +
             "  choice population_group\n" +
-            "  (Population,                   Group):\n" +
-            "  (Population >= {30.000.000}, \"Mega\"),\n" +
-            "  (Population >= {20.000.000}, \"Huge\"),\n" +
-            "  (Population <  {20.000.000}, \"Large\");\n" +
+            "  (Population,                   Group)\n" +
+            "  {Population >= '30.000.000', \"Mega\"}\n" +
+            "  {Population >= '20.000.000', \"Huge\"}\n" +
+            "  {Population <  '20.000.000', \"Large\"};\n" +
             "  list city_group_list(population_group);\n" +
             "  query group_query (mega_city:city) >> (city:population_group);\n" +
             "}\n";
@@ -612,22 +612,22 @@ public class ScopeQueryParserTest
 
 					@Override
 					public boolean onSolution(Solution solution) {
-						if (solution.keySet().contains("family_by_order"))
-					    	birdsResultsChecker.checkNextResult("family " + solution.getAxiom("family_by_order").getTermByName("family").getValue().toString() + " " + keyword + " " + attribute);
-					    else if (solution.keySet().contains("bird_by_family"))
-							birdsResultsChecker.checkNextResult(solution.getAxiom("bird_by_family").getTermByName("bird").getValue().toString() + " " + keyword + " " + attribute);
+						if (solution.keySet().contains("birds.family_by_order"))
+					    	birdsResultsChecker.checkNextResult("family " + solution.getAxiom("birds.family_by_order").getTermByName("family").getValue().toString() + " " + keyword + " " + attribute);
+					    else if (solution.keySet().contains("birds.bird_by_family"))
+							birdsResultsChecker.checkNextResult(solution.getAxiom("birds.bird_by_family").getTermByName("bird").getValue().toString() + " " + keyword + " " + attribute);
 					    return true;
 					}};
 				if (("order_" + keyword).equals(axiom.getName()))
 				{
 					Operand orderOperand = parserAssembler.findOperandByName("order");
-					orderOperand.assign(axiom.getTermByName("order").getValue().toString());
+					orderOperand.assign(new Parameter(Term.ANONYMOUS, axiom.getTermByName("order").getValue().toString()));
 					queryProgram.executeQuery(scope.getName(), "find_family_by_order", solutionHandler);
 				}
 				else
 				{
 					Operand familyOperand = parserAssembler.findOperandByName("family");
-					familyOperand.assign(axiom.getTermByName("family").getValue().toString());
+					familyOperand.assign(new Parameter(Term.ANONYMOUS, axiom.getTermByName("family").getValue().toString()));
 					queryProgram.executeQuery(scope.getName(), "find_bird_by_family", solutionHandler);
 				}
 			}

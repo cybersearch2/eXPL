@@ -26,10 +26,8 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.DI;
 
 /**
@@ -53,9 +51,11 @@ public class RegexGroups
         "   a = \"adv.\",  \n" +
 		"   j = \"adj.\" };\n" +
 		"// Collect words starting with 'in' along with other details\n" +
-		"template in_words (\n" +
+		"axiom word_definitions = {};\n" +
+		"calc in_words (\n" +
 		"  word regex(wordRegex), definition regex(defRegex { part, def }),\n" +
-        "  word = word + \", \" + expand[part] + \"- \" + def\n" +
+        "  axiom in_word = { word + \", \" + expand[part] + \"- \" + def },\n" +
+		"  word_definitions += in_word" +
 		");\n" +
 		"query query_in_words(lexicon : in_words);";
  
@@ -89,15 +89,7 @@ public class RegexGroups
 		// Here is the first solution: 
 		// word = inadequate, part = adj., def = not sufficient to meet a need
 		QueryProgram queryProgram = new QueryProgram(LEXICAL_SEARCH);
-		Result result = queryProgram.executeQuery("query_in_words", new SolutionHandler(){
-
-            @Override
-            public boolean onSolution(Solution solution)
-            {
-                //System.out.println(solution.keySet());
-                System.out.println(solution.getAxiom("in_words").getTermByName("word").toString());
-                return true;
-            }});
+		Result result = queryProgram.executeQuery("query_in_words");
 		return result.getIterator(QualifiedName.parseGlobalName("word_definitions"));
  	}
 	
@@ -112,7 +104,7 @@ public class RegexGroups
 	        RegexGroups regexGroups = new RegexGroups();
 	        Iterator<Axiom> iterator = regexGroups.getRegexGroups();
 	        while(iterator.hasNext())
-	            System.out.println(iterator.next().toString());
+	            System.out.println(iterator.next().getTermByIndex(0).getValue().toString());
 		} 
         catch (ExpressionException e) 
         { // Display nested ParseException

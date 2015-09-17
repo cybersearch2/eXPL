@@ -64,7 +64,7 @@ public class SolutionPairer extends AxiomPairer
 
 	/**
 	 * Visit next term
-	 * @see au.com.cybersearch2.classy_logic.pattern.AxiomPairer#next(au.com.cybersearch2.classy_logic.interfaces.Term, int)
+	 * @see au.com.cybersearch2.classy_logic.pattern.AxiomPairer#next(au.com.cybersearch2.classy_logic.interfaces.Operand, int)
 	 */
 	@Override
 	public boolean next(Operand operand, int depth) 

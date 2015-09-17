@@ -126,16 +126,13 @@ public class OperandContext
         if (value == null)
         {   // Term was empty
             if (!term.isEmpty())
-                ((Parameter)term).clearValue();
+                term.clearValue();
         }
         else
         {   // Term had value
-            // Use unifyTerm() to update it to reset id too
-            if (!term.isEmpty())
-                ((Parameter)term).clearValue();
-            Parameter param = new Parameter(term.getName());
-            param.assign(value);
-            term.unifyTerm(param, id);
+            Parameter param = new Parameter(term.getName(), value);
+            param.setId(id);
+            term.assign(param);
         }
         if (left != null)
             left.restore();

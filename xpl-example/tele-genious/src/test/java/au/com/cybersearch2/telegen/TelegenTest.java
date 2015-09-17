@@ -79,34 +79,34 @@ public class TelegenTest
     
  */
     static public final String TELEGEN_XPL =
-        "axiom issue : resource \"telegen\";\n" +
-        "axiom check : resource \"telegen\";\n" +
-        "axiom issue_param (issue_name): parameter;\n" +
-        "axiom check_param (check_name): parameter;\n" +
+        "axiom issue() : resource \"telegen\";\n" +
+        "axiom check() : resource \"telegen\";\n" +
+        "axiom issue_param(issue_name): parameter;\n" +
+        "axiom check_param(check_name): parameter;\n" +
         "template issue (name, observation);\n" +
         "template check (name, instruction);\n" +
         "choice first_check\n"  +
-        "    (  issue_name,           check_name): \n" +
-        "    (\"Start\",            \"Power cord\"),\n" +
-        "    (\"Video\",            \"Connections\"),\n" +
-        "    (\"Remote\",           \"Batteries\"),\n" +
-        "    (\"Set top box\",      \"Programme\"),\n" +
-        "    (true,                 \"Support\");\n" +
+        "    (  issue_name,           check_name) \n" +
+        "    {\"Start\",            \"Power cord\"}\n" +
+        "    {\"Video\",            \"Connections\"}\n" +
+        "    {\"Remote\",           \"Batteries\"}\n" +
+        "    {\"Set top box\",      \"Programme\"}\n" +
+        "    {true,                 \"Support\"};\n" +
         "choice next_check\n"  +
-        "    (  check_name,           next_check): \n" +
-        "    (\"Power cord\",       \"Wall outlet\"),\n" +
-        "    (\"Wall outlet\",      \"Remote\"),\n" +
-        "    (\"Remote\",           \"Support\"),\n" +
-        "    (\"Connections\",      \"Cables\"),\n" +
-        "    (\"Cables\",           \"Connected devices\"),\n" +
-        "    (\"Connected devices\",\"Source\"),\n" +
-        "    (\"Source\",           \"Running state\"),\n" +
-        "    (\"Running state\",    \"Support\"),\n" +
-        "    (\"Batteries\",        \"Sensor\"),\n" +
-        "    (\"Sensor\",           \"Pointing\"),\n" +
-        "    (\"Pointing\",         \"Support\"),\n" +
-        "    (\"Programme\",        \"Support\"),\n" +
-        "    (true,                 \"Support\");\n" +
+        "    (  check_name,           next_check) \n" +
+        "    {\"Power cord\",       \"Wall outlet\"}\n" +
+        "    {\"Wall outlet\",      \"Remote\"}\n" +
+        "    {\"Remote\",           \"Support\"}\n" +
+        "    {\"Connections\",      \"Cables\"}\n" +
+        "    {\"Cables\",           \"Connected devices\"}\n" +
+        "    {\"Connected devices\",\"Source\"}\n" +
+        "    {\"Source\",           \"Running state\"}\n" +
+        "    {\"Running state\",    \"Support\"}\n" +
+        "    {\"Batteries\",        \"Sensor\"}\n" +
+        "    {\"Sensor\",           \"Pointing\"}\n" +
+        "    {\"Pointing\",         \"Support\"}\n" +
+        "    {\"Programme\",        \"Support\"}\n" +
+        "    {true,                 \"Support\"};\n" +
         "query issues (issue:issue);\n" +
         "query checks (check:check);\n" +
         "query first_check_query (issue_param: first_check);\n" +

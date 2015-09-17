@@ -25,6 +25,7 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 
 /**
@@ -122,12 +123,14 @@ public class RegExOperand extends StringOperand
 					for (String group: groupValues)
 					{   // Group(0) is assigned to this object, so may be a subset of the original text
 						if (index == 0)
-							assign(groupValues[0]);
+							setValue(groupValues[0]);
 						else 
 						{   // Groups in regex start at group(1)
 							if (index > groupList.size())
 								break;
-							groupList.get(index - 1).assign(group);
+							Parameter param = new Parameter(Term.ANONYMOUS, group);
+							param.setId(id);
+							groupList.get(index - 1).assign(param);
 						}
 						++index;
 					}

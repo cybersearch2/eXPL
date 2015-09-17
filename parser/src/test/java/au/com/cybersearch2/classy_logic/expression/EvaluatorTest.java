@@ -22,7 +22,9 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.EvaluationUtils;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -225,23 +227,26 @@ public class EvaluatorTest
 		assertThat(binaryPrefix.shortCircuitOnFalse).isTrue();
 	}
 
-	@Test
+	@SuppressWarnings("unchecked")
+    @Test
 	public void testOperandAssign()
 	{
-		Operand leftTerm = mock(Operand.class);
+		Operand leftTerm = new Variable(QualifiedName.parseGlobalName("left"));
 		Operand rightTerm = mock(Operand.class);
 		Long value = Long.valueOf(76);
 		when(rightTerm.getValue()).thenReturn(value);
+		when((Class<Long>)(rightTerm.getValueClass())).thenReturn(Long.class);
 		//Evaluator evaluator = new TestEvaluator(leftTerm, "=", rightTerm);
-		assertThat(EvaluationUtils.assignRightToLeft(leftTerm, rightTerm)).isEqualTo(value);
-		verify(leftTerm).assign(value);
-		leftTerm = mock(Operand.class);
+		assertThat(EvaluationUtils.assignRightToLeft(leftTerm, rightTerm, 1)).isEqualTo(value);
+        assertThat(leftTerm.getValue()).isEqualTo(76L);
+		leftTerm = new Variable(QualifiedName.parseGlobalName("left"));
 		rightTerm = mock(Operand.class);
 		Float floatValue = Float.valueOf(63.0f);
 		when(rightTerm.getValue()).thenReturn(floatValue);
+        when((Class<Float>)(rightTerm.getValueClass())).thenReturn(Float.class);
 		//Evaluator evaluator = new TestEvaluator(leftTerm, "=", rightTerm);
-		assertThat(EvaluationUtils.assignRightToLeft(leftTerm, rightTerm)).isInstanceOf(Null.class);
-		verify(leftTerm).assign(floatValue);
+		assertThat(EvaluationUtils.assignRightToLeft(leftTerm, rightTerm, 1)).isInstanceOf(Null.class);
+        assertThat(leftTerm.getValue()).isEqualTo(63.0f);
 	}
 
 	@Test
@@ -627,14 +632,16 @@ public class EvaluatorTest
 		when(rightOperand.backup(anyInt())).thenReturn(true);
 		Evaluator evaluator = new TestEvaluator(NAME, "++", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
-		evaluator.assign(Long.MAX_VALUE);
+		Parameter MAX_LONG = new Parameter(Term.ANONYMOUS, Long.MAX_VALUE);
+		MAX_LONG.setId(1);
+		evaluator.assign(MAX_LONG);
 		assertThat(evaluator.backup(0)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
 		evaluator = new TestEvaluator(NAME, "++", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		when(rightOperand.backup(2)).thenReturn(false);
-		evaluator.assign(Long.MAX_VALUE);
+		evaluator.assign(MAX_LONG);
 		assertThat(evaluator.backup(2)).isFalse();
 		when(rightOperand.backup(anyInt())).thenReturn(true);
 		assertThat(evaluator.backup(1)).isTrue();
@@ -642,14 +649,14 @@ public class EvaluatorTest
 		assertThat(evaluator.isEmpty()).isTrue();
 		evaluator = new TestEvaluator(NAME, leftOperand, "++");
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
-		evaluator.assign(Long.MAX_VALUE);
+		evaluator.assign(MAX_LONG);
 		assertThat(evaluator.backup(0)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
 		evaluator = new TestEvaluator(NAME, leftOperand, "++");
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		when(leftOperand.backup(2)).thenReturn(false);
-		evaluator.assign(Long.MAX_VALUE);
+		evaluator.assign(MAX_LONG);
 		assertThat(evaluator.backup(2)).isFalse();
 		when(leftOperand.backup(anyInt())).thenReturn(true);
 		assertThat(evaluator.backup(1)).isTrue();
@@ -657,7 +664,7 @@ public class EvaluatorTest
 		assertThat(evaluator.isEmpty()).isTrue();
 		evaluator = new TestEvaluator(NAME, leftOperand, "+", rightOperand);
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
-		evaluator.assign(Long.MAX_VALUE);
+		evaluator.assign(MAX_LONG);
 		assertThat(evaluator.backup(0)).isTrue();
 		assertThat(evaluator.getValue()).isInstanceOf(Null.class);
 		assertThat(evaluator.isEmpty()).isTrue();
@@ -665,7 +672,7 @@ public class EvaluatorTest
 		assertThat(evaluator.unify(otherTerm, 1)).isEqualTo(1);
 		when(leftOperand.backup(2)).thenReturn(false);
 		when(rightOperand.backup(2)).thenReturn(false);
-		evaluator.assign(Long.MAX_VALUE);
+		evaluator.assign(MAX_LONG);
 		assertThat(evaluator.backup(2)).isFalse();
 		when(leftOperand.backup(1)).thenReturn(true);
 		when(rightOperand.backup(1)).thenReturn(true);

@@ -107,6 +107,8 @@ public class AgriPercentCollector extends JpaEntityCollector
         	// Sqlite does not support NaN. So use special value "-0.001" to indicate NaN
         	if (Double.valueOf(-0.001).equals(yearPercent.getPercent()))
         		yearPercent.setPercent(Double.NaN);
+        	if ((year == null) || (yearPercent == null))
+        	    System.out.println("Eureka!");
         	beanMap.put(year, yearPercent.getPercent());
         }
         yearPercentList.clear();

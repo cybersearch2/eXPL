@@ -34,10 +34,10 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class StudentScores 
 {
 	static final String LISTS = 
-		"axiom grades (student, english, maths, history):\n" +
-		" (\"George\", 15, 13, 16),\n" +
-		" (\"Sarah\", 12, 17, 15),\n" +
-		" (\"Amy\", 14, 16, 6);\n" +
+		"axiom grades (student, english, maths, history)\n" +
+		" {\"George\", 15, 13, 16}\n" +
+		" {\"Sarah\", 12, 17, 15}\n" +
+		" {\"Amy\", 14, 16, 6};\n" +
 		" list<string> mark;\n" +
 		" mark[0] = \"f-\";\n" +
 		" mark[1] = \"f\";\n" +

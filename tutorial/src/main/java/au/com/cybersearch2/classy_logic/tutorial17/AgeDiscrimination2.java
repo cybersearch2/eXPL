@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial10;
+package au.com.cybersearch2.classy_logic.tutorial17;
 
 import java.util.Iterator;
 
@@ -26,12 +26,13 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * AgeDiscrimination2
+ * Demonstrates how to deal with calculator query short circuits using fact keyword
  * @author Andrew Bowley
  * 11 Sep 2015
  */
-public class AgeDiscrimination
+public class AgeDiscrimination2
 {
-    static final String PERSON_RATING = 
+    static final String STAR_PERSON = 
             "axiom person (name, sex, age, starsign)\n" +
             "             {\"John\", \"m\", 23, \"gemini\"}\n" + 
             "             {\"Sue\", \"f\", 19, \"cancer\"}\n" + 
@@ -49,27 +50,34 @@ public class AgeDiscrimination
             "             {\"Tom\", \"m\", 22, \"cancer\"}\n" + 
             "             {\"Bill\", \"m\", 19, \"virgo\"};\n" + 
             "choice age_rating\n" +
-            "  (age     , age_weight, name)\n" +
+            "  (age     , age_weight)\n" +
             "  {age > 29, 0.3}\n" +
             "  {age > 25, 0.6}\n" +
             "  {age > 20, 1.0};\n" +
-            "list rated(age_rating);\n" +
-            "query rate_age (person : age_rating);";
+            "axiom star_people = {}\n;" +
+            "calc perfect_match(\n" +
+            "  template age_rating(age_weight) << age_rating(age),\n" +
+            "  ? fact(age_rating),\n" +
+            "  double rating = age_weight + 0.2 * (starsign == \"gemini\"),\n" +
+            "  axiom star_person = { name, sex, starsign, rating  },\n" +
+            "  star_people += star_person\n" +
+            ");\n" +
+           "query star_people(person : perfect_match);";
             
     /**
-     * Compiles the PERSON_RATING script and runs the "rate_age" query which gives each person 
+     * Compiles the STAR_PERSON script and runs the "star_people" query which gives each person 
      * over the age of 20 an age rating and excludes those aged 20 and under.<br/>
      * The first 3 expected results:<br/>
-    age_rating(age = 23, age_weight = 1.0, name = John)<br/>
-    age_rating(age = 34, age_weight = 0.3, name = Sam)<br/>
-    age_rating(age = 28, age_weight = 0.6, name = Jenny)<br/>
+     star_person(name = John, sex = m, starsign = gemini, rating = 1.2)<br/>
+     star_person(name = Sam, sex = m, starsign = scorpio, rating = 0.3)<br/>
+     star_person(name = Jenny, sex = f, starsign = gemini, rating = 0.8)<br/>
      * @return Axiom iterator
      */
     public Iterator<Axiom> getAgeRating()
     {
-        QueryProgram queryProgram = new QueryProgram(PERSON_RATING);
-        Result result = queryProgram.executeQuery("rate_age");
-        return result.getIterator(QualifiedName.parseGlobalName("rated"));
+        QueryProgram queryProgram = new QueryProgram(STAR_PERSON);
+        Result result = queryProgram.executeQuery("star_people");
+        return result.getIterator(QualifiedName.parseGlobalName("star_people"));
     }
 
     /**
@@ -80,8 +88,8 @@ public class AgeDiscrimination
     {
         try 
         {
-            AgeDiscrimination ageDiscrimination = new AgeDiscrimination();
-            Iterator<Axiom> iterator = ageDiscrimination.getAgeRating();
+            AgeDiscrimination2 ageDiscrimination2 = new AgeDiscrimination2();
+            Iterator<Axiom> iterator = ageDiscrimination2.getAgeRating();
             while(iterator.hasNext())
             {
                 System.out.println(iterator.next().toString());

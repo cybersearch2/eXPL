@@ -58,7 +58,7 @@ public class ParameterList<R>
 
     /**
      * Returns list of parameters
-     * @return
+     * @return List of OperandParam objects
      */
     public List<OperandParam> getOperandParamList()
     {

@@ -118,7 +118,7 @@ public class EvaluationUtils
      */
     public static boolean isNaN(Object number)
     {
-        if ((number == null) || (!(number instanceof Number)))
+        if ((number == null) || (!(number instanceof Number || number instanceof Boolean)))
             return true;
         return number.toString().equals(NAN);
     }
@@ -165,16 +165,29 @@ public class EvaluationUtils
      * Assign right term value to left term
      * @param leftTerm Left Operand
      * @param rightTerm Riht Operand
+     * @param modificationId Modification version
      * @return Value as Object
      */
-    public static Object assignRightToLeft(Operand leftTerm, Operand rightTerm)
+    public static Object assignRightToLeft(Operand leftTerm, Operand rightTerm, int modificationId)
     {
         Object value = rightTerm.getValue();
-        leftTerm.assign(value);
+        leftTerm.assign(rightTerm);
         // When the value class is not supported as a delegate, substitute a Null object.
         // This is defensive only as Operands are expected to only support Delegate classes
-        return DelegateOperand.isDelegateClass(value.getClass()) ? value : new Null();
+        return DelegateOperand.isDelegateClass(rightTerm.getValueClass()) ? value : new Null();
     }
 
-
+    /**
+     * Calculate a number using a boolean term converted to 1.0 for true and 0.0 for false.
+     * At least one parameter is expected to contain a Boolean object
+     * @param leftTerm Left operand
+     * @param rightTerm Right operand
+     * @return Number object (actualy BigDecimal)
+     */
+    public static Number calculateBoolean(Operand leftTerm, Operand rightTerm)
+    {
+        if (leftTerm.getValueClass() == Boolean.class)
+            return leftTerm.numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
+        return rightTerm.numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
+    }
 }

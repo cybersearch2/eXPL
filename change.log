@@ -67,6 +67,10 @@ eXPL v1.12
 64. Adapt AxiomListVariable to allow access to the terms of a singleton by name
 65. Add Choice pass-thru variables
 66. Add 2 Choice samples to tutorial 10
+67. Add tutorial 17 with calculator query samples
+68. Add to Term interface setValue() and clearValue() and assign() changed to take Term parameter and set id from it.
+69. Add literal expressions to Variables instead of just assigning value at compile time.
+70. Fix javacc code generation bug.
 
 
 eXPL v1.11

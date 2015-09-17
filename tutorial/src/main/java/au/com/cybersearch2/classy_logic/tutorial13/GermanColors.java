@@ -34,15 +34,15 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 public class GermanColors 
 {
     static final String GERMAN_COLORS =
-            "axiom lexicon (language, aqua, black, blue, white):\n" +
-            "  (\"english\", \"aqua\", \"black\", \"blue\", \"white\"),\n" +
-            "  (\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\");\n" +
+            "axiom lexicon (language, aqua, black, blue, white)\n" +
+            "  {\"english\", \"aqua\", \"black\", \"blue\", \"white\"}\n" +
+            "  {\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);\n" +
-            "choice swatch (name, red, green, blue) :\n" +
-            "(colors[aqua], 0, 255, 255),\n" +
-            "(colors[black], 0, 0, 0),\n" +
-            "(colors[blue], 0, 0, 255),\n" +
-            "(colors[white], 255, 255, 255);\n" +
+            "choice swatch (name, red, green, blue)\n" +
+            "{colors[aqua], 0, 255, 255}\n" +
+            "{colors[black], 0, 0, 0}\n" +
+            "{colors[blue], 0, 0, 255}\n" +
+            "{colors[white], 255, 255, 255};\n" +
             "axiom shade (name) : parameter;\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +

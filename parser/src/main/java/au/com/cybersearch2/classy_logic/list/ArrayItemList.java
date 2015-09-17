@@ -216,7 +216,7 @@ public class ArrayItemList<T> implements ItemList<T>
 
 	/**
 	 * newVariableInstance
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String)
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String, int)
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -227,7 +227,7 @@ public class ArrayItemList<T> implements ItemList<T>
 
 	/**
 	 * newVariableInstance
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String)
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String, int)
 	 */
 	@SuppressWarnings("unchecked")
 	@Override

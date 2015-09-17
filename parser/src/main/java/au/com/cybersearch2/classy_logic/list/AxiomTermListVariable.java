@@ -71,7 +71,7 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 		Term term = (Term) itemList.getItem(index);
      	if (proxy.isEmpty() || (term.getValueClass() != proxy.getValueClass()))
      		// Assign a value to set the proxy delegate
-    		proxy.assign(term.getValue());
+    		proxy.setValue(term.getValue());
 	}
 
 	/**

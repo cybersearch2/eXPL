@@ -38,7 +38,7 @@ public class ListLength extends Variable
 	
 	/**
 	 * Construct a ListLength object
-	 * @param listName
+	 * @param qname Qualified name of Variable
 	 * @param itemList The list object
 	 */
 	public ListLength(QualifiedName qname, ItemList<?> itemList) 
@@ -50,7 +50,7 @@ public class ListLength extends Variable
 
     /**
      * Construct a ListLength object
-     * @param listName
+     * @param qname Qualified name of Variable
      * @param itemListOperand The operand to contain a list object after evaluation
      */
     public ListLength(QualifiedName qname, Operand itemListOperand) 

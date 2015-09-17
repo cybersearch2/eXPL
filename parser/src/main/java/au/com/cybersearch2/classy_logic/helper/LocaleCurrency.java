@@ -137,7 +137,7 @@ public class LocaleCurrency
 
 	/**
 	 * Returns fraction digits for locale currency
-	 * @return
+	 * @return int
 	 */
 	public int getFractionDigits()
 	{

@@ -26,7 +26,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 8 Dec 2014
  */
-public class NullOperand extends ExpressionOperand<Null> implements Operand
+public class NullOperand extends ExpressionOperand<Object> implements Operand
 {
     /**
      * Construct anonymous NullOperand object
@@ -44,6 +44,15 @@ public class NullOperand extends ExpressionOperand<Null> implements Operand
 	{
 		super(qname, new Null());
 	}
+
+    /**
+     * Construct named NullOperand object with Null substitute such as Unknown
+     * @param qname Qualified name
+     */
+    public NullOperand(QualifiedName qname, Object substitute)
+    {
+        super(qname, substitute);
+    }
 
 	/**
 	 * getRightOperandOps
@@ -105,20 +114,22 @@ public class NullOperand extends ExpressionOperand<Null> implements Operand
 		boolean calc = false;
 		switch (operatorEnum2)
 		{
-		case EQ:  calc = (leftTerm instanceof NullOperand) && (rightTerm instanceof NullOperand); break; // "=="
-		case NE:  calc = !((leftTerm instanceof NullOperand) && (rightTerm instanceof NullOperand)); break; // "!="
+		case EQ:  calc = (leftTerm.getValueClass() == getValueClass()) && (rightTerm.getValueClass() == getValueClass()); break; // "=="
+		case NE:  calc = !((leftTerm.getValueClass() == getValueClass()) && (rightTerm.getValueClass() == getValueClass())); break; // "!="
 	    default:
 		}
 		return calc;
 	}
 
 	/**
-	 * This Operand is immutable
-	 * @see au.com.cybersearch2.classy_logic.terms.Parameter#assign(java.lang.Object)
+	 * This Operand value is immutable
+     * Interface: Assign a value and id to this Term from another term 
+     * @param term Term containing non-null value and id to set
 	 */
 	@Override
-	public void assign(Object value) 
+	public void assign(Term term) 
 	{
+	    id = term.getId();
 	}
 
 }

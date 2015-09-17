@@ -119,7 +119,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         else if (parameterList != null)
         {   // Perform static intialisation to a list of axioms
             setValue(parameterList.evaluate(id));
-            // Do not set id as the change is permanent unlees
+            // Do not set id as the change is permanent unless
             // a subsequent evaluation overrides this initialisation
             axiomListListener.addAxiomList(qname, getValue());
         }
@@ -145,15 +145,14 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
     }
     
     /**
-     * Update Parameter value - use for assignment operation
-     * @param value Object containing new value. Must be AxiomList or sub class
-     * @see au.com.cybersearch2.classy_logic.interfaces.Term#assign(java.lang.Object)
+     * Assign a value and id to this Term from another term 
+     * @param term Term containing non-null value and id to set
      */
     @Override
-    public void assign(Object value) 
+    public void assign(Term term) 
     {
-        AxiomList axiomList = (AxiomList)value;
-        setValue(axiomList);
+        super.assign(term);
+        AxiomList axiomList = (AxiomList)term.getValue();
         if (axiomListListener != null)
             axiomListListener.addAxiomList(qname, axiomList);
     }
@@ -168,7 +167,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         return  new OperatorEnum[]
         { 
             OperatorEnum.ASSIGN,
-         };
+        };
     }
 
     /**

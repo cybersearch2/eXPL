@@ -88,11 +88,22 @@ public interface Term
 	EvaluationStatus evaluate(int id);
 
 	/**
-	 * Assign a value to this Operand. It may overwrite and existing value
-	 * @param value Non-null object
+	 * Assign a value and id to this Term from another term 
+	 * @param term Term containing non-null value and id to set
 	 */
-	void assign(Object value);
+	void assign(Term term);
 
+    /**
+     * Set value, mark Term as not empty
+     * @param value Object. If null a Null object will be set and empty status unchanged
+     */
+	void setValue(Object value);
+	
+    /**
+     * Set value to Null, mark Term as empty and set id to 0
+     */
+     void clearValue();
+	
 	/**
      * Returns id
      * @return int

@@ -48,11 +48,10 @@ public  class GenericParameter<T> extends Parameter
 	}
 
 	/**
-	 * Set value
-	 * Note this masks non-type-specific setValue() of super class
+	 * Set value type safe
 	 * @param value Object of generic type T
 	 */
-	public void setValue(T value)
+	public void setTypeValue(T value)
 	{
 		if (value == null)
 			this.value = new Null();

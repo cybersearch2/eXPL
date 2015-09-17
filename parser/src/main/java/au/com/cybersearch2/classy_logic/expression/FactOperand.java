@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.EvaluationUtils;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -55,6 +56,8 @@ public class FactOperand extends BooleanOperand
                 // isFact() returns true for an empty axiom, which is not what we want
                 setValue(axiom.isFact() && (axiom.getTermCount() > 0));
             }
+            else if ((object instanceof Number) && object.toString().equals(EvaluationUtils.NAN))
+                setValue(false);
             else
                 setValue(expression.getValueClass() != Unknown.class);
         }

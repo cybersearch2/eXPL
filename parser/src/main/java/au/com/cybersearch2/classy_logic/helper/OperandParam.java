@@ -136,13 +136,13 @@ public class OperandParam implements Term
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Term#assign(java.lang.Object)
+     * Assign a value and id to this Term from another term 
+     * @param term Term containing non-null value and id to set
      */
     @Override
-    public void assign(Object value)
+    public void assign(Term term)
     {
-        operand.assign(value);
+        operand.assign(term);
     }
 
     /**
@@ -191,6 +191,16 @@ public class OperandParam implements Term
             params[0] = new Evaluator(params[0], ",", params[1]);
         }
         return params[0];
+    }
+
+    @Override
+    public void setValue(Object value)
+    {
+    }
+
+    @Override
+    public void clearValue()
+    {
     }
     
 }

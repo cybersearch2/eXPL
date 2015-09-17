@@ -86,7 +86,7 @@ public interface ItemList<T> extends Iterable<T>
 
 	/**
 	 * Returns class of items in this container
-	 * @return
+	 * @return Class
 	 */
 	Class<?> getItemClass();
 	

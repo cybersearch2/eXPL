@@ -220,7 +220,7 @@ public class Template extends Structure
 
 	/**
 	 * Set flag to indicate this object is used as a Choice
-	 * @param choice Value
+	 * @param isChoice Choice flag
 	 */
 	public void setChoice(boolean isChoice) 
 	{
@@ -229,7 +229,7 @@ public class Template extends Structure
 
 	/**
 	 * Returns flag set true if this is an inner template
-	 * @return
+	 * @return boolean
 	 */
 	public boolean isInnerTemplate()
     {
@@ -411,7 +411,7 @@ public class Template extends Structure
                 }
 				if (term == null)
 					throw new QueryExecutionException("Template \"" + getName() + "\" does not have term \"" + name + "\"");
-				term.assign(initData.get(name));
+				term.assign(new Parameter(Term.ANONYMOUS, initData.get(name)));
 			}
 		}
 	}
@@ -439,11 +439,15 @@ public class Template extends Structure
 
 	/**
 	 * Set new template object in chain
-	 * @param next Template object
+	 * @param nextTemplate Template object
 	 */
-	public void setNext(Template next) 
+	public void setNext(Template nextTemplate) 
 	{
-		this.next = next;
+	    Template template = this;
+        // Add inner template to outer template so it will be included in unification
+        while (template.getNext() != null)
+            template = template.getNext();
+        template.next = nextTemplate;
 	}
 
 	/**

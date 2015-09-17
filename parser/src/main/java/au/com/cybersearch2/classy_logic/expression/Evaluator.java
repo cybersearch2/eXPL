@@ -11,6 +11,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+
 import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.*;
 
 /**
@@ -170,7 +171,7 @@ public class Evaluator extends DelegateOperand
 	   		if (!leftIsNaN)
 	   		{
 	   			Number post = left.numberEvaluation(operatorEnum, left);
-	   			left.assign(post);
+	   			left.setValue(post);
 	   		}
 	   	}
 	   	else if (left == null)
@@ -188,7 +189,7 @@ public class Evaluator extends DelegateOperand
 	   			result = right.getValue();
 	   		else
 	   		{
-		   		result = calculate(left, right);
+		   		result = calculate(left, right, id);
 		   		// Assign operation updates left term with result
 				switch (operatorEnum)
 				{
@@ -200,7 +201,7 @@ public class Evaluator extends DelegateOperand
 		   			case ORASSIGN: // "|"
 		   			case XORASSIGN: // "^"
 		   			case REMASSIGN: // "%"
-	                left.assign(result);
+	                left.setValue(result);
 	                default:
 		   		}
 	   		}
@@ -298,7 +299,7 @@ public class Evaluator extends DelegateOperand
         if ((operatorEnum == OperatorEnum.INCR) || (operatorEnum == OperatorEnum.DECR))
         {   // ++ or --
             Number pre = right.numberEvaluation(operatorEnum, right);
-            right.assign(pre);
+            right.setValue(pre);
             return pre;
         }
         else if (operatorEnum == OperatorEnum.NOT)
@@ -448,12 +449,12 @@ public class Evaluator extends DelegateOperand
      * @param rightTerm
      * @return Result as Object
      */
-    protected Object calculate(Operand leftTerm, Operand rightTerm) 
+    protected Object calculate(Operand leftTerm, Operand rightTerm, int modificationId) 
     {
         switch (operatorEnum)
         {
         case ASSIGN: // "="
-            return assignRightToLeft(leftTerm, rightTerm);
+            return assignRightToLeft(leftTerm, rightTerm, modificationId);
         case LT: // "<"
         case GT: // ">"
         case EQ: // "=="
@@ -469,8 +470,10 @@ public class Evaluator extends DelegateOperand
         case PLUSASSIGN: // "+"
             if (isValidStringOperation(leftTerm, operatorEnum))
                 return ((Concaten<?>)leftTerm).concatenate(rightTerm);
-        case MINUS: // "-"
         case STAR: // "*"
+            if ((leftTerm.getValueClass() == Boolean.class) || (rightTerm.getValueClass() == Boolean.class))
+                return calculateBoolean(leftTerm, rightTerm);
+        case MINUS: // "-"
         case SLASH: // "/"
         case BIT_AND: // "&"
         case BIT_OR: // "|"
@@ -485,16 +488,16 @@ public class Evaluator extends DelegateOperand
         case REMASSIGN: // "%"
             // Prevent conversion of BigDecimal to Integer or Double by 
             // always selecting the BigDecimal term to perform the operation
-            boolean leftIsBigDec = leftTerm.getValueClass().equals(BigDecimal.class);
-            boolean rightIsBigDec = rightTerm.getValueClass().equals(BigDecimal.class);
+            boolean leftIsBigDec = leftTerm.getValueClass() == BigDecimal.class;
+            boolean rightIsBigDec = rightTerm.getValueClass() == BigDecimal.class;
             if (leftIsBigDec)
                 return leftTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
             else if (rightIsBigDec)
                 return rightTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
             // Prevent conversion of Double to Integer by 
             // always selecting the Double term to perform the operation
-            boolean leftIsDouble = leftTerm.getValueClass().equals(Double.class);
-            boolean rightIsDouble = rightTerm.getValueClass().equals(Double.class);
+            boolean leftIsDouble = leftTerm.getValueClass() == Double.class;
+            boolean rightIsDouble = rightTerm.getValueClass() == Double.class;
             if (leftIsDouble || !rightIsDouble)
                 return leftTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
             else

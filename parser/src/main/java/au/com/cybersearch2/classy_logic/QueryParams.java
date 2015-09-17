@@ -211,9 +211,9 @@ public class QueryParams
      * @param qualifiedTemplateName Qualified name of template to which the properties apply
      * @return Properties object
      */
-    public Axiom getParameter(QualifiedName qualifiedTemplateNam) 
+    public Axiom getParameter(QualifiedName qualifiedTemplateName) 
     {
-        return parametersMap == null ? null : parametersMap.get(qualifiedTemplateNam);
+        return parametersMap == null ? null : parametersMap.get(qualifiedTemplateName);
     }
 
     /**

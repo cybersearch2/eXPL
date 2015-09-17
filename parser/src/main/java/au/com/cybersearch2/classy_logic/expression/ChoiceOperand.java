@@ -18,8 +18,10 @@ package au.com.cybersearch2.classy_logic.expression;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * ChoiceOperand
@@ -49,14 +51,17 @@ public class ChoiceOperand extends BooleanOperand
     public EvaluationStatus evaluate(int id)
     {
         this.id = id;
+        Parameter param = null;
         if (choice.completeSolution(template, id))
-            assign(Boolean.TRUE); // Value indicates successful completion
+            param = new Parameter(Term.ANONYMOUS, Boolean.TRUE); // Value indicates successful completion
         else
         {    
             // Only backup local changes
             template.backup(true);
-            assign(Boolean.FALSE); // Value indicates no match
+            param = new Parameter(Term.ANONYMOUS, Boolean.FALSE); // Value indicates no match
         }
+        param.setId(id);
+        assign(param);
         return EvaluationStatus.COMPLETE;
     }
 

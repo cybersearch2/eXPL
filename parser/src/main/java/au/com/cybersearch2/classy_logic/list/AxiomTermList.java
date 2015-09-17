@@ -57,7 +57,7 @@ public class AxiomTermList implements ItemList<Object>
 	
 	/**
 	 * Construct an AxiomTermList object. The initial axiom is empty until axiomListener is notified.
-	 * @param name Qualified name of list
+	 * @param qname Qualified name of list
 	 * @param key Axiom key
 	 */
 	public AxiomTermList(QualifiedName qname, String key) 
@@ -175,12 +175,12 @@ public class AxiomTermList implements ItemList<Object>
 	public void assignItem(int index, Object value) 
 	{   
 		verify(index);
-		axiom.getTermByIndex(index).assign(value);
+		axiom.getTermByIndex(index).setValue(value);
 	}
 
 	/**
 	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String)
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String, int)
 	 */
 	@Override
 	public ItemListVariable<Object> newVariableInstance(int index, String suffix, int id) 
@@ -190,7 +190,7 @@ public class AxiomTermList implements ItemList<Object>
 
 	/**
 	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String)
+	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String, int)
 	 */
 	@Override
 	public ItemListVariable<Object> newVariableInstance(Operand expression, String suffix, int id) 

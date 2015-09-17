@@ -86,7 +86,18 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 	{
 	    return expression != null;
 	}
-	
+
+    /**
+     * Set value, mark Term as not empty
+     * @param value Object. If null a Null object will be set and empty status unchanged
+     */
+	@SuppressWarnings("unchecked")
+    @Override
+    public void setValue(Object value)
+    {
+        super.setTypeValue((T) value);
+    }
+
 	/**
 	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 
 	 * @param id Identity of caller. 

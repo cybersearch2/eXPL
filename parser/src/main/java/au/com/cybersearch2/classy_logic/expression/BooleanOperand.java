@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import java.math.BigDecimal;
+
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -68,7 +70,8 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
 			OperatorEnum.ASSIGN,
 			OperatorEnum.NOT,    // !
 			OperatorEnum.SC_OR, // "||"
-			OperatorEnum.SC_AND // "&&"
+			OperatorEnum.SC_AND, // "&&"
+            OperatorEnum.STAR // * true == 1.0, false = 0.0
 		};
 	}
 
@@ -81,7 +84,8 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
 			OperatorEnum.NE, // "!="
 			OperatorEnum.ASSIGN, // "="
 			OperatorEnum.SC_OR,  // "||"
-			OperatorEnum.SC_AND  // "&&"
+			OperatorEnum.SC_AND,  // "&&"
+            OperatorEnum.STAR // * true == 1.0, false = 0.0
 		};
 	}
 
@@ -99,8 +103,20 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
 	 */
 	@Override
 	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
-	{   // There is no valid evaluation involving a boolean and another term resulting in a number
-	    return new Integer(0);
+	{   // There is no valid evaluation involving a boolean and another term resulting in a number except *
+	    boolean leftIsBool = leftTerm.getValueClass() == Boolean.class; 
+        boolean rightIsBool = rightTerm.getValueClass() == Boolean.class; 
+        BigDecimal right;
+        BigDecimal left;
+        if (leftIsBool)
+            left =  ((Boolean)(leftTerm.getValue())).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+        else
+            left = convertObject(leftTerm.getValue());
+        if (rightIsBool)
+            right =  ((Boolean)(rightTerm.getValue())).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+        else
+            right = convertObject(rightTerm.getValue());
+	    return left.multiply(right);
 	}
 
 	/**
@@ -125,10 +141,28 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
 		return Boolean.FALSE;
 	}
 
+	/**
+     * Assign a value and id to this Term from another term 
+     * @param term Term containing non-null value and id to set
+	 */
 	@Override
-	public void assign(Object value) 
+	public void assign(Term term) 
 	{
-		setValue((Boolean)value);
+		setValue((Boolean)term.getValue());
+		id = term.getId();
 	}
+
+    /**
+     * Convert value to BigDecimal, if not already of this type
+     * @param object Value to convert
+     * @return BigDecimal object
+     */
+    protected BigDecimal convertObject(Object object)
+    {
+            if (object instanceof BigDecimal)
+                return (BigDecimal)(object);
+            else
+                return new BigDecimal(object.toString());
+    }
 
 }

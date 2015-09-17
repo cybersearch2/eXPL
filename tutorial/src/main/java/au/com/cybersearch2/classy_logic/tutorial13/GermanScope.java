@@ -35,9 +35,9 @@ public class GermanScope
 {
 	static final String GERMAN_SCOPE =
 			"axiom item (amount) : parameter;\n" +
-			"axiom lexicon (language, Total):\n" +
-	        "  (\"english\", \"Total\"),\n" +
-	        "  (\"german\", \"Gesamtkosten\");\n" +
+			"axiom lexicon (language, Total)\n" +
+	        "  {\"english\", \"Total\"}\n" +
+	        "  {\"german\", \"Gesamtkosten\"};\n" +
 	        "local translate(lexicon);" +
 			"template charge(currency amount);\n" +
 			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +

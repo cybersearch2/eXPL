@@ -55,7 +55,7 @@ public class Result
 
 	/**
 	 * Returns iterator for result list specified by key
-	 * @param key Qualiied name of list
+	 * @param qname Qualified name of list
 	 * @return Iterator of generic type Axiom
 	 */
     public Iterator<Axiom> getIterator(QualifiedName qname)

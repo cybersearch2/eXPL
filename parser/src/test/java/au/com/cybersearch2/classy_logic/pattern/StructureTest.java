@@ -380,7 +380,7 @@ public class StructureTest
 			}
 
 			@Override
-			public void assign(Object value) {
+			public void assign(Term term) {
 			}
 
 			@Override
@@ -403,6 +403,16 @@ public class StructureTest
             public QualifiedName getQualifiedName()
             {
                 return QualifiedName.parseName(getName());
+            }
+
+            @Override
+            public void setValue(Object value)
+            {
+            }
+
+            @Override
+            public void clearValue()
+            {
             }
 		};
 		testStructure.addTerm(term4);
@@ -490,7 +500,7 @@ public class StructureTest
 			}
 
 			@Override
-			public void assign(Object value) {
+			public void assign(Term term) {
 			}
 
 			@Override
@@ -513,6 +523,16 @@ public class StructureTest
             public QualifiedName getQualifiedName()
             {
                 return QualifiedName.parseName(getName());
+            }
+
+            @Override
+            public void setValue(Object value)
+            {
+            }
+
+            @Override
+            public void clearValue()
+            {
             }
 			
 		};

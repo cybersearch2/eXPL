@@ -184,7 +184,7 @@ public class Scope
 
 	/**
 	 * Returns name of scope or alias if global scope
-	 * @return
+	 * @return Alias
 	 */
 	public String getAlias()
 	{
@@ -446,7 +446,7 @@ public class Scope
 	/**
 	 * Add locale listener for local axiom identified by key. The supplied axiom listener is
 	 * notified of every change of scope.
-	 * @param key Local axiom id
+	 * @param qualifiedAxiomName Local axiom qualified name
 	 * @param axiomListener The local axiom listener
 	 */
 	public void addLocalAxiomListener(final QualifiedName qualifiedAxiomName, final AxiomListener axiomListener) 

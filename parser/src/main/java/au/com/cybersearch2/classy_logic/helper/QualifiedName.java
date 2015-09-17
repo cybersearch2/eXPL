@@ -193,7 +193,7 @@ public class QualifiedName implements Comparable<QualifiedName>
     /**
      * Converts text to QualifiedName. Two part names are placed in scope namespace.  
      * @param text
-     * @return
+     * @return QualifiedName object
      */
     public static QualifiedName parseName(String text)
     {
@@ -249,8 +249,8 @@ public class QualifiedName implements Comparable<QualifiedName>
     /**
      * Returns QualifiedName for text using context qualified name to supply missing parts
      * @param text 1 or 2-part name in text format
-     * @param contextName Context qualified name supplying scope and template parts of new qualified name
-     * @return
+     * @param qualifiedContextname Context qualified name supplying scope and template parts of new qualified name
+     * @return QualifiedName object
      */
     public static QualifiedName parseName(String text, QualifiedName qualifiedContextname)
     {

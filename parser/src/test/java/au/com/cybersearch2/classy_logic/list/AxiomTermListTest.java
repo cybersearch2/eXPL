@@ -20,6 +20,7 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -27,6 +28,7 @@ import au.com.cybersearch2.classy_logic.terms.BigDecimalTerm;
 import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
 import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
@@ -66,7 +68,7 @@ public class AxiomTermListTest
 		for (int i = 0; i < axiom.getTermCount(); i++)
 		{
 			IntegerOperand expression = new TestIntegerOperand("" + i);
-			expression.assign(Long.valueOf(i));
+			expression.assign(new Parameter(Term.ANONYMOUS, Long.valueOf(i)));
 			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(expression, Long.toString(i), 1);
 			listVariable.evaluate(1);
 			assertThat(listVariable.getValue()).isEqualTo(axiom.getTermByIndex(i).getValue());

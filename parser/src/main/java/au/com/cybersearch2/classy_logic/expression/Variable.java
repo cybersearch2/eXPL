@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
  * Variable
@@ -47,20 +48,22 @@ public class Variable extends DelegateOperand
      * @param qname Qualified name of variable
 	 * @param expression Operand to initialize this Variable upon evaluation
 	 */
-	public Variable(QualifiedName name, Operand expression) 
+	public Variable(QualifiedName qname, Operand expression) 
 	{
-		super(name);
+		super(qname);
 		this.expression = expression;
 	}
 
 	/**
-	 * Assign a value and set the delegate
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
+     * Assign a value and id to this Term from another term 
+     * Also set the delegate
+     * @param term Term containing non-null value and id to set
 	 */
 	@Override
-	public void assign(Object value) 
+	public void assign(Term term) 
 	{
-	    setValue(value);
+	    setValue(term.getValue());
+	    id = term.getId();
 	}
 
 	/**

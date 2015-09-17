@@ -223,13 +223,14 @@ public class IntegerOperand extends ExpressionOperand<Long>
 	}
 
 	/**
-	 * assign
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
+     * Assign a value and id to this Term from another term 
+     * @param term Term containing non-null value and id to set
 	 */
 	@Override
-	public void assign(Object value) 
+	public void assign(Term term) 
 	{
-		setValue((Long)value);
+		setValue((Long)term.getValue());
+		id = term.getId();
 	}
 
 }

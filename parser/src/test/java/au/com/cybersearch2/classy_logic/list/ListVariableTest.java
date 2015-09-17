@@ -38,6 +38,7 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -151,7 +152,7 @@ public class ListVariableTest
 		when(itemList.hasItem(0)).thenReturn(false);
 		when(itemList.getLength()).thenReturn(10);
 		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new TestBigDecimalOperand(NAME), 0, "0");
-		variable.assign(BigDecimal.ONE);
+		variable.assign(new Parameter(Term.ANONYMOUS, BigDecimal.ONE));
 	    verify(itemList).assignItem(0, BigDecimal.ONE);
 	}
 	
@@ -165,7 +166,7 @@ public class ListVariableTest
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(0)).thenReturn(BigDecimal.TEN);
 		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new TestBigDecimalOperand(NAME), 0, "0");
-		variable.assign(BigDecimal.ONE);
+		variable.assign(new Parameter(Term.ANONYMOUS, BigDecimal.ONE));
 	    verify(itemList).assignItem(0, BigDecimal.ONE);
 	}
     

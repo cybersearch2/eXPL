@@ -42,7 +42,7 @@ import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 public class IncreasedAgriculture 
 {
 	static final String AGRICULTURAL_LAND = 
-		"axiom Data : resource \"agriculture\";\n" +
+		"axiom Data() : resource \"agriculture\";\n" +
 		"include \"surface-land.xpl\";\n" +
 	    "template agri_10y (country ? y2010 - y1990 > 1.0, double y1990, double y2010);\n" +
 		"template surface_area_increase (country ? country == agri_10y.country, double surface_area = (agri_10y.y2010 - agri_10y.y1990)/100 * surface_area_Km2);\n" +

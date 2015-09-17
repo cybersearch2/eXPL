@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial10;
+package au.com.cybersearch2.classy_logic.tutorial17;
 
 import java.util.Iterator;
 
@@ -30,16 +30,10 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 16 Mar 2015
  */
-public class StampDuty2 
+public class StampDuty3 
 {
 	static final String STAMP_DUTY =
-            "axiom transacton_amount (amount)\n" +
-            "{123458.00}\n" +
-            "{55876.33}\n" +
-            "{1245890.00};\n" +
-            "calc stamp_duty_payable(\n" +
-            "  currency amount,\n" +
-            "  choice bracket\n"
+            "choice bracket\n"
             +   "(amount,       threshold,  base,    percent)\n" +
             "    {amount <  12000,      0,     0.00, 1.00}\n" +
             "    {amount <  30000,  12000,   120.00, 2.00}\n" +
@@ -49,8 +43,14 @@ public class StampDuty2
             "    {amount < 250000, 200000,  6830.00, 4.25}\n" +
             "    {amount < 300000, 250000,  8955.00, 4.75}\n" +
             "    {amount < 500000, 300000, 11330.00, 5.00}\n" +
-            "    {amount > 500000, 500000, 21330.00, 5.50},\n" +
-            "\n" +
+            "    {amount > 500000, 500000, 21330.00, 5.50};\n" +
+           "axiom transacton_amount (amount)\n" +
+            "{123458.00}\n" +
+            "{55876.33}\n" +
+            "{1245890.00};\n" +
+            "calc stamp_duty_payable(\n" +
+            "  currency amount,\n" +
+            "  template bracket(threshold, base, percent) << bracket(amount),\n" +
             "  currency duty = base + (amount - threshold) * (percent / 100),\n" +
             "  string display = format(duty)\n" +
             ");\n" +
@@ -62,9 +62,9 @@ public class StampDuty2
 	 * Choice named "bracket" here is a term of the "stamp_duty_payable"a calculator.
 	 * Note how selection term "amount" is declared preceding the Choice so as to give it a specific type.<br/>
 	 * The expected results:<br/>
-        stamp_duty_payable(amount = 123458.0, bracket = true, duty = 3768.320, display = AUD3,768.32)<br/>
-        stamp_duty_payable(amount = 55876.33, bracket = true, duty = 1285.67155, display = AUD1,285.67)<br/>
-        stamp_duty_payable(amount = 1245890.0, bracket = true, duty = 62353.9500, display = AUD62,353.95)
+        stamp_duty_payable(amount = 123458.0,duty = 3768.320, display = AUD3,768.32)<br/>
+        stamp_duty_payable(amount = 55876.33, duty = 1285.67155, display = AUD1,285.67)<br/>
+        stamp_duty_payable(amount = 1245890.0, duty = 62353.9500, display = AUD62,353.95)
      * @return Axiom iterator
 	 */
 	public Iterator<Axiom> getStampDuty()
@@ -82,7 +82,7 @@ public class StampDuty2
 	{
 		try 
 		{
-	        StampDuty2 stampDuty = new StampDuty2();
+	        StampDuty3 stampDuty = new StampDuty3();
             Iterator<Axiom> iterator = stampDuty.getStampDuty();
             while(iterator.hasNext())
             {

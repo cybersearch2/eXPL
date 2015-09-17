@@ -98,7 +98,7 @@ public class AxiomUtils
 
     /**
      * Returns an AxiomList object given a list of terms to marshall into an axiom
-     * @param listName Name of axiom list to return
+     * @param qualifiedListName Qualified name of axiom list to return
      * @param axiomKey Axiom name
      * @param argumentList List of terms
      * @return AxiomList object containing marshalled axiom
@@ -128,7 +128,7 @@ public class AxiomUtils
      * Returns flag set true if two aciom lists are size-wise congruent. 
      * @param leftAxiomList
      * @param rightAxiomList
-     * @return
+     * @return boolean
      */
     public static boolean isCongruent(AxiomList leftAxiomList, AxiomList rightAxiomList)
     {
@@ -298,13 +298,15 @@ public class AxiomUtils
             else 
                 value = copyListAxioms.get(0);
         }
-        copyTerm.assign(value);
+        Parameter param = new Parameter(Term.ANONYMOUS, value);
+        param.setId(term.getId());
+        copyTerm.assign(param);
         return copyTerm;
     }
 
     /**
      * newVariableInstance for AxiomTermList - integer position index
-     * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String)
+     * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String, int)
      */
     public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, int index, String suffix, int id) 
     {
@@ -314,14 +316,14 @@ public class AxiomUtils
         {
             axiomTermList.verify(index);
             // Assign a value to set the delegate
-            variable.assign(axiom.getTermByIndex(index).getValue());
+            variable.assign(axiom.getTermByIndex(index));
         }
         return new AxiomTermListVariable(axiomTermList, variable, index, suffix, id);
     }
 
     /**
      * newVariableInstance for AxiomTermList - operand variable index
-     * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String)
+     * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String, int)
      */
     public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, Operand expression, String suffix, int id) 
     {

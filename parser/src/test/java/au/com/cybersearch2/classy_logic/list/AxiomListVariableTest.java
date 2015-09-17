@@ -18,9 +18,7 @@ package au.com.cybersearch2.classy_logic.list;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +35,7 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -124,7 +123,7 @@ public class AxiomListVariableTest
 		otherTerm = new Parameter(NAME, Integer.valueOf(27));
 		assertThat(variable.unifyTerm(otherTerm, 2)).isEqualTo(2);
 		assertThat(variable.getValue()).isEqualTo(27);
-	    verify(axiomTermListVariable).assign(Integer.valueOf(27));
+	    verify(axiomTermListVariable, times(2)).assign(otherTerm);
 	}
 
 	@Test
@@ -317,9 +316,10 @@ public class AxiomListVariableTest
 		when(axiomTermListVariable.getValue()).thenReturn(Integer.valueOf(13));
 		when(axiomTermList.newVariableInstance(0, "0", 1)).thenReturn(axiomTermListVariable);
 		variable.setTermIndex(0, 1);
-		variable.assign(Integer.valueOf(13));
+		Parameter param = new Parameter(Term.ANONYMOUS, Integer.valueOf(13));
+		variable.assign(param);
 		
-	    verify(axiomTermListVariable).assign(Integer.valueOf(13));
+	    verify(axiomTermListVariable).setValue(Integer.valueOf(13));
 		assertThat(variable.getValue()).isEqualTo(13);
 	}
 	
@@ -338,9 +338,10 @@ public class AxiomListVariableTest
 		when(axiomTermList.newVariableInstance(0, "0", 1)).thenReturn(axiomTermListVariable);
 		variable.setTermIndex(0, 1);
 		assertThat(variable.getValue()).isEqualTo(0);
-		variable.assign(Integer.valueOf(13));
+		Parameter param = new Parameter(Term.ANONYMOUS, Integer.valueOf(13));
+		variable.assign(param);
 		
-	    verify(axiomTermListVariable).assign(Integer.valueOf(13));
+	    verify(axiomTermListVariable).setValue(Integer.valueOf(13));
 		assertThat(variable.getValue()).isEqualTo(13);
 	}
 
@@ -443,7 +444,7 @@ public class AxiomListVariableTest
 	    	assertThat(variable.getValue().toString()).isEqualTo(CITY_NAME_HEIGHT[index++]);
 	    	variable.backup(1);
     	}
-    	x.assign(Long.valueOf(0));
+    	x.setValue(Long.valueOf(0));
 		AxiomListVariable term0 = axiomList.newVariableInstance(x, 0, "0");
 		AxiomListVariable term1 = axiomList.newVariableInstance(axiomExpression, 1, "1");
     	index = 0;

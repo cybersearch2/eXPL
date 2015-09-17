@@ -59,10 +59,9 @@ public class ParameterOperand<R> extends Variable
      */
     public EvaluationStatus evaluate(int id)
     {
-        EvaluationStatus status = super.evaluate(id);
-        if (status == EvaluationStatus.COMPLETE)
-            setValue(parameterList.evaluate(id));
-        return status;
+        setValue(parameterList.evaluate(id));
+        this.id = id;
+        return EvaluationStatus.COMPLETE;
     }
  
     /**

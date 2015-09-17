@@ -35,6 +35,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
@@ -275,7 +276,7 @@ public class QueryProgramTest
 		parserAssembler.createAxiom(Q_AXIOM_NAME);
 		parserAssembler.createTemplate(Q_TEMPLATE_NAME, false);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
-		variable.assign(Integer.valueOf(0));
+		variable.assign(new Parameter(Term.ANONYMOUS, Integer.valueOf(0)));
 		parserAssembler.addTemplate(Q_TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
 		parserAssembler.addAxiom(Q_AXIOM_NAME, param);

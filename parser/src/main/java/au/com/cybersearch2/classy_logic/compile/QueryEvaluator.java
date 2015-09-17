@@ -28,6 +28,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryLauncher;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
@@ -36,25 +37,27 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * QueryEvaluator
- * Adapter to run a query as a function call and return result as an AxiomList.
+ * Adapter to run a query as a function call and return result as an AxiomTermList.
  * @author Andrew Bowley
  * 1 Aug 2015
  */
-public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void>
+public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<AxiomTermList>
 {
     /** Query parameters */
     protected QueryParams queryParams;
+    /** Caller's scope */
+    protected Scope callerScope;
     /** Flag to indicate if call to Calculator in same scope */
     protected boolean isCallInScope;
     /** Optional inner Template to receive query results */
     protected Template innerTemplate;
-    /** Caller's scope */
-    protected Scope callerScope;
+    /** Term belonging to inner template - holds AxiomTermList */
+    protected Term innerTerm;
 
     /**
      * Construct a QueryEvaluator object for a query specified by query parameters
      * @param queryParams  Query parameters
-     * @param isCallInScope Flag set true if call to query in same scope
+     * @param scope The caller's scope
      * @param innerTemplate Optional inner Template to receive query results
      */
     public QueryEvaluator(QueryParams queryParams, Scope scope, Template innerTemplate)
@@ -63,6 +66,20 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
         this.callerScope = scope;
         this.isCallInScope = queryParams.getScope() == scope;
         this.innerTemplate = innerTemplate;
+        OperandMap callerOperandMap = callerScope.getParserAssembler().getOperandMap();
+        if (innerTemplate != null)
+        {   // Get term belonging to inner template 
+            QualifiedName innerTemplateName = innerTemplate.getQualifiedName();
+            innerTerm = callerOperandMap.get(innerTemplateName);
+        }
+        else
+        {   // Create empty AxiomTermList to avoid null issues
+            KeyName firstKeyname = queryParams.getQuerySpec().getKeyNameList().get(0);
+            QualifiedName qname = QualifiedName.parseName(firstKeyname.getTemplateName(), callerOperandMap.getQualifiedContextname());
+            // Create empty AxiomTermList to return as query result. 
+            innerTerm = new Parameter(qname.getName(), new AxiomTermList(qname, firstKeyname.getTemplateName()));
+        }
+            
     }
     
     /**
@@ -80,7 +97,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
      * @see au.com.cybersearch2.classy_logic.interfaces.CallEvaluator#evaluate(java.util.List)
      */
     @Override
-    public Void evaluate(List<Term> argumentList)
+    public AxiomTermList evaluate(List<Term> argumentList)
     {
         QuerySpec querySpec = queryParams.getQuerySpec();
         String templateName = getCalculatorKeyName(querySpec).getTemplateName();
@@ -91,7 +108,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
         if (argumentList.size() > 0)
             prepareArguments(argumentList, template);
         // Set SolutionHander to collect results
-        SolutionHandler solutionHandler = getSolutionHandler(solutionName);
+        SolutionHandler solutionHandler = getSolutionHandler(solutionName, template.getId());
         queryParams.setSolutionHandler(solutionHandler);
         // Do query using QueryLauncher utility class
         ScopeContext scopeContext = isCallInScope ? null : scope.getContext(true);
@@ -110,9 +127,14 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
             else
                 template.pop();
         }
-        return null;
+        return (AxiomTermList) innerTerm.getValue();
     }
 
+    /**
+     * Set query parameters object with query arguments packed into an axiom
+     * @param argumentList List of terms holding argument values
+     * @param template Target query template
+     */
     protected void prepareArguments(List<Term> argumentList, Template template)
     {
         int index = 0; // Map unnamed arguments to template term names
@@ -133,14 +155,22 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
         queryParams.putParameters(template.getQualifiedName(), axiom);
     }
 
-    protected SolutionHandler getSolutionHandler(final String solutionName)
+    /**
+     * Returns solution handler to marshall query result into axiom term list
+     * @param solutionName Name to use to obtain solution
+     * @param id Modification id
+     * @return SolutionHandler object which does nothing if there is no inner template
+     */
+    protected SolutionHandler getSolutionHandler(final String solutionName, final int id)
     {
-        return new SolutionHandler(){
+        return innerTemplate == null ? 
+                QueryParams.DO_NOTHING : 
+                new SolutionHandler(){
         @Override
         public boolean onSolution(Solution solution)
         {
             Axiom axiom = solution.getAxiom(solutionName);
-            if ((axiom != null) && (innerTemplate != null))
+            if (axiom != null)
             {
                 // No backup, so reset before unification
                 innerTemplate.reset();
@@ -148,9 +178,6 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
                 {
                     if (innerTemplate.evaluate() == EvaluationStatus.COMPLETE);
                     {
-                        QualifiedName innerTemplateName = innerTemplate.getQualifiedName();
-                        Term innerTerm = callerScope.getParserAssembler().getOperandMap().get(innerTemplateName);
-                        AxiomTermList axiomTermList = (AxiomTermList)(innerTerm.getValue());
                         Axiom innerAxiom = new Axiom(innerTemplate.getKey());
                         for (int i = 0; i < (innerTemplate.getTermCount()); i++)
                         {
@@ -160,11 +187,28 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Void
                                 term = new Parameter(termName);
                             innerAxiom.addTerm(term);
                         }
-                        axiomTermList.setAxiom(innerAxiom);
+                        axiomTermListInstance(id).setAxiom(innerAxiom);
                     }
                 }
             }
             return true;
         }};
+    }
+ 
+    /**
+     * Returns axiom term list instance. Also stores it in inner term
+     * @param id Modification id
+     * @return Empty AxiomTermList object
+     */
+    protected AxiomTermList axiomTermListInstance(int id)
+    {
+        // Create AxiomTermList to contain query result. 
+        AxiomTermList axiomTermList = new AxiomTermList(innerTemplate.getQualifiedName(), innerTemplate.getKey());
+        // The inner term is the axiomTermList container.
+        // Over write any previous value, which will be in the solution by now
+        Parameter innerTermValue = new Parameter(Term.ANONYMOUS, axiomTermList);
+        innerTermValue.setId(id);
+        innerTerm.assign(innerTermValue);
+        return axiomTermList;
     }
 }

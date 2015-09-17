@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.tutorial12;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
@@ -34,7 +33,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class SingleCurrency 
 {
 	static final String CURRENCY =
-		"axiom item: (\"$1234.56\");\n" +
+		"axiom item() {\"$1234.56\"};\n" +
 		"template charge(currency(\"AU\") amount);\n" +
 	    "calc charge_plus_gst(\n" +
 	    "  currency(\"AU\") total = amount * 1.1,\n" +
@@ -44,7 +43,7 @@ public class SingleCurrency
 	/**
 	 * Compiles the CURRENCY script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
-	 * format_total(total_text = Total + gst: AUD1,358.02)<br/>
+	 * Total + gst: AUD1,358.02<br/>
 	 */
 	public String getFormatedTotalAmount()
 	{

@@ -36,17 +36,17 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 public class HighCitiesAxioms
 {
 	static final String CITY_EVELATIONS =
-	    "axiom city (name, altitude) :\n" + 
-        "    (\"bilene\", 1718),\n" +
-        "    (\"addis ababa\", 8000),\n" +
-        "    (\"denver\", 5280),\n" +
-        "    (\"flagstaff\", 6970),\n" +
-        "    (\"jacksonville\", 8),\n" +
-        "    (\"leadville\", 10200),\n" +
-        "    (\"madrid\", 1305),\n" +
-        "    (\"richmond\",19),\n" +
-        "    (\"spokane\", 1909),\n" +
-        "    (\"wichita\", 1305);\n" +
+	    "axiom city (name, altitude)\n" + 
+        "    {\"bilene\", 1718}\n" +
+        "    {\"addis ababa\", 8000}\n" +
+        "    {\"denver\", 5280}\n" +
+        "    {\"flagstaff\", 6970}\n" +
+        "    {\"jacksonville\", 8}\n" +
+        "    {\"leadville\", 10200}\n" +
+        "    {\"madrid\", 1305}\n" +
+        "    {\"richmond\",19}\n" +
+        "    {\"spokane\", 1909}\n" +
+        "    {\"wichita\", 1305};\n" +
         "axiom high_cities = {};\n" +
         "// Template for name and altitude of a high city\n" +
         "template high_city(\n" +

@@ -17,9 +17,6 @@ package au.com.cybersearch2.classy_logic.helper;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Currency;
@@ -28,8 +25,6 @@ import java.util.Locale;
 import java.util.Random;
 
 import org.junit.Test;
-
-import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 
 /**
  * LocaleCurrencyTest
@@ -164,7 +159,7 @@ public class LocaleCurrencyTest
 	  			if (!locale.getScript().isEmpty() || !locale.getVariant().isEmpty())
 	  				continue;
 	  	    	localeCurrency.setLocale(locale);
-		    	System.out.println(EURO_SAMPLES[index]);
+		    	//System.out.println(EURO_SAMPLES[index]);
 		    	//System.out.println(localeCurrency.parse(EURO_SAMPLES[index++]));
 	  	    	assertThat(localeCurrency.parse(EURO_SAMPLES[index++]).toString()).isEqualTo("12345.67");
 		    }

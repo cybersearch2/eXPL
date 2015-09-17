@@ -51,7 +51,7 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
      * Construct an AxiomParameterOperand object
      * @param qname Qualified name
      * @param axiomKey Key of axiom list to be generated
-     * @param argumentExpression Operand containing parameters as a tree of operands
+     * @param initializeList List of parameters to initialize this Operand
      */
     public AxiomParameterOperand(QualifiedName qname, String axiomKey, List<OperandParam> initializeList)
     {

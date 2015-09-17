@@ -39,7 +39,8 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 
 	/**
 	 * Construct an AxiomList object
-	 * @param name Name of axiom list
+	 * @param qname Name of axiom list
+	 * @param key Axiom key
 	 */
 	public AxiomList(QualifiedName qname, String key) 
 	{

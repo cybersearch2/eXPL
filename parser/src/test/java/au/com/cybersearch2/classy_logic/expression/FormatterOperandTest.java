@@ -30,6 +30,8 @@ import org.junit.Test;
 import static org.fest.assertions.api.Assertions.assertThat;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * FormatterOperandTest
@@ -72,7 +74,7 @@ public class FormatterOperandTest
 				Calendar date = GregorianCalendar.getInstance();
 				date.setTime(new Date());
 		    	Variable targetOperand = new TestVariable("Date");
-		    	targetOperand.assign(date);
+		    	targetOperand.assign(new Parameter(Term.ANONYMOUS, date));
 	 	        FormatterOperand formatOperand = new FormatterOperand(QualifiedName.parseName(locale.getCountry()), targetOperand, locale);
 	 	        assertThat(formatOperand.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 	 	        System.out.println(formatOperand.getValue().toString() + " " + locale.toString());

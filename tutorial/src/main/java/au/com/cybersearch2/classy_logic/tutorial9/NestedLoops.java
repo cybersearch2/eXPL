@@ -32,7 +32,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 public class NestedLoops 
 {
     static final String INSERT_SORT =
-    		"axiom unsorted : (12, 3, 1, 5, 8);\n" +
+    		"axiom unsorted() {12, 3, 1, 5, 8};\n" +
             "list<term> sorted(unsorted);\n" +
     		"calc insert_sort (\n" +
     		"integer i = 1, \n" +

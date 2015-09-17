@@ -51,7 +51,7 @@ public class AxiomPairer implements UnificationPairer
 
 	/**
 	 * Visit next term
-	 * @see au.com.cybersearch2.classy_logic.interfaces.OperandVisitor#next(au.com.cybersearch2.classy_logic.interfaces.Term, int)
+	 * @see au.com.cybersearch2.classy_logic.interfaces.OperandVisitor#next(au.com.cybersearch2.classy_logic.interfaces.Operand, int)
 	 */
 	@Override
 	public boolean next(Operand operand, int depth) 
@@ -68,7 +68,7 @@ public class AxiomPairer implements UnificationPairer
 
 	/**
 	 * Process two terms, matched by name or list order, according to their status.
-	 * @see au.com.cybersearch2.classy_logic.interfaces.UnificationPairer#pairTerms(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.interfaces.Term)
+	 * @see au.com.cybersearch2.classy_logic.interfaces.UnificationPairer#pairTerms(au.com.cybersearch2.classy_logic.interfaces.Operand, au.com.cybersearch2.classy_logic.interfaces.Term)
 	 */
 	@Override
 	public boolean pairTerms(Operand operand, Term otherTerm)

@@ -22,7 +22,6 @@ options
 PARSER_BEGIN(QueryParser)
 import java.io.InputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
-import au.com.cybersearch2.classy_logic.query.QueryType;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserResources;
@@ -41,7 +39,6 @@ import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.VariableType;
-import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
@@ -52,20 +49,11 @@ import au.com.cybersearch2.classy_logic.expression.MatchOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
 import au.com.cybersearch2.classy_logic.expression.Variable;
-import au.com.cybersearch2.classy_logic.expression.CallOperand;
-import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
-import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
-import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
-import au.com.cybersearch2.classy_logic.list.ArrayItemList;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.ListLength;
-import au.com.cybersearch2.classy_logic.list.ItemListVariable;
-import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
@@ -209,9 +197,9 @@ TOKEN :
   >
 |
   < NUMBER_LITERAL:
-       "{" 
+       "'" 
        ((["0"-"9"])+ ([",","."]))+ (["0"-"9"])+
-       "}"
+       "'"
   >
 |
   < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
@@ -585,7 +573,6 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
 {
     String name;
     VariableType varType = null;
-    VariableType listVarType = null;
     Operand index = null;
     Operand var = null;
     Token scToken = null;
@@ -720,7 +707,6 @@ void CalculatorExpression(int loop_number, Template template, String templateNam
 
 Operand InnerCalculator(int loop_number, String templateName, ParserAssembler parserAssembler, boolean runOnce) :
 {
-  Operand calcExpression;
   String loopName = templateName + loop_number;
   QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), templateName, QualifiedName.EMPTY);
   Template template = parserAssembler.chainTemplate(qualifiedTemplateName, loopName);
@@ -751,7 +737,7 @@ void CalculatorQuery(Template template, ParserAssembler parserAssembler) :
     Operand queryOperand = parserAssembler.getQueryOperand(qname, operandParamList, innerTemplate);
     template.addTerm(queryOperand);
     if (innerTemplate != null)
-        parserAssembler.addInnerTemplate(template, innerTemplate);
+        template.setNext(innerTemplate);
   }
 }
 
@@ -912,13 +898,18 @@ void AxiomSpecification(QualifiedName qualifiedAxiomName, ParserAssembler parser
     parserAssembler.createAxiom(qualifiedAxiomName);
 }
 {
-  [ "(" TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )*  ")" ] 
-  ":"  
-     ( ( AxiomItem(qualifiedAxiomName, parserAssembler) ( "," AxiomItem(qualifiedAxiomName, parserAssembler) )* ) 
-     |
-     ResourceDeclaration(qualifiedAxiomName, parserAssembler)
-     |
-     ParameterDeclaration(qualifiedAxiomName, parserAssembler) )
+  "(" ( TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )* )?  ")"  
+  (
+    ( ":"  
+      (
+      ResourceDeclaration(qualifiedAxiomName, parserAssembler)
+      |
+      ParameterDeclaration(qualifiedAxiomName, parserAssembler) 
+      )
+    )
+    |
+    ( <LBRACE> AxiomItem(qualifiedAxiomName, parserAssembler) <RBRACE> )+
+  )
 }
 
 QualifiedName ChoiceDeclaration(ParserAssembler parserAssembler) :
@@ -929,8 +920,7 @@ QualifiedName ChoiceDeclaration(ParserAssembler parserAssembler) :
 }
 {
   <CHOICE> qualifiedAxiomName=Choice(parserAssembler) "(" TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )*  ")" 
-                                             ":"  
-                                             ChoiceItem(selection, qualifiedAxiomName, parserAssembler) (LOOKAHEAD(2) "," ChoiceItem(++selection, qualifiedAxiomName, parserAssembler) )*  
+                                                        ( ChoiceItem(selection, qualifiedAxiomName, parserAssembler) )+ 
   {
       QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
       QualifiedName qualifiedTemplateName = new QualifiedName(contextName.getScope(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
@@ -987,7 +977,7 @@ void AxiomItem(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler
 {
 }
 {
-   "(" Fact(qualifiedAxiomName, parserAssembler) ("," Fact(qualifiedAxiomName, parserAssembler) )* ")" 
+    Fact(qualifiedAxiomName, parserAssembler) ("," Fact(qualifiedAxiomName, parserAssembler) )*  
     {
       parserAssembler.saveAxiom(qualifiedAxiomName);
     }
@@ -1000,7 +990,7 @@ void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserAssembler
     parserAssembler.addAxiom(qualifiedAxiomName, new Parameter(Term.ANONYMOUS, new Null()));
 }
 {
-   "(" operand=ChoiceExpression(name, parserAssembler) ("," Fact(qualifiedAxiomName, parserAssembler) )* ")" 
+   <LBRACE> operand=ChoiceExpression(name, parserAssembler) ("," Fact(qualifiedAxiomName, parserAssembler) )* <RBRACE> 
     {
        parserAssembler.saveAxiom(qualifiedAxiomName);
        QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
@@ -1447,7 +1437,6 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
   QualifiedName qname;
   Token literal = null;
   Operand param1 = null;
-  Operand param2 = null;
   Operand operand;
   OperandMap operandMap = parserAssembler.getOperandMap();
 }
@@ -1461,7 +1450,7 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
   {
     NumberTerm numberTerm = new NumberTerm(getText(literal), parserAssembler.getScopeLocale());
     Variable var = new Variable(QualifiedName.ANONYMOUS);
-    var.assign(numberTerm.getValue());
+    var.assign(numberTerm);
     return var;
   }
   |
@@ -1551,7 +1540,6 @@ List<OperandParam> ArgumentList(ParserAssembler parserAssembler, boolean nameReq
 {
   List<OperandParam> operandParamList = new ArrayList<OperandParam>();
   OperandParam operandParam;
-  Token op;
 }
 {
   operandParam = Argument(parserAssembler, nameRequired)
@@ -1559,7 +1547,7 @@ List<OperandParam> ArgumentList(ParserAssembler parserAssembler, boolean nameReq
     operandParamList.add(operandParam);
   }
   ( 
-    op="," 
+    "," 
     operandParam=Argument(parserAssembler, nameRequired) 
     {
       operandParamList.add(operandParam);
@@ -1623,9 +1611,7 @@ Operand Literal() :
   |
   UnknownLiteral()
   {
-    Variable unknownLiteral = new Variable(QualifiedName.ANONYMOUS);
-    unknownLiteral.assign(new Unknown());
-    return unknownLiteral;
+    return new NullOperand(QualifiedName.ANONYMOUS, new Unknown());
   }
 }
 
@@ -1665,7 +1651,6 @@ List<Parameter> LiteralList() :
 {
   List<Parameter>  literalList = new ArrayList<Parameter>();
   Parameter parameter;
-  Token op;
 }
 {
   parameter=LiteralTerm()
@@ -1673,7 +1658,7 @@ List<Parameter> LiteralList() :
     literalList.add(parameter);
   }
   ( 
-    op="," 
+    "," 
     parameter = LiteralTerm() 
     {
       literalList.add(parameter);

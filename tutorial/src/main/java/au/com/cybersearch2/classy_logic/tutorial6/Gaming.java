@@ -29,8 +29,8 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class Gaming {
 
     static final String FRUITS_POKER=
-    		"axiom spin (r1, r2, r3, r4) : (3,2,0,1);\n" +
-    		"axiom fruit : (\"apple\", \"orange\", \"banana\", \"lemon\");\n" +
+    		"axiom spin (r1, r2, r3, r4) {3,2,0,1};\n" +
+    		"axiom fruit() {\"apple\", \"orange\", \"banana\", \"lemon\"};\n" +
     	    
             "list<term> combo(fruit);\n" +
     		"template spin(combo[(r1)], combo[(r2)], combo[(r3)], combo[(r4)]);\n" +

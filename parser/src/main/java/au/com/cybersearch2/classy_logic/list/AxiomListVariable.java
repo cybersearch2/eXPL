@@ -67,8 +67,8 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	 * @param axiomList The backing axiom list
 	 * @param axiomIndex The index value to select the list item
 	 * @param suffix The axiom term identity
-	 * @see #setTermIndex(int termIndex) 
-	 * @see #setTermExpression(Operand termExpression) 
+	 * @see #setTermIndex(int termIndex, int) 
+	 * @see #setTermExpression(Operand termExpression, int) 
 	 */
 	public AxiomListVariable(AxiomList axiomList, int axiomIndex, String suffix) 
 	{
@@ -121,11 +121,11 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	
 	/**
 	 * Assign a value and set the delegate
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
 	 */
     @Override
-	public void assign(Object newValue) 
+	public void assign(Term term) 
 	{
+        Object newValue = term.getValue();
 	    if (newValue instanceof AxiomTermList)
 	    {
 	        AxiomTermList axiomTermList = (AxiomTermList)newValue;
@@ -150,8 +150,8 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	        }
 	    }
 	    else if (axiomTermListVariable != null)
-        	axiomTermListVariable.assign(newValue);
-        super.assign(newValue);
+        	axiomTermListVariable.setValue(newValue);
+        super.setValue(newValue);
 	}
 
 	/**
@@ -179,7 +179,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 			return oldValue;
 		// Replace this variable's value, if stale
 		if (!itemValue.equals(oldValue))
-	        super.assign(itemValue);
+	        super.setValue(itemValue);
 
 	    return itemValue;
 	}
@@ -200,7 +200,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
         	Object item = axiomTermListVariable.getValue();
         	if (item != null)
         	{
-        		super.assign(item);
+        		super.setValue(item);
                 this.id = modifierId;
         	}
         }
@@ -237,7 +237,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 			return 0;
 		int result = super.unifyTerm(otherTerm, id);
 		if (result == id)
-			axiomTermListVariable.assign(value);
+			axiomTermListVariable.assign(this);
 		return result;
     }
 
@@ -308,7 +308,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 				{
 				    if (termExpression != null)
 					    axiomTermListVariable.evaluate(modifierId);
-				    super.assign(axiomTermListVariable.getValue());
+				    super.assign(axiomTermListVariable);
 				}
 			}
 			this.id = modifierId;
@@ -318,15 +318,15 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 		    if (axiomTermListVariable.isEmpty())
                 updateAxiomTermListVariable(modifierId);
 			axiomTermListVariable.evaluate(modifierId);
-		    super.assign(axiomTermListVariable.getValue());
+		    super.assign(axiomTermListVariable);
 			this.id = modifierId;
 		}
         if (axiomOnly)
         {
             if (axiomList.hasItem(axiomIndex))
-                super.assign(axiomList.getItem(axiomIndex));
+                super.setValue(axiomList.getItem(axiomIndex));
             else
-                super.assign(new Null());
+                super.setValue(new Null());
         }
 		return EvaluationStatus.COMPLETE;
 	}
@@ -483,5 +483,6 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     {
         return new QualifiedName(axiomList2.getName() + "_item", axiomList2.getQualifiedName());
     }
+
 
 }

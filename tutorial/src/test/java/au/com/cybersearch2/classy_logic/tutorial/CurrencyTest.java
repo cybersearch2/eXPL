@@ -42,7 +42,7 @@ public class CurrencyTest
     public void test_SingleCurrency() throws Exception
     {
         SingleCurrency singleCurrency = new SingleCurrency();
-        assertThat(singleCurrency.getFormatedTotalAmount().toString()).isEqualTo("format_total(total_text = Total + gst: AUD1,358.02)");
+        assertThat(singleCurrency.getFormatedTotalAmount().toString()).isEqualTo("Total + gst: AUD1,358.02");
     }
 
     @Test
@@ -55,7 +55,7 @@ public class CurrencyTest
         while(iterator.hasNext())
         {
             String line = reader.readLine();
-            assertThat(iterator.next().toString()).isEqualTo(line);
+            assertThat(iterator.next().getTermByName("total_text").getValue().toString()).isEqualTo(line);
         }
         reader.close();
     }

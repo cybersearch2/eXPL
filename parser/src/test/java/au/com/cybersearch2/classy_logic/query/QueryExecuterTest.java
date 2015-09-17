@@ -134,24 +134,24 @@ public class QueryExecuterTest
 	};
 
 	public static final String GREEK_CONSTRUCTION =
-		"axiom charge : \n" +
-		"  (\"Athens\", 23 ),\n" +
-		"  (\"Sparta\", 13 ),\n" +
-		"  (\"Milos\", 17);\n" +
-		"axiom customer :\n" +
-		"  (\"Marathon Marble\", \"Sparta\"),\n" +
-		"  (\"Acropolis Construction\", \"Athens\"),\n" +
-		"  (\"Agora Imports\", \"Sparta\"),\n" +
-		"  (\"Spiros Theodolites\", \"Milos\");\n" +
-		"axiom fee (name, fee):\n" +
-		"  (\"Marathon Marble\", 61),\n" +
-		"  (\"Acropolis Construction\", 47),\n" +
-		"  (\"Agora Imports\", 49),\n" +
-		"  (\"Spiros Theodolites\", 57);\n" + 
-		"axiom freight (city, freight): \n" +
-		"  (\"Athens\", 5 ),\n" +
-		"  (\"Sparta\", 16 ),\n" +
-		"  (\"Milos\", 22);\n";
+		"axiom charge() \n" +
+		"  {\"Athens\", 23 }\n" +
+		"  {\"Sparta\", 13 }\n" +
+		"  {\"Milos\", 17};\n" +
+		"axiom customer()\n" +
+		"  {\"Marathon Marble\", \"Sparta\"}\n" +
+		"  {\"Acropolis Construction\", \"Athens\"}\n" +
+		"  {\"Agora Imports\", \"Sparta\"}\n" +
+		"  {\"Spiros Theodolites\", \"Milos\"};\n" +
+		"axiom fee (name, fee)\n" +
+		"  {\"Marathon Marble\", 61}\n" +
+		"  {\"Acropolis Construction\", 47}\n" +
+		"  {\"Agora Imports\", 49}\n" +
+		"  {\"Spiros Theodolites\", 57};\n" + 
+		"axiom freight (city, freight) \n" +
+		"  {\"Athens\", 5 }\n" +
+		"  {\"Sparta\", 16 }\n" +
+		"  {\"Milos\", 22};\n";
 
 	static final String[] FEE_AND_FREIGHT =
 	{

@@ -72,17 +72,6 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	
 
 	/**
-	 * Construct DelegateOperand object with specified value
-     * @param qname Qualified name of variable
-	 * @param value Value to set
-	 */
-	protected DelegateOperand(QualifiedName qname, Object value) 
-	{
-		super(qname.getName(), value);
-		this.qname = qname;
-	}
-
-	/**
      * Construct empty DelegateOperand object
      * @param qname Qualified name of variable
 	 */
@@ -193,7 +182,8 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	 * GenericParameter has a protected type-specific setValue()
 	 * @param value
 	 */
-	protected void setValue(Object value)
+	@Override
+	public void setValue(Object value)
 	{
 		if (value == null)
 			value = new Null();
@@ -209,12 +199,12 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
      * Assign a value to this Operand. It may overwrite and existing value
      * This value will be overwritten on next call to evaluate(), so calling
      * assign() on an Evaluator is pointless.
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#assign(java.lang.Object)
      */
     @Override
-    public void assign(Object value) 
+    public void assign(Term term) 
     {
-         setValue(value);
+         setValue(term.getValue());
+         id = term.getId();
     }
 
 

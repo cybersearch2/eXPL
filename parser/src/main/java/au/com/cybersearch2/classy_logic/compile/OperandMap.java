@@ -87,13 +87,17 @@ public class OperandMap
 	 * Returns all operand values in a map container
 	 * @return Map with key of type Operand and value of type Object
 	 */
-	public  Map<Operand, Object> getOperandValues()
+	public  Map<Operand, Parameter> getOperandValues()
 	{
-		Map<Operand, Object> operandValueMap = new HashMap<Operand, Object>();
+		Map<Operand, Parameter> operandValueMap = new HashMap<Operand, Parameter>();
 		for (Operand operand: operandMap.values())
 		{
 			if (!operand.isEmpty())
-				operandValueMap.put(operand, operand.getValue());
+			{
+			    Parameter parameter = new Parameter(operand.getName(), operand.getValue());
+			    parameter.setId(operand.getId());
+				operandValueMap.put(operand, parameter);
+			}
 		}
 		return operandValueMap;
 	}
@@ -102,25 +106,23 @@ public class OperandMap
 	 * Set operand values
 	 * @param operandValueMap Map container
 	 */
-	public void setOperandValues(Map<Operand, Object> operandValueMap)
+	public void setOperandValues(Map<Operand, Parameter> operandValueMap)
 	{
-		for (Entry<Operand, Object> entry: operandValueMap.entrySet())
-			if (entry.getValue() instanceof Null) // Null special case
-				((Parameter)entry.getKey()).clearValue();
+		for (Entry<Operand, Parameter> entry: operandValueMap.entrySet())
+			if (entry.getValue().getValueClass() == Null.class) // Null special case
+				entry.getKey().clearValue();
 			else
-			   entry.getKey().assign(entry.getValue());
+			    entry.getKey().assign(entry.getValue());
 		// Clear operands not included in operandValueMap
 		for (Entry<QualifiedName, Operand> entry: operandMap.entrySet())
-		{
 			if (!operandValueMap.containsKey(entry.getValue()))
-				((Parameter)entry.getValue()).clearValue();
-		}
+				entry.getValue().clearValue();
 	}
 
 	/**
 	 * Throws exception for 'Duplicate Operand name' if operand name is a duplicat
 	 * @param name Name of operand in text format
-	 * @see hasOperand(java.lang.String)
+	 * @see #hasOperand(java.lang.String)
      * @throws ExpressionException
 	 */
 	public void duplicateOperandCheck(String name)
@@ -339,8 +341,8 @@ public class OperandMap
 	}
 
 	/**
-	 * Returns operand referenced by name
-	 * @param name
+	 * Returns operand referenced by qualified name
+	 * @param qname Qualified name
 	 * @return Operand object or null if not exists
 	 */
 	public Operand get(QualifiedName qname)
@@ -395,14 +397,13 @@ public class OperandMap
 			    // Expression needs evaluation
 				return new Evaluator(itemList.getQualifiedName(), variable, "=", expression);
 			// Expression has a value which will be assigned to the list item
-			variable.assign(expression.getValue());
+			variable.assign(expression);
 		}
 		return variable;
 	}
 
 	/**
 	 * Copy result axiom lists as iterables to supplied container
-	 * @param prefix Scope name or empty if global scope
 	 * @param listMap2 Container to receive lists
 	 */
 	public void copyLists(Map<QualifiedName, Iterable<Axiom>> listMap2) 
@@ -417,7 +418,7 @@ public class OperandMap
 
     /**
      * Copy result axioms to supplied container
-     * @param listMap2 Container to receive axioms
+     * @param axiomMap Container to receive axioms
      */
     public void copyAxioms(Map<QualifiedName, Axiom> axiomMap)
     {

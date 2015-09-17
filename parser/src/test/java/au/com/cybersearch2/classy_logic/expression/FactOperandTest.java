@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -43,11 +44,11 @@ public class FactOperandTest
         factOperand.evaluate(1);
         assertThat((Boolean)factOperand.getValue()).isFalse();
         assertThat(factOperand.getId()).isEqualTo(1);
-        booleanOperand.assign(Boolean.FALSE);
+        booleanOperand.assign(new Parameter(Term.ANONYMOUS, Boolean.FALSE));
         factOperand.evaluate(2);
         assertThat((Boolean)factOperand.getValue()).isTrue();
         assertThat(factOperand.getId()).isEqualTo(2);
-        booleanOperand.assign(Boolean.TRUE);
+        booleanOperand.assign(new Parameter(Term.ANONYMOUS, Boolean.TRUE));
         factOperand.evaluate(3);
         assertThat((Boolean)factOperand.getValue()).isTrue();
         assertThat(factOperand.getId()).isEqualTo(3);
@@ -57,7 +58,7 @@ public class FactOperandTest
         // Create Variable to be axiomTermList container. Give it the same name as the inner Template 
         // so it is qualified by the name of the enclosing Template
         Variable listVariable = new Variable(QNAME);
-        listVariable.assign(axiomTermList);
+        listVariable.assign(new Parameter(Term.ANONYMOUS, axiomTermList));
         factOperand = new FactOperand(listVariable);
         factOperand.evaluate(1);
         assertThat((Boolean)factOperand.getValue()).isFalse();
@@ -71,8 +72,8 @@ public class FactOperandTest
         axiom.addTerm(y);
         factOperand.evaluate(3);
         assertThat((Boolean)factOperand.getValue()).isFalse();
-        x.assign(Long.valueOf(1));
-        y.assign(Long.valueOf(2));
+        x.assign(new Parameter(Term.ANONYMOUS, Long.valueOf(1)));
+        y.assign(new Parameter(Term.ANONYMOUS, Long.valueOf(2)));
         factOperand.evaluate(4);
         assertThat((Boolean)factOperand.getValue()).isTrue();
     }

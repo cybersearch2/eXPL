@@ -87,9 +87,9 @@ public class QueryParserTest
 		"template city(string name, integer height);\n";
 	
 	static final String SCRIPT3 =
-		"axiom city :" +
-		"(\"bilene\", 1718)," +
-		"(\"denver\", 5280)" +
+		"axiom city()" +
+		"{\"bilene\", 1718}" +
+		"{\"denver\", 5280}" +
 		";";
 
 	static final String SCRIPT4 =
@@ -307,7 +307,7 @@ public class QueryParserTest
     		;
 
     static final String INSERT_SORT_XPL =
-    		"axiom unsorted : (12, 3, 1, 5, 8);\n" +
+    		"axiom unsorted() {12, 3, 1, 5, 8};\n" +
             "list<term> sort_list(unsorted);\n" +
     		"calc insert_sort (\n" +
     		"integer i, \n" +
@@ -326,23 +326,23 @@ public class QueryParserTest
     		;
 
     static final String AXIOM_WRAPPER_XPL =
-    		"axiom colors (red, green, blue) : (0.75, 0.50, 0.25);\n" +
+    		"axiom colors (red, green, blue) {0.75, 0.50, 0.25};\n" +
             "list<term> colors_list(colors);\n" +
     		"template color_convert(red, green, blue, double r = colors_list[red], double g = colors_list[green], double b = colors_list[blue]);"
     		;
     
 	static final String CITY_EVELATIONS_SORTED =
-		    "axiom city (name, altitude):\n"  +
-			"(\"bilene\", 1718),\n"  +
-			"(\"addis ababa\", 8000),\n"  +
-			"(\"denver\", 5280),\n"  +
-			"(\"flagstaff\", 6970),\n"  +
-			"(\"jacksonville\", 8),\n"  +
-			"(\"leadville\", 10200),\n"  +
-			"(\"madrid\", 1305),\n"  +
-			"(\"richmond\",19),\n"  +
-			"(\"spokane\", 1909),\n"  +
-			"(\"wichita\", 1305);\n" +
+		    "axiom city (name, altitude)\n"  +
+			"{\"bilene\", 1718}\n"  +
+			"{\"addis ababa\", 8000}\n"  +
+			"{\"denver\", 5280}\n"  +
+			"{\"flagstaff\", 6970}\n"  +
+			"{\"jacksonville\", 8}\n"  +
+			"{\"leadville\", 10200}\n"  +
+			"{\"madrid\", 1305}\n"  +
+			"{\"richmond\",19}\n"  +
+			"{\"spokane\", 1909}\n"  +
+			"{\"wichita\", 1305};\n" +
 			"template high_city(string name, altitude ? altitude > 5000);\n" +
             "list city_list(high_city);\n" +
     		"calc insert_sort (\n" +
@@ -366,7 +366,7 @@ public class QueryParserTest
 			;
 
 	static final String CURRENCY_XPL =
-			"axiom item: (\"$1234.56\");\n" +
+			"axiom item() {\"$1234.56\"};\n" +
 			"template charge(currency(\"AU\") amount);\n" +
 	        "calc charge_plus_gst(currency(\"AU\") total = charge.amount * 1.1);\n" +
 	        "calc format_total(string total_text = \"Total + gst: \" + format(charge_plus_gst.total));\n" +
@@ -382,49 +382,52 @@ public class QueryParserTest
   			
 	static final String STAMP_DUTY_XPL =
 			"choice bracket "
-			+ "(amount,       threshold,  base,    percent) :\n" +
-			"  (amount <  12000,      0,     0.00, 1.00),\n" +
-			"  (amount <  30000,  12000,   120.00, 2.00),\n" +
-			"  (amount <  50000,  30000,   480.00, 3.00),\n" +
-			"  (amount < 100000,  50000,  1080.00, 3.50),\n" +
-			"  (amount < 200000, 100000,  2830.00, 4.00),\n" +
-			"  (amount < 250000, 200000,  6830.00, 4.25),\n" +
-			"  (amount < 300000, 250000,  8955.00, 4.75),\n" +
-			"  (amount < 500000, 300000, 11330.00, 5.00),\n" +
-			"  (amount > 500000, 500000, 21330.00, 5.50);\n" +
+			+ "(amount,       threshold,  base,    percent)\n" +
+			"  {amount <  12000,      0,     0.00, 1.00}\n" +
+			"  {amount <  30000,  12000,   120.00, 2.00}\n" +
+			"  {amount <  50000,  30000,   480.00, 3.00}\n" +
+			"  {amount < 100000,  50000,  1080.00, 3.50}\n" +
+			"  {amount < 200000, 100000,  2830.00, 4.00}\n" +
+			"  {amount < 250000, 200000,  6830.00, 4.25}\n" +
+			"  {amount < 300000, 250000,  8955.00, 4.75}\n" +
+			"  {amount < 500000, 300000, 11330.00, 5.00}\n" +
+			"  {amount > 500000, 500000, 21330.00, 5.50};\n" +
 			"\n" +
-			"axiom transacton_amount (amount) : ( 123458 );\n" +
+			"axiom transacton_amount (amount) { 123458 };\n" +
 			"calc payable(duty = bracket.base + (amount - bracket.threshold) * (bracket.percent / 100));\n" +
 			"query stamp_duty_query (transacton_amount : bracket) >> (payable);\n";
 
     static final String CHOICE_COLORS =
-            "choice swatch (name, red, green, blue) :\n" +
-            "(\"aqua\", 0, 255, 255),\n" +
-            "(\"black\", 0, 0, 0),\n" +
-            "(\"blue\", 0, 0, 255),\n" +
-            "(\"white\", 255, 255, 255);\n" +
+            "choice swatch\n" +
+            "(name, red, green, blue)\n" +
+            "{\"aqua\",  0, 255, 255}\n" +
+            "{\"black\", 0, 0, 0}\n" +
+            "{\"blue\",  0, 0, 255}\n" +
+            "{\"white\", 255, 255, 255};\n" +
             "axiom shade (name) : parameter;\n" +
             "query color_query (shade : swatch);\n";
             ;
 
     static final String CHOICE_COLORS2 =
-            "choice swatch (rgb, color, red, green, blue) :\n" +
-            "(0x00FFFF, \"aqua\", 0, 255, 255),\n" +
-            "(0x000000, \"black\", 0, 0, 0),\n" +
-            "(0x0000FF, \"blue\", 0, 0, 255),\n" +
-            "(0xFFFFFF, \"white\", 255, 255, 255);\n" +
+            "choice swatch\n" +
+            "(rgb, color, red, green, blue)\n" +
+            "{0x00FFFF, \"aqua\", 0, 255, 255}\n" +
+            "{0x000000, \"black\", 0, 0, 0}\n" +
+            "{0x0000FF, \"blue\", 0, 0, 255}\n" +
+            "{0xFFFFFF, \"white\", 255, 255, 255};\n" +
             "axiom shade (rgb) : parameter;\n" +
             "query color_query (shade : swatch);\n";
             ;
 
     static final String CHOICE_COLORS3 =
             "integer unknown_rgb;\n" +
-            "choice swatch (rgb, color, red, green, blue) :\n" +
-            "(0x00FFFF, \"aqua\", 0, 255, 255),\n" +
-            "(0x000000, \"black\", 0, 0, 0),\n" +
-            "(0x0000FF, \"blue\", 0, 0, 255),\n" +
-            "(0xFFFFFF, \"white\", 255, 255, 255),\n" +
-            "(unknown_rgb,  \"unknown\", 0, 0, 0);\n" +
+            "choice swatch\n" +
+            "(rgb, color, red, green, blue)\n" +
+            "{0x00FFFF, \"aqua\", 0, 255, 255}\n" +
+            "{0x000000, \"black\", 0, 0, 0}\n" +
+            "{0x0000FF, \"blue\", 0, 0, 255}\n" +
+            "{0xFFFFFF, \"white\", 255, 255, 255}\n" +
+            "{unknown_rgb,  \"unknown\", 0, 0, 0};\n" +
             "axiom shade (rgb) : parameter;\n" +
             "query color_query (shade : swatch);\n";
             ;
@@ -432,10 +435,10 @@ public class QueryParserTest
     static final String MEGA_CITY3 = 
             "include \"mega_city.xpl\";\n" +
             "choice population_group\n" +
-            "(Population,              Group):\n" +
-            "(Population >= {30,000,000}, \"Mega\"),\n" +
-            "(Population >= {20,000,000}, \"Huge\"),\n" +
-            "(Population <  {20,000,000}, \"Large\");\n" +
+            "(Population,              Group)\n" +
+            "{Population >= '30,000,000', \"Mega\"}\n" +
+            "{Population >= '20,000,000', \"Huge\"}\n" +
+            "{Population <  '20,000,000', \"Large\"};\n" +
             "list city_group_list(population_group);\n" +
             "query group_query (mega_city:population_group);";
 
@@ -1289,7 +1292,6 @@ public class QueryParserTest
 			listBirds(parserAssembler, promptMap, keyword, birdsResultsChecker);
 		}
 	}
-	// .getTermByName("nostrils").getValue().toString()
 
 	private void listBirds(ParserAssembler parserAssembler, Map<String, List<Axiom>> promptMap, String keyword, BirdsResultsChecker birdsResultsChecker)
 	{

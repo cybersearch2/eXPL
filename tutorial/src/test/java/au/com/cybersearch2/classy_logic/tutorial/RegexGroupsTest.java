@@ -44,11 +44,14 @@ public class RegexGroupsTest
         Iterator<Axiom> iterator = regexGroups.getRegexGroups();
         File testFile = new File("src/main/resources", "in-words-list.txt");
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
+        int count = 0;
         while(iterator.hasNext())
         {
             String line = reader.readLine();
-            assertThat(iterator.next().toString()).isEqualTo(line);
+            assertThat(iterator.next().getTermByIndex(0).getValue().toString()).isEqualTo(line);
+            ++count;
         }
         reader.close();
+        assertThat(count).isEqualTo(54);
     }
 }

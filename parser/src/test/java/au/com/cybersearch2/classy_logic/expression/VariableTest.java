@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -71,27 +72,27 @@ public class VariableTest
 	{
 		Variable variable = new TestVariable(NAME);
 	    variable = new TestVariable(NAME);
-	    variable.assign(BigDecimal.ONE);
+	    variable.assign(new Parameter(Term.ANONYMOUS, BigDecimal.ONE));
 	    assertThat(variable.isEmpty()).isFalse();
 		assertThat(variable.delegate).isInstanceOf(BigDecimalOperand.class);
 		assertThat(variable.getValue()).isEqualTo(BigDecimal.ONE);
 	    variable = new TestVariable(NAME);
-	    variable.assign(Boolean.TRUE);
+	    variable.assign(new Parameter(Term.ANONYMOUS, Boolean.TRUE));
 	    assertThat(variable.isEmpty()).isFalse();
 		assertThat(variable.delegate).isInstanceOf(BooleanOperand.class);
 		assertThat(variable.getValue()).isEqualTo(Boolean.TRUE);
 	    variable = new TestVariable(NAME);
-	    variable.assign(Double.valueOf("1.0"));
+	    variable.assign(new Parameter(Term.ANONYMOUS, Double.valueOf("1.0")));
 	    assertThat(variable.isEmpty()).isFalse();
 		assertThat(variable.delegate).isInstanceOf(DoubleOperand.class);
 		assertThat(variable.getValue()).isEqualTo(Double.valueOf("1.0"));
 	    variable = new TestVariable(NAME);
-	    variable.assign(Integer.valueOf("1"));
+	    variable.assign(new Parameter(Term.ANONYMOUS, Integer.valueOf("1")));
 	    assertThat(variable.isEmpty()).isFalse();
 		assertThat(variable.delegate).isInstanceOf(IntegerOperand.class);
 		assertThat(variable.getValue()).isEqualTo(Integer.valueOf("1"));
 	    variable = new TestVariable(NAME);
-	    variable.assign("1.0f");
+	    variable.assign(new Parameter(Term.ANONYMOUS, "1.0f"));
 	    assertThat(variable.isEmpty()).isFalse();
 		assertThat(variable.delegate).isInstanceOf(StringOperand.class);
 		assertThat(variable.getValue()).isEqualTo("1.0f");
@@ -102,15 +103,15 @@ public class VariableTest
 	{
 		Variable variable = new TestVariable(NAME);
 	    variable = new TestVariable(NAME);
-	    variable.assign(BigDecimal.ONE);
+	    variable.assign(new Parameter(Term.ANONYMOUS, BigDecimal.ONE));
 	    variable = new TestVariable(NAME);
-	    variable.assign(Boolean.TRUE);
+	    variable.assign(new Parameter(Term.ANONYMOUS, Boolean.TRUE));
 	    variable = new TestVariable(NAME);
-	    variable.assign(Double.valueOf("1.0"));
+	    variable.assign(new Parameter(Term.ANONYMOUS, Double.valueOf("1.0")));
 	    variable = new TestVariable(NAME);
-	    variable.assign(Integer.valueOf("1"));
+	    variable.assign(new Parameter(Term.ANONYMOUS, Integer.valueOf("1")));
 	    variable = new TestVariable(NAME);
-	    variable.assign("1.0f");
+	    variable.assign(new Parameter(Term.ANONYMOUS, "1.0f"));
 	}
 
 	@Test
@@ -143,7 +144,8 @@ public class VariableTest
 	    Parameter otherTerm = new Parameter("x", Boolean.TRUE);
 		variable.unifyTerm(otherTerm, 1);
 		variable.setDelegate(variable.getValueClass());
-		assertThat(variable.numberEvaluation(new TestIntegerOperand("L", Integer.valueOf(7)), OperatorEnum.XOR, new TestIntegerOperand("R", Integer.valueOf(5)))).isEqualTo(new Integer(0));
+		// Boolean allows multiplication with number. Operator is ignored along with fact no boolean terms involved!
+		assertThat(variable.numberEvaluation(new TestIntegerOperand("L", Integer.valueOf(7)), OperatorEnum.XOR, new TestIntegerOperand("R", Integer.valueOf(5)))).isEqualTo(new BigDecimal("35"));
 		assertThat(variable.numberEvaluation(OperatorEnum.INCR, new TestIntegerOperand("R", Integer.valueOf(8)))).isEqualTo(new Integer(0));
 	    variable = new TestVariable(NAME);
 	    otherTerm = new Parameter("x", "String");

@@ -73,7 +73,7 @@ public class LoopEvaluator extends BooleanOperand
 			EvaluationStatus evaluationStatus = template.evaluate();
 			if (runOnce || (evaluationStatus == EvaluationStatus.SHORT_CIRCUIT))
 			{
-				assign(Boolean.TRUE); // Value indicates successful completion
+				setValue(Boolean.TRUE); // Value indicates successful completion
 				return EvaluationStatus.COMPLETE;
 			}
 			// Only backup local changes
@@ -83,7 +83,7 @@ public class LoopEvaluator extends BooleanOperand
 				long now = new Date().getTime();
 				if (now - start >= timeoutMsecs)
 				{
-					assign(Boolean.FALSE); // Value indicates timeout
+					setValue(Boolean.FALSE); // Value indicates timeout
 					throw new QueryExecutionException("Calculation aborted after " + Calculator.CALCULATION_TIMEOUT_SECS + " seconds");
 				}
 				count = 0;

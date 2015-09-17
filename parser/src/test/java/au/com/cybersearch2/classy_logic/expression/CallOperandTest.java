@@ -223,10 +223,10 @@ public class CallOperandTest
         " calc test (integer x = math.add(12,42,93,55));\n" +
         " query four_arg_query (test);";
     static final String GRADES = 
-        "axiom grades (student, english, math, history):\n" +
-            " (\"Amy\", 14, 16, 6),\n" +
-            " (\"George\", 15, 13, 16),\n" +
-            " (\"Sarah\", 12, 17, 15);\n";
+        "axiom grades (student, english, math, history)\n" +
+            " {\"Amy\", 14, 16, 6}\n" +
+            " {\"George\", 15, 13, 16}\n" +
+            " {\"Sarah\", 12, 17, 15};\n";
 
     static final String GRADES_CALC = GRADES +
         " template score(student, integer total = math.add(english, math, history));\n" +
@@ -270,8 +270,8 @@ public class CallOperandTest
     };
     
    static final String ALPHA_MARKS = 
-    " axiom alpha_marks :\n" +
-    "(\n" +
+    " axiom alpha_marks()\n" +
+    "{\n" +
     " \"\",\n" +
     " \"f-\", \"f\", \"f+\",\n" +
     " \"e-\", \"e\", \"e+\",\n" +
@@ -279,7 +279,7 @@ public class CallOperandTest
     " \"c-\", \"c\", \"c+\",\n" +
     " \"b-\", \"b\", \"b+\",\n" +
     " \"a-\", \"a\", \"a+\"\n" +
-    ");\n" +
+    "};\n" +
     "list<term> mark(alpha_marks);\n";
     
     static final String MARKS_CALC = GRADES + ALPHA_MARKS +
@@ -355,17 +355,17 @@ public class CallOperandTest
             "query marks(grades : score);";
 
     static final String CITY_EVELATIONS =
-        "axiom city (name, altitude):\n" + 
-            "    (\"bilene\", 1718),\n" +
-            "    (\"addis ababa\", 8000),\n" +
-            "    (\"denver\", 5280),\n" +
-            "    (\"flagstaff\", 6970),\n" +
-            "    (\"jacksonville\", 8),\n" +
-            "    (\"leadville\", 10200),\n" +
-            "    (\"madrid\", 1305),\n" +
-            "    (\"richmond\",19),\n" +
-            "    (\"spokane\", 1909),\n" +
-            "    (\"wichita\", 1305);\n";
+        "axiom city (name, altitude)\n" + 
+            "    {\"bilene\", 1718}\n" +
+            "    {\"addis ababa\", 8000}\n" +
+            "    {\"denver\", 5280}\n" +
+            "    {\"flagstaff\", 6970}\n" +
+            "    {\"jacksonville\", 8}\n" +
+            "    {\"leadville\", 10200}\n" +
+            "    {\"madrid\", 1305}\n" +
+            "    {\"richmond\",19}\n" +
+            "    {\"spokane\", 1909}\n" +
+            "    {\"wichita\", 1305};\n";
     
     static final String CITY_AVERAGE_HEIGHT_CALC = CITY_EVELATIONS +
             "list city_list(city);\n" +
@@ -404,15 +404,15 @@ public class CallOperandTest
             "query average_height (average_height);"
            ;
     static final String GERMAN_COLORS =
-            "axiom lexicon (language, aqua, black, blue, white):\n" +
-            "  (\"english\", \"aqua\", \"black\", \"blue\", \"white\"),\n" +
-            "  (\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\");\n" +
+            "axiom lexicon (language, aqua, black, blue, white)\n" +
+            "  {\"english\", \"aqua\", \"black\", \"blue\", \"white\"}\n" +
+            "  {\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);" +
-            "choice swatch (shade, red, green, blue) :\n" +
-            "(colors[aqua], 0, 255, 255),\n" +
-            "(colors[black], 0, 0, 0),\n" +
-            "(colors[blue], 0, 0, 255),\n" +
-            "(colors[white], 255, 255, 255);\n" +
+            "choice swatch (shade, red, green, blue)\n" +
+            "{colors[aqua], 0, 255, 255}\n" +
+            "{colors[black], 0, 0, 0}\n" +
+            "{colors[blue], 0, 0, 255}\n" +
+            "{colors[white], 255, 255, 255};\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
             "}\n" +
@@ -482,22 +482,23 @@ public class CallOperandTest
     };
     
     static final String PERFECT_MATCH = 
-            " axiom person (name, sex, age, starsign):\n" +
-            "              (\"John\", \"m\", 23, \"gemini\"),\n" + 
-            "              (\"Sue\", \"f\", 19, \"cancer\"),\n" + 
-            "              (\"Sam\", \"m\", 24, \"scorpio\"),\n" + 
-            "              (\"Jenny\", \"f\", 21, \"gemini\"),\n" + 
-            "              (\"Andrew\", \"m\", 26, \"virgo\"),\n" + 
-            "              (\"Alice\", \"f\", 20, \"pices\"),\n" + 
-            "              (\"Ingrid\", \"f\", 23, \"cancer\"),\n" + 
-            "              (\"Jack\", \"m\", 32, \"pices\"),\n" + 
-            "              (\"Sonia\", \"f\", 33, \"gemini\"),\n" + 
-            "              (\"Alex\", \"m\", 22, \"aquarius\"),\n" + 
-            "              (\"Jill\", \"f\", 33, \"cancer\"),\n" + 
-            "              (\"Fiona\", \"f\", 29, \"gemini\"),\n" + 
-            "              (\"melissa\", \"f\", 30, \"virgo\"),\n" + 
-            "              (\"Tom\", \"m\", 22, \"cancer\"),\n" + 
-            "              (\"Bill\", \"m\", 19, \"virgo\");\n" + 
+            " axiom person (name, sex, age, starsign)\n" +
+            "              {\"John\", \"m\", 23, \"gemini\"}\n" + 
+            "              {\"Sue\", \"f\", 19, \"cancer\"}\n" + 
+            "              {\"Sam\", \"m\", 24, \"scorpio\"}\n" + 
+            "              {\"Jenny\", \"f\", 21, \"gemini\"}\n" + 
+            "              {\"Andrew\", \"m\", 26, \"virgo\"}\n" + 
+            "              {\"Alice\", \"f\", 20, \"pices\"}\n" + 
+            "              {\"Ingrid\", \"f\", 23, \"cancer\"}\n" + 
+            "              {\"Jack\", \"m\", 32, \"pices\"}\n" + 
+            "              {\"Sonia\", \"f\", 33, \"gemini\"}\n" + 
+            "              {\"Alex\", \"m\", 22, \"aquarius\"}\n" + 
+            "              {\"Jill\", \"f\", 33, \"cancer\"}\n" + 
+            "              {\"Fiona\", \"f\", 29, \"gemini\"}\n" + 
+            "              {\"melissa\", \"f\", 30, \"virgo\"}\n" + 
+            "              {\"Tom\", \"m\", 22, \"cancer\"}\n" + 
+            "              {\"Bill\", \"m\", 19, \"virgo\"};\n" + 
+            "axiom geminis = {};" +
             "list person_list(person);\n" +
             "calc people_by_starsign(\n" +
             "  string starsign,\n" +
@@ -517,29 +518,29 @@ public class CallOperandTest
              " integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(candidates),\n" +
-            "    gemini = candidates[i++],\n" +
-            "    system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign])\n" +
+            "    geminis += candidates[i++]\n" +
+            "    //system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign])\n" +
             "  }\n" +
             " );\n" +
-            " query match(match);";
+            "query match(match);";
     
     static final String FACTUAL_MATCH = 
-            " axiom person (name, sex, age, starsign):\n" +
-            "              (\"John\", \"m\", 23, \"gemini\"),\n" + 
-            "              (\"Sue\", \"f\", 19, \"cancer\"),\n" + 
-            "              (\"Sam\", \"m\", 24, \"scorpio\"),\n" + 
-            "              (\"Jenny\", \"f\", 21, \"gemini\"),\n" + 
-            "              (\"Andrew\", \"m\", 26, \"virgo\"),\n" + 
-            "              (\"Alice\", \"f\", 20, \"pices\"),\n" + 
-            "              (\"Ingrid\", \"f\", 23, \"cancer\"),\n" + 
-            "              (\"Jack\", \"m\", 32, \"pices\"),\n" + 
-            "              (\"Sonia\", \"f\", 0, \"gemini\"),\n" + 
-            "              (\"Alex\", \"m\", 22, \"aquarius\"),\n" + 
-            "              (\"Jill\", \"f\", 33, \"cancer\"),\n" + 
-            "              (\"Fiona\", \"f\", 29, \"gemini\"),\n" + 
-            "              (\"Melissa\", \"f\", 30, \"virgo\"),\n" + 
-            "              (\"Tom\", \"m\", 22, \"cancer\"),\n" + 
-            "              (\"Bill\", \"m\", 19, \"virgo\");\n" + 
+            " axiom person (name, sex, age, starsign)\n" +
+            "              {\"John\", \"m\", 23, \"gemini\"}\n" + 
+            "              {\"Sue\", \"f\", 19, \"cancer\"}\n" + 
+            "              {\"Sam\", \"m\", 24, \"scorpio\"}\n" + 
+            "              {\"Jenny\", \"f\", 21, \"gemini\"}\n" + 
+            "              {\"Andrew\", \"m\", 26, \"virgo\"}\n" + 
+            "              {\"Alice\", \"f\", 20, \"pices\"}\n" + 
+            "              {\"Ingrid\", \"f\", 23, \"cancer\"}\n" + 
+            "              {\"Jack\", \"m\", 32, \"pices\"}\n" + 
+            "              {\"Sonia\", \"f\", 0, \"gemini\"}\n" + 
+            "              {\"Alex\", \"m\", 22, \"aquarius\"}\n" + 
+            "              {\"Jill\", \"f\", 33, \"cancer\"}\n" + 
+            "              {\"Fiona\", \"f\", 29, \"gemini\"}\n" + 
+            "              {\"Melissa\", \"f\", 30, \"virgo\"}\n" + 
+            "              {\"Tom\", \"m\", 22, \"cancer\"}\n" + 
+            "              {\"Bill\", \"m\", 19, \"virgo\"};\n" + 
             "list person_list(person);\n" +
             "calc people_by_starsign(\n" +
             "  string starsign,\n" +
@@ -569,7 +570,7 @@ public class CallOperandTest
             "    gemini = candidates[i++],\n" +
             "    ? fact(gemini)\n" +
             "    {\n" +
-            "      // system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign]) }\n" +
+            "      // system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign]) )\n" +
             "      axiom person = { name = gemini[name] , sex = gemini[sex], age = gemini[age] , starsign = gemini[starsign] },\n" +
             "      eligible += person\n" +
             "    }\n" +
@@ -605,10 +606,9 @@ public class CallOperandTest
     {
         QueryProgram queryProgram = new QueryProgram(PERFECT_MATCH);
         Result result = queryProgram.executeQuery("match");
-        QualifiedName qname = QualifiedName.parseGlobalName("match.perfect");
+        QualifiedName qname = QualifiedName.parseGlobalName("geminis");
         
-        AxiomList candidates = (AxiomList) result.getAxiom(qname).getTermByName("candidates").getValue();
-        Iterator<AxiomTermList> iterator = candidates.iterator();
+        Iterator<Axiom> iterator = result.getIterator(qname);
         int index = 0;
         while(iterator.hasNext())
             //System.out.println(iterator.next().toString());

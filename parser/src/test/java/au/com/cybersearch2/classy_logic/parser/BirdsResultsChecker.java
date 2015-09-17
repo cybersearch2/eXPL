@@ -45,9 +45,9 @@ public class BirdsResultsChecker
 	{
 		try 
 		{
-			//assertThat(result).isEqualTo(reader.readLine());
-			System.out.println(result);
-			reader.readLine();
+			assertThat(result).isEqualTo(reader.readLine());
+			//System.out.println(result);
+			//reader.readLine();
 		} 
 		catch (IOException e) 
 		{

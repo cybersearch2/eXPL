@@ -31,22 +31,22 @@ public class GreekConstruction3
 
 	static final String GREEK_CONSTRUCTION =
 			
-		"axiom customer :\n" +
-		"  (\"Marathon Marble\", \"Sparta\"),\n" +
-		"  (\"Acropolis Construction\", \"Athens\"),\n" +
-		"  (\"Agora Imports\", \"Sparta\"),\n" +
-		"  (\"Spiros Theodolites\", \"Milos\");\n" +
+		"axiom customer()\n" +
+		"  {\"Marathon Marble\", \"Sparta\"}\n" +
+		"  {\"Acropolis Construction\", \"Athens\"}\n" +
+		"  {\"Agora Imports\", \"Sparta\"}\n" +
+		"  {\"Spiros Theodolites\", \"Milos\"};\n" +
 		
-		"axiom fee (name, fee):\n" +
-		"  (\"Marathon Marble\", 61),\n" +
-		"  (\"Acropolis Construction\", 47),\n" +
-		"  (\"Agora Imports\", 49),\n" +
-		"  (\"Spiros Theodolites\", 57);\n" + 
+		"axiom fee (name, fee)\n" +
+		"  {\"Marathon Marble\", 61}\n" +
+		"  {\"Acropolis Construction\", 47}\n" +
+		"  {\"Agora Imports\", 49}\n" +
+		"  {\"Spiros Theodolites\", 57};\n" + 
 		
-		"axiom freight (city, freight): \n" +
-		"  (\"Athens\", 5 ),\n" +
-		"  (\"Sparta\", 16 ),\n" +
-		"  (\"Milos\", 22);\n" +
+		"axiom freight (city, freight) \n" +
+		"  {\"Athens\", 5 }\n" +
+		"  {\"Sparta\", 16 }\n" +
+		"  {\"Milos\", 22};\n" +
 		
 		"template customer(name, city);\n" +
 		"template account(name ? name == customer.name, fee);\n" +
