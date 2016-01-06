@@ -17,14 +17,25 @@ package au.com.cybersearch2.telegen;
 
 import java.lang.reflect.Method;
 
+import javax.inject.Singleton;
+
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.TestLifecycleApplication;
 
 import android.app.Application;
-import au.com.cybersearch2.classyapp.ContextModule;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
+import au.com.cybersearch2.classyapp.ApplicationContext;
+import au.com.cybersearch2.classyapp.ApplicationLocale;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
 import au.com.cybersearch2.classytask.WorkStatus;
 import au.com.cybersearch2.telegen.interfaces.TelegenLauncher;
+import dagger.Component;
 
 /**
  * TestTelegenApplication
@@ -33,7 +44,24 @@ import au.com.cybersearch2.telegen.interfaces.TelegenLauncher;
  */
 public class TestTelegenApplication extends Application implements TestLifecycleApplication, TelegenLauncher
 {
-    private static TelegenApplicationModule telegenApplicationModule;
+    @Singleton
+    @Component(modules = TelegenApplicationModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(TelegenStartup telegenStartup);
+        void inject(TelegenLogic telegenLogic);
+        void inject(MainActivity mainActivity);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(DisplayDetailsDialog displayDetailsDialog);
+        void inject(ApplicationLocale ApplicationLocale);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(JpaEntityCollector jpaEntityCollector);
+        void inject(ApplicationContext applicationContext);
+    }
+    
     public static final String TAG = "TestTelegenApplication";
     public static final String PU_NAME = "telegen";
     private static TestTelegenApplication singleton;
@@ -74,21 +102,13 @@ public class TestTelegenApplication extends Application implements TestLifecycle
         return singleton;
     }
     
-    public static TelegenApplicationModule getTestApplicationModule()
+    public void init()
     {
-        return telegenApplicationModule;
-    }
-
-    public void init(Object... extraModules)
-    {
-        telegenApplicationModule = new TelegenApplicationModule();
-        ContextModule contextModule = new ContextModule(this);
-        Object[] initModules = new Object[extraModules.length + 1];
-        initModules[0] = contextModule;
-        if (extraModules.length > 0)
-            for (int i = 0; i < extraModules.length; i++)
-                initModules[i + 1] = extraModules[i];
-        new DI(telegenApplicationModule, initModules);
+        ApplicationComponent component = 
+                DaggerTestTelegenApplication_ApplicationComponent.builder()
+                .telegenApplicationModule(new TelegenApplicationModule(this))
+                .build();
+        DI.getInstance(component);
     }
     
     public void startup()

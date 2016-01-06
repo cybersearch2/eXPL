@@ -16,16 +16,25 @@
 package au.com.cybersearch2.telegen;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.persistence.PersistenceException;
 
 import android.content.Context;
 import android.util.Log;
-import au.com.cybersearch2.classyapp.ContextModule;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
+import au.com.cybersearch2.classyapp.ApplicationContext;
+import au.com.cybersearch2.classyapp.ApplicationLocale;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
 import au.com.cybersearch2.classytask.ThreadHelper;
 import au.com.cybersearch2.classytask.WorkStatus;
 import au.com.cybersearch2.classytask.WorkTracker;
+import dagger.Component;
 
 import com.j256.ormlite.dao.DaoManager;
 
@@ -38,6 +47,23 @@ import com.j256.ormlite.dao.DaoManager;
  */
 public class TelegenStartup
 {
+    @Singleton
+    @Component(modules = TelegenApplicationModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(TelegenStartup telegenStartup);
+        void inject(TelegenLogic telegenLogic);
+        void inject(MainActivity mainActivity);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(DisplayDetailsDialog displayDetailsDialog);
+        void inject(ApplicationLocale ApplicationLocale);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(JpaEntityCollector jpaEntityCollector);
+        void inject(ApplicationContext applicationContext);
+    }
    
     public static final String TAG = "TelegenStartup";
     /** Application  Dependency Injection configuration */
@@ -66,9 +92,11 @@ public class TelegenStartup
     	// Clear out ORMLite internal caches.
         DaoManager.clearCache();
         // Create application Object Graph for Dependency Injection
-        telegenApplicationModule = new TelegenApplicationModule();
-        DI dependencyInjection = new DI(telegenApplicationModule, new ContextModule(context));
-        dependencyInjection.validate();
+        ApplicationComponent component = 
+                DaggerTelegenStartup_ApplicationComponent.builder()
+                .telegenApplicationModule(new TelegenApplicationModule(context))
+                .build();
+        DI.getInstance(component);
         persistenceContext = new PersistenceContext();
         // Inject threadHelper
         DI.inject(this);

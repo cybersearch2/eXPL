@@ -19,15 +19,10 @@ import javax.inject.Singleton;
 
 import au.com.cybersearch2.classy_logic.JpaProviderHelper;
 import au.com.cybersearch2.classy_logic.ProviderManager;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
-import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classyapp.JavaTestResourceEnvironment;
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classydb.SQLiteDatabaseSupport;
 import au.com.cybersearch2.classydb.DatabaseSupport.ConnectionType;
+import au.com.cybersearch2.classydb.SQLiteDatabaseSupport;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
@@ -39,7 +34,7 @@ import dagger.Provides;
  * @author Andrew Bowley
  * 22 May 2015
  */
-@Module(injects = { 
+@Module(/*injects = { 
         TelegenTest.class,
         ParserResources.class,
         ParserAssembler.ExternalAxiomSource.class,
@@ -48,7 +43,7 @@ import dagger.Provides;
         NativeScriptDatabaseWork.class,
         PersistenceContext.class,
         DatabaseAdminImpl.class
-        })
+        }*/)
 public class TelegenTestModule implements ApplicationModule
 {
 

@@ -17,13 +17,18 @@ package au.com.cybersearch2.classy_logic.tutorial16;
 
 import java.util.Iterator;
 
+import javax.inject.Singleton;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
+import dagger.Component;
 
 /**
  * SchoolMarks
@@ -33,11 +38,18 @@ import au.com.cybersearch2.classyinject.DI;
  */
 public class SchoolMarks
 {
+    @Singleton
+    @Component(modules = MathsLibraryModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(ParserAssembler.ExternalFunctionProvider externalFunctionProvider);
+    }
+    
     static final String GRADES_SUM = 
-            "axiom grades (student, english, math, history):\n" +
-                " (\"Amy\", 14, 16, 6),\n" +
-                " (\"George\", 15, 13, 16),\n" +
-                " (\"Sarah\", 12, 17, 14);\n" +
+            "axiom grades (student, english, math, history)\n" +
+                " {\"Amy\", 14, 16, 6}\n" +
+                " {\"George\", 15, 13, 16}\n" +
+                " {\"Sarah\", 12, 17, 14};\n" +
             "template score(student, integer total = math.add(english, math, history));\n" +
             "list report(score);\n" +
             "query marks(grades : score);";
@@ -48,7 +60,11 @@ public class SchoolMarks
      */
     public SchoolMarks()
     {
-        new DI(new MathsLibraryModule());
+        ApplicationComponent component = 
+                DaggerSchoolMarks_ApplicationComponent.builder()
+                .mathsLibraryModule(new MathsLibraryModule())
+                .build();
+        DI.getInstance(component);
     }
     
 

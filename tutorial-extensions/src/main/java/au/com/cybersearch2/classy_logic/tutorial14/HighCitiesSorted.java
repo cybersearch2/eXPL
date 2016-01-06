@@ -19,16 +19,27 @@ import java.sql.SQLException;
 import java.util.Iterator;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider;
+import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classytask.WorkerRunnable;
+import dagger.Component;
 
 /**
  * HighCities
@@ -40,6 +51,21 @@ import au.com.cybersearch2.classyinject.DI;
  */
 public class HighCitiesSorted 
 {
+    @Singleton
+    @Component(modules = CitiesModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(HighCitiesSorted highCitiesSorted);
+        void inject(JpaEntityCollector jpaEntityCollector);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(ParserResources parserResources);
+        void inject(WorkerRunnable<Boolean> workerRunnable);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+    }
+
 	static final String CITY_EVELATIONS =
 	        "axiom city (name, altitude): resource \"cities\";\n" + 
             "// Template for name and altitude of a high city\n" +
@@ -74,7 +100,11 @@ public class HighCitiesSorted
 	public HighCitiesSorted()
 	{
 		// Configure dependency injection to get resource "cities"
-		new DI(new CitiesModule()).validate();
+        ApplicationComponent component = 
+                DaggerHighCitiesSorted_ApplicationComponent.builder()
+                .citiesModule(new CitiesModule())
+                .build();
+        DI.getInstance(component);
 		DI.inject(this);
 		EntityAxiomProvider entityAxiomProvider = new EntityAxiomProvider("cities", new CitiesDatabase());
 		entityAxiomProvider.addEntity("city", City.class); 

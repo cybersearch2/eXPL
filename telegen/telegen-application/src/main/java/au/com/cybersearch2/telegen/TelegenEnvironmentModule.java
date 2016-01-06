@@ -18,18 +18,11 @@ package au.com.cybersearch2.telegen;
 import javax.inject.Singleton;
 
 import au.com.cybersearch2.classy_logic.JpaProviderHelper;
-import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
-import au.com.cybersearch2.classyapp.ApplicationLocale;
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
 import au.com.cybersearch2.classydb.AndroidDatabaseSupport;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
 import au.com.cybersearch2.classytask.InternalHandler;
 import au.com.cybersearch2.classytask.ThreadHelper;
-import au.com.cybersearch2.classytask.UserTaskContext;
-import au.com.cybersearch2.classytask.WorkerRunnable;
 import dagger.Module;
 import dagger.Provides;
 
@@ -39,7 +32,7 @@ import dagger.Provides;
  * @author Andrew Bowley
  * 18/04/2014
  */
-@Module(injects = { WorkerRunnable.class,
+@Module(/*injects = { WorkerRunnable.class,
                     NativeScriptDatabaseWork.class,
                     DatabaseAdminImpl.class,
                     UserTaskContext.class,
@@ -47,7 +40,7 @@ import dagger.Provides;
                     PersistenceContext.class,
                     ApplicationLocale.class,
                     JpaEntityCollector.class
-})
+}*/)
 public class TelegenEnvironmentModule
 {
     @Provides @Singleton ThreadHelper provideThreadHelper()

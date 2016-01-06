@@ -19,11 +19,13 @@ import java.util.Iterator;
 
 import javax.inject.Inject;
 
+import au.com.cybersearch2.classy_logic.DaggerTestComponent;
 import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
 import au.com.cybersearch2.classy_logic.ProviderManager;
-import au.com.cybersearch2.classy_logic.QueryParserModule;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.TestComponent;
+import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -69,7 +71,11 @@ public class RegexGroups
 	public RegexGroups()
 	{
 		// Configure dependency injection to get resource "lexicon"
-		new DI(new QueryParserModule()).validate();
+        TestComponent component = 
+                DaggerTestComponent.builder()
+                .testModule(new TestModule())
+                .build();
+        DI.getInstance(component);
 		DI.inject(this);
 		providerManager.putAxiomProvider(new LexiconAxiomProvider());
 	}

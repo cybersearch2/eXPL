@@ -39,6 +39,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
+import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 
@@ -49,7 +50,7 @@ import dagger.Provides;
  */
 public class CallOperandTest
 {
-    @Module(injects=ParserAssembler.ExternalFunctionProvider.class)
+    @Module(/*injects=ParserAssembler.ExternalFunctionProvider.class*/)
     static class CallOperandTestModule implements ApplicationModule
     {
         @Provides @Singleton FunctionManager provideFunctionManager()
@@ -64,7 +65,14 @@ public class CallOperandTest
             return functionManager;
         }
     }
- 
+
+    @Singleton
+    @Component(modules = CallOperandTestModule.class)  
+    public interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(ParserAssembler.ExternalFunctionProvider externalFunctionProvider);
+    }
+    
     static class SystemFunctionProvider implements FunctionProvider<Void>
     {
         @Override
@@ -596,7 +604,11 @@ public class CallOperandTest
     @Before
     public void setUp()
     {
-        new DI(new CallOperandTestModule());
+        ApplicationComponent component = 
+                DaggerCallOperandTest_ApplicationComponent.builder()
+                .callOperandTestModule(new CallOperandTestModule())
+                .build();
+        DI.getInstance(component);
     }
 
     
@@ -709,8 +721,8 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                System.out.println(solution.getAxiom("score").toString());
-                //assertThat(solution.getAxiom("score").toString()).isEqualTo(GRADES_RESULTS[index++]);
+                //System.out.println(solution.getAxiom("score").toString());
+                assertThat(solution.getAxiom("score").toString()).isEqualTo(GRADES_RESULTS[index++]);
                 return true;
             }});
     }

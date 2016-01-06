@@ -24,21 +24,31 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Singleton;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.parser.QueryParserTest;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classytask.WorkerRunnable;
+import dagger.Component;
 
 /**
  * AgricultureJpaTest
@@ -47,6 +57,20 @@ import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
  */
 public class AgricultureJpaTest 
 {
+    @Singleton
+    @Component(modules = AgricultureModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(AgriPercentCollector agriPercentCollector);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(ParserResources parserResources);
+        void inject(WorkerRunnable<Boolean> workerRunnable);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+    }
+
     /** Named query to find all cities */
     static public final String ALL_AGRI_PERCENT = "all_agri_percent";
     /** Persistence Unit name to look up configuration details in persistence.xml */
@@ -61,14 +85,15 @@ public class AgricultureJpaTest
         	"Y2008 = 58.12, Y2009 = 58.12, Y2010 = 58.12)";
      
 
-    public AgricultureModule agricultureModule;
-
     @Before
     public void setUp() throws InterruptedException 
     {
         // Set up dependency injection, which creates an ObjectGraph from a ManyToManyModule configuration object
-    	agricultureModule = new AgricultureModule();
-    	new DI(agricultureModule).validate();
+    	ApplicationComponent component = 
+    	        DaggerAgricultureJpaTest_ApplicationComponent.builder()
+    	        .agricultureModule(new AgricultureModule())
+    	        .build();
+    	DI.getInstance(component);
         PersistenceWork setUpWork = new PersistenceWork(){
 
             @Override

@@ -29,6 +29,7 @@ import javax.inject.Singleton;
 import org.junit.Before;
 import org.junit.Test;
 
+import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -71,7 +72,7 @@ import au.com.cybersearch2.classyinject.DI;
  */
 public class QueryExecuterTest 
 {
-	@Module(injects = ParserAssembler.ExternalAxiomSource.class)
+	@Module(/*injects = ParserAssembler.ExternalAxiomSource.class*/)
 	static class QueryExecuterModule implements ApplicationModule
 	{
 	    @Provides @Singleton ProviderManager provideProviderManager()
@@ -79,7 +80,14 @@ public class QueryExecuterTest
 	    	return new ProviderManager();
 	    }
 	}
-	
+
+    @Singleton
+    @Component(modules = QueryExecuterModule.class)  
+    public interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+    }
+
 	class MultQueryTracer
 	{
 		int i;
@@ -245,7 +253,11 @@ public class QueryExecuterTest
 		freights.add(new Axiom("freight", new Parameter("city", "Athens"), new Parameter("freight", new Integer(5))));
 		freights.add(new Axiom("freight", new Parameter("city", "Sparta"), new Parameter("freight", new Integer(16))));
 		freights.add(new Axiom("freight", new Parameter("city", "Milos"), new Parameter("freight", new Integer(22))));
-		new DI(new QueryExecuterModule());
+        ApplicationComponent component = 
+                DaggerQueryExecuterTest_ApplicationComponent.builder()
+                .queryExecuterModule(new QueryExecuterModule())
+                .build();
+        DI.getInstance(component);
 	}
 
 

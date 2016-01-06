@@ -117,7 +117,7 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 		Locale matchedByCountry = null;
 		for (Locale locale: Locale.getAvailableLocales())
 			if (locale.getCountry().equals(country) && 
-				locale.getScript().isEmpty() &&
+				/*locale.getScript().isEmpty() && */
 				locale.getVariant().isEmpty())
 			{
 				matchedByCountry = locale;

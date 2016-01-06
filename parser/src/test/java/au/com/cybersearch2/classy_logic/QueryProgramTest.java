@@ -27,6 +27,7 @@ import javax.inject.Singleton;
 import org.junit.Before;
 import org.junit.Test;
 
+import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
@@ -52,7 +53,7 @@ import au.com.cybersearch2.classyinject.DI;
  */
 public class QueryProgramTest 
 {
-	@Module(injects = ParserAssembler.ExternalAxiomSource.class)
+	@Module(/*injects = ParserAssembler.ExternalAxiomSource.class*/)
 	static class QueryProgramModule implements ApplicationModule
 	{
 	    @Provides @Singleton ProviderManager provideProviderManager()
@@ -60,7 +61,14 @@ public class QueryProgramTest
 	    	return new ProviderManager();
 	    }
 	}
-	
+
+    @Singleton
+    @Component(modules = QueryProgramModule.class)  
+    public interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+    }
+
 	private static final String AXIOM_KEY = "AxiomKey";
 	protected QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, AXIOM_KEY);
 	private static final String AXIOM_KEY2 = "AxiomKey2";
@@ -78,7 +86,11 @@ public class QueryProgramTest
 	@Before
 	public void setUp()
 	{
-		new DI(new QueryProgramModule());
+        ApplicationComponent component = 
+                DaggerQueryProgramTest_ApplicationComponent.builder()
+                .queryProgramModule(new QueryProgramModule())
+                .build();
+        DI.getInstance(component);
 	}
 	
 	@Test

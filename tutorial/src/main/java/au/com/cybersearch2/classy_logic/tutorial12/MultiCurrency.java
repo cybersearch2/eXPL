@@ -17,9 +17,11 @@ package au.com.cybersearch2.classy_logic.tutorial12;
 
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.QueryParserModule;
+import au.com.cybersearch2.classy_logic.DaggerTestComponent;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.TestComponent;
+import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -55,7 +57,11 @@ public class MultiCurrency
 	 */
 	public MultiCurrency() 
 	{
-		new DI(new QueryParserModule()).validate();
+        TestComponent component = 
+                DaggerTestComponent.builder()
+                .testModule(new TestModule())
+                .build();
+        DI.getInstance(component);
 	}
 
 	/**

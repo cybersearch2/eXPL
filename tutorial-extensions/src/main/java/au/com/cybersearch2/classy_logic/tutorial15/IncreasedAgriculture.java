@@ -18,18 +18,26 @@ package au.com.cybersearch2.classy_logic.tutorial15;
 import java.util.Iterator;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classytask.WorkerRunnable;
+import dagger.Component;
 
 /**
  * IncreasedAgriculture demonstrates Axiom Provider writing query results to a database.
@@ -41,6 +49,23 @@ import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
  */
 public class IncreasedAgriculture 
 {
+    @Singleton
+    @Component(modules = AgriModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(IncreasedAgriculture increasedAgriculture);
+        void inject(AgriPercentCollector agriPercentCollector);
+        void inject(JpaEntityCollector jpaEntityCollector);
+        void inject(AgriAxiomProvider agriAxiomProvider);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(ParserResources parserResources);
+        void inject(WorkerRunnable<Boolean> workerRunnable);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+    }
+
 	static final String AGRICULTURAL_LAND = 
 		"axiom Data() : resource \"agriculture\";\n" +
 		"include \"surface-land.xpl\";\n" +
@@ -66,7 +91,11 @@ public class IncreasedAgriculture
 	public IncreasedAgriculture()
 	{
 		// Configure dependency injection to get resource "agriculture"
-		new DI(new AgriModule()).validate();
+        ApplicationComponent component = 
+                DaggerIncreasedAgriculture_ApplicationComponent.builder()
+                .agriModule(new AgriModule())
+                .build();
+        DI.getInstance(component);
 		DI.inject(this);
 	    PersistenceContext persistenceContext = new PersistenceContext();
 	    persistenceContext.initializeAllDatabases();

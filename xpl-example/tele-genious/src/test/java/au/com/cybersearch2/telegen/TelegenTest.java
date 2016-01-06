@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,21 +29,29 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
 import au.com.cybersearch2.entity.Check;
 import au.com.cybersearch2.entity.Issue;
 import au.com.cybersearch2.entity.TestChecks;
 import au.com.cybersearch2.entity.TestIssues;
+import dagger.Component;
 
 /**
  * TelegenTest
@@ -51,6 +60,20 @@ import au.com.cybersearch2.entity.TestIssues;
  */
 public class TelegenTest
 {
+    @Singleton
+    @Component(modules = TelegenTestModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(TelegenTest telegenTest);
+        void inject(JpaEntityCollector jpaEntityCollector);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(ParserResources parserResources);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+    }
+
     /** Persistence Unit name to look up configuration details in persistence.xml */
     static public final String PU_NAME = "telegen";
     static public final String  SUPPORT_CHECK_NAME = "Support";
@@ -290,7 +313,11 @@ public class TelegenTest
      */
     protected void createObjectGraph()
     {
-        new DI(new TelegenTestModule()).validate();
+        ApplicationComponent component = 
+                DaggerTelegenTest_ApplicationComponent.builder()
+                .telegenTestModule(new TelegenTestModule())
+                .build();
+        DI.getInstance(component);
     }
 
     protected QueryProgram compileScript(String script) throws ParseException

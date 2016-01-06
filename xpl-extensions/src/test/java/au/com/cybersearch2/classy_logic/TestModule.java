@@ -15,24 +15,36 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic;
 
-import au.com.cybersearch2.classy_logic.tutorial11.RegexGroups;
-import au.com.cybersearch2.classy_logic.tutorial4.InWords;
-import au.com.cybersearch2.classy_logic.tutorial9.CalculateSquareMiles2;
-import au.com.cybersearch2.classyinject.ApplicationModule;
+import javax.inject.Singleton;
+
 import dagger.Module;
+import dagger.Provides;
+import au.com.cybersearch2.classyapp.ResourceEnvironment;
+import au.com.cybersearch2.classytask.ThreadHelper;
 
 /**
- * QueryParserModule
+ * TestModule
  * @author Andrew Bowley
- * 9 Dec 2014
+ * 17 Mar 2015
  */
-@Module(injects= 
+@Module(/*injects= {
+		ParserResources.class,
+		ParserAssembler.ExternalAxiomSource.class,
+		WorkerRunnable.class }*/)
+public class TestModule 
 {
-		InWords.class, 
-		RegexGroups.class,
-		CalculateSquareMiles2.class
-},
-includes=TestModule.class)
-public class QueryParserModule implements ApplicationModule 
-{
+    @Provides @Singleton ThreadHelper provideSystemEnvironment()
+    {
+        return new TestSystemEnvironment();
+    }
+    
+    @Provides @Singleton ResourceEnvironment provideResourceEnvironment()
+    {
+        return new JavaTestResourceEnvironment("src/test/resources");
+    }
+
+    @Provides @Singleton JpaProviderHelper provideJpaProviderHelper()
+    {
+        return new JpaProviderHelper();
+    }
 }

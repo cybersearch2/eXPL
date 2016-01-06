@@ -19,7 +19,6 @@ import javax.inject.Singleton;
 
 import au.com.cybersearch2.classy_logic.JpaProviderHelper;
 import au.com.cybersearch2.classy_logic.TestModule;
-import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import dagger.Module;
 import dagger.Provides;
@@ -29,13 +28,13 @@ import dagger.Provides;
  * @author Andrew Bowley
  * 9 Dec 2014
  */
-@Module(injects= 
+@Module(/*injects= 
 {
 		IncreasedAgriculture.class,
         AgriPercentCollector.class, 
 		JpaEntityCollector.class,
 		AgriAxiomProvider.class
-},
+},*/
 includes=TestModule.class)
 public class AgriModule implements ApplicationModule 
 {

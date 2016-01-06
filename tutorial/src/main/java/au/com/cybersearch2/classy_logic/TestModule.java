@@ -19,21 +19,19 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
+import au.com.cybersearch2.classy_logic.parser.TestAxiomProvider;
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
 import au.com.cybersearch2.classytask.ThreadHelper;
-import au.com.cybersearch2.classytask.WorkerRunnable;
 
 /**
  * TestModule
  * @author Andrew Bowley
  * 17 Mar 2015
  */
-@Module(injects= {
+@Module(/*injects= {
 		ParserResources.class,
 		ParserAssembler.ExternalAxiomSource.class,
-		WorkerRunnable.class })
+		WorkerRunnable.class }*/)
 public class TestModule 
 {
     @Provides @Singleton ThreadHelper provideSystemEnvironment()
@@ -48,6 +46,6 @@ public class TestModule
 
     @Provides @Singleton ProviderManager provideProviderManager()
     {
-    	return new ProviderManager();
+        return new TestAxiomProvider();
     }
 }

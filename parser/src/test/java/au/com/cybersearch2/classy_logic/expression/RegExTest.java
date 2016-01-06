@@ -30,6 +30,7 @@ import javax.inject.Singleton;
 import org.junit.Before;
 import org.junit.Test;
 
+import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import au.com.cybersearch2.classy_logic.ProviderManager;
@@ -38,11 +39,9 @@ import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
-import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
 
@@ -53,7 +52,7 @@ import au.com.cybersearch2.classyinject.DI;
  */
 public class RegExTest 
 {
-	@Module(injects = ParserAssembler.ExternalAxiomSource.class)
+	@Module(/*injects = ParserAssembler.ExternalAxiomSource.class*/)
 	static class RegExModule implements ApplicationModule
 	{
 	    @Provides @Singleton ProviderManager provideProviderManagerr()
@@ -62,10 +61,22 @@ public class RegExTest
 	    }
 	}
 
+    @Singleton
+    @Component(modules = RegExModule.class)  
+    public interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+    }
+
+
 	@Before
 	public void setUp()
 	{
-		new DI(new RegExModule());
+        ApplicationComponent component = 
+                DaggerRegExTest_ApplicationComponent.builder()
+                .regExModule(new RegExModule())
+                .build();
+        DI.getInstance(component);
 	}
 	
 

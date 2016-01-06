@@ -37,6 +37,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Singleton;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,6 +47,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -57,7 +60,10 @@ import au.com.cybersearch2.classy_logic.query.QueryExecuterTest;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
+import au.com.cybersearch2.classytask.WorkerRunnable;
+import dagger.Component;
 
 /**
  * ScopeQueryParserTest
@@ -66,7 +72,16 @@ import au.com.cybersearch2.classyinject.DI;
  */
 public class ScopeQueryParserTest 
 {
-	static final String CITY_EVELATIONS =
+    @Singleton
+    @Component(modules = QueryParserModule.class)  
+    public interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(ParserResources parserResources);
+        void inject(WorkerRunnable<Boolean> workerRunnable);
+    }
+
+    static final String CITY_EVELATIONS =
 	    "include \"named_cities.xpl\";\n" + 
 	    "template high_city(string name, altitude ? altitude > 5000);\n" +
         "scope cities\n" +
@@ -290,7 +305,11 @@ public class ScopeQueryParserTest
     @Before
     public void setup() throws Exception
     {
-        new DI(new QueryParserModule()).validate();
+        ApplicationComponent component = 
+                DaggerScopeQueryParserTest_ApplicationComponent.builder()
+                .queryParserModule(new QueryParserModule())
+                .build();
+        DI.getInstance(component);
     }
 
     @Test

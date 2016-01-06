@@ -18,8 +18,8 @@ package au.com.cybersearch2.telegen;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import android.content.Context;
 import au.com.cybersearch2.classy_logic.ProviderManager;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyjpa.AndroidPersistenceEnvironment;
 import au.com.cybersearch2.classyjpa.AndroidPersistenceFactory;
@@ -31,16 +31,23 @@ import dagger.Provides;
  * @author Andrew Bowley
  * 08/07/2014
  */
-@Module(injects = 
+@Module(/*injects = 
 { 
     TelegenStartup.class,
     MainActivity.class,
     TelegenLogic.class,
     ParserAssembler.ExternalAxiomSource.class,
     DisplayDetailsDialog.class,
-}, includes = TelegenEnvironmentModule.class)
+},*/ includes = TelegenEnvironmentModule.class)
 public class TelegenApplicationModule implements ApplicationModule
 {
+    private Context context;
+ 
+    public TelegenApplicationModule(Context context)
+    {
+        this.context = context;
+    }
+    
     @Provides @Singleton @Named(TelegenApplication.PU_NAME)
     AndroidPersistenceEnvironment provideAndroidPersistenceEnvironment()
     {
@@ -55,5 +62,13 @@ public class TelegenApplicationModule implements ApplicationModule
     @Provides @Singleton TelegenLogic provideTelegenLogic()
     {
         return new TelegenLogic();
+    }
+    /**
+     * Returns Android Application Context
+     * @return Context
+     */
+    @Provides @Singleton Context provideContext()
+    {
+        return context;
     }
 }

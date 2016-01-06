@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>au.com.cybersearch2</groupId>
 		<artifactId>telegen-parent</artifactId>
-		<version>1.13-SNAPSHOT</version>
+		<version>1.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>telegen</artifactId>
 	<packaging>apk</packaging>
@@ -13,7 +13,7 @@
 
 	<dependencies>
         <!-- Added for Proguard -->
-        <dependency>
+       <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
           <version>${slf4j-version}</version>
@@ -141,7 +141,7 @@
           <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>com.squareup.dagger</groupId>
+          <groupId>com.google.dagger</groupId>
           <artifactId>dagger-compiler</artifactId>
           <optional>true</optional>
         </dependency>
@@ -341,6 +341,13 @@
 								<debuggable>false</debuggable>
 								<versionCodeAutoIncrement>true</versionCodeAutoIncrement>
 							</manifest>
+	              <proguard>
+	                <skip>false</skip>
+	                <config>proguard.cfg</config>
+	                 <configs>
+	                    <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
+	                 </configs>
+	              </proguard>
 						</configuration>
 						<executions>
 							<execution>

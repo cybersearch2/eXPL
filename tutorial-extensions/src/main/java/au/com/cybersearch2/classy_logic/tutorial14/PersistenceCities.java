@@ -19,14 +19,25 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Singleton;
+
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classytask.WorkerRunnable;
+import dagger.Component;
 
 /**
  * PersistenceHighCities demonstrates how to source axioms from a database using
@@ -37,6 +48,20 @@ import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
  */
 public class PersistenceCities 
 {
+    @Singleton
+    @Component(modules = CitiesModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(JpaEntityCollector jpaEntityCollector);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(ParserResources parserResources);
+        void inject(WorkerRunnable<Boolean> workerRunnable);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+    }
+    
     /** Named query to find all cities */
     static public final String ALL_CITIES = "all_cities";
     /** Persistence Unit name to look up configuration details in persistence.xml */
@@ -49,7 +74,11 @@ public class PersistenceCities
      */
 	public PersistenceCities() throws InterruptedException 
 	{
-		new DI(new CitiesModule()).validate();
+        ApplicationComponent component = 
+                DaggerPersistenceCities_ApplicationComponent.builder()
+                .citiesModule(new CitiesModule())
+                .build();
+        DI.getInstance(component);
         PersistenceWork setUpWork = new CitiesDatabase();
         // Execute work and wait synchronously for completion
         PersistenceContainer container = new PersistenceContainer(PU_NAME);

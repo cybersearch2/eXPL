@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>au.com.cybersearch2</groupId>
   <artifactId>xpl</artifactId>
-  <version>1.13-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Expression Pattern Language (eXPL) Parent</name>
   <description>Expression Pattern Language Compiler and Query Engine</description>
@@ -63,16 +63,16 @@
     <android.sdk.path>${env.ANDROID_HOME}</android.sdk.path>
     <android.plugin.version>4.3.0</android.plugin.version>
     <!-- Android API Level. Aim for highest available, but check Support Library does not break -->
-    <android.platform.version>22</android.platform.version>
+    <android.platform.version>23</android.platform.version>
     <!-- Specific Android SDK release - version + "_r" + release. Used to identify Android jar. -->
-    <android.sdk.version>5.1.1_r2</android.sdk.version>
+    <android.sdk.version>6.0.0_r2</android.sdk.version>
     <!-- Android Suport Library version - always 3-part -->
-    <android.support.version>22.2.1</android.support.version>
-    <robolectric.version>3.0-rc2</robolectric.version>
+    <android.support.version>23.1.1</android.support.version>
+    <robolectric.version>3.0</robolectric.version>
     <ormlite.version>4.49-SNAPSHOT</ormlite.version>
     <slf4j-version>1.7.2</slf4j-version>
-    <dagger.version>1.2.2</dagger.version>
-    <classy_tools.version>1.12</classy_tools.version>
+    <dagger.version>2.0.2</dagger.version>
+    <classy_tools.version>1.2-SNAPSHOT</classy_tools.version>
     <release.repo.id>artifactory</release.repo.id>
     <release.repo.url>http://microserver/artifactory/libs-release-local</release.repo.url>
     <snapshot.repo.id>artifactory</snapshot.repo.id>
@@ -176,13 +176,6 @@
 	              </sdk>
 	              <undeployBeforeDeploy>true</undeployBeforeDeploy>
 	              <disableConflictingDependenciesWarning>true</disableConflictingDependenciesWarning>
-	              <proguard>
-	                <skip>false</skip>
-	                <config>proguard.cfg</config>
-	                 <configs>
-	                    <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
-	                 </configs>
-	              </proguard>
 	            </configuration>
 	            <extensions>true</extensions>
 	          </plugin>
@@ -305,14 +298,19 @@
           <version>1.2.5</version>
         </dependency>
         <dependency>
-          <groupId>org.bsc.maven</groupId>
-          <artifactId>maven-processor-plugin</artifactId>
-          <version>3.1.0-beta1</version>
+          <groupId>javax.inject</groupId>
+          <artifactId>javax.inject</artifactId>
+          <version>1</version>
+        </dependency>
+        <dependency>
+	       <groupId>javax.annotation</groupId>
+	       <artifactId>jsr250-api</artifactId>
+	       <version>1.0</version>
         </dependency>    
         <dependency>
-          <groupId>com.squareup.dagger</groupId>
+          <groupId>com.google.dagger</groupId>
           <artifactId>dagger-compiler</artifactId>
-          <version>1.2.2</version>
+          <version>${dagger.version}</version>
         </dependency>  
         <dependency>
           <groupId>org.xerial</groupId>
@@ -332,7 +330,7 @@
         <dependency>
           <groupId>org.robolectric</groupId>
           <artifactId>shadows-core</artifactId>
-          <version>3.0-rc2</version>
+          <version>3.0</version>
         </dependency> 
       </dependencies>
   </dependencyManagement>

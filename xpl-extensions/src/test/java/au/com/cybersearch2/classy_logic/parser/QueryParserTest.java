@@ -20,17 +20,28 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import javax.inject.Singleton;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
+import au.com.cybersearch2.classy_logic.jpa.CityCollector;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classytask.WorkerRunnable;
+import dagger.Component;
 
 /**
  * QueryParserTest
@@ -39,6 +50,20 @@ import au.com.cybersearch2.classyinject.DI;
  */
 public class QueryParserTest 
 {
+    @Singleton
+    @Component(modules = QueryParserModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(CityCollector cityCollector);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(ParserResources parserResources);
+        void inject(WorkerRunnable<Boolean> workerRunnable);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+    }
+
 
 	static final String HIGH_CITIES_JPA_XPL =
 			"axiom city (name, altitude): resource \"cities\";\n" +
@@ -48,7 +73,11 @@ public class QueryParserTest
     @Before
     public void setup() throws Exception
     {
-        new DI(new QueryParserModule()).validate();
+        ApplicationComponent component = 
+                DaggerQueryParserTest_ApplicationComponent.builder()
+                .queryParserModule(new QueryParserModule())
+                .build();
+        DI.getInstance(component);
     }
 
 	@Test

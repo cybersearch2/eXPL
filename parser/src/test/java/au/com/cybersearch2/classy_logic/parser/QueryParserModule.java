@@ -22,22 +22,19 @@ import dagger.Provides;
 import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.TestSystemEnvironment;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classytask.ThreadHelper;
-import au.com.cybersearch2.classytask.WorkerRunnable;
 
 /**
  * QueryParserModule
  * @author Andrew Bowley
  * 9 Dec 2014
  */
-@Module(injects= {
+@Module(/*injects= {
 	ParserResources.class,
 	ParserAssembler.ExternalAxiomSource.class,
-	WorkerRunnable.class })
+	WorkerRunnable.class }*/)
 public class QueryParserModule implements ApplicationModule 
 {
     @Provides @Singleton ThreadHelper provideSystemEnvironment()

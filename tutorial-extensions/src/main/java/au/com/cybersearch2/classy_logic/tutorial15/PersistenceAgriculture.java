@@ -19,18 +19,28 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Singleton;
 import javax.persistence.PersistenceException;
 
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
 import au.com.cybersearch2.classytask.WorkStatus;
+import au.com.cybersearch2.classytask.WorkerRunnable;
+import dagger.Component;
 
 /**
  * PersistenceAgriculture demonstrates a custom JpaEntityCollector, AgriPercentCollector, used to
@@ -41,6 +51,22 @@ import au.com.cybersearch2.classytask.WorkStatus;
  */
 public class PersistenceAgriculture 
 {
+    @Singleton
+    @Component(modules = AgriModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(AgriPercentCollector agriPercentCollector);
+        void inject(JpaEntityCollector jpaEntityCollector);
+        void inject(AgriAxiomProvider agriAxiomProvider);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(ParserResources parserResources);
+        void inject(WorkerRunnable<Boolean> workerRunnable);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+    }
+
     /** Persistence Unit name to look up configuration details in persistence.xml */
     static public final String PU_NAME = "agriculture";
 
@@ -51,7 +77,11 @@ public class PersistenceAgriculture
      */
 	public PersistenceAgriculture() 
 	{
-		new DI(new AgriModule()).validate();
+        ApplicationComponent component = 
+                DaggerPersistenceAgriculture_ApplicationComponent.builder()
+                .agriModule(new AgriModule())
+                .build();
+        DI.getInstance(component);
         PersistenceWork setUpWork = new AgriDatabase();
         // Execute work and wait synchronously for completion
         PersistenceContainer container = new PersistenceContainer(PU_NAME);

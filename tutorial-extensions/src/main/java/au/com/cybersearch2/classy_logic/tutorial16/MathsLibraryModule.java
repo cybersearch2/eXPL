@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.tutorial16;
 import javax.inject.Singleton;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classyinject.ApplicationModule;
 import dagger.Module;
 import dagger.Provides;
@@ -28,7 +27,7 @@ import dagger.Provides;
  * @author Andrew Bowley
  * 14 Sep 2015
  */
-@Module(injects=ParserAssembler.ExternalFunctionProvider.class)
+@Module(/*injects=ParserAssembler.ExternalFunctionProvider.class*/)
 public class MathsLibraryModule implements ApplicationModule
 {
     @Provides @Singleton FunctionManager provideFunctionManager()

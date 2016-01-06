@@ -91,7 +91,7 @@ public class MainActivityTest
 
           @Implementation
           public void onForceLoad() {
-            ShadowApplication.getInstance().getBackgroundScheduler().post(new Runnable() {
+              Robolectric.getBackgroundThreadScheduler().post(new Runnable() {
               @Override
               public void run() {
                 future.run();
@@ -118,7 +118,7 @@ public class MainActivityTest
         testTelegenApplication.startup();// Initialize database
         testTelegenApplication.waitForApplicationSetup();
         Robolectric.getForegroundThreadScheduler().pause();
-        ShadowApplication.getInstance().getBackgroundScheduler().pause();
+        Robolectric.getBackgroundThreadScheduler().pause();
     }
 
     @After
@@ -141,15 +141,15 @@ public class MainActivityTest
         mainActivity = controller.create().start().visible().get();
         assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.CREATE);
         
-        ShadowApplication.getInstance().getBackgroundScheduler().advanceToLastPostedRunnable();
+        Robolectric.getBackgroundThreadScheduler().advanceToLastPostedRunnable();
         assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.INIT);
         
         assertThat(mainActivity.telegenLogic).isNotNull();
         Robolectric.getForegroundThreadScheduler().advanceToLastPostedRunnable();
-        ShadowApplication.getInstance().getBackgroundScheduler().advanceToLastPostedRunnable();
+        Robolectric.getBackgroundThreadScheduler().advanceToLastPostedRunnable();
         assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.START);
         
-        Robolectric.flushForegroundScheduler();
+        Robolectric.getForegroundThreadScheduler().advanceToLastPostedRunnable();
         assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.ISSUES);
         
         assertThat(mainActivity.adapter.getCount()).isEqualTo(TestIssues.ISSUE_DATA.length);
@@ -164,13 +164,13 @@ public class MainActivityTest
         assertThat(mainActivity.displayListFragment.isVisible()).isTrue();
         assertThat(mainActivity.displayListFragment.getListView().getCount()).isEqualTo(TestIssues.ISSUE_DATA.length);
         OnItemClickListener onItemClickListener = mainActivity.displayListFragment.getListView().getOnItemClickListener();
-        ShadowApplication.getInstance().getBackgroundScheduler().advanceToLastPostedRunnable();
+        Robolectric.getBackgroundThreadScheduler().advanceToLastPostedRunnable();
         Robolectric.getForegroundThreadScheduler().pause();
         // position = 0
         onItemClickListener.onItemClick(null, null, 0, 0);
-        ShadowApplication.getInstance().getBackgroundScheduler().runOneTask();
+        Robolectric.getBackgroundThreadScheduler().runOneTask();
         assertThat(mainActivity.telegenLogic.currentCheck).isEqualTo(TestChecks.CHECK_DATA[0][0]);
-        Robolectric.flushForegroundScheduler();
+        Robolectric.getForegroundThreadScheduler().advanceToLastPostedRunnable();
         assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.CHECKS);
         
         ShadowDialog dialog = Shadows.shadowOf(ShadowDialog.getLatestDialog());

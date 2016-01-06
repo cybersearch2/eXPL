@@ -15,8 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial3;
 
-import au.com.cybersearch2.classy_logic.QueryParserModule;
+import au.com.cybersearch2.classy_logic.DaggerTestComponent;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.TestComponent;
+import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -42,7 +44,11 @@ public class EuropeanMegaCities
 
 	public EuropeanMegaCities()
 	{   // Set up dependency injection so file mega_city.xpl can be located in project folder src/test/resources
-        new DI(new QueryParserModule()).validate();
+        TestComponent component = 
+                DaggerTestComponent.builder()
+                .testModule(new TestModule())
+                .build();
+        DI.getInstance(component);
 	}
 
 	/**

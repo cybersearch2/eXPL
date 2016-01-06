@@ -17,33 +17,27 @@ package au.com.cybersearch2.classy_logic;
 
 import javax.inject.Singleton;
 
-import dagger.Module;
-import dagger.Provides;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classydb.SQLiteDatabaseSupport;
 import au.com.cybersearch2.classydb.DatabaseSupport.ConnectionType;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classydb.SQLiteDatabaseSupport;
 import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
 import au.com.cybersearch2.classytask.ThreadHelper;
-import au.com.cybersearch2.classytask.WorkerRunnable;
+import dagger.Module;
+import dagger.Provides;
 
 /**
  * TestModule
  * @author Andrew Bowley
  * 17 Mar 2015
  */
-@Module(injects= {
+@Module(/*injects= {
         ParserAssembler.ExternalAxiomSource.class,
 		ParserResources.class,
 		WorkerRunnable.class,
 		PersistenceFactory.class,
 		NativeScriptDatabaseWork.class,
 		PersistenceContext.class,
-		DatabaseAdminImpl.class })
+		DatabaseAdminImpl.class }*/)
 public class TestModule 
 {
     @Provides @Singleton ThreadHelper provideSystemEnvironment()

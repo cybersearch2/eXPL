@@ -19,16 +19,28 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Singleton;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classydb.DatabaseAdminImpl;
+import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
+import au.com.cybersearch2.classyinject.ApplicationModule;
 import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classytask.WorkerRunnable;
+import dagger.Component;
 
 /**
  * HighCitiesJpaTest
@@ -37,7 +49,21 @@ import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
  */
 public class HighCitiesJpaTest 
 {
-    /** Named query to find all cities */
+    @Singleton
+    @Component(modules = HighCitiesModule.class)  
+    static interface ApplicationComponent extends ApplicationModule
+    {
+        void inject(CityCollector cityCollector);
+        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
+        void inject(ParserResources parserResources);
+        void inject(WorkerRunnable<Boolean> workerRunnable);
+        void inject(PersistenceContext persistenceContext);
+        void inject(PersistenceFactory persistenceFactory);
+        void inject(DatabaseAdminImpl databaseAdminImpl);
+        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+    }
+
+   /** Named query to find all cities */
     static public final String ALL_CITIES = "all_cities";
     /** Persistence Unit name to look up configuration details in persistence.xml */
     static public final String PU_NAME = "cities";
@@ -70,14 +96,15 @@ public class HighCitiesJpaTest
 		"city(Name = wichita, Altitude = 1305)"
 	};
 
-    public HighCitiesModule highCitiesModule;
-
     @Before
     public void setUp() throws InterruptedException 
     {
         // Set up dependency injection
-    	highCitiesModule = new HighCitiesModule();
-    	new DI(highCitiesModule).validate();
+        ApplicationComponent component = 
+                DaggerHighCitiesJpaTest_ApplicationComponent.builder()
+                .highCitiesModule(new HighCitiesModule())
+                .build();
+        DI.getInstance(component);
         PersistenceWork setUpWork = new PersistenceWork(){
 
             @Override
