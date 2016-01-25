@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2016  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,32 +15,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.telegen;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Locale;
-
-import au.com.cybersearch2.classyapp.ApplicationContext;
-import au.com.cybersearch2.classyapp.ResourceEnvironment;
+import android.os.Process;
+import au.com.cybersearch2.classytask.ThreadHelper;
 
 /**
- * TelegenResourceEnvironment
+ * AndroidThreadHelper
  * @author Andrew Bowley
- * 07/07/2014
+ * 25 Jan 2016
  */
-public class TelegenResourceEnvironment implements ResourceEnvironment
+public class AndroidThreadHelper implements ThreadHelper
 {
-    Locale locale = new Locale("en", "AU");
-
     @Override
-    public InputStream openResource(String resourceName) throws IOException 
+    public void setBackgroundPriority() 
     {
-        ApplicationContext applicationContex = new ApplicationContext();
-        return applicationContex.getContext().getAssets().open(resourceName);
-    }
-
-    @Override
-    public Locale getLocale() 
-    {
-        return locale;
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
     }
 }

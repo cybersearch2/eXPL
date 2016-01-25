@@ -19,28 +19,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.inject.Singleton;
-import javax.persistence.PersistenceException;
-
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
+import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
-import au.com.cybersearch2.classytask.WorkStatus;
-import au.com.cybersearch2.classytask.WorkerRunnable;
-import dagger.Component;
+import au.com.cybersearch2.classyjpa.entity.PersistenceWorkModule;
+import au.com.cybersearch2.classytask.Executable;
 
 /**
  * PersistenceAgriculture demonstrates a custom JpaEntityCollector, AgriPercentCollector, used to
@@ -51,50 +39,25 @@ import dagger.Component;
  */
 public class PersistenceAgriculture 
 {
-    @Singleton
-    @Component(modules = AgriModule.class)  
-    static interface ApplicationComponent extends ApplicationModule
-    {
-        void inject(AgriPercentCollector agriPercentCollector);
-        void inject(JpaEntityCollector jpaEntityCollector);
-        void inject(AgriAxiomProvider agriAxiomProvider);
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-        void inject(ParserResources parserResources);
-        void inject(WorkerRunnable<Boolean> workerRunnable);
-        void inject(PersistenceContext persistenceContext);
-        void inject(PersistenceFactory persistenceFactory);
-        void inject(DatabaseAdminImpl databaseAdminImpl);
-        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
-    }
-
     /** Persistence Unit name to look up configuration details in persistence.xml */
     static public final String PU_NAME = "agriculture";
+
+    private ApplicationComponent component;
+    private AgriYearPercentPersistenceService persistenceService;
 
     /**
      * Construct PersistenceHighCities object. It initializes dependency injection
      * and creates a in-memory Cities database.
      * @throws InterruptedException
      */
-	public PersistenceAgriculture() 
+	public PersistenceAgriculture() throws InterruptedException 
 	{
-        ApplicationComponent component = 
-                DaggerPersistenceAgriculture_ApplicationComponent.builder()
-                .agriModule(new AgriModule())
+        component = 
+                DaggerApplicationComponent.builder()
+                .testModule(new TestModule())
                 .build();
-        DI.getInstance(component);
-        PersistenceWork setUpWork = new AgriDatabase();
-        // Execute work and wait synchronously for completion
-        PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        try
-        {
-            WorkStatus status = container.executeTask(setUpWork).waitForTask();
-            if (status != WorkStatus.FINISHED)
-                throw new PersistenceException("Task to set up database failed");
-        }
-        catch (InterruptedException e)
-        {
-            throw new PersistenceException("Error setting up database", e);
-        }
+        getExecutable(new AgriDatabase()).waitForTask();
+        persistenceService = new AgriYearPercentPersistenceService(component);
 	}
 
 	/**
@@ -105,7 +68,7 @@ public class PersistenceAgriculture
 	 */
     public Iterator<Axiom> testDataQuery()
     {
-        JpaEntityCollector yearPercentCollector = new AgriPercentCollector(PU_NAME);
+        JpaEntityCollector<YearPercent> yearPercentCollector = new AgriPercentCollector(persistenceService);
     	List<NameMap> termNameList = new ArrayList<NameMap>();
     	termNameList.add(new NameMap("country", "country"));
         for (int year = 1962; year < 2011; ++year)
@@ -114,8 +77,14 @@ public class PersistenceAgriculture
     	return jpaSource.iterator();
     }
 
+    public Executable getExecutable(PersistenceWork persistenceWork)
+    {
+    	PersistenceWorkModule persistenceWorkModule = new PersistenceWorkModule(PU_NAME, true, persistenceWork);
+        return component.plus(persistenceWorkModule).executable();
+    }
 
-	public static void main(String[] args)
+
+	public static void main(String[] args) throws InterruptedException
 	{
         try 
         {

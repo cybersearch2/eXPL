@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2016  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,16 +13,23 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.telegen.interfaces;
+package au.com.cybersearch2.classy_logic.tutorial15;
 
-import au.com.cybersearch2.classytask.WorkStatus;
+import javax.inject.Singleton;
+
+import au.com.cybersearch2.classy_logic.TestModule;
+import au.com.cybersearch2.classyjpa.entity.PersistenceWorkModule;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import dagger.Component;
 
 /**
- * TelegenLauncher
  * @author Andrew Bowley
- * 18 Jun 2015
+ *
  */
-public interface TelegenLauncher
+@Singleton
+@Component(modules = TestModule.class)  
+public interface ApplicationComponent 
 {
-    WorkStatus waitForApplicationSetup();
+    PersistenceContext persistenceContext();
+    PersistenceWorkSubcontext plus(PersistenceWorkModule persistenceWorkModule);
 }

@@ -41,7 +41,7 @@ public class HighCitiesSortedTest
     }
     
     @Test
-    public void test_HighCitiesSorted() throws SQLException, ParseException
+    public void test_HighCitiesSorted() throws SQLException, ParseException, InterruptedException
     {
         HighCitiesSorted highCitiesSorted = new HighCitiesSorted();
         Iterator<Axiom> iterator = highCitiesSorted.getHighCities();

@@ -15,10 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.jpa;
 
+import au.com.cybersearch2.classy_logic.PersistenceWorker;
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
-import au.com.cybersearch2.classy_logic.jpa.QueryForAllGenerator;
-import au.com.cybersearch2.classyjpa.persist.Persistence;
-import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
 import au.com.cybersearch2.entity.Issue;
 
@@ -29,7 +27,7 @@ import au.com.cybersearch2.entity.Issue;
  * @author Andrew Bowley
  * 10 Feb 2015
  */
-public class IssueCollector extends JpaEntityCollector 
+public class IssueCollector extends JpaEntityCollector<Issue>
 {
     /** Named query to find all cities */
     static public final String ALL_ISSUES = "all_issues";
@@ -41,27 +39,10 @@ public class IssueCollector extends JpaEntityCollector
      * Construct a IssueCollector object
      * @param persistenceUnit
      */
-	public IssueCollector(String persistenceUnit) 
-	{
-		super(persistenceUnit);
-		// JpaEntityCollector needs the name of the query to fetch all cities 
-		this.namedJpaQuery = ALL_ISSUES;
-        // Inject persistenceContext
-        persistenceContext = new PersistenceContext();
-		setUp(persistenceUnit);
-	}
-
-	/**
-	 * Set up the named query which uses utility class QueryForAllGenerator
-	 * @param persistenceUnit
-	 */
-	protected void setUp(String persistenceUnit)
-	{
-        Persistence persistence = persistenceContext.getPersistenceUnit(persistenceUnit);
-        // Get Interface for JPA Support, required to create named queries
-        PersistenceAdmin persistenceAdmin = persistence.getPersistenceAdmin();
-        QueryForAllGenerator allEntitiesQuery = 
-                new QueryForAllGenerator(persistenceAdmin);
-        persistenceAdmin.addNamedQuery(Issue.class, ALL_ISSUES, allEntitiesQuery);
-	}
+    public IssueCollector(PersistenceWorker<Issue> persistenceService) 
+    {
+        super(Issue.class, persistenceService);
+        // JpaEntityCollector needs the name of the query to fetch all cities 
+        this.namedJpaQuery = ALL_ISSUES;
+    }
 }

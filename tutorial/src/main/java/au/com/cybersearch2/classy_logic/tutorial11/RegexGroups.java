@@ -15,29 +15,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial11;
 
+import java.io.File;
 import java.util.Iterator;
 
-import javax.inject.Inject;
-
-import au.com.cybersearch2.classy_logic.DaggerTestComponent;
 import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.TestComponent;
-import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classyinject.DI;
 
-/**
- * RegexGroups
- * Shows regular expression selecting from list of words terms starting with "in"
- * @author Andrew Bowley
- * 3 Mar 2015
- */
 public class RegexGroups 
 {
 	static final String LEXICAL_SEARCH = 
@@ -62,7 +51,6 @@ public class RegexGroups
 		"query query_in_words(lexicon : in_words);";
  
 	/** ProviderManager object wihich is axiom source for the compiler */
-	@Inject
 	ProviderManager providerManager;
 
 	/**
@@ -70,13 +58,7 @@ public class RegexGroups
 	 */
 	public RegexGroups()
 	{
-		// Configure dependency injection to get resource "lexicon"
-        TestComponent component = 
-                DaggerTestComponent.builder()
-                .testModule(new TestModule())
-                .build();
-        DI.getInstance(component);
-		DI.inject(this);
+		providerManager = new ProviderManager(new File("src/main/resources"));
 		providerManager.putAxiomProvider(new LexiconAxiomProvider());
 	}
 	
@@ -94,7 +76,8 @@ public class RegexGroups
 		// Expected 54 results can be found in /src/test/resources/in_words.lst. 
 		// Here is the first solution: 
 		// word = inadequate, part = adj., def = not sufficient to meet a need
-		QueryProgram queryProgram = new QueryProgram(LEXICAL_SEARCH);
+		QueryProgram queryProgram = new QueryProgram(providerManager);
+		queryProgram.parseScript(LEXICAL_SEARCH);
 		Result result = queryProgram.executeQuery("query_in_words");
 		return result.getIterator(QualifiedName.parseGlobalName("word_definitions"));
  	}

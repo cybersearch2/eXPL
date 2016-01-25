@@ -15,29 +15,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial15;
 
+import java.io.File;
 import java.util.Iterator;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import au.com.cybersearch2.classy_logic.PersistenceService;
+import au.com.cybersearch2.classy_logic.PersistenceWorker;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
+import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
-import au.com.cybersearch2.classytask.WorkerRunnable;
-import dagger.Component;
 
 /**
  * IncreasedAgriculture demonstrates Axiom Provider writing query results to a database.
@@ -49,23 +39,6 @@ import dagger.Component;
  */
 public class IncreasedAgriculture 
 {
-    @Singleton
-    @Component(modules = AgriModule.class)  
-    static interface ApplicationComponent extends ApplicationModule
-    {
-        void inject(IncreasedAgriculture increasedAgriculture);
-        void inject(AgriPercentCollector agriPercentCollector);
-        void inject(JpaEntityCollector jpaEntityCollector);
-        void inject(AgriAxiomProvider agriAxiomProvider);
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-        void inject(ParserResources parserResources);
-        void inject(WorkerRunnable<Boolean> workerRunnable);
-        void inject(PersistenceContext persistenceContext);
-        void inject(PersistenceFactory persistenceFactory);
-        void inject(DatabaseAdminImpl databaseAdminImpl);
-        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
-    }
-
 	static final String AGRICULTURAL_LAND = 
 		"axiom Data() : resource \"agriculture\";\n" +
 		"include \"surface-land.xpl\";\n" +
@@ -82,24 +55,24 @@ public class IncreasedAgriculture
 		"query increased_query(surface_area_increase : increased);";
 	
 	/** ProviderManager is Axiom source for eXPL compiler */
-	@Inject
-	ProviderManager providerManager;
+	private ProviderManager providerManager;
+    private ApplicationComponent component;
 
 	/**
 	 * Construct IncreasedAgriculture object
 	 */
 	public IncreasedAgriculture()
 	{
-		// Configure dependency injection to get resource "agriculture"
-        ApplicationComponent component = 
-                DaggerIncreasedAgriculture_ApplicationComponent.builder()
-                .agriModule(new AgriModule())
+        component = 
+                DaggerApplicationComponent.builder()
+                .testModule(new TestModule())
                 .build();
-        DI.getInstance(component);
-		DI.inject(this);
-	    PersistenceContext persistenceContext = new PersistenceContext();
-	    persistenceContext.initializeAllDatabases();
-		providerManager.putAxiomProvider(new AgriAxiomProvider());
+		PersistenceWorker<YearPercent> yearPercentService = 
+				new AgriYearPercentPersistenceService(component); 
+		PersistenceService<Agri10Year> agri10YearService = 
+				new AgriTenYearPersistenceService(component);  
+		providerManager = new ProviderManager();
+		providerManager.putAxiomProvider(new AgriAxiomProvider(yearPercentService,agri10YearService ));
 	}
 	
 	/**
@@ -115,7 +88,9 @@ public class IncreasedAgriculture
 	 */
 	public Iterator<Axiom> displayIncreasedAgri()
 	{
-		QueryProgram queryProgram1 = new QueryProgram(AGRICULTURAL_LAND);
+		QueryProgram queryProgram1 = new QueryProgram(providerManager);
+		queryProgram1.setResourceBase(new File("src/main/resources"));
+		queryProgram1.parseScript(AGRICULTURAL_LAND);
 		queryProgram1.executeQuery("more_agriculture"
         // Uncomment following SolutionHandler parameter to see intermediate result 
 		/*, new SolutionHandler(){
@@ -124,7 +99,9 @@ public class IncreasedAgriculture
 				System.out.println(solution.getAxiom("surface_area_increase").toString());
 				return true;
 			}}*/);
-		QueryProgram queryProgram2 = new QueryProgram(AGRI_10_YEAR);
+		QueryProgram queryProgram2 = new QueryProgram(providerManager);
+		queryProgram2.setResourceBase(new File("src/main/resources"));
+		queryProgram2.parseScript(AGRI_10_YEAR);
 		Result result = queryProgram2.executeQuery("increased_query");
 		return result.getIterator(QualifiedName.parseGlobalName("increased_list"));
 	}

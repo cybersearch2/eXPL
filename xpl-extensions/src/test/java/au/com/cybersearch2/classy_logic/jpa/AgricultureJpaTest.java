@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.jpa;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,25 +31,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
-import au.com.cybersearch2.classy_logic.parser.QueryParserTest;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.entity.PersistenceWorkModule;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
-import au.com.cybersearch2.classytask.WorkerRunnable;
+import au.com.cybersearch2.classytask.Executable;
 import dagger.Component;
+import dagger.Subcomponent;
 
 /**
  * AgricultureJpaTest
@@ -58,17 +54,18 @@ import dagger.Component;
 public class AgricultureJpaTest 
 {
     @Singleton
-    @Component(modules = AgricultureModule.class)  
-    static interface ApplicationComponent extends ApplicationModule
+    @Component(modules = TestModule.class)  
+    static interface ApplicationComponent
     {
-        void inject(AgriPercentCollector agriPercentCollector);
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-        void inject(ParserResources parserResources);
-        void inject(WorkerRunnable<Boolean> workerRunnable);
-        void inject(PersistenceContext persistenceContext);
-        void inject(PersistenceFactory persistenceFactory);
-        void inject(DatabaseAdminImpl databaseAdminImpl);
-        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+        PersistenceContext persistenceContext();
+        PersistenceWorkSubcontext plus(PersistenceWorkModule persistenceWorkModule);
+    }
+
+    @Singleton
+    @Subcomponent(modules = PersistenceWorkModule.class)
+    static interface PersistenceWorkSubcontext
+    {
+        Executable executable();
     }
 
     /** Named query to find all cities */
@@ -84,25 +81,28 @@ public class AgricultureJpaTest
             "Y2000 = 57.88, Y2001 = 57.88, Y2002 = 57.88, Y2003 = 57.88, Y2004 = 58.12, Y2005 = 58.13, Y2006 = 58.12, Y2007 = 58.12, " +
         	"Y2008 = 58.12, Y2009 = 58.12, Y2010 = 58.12)";
      
-
+    private ApplicationComponent component;
+    
     @Before
     public void setUp() throws InterruptedException 
     {
         // Set up dependency injection, which creates an ObjectGraph from a ManyToManyModule configuration object
-    	ApplicationComponent component = 
+    	component = 
     	        DaggerAgricultureJpaTest_ApplicationComponent.builder()
-    	        .agricultureModule(new AgricultureModule())
+    	        .testModule(new TestModule())
     	        .build();
-    	DI.getInstance(component);
         PersistenceWork setUpWork = new PersistenceWork(){
 
             @Override
             public void doTask(EntityManagerLite entityManager)
             {
         		ParserAssembler parserAssembler = null;
-				try {
-					parserAssembler = QueryParserTest.openScript("include \"agriculture-land.xpl\";");
-				} catch (ParseException e) {
+				try 
+				{
+					parserAssembler = openScript("include \"agriculture-land.xpl\";");
+				} 
+				catch (ParseException e) 
+				{
 					e.printStackTrace();
 				}
         	    AxiomSource agriSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("Data"));
@@ -150,8 +150,7 @@ public class AgricultureJpaTest
             }
         };
         // Execute work and wait synchronously for completion
-        PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        container.executeTask(setUpWork).waitForTask();
+        getExecutable(setUpWork).waitForTask();
     }
 
     /**
@@ -167,7 +166,10 @@ public class AgricultureJpaTest
         parserAssembler = openScript("include \"agriculture-land.xpl\";");
         AxiomSource agriSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("Data"));
         Iterator<Axiom> dataIterator = agriSource.iterator();
-        AgriPercentCollector agriPercentCollector = new AgriPercentCollector(PU_NAME);
+        AgriPersistenceService agriPersistenceService = 
+        		new AgriPersistenceService(component.persistenceContext(), this);
+        AgriPercentCollector agriPercentCollector = 
+        		new AgriPercentCollector(agriPersistenceService);
         List<NameMap> termNameList = new ArrayList<NameMap>();
         termNameList.add(new NameMap("country", "country"));
         for (int year = 1962; year < 2011; ++year)
@@ -199,7 +201,14 @@ public class AgricultureJpaTest
         QueryParser queryParser = new QueryParser(stream);
         queryParser.enable_tracing();
         QueryProgram queryProgram = new QueryProgram();
+        queryProgram.setResourceBase(new File("src/test/resources"));
         queryParser.input(queryProgram);
         return queryProgram.getGlobalScope().getParserAssembler();
+    }
+    
+    public Executable getExecutable(PersistenceWork persistenceWork)
+    {
+    	PersistenceWorkModule persistenceWorkModule = new PersistenceWorkModule(PU_NAME, true, persistenceWork);
+        return component.plus(persistenceWorkModule).executable();
     }
 }

@@ -62,8 +62,6 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
 
 /**
  * QueryExecuterTest
@@ -72,8 +70,8 @@ import au.com.cybersearch2.classyinject.DI;
  */
 public class QueryExecuterTest 
 {
-	@Module(/*injects = ParserAssembler.ExternalAxiomSource.class*/)
-	static class QueryExecuterModule implements ApplicationModule
+	@Module
+	static class QueryExecuterModule
 	{
 	    @Provides @Singleton ProviderManager provideProviderManager()
 	    {
@@ -83,7 +81,7 @@ public class QueryExecuterTest
 
     @Singleton
     @Component(modules = QueryExecuterModule.class)  
-    public interface ApplicationComponent extends ApplicationModule
+    public interface ApplicationComponent
     {
         void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
     }
@@ -257,7 +255,6 @@ public class QueryExecuterTest
                 DaggerQueryExecuterTest_ApplicationComponent.builder()
                 .queryExecuterModule(new QueryExecuterModule())
                 .build();
-        DI.getInstance(component);
 	}
 
 

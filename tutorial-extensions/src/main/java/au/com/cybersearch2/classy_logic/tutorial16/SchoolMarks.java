@@ -17,18 +17,13 @@ package au.com.cybersearch2.classy_logic.tutorial16;
 
 import java.util.Iterator;
 
-import javax.inject.Singleton;
-
+import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
-import dagger.Component;
 
 /**
  * SchoolMarks
@@ -38,13 +33,6 @@ import dagger.Component;
  */
 public class SchoolMarks
 {
-    @Singleton
-    @Component(modules = MathsLibraryModule.class)  
-    static interface ApplicationComponent extends ApplicationModule
-    {
-        void inject(ParserAssembler.ExternalFunctionProvider externalFunctionProvider);
-    }
-    
     static final String GRADES_SUM = 
             "axiom grades (student, english, math, history)\n" +
                 " {\"Amy\", 14, 16, 6}\n" +
@@ -55,34 +43,28 @@ public class SchoolMarks
             "query marks(grades : score);";
 
     /**
-     * Construct SchoolMarks object.
-     * Binds MathsLibraryModule containing FunctionProvider implementation for math.add()
-     */
-    public SchoolMarks()
-    {
-        ApplicationComponent component = 
-                DaggerSchoolMarks_ApplicationComponent.builder()
-                .mathsLibraryModule(new MathsLibraryModule())
-                .build();
-        DI.getInstance(component);
-    }
-    
-
-    /**
      * Compiles the GRADES_SUM script and runs the "marks" query.<br/>
      * The expected results:<br/>
         score(student = Amy, total = 36)<br/>
         score(student = George, total = 44)<br/>
-        score(student = Sarah, total = 44)<br/>
+        score(student = Sarah, total = 43)<br/>
      * @return Axiom iterator
      */
     public Iterator<Axiom>  generateReport()
     {
-        QueryProgram queryProgram = new QueryProgram(GRADES_SUM);
+        QueryProgram queryProgram = new QueryProgram(provideFunctionManager());
+        queryProgram.parseScript(GRADES_SUM);
         Result result = queryProgram.executeQuery("marks");
         return result.getIterator(QualifiedName.parseGlobalName("report"));
     }
 
+    FunctionManager provideFunctionManager()
+    {
+        FunctionManager functionManager = new FunctionManager();
+        MathFunctionProvider mathFunctionProvider = new MathFunctionProvider();
+        functionManager.putFunctionProvider(mathFunctionProvider.getName(), mathFunctionProvider);
+        return functionManager;
+    }
 
     /**
      * Run tutorial

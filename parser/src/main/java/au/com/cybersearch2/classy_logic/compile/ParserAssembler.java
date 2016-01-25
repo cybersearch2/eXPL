@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
@@ -43,7 +41,6 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomListSpec;
 import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classyinject.DI;
 
 
 /**
@@ -65,11 +62,11 @@ public class ParserAssembler implements LocaleListener
      */
 	public static class ExternalAxiomSource
 	{
-		@Inject
-		ProviderManager providerManager;
-		public ExternalAxiomSource()
+		protected ProviderManager providerManager;
+		
+		public ExternalAxiomSource(ProviderManager providerManager)
 		{
-            DI.inject(this); 
+			this.providerManager = providerManager;
 		}
 
 		public AxiomProvider getAxiomProvider(String name)
@@ -94,11 +91,11 @@ public class ParserAssembler implements LocaleListener
 	 */
 	public static class ExternalFunctionProvider
 	{
-        @Inject
-        FunctionManager functionManager;
-        public ExternalFunctionProvider()
+        protected FunctionManager functionManager;
+        
+        public ExternalFunctionProvider(FunctionManager functionManager)
         {
-            DI.inject(this); 
+        	this.functionManager = functionManager;
         }
 
         public FunctionProvider<?> getFunctionProvider(String name)
@@ -129,6 +126,11 @@ public class ParserAssembler implements LocaleListener
 	protected Map<QualifiedName, Axiom> scopeAxiomMap;
 	/** Axioms used as parameters */
 	protected List<QualifiedName> parameterList;
+	/** Optional ProviderManager for external axiom sources */
+	protected ProviderManager providerManager;
+	/** Optional FunctionManager for library operands */
+	protected FunctionManager functionManager;
+
 
 	/** Axiom provider connects to persistence back end */
 	ExternalAxiomSource externalAxiomSource;
@@ -162,7 +164,17 @@ public class ParserAssembler implements LocaleListener
     	return operandMap;
     }
 
-    /**
+    public void setProviderManager(ProviderManager providerManager) 
+    {
+		this.providerManager = providerManager;
+	}
+
+	public void setFunctionManager(FunctionManager functionManager) 
+	{
+		this.functionManager = functionManager;
+	}
+
+	/**
      * Returns enclosing scope
      * @return Scope object
      */
@@ -714,7 +726,11 @@ public class ParserAssembler implements LocaleListener
             throw new ExpressionException("Call name \"" + qname.toString() + "\" is invalid");
         String callName = library + "." + name;
 	    if (externalFunctionProvider == null)
-	        externalFunctionProvider = new ExternalFunctionProvider();
+	    {
+	    	if (functionManager == null)
+	    		functionManager = new FunctionManager(){};
+	        externalFunctionProvider = new ExternalFunctionProvider(functionManager);
+	    }
 	    FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
 	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
 	    if (callEvaluator == null)
@@ -773,7 +789,11 @@ public class ParserAssembler implements LocaleListener
 	protected AxiomProvider getAxiomProvider(String resourceName) 
 	{
     	if (externalAxiomSource == null)
-    		externalAxiomSource = new ExternalAxiomSource();
+    	{
+    		if (providerManager == null)
+    		    providerManager = new ProviderManager(){};
+    		externalAxiomSource = new ExternalAxiomSource(providerManager);
+    	}
 		return externalAxiomSource.getAxiomProvider(resourceName);
 	}
 

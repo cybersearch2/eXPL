@@ -22,6 +22,7 @@ import java.util.Iterator;
 
 import javax.persistence.Query;
 
+import au.com.cybersearch2.classy_logic.PersistenceWorker;
 import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classybean.BeanMap;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
@@ -34,7 +35,7 @@ import au.com.cybersearch2.classyjpa.EntityManagerLite;
  * @author Andrew Bowley
  * 10 Feb 2015
  */
-public class AgriPercentCollector extends JpaEntityCollector 
+public class AgriPercentCollector extends JpaEntityCollector<YearPercent> 
 {
     protected YearPercent yearPercent;
     protected Data fact;
@@ -45,9 +46,9 @@ public class AgriPercentCollector extends JpaEntityCollector
 	/**
 	 * 
 	 */
-	public AgriPercentCollector(String persistenceUnit) 
+	public AgriPercentCollector(PersistenceWorker<YearPercent> persistenceService) 
 	{
-		super(persistenceUnit, YearPercent.class);
+		super(YearPercent.class, persistenceService);
 		setUserTransactionMode(true);
     	setMaxResults(48 * 10); // Batch size 10
     	batchMode = true;
@@ -57,6 +58,8 @@ public class AgriPercentCollector extends JpaEntityCollector
 	@Override
 	public void doTask(EntityManagerLite entityManager) 
 	{
+		if (namedJpaQuery == null)
+            createSelectAllQuery("all_" + entityClass.getName());
 		// Collect all year percent items 
         Query query = entityManager.createNamedQuery(namedJpaQuery);
         if (maxResults > 0)

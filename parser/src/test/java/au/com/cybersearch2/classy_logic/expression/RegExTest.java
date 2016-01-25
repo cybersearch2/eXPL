@@ -42,8 +42,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
 
 /**
  * RegExTest
@@ -52,8 +50,8 @@ import au.com.cybersearch2.classyinject.DI;
  */
 public class RegExTest 
 {
-	@Module(/*injects = ParserAssembler.ExternalAxiomSource.class*/)
-	static class RegExModule implements ApplicationModule
+	@Module
+	static class RegExModule
 	{
 	    @Provides @Singleton ProviderManager provideProviderManagerr()
 	    {
@@ -63,7 +61,7 @@ public class RegExTest
 
     @Singleton
     @Component(modules = RegExModule.class)  
-    public interface ApplicationComponent extends ApplicationModule
+    public interface ApplicationComponent
     {
         void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
     }
@@ -76,7 +74,6 @@ public class RegExTest
                 DaggerRegExTest_ApplicationComponent.builder()
                 .regExModule(new RegExModule())
                 .build();
-        DI.getInstance(component);
 	}
 	
 

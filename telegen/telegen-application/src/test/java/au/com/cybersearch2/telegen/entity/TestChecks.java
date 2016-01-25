@@ -16,7 +16,6 @@
 package au.com.cybersearch2.telegen.entity;
 
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
 import au.com.cybersearch2.entity.Check;
 
@@ -25,7 +24,7 @@ import au.com.cybersearch2.entity.Check;
  * @author Andrew Bowley
  * 22 May 2015
  */
-public class TestChecks 
+public class TestChecks implements PersistenceWork 
 {
 
 	public static final String[][] CHECK_DATA = new String[][] 
@@ -47,50 +46,32 @@ public class TestChecks
             
 	};
 	
-	public TestChecks() 
-	{
-	}
-
     /**
      * Populate entity tables. Call this before doing any queries. 
      * Note the calling thread is suspended while the work is performed on a background thread. 
-     * @param puName Persistence Unit name
-     * @throws InterruptedException
      */
-    public void setUp(String puName) throws InterruptedException
+
+    @Override
+    public void doTask(EntityManagerLite entityManager)
     {
-        // Persistence work adds checks to the database using JPA.
-        // Hence there will be an enclosing transaction to ensure data consistency.
-        // Any failure will result in an IllegalStateExeception being thrown from
-        // the calling thread.
-        PersistenceWork setUpWork = new PersistenceWork(){
+    	for (String[] checkItem: CHECK_DATA)
+    	{
+    	    Check check = new Check(checkItem[0], checkItem[1]);
+    	    entityManager.persist(check);
+    	}
+    }
 
-            @Override
-            public void doTask(EntityManagerLite entityManager)
-            {
-            	for (String[] checkItem: CHECK_DATA)
-            	{
-            	    Check check = new Check(checkItem[0], checkItem[1]);
-            	    entityManager.persist(check);
-            	}
-            }
+    @Override
+    public void onPostExecute(boolean success)
+    {
+        if (!success)
+            throw new IllegalStateException("Database set up failed. Check console for error details.");
+    }
 
-            @Override
-            public void onPostExecute(boolean success)
-            {
-                if (!success)
-                    throw new IllegalStateException("Database set up failed. Check console for error details.");
-            }
-
-            @Override
-            public void onRollback(Throwable rollbackException)
-            {
-                throw new IllegalStateException("Database set up failed. Check console for stack trace.", rollbackException);
-            }
-        };
-        // Execute work and wait synchronously for completion
-        PersistenceContainer container = new PersistenceContainer(puName);
-        container.executeTask(setUpWork).waitForTask();
+    @Override
+    public void onRollback(Throwable rollbackException)
+    {
+        throw new IllegalStateException("Database set up failed. Check console for stack trace.", rollbackException);
     }
 
 }

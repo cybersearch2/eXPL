@@ -3,34 +3,28 @@ package au.com.cybersearch2.telegen;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.AndroidPersistenceEnvironment;
-import au.com.cybersearch2.classytask.BackgroundTask;
-import au.com.cybersearch2.classytask.WorkStatus;
+import au.com.cybersearch2.classytask.AsyncBackgroundTask;
 import au.com.cybersearch2.classywidget.PropertiesListAdapter;
 import au.com.cybersearch2.classywidget.ListItem;
-import au.com.cybersearch2.telegen.interfaces.TelegenLauncher;
 
 /**
  * Tele-Genious MainActivity
  * @author Andrew Bowley
  * 19 Jun 2015
  */
-@SuppressWarnings("deprecation")
-public class MainActivity extends ActionBarActivity 
+public class MainActivity extends AppCompatActivity 
 {
     public enum MainStatus
     {
@@ -43,8 +37,8 @@ public class MainActivity extends ActionBarActivity
     
     private static final String TAG = "MainActivity";
 
-    /** Status tracking for maintenance only */
-    protected MainStatus mainStatus;
+    /** Start state tracks appplication initialization progress */
+    volatile protected StartState startState = StartState.precreate;
     
     protected Dialog dialog;
     /** Display list view */
@@ -52,9 +46,6 @@ public class MainActivity extends ActionBarActivity
     /** Adapter for display list view */
     protected PropertiesListAdapter adapter;
     
-    /** Android Persistence implementation which has a custom feature of providing the underlying SQLiteOpenHelper */
-    @Inject @Named(TelegenApplication.PU_NAME) 
-    AndroidPersistenceEnvironment androidPersistenceEnvironment;
     /** Logic engine */
     @Inject
     TelegenLogic telegenLogic;
@@ -69,17 +60,18 @@ public class MainActivity extends ActionBarActivity
     public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
-        mainStatus = MainStatus.CREATE;
-        // Wait for application start which initializes persistence
-        final TelegenLauncher telegenLauncher = (TelegenLauncher)getApplication();
+        Log.i(TAG, "In MainActivity onCreate()");
         // Prepare display list view
         setContentView(R.layout.display_list_fragment);
         displayListFragment = getIssuesListFragment();
         adapter = new PropertiesListAdapter(this);
         displayListFragment.setListAdapter(adapter);
+        final TelegenApplication telegenApplication = TelegenApplication.getInstance();
+        final MainActivity mainActivity = this;
         // Complete initialization in background
-        BackgroundTask starter =  new BackgroundTask(this)
+        AsyncBackgroundTask starter =  new AsyncBackgroundTask(getApplication())
         {
+            List<ListItem> issuesList;
             /**
              * The background task
              * @see au.com.cybersearch2.classytask.BackgroundTask#loadInBackground()
@@ -87,37 +79,9 @@ public class MainActivity extends ActionBarActivity
             @Override
             public Boolean loadInBackground()
             {
-                mainStatus = MainStatus.INIT;
-                WorkStatus status = telegenLauncher.waitForApplicationSetup();
-                if (status != WorkStatus.FINISHED)
-                    return Boolean.FALSE;
-                DI.inject(MainActivity.this);
-                return Boolean.TRUE;
-            }
-
-            @Override
-            public void onLoadComplete(Loader<Boolean> loader, Boolean success)
-            {
-                if (!success)
-                    displayToast("Telegen failed to start due to unexpected error");
-                else
-                    startActivity();
-            }};
-         starter.onStartLoading();
-     }
-
-    /**
-     * Display list of issues
-     */
-    protected void startActivity()
-    {
-        mainStatus = MainStatus.START;
-        BackgroundTask issuesLoader = new BackgroundTask(this){
-            List<ListItem> issuesList;
-            
-            @Override
-            public Boolean loadInBackground()
-            {
+                Log.i(TAG, "Loading in background...");
+                startState = StartState.build;
+                telegenApplication.getTelegenComponent().inject(mainActivity);
                 issuesList = telegenLogic.getIssues();
                 return Boolean.TRUE;
             }
@@ -125,11 +89,15 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onLoadComplete(Loader<Boolean> loader, Boolean success)
             {
-                displayIssues(issuesList);
-            }
-        };
-        issuesLoader.onStartLoading();
-    }
+                Log.i(TAG, "Loading completed " + success);
+                startState = success ? StartState.run : StartState.fail;
+                if (!success)
+                    displayToast("Telegen failed to start due to unexpected error");
+                else
+                    displayIssues(issuesList);
+            }};
+         starter.onStartLoading();
+     }
 
     /**
      * Returns fragment which diplays a list
@@ -173,17 +141,42 @@ public class MainActivity extends ActionBarActivity
         if (Intent.ACTION_MAIN.equals(intent.getAction())) 
             startActivity();
     }
- 
+
+    /**
+     * Display list of issues
+     */
+    protected void startActivity()
+    {
+        AsyncBackgroundTask issuesLoader = new AsyncBackgroundTask(getApplication()){
+            List<ListItem> issuesList;
+            
+            @Override
+            public Boolean loadInBackground()
+            {
+                issuesList = telegenLogic.getIssues();
+                return Boolean.TRUE;
+            }
+
+            @Override
+            public void onLoadComplete(Loader<Boolean> loader, Boolean success)
+            {
+                displayIssues(issuesList);
+            }
+        };
+        issuesLoader.onStartLoading();
+    }
+
+
     /**
      * Display issues as a list
      * @param issuesList Backing list for display list view
      */
     protected void displayIssues(final List<ListItem> issuesList)
     {
-        mainStatus = MainStatus.ISSUES;
         adapter.changeData(issuesList);
         displayListFragment.getListView().setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) 
+            {
                 startChecksDialog(issuesList.get(position));
              }
         });
@@ -195,7 +188,7 @@ public class MainActivity extends ActionBarActivity
      */
     protected void startChecksDialog(final ListItem issue)
     {
-        BackgroundTask responder =  new BackgroundTask(this) 
+        AsyncBackgroundTask responder =  new AsyncBackgroundTask(getApplication()) 
         {   // Bundle supplies title, context and context to dialog
             Bundle args = new Bundle();
             
@@ -214,8 +207,7 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onLoadComplete(Loader<Boolean> loader, Boolean success)
             {
-                mainStatus = MainStatus.CHECKS;
-                dialog = showDialog(args);
+                 dialog = showDialog(args);
             }
         };
         responder.onStartLoading();

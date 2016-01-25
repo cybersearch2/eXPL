@@ -42,6 +42,7 @@ import javax.inject.Singleton;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
@@ -60,9 +61,6 @@ import au.com.cybersearch2.classy_logic.query.QueryExecuterTest;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classytask.WorkerRunnable;
 import dagger.Component;
 
 /**
@@ -74,11 +72,10 @@ public class ScopeQueryParserTest
 {
     @Singleton
     @Component(modules = QueryParserModule.class)  
-    public interface ApplicationComponent extends ApplicationModule
+    public interface ApplicationComponent
     {
         void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
         void inject(ParserResources parserResources);
-        void inject(WorkerRunnable<Boolean> workerRunnable);
     }
 
     static final String CITY_EVELATIONS =
@@ -309,7 +306,6 @@ public class ScopeQueryParserTest
                 DaggerScopeQueryParserTest_ApplicationComponent.builder()
                 .queryParserModule(new QueryParserModule())
                 .build();
-        DI.getInstance(component);
     }
 
     @Test
@@ -357,7 +353,8 @@ public class ScopeQueryParserTest
     @Test
     public void test_mega_cities3() throws IOException
     {
-        QueryProgram queryProgram = new QueryProgram(MEGA_CITY3);
+        QueryProgram queryProgram = new QueryProgram(new TestAxiomProvider());
+        queryProgram.parseScript(MEGA_CITY3);
         //queryProgram.executeQuery("german", "group_query", new SolutionHandler(){
         //queryProgram.executeQuery("german.group_query", new SolutionHandler(){
         //  @Override
@@ -439,6 +436,7 @@ public class ScopeQueryParserTest
 	public void test_city_elevation() throws ParseException, IOException
 	{
 		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.setResourceBase(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
 		openScript(CITY_EVELATIONS, queryProgram);
 		Scope cityScope = queryProgram.getScope("cities");
 		Scope globalScope = queryProgram.getGlobalScope();
@@ -471,6 +469,7 @@ public class ScopeQueryParserTest
 	public void test_agricultural_land() throws ParseException, IOException
 	{
 		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.setResourceBase(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
 		openScript(AGRICULTURAL_LAND, queryProgram);
 		SolutionHandler solutionHandler = new SolutionHandler(){
 	 	    File surfaceAreaList = new File("src/test/resources", "surface-area.lst");
@@ -530,6 +529,7 @@ public class ScopeQueryParserTest
 	public void test_birds() throws ParseException, IOException
 	{
 		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.setResourceBase(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
 		openScript(BIRDS, queryProgram);
 		Scope scope =queryProgram.getScope("birds");
 		Map<String, QuerySpec> querySpecMap = scope.getQuerySpecMap();
@@ -623,6 +623,7 @@ public class ScopeQueryParserTest
 			else 
 			{
 				QueryProgram queryProgram = new QueryProgram();
+				queryProgram.setResourceBase(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
 				openScript(BIRDS, queryProgram);
 
 				Scope scope = queryProgram.getScope("birds");

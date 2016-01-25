@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.jpa;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,23 +26,15 @@ import javax.inject.Singleton;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
-import au.com.cybersearch2.classy_logic.jpa.JpaSource;
+import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.entity.PersistenceWorkModule;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
-import au.com.cybersearch2.classytask.WorkerRunnable;
+import au.com.cybersearch2.classytask.Executable;
 import dagger.Component;
+import dagger.Subcomponent;
 
 /**
  * HighCitiesJpaTest
@@ -50,18 +44,20 @@ import dagger.Component;
 public class HighCitiesJpaTest 
 {
     @Singleton
-    @Component(modules = HighCitiesModule.class)  
-    static interface ApplicationComponent extends ApplicationModule
+    @Component(modules = TestModule.class)  
+    static interface ApplicationComponent
     {
-        void inject(CityCollector cityCollector);
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-        void inject(ParserResources parserResources);
-        void inject(WorkerRunnable<Boolean> workerRunnable);
-        void inject(PersistenceContext persistenceContext);
-        void inject(PersistenceFactory persistenceFactory);
-        void inject(DatabaseAdminImpl databaseAdminImpl);
-        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+        PersistenceContext persistenceContext();
+        PersistenceWorkSubcontext plus(PersistenceWorkModule persistenceWorkModule);
     }
+
+    @Singleton
+    @Subcomponent(modules = PersistenceWorkModule.class)
+    static interface PersistenceWorkSubcontext
+    {
+        Executable executable();
+    }
+
 
    /** Named query to find all cities */
     static public final String ALL_CITIES = "all_cities";
@@ -96,15 +92,16 @@ public class HighCitiesJpaTest
 		"city(Name = wichita, Altitude = 1305)"
 	};
 
+    private ApplicationComponent component;
+
     @Before
     public void setUp() throws InterruptedException 
     {
         // Set up dependency injection
-        ApplicationComponent component = 
+        component = 
                 DaggerHighCitiesJpaTest_ApplicationComponent.builder()
-                .highCitiesModule(new HighCitiesModule())
+                .testModule(new TestModule())
                 .build();
-        DI.getInstance(component);
         PersistenceWork setUpWork = new PersistenceWork(){
 
             @Override
@@ -137,14 +134,17 @@ public class HighCitiesJpaTest
             }
         };
         // Execute work and wait synchronously for completion
-        PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        container.executeTask(setUpWork).waitForTask();
+        // Execute work and wait synchronously for completion
+        getExecutable(setUpWork).waitForTask();
     }
 
     @Test
     public void test_query() throws Exception
     {
-    	CityCollector cityCollector = new CityCollector(PU_NAME);
+    	CityPersistenceService cityPersistenceService = 
+        		new CityPersistenceService(component.persistenceContext(), this);
+    	CityCollector cityCollector = new CityCollector(cityPersistenceService);
+    	cityCollector.createSelectAllQuery("all_cities");
     	JpaSource jpaSource = new JpaSource(cityCollector, "city");
     	Iterator<Axiom> axiomIterator = jpaSource.iterator();
     	int next = 0;
@@ -156,7 +156,9 @@ public class HighCitiesJpaTest
     @Test
     public void test_query_term_names() throws Exception
     {
-    	CityCollector cityCollector = new CityCollector(PU_NAME);
+    	CityPersistenceService cityPersistenceService = 
+        		new CityPersistenceService(component.persistenceContext(), this);
+    	CityCollector cityCollector = new CityCollector(cityPersistenceService);
     	List<NameMap> termNameList = new ArrayList<NameMap>();
     	termNameList.add(new NameMap("Name", "name"));
     	termNameList.add(new NameMap("Altitude", "altitude"));
@@ -168,4 +170,9 @@ public class HighCitiesJpaTest
     		assertThat(CITY_AXIOMS2[next++]).isEqualTo(axiomIterator.next().toString());
     }
     
+    public Executable getExecutable(PersistenceWork persistenceWork)
+    {
+    	PersistenceWorkModule persistenceWorkModule = new PersistenceWorkModule(PU_NAME, true, persistenceWork);
+        return component.plus(persistenceWorkModule).executable();
+    }
 }

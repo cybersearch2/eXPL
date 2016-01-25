@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2016  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,44 +13,39 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.telegen;
+package au.com.cybersearch2.telegen.module;
+
+import java.util.Locale;
 
 import javax.inject.Singleton;
 
-import au.com.cybersearch2.classy_logic.JpaProviderHelper;
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
 import au.com.cybersearch2.classydb.AndroidDatabaseSupport;
 import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
 import au.com.cybersearch2.classytask.InternalHandler;
+import au.com.cybersearch2.classytask.TaskManager;
 import au.com.cybersearch2.classytask.ThreadHelper;
+import au.com.cybersearch2.telegen.AndroidResourceEnvironment;
+import au.com.cybersearch2.telegen.AndroidThreadHelper;
 import dagger.Module;
 import dagger.Provides;
 
-
 /**
- * TelegenApplicationModule
+ * TelegenEnvironmentModule
  * @author Andrew Bowley
- * 18/04/2014
+ * 25 Jan 2016
  */
-@Module(/*injects = { WorkerRunnable.class,
-                    NativeScriptDatabaseWork.class,
-                    DatabaseAdminImpl.class,
-                    UserTaskContext.class,
-                    PersistenceFactory.class,
-                    PersistenceContext.class,
-                    ApplicationLocale.class,
-                    JpaEntityCollector.class
-}*/)
+@Module
 public class TelegenEnvironmentModule
 {
     @Provides @Singleton ThreadHelper provideThreadHelper()
     {
-        return new TelegenThreadHelper();
+        return new AndroidThreadHelper();
     }
     
     @Provides @Singleton ResourceEnvironment provideResourceEnvironment()
     {
-        return new TelegenResourceEnvironment();
+        return new AndroidResourceEnvironment();
     }
 
     @Provides @Singleton InternalHandler provideInternalHandler()
@@ -58,13 +53,25 @@ public class TelegenEnvironmentModule
         return new InternalHandler();
     }
 
-    @Provides @Singleton PersistenceFactory providePersistenceFactory()
+    @Provides @Singleton TaskManager provideTaskManager()
     {
-        return new PersistenceFactory(new AndroidDatabaseSupport());
+        return new TaskManager();
+    }
+
+    @Provides @Singleton AndroidDatabaseSupport provideDatabaseSupport()
+    {
+        return new AndroidDatabaseSupport();
     }
     
-    @Provides @Singleton JpaProviderHelper provideJpaProviderHelper()
+    @Provides @Singleton PersistenceFactory providePersistenceFactory(
+            AndroidDatabaseSupport databaseSupport, 
+            ResourceEnvironment resourceEnvironment)
     {
-        return new JpaProviderHelper();
+        return new PersistenceFactory(databaseSupport, resourceEnvironment);
+    }
+
+    @Provides @Singleton Locale provideLocale(ResourceEnvironment resourceEnvironment)
+    {
+        return resourceEnvironment.getLocale();
     }
 }

@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -30,7 +28,6 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classywidget.ListItem;
 
 /**
@@ -82,14 +79,11 @@ public class TelegenLogic
     protected String currentQuery;
     protected String currentCheck;
     protected QueryProgram queryProgram;
-    @Inject
-    ProviderManager providerManager;
 
-    public TelegenLogic()
+    public TelegenLogic(ProviderManager providerManager)
     {
-        DI.inject(this);
-        providerManager.putAxiomProvider(new TelegenAxiomProvider(TelegenApplication.PU_NAME));
-        queryProgram = new QueryProgram(TELEGEN_XPL);
+        queryProgram = new QueryProgram(providerManager);
+        queryProgram.parseScript(TELEGEN_XPL);
     }
  
     public String getCurrentQuery()

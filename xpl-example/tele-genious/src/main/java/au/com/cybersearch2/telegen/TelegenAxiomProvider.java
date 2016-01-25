@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.telegen;
 
+import au.com.cybersearch2.classy_logic.PersistenceWorker;
 import au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
 import au.com.cybersearch2.entity.Check;
@@ -33,21 +34,25 @@ public class TelegenAxiomProvider extends EntityAxiomProvider
     /**
      * TelegenAxiomProvider
      */
-    public TelegenAxiomProvider(String persistenceUnit)
+    public TelegenAxiomProvider(
+		PersistenceWorker<Issue> issueWorker, 
+		PersistenceWorker<Check> checkWorker)
     {
-        this(persistenceUnit, null);
+        this(issueWorker, checkWorker, null);
 
     }
 
     /**
      * TelegenAxiomProvider
      */
-    public TelegenAxiomProvider(String persistenceUnit,
-            PersistenceWork setUpTask)
+    public TelegenAxiomProvider(
+		PersistenceWorker<Issue> issueWorker, 
+		PersistenceWorker<Check> checkWorker,
+        PersistenceWork setUpTask)
     {
-        super(persistenceUnit, setUpTask);
-        addEntity(ISSUE, Issue.class);
-        addEntity(CHECK, Check.class);
+        super("telegen", setUpTask);
+        addEntity(ISSUE, Issue.class, issueWorker);
+        addEntity(CHECK, Check.class, checkWorker);
     }
 
 }

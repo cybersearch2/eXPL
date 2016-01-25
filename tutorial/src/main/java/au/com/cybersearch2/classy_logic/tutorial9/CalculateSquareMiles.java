@@ -15,20 +15,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
+import java.io.File;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.DaggerTestComponent;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.TestComponent;
-import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
-import au.com.cybersearch2.classyinject.DI;
 
 /**
  * CalculateSquareMiles
@@ -51,11 +48,6 @@ public class CalculateSquareMiles
 
 	public CalculateSquareMiles()
 	{	
-        TestComponent component = 
-                DaggerTestComponent.builder()
-                .testModule(new TestModule())
-                .build();
-        DI.getInstance(component);
 	}
 	
     /**
@@ -67,7 +59,10 @@ public class CalculateSquareMiles
      */
 	public Iterator<Axiom> getSurfaceAreas()
 	{
-		QueryProgram queryProgram = new QueryProgram(COUNTRY_SURFACE_AREA);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.setResourceBase(new File("src/main/resources"));
+
+		queryProgram.parseScript(COUNTRY_SURFACE_AREA);
 		Result result = queryProgram.executeQuery("surface_area_mi2", new SolutionHandler(){
 
             @Override

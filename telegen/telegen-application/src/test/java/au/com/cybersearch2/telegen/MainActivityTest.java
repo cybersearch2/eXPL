@@ -25,28 +25,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.RealObject;
-import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowDialog;
-import org.robolectric.util.ActivityController;
 import org.robolectric.util.SimpleFuture;
 
 import android.content.Context;
-import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.SystemClock;
 import android.support.v4.content.AsyncTaskLoader;
-import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
-import au.com.cybersearch2.classyjpa.AndroidPersistenceEnvironment;
+import android.widget.TextView;
 import au.com.cybersearch2.classywidget.ListItem;
-import au.com.cybersearch2.telegen.MainActivity.MainStatus;
 import au.com.cybersearch2.telegen.entity.TestChecks;
 import au.com.cybersearch2.telegen.entity.TestIssues;
 
@@ -108,50 +100,24 @@ public class MainActivityTest
    
     public static final long ID = 1L;
     static String DATABASE_NAME = "telegen.db";
-    private ActivityController<MainActivity> controller;
-    private MainActivity mainActivity;
 
     @Before
     public void setUp() 
     {
-        TestTelegenApplication testTelegenApplication = TestTelegenApplication.getTestInstance();
-        testTelegenApplication.startup();// Initialize database
-        testTelegenApplication.waitForApplicationSetup();
-        Robolectric.getForegroundThreadScheduler().pause();
-        Robolectric.getBackgroundThreadScheduler().pause();
     }
 
     @After
     public void tearDown() 
     {
-        controller.destroy();
     }
     
 
-    private Intent getNewIntent()
-    {
-        return new Intent(RuntimeEnvironment.application, MainActivity.class);
-    }
-    
     @Config(shadows = { MyShadowSystemClock.class, MyShadowAsyncTaskLoader.class })
     @Test
     public void test_OnCreate() throws Exception
     {
-        controller = Robolectric.buildActivity(MainActivity.class);
-        mainActivity = controller.create().start().visible().get();
-        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.CREATE);
-        
-        Robolectric.getBackgroundThreadScheduler().advanceToLastPostedRunnable();
-        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.INIT);
-        
+        MainActivity mainActivity = Robolectric.buildActivity(MainActivity.class).create().start().visible().get();
         assertThat(mainActivity.telegenLogic).isNotNull();
-        Robolectric.getForegroundThreadScheduler().advanceToLastPostedRunnable();
-        Robolectric.getBackgroundThreadScheduler().advanceToLastPostedRunnable();
-        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.START);
-        
-        Robolectric.getForegroundThreadScheduler().advanceToLastPostedRunnable();
-        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.ISSUES);
-        
         assertThat(mainActivity.adapter.getCount()).isEqualTo(TestIssues.ISSUE_DATA.length);
         int index = 0;
         for (int i = 0; i < TestIssues.ISSUE_DATA.length; i++)
@@ -171,7 +137,6 @@ public class MainActivityTest
         Robolectric.getBackgroundThreadScheduler().runOneTask();
         assertThat(mainActivity.telegenLogic.currentCheck).isEqualTo(TestChecks.CHECK_DATA[0][0]);
         Robolectric.getForegroundThreadScheduler().advanceToLastPostedRunnable();
-        assertThat(mainActivity.mainStatus).isEqualTo(MainStatus.CHECKS);
         
         ShadowDialog dialog = Shadows.shadowOf(ShadowDialog.getLatestDialog());
         assertThat(dialog.getTitle()).isEqualTo(DisplayDetailsDialog.DIALOG_TITLE);
@@ -182,23 +147,22 @@ public class MainActivityTest
         assertThat(tv2.getText()).isEqualTo(TestIssues.ISSUE_DATA[0][1]);
         TextView tv3 = (TextView) ShadowDialog.getLatestDialog().findViewById(R.id.detail_content);
         assertThat(tv3.getText()).isEqualTo(TestChecks.CHECK_DATA[0][1]);
-        AndroidPersistenceEnvironment androidPersistenceEnvironment = mainActivity.androidPersistenceEnvironment;
-        assertThat(androidPersistenceEnvironment).isNotNull();
-        SQLiteOpenHelper sqlLiteOpenHelper = androidPersistenceEnvironment.getSQLiteOpenHelper();
-        assertThat(sqlLiteOpenHelper).isNotNull();
-        assertThat(sqlLiteOpenHelper.getDatabaseName()).isEqualTo(DATABASE_NAME);
-        SQLiteDatabase sqliteDatabase = null;
-        try
-        {
-            sqliteDatabase = sqlLiteOpenHelper.getWritableDatabase();
-            assertThat(sqliteDatabase.isDatabaseIntegrityOk()).isTrue();
-            assertThat(sqliteDatabase.getVersion()).isEqualTo(1);
-        }
-        finally
-        {
-            if ((sqliteDatabase != null) && sqliteDatabase.isOpen())
-                sqliteDatabase.close();
-        }
+        test_NextCheck(mainActivity.telegenLogic);
     }
  
+    public void test_NextCheck(TelegenLogic telegenLogic)
+    {
+        String firstCheck = telegenLogic.getFirstCheck("Start");
+        assertThat(firstCheck).isEqualTo("Make sure the AC power cord is securely plugged in to the wall outlet");
+        assertThat(telegenLogic.currentCheck).isEqualTo("Power cord");
+        String nextCheck = telegenLogic.getNextCheck();
+        assertThat(nextCheck).isEqualTo("Make sure the wall outlet is working");
+        assertThat(telegenLogic.currentCheck).isEqualTo("Wall outlet");
+        nextCheck = telegenLogic.getNextCheck();
+        assertThat(nextCheck).isEqualTo("Try pressing the POWER button on the TV to make sure the problem is not the remote.");
+        assertThat(telegenLogic.currentCheck).isEqualTo("Remote");
+        nextCheck = telegenLogic.getNextCheck();
+        assertThat(nextCheck).isEqualTo("Contact Support");
+        assertThat(telegenLogic.currentCheck).isEqualTo(TelegenLogic.CALL_SUPPORT);
+    }
 }

@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2016  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,29 +17,13 @@ package au.com.cybersearch2.classy_logic.tutorial14;
 
 import javax.inject.Singleton;
 
-import au.com.cybersearch2.classy_logic.JpaProviderHelper;
-import au.com.cybersearch2.classy_logic.TestModule;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import dagger.Module;
-import dagger.Provides;
+import au.com.cybersearch2.classyjpa.entity.PersistenceWorkModule;
+import au.com.cybersearch2.classytask.Executable;
+import dagger.Subcomponent;
 
-/**
- * CitiesModule is the PersistenceHighCities dependency inject configuration
- * @author Andrew Bowley
- * 9 Dec 2014
- */
-@Module(/*injects= 
+@Singleton
+@Subcomponent(modules = PersistenceWorkModule.class)
+public interface PersistenceWorkSubcontext 
 {
-	HighCitiesSorted.class,
-	JpaEntityCollector.class, 
-	PersistenceCities.class
-},*/
-includes=TestModule.class)
-public class CitiesModule implements ApplicationModule 
-{
-    @Provides @Singleton JpaProviderHelper provideJpaProviderHelper()
-    {
-        return new JpaProviderHelper();
-    }
-    
+    Executable executable();
 }

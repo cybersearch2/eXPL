@@ -18,13 +18,11 @@ package au.com.cybersearch2.classy_logic.jpa;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.inject.Inject;
 import javax.persistence.Query;
 
-import au.com.cybersearch2.classy_logic.JpaProviderHelper;
+import au.com.cybersearch2.classy_logic.PersistenceWorker;
 import au.com.cybersearch2.classy_logic.interfaces.DataCollector;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
 import au.com.cybersearch2.classyjpa.persist.PersistenceAdmin;
@@ -41,14 +39,12 @@ import au.com.cybersearch2.classytask.WorkStatus;
  * @author Andrew Bowley
  * 10 Feb 2015
  */
-public class JpaEntityCollector implements DataCollector, PersistenceWork 
+public class JpaEntityCollector<E> implements DataCollector, PersistenceWork 
 {
 	/** Named query to be performed if doInBackground() is not overriden */
     protected String namedJpaQuery;
     /** List of objects to be translated into an axiom source */
     protected Collection<Object> data;
-    /** JPA container to execute named query */
-    protected String persistenceUnit;
     /** Maximum number of objects to return from a single query */
     protected int maxResults;
     /** The start position of the first result, numbered from 0 */
@@ -60,35 +56,21 @@ public class JpaEntityCollector implements DataCollector, PersistenceWork
     /** Flag set true if user-controlled transactions */
     protected boolean userTransactionMode;
 
-    /** Provider Helper to perform persistence work */
-    @Inject
-    JpaProviderHelper providerHelper;
+    /** Helper to perform persistence work */
+    protected PersistenceWorker<E> persistenceWorker;
+    protected Class<E> entityClass;
 
     /**
      * Construct a JpaEntityCollector object
-     * @param persistenceUnit Name of persistence unit defined in persistence.xml configuration file
-     */
-    protected JpaEntityCollector(String persistenceUnit)
-    {
-        this.persistenceUnit = persistenceUnit;
-        DI.inject(this);
-    }
-    
-    /**
      * Construct a JpaEntityCollector object for a specific entity class.
      * This maps all the class fields with a supported type to axiom terms
-     * @param persistenceUnit Name of persistence unit defined in persistence.xml configuration file
      * @param entityClass Class of entity to be collected
+     * @param persistenceUnit Name of persistence unit defined in persistence.xml configuration file
      */
-    public JpaEntityCollector(String persistenceUnit, Class<?> entityClass)
+    public JpaEntityCollector(Class<E> entityClass, PersistenceWorker<E> persistenceService)
     {
-        this(persistenceUnit);
-        namedJpaQuery = "all_" + entityClass.getName();
-        PersistenceContext persistenceContext = new PersistenceContext();
-        PersistenceAdmin persistenceAdmin = persistenceContext.getPersistenceAdmin(persistenceUnit);
-        QueryForAllGenerator allEntitiesQuery = 
-                new QueryForAllGenerator(persistenceAdmin);
-        persistenceAdmin.addNamedQuery(entityClass, namedJpaQuery, allEntitiesQuery);
+        this.persistenceWorker = persistenceService;
+        this.entityClass = entityClass;
     }
     
     /**
@@ -119,6 +101,8 @@ public class JpaEntityCollector implements DataCollector, PersistenceWork
 	@Override
 	public void doTask(EntityManagerLite entityManager) 
 	{
+		if (namedJpaQuery == null)
+            createSelectAllQuery("all_" + entityClass.getName());
         Query query = entityManager.createNamedQuery(namedJpaQuery);
         if (maxResults > 0)
         {   // Paging enabled
@@ -131,12 +115,23 @@ public class JpaEntityCollector implements DataCollector, PersistenceWork
         	// clear "moreExpected" flag if no more results avaliable
         	if (data.size() > 0)
         	{
-        		startPosition += data.size();
+        		startPosition += data.size() + 1;
         		moreExpected = true;
         	}
         	else
         		moreExpected = false;
         }
+	}
+
+	public void createSelectAllQuery(String queryName) 
+	{
+		namedJpaQuery = queryName;
+        PersistenceContext persistenceContext = persistenceWorker.getPersistenceContext();
+        String persistenceUnit = persistenceWorker.getPersistenceUnit();
+        PersistenceAdmin persistenceAdmin = persistenceContext.getPersistenceAdmin(persistenceUnit);
+        QueryForAllGenerator allEntitiesQuery = 
+                new QueryForAllGenerator(persistenceAdmin);
+        persistenceAdmin.addNamedQuery(entityClass, queryName, allEntitiesQuery);
 	}
 
 	/**
@@ -174,9 +169,17 @@ public class JpaEntityCollector implements DataCollector, PersistenceWork
 	@Override
 	public Collection<Object> getData() 
 	{
-		WorkStatus status = providerHelper.doWork(persistenceUnit, this, userTransactionMode);
+		WorkStatus status = null;
+		try 
+		{
+			status = persistenceWorker.doWork(this).waitForTask();
+		} 
+		catch (InterruptedException e) 
+		{
+			return Collections.emptyList();
+		}
 		if (status != WorkStatus.FINISHED)
-			throw new QueryExecutionException("Error fetching axioms from persistence unit " + persistenceUnit);
+			throw new QueryExecutionException("Error fetching axioms from persistence unit " + persistenceWorker.getPersistenceUnit());
 		if (batchMode)
 			processBatch();
 		if (data == null)
@@ -214,12 +217,10 @@ public class JpaEntityCollector implements DataCollector, PersistenceWork
 		this.maxResults = maxResults;
 	}
 
-	/**
-	 * Returns peristence unit
-	 * @return String
-	 */
-	public String getPersistenceUnit()
+	public PersistenceWorker<E> getPersistenceService() 
 	{
-	    return persistenceUnit;
+		return persistenceWorker;
 	}
+
+	
 }

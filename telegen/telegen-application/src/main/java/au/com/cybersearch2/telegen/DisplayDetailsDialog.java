@@ -13,9 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
-import au.com.cybersearch2.classyapp.ApplicationContext;
-import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classytask.BackgroundTask;
+import au.com.cybersearch2.classytask.AsyncBackgroundTask;
 
 
 public class DisplayDetailsDialog extends DialogFragment 
@@ -26,8 +24,8 @@ public class DisplayDetailsDialog extends DialogFragment
     public static final CharSequence DIALOG_TITLE = "Troubleshooting";
     
     protected Dialog dialog;
-    protected Context androidContext;
-    
+    @Inject
+    Context context;
     @Inject
     TelegenLogic telegenLogic;
   
@@ -38,17 +36,17 @@ public class DisplayDetailsDialog extends DialogFragment
          final View view = inflater.inflate(R.layout.display_details, container, false); 
 
          String title = getArguments().getString(KEY_TITLE);
-         String context = getArguments().getString(KEY_CONTEXT);
+         String detailContext = getArguments().getString(KEY_CONTEXT);
          String content = getArguments().getString(KEY_CONTENT);
          if ((title != null) && (title.length() > 0))
          {
              TextView tv1 = (TextView)view.findViewById(R.id.detail_title);
              tv1.setText(title);
          }
-         if ((context != null) && (context.length() > 0))
+         if ((detailContext != null) && (detailContext.length() > 0))
          {
              TextView tv2 = (TextView)view.findViewById(R.id.detail_context);
-             tv2.setText(context);
+             tv2.setText(detailContext);
         }
         if ((content != null) && (content.length() > 0))
         {
@@ -59,7 +57,7 @@ public class DisplayDetailsDialog extends DialogFragment
         final Button button = (Button)view.findViewById(R.id.button_next);
         button.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                final BackgroundTask responder =  new BackgroundTask(androidContext)
+                final AsyncBackgroundTask responder =  new AsyncBackgroundTask(context)
                 {
                     String check;
                     
@@ -101,8 +99,6 @@ public class DisplayDetailsDialog extends DialogFragment
         dialog.setTitle(DIALOG_TITLE);
         dialog.setCanceledOnTouchOutside(true);
         dialog.setCancelable(true);
-        DI.inject(this);
-        androidContext = new ApplicationContext().getContext();
         return dialog;
     }
     

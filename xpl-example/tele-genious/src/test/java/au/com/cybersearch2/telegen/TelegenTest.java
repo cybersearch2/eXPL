@@ -18,40 +18,35 @@ package au.com.cybersearch2.telegen;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.PersistenceWorker;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.jpa.JpaEntityCollector;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.entity.PersistenceWorkModule;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classytask.Executable;
 import au.com.cybersearch2.entity.Check;
 import au.com.cybersearch2.entity.Issue;
 import au.com.cybersearch2.entity.TestChecks;
 import au.com.cybersearch2.entity.TestIssues;
 import dagger.Component;
+import dagger.Subcomponent;
 
 /**
  * TelegenTest
@@ -61,17 +56,18 @@ import dagger.Component;
 public class TelegenTest
 {
     @Singleton
-    @Component(modules = TelegenTestModule.class)  
-    static interface ApplicationComponent extends ApplicationModule
+    @Component(modules = TelegenModule.class)  
+    static interface ApplicationComponent
     {
-        void inject(TelegenTest telegenTest);
-        void inject(JpaEntityCollector jpaEntityCollector);
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-        void inject(ParserResources parserResources);
-        void inject(PersistenceContext persistenceContext);
-        void inject(PersistenceFactory persistenceFactory);
-        void inject(DatabaseAdminImpl databaseAdminImpl);
-        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+        PersistenceContext persistenceContext();
+        PersistenceWorkSubcontext plus(PersistenceWorkModule persistenceWorkModule);
+    }
+
+    @Singleton
+    @Subcomponent(modules = PersistenceWorkModule.class)
+    static interface PersistenceWorkSubcontext
+    {
+        Executable executable();
     }
 
     /** Persistence Unit name to look up configuration details in persistence.xml */
@@ -135,31 +131,33 @@ public class TelegenTest
         "query first_check_query (issue_param: first_check);\n" +
         "query next_check_query (check_param: next_check);";
 
-    /** Factory object to create "telegen" Persistence Unit implementation */
-    @Inject
-    PersistenceContext persistenceContext;
-    @Inject
-    ProviderManager providerManager;
-
-    /**
-     * TelegenTest
-     */
-    public TelegenTest()
-    {
-    }
+    private ProviderManager providerManager;
+    private ApplicationComponent component;
 
     @Before
     public void setUp() throws Exception
     {
-        // Set up dependency injection, which creates an ObjectGraph from a ManyToManyModule configuration object
-        createObjectGraph();
-        DI.inject(this);
-        persistenceContext.initializeAllDatabases();
-        TestIssues testIssues = new TestIssues();
-        testIssues.setUp(PU_NAME);
-        TestChecks testChecks = new TestChecks();
-        testChecks.setUp(PU_NAME);
-        providerManager.putAxiomProvider(new TelegenAxiomProvider(PU_NAME));
+        // Set up dependency injection
+        component = 
+                DaggerTelegenTest_ApplicationComponent.builder()
+                .telegenModule(new TelegenModule())
+                .build();
+        getExecutable(new TestIssues()).waitForTask();
+        getExecutable(new TestChecks()).waitForTask();
+        providerManager = new ProviderManager();
+        PersistenceWorker<Issue> issueWorker = new PersistenceWorker<Issue>(PU_NAME, component.persistenceContext()){
+
+			@Override
+			public Executable doWork(PersistenceWork persistenceWork) {
+				return getExecutable(persistenceWork);
+			}};
+        PersistenceWorker<Check> checkWorker = new PersistenceWorker<Check>(PU_NAME, component.persistenceContext()){
+
+            @Override
+            public Executable doWork(PersistenceWork persistenceWork) {
+                return getExecutable(persistenceWork);
+            }};
+       providerManager.putAxiomProvider(new TelegenAxiomProvider(issueWorker, checkWorker));
     }
     
     @Test
@@ -202,8 +200,7 @@ public class TelegenTest
             }
         };
         // Execute work and wait synchronously for completion
-        PersistenceContainer container = new PersistenceContainer(PU_NAME);
-        container.executeTask(verificationWork).waitForTask();
+       getExecutable(verificationWork).waitForTask();
     }
 
     @Test
@@ -270,7 +267,13 @@ public class TelegenTest
             ++checkIndex;
         }
     }
-    
+
+    public Executable getExecutable(PersistenceWork persistenceWork)
+    {
+    	PersistenceWorkModule persistenceWorkModule = new PersistenceWorkModule(PU_NAME, true, persistenceWork);
+        return component.plus(persistenceWorkModule).executable();
+    }
+   
     protected void doFirstCheck(QueryProgram queryProgram, String issue, final String check) throws Exception
     {
         // Create QueryParams object for Global scope and query "stamp_duty_query"
@@ -306,25 +309,13 @@ public class TelegenTest
             }});
         queryProgram.executeQuery(queryParams);
     }
-/**
-     * Set up dependency injection, which creates an ObjectGraph from a ManyToManyModule configuration object.
-     * Override to run with different database and/or platform. 
-     * Refer au.com.cybersearch2.example.AndroidManyToMany in classyandroid module for Android example.
-     */
-    protected void createObjectGraph()
-    {
-        ApplicationComponent component = 
-                DaggerTelegenTest_ApplicationComponent.builder()
-                .telegenTestModule(new TelegenTestModule())
-                .build();
-        DI.getInstance(component);
-    }
 
     protected QueryProgram compileScript(String script) throws ParseException
     {
         InputStream stream = new ByteArrayInputStream(script.getBytes());
         QueryParser queryParser = new QueryParser(stream);
-        QueryProgram queryProgram = new QueryProgram();
+        QueryProgram queryProgram = new QueryProgram(providerManager);
+        queryProgram.setResourceBase(new File("src/main/resources"));
         queryParser.input(queryProgram);
         return queryProgram;
     }

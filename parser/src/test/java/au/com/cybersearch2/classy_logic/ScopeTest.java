@@ -40,8 +40,6 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
 
 /**
  * ScopeTest
@@ -51,7 +49,7 @@ import au.com.cybersearch2.classyinject.DI;
 public class ScopeTest 
 {
 	@Module(/*injects = ParserAssembler.ExternalAxiomSource.class*/)
-	static class ScopeModule implements ApplicationModule
+	static class ScopeModule
 	{
 	    @Provides @Singleton ProviderManager provideProviderManager()
 	    {
@@ -61,9 +59,8 @@ public class ScopeTest
 
     @Singleton
     @Component(modules = ScopeModule.class)  
-    public interface ApplicationComponent extends ApplicationModule
+    public interface ApplicationComponent
     {
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
     }
 
 	static Map<QualifiedName, List<AxiomListener>> EMPTY_AXIOM_LISTENER_MAP = Collections.emptyMap();
@@ -81,8 +78,7 @@ public class ScopeTest
                 DaggerScopeTest_ApplicationComponent.builder()
                 .scopeModule(new ScopeModule())
                 .build();
-        DI.getInstance(component);
-	}
+    }
 	
 
 	@Test

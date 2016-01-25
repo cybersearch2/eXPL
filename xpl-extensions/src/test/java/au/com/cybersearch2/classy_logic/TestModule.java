@@ -20,6 +20,13 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
+import au.com.cybersearch2.classydb.ConnectionSourceFactory;
+import au.com.cybersearch2.classydb.DatabaseSupport;
+import au.com.cybersearch2.classydb.SQLiteDatabaseSupport;
+import au.com.cybersearch2.classydb.DatabaseSupport.ConnectionType;
+import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
+import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
+import au.com.cybersearch2.classytask.TaskManager;
 import au.com.cybersearch2.classytask.ThreadHelper;
 
 /**
@@ -27,12 +34,11 @@ import au.com.cybersearch2.classytask.ThreadHelper;
  * @author Andrew Bowley
  * 17 Mar 2015
  */
-@Module(/*injects= {
-		ParserResources.class,
-		ParserAssembler.ExternalAxiomSource.class,
-		WorkerRunnable.class }*/)
+@Module
 public class TestModule 
 {
+    private SQLiteDatabaseSupport sqliteDatabaseSupport;
+    
     @Provides @Singleton ThreadHelper provideSystemEnvironment()
     {
         return new TestSystemEnvironment();
@@ -43,8 +49,34 @@ public class TestModule
         return new JavaTestResourceEnvironment("src/test/resources");
     }
 
-    @Provides @Singleton JpaProviderHelper provideJpaProviderHelper()
+    @Provides @Singleton TaskManager provideTaskManager()
     {
-        return new JpaProviderHelper();
+        return new TaskManager();
+    }
+
+    @Provides @Singleton DatabaseSupport provideDatabaseSupport()
+    {
+        sqliteDatabaseSupport = new SQLiteDatabaseSupport(ConnectionType.memory);
+        return sqliteDatabaseSupport;    
+    }
+    
+    @Provides @Singleton PersistenceFactory providePersistenceFactory(DatabaseSupport databaseSupport, ResourceEnvironment resourceEnvironment)
+    {
+        return new PersistenceFactory(databaseSupport, resourceEnvironment);
+    }
+
+    @Provides @Singleton ConnectionSourceFactory provideConnectionSourceFactory()
+    {
+        return sqliteDatabaseSupport;
+    }
+
+    @Provides @Singleton PersistenceContext providePersistenceContext(PersistenceFactory persistenceFactory, ConnectionSourceFactory connectionSourceFactory)
+    {
+        return new PersistenceContext(persistenceFactory, connectionSourceFactory);
+    }
+    
+    @Provides @Singleton ProviderManager provideProviderManager()
+    {
+        return new ProviderManager();
     }
 }

@@ -45,6 +45,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
@@ -73,10 +75,8 @@ import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classytask.WorkerRunnable;
 import dagger.Component;
+import dagger.Provides;
 
 /**
  * QueryParserTest
@@ -85,16 +85,6 @@ import dagger.Component;
  */
 public class QueryParserTest 
 {
-    @Singleton
-    @Component(modules = QueryParserModule.class)  
-    public interface ApplicationComponent extends ApplicationModule
-    {
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-        void inject(ParserResources parserResources);
-        void inject(WorkerRunnable<Boolean> workerRunnable);
-    }
-
-
 	static final String SCRIPT1 =
 	    "integer twoFlip = ~2;\n" +
         "integer mask = 2;\n" +
@@ -465,17 +455,13 @@ public class QueryParserTest
     @Before
     public void setup() throws Exception
     {
-        ApplicationComponent component = 
-                DaggerQueryParserTest_ApplicationComponent.builder()
-                .queryParserModule(new QueryParserModule())
-                .build();
-        DI.getInstance(component);
     }
 
     @Test
     public void test_mega_cities3() throws IOException
     {
-        QueryProgram queryProgram = new QueryProgram(MEGA_CITY3);
+        QueryProgram queryProgram = new QueryProgram(provideProviderManager());
+        queryProgram.parseScript(MEGA_CITY3);
         //queryProgram.executeQuery("group_query", new SolutionHandler(){
        //   @Override
        //   public boolean onSolution(Solution solution) {
@@ -883,7 +869,8 @@ public class QueryParserTest
 	@Test
 	public void test_highCities() throws Exception
 	{
-		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
+		QueryProgram queryProgram = new QueryProgram(provideProviderManager());
+		queryProgram.parseScript(CITY_EVELATIONS);
 	    ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 	    Template highCities = parserAssembler.getTemplate("high_city");
 	    highCities.setKey("city");
@@ -1354,8 +1341,13 @@ public class QueryParserTest
 		QueryParser queryParser = new QueryParser(stream);
 		queryParser.enable_tracing();
 		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.setResourceBase(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
 		queryParser.input(queryProgram);
         return queryProgram.getGlobalScope().getParserAssembler();
 	}
 	
+    ProviderManager provideProviderManager()
+    {
+        return new TestAxiomProvider();
+    }
 }

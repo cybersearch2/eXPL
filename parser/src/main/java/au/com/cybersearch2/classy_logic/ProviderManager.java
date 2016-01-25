@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,13 +34,34 @@ public class ProviderManager
 {
 	/** Map Axiom Providers to their names */
 	protected Map<String, AxiomProvider> axiomProviderMap;
+	/** Resource path base */
+	protected File resourceBase;
 	
 	/**
 	 * Construct ProviderManager object
 	 */
 	public ProviderManager() 
 	{
+		this(null);
+	}
+	
+	/**
+	 * Construct ProviderManager object
+	 */
+	public ProviderManager(File resourceBase) 
+	{
+		this.resourceBase = resourceBase;
 		axiomProviderMap = new HashMap<String, AxiomProvider>();
+	}
+	
+	public File getResourceBase() 
+	{
+		return resourceBase;
+	}
+
+	public void setResourceBase(File resourceBase) 
+	{
+		this.resourceBase = resourceBase;
 	}
 
 	/**

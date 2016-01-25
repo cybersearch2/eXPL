@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.tutorial15;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.Iterator;
 
@@ -98,6 +99,7 @@ public class AgriDatabase implements PersistenceWork
 		QueryParser queryParser = new QueryParser(stream);
 		queryParser.enable_tracing();
 		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.setResourceBase(new File("src/main/resources"));
 		queryParser.input(queryProgram);
         return queryProgram.getGlobalScope().getParserAssembler();
 	}

@@ -28,10 +28,7 @@ import au.com.cybersearch2.classytask.ThreadHelper;
  * @author Andrew Bowley
  * 17 Mar 2015
  */
-@Module(/*injects= {
-		ParserResources.class,
-		ParserAssembler.ExternalAxiomSource.class,
-		WorkerRunnable.class }*/)
+@Module
 public class TestModule 
 {
     @Provides @Singleton ThreadHelper provideSystemEnvironment()

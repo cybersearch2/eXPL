@@ -15,20 +15,18 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial4;
 
+import java.io.File;
+
 import javax.inject.Inject;
 
-import au.com.cybersearch2.classy_logic.DaggerTestComponent;
 import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
-import au.com.cybersearch2.classy_logic.TestComponent;
-import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
-import au.com.cybersearch2.classyinject.DI;
 
 /**
  * InWords
@@ -50,13 +48,7 @@ public class InWords
 	
 	public InWords()
 	{
-		// Configure dependency injection to get resource "lexicon"
-        TestComponent component = 
-                DaggerTestComponent.builder()
-                .testModule(new TestModule())
-                .build();
-        DI.getInstance(component);
-		DI.inject(this);
+		providerManager = new ProviderManager(new File("src/main/resources"));
 		providerManager.putAxiomProvider(new LexiconAxiomProvider());
 	}
 	
@@ -65,7 +57,8 @@ public class InWords
 		// Expected 54 results can be found in /src/test/resources/in_words.lst. 
 		// Here is the first result: 
 		// in_words(Word = inadequate, Definition = j. not sufficient to meet a need)
-		QueryProgram queryProgram = new QueryProgram(LEXICAL_SEARCH);
+		QueryProgram queryProgram = new QueryProgram(providerManager);
+		queryProgram.parseScript(LEXICAL_SEARCH);
 		queryProgram.executeQuery("query_in_words", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {

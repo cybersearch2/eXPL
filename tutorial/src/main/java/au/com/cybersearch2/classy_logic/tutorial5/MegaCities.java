@@ -15,16 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial5;
 
-import au.com.cybersearch2.classy_logic.DaggerTestComponent;
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
-import au.com.cybersearch2.classy_logic.TestComponent;
-import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
-import au.com.cybersearch2.classyinject.DI;
 
 /**
  * EuropeanMegaCities
@@ -44,11 +42,6 @@ public class MegaCities
 
 	public MegaCities()
 	{   // Set up dependency injection so file mega_city.xpl can be located in project folder src/test/resources
-        TestComponent component = 
-                DaggerTestComponent.builder()
-                .testModule(new TestModule())
-                .build();
-        DI.getInstance(component);
 	}
 
 	/**
@@ -67,7 +60,10 @@ public class MegaCities
 	 */
 	public void displayTopTenAsianCities()
 	{
-		QueryProgram queryProgram = new QueryProgram(MEGA_CITY);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.setResourceBase(new File("src/main/resources"));
+
+		queryProgram.parseScript(MEGA_CITY);
 		queryProgram.executeQuery("asia_top_ten", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {

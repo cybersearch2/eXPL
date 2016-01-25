@@ -15,18 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial15;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.persistence.PersistenceException;
-
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.SelectArg;
-
-import au.com.cybersearch2.classy_logic.JpaProviderHelper;
+import au.com.cybersearch2.classy_logic.PersistenceService;
+import au.com.cybersearch2.classy_logic.PersistenceWorker;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -36,11 +29,6 @@ import au.com.cybersearch2.classy_logic.jpa.JpaSource;
 import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classyinject.DI;
-import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.entity.EntityManagerDelegate;
-import au.com.cybersearch2.classyjpa.entity.PersistenceDao;
-import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
 
 /**
  * AgriAxiomProvider
@@ -54,81 +42,6 @@ import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
  */
 public class AgriAxiomProvider extends EntityAxiomProvider 
 {
-	/**
-	 * PersistAgri10Year
-	 * Set up task to create Agri10Year table in test database. 
-	 * This requires fetching Country objects to insert in Agri10Year items.
-	 * See AgriDatabase for construction of test database.
-	 * @author Andrew Bowley
-	 * 23 May 2015
-	 */
-	class PersistAgri10Year implements PersistenceWork
-	{
-		protected Agri10Year agri10Year;
-
-		/**
-		 * Construct PersistAgri10Year object
-		 * @param agri10Year The object to persist
-		 */
-		public PersistAgri10Year(Agri10Year agri10Year)
-		{
-			this.agri10Year =agri10Year;
-		}
-
-		/**
-		 * Use OrmLite to run query to fetch Country object referenced by name in supplied Agri10Year object
-		 * @see au.com.cybersearch2.classyjpa.entity.PersistenceWork#doInBackground(au.com.cybersearch2.classyjpa.EntityManagerLite)
-		 */
-        @Override
-	    public void doTask(EntityManagerLite entityManager)
-	    {
-	    	// Use OrmLite query to get Country object from database 
-            EntityManagerDelegate delegate = (EntityManagerDelegate)entityManager.getDelegate();
-            @SuppressWarnings("unchecked")
-            PersistenceDao<Country, Integer> countryDao = 
-                    (PersistenceDao<Country, Integer>) delegate.getDaoForClass(Country.class);
-            QueryBuilder<Country, Integer> statementBuilder = countryDao.queryBuilder();
-            SelectArg selectArg = new SelectArg();
-            // build a query with the WHERE clause set to 'country = ?'
-            PreparedQuery<Country> preparedQuery = null;
-            try
-            {
-            	statementBuilder.where().eq("country", selectArg);
-            	preparedQuery = statementBuilder.prepare();
-            }
-            catch (SQLException e)
-            {
-            	throw new PersistenceException("Database error", e);
-            }
-            // Now we can set the select arg (?) and run the query
-            selectArg.setValue(agri10Year.getCountryName());
-            List<Country> results = countryDao.query(preparedQuery);
-            if (results.size() > 0)
-            {
-	            Country country = results.get(0);
-	            entityManager.merge(country);
-	            agri10Year.setCountry(country);
-		    	entityManager.persist(agri10Year);
-            }
-            else
-            	System.err.println("Cannot find country \"" + agri10Year.getCountryName() + "\"");
-	    }
-
-	    @Override
-	    public void onPostExecute(boolean success)
-	    {
-	        if (!success)
-	            throw new IllegalStateException("Database error.");
-	    }
-
-	    @Override
-	    public void onRollback(Throwable rollbackException)
-	    {
-	    	//throw new IllegalStateException("Database error.", rollbackException);
-	    	System.err.println(rollbackException.toString());
-	    }
-    }
-	
     /** Persistence Unit name to look up configuration details in persistence.xml */
     static public final String PU_NAME = "agriculture";
     /** Axiom source name for percentage surface area over 50 year interval */
@@ -139,19 +52,21 @@ public class AgriAxiomProvider extends EntityAxiomProvider
     static int agri10YearId;
     
     
-    @Inject
-    JpaProviderHelper providerHelper;
+    protected PersistenceService<Agri10Year> agri10YearService;
     
 	/**
 	 * Construct AgriAxiomProvider object
 	 */
-	public AgriAxiomProvider() 
+	public AgriAxiomProvider(
+			PersistenceWorker<YearPercent> yearPercentWorker, 
+			PersistenceService<Agri10Year> agri10YearService) 
 	{
 	    // Super class will construct TEN_YEAR_AXIOM collector
 		super(PU_NAME, new AgriDatabase());
-		addEntity(TEN_YEAR_AXIOM, Agri10Year.class);
-		addCollector(PERCENT_AXIOM, new AgriPercentCollector(PU_NAME));
-		DI.inject(this);
+		this.agri10YearService = agri10YearService;
+		//this.persistenceService = persistenceWorker;
+		addEntity(TEN_YEAR_AXIOM, Agri10Year.class, agri10YearService);
+		addCollector(PERCENT_AXIOM, new AgriPercentCollector(yearPercentWorker));
 	}
 
 	/**
@@ -168,6 +83,7 @@ public class AgriAxiomProvider extends EntityAxiomProvider
 	 * 
 	 * @see au.com.cybersearch2.classy_logic.jpa.EntityAxiomProvider#getAxiomSource(java.lang.String, java.util.List)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public AxiomSource getAxiomSource(String axiomName,
 			List<String> axiomTermNameList) 
@@ -175,7 +91,7 @@ public class AgriAxiomProvider extends EntityAxiomProvider
 		List<NameMap> nameMapList = null;
 		if (axiomTermNameList != null)
 			nameMapList = new ArrayList<NameMap>();
-		JpaEntityCollector collector = collectorMap.get(axiomName);
+		JpaEntityCollector<YearPercent> collector = (JpaEntityCollector<YearPercent>) collectorMap.get(axiomName);
 		if (PERCENT_AXIOM.equals(axiomName))
 		{
 			if (axiomTermNameList != null)
@@ -227,7 +143,14 @@ public class AgriAxiomProvider extends EntityAxiomProvider
 		    	agri10Year.setId(agri10YearId++);
 		    	agri10Year.setSurfaceArea((Double)axiom.getTermByName("surface_area").getValue());
 		    	// Do task of persisting Agri10Year asychronously. (Subject to using multi-connection ConnectionSource).
-		    	providerHelper.doWorkAsync(PU_NAME, new PersistAgri10Year(agri10Year), false);
+		    	try 
+		    	{
+		    		agri10YearService.put(agri10Year);
+				} 
+		    	catch (InterruptedException e) 
+		    	{
+
+				}
 		    	// Change above line for next two to do task synchronously
 				//if (providerManager.doWork(PU_NAME, new PersistAgri10Year(agri10Year)) != WorkStatus.FINISHED)
 			    //	throw new QueryExecutionException("Error persisting resource " + getName() + " axiom: " + axiom.toString());

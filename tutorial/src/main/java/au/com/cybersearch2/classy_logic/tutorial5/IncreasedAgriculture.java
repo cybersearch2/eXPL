@@ -15,18 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial5;
 
+import java.io.File;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.DaggerTestComponent;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.TestComponent;
-import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classyinject.DI;
 
 /**
  * IncreasedAgriculture demonstrates evaluation for the purpose of numerical analysis.
@@ -51,11 +48,6 @@ public class IncreasedAgriculture
 
    public IncreasedAgriculture()
    {   // Set up dependency injection so file mega_city.xpl can be located in project folder src/test/resources
-       TestComponent component = 
-               DaggerTestComponent.builder()
-               .testModule(new TestModule())
-               .build();
-       DI.getInstance(component);
    }
 
 
@@ -71,7 +63,10 @@ public class IncreasedAgriculture
 	 */
 	public Iterator<Axiom> displayIncreasedAgri()
 	{
-		QueryProgram queryProgram = new QueryProgram(AGRICULTURAL_LAND);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.setResourceBase(new File("src/main/resources"));
+
+		queryProgram.parseScript(AGRICULTURAL_LAND);
 		Result result = queryProgram.executeQuery("more_agriculture");
 		return result.getIterator(QualifiedName.parseGlobalName("nation_list"));
 	}

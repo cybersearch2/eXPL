@@ -15,18 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial12;
 
+import java.io.File;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.DaggerTestComponent;
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.TestComponent;
-import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classyinject.DI;
 
 /**
  * MultiCurrency
@@ -57,11 +55,6 @@ public class MultiCurrency
 	 */
 	public MultiCurrency() 
 	{
-        TestComponent component = 
-                DaggerTestComponent.builder()
-                .testModule(new TestModule())
-                .build();
-        DI.getInstance(component);
 	}
 
 	/**
@@ -75,7 +68,10 @@ public class MultiCurrency
 	 */
 	public Iterator<Axiom> getFormatedAmounts()
 	{
-		QueryProgram queryProgram = new QueryProgram(WORLD_CURRENCY);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.setResourceBase(new File("src/main/resources"));
+
+		queryProgram.parseScript(WORLD_CURRENCY);
 		// Use this query to see the total amount before it is formatted
 		// Note adjustment of decimal places to suite currency.
 		Result result = queryProgram.executeQuery("price_query");

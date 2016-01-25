@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.tutorial;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Iterator;
@@ -86,6 +87,7 @@ public class PersistenceAgricultureTest
         QueryParser queryParser = new QueryParser(stream);
         queryParser.enable_tracing();
         QueryProgram queryProgram = new QueryProgram();
+        queryProgram.setResourceBase(new File("src/main/resources"));
         queryParser.input(queryProgram);
         return queryProgram.getGlobalScope().getParserAssembler();
     }

@@ -16,10 +16,12 @@
 package au.com.cybersearch2.classy_logic;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -78,15 +80,43 @@ public class QueryProgram extends QueryLauncher
 	
 	/** Named scopes */
 	protected Map<String, Scope> scopes;
+	/** Optional ProviderManager for external axiom sources */
+	protected ProviderManager providerManager;
+	/** Optional FunctionManager for library operands */
+	protected FunctionManager functionManager;
+	/** Resource path base */
+	protected File resourceBase;
+
+	public QueryProgram() 
+	{
+		this(null, null);
+	}
+	public QueryProgram(ProviderManager providerManager) 
+	{
+		this(providerManager, null);
+	}
+	public QueryProgram(FunctionManager functionManager) 
+	{
+		this(null, functionManager);
+	}
 	
 	/**
 	 * Construct a QueryProgram object. It is initially empty and populated by QueryParser
 	 * @see au.com.cybersearch2.classy_logic.parser.QueryParser
 	 */
-	public QueryProgram() 
+	public QueryProgram(ProviderManager providerManager, FunctionManager functionManager) 
 	{
+		this.providerManager = providerManager;
+		this.functionManager = functionManager;
+		// Default resource location is CWD
+		if ((providerManager != null) && (providerManager.getResourceBase() != null))
+			resourceBase = providerManager.getResourceBase();
+		else
+			resourceBase = new File(".");
 		scopes = new HashMap<String, Scope>();
-		scopes.put(GLOBAL_SCOPE, new Scope(scopes, GLOBAL_SCOPE, Scope.EMPTY_PROPERTIES));
+		Scope globalScope = new Scope(scopes, GLOBAL_SCOPE, Scope.EMPTY_PROPERTIES);
+		injectScope(globalScope);
+		scopes.put(GLOBAL_SCOPE, globalScope);
 	}
 
     /**
@@ -95,17 +125,32 @@ public class QueryProgram extends QueryLauncher
      */
     public QueryProgram(String script) 
     {
-       this();
-       InputStream stream = new ByteArrayInputStream(script.getBytes());
-       QueryParser queryParser = new QueryParser(stream);
-       try
-       {
+        this(null, null);
+        parseScript(script);
+    }
+    
+    public File getResourceBase() 
+    {
+		return resourceBase;
+	}
+    
+	public void setResourceBase(File resourceBase) 
+	{
+		this.resourceBase = resourceBase;
+	}
+	
+	public void parseScript(String script) 
+    {
+	    InputStream stream = new ByteArrayInputStream(script.getBytes());
+        QueryParser queryParser = new QueryParser(stream);
+        try
+        {
             queryParser.input(this);
-       }
-       catch (ParseException e)
-       {
+        }
+        catch (ParseException e)
+        {
             throw new ExpressionException("Error compiling script: " + e.getMessage(), e);
-       }
+        }
     }
 
     /**
@@ -123,9 +168,19 @@ public class QueryProgram extends QueryLauncher
             throw new ExpressionException("Scope named \"" + scopeName + "\" already exists");
        Scope newScope = new Scope(scopes, scopeName, properties);
        scopes.put(scopeName, newScope);
+       injectScope(newScope);
        return newScope;
     }
 
+    private void injectScope(Scope scope)
+    {
+    	ParserAssembler parserAssembler = scope.getParserAssembler();
+        if (providerManager != null)
+        	parserAssembler.setProviderManager(providerManager);
+        if (functionManager != null)
+        	parserAssembler.setFunctionManager(functionManager);
+    }
+    
 	/**
 	 * Returns global scope
 	 * @return Scope

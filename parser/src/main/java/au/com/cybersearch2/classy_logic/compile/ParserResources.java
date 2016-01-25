@@ -15,13 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.compile;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import javax.inject.Inject;
+import java.util.Locale;
 
 import au.com.cybersearch2.classyapp.ResourceEnvironment;
-import au.com.cybersearch2.classyinject.DI;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
@@ -37,16 +37,37 @@ public class ParserResources
 {
     /** Main compiler object to parse */
 	protected QueryProgram queryProgram;
-    @Inject ResourceEnvironment resourceEnvironment;
- 
+    protected ResourceEnvironment resourceEnvironment;
+
     /**
      * Construct ParserResources object
      * @param queryProgram Main compiler object
      */
-	public ParserResources(QueryProgram queryProgram) 
+	public ParserResources(final QueryProgram queryProgram) 
+	{
+		this(queryProgram, new ResourceEnvironment(){
+
+			@Override
+			public InputStream openResource(String resourceName) throws IOException 
+			{
+				return new FileInputStream(new File(queryProgram.getResourceBase(), resourceName));
+			}
+
+			@Override
+			public Locale getLocale() 
+			{
+				return Locale.getDefault();
+			}});
+	}
+
+    /**
+     * Construct ParserResources object
+     * @param queryProgram Main compiler object
+     */
+	public ParserResources(QueryProgram queryProgram, ResourceEnvironment resourceEnvironment) 
 	{
 		this.queryProgram = queryProgram;
-		DI.inject(this);
+		this.resourceEnvironment = resourceEnvironment;
 	}
 
     /**

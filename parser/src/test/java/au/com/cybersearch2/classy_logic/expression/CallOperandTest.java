@@ -15,33 +15,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import java.util.Iterator;
 import java.util.List;
 
-import javax.inject.Singleton;
-
 import org.junit.Before;
 import org.junit.Test;
-import static org.fest.assertions.api.Assertions.assertThat;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
 
 /**
  * CallOperandTest
@@ -50,29 +43,6 @@ import dagger.Provides;
  */
 public class CallOperandTest
 {
-    @Module(/*injects=ParserAssembler.ExternalFunctionProvider.class*/)
-    static class CallOperandTestModule implements ApplicationModule
-    {
-        @Provides @Singleton FunctionManager provideFunctionManager()
-        {
-            FunctionManager functionManager = new FunctionManager();
-            MathFunctionProvider mathFunctionProvider = new MathFunctionProvider();
-            functionManager.putFunctionProvider(mathFunctionProvider.getName(), mathFunctionProvider);
-            EduFunctionProvider eduFunctionProvider = new EduFunctionProvider();
-            functionManager.putFunctionProvider(eduFunctionProvider.getName(), eduFunctionProvider);
-            SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
-            functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
-            return functionManager;
-        }
-    }
-
-    @Singleton
-    @Component(modules = CallOperandTestModule.class)  
-    public interface ApplicationComponent extends ApplicationModule
-    {
-        void inject(ParserAssembler.ExternalFunctionProvider externalFunctionProvider);
-    }
-    
     static class SystemFunctionProvider implements FunctionProvider<Void>
     {
         @Override
@@ -601,14 +571,12 @@ public class CallOperandTest
         "person(name = Fiona, sex = f, age = 29, starsign = gemini)"
     };
 
+    QueryProgram queryProgram;
+    
     @Before
     public void setUp()
     {
-        ApplicationComponent component = 
-                DaggerCallOperandTest_ApplicationComponent.builder()
-                .callOperandTestModule(new CallOperandTestModule())
-                .build();
-        DI.getInstance(component);
+    	queryProgram = new QueryProgram(provideFunctionManager());
     }
 
     
@@ -616,7 +584,7 @@ public class CallOperandTest
     @Test
     public void test_gemini_people()
     {
-        QueryProgram queryProgram = new QueryProgram(PERFECT_MATCH);
+        queryProgram.parseScript(PERFECT_MATCH);
         Result result = queryProgram.executeQuery("match");
         QualifiedName qname = QualifiedName.parseGlobalName("geminis");
         
@@ -631,7 +599,7 @@ public class CallOperandTest
     @Test
     public void test_factual_people()
     {
-        QueryProgram queryProgram = new QueryProgram(FACTUAL_MATCH);
+        queryProgram.parseScript(FACTUAL_MATCH);
         Result result = queryProgram.executeQuery("match");
         QualifiedName qname = QualifiedName.parseGlobalName("match.eligible");
         Iterator<Axiom> iterator = result.getIterator(qname);
@@ -645,7 +613,7 @@ public class CallOperandTest
     @Test
     public void test_sort_cities()
     {
-        QueryProgram queryProgram = new QueryProgram(SORTED_CITIES);
+        queryProgram.parseScript(SORTED_CITIES);
         Result result = queryProgram.executeQuery("sort_cities");
         Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("city_list"));
         int index = 0;
@@ -658,7 +626,7 @@ public class CallOperandTest
     @Test
     public void test_two_argument()
     {
-        QueryProgram queryProgram = new QueryProgram(TWO_ARG_CALC);
+    	queryProgram.parseScript(TWO_ARG_CALC);
         queryProgram.executeQuery("two_arg_query", new SolutionHandler(){
 
             @Override
@@ -672,7 +640,7 @@ public class CallOperandTest
     @Test
     public void test_three_argument()
     {
-        QueryProgram queryProgram = new QueryProgram(THREE_ARG_CALC);
+    	queryProgram.parseScript(THREE_ARG_CALC);
         queryProgram.executeQuery("three_arg_query", new SolutionHandler(){
 
             @Override
@@ -686,7 +654,7 @@ public class CallOperandTest
     @Test
     public void test_four_argument()
     {
-        QueryProgram queryProgram = new QueryProgram(FOUR_ARG_CALC);
+    	queryProgram.parseScript(FOUR_ARG_CALC);
         queryProgram.executeQuery("four_arg_query", new SolutionHandler(){
 
             @Override
@@ -700,7 +668,7 @@ public class CallOperandTest
     @Test
     public void test_three_variables()
     {
-        QueryProgram queryProgram = new QueryProgram(GRADES_CALC);
+    	queryProgram.parseScript(GRADES_CALC);
         queryProgram.executeQuery("marks", new SolutionHandler(){
             int index = 0;  
             @Override
@@ -715,7 +683,7 @@ public class CallOperandTest
     @Test
     public void test_term_variables()
     {
-        QueryProgram queryProgram = new QueryProgram(MARKS_CALC);
+        queryProgram.parseScript(MARKS_CALC);
         queryProgram.executeQuery("marks", new SolutionHandler(){
             int index = 0;  
             @Override
@@ -730,7 +698,7 @@ public class CallOperandTest
     @Test
     public void test_school_grades()
     {
-        QueryProgram queryProgram = new QueryProgram(MARKS_GRADES_CALC);
+        queryProgram.parseScript(MARKS_GRADES_CALC);
         queryProgram.executeQuery("marks", new SolutionHandler(){
             int index = 0;  
             @Override
@@ -757,7 +725,7 @@ public class CallOperandTest
     
     protected void test_school_report(String xpl)
     {
-        QueryProgram queryProgram = new QueryProgram(xpl);
+        queryProgram.parseScript(xpl);
         queryProgram.executeQuery("marks", new SolutionHandler(){
             int index1 = 0;  
             int index2 = 0;  
@@ -788,7 +756,7 @@ public class CallOperandTest
     @Test
     public void test_list_variables()
     {
-        QueryProgram queryProgram = new QueryProgram(CITY_AVERAGE_HEIGHT_CALC);
+        queryProgram.parseScript(CITY_AVERAGE_HEIGHT_CALC);
         queryProgram.executeQuery("average_height", new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution)
@@ -804,7 +772,7 @@ public class CallOperandTest
     public void test_calculator()
     {
         final long averageHeight = (1718+8000+5280+6970+8+10200+1305+19+1909+1305)/10;
-        QueryProgram queryProgram = new QueryProgram(CITY_AVERAGE_HEIGHT_CALC2);
+        queryProgram.parseScript(CITY_AVERAGE_HEIGHT_CALC2);
         queryProgram.executeQuery("average_height", new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution)
@@ -821,7 +789,7 @@ public class CallOperandTest
     @Test
     public void test_choice_german_colors()
     {
-        QueryProgram queryProgram = new QueryProgram(GERMAN_COLORS);
+        queryProgram.parseScript(GERMAN_COLORS);
         queryProgram.executeQuery("german_colors", new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution)
@@ -850,5 +818,17 @@ public class CallOperandTest
                 assertThat(colorsList.getAxiomTermNameList()).isEmpty();
                 return true;
             }}); 
+    }
+
+    FunctionManager provideFunctionManager()
+    {
+        FunctionManager functionManager = new FunctionManager();
+        MathFunctionProvider mathFunctionProvider = new MathFunctionProvider();
+        functionManager.putFunctionProvider(mathFunctionProvider.getName(), mathFunctionProvider);
+        EduFunctionProvider eduFunctionProvider = new EduFunctionProvider();
+        functionManager.putFunctionProvider(eduFunctionProvider.getName(), eduFunctionProvider);
+        SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
+        functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
+        return functionManager;
     }
 }

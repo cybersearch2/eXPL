@@ -232,6 +232,26 @@
 	                                <ignore />
 	                            </action>
 	                        </pluginExecution>
+                            <pluginExecution>
+                                <pluginExecutionFilter>
+                                    <groupId>
+                                        org.bitbucket.komo81
+                                    </groupId>
+                                    <artifactId>
+                                        eclipse-aar-maven-plugin
+                                    </artifactId>
+                                    <versionRange>
+                                        [1.0.0,)
+                                    </versionRange>
+                                    <goals>
+                                        <goal>clean</goal>
+                                        <goal>generate</goal>
+                                   </goals>
+                                </pluginExecutionFilter>
+                                <action>
+                                    <ignore />
+                                </action>
+                           </pluginExecution>
 	                    </pluginExecutions>
 	                </lifecycleMappingMetadata>
 	            </configuration>

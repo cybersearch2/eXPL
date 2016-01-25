@@ -25,23 +25,23 @@ import javax.inject.Singleton;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.PersistenceWorker;
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.TestModule;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
-import au.com.cybersearch2.classy_logic.jpa.CityCollector;
+import au.com.cybersearch2.classy_logic.jpa.City;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
-import au.com.cybersearch2.classydb.DatabaseAdminImpl;
-import au.com.cybersearch2.classydb.NativeScriptDatabaseWork;
-import au.com.cybersearch2.classyinject.ApplicationModule;
-import au.com.cybersearch2.classyinject.DI;
+import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
+import au.com.cybersearch2.classyjpa.entity.PersistenceWorkModule;
 import au.com.cybersearch2.classyjpa.persist.PersistenceContext;
-import au.com.cybersearch2.classyjpa.persist.PersistenceFactory;
-import au.com.cybersearch2.classytask.WorkerRunnable;
+import au.com.cybersearch2.classytask.Executable;
 import dagger.Component;
+import dagger.Subcomponent;
 
 /**
  * QueryParserTest
@@ -51,33 +51,39 @@ import dagger.Component;
 public class QueryParserTest 
 {
     @Singleton
-    @Component(modules = QueryParserModule.class)  
-    static interface ApplicationComponent extends ApplicationModule
+    @Component(modules = TestModule.class)  
+    static interface ApplicationComponent
     {
-        void inject(CityCollector cityCollector);
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-        void inject(ParserResources parserResources);
-        void inject(WorkerRunnable<Boolean> workerRunnable);
-        void inject(PersistenceContext persistenceContext);
-        void inject(PersistenceFactory persistenceFactory);
-        void inject(DatabaseAdminImpl databaseAdminImpl);
-        void inject(NativeScriptDatabaseWork nativeScriptDatabaseWork);
+        PersistenceContext persistenceContext();
+        PersistenceWorkSubcontext plus(PersistenceWorkModule persistenceWorkModule);
     }
 
+    @Singleton
+    @Subcomponent(modules = PersistenceWorkModule.class)
+    static interface PersistenceWorkSubcontext
+    {
+        Executable executable();
+    }
 
+    /** Persistence Unit name to look up configuration details in persistence.xml */
+    static public final String PU_NAME = "cities";
 	static final String HIGH_CITIES_JPA_XPL =
 			"axiom city (name, altitude): resource \"cities\";\n" +
 			"template high_city(string name, altitude ? altitude > 5000);\n"
 			;
 
+    private ApplicationComponent component;
+    private ProviderManager providerManager;
+
     @Before
     public void setup() throws Exception
     {
-        ApplicationComponent component = 
+        component = 
                 DaggerQueryParserTest_ApplicationComponent.builder()
-                .queryParserModule(new QueryParserModule())
+                .testModule(new TestModule())
                 .build();
-        DI.getInstance(component);
+        PersistenceWorker<City> persistenceService = new CityPersistenceService(component.persistenceContext(), this);
+        providerManager = new TestAxiomProvider(persistenceService);
     }
 
 	@Test
@@ -85,7 +91,7 @@ public class QueryParserTest
 	{
 		InputStream stream = new ByteArrayInputStream(HIGH_CITIES_JPA_XPL.getBytes());
 		QueryParser queryParser = new QueryParser(stream);
-		QueryProgram queryProgram = new QueryProgram();
+		QueryProgram queryProgram = new QueryProgram(providerManager);
 		queryParser.input(queryProgram);
 	    ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 	    Template highCities = parserAssembler.getTemplate("high_city");
@@ -120,14 +126,9 @@ public class QueryParserTest
  	    assertThat(count).isEqualTo(4);
 	}
 	
-	public static ParserAssembler openScript(String script) throws ParseException
-	{
-		InputStream stream = new ByteArrayInputStream(script.getBytes());
-		QueryParser queryParser = new QueryParser(stream);
-		queryParser.enable_tracing();
-		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
-        return queryProgram.getGlobalScope().getParserAssembler();
-	}
-	
+    public Executable getExecutable(PersistenceWork persistenceWork)
+    {
+    	PersistenceWorkModule persistenceWorkModule = new PersistenceWorkModule(PU_NAME, true, persistenceWork);
+        return component.plus(persistenceWorkModule).executable();
+    }
 }

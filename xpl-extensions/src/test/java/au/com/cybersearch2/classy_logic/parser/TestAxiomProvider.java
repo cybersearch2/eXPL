@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.PersistenceWorker;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
@@ -30,7 +31,6 @@ import au.com.cybersearch2.classy_logic.jpa.NameMap;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classyjpa.EntityManagerLite;
-import au.com.cybersearch2.classyjpa.entity.PersistenceContainer;
 import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
 
 /**
@@ -40,6 +40,13 @@ import au.com.cybersearch2.classyjpa.entity.PersistenceWork;
  */
 public class TestAxiomProvider extends ProviderManager implements AxiomProvider 
 {
+	private PersistenceWorker<City> persistenceWorker;
+
+	public TestAxiomProvider(PersistenceWorker<City> persistenceService)
+	{
+		this.persistenceWorker = persistenceService;
+	}
+	
 	@Override
 	public void setResourceProperties(String axiomName,
 			Map<String, Object> properties) 
@@ -49,7 +56,6 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 		{
 			persistenceUnit = "cities";
 			// Execute work and wait synchronously for completion
-			PersistenceContainer container = new PersistenceContainer(persistenceUnit);
 			List<Object> data = new ArrayList<Object>();
         	data.add(new City("bilene", 1718));
         	data.add(new City("addis ababa", 8000));
@@ -61,7 +67,7 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
         	data.add(new City("richmond",19));
         	data.add(new City("spokane", 1909));
         	data.add(new City("wichita", 1305));
-			container.executeTask(setUpWork(data)).waitForTask();
+        	persistenceWorker.doWork(setUpWork(data)).waitForTask();
 		} 
 		catch (InterruptedException e) 
 		{
@@ -79,7 +85,9 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 			List<NameMap> nameMapList = new ArrayList<NameMap>();
 			for (String termName: axiomTermNameList)
 				nameMapList.add(new NameMap(termName, termName));
-			axiomSource = new JpaSource(new CityCollector("cities"), axiomName, nameMapList);
+			CityCollector cityCollector = new CityCollector(persistenceWorker);
+	    	cityCollector.createSelectAllQuery("all_cities");
+			axiomSource = new JpaSource(cityCollector, axiomName, nameMapList);
 		}
 		return axiomSource;
 	}
