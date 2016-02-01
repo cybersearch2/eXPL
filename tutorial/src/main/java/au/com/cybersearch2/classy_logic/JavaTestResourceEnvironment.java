@@ -22,18 +22,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 
-import au.com.cybersearch2.classyapp.ResourceEnvironment;
-
 /**
  * JavaTestResourceEnvironment
  * @author Andrew Bowley
  * 05/08/2014
  */
-public class JavaTestResourceEnvironment implements ResourceEnvironment
+public class JavaTestResourceEnvironment
 {
     public static final String DEFAULT_RESOURCE_LOCATION = "src/test/resources";
     
-    Locale locale = new Locale("en", "AU");
+    Locale locale = Locale.getDefault();
     final String resourceLocation;
 
     public JavaTestResourceEnvironment()
@@ -46,7 +44,6 @@ public class JavaTestResourceEnvironment implements ResourceEnvironment
         this.resourceLocation = resourceLocation;
     }
     
-    @Override
     public InputStream openResource(String resourceName) throws IOException 
     {
         File resourceFile = new File(resourceLocation, resourceName);
@@ -56,7 +53,6 @@ public class JavaTestResourceEnvironment implements ResourceEnvironment
         return instream;
     }
 
-    @Override
     public Locale getLocale() 
     {
         return locale;

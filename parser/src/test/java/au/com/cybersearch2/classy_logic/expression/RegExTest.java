@@ -17,7 +17,7 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.FileReader;
@@ -25,18 +25,11 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Collections;
 
-import javax.inject.Singleton;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
-import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.compile.Group;
-import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -50,30 +43,9 @@ import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
  */
 public class RegExTest 
 {
-	@Module
-	static class RegExModule
-	{
-	    @Provides @Singleton ProviderManager provideProviderManagerr()
-	    {
-	    	return new ProviderManager();
-	    }
-	}
-
-    @Singleton
-    @Component(modules = RegExModule.class)  
-    public interface ApplicationComponent
-    {
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-    }
-
-
 	@Before
 	public void setUp()
 	{
-        ApplicationComponent component = 
-                DaggerRegExTest_ApplicationComponent.builder()
-                .regExModule(new RegExModule())
-                .build();
 	}
 	
 

@@ -24,15 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Singleton;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -48,21 +43,6 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class ScopeTest 
 {
-	@Module(/*injects = ParserAssembler.ExternalAxiomSource.class*/)
-	static class ScopeModule
-	{
-	    @Provides @Singleton ProviderManager provideProviderManager()
-	    {
-	    	return new ProviderManager();
-	    }
-	}
-
-    @Singleton
-    @Component(modules = ScopeModule.class)  
-    public interface ApplicationComponent
-    {
-    }
-
 	static Map<QualifiedName, List<AxiomListener>> EMPTY_AXIOM_LISTENER_MAP = Collections.emptyMap();
 	
 	private static final String AXIOM_KEY = "AxiomKey";
@@ -74,10 +54,6 @@ public class ScopeTest
 	@Before
 	public void setUp()
 	{
-        ApplicationComponent component = 
-                DaggerScopeTest_ApplicationComponent.builder()
-                .scopeModule(new ScopeModule())
-                .build();
     }
 	
 

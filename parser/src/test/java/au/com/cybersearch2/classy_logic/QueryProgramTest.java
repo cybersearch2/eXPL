@@ -22,14 +22,9 @@ import static org.mockito.Mockito.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Singleton;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
@@ -51,22 +46,6 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class QueryProgramTest 
 {
-	@Module(/*injects = ParserAssembler.ExternalAxiomSource.class*/)
-	static class QueryProgramModule
-	{
-	    @Provides @Singleton ProviderManager provideProviderManager()
-	    {
-	    	return new ProviderManager();
-	    }
-	}
-
-    @Singleton
-    @Component(modules = QueryProgramModule.class)  
-    public interface ApplicationComponent
-    {
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-    }
-
 	private static final String AXIOM_KEY = "AxiomKey";
 	protected QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, AXIOM_KEY);
 	private static final String AXIOM_KEY2 = "AxiomKey2";
@@ -84,10 +63,6 @@ public class QueryProgramTest
 	@Before
 	public void setUp()
 	{
-        ApplicationComponent component = 
-                DaggerQueryProgramTest_ApplicationComponent.builder()
-                .queryProgramModule(new QueryProgramModule())
-                .build();
  	}
 	
 	@Test

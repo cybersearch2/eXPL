@@ -15,7 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.query;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,17 +29,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Singleton;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import dagger.Component;
-import dagger.Module;
-import dagger.Provides;
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import au.com.cybersearch2.classy_logic.ProviderManager;
+import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
@@ -57,7 +55,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
-import au.com.cybersearch2.classy_logic.parser.QueryParserTest;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -70,21 +67,6 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class QueryExecuterTest 
 {
-	@Module
-	static class QueryExecuterModule
-	{
-	    @Provides @Singleton ProviderManager provideProviderManager()
-	    {
-	    	return new ProviderManager();
-	    }
-	}
-
-    @Singleton
-    @Component(modules = QueryExecuterModule.class)  
-    public interface ApplicationComponent
-    {
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-    }
 
 	class MultQueryTracer
 	{
@@ -251,17 +233,13 @@ public class QueryExecuterTest
 		freights.add(new Axiom("freight", new Parameter("city", "Athens"), new Parameter("freight", new Integer(5))));
 		freights.add(new Axiom("freight", new Parameter("city", "Sparta"), new Parameter("freight", new Integer(16))));
 		freights.add(new Axiom("freight", new Parameter("city", "Milos"), new Parameter("freight", new Integer(22))));
-        ApplicationComponent component = 
-                DaggerQueryExecuterTest_ApplicationComponent.builder()
-                .queryExecuterModule(new QueryExecuterModule())
-                .build();
 	}
 
 
 	@Test
 	public void test_xpl() throws ParseException
 	{
-		QueryParserTest.openScript(GREEK_CONSTRUCTION);
+		openScript(GREEK_CONSTRUCTION);
 	}
 	
     @Test 
@@ -739,4 +717,16 @@ public class QueryExecuterTest
     {
         return new QualifiedName(QualifiedName.EMPTY, name, QualifiedName.EMPTY);
     }
+
+    public static ParserAssembler openScript(String script) throws ParseException
+    {
+        InputStream stream = new ByteArrayInputStream(script.getBytes());
+        QueryParser queryParser = new QueryParser(stream);
+        queryParser.enable_tracing();
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.setResourceBase(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
+        queryParser.input(queryProgram);
+        return queryProgram.getGlobalScope().getParserAssembler();
+    }
+    
 }

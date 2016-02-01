@@ -19,9 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
 
-import au.com.cybersearch2.classyapp.ResourceEnvironment;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
@@ -29,7 +27,6 @@ import au.com.cybersearch2.classy_logic.parser.QueryParser;
 /**
  * ParserResources
  * Provides access to external scripts via streaming. 
- * Requires dependency injection for system adaption.
  * @author Andrew Bowley
  * 9 Dec 2014
  */
@@ -37,7 +34,7 @@ public class ParserResources
 {
     /** Main compiler object to parse */
 	protected QueryProgram queryProgram;
-    protected ResourceEnvironment resourceEnvironment;
+    protected File resourceBase;
 
     /**
      * Construct ParserResources object
@@ -45,29 +42,17 @@ public class ParserResources
      */
 	public ParserResources(final QueryProgram queryProgram) 
 	{
-		this(queryProgram, new ResourceEnvironment(){
-
-			@Override
-			public InputStream openResource(String resourceName) throws IOException 
-			{
-				return new FileInputStream(new File(queryProgram.getResourceBase(), resourceName));
-			}
-
-			@Override
-			public Locale getLocale() 
-			{
-				return Locale.getDefault();
-			}});
+		this(queryProgram, queryProgram.getResourceBase());
 	}
 
     /**
      * Construct ParserResources object
      * @param queryProgram Main compiler object
      */
-	public ParserResources(QueryProgram queryProgram, ResourceEnvironment resourceEnvironment) 
+	public ParserResources(QueryProgram queryProgram, File resourceBase) 
 	{
 		this.queryProgram = queryProgram;
-		this.resourceEnvironment = resourceEnvironment;
+		this.resourceBase = resourceBase;
 	}
 
     /**
@@ -78,7 +63,7 @@ public class ParserResources
      */
 	public void includeResource(String resourceName) throws IOException, ParseException
 	{	
-		InputStream instream = resourceEnvironment.openResource(resourceName);
+		InputStream instream = openResource(resourceName);
 		QueryParser parser = new QueryParser(instream);
 		try
 		{
@@ -107,4 +92,10 @@ public class ParserResources
                 //log.warn(TAG, "Error closing resource " + resourceName, e);
             }
     }
+    
+    private InputStream openResource(String resourceName) throws IOException 
+    {
+        return new FileInputStream(new File(resourceBase, resourceName));
+    }
+
 }

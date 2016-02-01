@@ -37,8 +37,6 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Singleton;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -61,7 +59,6 @@ import au.com.cybersearch2.classy_logic.query.QueryExecuterTest;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import dagger.Component;
 
 /**
  * ScopeQueryParserTest
@@ -70,8 +67,6 @@ import dagger.Component;
  */
 public class ScopeQueryParserTest 
 {
-    @Singleton
-    @Component(modules = QueryParserModule.class)  
     public interface ApplicationComponent
     {
         void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
@@ -302,10 +297,6 @@ public class ScopeQueryParserTest
     @Before
     public void setup() throws Exception
     {
-        ApplicationComponent component = 
-                DaggerScopeQueryParserTest_ApplicationComponent.builder()
-                .queryParserModule(new QueryParserModule())
-                .build();
     }
 
     @Test

@@ -17,8 +17,6 @@ package au.com.cybersearch2.classy_logic.tutorial4;
 
 import java.io.File;
 
-import javax.inject.Inject;
-
 import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -43,8 +41,7 @@ public class InWords
 		"template in_words (word regex(\"^in[^ ]+\"), string definition);\n" +
 		"query query_in_words(lexicon : in_words);";
 
-	@Inject
-	ProviderManager providerManager;
+	protected ProviderManager providerManager;
 	
 	public InWords()
 	{
