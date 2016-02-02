@@ -25,7 +25,7 @@ joins. Calculations are supported to assist with generating aggregate values, so
 data processing functions.
 
 
-=== Classy logic features ===
+## Classy logic features
    * Template term evaluation uses Java syntax
    * Templates can generate axioms for flexibility, adaptability
    * Internationalization and regular expressions support
@@ -33,7 +33,8 @@ data processing functions.
    * Open Source GPLv3 license
    * Tutorial with code exampled for getting up to speed with XPL
 
-=== Extensions library  ===
+## Extensions library
+
 Project classy_xpl provides extensions for lightweight JPA - go https://github.com/andrew-bowley/classy_tools.git
 Classy Logic uses Classy Tools as a foundation library, so shares with it the use of Dagger Dependency,
 and a Java Persistence API implementation.
