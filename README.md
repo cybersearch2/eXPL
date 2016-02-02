@@ -31,10 +31,11 @@ data processing functions.
    * Internationalization and regular expressions support
    * Random access lists supported
    * Open Source GPLv3 license
-   * Classy Tools library dependency provides lightweight JPA support
    * Tutorial with code exampled for getting up to speed with XPL
 
-Classy Logic uses Classy Tools as a foundation library, so shares with it the use of Dagger Dependency, 
-Bean utilities and most importantly, a Java Persistence API implementation.
+=== Extensions library  ===
+Project classy_xpl provides extensions for lightweight JPA - go https://github.com/andrew-bowley/classy_tools.git
+Classy Logic uses Classy Tools as a foundation library, so shares with it the use of Dagger Dependency,
+and a Java Persistence API implementation.
 
 
