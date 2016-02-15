@@ -2,6 +2,7 @@
 .factorypath
 /.settings/
 /target/
+/libs/
 /.classpath
 /.factorypath
 /.settings/
