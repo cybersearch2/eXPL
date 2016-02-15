@@ -1,4 +1,8 @@
-eXPL v1.12
+eXPL v1.2
+
+1. Upgrade to Dagger 2 and remove parser and tutorial dependency on Classy Tools. 
+2. Spit extensions and telegen modules to new classy_xpl project dependent on Classy Tools v1.2
+______________________________________________________________________________________________________________________
 
  1. Add functions and script queries. A major update which introduced new interfaces and classes.
  2. Give access to all scopes from any scope
