@@ -27,12 +27,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -193,21 +194,23 @@ public class ScopeQueryParserTest
 
     static final String[] BIRD_PROMPTS =
     {
-        "voice: {loud trumpeting,muffled musical whistle,short whistle}",
         "bill: {flat,hooked,sharp hooked,short}",
-        "neck: {long}",
-        "feet: {curved talons,one long backward toe,webbed}",
-        "eats: {birds,flying insects,insects,meat}",
-        "tail: {forked,long rusty,narrow at tip,square}",
-        "size: {large,medium,plump}",
-        "flight: {agile,flap glide,flat,ponderous,powerful,v shaped}",
         "color: {dark,white}",
-        "wings: {broad,long narrow,long pointed}",
+        "eats: {birds,flying insects,insects,meat}",
+        //"family: ",
         "feed: {on water surface,scavange}",
-        "throat: {white}",
+        "feet: {curved talons,one long backward toe,webbed}",
+        "flight: {agile,flap glide,flat,ponderous,powerful,v shaped}",
         "head: {large}",
+        "live: {at sea}",
+        "neck: {long}",
         "nostrils: {external tubular}",
-        "live: {at sea}"
+        //"order: ",
+        "size: {large,medium,plump}",
+        "tail: {forked,long rusty,narrow at tip,square}",
+        "throat: {white}",
+        "voice: {loud trumpeting,muffled musical whistle,short whistle}",
+        "wings: {broad,long narrow,long pointed}"
     };
 
 	static final String INSERT_SORT_XPL =
@@ -529,7 +532,7 @@ public class ScopeQueryParserTest
 		Set<String> orderSet = new TreeSet<String>();
 		Set<String> familySet = new TreeSet<String>();
 		Set<String> birdSet = new TreeSet<String>();
-		final Map<String, List<Axiom>> promptMap = new HashMap<String, List<Axiom>>();
+		final Map<String, List<Axiom>> promptMap = new TreeMap<String, List<Axiom>>();
 		// Get menu prompts as lists of Axioms mapped by bird attribute (keyword)
 		for (Entry<String, QuerySpec> entry: querySpecMap.entrySet())
 		{
@@ -606,7 +609,16 @@ public class ScopeQueryParserTest
 		List<Axiom> axiomList = promptMap.get(keyword);
 		if (axiomList == null)
 			return;
-		for (Axiom axiom: axiomList)
+		Set<Axiom> axiomSet = new TreeSet<Axiom>(new Comparator<Axiom> (){
+
+            @Override
+            public int compare(Axiom axiom1, Axiom axiom2)
+            {
+                return axiom1.getName().compareTo(axiom2.getName());
+            }}
+		);
+		axiomSet.addAll(axiomList);
+		for (Axiom axiom: axiomSet)
 		{
 			final String attribute = axiom.getTermByName(keyword).getValue().toString();
 			if (("bird_" + keyword).equals(axiom.getName()))

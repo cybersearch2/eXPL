@@ -25,18 +25,17 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.LineNumberReader;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.junit.Before;
@@ -218,23 +217,23 @@ public class QueryParserTest
                                         ; 
     static final String[] BIRD_PROMPTS =
     {
-        "voice: {loud trumpeting,muffled musical whistle,short whistle}",
         "bill: {flat,hooked,sharp hooked,short}",
-        "neck: {long}",
-        "feet: {curved talons,one long backward toe,webbed}",
-        "eats: {birds,flying insects,insects,meat}",
-        "tail: {forked,long rusty,narrow at tip,square}",
-        "size: {large,medium,plump}",
-        "flight: {agile,flap glide,flat,ponderous,powerful,v shaped}",
-        "order: ",
         "color: {dark,white}",
-        "wings: {broad,long narrow,long pointed}",
+        "eats: {birds,flying insects,insects,meat}",
         "family: ",
         "feed: {on water surface,scavange}",
-        "throat: {white}",
+        "feet: {curved talons,one long backward toe,webbed}",
+        "flight: {agile,flap glide,flat,ponderous,powerful,v shaped}",
         "head: {large}",
+        "live: {at sea}",
+        "neck: {long}",
         "nostrils: {external tubular}",
-        "live: {at sea}"
+        "order: ",
+        "size: {large,medium,plump}",
+        "tail: {forked,long rusty,narrow at tip,square}",
+        "throat: {white}",
+        "voice: {loud trumpeting,muffled musical whistle,short whistle}",
+        "wings: {broad,long narrow,long pointed}"
     };
  
     static final String SIMPLE_CALCULATE =
@@ -1198,7 +1197,7 @@ public class QueryParserTest
 		Set<String> orderSet = new TreeSet<String>();
 		Set<String> familySet = new TreeSet<String>();
 		Set<String> birdSet = new TreeSet<String>();
-		Map<String, List<Axiom>> promptMap = new HashMap<String, List<Axiom>>();
+		Map<String, List<Axiom>> promptMap = new TreeMap<String, List<Axiom>>();
 		ParserAssembler parserAssembler = openScript(BIRDS);
 		AxiomSource orderSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("order"));
 		Axiom orderAxiom1 = orderSource.iterator().next();
@@ -1287,6 +1286,7 @@ public class QueryParserTest
 			if (!firstTime)
 				builder.append('}');
 			//System.out.println();
+			//System.out.println(builder.toString());
 			assertThat(BIRD_PROMPTS[index++]).isEqualTo(builder.toString());
 		}
 		//System.out.println();

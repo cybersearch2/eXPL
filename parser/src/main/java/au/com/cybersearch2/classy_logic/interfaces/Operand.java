@@ -64,7 +64,7 @@ public interface Operand extends Term
 	/**
 	 * Evaluate a binary expression
 	 * @param leftTerm Term on left
-	 * @param operatorEnum2 OperatorEnum for one of +, -, *, /, &, |, ^ or % 
+	 * @param operatorEnum2 OperatorEnum for one of +, -, *, /, &amp;, |, ^ or % 
 	 * @param rightTerm Term on right
 	 * @return Class derived from Number.
 	 */

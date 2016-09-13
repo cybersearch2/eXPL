@@ -97,7 +97,8 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
 
 	/**
 	 * Evaluate a binary expression using this Term as the left term
-	 * @param operatorEnum2 OperatorEnum for one of +, -, *, /, &, |, ^ or % 
+     * @param leftTerm Term on left
+	 * @param operatorEnum2 OperatorEnum for one of +, -, *, /, &amp;, |, ^ or % 
 	 * @param rightTerm Term on right
 	 * @return sub class of Number with result
 	 */

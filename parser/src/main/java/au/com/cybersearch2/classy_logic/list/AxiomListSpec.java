@@ -290,7 +290,6 @@ public class AxiomListSpec
     
     /**
      * Returns index of item identified by name
-     * @param listName Name of list - used only for error reporting
      * @param itemName Item name
      * @param axiomTermNameList Term names of axiom source
      * @return Index

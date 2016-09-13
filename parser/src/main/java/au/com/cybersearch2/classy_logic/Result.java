@@ -75,7 +75,7 @@ public class Result
 
     /**
      * Returns the result list for specified key
-     * @param key Qualiied name of list
+     * @param qname Qualiied name of list
      * @return Iterable object
      */
     protected Iterable<Axiom> getList(QualifiedName qname) 

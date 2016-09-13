@@ -115,10 +115,10 @@ public class Evaluator extends DelegateOperand
 
 	/**
 	 * Execute expression and set Evaluator value with result
-	 * There is a precedence for errors, in highest to lowest:<br/>
-	 * Term is empty<br/>
-	 * Number is NaN<br/>
-	 * Operation not permited for type of Term value<br/>
+	 * There is a precedence for errors, in highest to lowest:
+	 * Term is empty
+	 * Number is NaN
+	 * Operation not permited for type of Term value
 	 * Term value is null
 	 * 
 	 * @param id Identity of caller, which must be provided for backup()
