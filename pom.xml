@@ -56,9 +56,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <release.repo.id>artifactory</release.repo.id>
-    <release.repo.url>http://build.cyberserch2.local/artifactory/libs-release-local</release.repo.url>
+    <release.repo.url>http://build.cybersearch2.local/artifactory/libs-release-local</release.repo.url>
     <snapshot.repo.id>artifactory</snapshot.repo.id>
-    <snapshot.repo.url>http://build.cyberserch2.local/artifactory/libs-snapshot-local</snapshot.repo.url>
+    <snapshot.repo.url>http://build.cybersearch2.local/artifactory/libs-snapshot-local</snapshot.repo.url>
   </properties>
   <build>
 	  <pluginManagement>
