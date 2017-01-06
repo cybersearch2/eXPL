@@ -32,7 +32,7 @@ public class RegexGroups
 	static final String LEXICAL_SEARCH = 
 		// Use an external axiom source which is bound in TestAxiomProvider dependency class
 	    // to AxiomSource class LexiconSource
-		"axiom lexicon (Word, Definition) : resource \"lexicon\";\n" +
+		"axiom lexicon (Word, Definition) : \"lexicon\";\n" +
 		"string wordRegex = \"^in[^ ]+\";\n" +
 	    "string defRegex = \"^(.)\\. (.*+)\";\n" +
 	    "// Convert single letter part of speech to word\n" +

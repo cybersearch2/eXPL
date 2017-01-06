@@ -18,10 +18,12 @@ package au.com.cybersearch2.classy_logic.interfaces;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+
 
 /**
  * AxiomProvider
- * Sources axioms from persistence system
+ * Interface for an eXPL resource object which receives and transmits axioms on a data connection.
  * @author Andrew Bowley
  * 11 Feb 2015
  */
@@ -34,11 +36,16 @@ public interface AxiomProvider
 	String getName();
 	
 	/**
-	 * Establish resource for specified axiom name and properties
-	 * @param axiomName Axiom key
+	 * Open with specified properties
 	 * @param properties Optional properties specific to the provider implementation
 	 */
-	void setResourceProperties(String axiomName, Map<String, Object> properties);
+	void open(Map<String, Object> properties)throws ExpressionException;
+
+	/**
+	 * Close to free all resources used by provider
+	 */
+	void close();
+	
 	/**
 	 * Returns axiom source for specified axiom name  
 	 * @param axiomName Axiom key

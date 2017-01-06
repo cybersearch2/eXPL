@@ -129,7 +129,7 @@ public class VariableType
         AxiomListListener axiomListListener = null;
         if (operandType == OperandType.AXIOM || operandType == OperandType.LIST || operandType == OperandType.TERM)
         {
-            getPropertyString(AXIOM_KEY);
+            axiomKey = getPropertyString(AXIOM_KEY);
             if (axiomKey == null)
                 axiomKey = qname.getName();
             axiomListListener = axiomListListener(parserAssembler.getOperandMap());

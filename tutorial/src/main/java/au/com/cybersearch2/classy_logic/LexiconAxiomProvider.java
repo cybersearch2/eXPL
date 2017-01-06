@@ -38,8 +38,7 @@ public class LexiconAxiomProvider implements AxiomProvider
 	}
 
 	@Override
-	public void setResourceProperties(String axiomName,
-			Map<String, Object> properties) 
+	public void open(Map<String, Object> properties) 
 	{
 	}
 
@@ -67,5 +66,10 @@ public class LexiconAxiomProvider implements AxiomProvider
 			}
 		};
 	}
+
+    @Override
+    public void close()
+    {
+    }
 
 }

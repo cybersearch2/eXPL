@@ -286,6 +286,7 @@ void input(QueryProgram queryProgram) :
 {
 }
 {
+  ( ResourceDeclaration(queryProgram) ";" )*
   ( Statement(queryProgram, queryProgram.getGlobalScope()) | QueryChain(queryProgram.getGlobalScope()) | ScopeDeclaration(queryProgram) )+
   <EOF>
 }
@@ -398,13 +399,12 @@ void ListDeclaration(ParserAssembler parserAssembler) :
     Token nameToken;
     VariableType varType = null;
     QualifiedName qualifiedAxiomName = null;
-    AxiomProvider axiomProvider = null;
 }
 {
   ( keywordToken=<LIST> | keywordToken=<LOCAL> ) 
   [ "<" varType=Type(parserAssembler.getOperandMap()) ">" ] 
   nameToken=<IDENTIFIER> 
-  [ "(" qualifiedAxiomName=Axiom(parserAssembler)  ( ":" axiomProvider=ResourceDeclaration(qualifiedAxiomName, parserAssembler) )? ")" ]
+  [ "(" qualifiedAxiomName=Axiom(parserAssembler)  ( ResourceBinding(qualifiedAxiomName, parserAssembler) )? ")" ]
   {
     String listName = nameToken.image;
     if ((varType == null) && (qualifiedAxiomName == null))
@@ -414,7 +414,7 @@ void ListDeclaration(ParserAssembler parserAssembler) :
     if (varType == null)
         varType = keywordToken.kind == QueryParserConstants.LIST ? new VariableType(OperandType.AXIOM) : new VariableType(OperandType.LOCAL);
     if (qualifiedAxiomName != null)
-        varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName.getName());
+        varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
     ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
     parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
   }
@@ -900,16 +900,12 @@ void AxiomSpecification(QualifiedName qualifiedAxiomName, ParserAssembler parser
 {
   "(" ( TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )* )?  ")"  
   (
-    ( ":"  
-      (
-      ResourceDeclaration(qualifiedAxiomName, parserAssembler)
-      |
-      ParameterDeclaration(qualifiedAxiomName, parserAssembler) 
-      )
-    )
+    LOOKAHEAD(2) ResourceBinding(qualifiedAxiomName, parserAssembler)
+    |
+    LOOKAHEAD(2) ParameterDeclaration(qualifiedAxiomName, parserAssembler) 
     |
     ( <LBRACE> AxiomItem(qualifiedAxiomName, parserAssembler) <RBRACE> )+
-  )
+  )?
 }
 
 QualifiedName ChoiceDeclaration(ParserAssembler parserAssembler) :
@@ -937,12 +933,14 @@ QualifiedName ChoiceDeclaration(ParserAssembler parserAssembler) :
 
 QualifiedName Axiom(ParserAssembler parserAssembler) :
 {
-    Token axiomToken;
+    String axiomName;
 }
 {
-  axiomToken=<IDENTIFIER>
+  axiomName=Name()
   { 
-    return parserAssembler.getContextName(axiomToken.image); 
+    return axiomName.indexOf(".") == -1 ? 
+        parserAssembler.getContextName(axiomName) :
+        QualifiedName.parseName(axiomName); 
   }
 }
 
@@ -1014,7 +1012,7 @@ Operand ChoiceExpression(String name, ParserAssembler parserAssembler) :
     }
 }
 
-AxiomProvider ResourceDeclaration(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
+void ResourceDeclaration(QueryProgram queryProgram) :
 {
   Token nameToken;
   Map<String, Object> properties = new HashMap<String, Object>();
@@ -1022,7 +1020,20 @@ AxiomProvider ResourceDeclaration(QualifiedName qualifiedAxiomName, ParserAssemb
 {
   <RESOURCE> nameToken=<STRING_LITERAL> ( "(" InitialiserList(properties) ")" )?
   {
-    return parserAssembler.setResourceProperties(getText(nameToken), qualifiedAxiomName, properties);
+    queryProgram.openResource(getText(nameToken), properties);
+  }
+}
+
+void ResourceBinding(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
+{
+  Token nameToken = null;
+}
+{
+  ":" ( nameToken=<STRING_LITERAL> | <RESOURCE> )
+  {
+    AxiomProvider axiomProvider = (nameToken != null) ?
+        parserAssembler.bindResource(QualifiedName.parseName(getText(nameToken)), qualifiedAxiomName) :
+        parserAssembler.bindResource(qualifiedAxiomName);
   }
 }
 
@@ -1030,7 +1041,7 @@ void ParameterDeclaration(QualifiedName qualifiedAxiomName, ParserAssembler pars
 {
 }
 {
-  <PARAMETER>
+  ":" <PARAMETER>
   {
     parserAssembler.setParameter(qualifiedAxiomName);
   }
@@ -1459,6 +1470,11 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
     if (param1 == null)
         return operandMap.addOperand(name, null);
     return param1;
+  }
+  |
+  <SCOPE> param1=IndexExpression(parserAssembler)
+  {
+    return parserAssembler.setListVariable("scope", param1, null);
   }
   |
   "(" ( param1 = Expression(parserAssembler) ) ")" 

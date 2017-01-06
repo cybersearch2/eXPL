@@ -21,6 +21,7 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
 import au.com.cybersearch2.classy_logic.ProviderManager;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -39,8 +40,7 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 	}
 	
 	@Override
-	public void setResourceProperties(String axiomName,
-			Map<String, Object> properties) 
+	public void open(Map<String, Object> properties) 
 	{
 	}
 
@@ -71,7 +71,7 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 	}
 	
 	@Override
-	public AxiomProvider getAxiomProvider(String name)
+	public AxiomProvider getAxiomProvider(QualifiedName name)
 	{
 		return this;
 	}
@@ -81,6 +81,11 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 	{
 		return "test";
 	}
+
+    @Override
+    public void close()
+    {
+    }
 
 
 }

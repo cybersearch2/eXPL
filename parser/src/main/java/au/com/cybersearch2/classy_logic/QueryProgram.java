@@ -25,6 +25,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
@@ -287,6 +288,23 @@ public class QueryProgram extends QueryLauncher
 		return executeQuery(scopeName, queryName, QueryParams.DO_NOTHING);
 
 	}
+
+    /**
+     * Open resource with properties, if supplied
+     * @param resourceName Resource name
+     * @param properties Properties specific to the resource. May be empty.
+     * @throws ExpressionException if open of provider fails
+     */
+    public AxiomProvider openResource(String resourceName,  Map<String, Object> properties) throws ExpressionException
+    {
+        AxiomProvider axiomProvider = null;
+        if (providerManager != null)
+            axiomProvider = providerManager.getAxiomProvider(QualifiedName.parseName(resourceName));
+        if (axiomProvider == null)
+            throw new ExpressionException("Resource \"" + resourceName + "\"not found");
+        axiomProvider.open(properties);
+        return axiomProvider;
+    }
 
 
 

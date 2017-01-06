@@ -382,9 +382,9 @@ public class CallOperandTest
             "query average_height (average_height);"
            ;
     static final String GERMAN_COLORS =
-            "axiom lexicon (language, aqua, black, blue, white)\n" +
-            "  {\"english\", \"aqua\", \"black\", \"blue\", \"white\"}\n" +
-            "  {\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
+            "axiom lexicon (aqua, black, blue, white);\n" +
+            "axiom german.lexicon (aqua, black, blue, white)\n" +
+            "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);" +
             "choice swatch (shade, red, green, blue)\n" +
             "{colors[aqua], 0, 255, 255}\n" +
@@ -804,7 +804,7 @@ public class CallOperandTest
                 assertThat(colorsList.getAxiomTermNameList()).isEmpty();
                 return true;
             }});
-            
+           
         queryProgram.executeQuery("german_orange", new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution)
@@ -819,7 +819,6 @@ public class CallOperandTest
                 return true;
             }}); 
     }
-
     FunctionManager provideFunctionManager()
     {
         FunctionManager functionManager = new FunctionManager();

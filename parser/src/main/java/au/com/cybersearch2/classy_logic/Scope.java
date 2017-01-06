@@ -23,18 +23,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.VariableType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.QueryType;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * Scope
@@ -44,6 +49,8 @@ import au.com.cybersearch2.classy_logic.query.QueryType;
  */
 public class Scope 
 {
+    /** scope literal */
+    static final protected String SCOPE = "scope";
 	/** Scope name - must be unique to all scopes */
     protected String name;
     /** Map QuerySpec objects to query name */
@@ -72,7 +79,8 @@ public class Scope
 	{
 		this.scopeMap = scopeMap;
 		this.name = name;
-		if (properties != null)
+		boolean hasProperties = (properties != null) && (properties.size() > 0);
+		if (hasProperties)
 		{
 			Object language = properties.get(QueryProgram.LANGUAGE);
 			if (language != null)
@@ -91,6 +99,8 @@ public class Scope
 		    locale = Locale.getDefault(/*Locale.Category.FORMAT*/);
 		querySpecMap = new HashMap<String, QuerySpec>();
 		parserAssembler = new ParserAssembler(this);
+        if (hasProperties)
+            addScopeList(properties);
 	}
 	
 	/**
@@ -455,28 +465,32 @@ public class Scope
 		final ParserAssembler parserAssembler = getGlobalScope().getParserAssembler();
 		LocaleListener localeListener = new LocaleListener(){
 
+		    /**
+		     * Assign backing axiom to local list. If no axiom source is found, create one
+		     * in which each item is "unknown"
+		     */
 			@Override
 			public void onScopeChange(Scope scope) 
 			{
-				AxiomSource axiomSource = parserAssembler.getAxiomSource(qualifiedAxiomName);
-				Iterator<Axiom> iterator = axiomSource.iterator();
-				Axiom defaultAxiom = null;
-				Axiom localAxiom = null;
-				while (iterator.hasNext())
-				{
-					Axiom axiom = iterator.next();
-					if (defaultAxiom == null)
-						defaultAxiom = axiom;
-					if (axiom.getTermByIndex(0).getValue().toString().equals(scope.getName()))
-					{
-						localAxiom = axiom;
-						break;
-					}
-				}
-				if (defaultAxiom == null)
-					throw new ExpressionException("Axiom source \"" + qualifiedAxiomName.getName() + "\" is empty");
-				if (localAxiom == null)
-					localAxiom = defaultAxiom;
+                Axiom localAxiom = null;
+			    QualifiedName qname = getQualifiedName(scope, qualifiedAxiomName.getName());
+				AxiomSource axiomSource = parserAssembler.getAxiomSource(qname);
+		        if (axiomSource == null)
+		        {
+		            axiomSource = getGlobalParserAssembler().getAxiomSource(qualifiedAxiomName);
+	                if (axiomSource != null)
+	                    localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
+	                else
+	                    throw new ExpressionException("Axiom source \"" + qualifiedAxiomName.toString() + "\" not found");
+		        }
+		        if (localAxiom == null)
+		        {
+                    Iterator<Axiom> iterator = axiomSource.iterator();
+    		        if (iterator.hasNext())
+    		            localAxiom = iterator.next();
+    		        else
+                        localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
+		        }
 				axiomListener.onNextAxiom(localAxiom);
 			}
 		};
@@ -506,5 +520,54 @@ public class Scope
         return scopeMap.get(QueryProgram.GLOBAL_SCOPE).getParserAssembler();
     }
 
+    /**
+     * Create placeholder axiom with "unknown" items
+     * @param axiomName
+     * @param termNameList List of term names
+     * @return Axiom object
+     */
+    private Axiom createUnknownAxiom(String axiomName, List<String> termNameList)
+    {
+        Axiom axiom = new Axiom(axiomName);
+        Unknown unknown = new Unknown();
+        for (String termName: termNameList)
+            axiom.addTerm(new Parameter(termName, unknown));
+        return axiom;
+    }
 
+    /**
+     * Add "scope" builtin term list to access scope properties
+     * @param properties Scope properties
+     */
+    private void addScopeList(Map<String, Object> properties)
+    {   // Add axiom to ParserAssembler
+        QualifiedName qname = getQualifiedName(this, SCOPE);
+        parserAssembler.createAxiom(qname);
+        for (String termName: properties.keySet())
+        {
+            parserAssembler.addAxiom(qname, new Parameter(termName, properties.get(termName)));
+            parserAssembler.addAxiomTermName(qname, termName);
+        }
+        parserAssembler.saveAxiom(qname);
+        // Create scope term list 
+        VariableType varType = new VariableType(OperandType.TERM);
+        varType.setProperty(VariableType.AXIOM_KEY, qname);
+        AxiomTermList localList = new AxiomTermList(qname, qname.toString());
+        parserAssembler.registerAxiomTermList(localList);
+        parserAssembler.getOperandMap().addItemList(qname, localList);
+    }
+ 
+    /**
+     * Returns 2-part qualified name 
+     * @param scope Scope
+     * @param name 
+     * @return
+     */
+    private QualifiedName getQualifiedName(Scope scope, String name)
+    {
+        String scopeName = scope.getName();
+        if (scopeName.equals(QueryProgram.GLOBAL_SCOPE))
+            scopeName = "";
+        return new QualifiedName(scopeName, null, name);
+    }
 }

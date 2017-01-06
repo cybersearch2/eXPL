@@ -34,9 +34,9 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 public class GermanColors 
 {
     static final String GERMAN_COLORS =
-            "axiom lexicon (language, aqua, black, blue, white)\n" +
-            "  {\"english\", \"aqua\", \"black\", \"blue\", \"white\"}\n" +
-            "  {\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
+            "axiom lexicon (aqua, black, blue, white);\n" +
+            "axiom german.lexicon (aqua, black, blue, white)\n" +
+            "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);\n" +
             "choice swatch (name, red, green, blue)\n" +
             "{colors[aqua], 0, 255, 255}\n" +

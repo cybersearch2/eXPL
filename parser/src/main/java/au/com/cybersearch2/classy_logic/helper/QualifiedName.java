@@ -78,7 +78,7 @@ public class QualifiedName implements Comparable<QualifiedName>
     public QualifiedName(String scope, String template, String name)
     {
         this.scope = scope;
-        this.template = template;
+        this.template = template == null ? EMPTY : template;
         this.name = name;
     }
 

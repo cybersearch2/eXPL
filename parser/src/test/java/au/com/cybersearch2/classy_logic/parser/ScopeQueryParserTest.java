@@ -253,9 +253,9 @@ public class ScopeQueryParserTest
 		    ;
  
 	static final String GERMAN_CURRENCY_XPL =
-			"axiom lexicon (language, Total)\n" +
-	        "  {\"english\", \"Total\"}\n" +
-	        "  {\"german\", \"Gesamtkosten\"};\n" +
+			"axiom lexicon (Total);\n" +
+		    "axiom german.lexicon (Total)\n" +
+	        "  {\"Gesamtkosten\"};\n" +
 	        "local translate(lexicon);" +
 			"template charge(currency amount);\n" +
 			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +
@@ -267,9 +267,9 @@ public class ScopeQueryParserTest
 	        "}";
 
     static final String GERMAN_COLORS =
-            "axiom lexicon (language, aqua, black, blue, white)\n" +
-            "  {\"english\", \"aqua\", \"black\", \"blue\", \"white\"}\n" +
-            "  {\"german\", \"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
+            "axiom lexicon (aqua, black, blue, white);\n" +
+            "axiom german.lexicon (aqua, black, blue, white)\n" +
+            "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);" +
             "choice swatch (name, red, green, blue)\n" +
             "{colors[aqua], 0, 255, 255}\n" +
@@ -282,6 +282,15 @@ public class ScopeQueryParserTest
             "  query color_query (shade : swatch);\n" +
             "}";
 
+    static final String GERMAN_SCOPE_XPL =
+            "scope german (language=\"de\", region=\"DE\")\n" +
+            "{\n" +
+            "  calc format_summary(string summary = " +
+            "  \"language = \" + scope[language] + " +
+            "  \", region = \" + scope[region]);\n" +
+            "  query properties_query(format_summary);\n" +
+            "}";
+
     static final String MEGA_CITY3 = 
             "include \"mega_city.xpl\";\n" +
             "template city (Rank, Megacity, Continent, Country, decimal Population);\n" +
@@ -292,7 +301,7 @@ public class ScopeQueryParserTest
             "  {Population >= '30.000.000', \"Mega\"}\n" +
             "  {Population >= '20.000.000', \"Huge\"}\n" +
             "  {Population <  '20.000.000', \"Large\"};\n" +
-            "  list city_group_list(population_group);\n" +
+            "  list city_group_list(german.population_group);\n" +
             "  query group_query (mega_city:city) >> (city:population_group);\n" +
             "}\n";
 
@@ -349,17 +358,16 @@ public class ScopeQueryParserTest
     {
         QueryProgram queryProgram = new QueryProgram(new TestAxiomProvider());
         queryProgram.parseScript(MEGA_CITY3);
-        //queryProgram.executeQuery("german", "group_query", new SolutionHandler(){
         //queryProgram.executeQuery("german.group_query", new SolutionHandler(){
         //  @Override
         //  public boolean onSolution(Solution solution) {
-        //      System.out.println(solution.getAxiom("population_group").toString());
+        //      System.out.println(solution.getAxiom("german.population_group").toString());
         //      return true;
         //  }});
         Result result = queryProgram.executeQuery("german.group_query");
         Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseName("german.city_group_list"));
-        File worldCurrencyList = new File("src/test/resources", "cities-group.lst");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(worldCurrencyList), "UTF-8"));
+        File citiesList = new File("src/test/resources", "cities-group.lst");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(citiesList), "UTF-8"));
         while(iterator.hasNext())
         {
             //System.out.println(iterator.next().toString());
@@ -370,7 +378,7 @@ public class ScopeQueryParserTest
     }
     
     @Test
-    public void test_german_currency_Format() throws ParseException
+    public void test_german_currency_format() throws ParseException
     {
 		InputStream stream = new ByteArrayInputStream(GERMAN_CURRENCY_XPL.getBytes());
 		QueryParser queryParser = new QueryParser(stream);
@@ -385,6 +393,22 @@ public class ScopeQueryParserTest
 				assertThat(solution.getAxiom("format_total").toString()).isEqualTo("format_total(total_text = Gesamtkosten + gst: 13.580,24 EUR)");
 				return true;
 			}});
+    }
+    
+    @Test
+    public void test_german_scope() throws ParseException
+    {
+        InputStream stream = new ByteArrayInputStream(GERMAN_SCOPE_XPL.getBytes());
+        QueryParser queryParser = new QueryParser(stream);
+        QueryProgram queryProgram = new QueryProgram();
+        queryParser.input(queryProgram);
+        queryProgram.executeQuery("german.properties_query", new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                //System.out.println(solution.getAxiom("german.format_summary").toString());
+                assertThat(solution.getAxiom("german.format_summary").toString()).isEqualTo("format_summary(summary = language = de, region = DE)");
+                return true;
+            }});
     }
     
     @Test
