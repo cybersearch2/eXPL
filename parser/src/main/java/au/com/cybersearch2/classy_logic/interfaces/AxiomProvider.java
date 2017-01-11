@@ -55,9 +55,10 @@ public interface AxiomProvider
 	AxiomSource getAxiomSource(String axiomName, List<String> axiomTermNameList);
 	/** 
 	 * Returns listener to notify when an axiom is passed to this provider 
+     * @param axiomName Axiom key
 	 * @return AxiomListener object
 	 */
-	AxiomListener getAxiomListener();
+	AxiomListener getAxiomListener(String axiomName);
 	/** 
 	 * Returns flag to indicate if no axioms are available from the provider 
 	 * @return boolean

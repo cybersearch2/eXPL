@@ -36,6 +36,7 @@ import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
@@ -532,7 +533,7 @@ public class LogicQueryTest
 	@Test 
 	public void test_axiom_listener()
 	{
-		Template template = new Template(new QualifiedName(QualifiedName.EMPTY, "template_name", QualifiedName.EMPTY));
+		Template template = new Template(new QualifiedTemplateName(QualifiedName.EMPTY, "template_name"));
 		template.setKey(KEY);
 		template.addTerm(new TestStringOperand("string"));
 		template.addTerm(new TestIntegerOperand("integer"));

@@ -22,6 +22,7 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 
@@ -97,7 +98,10 @@ public class ProviderManager
 	 */
 	public void putAxiomProvider(AxiomProvider axiomProvider)
 	{
-		axiomProviderMap.put(QualifiedName.parseName(axiomProvider.getName()), axiomProvider);
+	    QualifiedName qualifiedAxiomName = QualifiedName.parseName(axiomProvider.getName());
+		axiomProviderMap.put(qualifiedAxiomName, axiomProvider);
+		QualifiedTemplateName qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
+        axiomProviderMap.put(qualifiedTemplateName, axiomProvider);
 	}
 
 	/**

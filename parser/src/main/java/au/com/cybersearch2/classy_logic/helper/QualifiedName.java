@@ -60,13 +60,13 @@ public class QualifiedName implements Comparable<QualifiedName>
     }
 
     /**
-     * Construct QualifiedName object from template and name parts in global namespace
+     * Construct QualifiedName object from namee and scope parts
      * @param template
      * @param name
      */
-    public QualifiedName(String template, String name)
+    public QualifiedName(String scope, String name)
     {
-        this(EMPTY, template, name);
+        this(scope, EMPTY, name);
     }
 
     /**
@@ -75,7 +75,7 @@ public class QualifiedName implements Comparable<QualifiedName>
      * @param template
      * @param name
      */
-    public QualifiedName(String scope, String template, String name)
+    protected QualifiedName(String scope, String template, String name)
     {
         this.scope = scope;
         this.template = template == null ? EMPTY : template;

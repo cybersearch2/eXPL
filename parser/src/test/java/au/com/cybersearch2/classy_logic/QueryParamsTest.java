@@ -20,6 +20,8 @@ import static org.mockito.Mockito.*;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -35,6 +37,8 @@ public class QueryParamsTest
 	private static final String QUERY_SPEC_NAME = "QuerySpec";
 	private static final String AXIOM_KEY = "AxiomKey";
 	private static final String TEMPLATE_NAME = "TemplateName";
+    private static final QualifiedName Q_AXIOM_KEY = new QualifiedName("", AXIOM_KEY);
+    private static final QualifiedName Q_TEMPLATE_NAME = new QualifiedTemplateName("", TEMPLATE_NAME);
 
 	@Test
 	public void test_set_parameters_from_scope()
@@ -44,10 +48,10 @@ public class QueryParamsTest
 		Template template = mock(Template.class);
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
-		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
-		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
-		when(scope.findAxiomSource(AXIOM_KEY)).thenReturn(axiomSource);
-		when(scope.getTemplate(TEMPLATE_NAME)).thenReturn(template);
+		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_KEY);
+		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
+		when(scope.findAxiomSource(Q_AXIOM_KEY)).thenReturn(axiomSource);
+		when(scope.getTemplate(Q_TEMPLATE_NAME)).thenReturn(template);
 		querySpec.addKeyName(keyname);
 		QueryParams queryParams = new QueryParams(scope, querySpec);
 		queryParams.initialize();
@@ -62,9 +66,10 @@ public class QueryParamsTest
 		Template template = mock(Template.class);
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
-		when(keyname.getAxiomKey()).thenReturn("");
-		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
-		when(scope.getTemplate(TEMPLATE_NAME)).thenReturn(template);
+		QualifiedName emptyAxiomName = new QualifiedName("");
+		when(keyname.getAxiomKey()).thenReturn(emptyAxiomName);
+	    when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
+		when(scope.getTemplate(Q_TEMPLATE_NAME)).thenReturn(template);
 		querySpec.addKeyName(keyname);
 		QueryParams queryParams = new QueryParams(scope, querySpec);
 		queryParams.initialize();

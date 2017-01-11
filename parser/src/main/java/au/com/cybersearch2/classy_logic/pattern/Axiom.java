@@ -15,6 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +27,8 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.terms.TermStore;
 
 
 /**
@@ -34,7 +40,15 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class Axiom extends Structure
 {
-	/**
+	private static final long serialVersionUID = 2741521667825735668L;
+    private static final ObjectStreamField[] serialPersistentFields =
+    {
+        new ObjectStreamField("name", String.class),
+        new ObjectStreamField("pairByPosition", Boolean.class)
+    };
+
+
+    /**
 	 * TermPair holds paired Terms for unification
 	 */
 	public static class TermPair
@@ -112,6 +126,11 @@ public class Axiom extends Structure
 		pairByPosition = true;
 	}
 
+	public Axiom()
+	{
+	    super(null);
+	}
+	
 	/**
 	 * Set flag to indicate unification term pairing to be performed sequentially
 	 * @param value PairByPosition flag 
@@ -213,4 +232,29 @@ public class Axiom extends Structure
 		pairByPosition = false;
 	}
 
+    private void writeObject(ObjectOutputStream oos)
+            throws IOException 
+    {
+        // termList size
+        oos.writeInt(termList.size());
+        // terms
+        for (Term term: termList)
+            oos.writeObject(new TermStore(term));
+    }
+    
+    private void readObject(ObjectInputStream ois)
+            throws IOException, ClassNotFoundException  
+    {
+        // termList size
+        Term[] termArray = new Term[ois.readInt()];
+        // terms
+        for (int i = 0; i < termArray.length; i++)
+        {
+            TermStore termStore = (TermStore) ois.readObject();
+            Parameter param = new Parameter(termStore.getName(), termStore.getValue());
+            param.setId(termStore.getId());
+            termArray[i] = param;
+        }
+        setTerms(termArray);
+    }
 }

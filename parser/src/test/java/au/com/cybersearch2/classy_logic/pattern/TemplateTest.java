@@ -25,6 +25,7 @@ import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrow
 import static org.mockito.Mockito.*;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
@@ -194,6 +195,6 @@ public class TemplateTest
 
     protected static QualifiedName parseTemplateName(String name)
     {
-        return new QualifiedName(QualifiedName.EMPTY, name, QualifiedName.EMPTY);
+        return new QualifiedTemplateName(QualifiedName.EMPTY, name);
     }
 }

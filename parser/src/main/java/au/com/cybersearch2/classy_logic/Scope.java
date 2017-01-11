@@ -27,9 +27,12 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.VariableType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
@@ -135,7 +138,7 @@ public class Scope
 	 */
 	public QuerySpec buildQuerySpec(QuerySpec querySpec, KeyName firstKeyname, int keynameCount, Map<String, Object> properties)
     {
-	       String templateName = firstKeyname.getTemplateName();
+	       QualifiedName templateName = firstKeyname.getTemplateName();
 	       Template firstTemplate = getTemplate(templateName);
 	       if (!firstTemplate.isCalculator())
 	           // If the head query is not a calculator, then the build is complete
@@ -146,7 +149,7 @@ public class Scope
 	       // Query parameters specified as properties
 	       if (properties.size() > 0)
 	          querySpec.putProperties(firstKeyname, properties);
-	       String axiomName = firstKeyname.getAxiomKey();
+	       String axiomName = firstKeyname.getAxiomKey().getName();
 	       // Check if logic query needs to be inserted in front of head calculator
 	       if (!querySpec.isHeadQuery() || axiomName.isEmpty())
 	          return querySpec;
@@ -157,7 +160,7 @@ public class Scope
 	       // Append new calculator query spec to head query spec.
 	       QuerySpec chainQuerySpec = headQuerySpec.chain();
 	       // Create new keyname with empty axiom key to indicate get axiom from solution
-	       KeyName calculateKeyname = new KeyName("", firstKeyname.getTemplateName());
+	       KeyName calculateKeyname = new KeyName("", firstKeyname.getTemplateName().getTemplate());
 	       chainQuerySpec.addKeyName(calculateKeyname);
 	       chainQuerySpec.setQueryType(QueryType.calculator);
 	       if (properties.size() > 0)
@@ -168,8 +171,8 @@ public class Scope
 	       if (logicTemplate != null)
 	           return headQuerySpec;
 	       // Create new logic query template which will populated with terms to match axiom terms at start of query
-           QualifiedName qualifiedAxiomName = new QualifiedName(getAlias(), axiomName, QualifiedName.EMPTY);
-	       logicTemplate = parserAssembler.createTemplate(qualifiedAxiomName, false);
+           QualifiedName qualifiedTemplateName = new QualifiedTemplateName(getAlias(), axiomName);
+	       logicTemplate = parserAssembler.createTemplate(qualifiedTemplateName, false);
 	       logicTemplate.setKey(axiomName);
 	       return headQuerySpec;
 	    }
@@ -283,8 +286,57 @@ public class Scope
         }
         if ((axiomSource == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
         {
-            qname = QualifiedName.parseGlobalName(axiomKey);
             axiomSource = getGlobalParserAssembler().getAxiomSource(qname);
+            if (axiomSource == null)
+            {
+                qname = QualifiedName.parseGlobalName(axiomKey);
+                axiomSource = getGlobalParserAssembler().getAxiomSource(qname);
+            }
+        }
+        return axiomSource;
+    }
+
+    /**
+     * Returns axiom source for specified axiom name
+     * @param axiomKey
+     * @return AxiomSource object
+     */
+    public AxiomSource getAxiomSource(QualifiedName axiomKey)
+    {
+        AxiomSource axiomSource = findAxiomSource(axiomKey);
+        if (axiomSource == null)
+            throw new IllegalArgumentException("Axiom \"" + axiomKey.toString() + "\" does not exist");
+        return axiomSource;
+    }
+
+    /**
+     * Returns axiom source for specified axiom name
+     * @param axiomKey
+     * @return AxiomSource object or null if it does not exist in scope
+     */
+    public AxiomSource findAxiomSource(QualifiedName axiomKey)
+    {
+        String scopeName = axiomKey.getScope();
+        if (!scopeName.isEmpty() && (scopeMap.get(scopeName) == null))
+            throw new ExpressionException("Scope \"" + scopeName + "\"  in axiom key \"" + axiomKey.toString() + "\" is not found");
+        AxiomSource axiomSource = parserAssembler.getAxiomSource(axiomKey);
+        if (axiomSource != null)
+            return axiomSource;
+        QualifiedName qname = QualifiedName.parseName(axiomKey.getName(), parserAssembler.getOperandMap().getQualifiedContextname());
+        axiomSource = parserAssembler.getAxiomSource(qname);
+        if ((axiomSource == null) && !qname.getTemplate().isEmpty())
+        {
+            qname.clearTemplate();
+            axiomSource = parserAssembler.getAxiomSource(qname);
+        }
+        if ((axiomSource == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
+        {
+            axiomSource = getGlobalParserAssembler().getAxiomSource(qname);
+            if (axiomSource == null)
+            {
+                qname = QualifiedName.parseGlobalName(axiomKey.getName());
+                axiomSource = getGlobalParserAssembler().getAxiomSource(qname);
+            }
         }
         return axiomSource;
     }
@@ -309,12 +361,91 @@ public class Scope
      */
     public Template findTemplate(String templateName)
     {
-        QualifiedName qualifiedTemplateName = new QualifiedName(getAlias(), templateName, QualifiedName.EMPTY);
+        QualifiedName globalTemplateName = null;
+        String[] parts = templateName.split("\\.");
+        String scopeName = parts.length == 1 ? getAlias() : parts[0];
+        if (parts.length > 1)
+            templateName = parts[1];
+        QualifiedName qualifiedTemplateName = new QualifiedTemplateName(scopeName, templateName);
         Template template = parserAssembler.getTemplate(qualifiedTemplateName);
         if ((template == null) && !qualifiedTemplateName.getScope().isEmpty())
         {
-            qualifiedTemplateName = new QualifiedName(QualifiedName.EMPTY, templateName, QualifiedName.EMPTY);
-            template = getGlobalParserAssembler().getTemplate(qualifiedTemplateName);
+            globalTemplateName = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, templateName);
+            template = getGlobalParserAssembler().getTemplate(globalTemplateName);
+        }
+        if (template == null)
+        {   // Create template for resource binding, if one exists
+            AxiomProvider axiomProvider = null;
+            QualifiedName globalResourceName = null;
+            QualifiedName resourceName = parserAssembler.getResourceName(qualifiedTemplateName);
+            if (resourceName != null) 
+            {
+                axiomProvider = parserAssembler.getAxiomProvider(resourceName);
+                if (axiomProvider != null)
+                    return createResourceTemplate(qualifiedTemplateName, parserAssembler);
+            }
+            else if (!qualifiedTemplateName.getScope().isEmpty())
+            {
+                globalResourceName =  getGlobalParserAssembler().getResourceName(qualifiedTemplateName);
+                if (globalResourceName != null) 
+                    axiomProvider =  getGlobalParserAssembler().getAxiomProvider(globalResourceName);
+                if (axiomProvider != null)
+                    return createResourceTemplate(qualifiedTemplateName, getGlobalParserAssembler());
+            }
+        }
+        return template;
+    }
+
+    /**
+     * Returns template with specified name. Will search first in own scope and then in global scope if not found
+     * @param name Name of template
+     * @return Template object or null if template not found
+     */
+    public Template getTemplate(QualifiedName name)
+    {
+        Template template = findTemplate(name);
+        if (template == null)
+            throw new IllegalArgumentException("Template \"" + name + "\" does not exist");
+        return template;
+    }
+
+    /**
+     * Returns template with specified name
+     * @param templateName
+     * @return Template object or null if template not found
+     */
+    public Template findTemplate(QualifiedName templateName)
+    {
+        String scopeName = templateName.getScope();
+        if (!scopeName.isEmpty() && (scopeMap.get(scopeName) == null))
+            throw new ExpressionException("Scope \"" + scopeName + "\"  in template key \"" + templateName.toString() + "\" is not found");
+        Template template = parserAssembler.getTemplate(templateName);
+        if ((template == null) && templateName.getScope().isEmpty())
+        {
+            QualifiedName localname = new QualifiedTemplateName(name, templateName.getTemplate());
+            template = parserAssembler.getTemplate(localname);
+        }
+        if (template == null)
+            template = getGlobalParserAssembler().getTemplate(templateName);
+        if (template == null)
+        {   // Create template for resource binding, if one exists
+            AxiomProvider axiomProvider = null;
+            QualifiedName globalResourceName = null;
+            QualifiedName resourceName = parserAssembler.getResourceName(templateName);
+            if (resourceName != null) 
+            {
+                axiomProvider = parserAssembler.getAxiomProvider(resourceName);
+                if (axiomProvider != null)
+                    return createResourceTemplate(templateName, parserAssembler);
+            }
+            else if (!templateName.getScope().isEmpty())
+            {
+                globalResourceName =  getGlobalParserAssembler().getResourceName(templateName);
+                if (globalResourceName != null) 
+                    axiomProvider =  getGlobalParserAssembler().getAxiomProvider(globalResourceName);
+                if (axiomProvider != null)
+                    return createResourceTemplate(templateName, getGlobalParserAssembler());
+            }
         }
         return template;
     }
@@ -352,11 +483,11 @@ public class Scope
 	{
 	    // Look first in local scope, then if not found, try global scope
         String scopeName = name.equals(QueryProgram.GLOBAL_SCOPE) ? QualifiedName.EMPTY : name;
-        QualifiedName qualifiedListName = new QualifiedName(scopeName, QualifiedName.EMPTY, listName);
+        QualifiedName qualifiedListName = new QualifiedName(scopeName, listName);
 		ItemList<?> itemList = parserAssembler.getOperandMap().getItemList(qualifiedListName);
 		if ((itemList == null) && !scopeName.isEmpty())
 		{
-		    qualifiedListName = new QualifiedName(QualifiedName.EMPTY, QualifiedName.EMPTY, listName);
+		    qualifiedListName = new QualifiedName(listName);
 			itemList = getGlobalParserAssembler().getOperandMap().getItemList(qualifiedListName);
 		}
 		return itemList;
@@ -473,7 +604,7 @@ public class Scope
 			public void onScopeChange(Scope scope) 
 			{
                 Axiom localAxiom = null;
-			    QualifiedName qname = getQualifiedName(scope, qualifiedAxiomName.getName());
+			    QualifiedName qname = new QualifiedName(scope.getName(), qualifiedAxiomName.getName());
 				AxiomSource axiomSource = parserAssembler.getAxiomSource(qname);
 		        if (axiomSource == null)
 		        {
@@ -541,7 +672,7 @@ public class Scope
      */
     private void addScopeList(Map<String, Object> properties)
     {   // Add axiom to ParserAssembler
-        QualifiedName qname = getQualifiedName(this, SCOPE);
+        QualifiedName qname = new QualifiedName(name, SCOPE);
         parserAssembler.createAxiom(qname);
         for (String termName: properties.keySet())
         {
@@ -558,16 +689,35 @@ public class Scope
     }
  
     /**
-     * Returns 2-part qualified name 
-     * @param scope Scope
-     * @param name 
-     * @return
+     * Create template for for term list bound to resource.
+     * The termplate terms are simply named variables.
+     * An axiom declaration must exist with same name as template.
+     * Preconditions: A template with specified name does not already exist
+     * and a term name list is defined for axiom declaration.
+     * @param templateName Qualified template name
+     * @param parserAssembler ParserAssembler object for scope identified in temmplate name
+     * @return Template object
      */
-    private QualifiedName getQualifiedName(Scope scope, String name)
-    {
-        String scopeName = scope.getName();
-        if (scopeName.equals(QueryProgram.GLOBAL_SCOPE))
-            scopeName = "";
-        return new QualifiedName(scopeName, null, name);
+    private Template createResourceTemplate(QualifiedName templateName, ParserAssembler parserAssembler)
+    {   // Create qualified axiom  name 
+        QualifiedName qualifiedAxiomName = new QualifiedName(templateName.getScope(),  templateName.getTemplate());
+        // Get term names
+        List<String> termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
+        if ((termNameList == null) && !templateName.getScope().isEmpty())
+        {
+            qualifiedAxiomName.clearScope();
+            termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
+        }
+        if ((termNameList != null) && !termNameList.isEmpty())
+        {
+            Template template = parserAssembler.createTemplate(templateName, false);
+            for (String termName: termNameList)
+            {
+                QualifiedName qname = parserAssembler.getContextName(termName);
+                template.addTerm(new Variable(qname));
+            }
+            return template;
+        }
+        return null;
     }
 }

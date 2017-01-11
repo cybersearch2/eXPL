@@ -67,6 +67,7 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 
 
@@ -398,21 +399,28 @@ void ListDeclaration(ParserAssembler parserAssembler) :
     Token keywordToken;
     Token nameToken;
     VariableType varType = null;
+    QualifiedName qualifiedBindingName = null;
     QualifiedName qualifiedAxiomName = null;
 }
 {
   ( keywordToken=<LIST> | keywordToken=<LOCAL> ) 
   [ "<" varType=Type(parserAssembler.getOperandMap()) ">" ] 
   nameToken=<IDENTIFIER> 
-  [ "(" qualifiedAxiomName=Axiom(parserAssembler)  ( ResourceBinding(qualifiedAxiomName, parserAssembler) )? ")" ]
+  [ "(" qualifiedAxiomName=Axiom(parserAssembler)  ( qualifiedBindingName = ResourceBinding(QueryParserConstants.TEMPLATE, qualifiedAxiomName, parserAssembler) )? ")" ]
   {
     String listName = nameToken.image;
+    boolean isLocal = keywordToken.kind == QueryParserConstants.LOCAL;
+    boolean isTermList = (varType != null) && varType.getOperandType() == OperandType.TERM;
     if ((varType == null) && (qualifiedAxiomName == null))
         throw new ParseException("Invalid declaration for list \"" + listName + "\". Missing type or axiom name.");
-    if ((varType != null) && (keywordToken.kind == QueryParserConstants.LOCAL))
+    if ((varType != null) && isLocal)
         throw new ParseException("Invalid declaration for local \"" + listName + "\". Type in declaration not allowed.");
+    if ((qualifiedBindingName != null) && !isTermList)
+        throw new ParseException("Invalid declaration for local \"" + listName + "\". Only Term Type list can be bound to a resource");
+    if (qualifiedBindingName != null)
+        qualifiedAxiomName = qualifiedBindingName;
     if (varType == null)
-        varType = keywordToken.kind == QueryParserConstants.LIST ? new VariableType(OperandType.AXIOM) : new VariableType(OperandType.LOCAL);
+        varType = isLocal ? new VariableType(OperandType.LOCAL) : new VariableType(OperandType.AXIOM);
     if (qualifiedAxiomName != null)
         varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
     ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
@@ -490,7 +498,7 @@ Template Template(ParserAssembler parserAssembler, boolean isCalculator) :
 {
   templateToken=<IDENTIFIER>
   { 
-      QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), templateToken.image, QualifiedName.EMPTY);
+      QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), templateToken.image);
       parserAssembler.getOperandMap().setQualifiedContextname(qualifiedTemplateName);
       return parserAssembler.createTemplate(qualifiedTemplateName, isCalculator); 
   }
@@ -708,7 +716,7 @@ void CalculatorExpression(int loop_number, Template template, String templateNam
 Operand InnerCalculator(int loop_number, String templateName, ParserAssembler parserAssembler, boolean runOnce) :
 {
   String loopName = templateName + loop_number;
-  QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), templateName, QualifiedName.EMPTY);
+  QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), templateName);
   Template template = parserAssembler.chainTemplate(qualifiedTemplateName, loopName);
 }
 {
@@ -900,7 +908,7 @@ void AxiomSpecification(QualifiedName qualifiedAxiomName, ParserAssembler parser
 {
   "(" ( TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )* )?  ")"  
   (
-    LOOKAHEAD(2) ResourceBinding(qualifiedAxiomName, parserAssembler)
+    LOOKAHEAD(2) ResourceBinding(QueryParserConstants.AXIOM, qualifiedAxiomName, parserAssembler)
     |
     LOOKAHEAD(2) ParameterDeclaration(qualifiedAxiomName, parserAssembler) 
     |
@@ -919,7 +927,7 @@ QualifiedName ChoiceDeclaration(ParserAssembler parserAssembler) :
                                                         ( ChoiceItem(selection, qualifiedAxiomName, parserAssembler) )+ 
   {
       QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
-      QualifiedName qualifiedTemplateName = new QualifiedName(contextName.getScope(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
+      QualifiedName qualifiedTemplateName = new QualifiedTemplateName(contextName.getScope(), qualifiedAxiomName.getName());
       if (contextName.getTemplate().isEmpty())
           return qualifiedTemplateName;
       parserAssembler.getOperandMap().setQualifiedContextname(contextName);
@@ -953,7 +961,7 @@ QualifiedName Choice(ParserAssembler parserAssembler) :
   { 
     QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
     parserAssembler.createAxiom(qualifiedChoiceName);
-    QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), qualifiedChoiceName.getName(), QualifiedName.EMPTY);
+    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedChoiceName.getName());
     Template template = parserAssembler.createTemplate(qualifiedTemplateName, true);
     template.setChoice(true);
     return qualifiedChoiceName;
@@ -991,7 +999,7 @@ void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserAssembler
    <LBRACE> operand=ChoiceExpression(name, parserAssembler) ("," Fact(qualifiedAxiomName, parserAssembler) )* <RBRACE> 
     {
        parserAssembler.saveAxiom(qualifiedAxiomName);
-       QualifiedName qualifiedTemplateName = new QualifiedName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
+       QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName());
        parserAssembler.addTemplate(qualifiedTemplateName, operand);
     }
 }
@@ -1024,16 +1032,21 @@ void ResourceDeclaration(QueryProgram queryProgram) :
   }
 }
 
-void ResourceBinding(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
+QualifiedName ResourceBinding(int kind, QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
 {
   Token nameToken = null;
 }
 {
   ":" ( nameToken=<STRING_LITERAL> | <RESOURCE> )
   {
+    QualifiedName qualifiedBindingName = 
+        kind == QueryParserConstants.TEMPLATE ?
+        new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName()) :
+        qualifiedAxiomName;
     AxiomProvider axiomProvider = (nameToken != null) ?
-        parserAssembler.bindResource(QualifiedName.parseName(getText(nameToken)), qualifiedAxiomName) :
-        parserAssembler.bindResource(qualifiedAxiomName);
+        parserAssembler.bindResource(QualifiedName.parseName(getText(nameToken)), qualifiedBindingName) :
+        parserAssembler.bindResource(qualifiedBindingName);
+    return qualifiedBindingName;
   }
 }
 
@@ -1093,13 +1106,16 @@ String Name() :
 
 KeyName KeyName(QuerySpec querySpec) :
 {
-  String axiomKey = null;
-  String templateName;
+  String name1;
+  String name2 = null;
 }
 {
-  ( LOOKAHEAD(2) axiomKey=Name() ":" )? templateName=Name()
+  name1=Name() (":" name2=Name() )?
   {
-    KeyName keyname = new KeyName(axiomKey == null ? "" : axiomKey, templateName);
+    boolean isBinary = name2 != null;
+    String axiomKey = isBinary  ? name1 : "";
+    String templateName = isBinary  ? name2 : name1;
+    KeyName keyname = new KeyName(axiomKey, templateName);
     querySpec.addKeyName(keyname);
     return keyname;
   }

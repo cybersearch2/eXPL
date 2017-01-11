@@ -75,9 +75,9 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         else
         {   // Create empty AxiomTermList to avoid null issues
             KeyName firstKeyname = queryParams.getQuerySpec().getKeyNameList().get(0);
-            QualifiedName qname = QualifiedName.parseName(firstKeyname.getTemplateName(), callerOperandMap.getQualifiedContextname());
+            QualifiedName qname = QualifiedName.parseName(firstKeyname.getTemplateName().getName(), callerOperandMap.getQualifiedContextname());
             // Create empty AxiomTermList to return as query result. 
-            innerTerm = new Parameter(qname.getName(), new AxiomTermList(qname, firstKeyname.getTemplateName()));
+            innerTerm = new Parameter(qname.getName(), new AxiomTermList(qname, firstKeyname.getTemplateName().getTemplate()));
         }
             
     }
@@ -100,7 +100,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
     public AxiomTermList evaluate(List<Term> argumentList)
     {
         QuerySpec querySpec = queryParams.getQuerySpec();
-        String templateName = getCalculatorKeyName(querySpec).getTemplateName();
+        String templateName = getCalculatorKeyName(querySpec).getTemplateName().getTemplate();
         Scope scope = queryParams.getScope();
         Template template = scope.findTemplate(templateName);
         final String solutionName =  template.getQualifiedName().toString();

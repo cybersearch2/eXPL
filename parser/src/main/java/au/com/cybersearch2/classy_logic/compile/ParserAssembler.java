@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -157,7 +158,7 @@ public class ParserAssembler implements LocaleListener
 	public ParserAssembler(Scope scope)
 	{
 		this.scope = scope;
-		operandMap = new OperandMap(new QualifiedName(scope.getAlias(), QualifiedName.EMPTY, QualifiedName.EMPTY));
+		operandMap = new OperandMap(new QualifiedName(scope.getAlias(), QualifiedName.EMPTY));
 	    axiomListMap = new HashMap<QualifiedName, List<Axiom>>();
 	    axiomMap = new HashMap<QualifiedName, Axiom>();
 	    axiomTermNameMap = new HashMap<QualifiedName, List<String>>();
@@ -230,8 +231,6 @@ public class ParserAssembler implements LocaleListener
 	{
 		Template template = new Template(qualifiedTemplateName);
 		template.setCalculator(isCalculator);
-        if (!scope.getAlias().equals(qualifiedTemplateName.getScope()))
-            qualifiedTemplateName = new QualifiedName(scope.getAlias(), qualifiedTemplateName.getTemplate(), QualifiedName.EMPTY);
 		templateMap.put(qualifiedTemplateName, template);
 		return template;
 	}
@@ -409,38 +408,43 @@ public class ParserAssembler implements LocaleListener
 
     /**
      * Bind resource to axiom provider using qualified axiom name as resource name
-     * @param qualifiedAxiomName Qulified name of axiom
+     * @param qualifiedBindingName Qualified name of axiom or template
      * @throws ExpressionException if axiom provider not found
      */
-    public AxiomProvider bindResource(QualifiedName qualifiedAxiomName)
+    public AxiomProvider bindResource(QualifiedName qualifiedBindingName)
     {
         // Try implicit resource name same as axiom name
         // If this fails, try match to full qualified name as text
-        QualifiedName resourceName = new QualifiedName(qualifiedAxiomName.getName());
+        String name = qualifiedBindingName.getName();
+        if (name.isEmpty())
+            name = qualifiedBindingName.getTemplate();
+        QualifiedName resourceName = new QualifiedName(name);
         AxiomProvider axiomProvider = getAxiomProvider(resourceName);
         return (axiomProvider != null) ? 
-            bindResource(resourceName, qualifiedAxiomName) :
-            bindResource(qualifiedAxiomName, qualifiedAxiomName);
+            bindResource(resourceName, qualifiedBindingName) :
+            bindResource(qualifiedBindingName, qualifiedBindingName);
     }
     
     /**
      * Bind resource to axiom provider for given qualified axiom name and remove internal reference
      * @param resourceName Resource qualified name
-     * @param qualifiedAxiomName Qulified name of axiom
+     * @param qualifiedBindingName Qulified name of axiom or template
      * @throws ExpressionException if axiom provider not found
      */
-    public AxiomProvider bindResource(QualifiedName resourceName, QualifiedName qualifiedAxiomName)
+    public AxiomProvider bindResource(QualifiedName resourceName, QualifiedName qualifiedBindingName)
     {
         // Note resource references axiom by qualified name, which prepends scope name
         AxiomProvider axiomProvider = getAxiomProvider(resourceName);
         if (axiomProvider == null) 
             throw new ExpressionException("Axiom provider \"" + resourceName + "\" not found");
-        registerAxiomListener(qualifiedAxiomName, axiomProvider.getAxiomListener());
-
+        if (!qualifiedBindingName.getTemplate().isEmpty())
+            registerAxiomListener(qualifiedBindingName, axiomProvider.getAxiomListener(qualifiedBindingName.toString()));
+        else
+            // Remove entry from axiomListMap so the axiom is not regarded as internal
+            axiomListMap.remove(qualifiedBindingName);
+            
         // Preserve mapping of qualified axiom name to resource name
-        axiomResourceMap.put(qualifiedAxiomName, resourceName);
-        // Remove entry from axiomListMap so the axiom is not regarded as internal
-        axiomListMap.remove(qualifiedAxiomName);
+        axiomResourceMap.put(qualifiedBindingName, resourceName);
         return axiomProvider;
     }
 
@@ -500,7 +504,7 @@ public class ParserAssembler implements LocaleListener
     	List<String> axiomTermNameList = axiomTermNameMap.get(qualifiedAxiomName);
     	if (axiomTermNameList == null)
     	    axiomTermNameList = Collections.emptyList();
-     	return getAxiomProvider(resourceName).getAxiomSource( qualifiedAxiomName.getName(), axiomTermNameList); 
+     	return getAxiomProvider(resourceName).getAxiomSource(qualifiedAxiomName.toString(), axiomTermNameList); 
     }
 
     /**
@@ -593,7 +597,7 @@ public class ParserAssembler implements LocaleListener
         if (qualifiedAxiomName == null)
             // Assume key is for template
             qualifiedAxiomName = axiomKey;
-        QualifiedName qualifiedTemplateName = new QualifiedName(qualifiedAxiomName.getScope(), axiomKey.getName(), QualifiedName.EMPTY);
+        QualifiedName qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), axiomKey.getName());
         boolean isChoice = templateMap.containsKey(qualifiedTemplateName) &&
                             templateMap.get(qualifiedTemplateName).isChoice();
         List<Axiom> internalAxiomList = axiomListMap.get(qualifiedAxiomName);
@@ -702,12 +706,7 @@ public class ParserAssembler implements LocaleListener
 	 * @param axiomListener The axiom listener
 	 */
 	public void registerAxiomListener(QualifiedName qname, AxiomListener axiomListener) 
-	{   // Convert axiom name to template name to listen for solution notifications
-        //QualifiedName qualifiedTemplateName = new QualifiedName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName(), QualifiedName.EMPTY);
-	    if (!isQualifiedAxiomName(qname))
-	    {
-	        qname = new QualifiedName(qname.getScope(), qname.getName(), QualifiedName.EMPTY);
-	    }
+	{   // Note to listen for solution notifications, qname must be template name 
 		List<AxiomListener> axiomListenerList = getAxiomListenerList(qname);
 		axiomListenerList.add(axiomListener);
 	}
@@ -733,7 +732,7 @@ public class ParserAssembler implements LocaleListener
 	public Template chainTemplate(QualifiedName qualifiedTemplateName, String chainName) 
 	{
 		Template template = getTemplate(qualifiedTemplateName);
-		Template chainTemplate = new Template(new QualifiedName(qualifiedTemplateName.getScope(), chainName, QualifiedName.EMPTY));
+		Template chainTemplate = new Template(new QualifiedTemplateName(qualifiedTemplateName.getScope(), chainName));
 		template.setNext(chainTemplate);
 		templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
 		return chainTemplate;
@@ -797,7 +796,7 @@ public class ParserAssembler implements LocaleListener
         QuerySpec querySpec = functionScope.getQuerySpec(queryName);
         if (querySpec == null)
         {
-            QualifiedName qualifiedTemplateName = new QualifiedName(library, queryName, QualifiedName.EMPTY);
+            QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library, queryName);
             if ((functionScope == scope) && (getTemplate(qualifiedTemplateName) == null))
                 throw new ExpressionException("Query \"" + queryName + "\" not found in scope \"" + library + "\"");
             querySpec = new QuerySpec(callName);
@@ -809,7 +808,7 @@ public class ParserAssembler implements LocaleListener
             addInnerTemplate(innerTemplate);
         QueryEvaluator queryEvaluator = 
                 new QueryEvaluator(queryParams, scope, innerTemplate);
-        QualifiedName qualifiedCallName = new QualifiedName(library, QualifiedName.EMPTY, queryName);
+        QualifiedName qualifiedCallName = new QualifiedName(library, queryName);
         return new CallOperand<AxiomTermList>(qualifiedCallName, queryEvaluator, operandParamList);
     }
 
@@ -818,7 +817,7 @@ public class ParserAssembler implements LocaleListener
 	 * @param resourceName AxiomProvider qualified name
 	 * @return AxiomProvider object or null if object not found
 	 */
-	protected AxiomProvider getAxiomProvider(QualifiedName resourceName) 
+	public AxiomProvider getAxiomProvider(QualifiedName resourceName) 
 	{
     	if (externalAxiomSource == null)
     	{
@@ -1025,4 +1024,13 @@ public class ParserAssembler implements LocaleListener
         return operand;
     }
 
+    /**
+     * Returns qualified name for resource specified by qualified binding name
+     * @param qname Qualidfied name of axiom or template bound to resource
+     * @return QualifiedName object or null if not found
+     */
+    public QualifiedName getResourceName(QualifiedName qname)
+    {
+        return axiomResourceMap.get(qname);
+    }
 }

@@ -93,21 +93,26 @@ public class ChainQueryExecuter
     }
 
 	/**
-	 * Bind axiom listeners to processors. This is a late binding step for any outstanding oubound list variables. 
+	 * Bind axiom listeners to processors. This is a late binding step for any outstanding outbound list variables. 
 	 */
 	protected void bindAxiomListeners()
 	{
 		Set<QualifiedName> keys = axiomListenerMap.keySet();
 		for (QualifiedName key: keys)
 		{
-        	AxiomSource axiomSource = scope.findAxiomSource(key.getName());
+		    if (!key.getTemplate().isEmpty())
+		        continue;  // Templates are output
+        	AxiomSource axiomSource = scope.findAxiomSource(key);
         	// TODO - Log warning if axiom source not found
         	if (axiomSource !=null)
         	{
         	    List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
         	    for (AxiomListener axiomListener: axiomListenerList)
         	    {
-        	        Axiom axiom = axiomSource.iterator().next();
+        	        Iterator<Axiom> iterator = axiomSource.iterator();
+        	        if (!iterator.hasNext())
+        	            break;
+        	        Axiom axiom = iterator.next();
         	        if (axiom != null)
                         axiomListener.onNextAxiom(axiom);
         	    }

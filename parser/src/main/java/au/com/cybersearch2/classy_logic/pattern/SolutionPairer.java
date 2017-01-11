@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.pattern;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
@@ -74,7 +75,7 @@ public class SolutionPairer extends AxiomPairer
 	        return true;
 	    String templateKey = solution.getCurrentKey();
 	    if (!localContext.inSameSpace(qname)) 
-	        templateKey = new QualifiedName(qname.getScope(), qname.getTemplate(), QualifiedName.EMPTY).toString();
+	        templateKey = new QualifiedTemplateName(qname.getScope(), qname.getTemplate()).toString();
 		if (solution.keySet().contains(templateKey))
 		{   
 			// Solution has Axiom with key name

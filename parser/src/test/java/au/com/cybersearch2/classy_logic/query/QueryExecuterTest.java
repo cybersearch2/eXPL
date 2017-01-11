@@ -48,6 +48,7 @@ import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
 import au.com.cybersearch2.classy_logic.expression.TestVariable;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -567,11 +568,11 @@ public class QueryExecuterTest
 		Scope scope = mock(Scope.class);
 		when(scope.getParserAssembler()).thenReturn(parserAssembler);
 		when(parserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
-		when(scope.findAxiomSource("city")).thenReturn(new AxiomListSource(cityList));
-		when(scope.getTemplate("city")).thenReturn(cities);
 		axiomListenerMap.put(QualifiedName.parseName("city"), Collections.singletonList(axiomListener));
 		QuerySpec querySpec = new QuerySpec("Test");
 		KeyName keyName1 = new KeyName("city", "city");
+        when(scope.findAxiomSource(keyName1.getAxiomKey())).thenReturn(new AxiomListSource(cityList));
+        when(scope.getTemplate(keyName1.getTemplateName())).thenReturn(cities);
 		querySpec.addKeyName(keyName1);
         QueryParams queryParams = new QueryParams(scope, querySpec);
         queryParams.initialize();
@@ -610,12 +611,14 @@ public class QueryExecuterTest
 	    Variable city = new Variable(QualifiedName.parseName("city", chargeTemplateName));
 	    Variable charge = new Variable(QualifiedName.parseName("charge", chargeTemplateName));
 	    Template s1 = new Template(chargeTemplateName, city, charge);
-	    s1.setKey(charges.get(0).getName());
+	    s1.setKey("charge");
+	    QualifiedName chargeAxiomName = new QualifiedName("charge");
         QualifiedName customerTemplateName = parseTemplateName("customer");
         Variable name = new Variable(QualifiedName.parseName("name", customerTemplateName));
         Variable city2 = new Variable(QualifiedName.parseName("city", customerTemplateName));
 	    Template s2 = new Template(customerTemplateName, name, city2);
-	    s2.setKey(customers.get(0).getName());
+	    s2.setKey("customer");
+        QualifiedName customerAxiomName = new QualifiedName("customer");
 	    List<Template> templateList = new ArrayList<Template>();
 	    templateList.add(s1);
 	    templateList.add(s2);
@@ -650,27 +653,27 @@ public class QueryExecuterTest
 			{
 				multiQueryTracer.trace(axiom);
 			}};
+		QualifiedName feeTemplateName = QualifiedName.parseName("fee");
+	    QualifiedName freightTemplateName = QualifiedName.parseName("freight");		
 		Map<QualifiedName, List<AxiomListener>> axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
 		axiomListenerMap.put(QualifiedName.parseName("charge"), Collections.singletonList(axiomListener1));
 		axiomListenerMap.put(QualifiedName.parseName("customer"), Collections.singletonList(axiomListener2));
-		axiomListenerMap.put(QualifiedName.parseName("fee"), Collections.singletonList(axiomListener3));
-		axiomListenerMap.put(QualifiedName.parseName("freight"), Collections.singletonList(axiomListener4));
+		axiomListenerMap.put(feeTemplateName, Collections.singletonList(axiomListener3));
+		axiomListenerMap.put(freightTemplateName, Collections.singletonList(axiomListener4));
 		axiomListenerMap.put(QualifiedName.parseName("sparta_only"), Collections.singletonList(axiomListener5));
 
 		ParserAssembler parserAssembler = mock(ParserAssembler.class);
 		Scope scope = mock(Scope.class);
 		when(scope.getParserAssembler()).thenReturn(parserAssembler);
-		when(scope.findAxiomSource("charge")).thenReturn(new AxiomListSource(charges));
-		when(scope.findAxiomSource("customer")).thenReturn(new AxiomListSource(customers));
-		when(scope.findAxiomSource("fee")).thenReturn(new AxiomListSource(fees));
-		when(scope.findAxiomSource("freight")).thenReturn(new AxiomListSource(freights));
-		when(scope.getTemplate("charge")).thenReturn(s1);
-		when(scope.getTemplate("customer")).thenReturn(s2);
+		when(scope.findAxiomSource(chargeAxiomName)).thenReturn(new AxiomListSource(charges));
+		when(scope.findAxiomSource(customerAxiomName)).thenReturn(new AxiomListSource(customers));
+        KeyName keyName1 = new KeyName("charge", "charge");
+		when(scope.getTemplate(keyName1.getTemplateName())).thenReturn(s1);
+        KeyName keyName2 = new KeyName("customer", "customer");
+		when(scope.getTemplate(keyName2.getTemplateName())).thenReturn(s2);
 		when(parserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
 		QuerySpec querySpec = new QuerySpec("Test");
-		KeyName keyName1 = new KeyName(s1.getKey(), "charge");
 		querySpec.addKeyName(keyName1);
-		KeyName keyName2 = new KeyName(s2.getKey(), "customer");
 		querySpec.addKeyName(keyName2);
         QueryParams queryParams = new QueryParams(scope, querySpec);
         queryParams.initialize();
@@ -681,12 +684,16 @@ public class QueryExecuterTest
 	    Variable fee = new Variable(QualifiedName.parseName("fee", accountTemplateName));
 	    Template account = new Template(accountTemplateName, nameMatch, fee);
 	    account.setKey("fee");
+	    QualifiedName feeAxiomName = new QualifiedName("fee");
+        when(scope.findAxiomSource(feeAxiomName)).thenReturn(new AxiomListSource(fees));
 	    QualifiedName deliveryTemplateName = parseTemplateName("delivery");
 	    Evaluator expression2 = new Evaluator(new StringOperand(QualifiedName.parseName("city", deliveryTemplateName)), "==", city2);
 	    Evaluator cityMatch = new Evaluator(QualifiedName.parseName("city", deliveryTemplateName), expression2, "&&");
 	    Variable freight = new Variable(QualifiedName.parseName("freight", deliveryTemplateName));
 	    Template delivery = new Template(deliveryTemplateName, cityMatch, freight);
 	    delivery.setKey("freight");
+        QualifiedName freightAxiomName = new QualifiedName("freight");
+        when(scope.findAxiomSource(freightAxiomName)).thenReturn(new AxiomListSource(freights));
 	    List<Template> chainTemplateList = new ArrayList<Template>(2);
 	    chainTemplateList.add(account);
 	    chainTemplateList.add(delivery);
@@ -697,13 +704,13 @@ public class QueryExecuterTest
 	    Template spartaOnly = new Template(spartaOnlyName, spartaLiteral);
 	    spartaOnly.setKey("spartaOnly");
 	    query.chain(ensemble, Collections.singletonList(spartaOnly));
-	    //System.out.println(query.toString());
+	    System.out.println(query.toString());
     	assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
 	    Iterator<ChainQuery> it = query.chainQueryIterator();
 	    assertThat(it.next().toString()).isEqualTo("account(name?name==name, fee), delivery(city?city==city, freight)");
 	    assertThat(it.next().toString()).isEqualTo("sparta_only(city)");
-	    //while (it.hasNext())
-		//    System.out.println(">>" + it.next().toString());
+	    while (it.hasNext())
+		    System.out.println(">>" + it.next().toString());
 	    assertThat(query.execute()).isTrue();
 		assertThat(query.getSolution().getAxiom("account").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[0]);
 		assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[1]);
@@ -715,7 +722,7 @@ public class QueryExecuterTest
 
     protected static QualifiedName parseTemplateName(String name)
     {
-        return new QualifiedName(QualifiedName.EMPTY, name, QualifiedName.EMPTY);
+        return new QualifiedTemplateName(QualifiedName.EMPTY, name);
     }
 
     public static ParserAssembler openScript(String script) throws ParseException

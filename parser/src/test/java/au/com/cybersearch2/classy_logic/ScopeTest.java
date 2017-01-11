@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
@@ -48,8 +49,8 @@ public class ScopeTest
 	private static final String AXIOM_KEY = "AxiomKey";
 	private static final String TEMPLATE_NAME = "TemplateName";
 	private static final String SCOPE_NAME = "ScopeName";
-    static QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, AXIOM_KEY);
-    static QualifiedName GLOBAL_Q_AXIOM_NAME = new QualifiedName(QualifiedName.EMPTY, QualifiedName.EMPTY, AXIOM_KEY);
+    static QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, AXIOM_KEY);
+    static QualifiedName GLOBAL_Q_AXIOM_NAME = new QualifiedName(QualifiedName.EMPTY, AXIOM_KEY);
 
 	@Before
 	public void setUp()
@@ -84,11 +85,11 @@ public class ScopeTest
 		scope.getParserAssembler().createAxiom(Q_AXIOM_NAME);
 		scope.getParserAssembler().addAxiom(Q_AXIOM_NAME, new Parameter("x"));
 		scope.getParserAssembler().saveAxiom(Q_AXIOM_NAME);
-		scope.getParserAssembler().createTemplate(new QualifiedName(SCOPE_NAME, TEMPLATE_NAME, QualifiedName.EMPTY), false);
+		scope.getParserAssembler().createTemplate(new QualifiedTemplateName(SCOPE_NAME, TEMPLATE_NAME), false);
 		assertThat(scope.getAxiomSource(AXIOM_KEY).iterator().next()).isNotNull();
 		assertThat(scope.getTemplate(TEMPLATE_NAME)).isNotNull();
 		verify(globalParserAssembler, times(0)).getAxiomSource(Q_AXIOM_NAME);
-		verify(globalParserAssembler, times(0)).getTemplate(new QualifiedName(QualifiedName.EMPTY, TEMPLATE_NAME, QualifiedName.EMPTY));
+		verify(globalParserAssembler, times(0)).getTemplate(new QualifiedTemplateName(QualifiedName.EMPTY, TEMPLATE_NAME));
 	}
 
 	@Test

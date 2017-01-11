@@ -85,13 +85,13 @@ public class QueryParams
     		for (KeyName keyname: querySpec.getKeyNameList())
     		{
     		    // Collect axiom source
-    			String axiomKey = keyname.getAxiomKey();
-    			if (!axiomKey.isEmpty())
+    			QualifiedName axiomKey = keyname.getAxiomKey();
+    			if (!axiomKey.getName().isEmpty())
     			{
     			    AxiomSource axiomSource = scope.findAxiomSource(axiomKey);
     			    if ((axiomSource == null) && (initialSolution != null))
     			    {
-    			        Axiom axiom = initialSolution.getAxiom(axiomKey);
+    			        Axiom axiom = initialSolution.getAxiom(axiomKey.getName());
     			        if (axiom != null)
     			        {
     			            axiomSource = new SingleAxiomSource(axiom);
@@ -102,18 +102,17 @@ public class QueryParams
     			        // Trigger source not found exception
     			        scope.getAxiomSource(axiomKey);
     			    else
-                        axiomEnsemble.put(axiomKey, axiomSource);
+                        axiomEnsemble.put(axiomKey.getName(), axiomSource);
     			}
         	    if (isStart)
         	    {
             		// Collect template
-        			String templateName = keyname.getTemplateName();
-        			Template template = scope.getTemplate(templateName);
+        			Template template = scope.getTemplate(keyname.getTemplateName());
         			if (template == null)
-        				throw new IllegalArgumentException("Template \"" + templateName + "\" does not exist");
-        			if (!axiomKey.isEmpty()) // Empty axiom key indicates no axiom
+        				throw new IllegalArgumentException("Template \"" + keyname.getTemplateName().toString() + "\" does not exist");
+        			if (!axiomKey.getName().isEmpty()) // Empty axiom key indicates no axiom
         			    // Setting template key here faciltates unification
-        				template.setKey(axiomKey);
+        				template.setKey(axiomKey.getName());
         			templateList.add(template);
         	    }
     		}

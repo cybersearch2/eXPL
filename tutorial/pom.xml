@@ -36,7 +36,17 @@
     <dependency>
       <groupId>org.easytesting</groupId>
       <artifactId>fest-util</artifactId>
-       <scope>test</scope>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
+      <version>1.4.9</version>
+    </dependency>
+    <dependency>
+       <groupId>xpp3</groupId>
+       <artifactId>xpp3</artifactId>
+       <version>1.1.4c</version>
     </dependency>
   </dependencies>
   <profiles>

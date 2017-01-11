@@ -59,7 +59,7 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 	}
 
 	@Override
-	public AxiomListener getAxiomListener() 
+	public AxiomListener getAxiomListener(String name) 
 	{   // Do-nothing listener for read-only provider
 		return new AxiomListener()
 		{

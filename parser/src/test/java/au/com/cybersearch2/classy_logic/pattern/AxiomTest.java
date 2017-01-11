@@ -15,6 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +31,7 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -523,9 +531,50 @@ public class AxiomTest
        	axiom.addTerm(term3, nameList);
        	assertThat(axiom.getTermCount()).isEqualTo(3);
    }
+ 
+    @Test 
+    public void test_serialization() throws Exception
+    {
+        int termCount = 10;
+        int id = 0;
+        Parameter[] testTerms = new Parameter[termCount];
+        testTerms[id] = new Parameter(TERM_NAME + id, BigDecimal.TEN);
+        testTerms[id].setId(++id);
+        Axiom axiom = new Axiom(NAME);
+        axiom.addTerm(testTerms[0]);
+        File serializeFile = File.createTempFile("axiom_test_serialization", null, null);
+        serializeFile.deleteOnExit();
+        writeAxiom(axiom, serializeFile);
+        Axiom marshalled = readAxiom(serializeFile);
+        assertThat(marshalled.getName()).isEqualTo(NAME);
+        assertThat(marshalled.getTermCount()).isEqualTo(1);
+        Term term = marshalled.getTermByIndex(0);
+        assertThat(term.getId()).isEqualTo(1);
+        assertThat(term.getName()).isEqualTo(TERM_NAME + 0);
+        assertThat(term.getValue()).isEqualTo(BigDecimal.TEN);
+        assertThat(marshalled.pairByPosition).isFalse();
+    }
     
+    private Axiom readAxiom(File serializeFile) throws IOException, ClassNotFoundException
+    {
+        FileInputStream fis = new FileInputStream(serializeFile);
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        Object marshalled = ois.readObject();
+        ois.close();
+        return (Axiom)marshalled;
+    }
+
+    private void writeAxiom(Axiom axiom, File serializeFile) throws IOException
+    {
+        FileOutputStream fos = new FileOutputStream(serializeFile);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(axiom);
+        oos.flush();
+        oos.close();
+    }
+
     protected static QualifiedName parseTemplateName(String name)
     {
-        return new QualifiedName(QualifiedName.EMPTY, name, QualifiedName.EMPTY);
+        return new QualifiedTemplateName(QualifiedName.EMPTY, name);
     }
 }

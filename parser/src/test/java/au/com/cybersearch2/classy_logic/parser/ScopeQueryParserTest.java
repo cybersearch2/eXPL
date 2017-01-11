@@ -467,8 +467,8 @@ public class ScopeQueryParserTest
 		assertThat(keynameList).isNotNull();
 		assertThat(keynameList.size()).isEqualTo(1);
 		KeyName keyName = keynameList.get(0);
-		assertThat(keyName.getAxiomKey()).isEqualTo("city");
-		assertThat(keyName.getTemplateName()).isEqualTo("high_city");
+		assertThat(keyName.getAxiomKey()).isEqualTo(new QualifiedName("city"));
+		assertThat(keyName.getTemplateName().getTemplate()).isEqualTo("high_city");
 		assertThat(globalScope.getParserAssembler().getTemplate("high_city")).isNotNull();
 		// TODO - fix with QualifiedNames
 		//assertThat(parserAssembler.getAxiomSource("city")).isNull();

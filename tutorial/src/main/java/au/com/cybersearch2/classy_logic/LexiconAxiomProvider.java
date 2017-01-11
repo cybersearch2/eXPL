@@ -56,7 +56,7 @@ public class LexiconAxiomProvider implements AxiomProvider
 	}
 
 	@Override
-	public AxiomListener getAxiomListener() 
+	public AxiomListener getAxiomListener(String name) 
 	{   // Do-nothing listener for read-only provider
 		return new AxiomListener()
 		{

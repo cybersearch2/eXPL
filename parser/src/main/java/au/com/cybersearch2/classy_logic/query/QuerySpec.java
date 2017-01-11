@@ -79,7 +79,7 @@ public class QuerySpec
 	public void putProperties(KeyName keyName, Map<String, Object> properties) 
 	{
 		if ((properties != null) && properties.size() > 0)
-			propertiesMap.put(keyName.getTemplateName(), properties);
+			propertiesMap.put(keyName.getTemplateName().getTemplate(), properties);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class QuerySpec
 	 */
 	public boolean hasNoAxiom()
 	{
-		return (keyNameList.size() == 1) && keyNameList.get(0).getAxiomKey().isEmpty();
+		return (keyNameList.size() == 1) && keyNameList.get(0).getAxiomKey().getName().isEmpty();
 	}
 
 	/**

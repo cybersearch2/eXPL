@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import java.io.ObjectStreamField;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,7 +42,15 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class Template extends Structure 
 {
-	public static final String ITERABLE = "iterable";
+	private static final long serialVersionUID = -3549624322416667887L;
+    private static final ObjectStreamField[] serialPersistentFields =
+    {   // Template inherits Serializable from Structure but
+        //    should not be serialized. Two fields defined for tracing purposes.
+        new ObjectStreamField("name", String.class),
+        new ObjectStreamField("id", Integer.class)
+    };
+    
+    public static final String ITERABLE = "iterable";
     public static final String TERMNAMES = "termnames";
     public static List<String>  EMPTY_NAMES_LIST;
     public static Iterable<AxiomTermList> EMPTY_ITERABLE;

@@ -30,6 +30,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
@@ -47,18 +48,18 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 public class QueryProgramTest 
 {
 	private static final String AXIOM_KEY = "AxiomKey";
-	protected QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, AXIOM_KEY);
+	protected QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, AXIOM_KEY);
 	private static final String AXIOM_KEY2 = "AxiomKey2";
-    protected QualifiedName Q_AXIOM_NAME2 = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, AXIOM_KEY2);
+    protected QualifiedName Q_AXIOM_NAME2 = new QualifiedName(SCOPE_NAME, AXIOM_KEY2);
 	private static final String TEMPLATE_NAME = "TemplateName";
-	protected QualifiedName Q_TEMPLATE_NAME = new QualifiedName(SCOPE_NAME ,TEMPLATE_NAME, QualifiedName.EMPTY);
+	protected QualifiedName Q_TEMPLATE_NAME = new QualifiedTemplateName(SCOPE_NAME ,TEMPLATE_NAME);
 	private static final String TEMPLATE_NAME2 = "TemplateName2";
-    protected QualifiedName Q_TEMPLATE_NAME2 = new QualifiedName(SCOPE_NAME ,TEMPLATE_NAME2, QualifiedName.EMPTY);;
+    protected QualifiedName Q_TEMPLATE_NAME2 = new QualifiedTemplateName(SCOPE_NAME ,TEMPLATE_NAME2);
 	private static final String OPERAND_NAME = "OperandName";
 	private static final String SCOPE_NAME = "ScopeName";
 	private static final String QUERY_SPEC_NAME = "QuerySpec";
 	private static final String VARIABLE_NAME = "VariableName";
-    protected QualifiedName Q_VARIABLE_NAME = new QualifiedName(SCOPE_NAME, QualifiedName.EMPTY, VARIABLE_NAME);
+    protected QualifiedName Q_VARIABLE_NAME = new QualifiedName(SCOPE_NAME, VARIABLE_NAME);
 
 	@Before
 	public void setUp()
@@ -130,8 +131,8 @@ public class QueryProgramTest
 		ParserAssembler parserAssembler = scope.getParserAssembler();
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
-		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
-		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
+		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
+		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
 		parserAssembler.createAxiom(Q_AXIOM_NAME);
 		parserAssembler.createTemplate(Q_TEMPLATE_NAME, false);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
@@ -165,8 +166,8 @@ public class QueryProgramTest
 		ParserAssembler parserAssembler = scope.getParserAssembler();
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
-		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
-		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
+		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
+		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
 		parserAssembler.createAxiom(Q_AXIOM_NAME);
 		parserAssembler.createTemplate(Q_TEMPLATE_NAME, false);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
@@ -177,8 +178,8 @@ public class QueryProgramTest
 		querySpec.addKeyName(keyname);
 		QuerySpec querySpec2 = querySpec.chain();
 		KeyName keyname2 = mock(KeyName.class);
-		when(keyname2.getAxiomKey()).thenReturn(AXIOM_KEY2);
-		when(keyname2.getTemplateName()).thenReturn(TEMPLATE_NAME2);
+		when(keyname2.getAxiomKey()).thenReturn(Q_AXIOM_NAME2);
+		when(keyname2.getTemplateName()).thenReturn(Q_TEMPLATE_NAME2);
 		parserAssembler.createAxiom(Q_AXIOM_NAME2);
 		parserAssembler.createTemplate(Q_TEMPLATE_NAME2, false);
 		Variable variable2 = new Variable(Q_VARIABLE_NAME);
@@ -210,8 +211,8 @@ public class QueryProgramTest
 		ParserAssembler parserAssembler = scope.getParserAssembler();
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
-		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
-		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
+		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
+		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
 		parserAssembler.createAxiom(Q_AXIOM_NAME);
 		parserAssembler.createTemplate(Q_TEMPLATE_NAME, false);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
@@ -223,8 +224,8 @@ public class QueryProgramTest
 		// Chain to calculatorTEMPLATE_NAME2
 		QuerySpec querySpec2 = querySpec.chain();
 		KeyName keyname2 = mock(KeyName.class);
-		when(keyname2.getAxiomKey()).thenReturn("");
-		when(keyname2.getTemplateName()).thenReturn(TEMPLATE_NAME2);
+		when(keyname2.getAxiomKey()).thenReturn(new QualifiedName(""));
+		when(keyname2.getTemplateName()).thenReturn(Q_TEMPLATE_NAME2);
 		parserAssembler.createTemplate(Q_TEMPLATE_NAME2, true);
 		Variable variable2 = new Variable(Q_VARIABLE_NAME);
 		parserAssembler.addTemplate(Q_TEMPLATE_NAME2, variable2);
@@ -255,8 +256,8 @@ public class QueryProgramTest
 		ParserAssembler parserAssembler = scope.getParserAssembler();
 		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
 		KeyName keyname = mock(KeyName.class);
-		when(keyname.getAxiomKey()).thenReturn(AXIOM_KEY);
-		when(keyname.getTemplateName()).thenReturn(TEMPLATE_NAME);
+		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
+		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
 		parserAssembler.createAxiom(Q_AXIOM_NAME);
 		parserAssembler.createTemplate(Q_TEMPLATE_NAME, false);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
@@ -269,8 +270,8 @@ public class QueryProgramTest
 		querySpec.addKeyName(keyname);
 		QuerySpec querySpec2 = querySpec.chain();
 		KeyName keyname2 = mock(KeyName.class);
-		when(keyname2.getAxiomKey()).thenReturn("");
-		when(keyname2.getTemplateName()).thenReturn(TEMPLATE_NAME2);
+		when(keyname2.getAxiomKey()).thenReturn(new QualifiedName(""));
+		when(keyname2.getTemplateName()).thenReturn(Q_TEMPLATE_NAME2);
 		Variable variable2 = new Variable(QualifiedName.parseGlobalName(TEMPLATE_NAME + "." + VARIABLE_NAME));
         Variable variable3 = new Variable(QualifiedName.parseName(VARIABLE_NAME + "3"), variable2);
 		parserAssembler.createTemplate(Q_TEMPLATE_NAME2, true);

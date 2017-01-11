@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+
 /**
  * KeyName
  * Axiom key and template name to pair for query
@@ -24,9 +26,9 @@ package au.com.cybersearch2.classy_logic.pattern;
 public class KeyName 
 {
 	/** Axiom key - actually name of axiom */
-	protected String axiomKey;
+	protected QualifiedName axiomKey;
 	/** Template name */
-	protected String templateName;
+	protected QualifiedName templateName;
 	
 	/**
 	 * Construct KeyName object
@@ -35,15 +37,15 @@ public class KeyName
 	 */
 	public KeyName(String axiomKey, String templateName) 
 	{
-		this.axiomKey = axiomKey;
-		this.templateName = templateName;
+		this.axiomKey = QualifiedName.parseName(axiomKey);
+		this.templateName = QualifiedName.parseTemplateName(templateName);
 	}
 
 	/**
 	 * Returns axiom key
 	 * @return String
 	 */
-	public String getAxiomKey() 
+	public QualifiedName getAxiomKey() 
 	{
 		return axiomKey;
 	}
@@ -52,7 +54,7 @@ public class KeyName
 	 * Returns template name
 	 * @return String
 	 */
-	public String getTemplateName() 
+	public QualifiedName getTemplateName() 
 	{
 		return templateName;
 	}

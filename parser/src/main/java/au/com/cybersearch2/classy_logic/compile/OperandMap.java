@@ -165,14 +165,14 @@ public class OperandMap
 		Operand param = operandMap.get(qname);
 		if ((param == null) && !qname.getTemplate().isEmpty())
 		{
-		    QualifiedName sameScope = new QualifiedName(qname.getScope(), QualifiedName.EMPTY, qname.getName());
+		    QualifiedName sameScope = new QualifiedName(qname.getScope(), qname.getName());
 		    param = operandMap.get(sameScope);
 		    if (param != null)
 		        qname = sameScope;
 		}
         if ((param == null) && !qname.getScope().isEmpty())
         {
-            QualifiedName globalScope = new QualifiedName(QualifiedName.EMPTY, QualifiedName.EMPTY, qname.getName());
+            QualifiedName globalScope = new QualifiedName(qname.getName());
             param = operandMap.get(globalScope);
             if (param != null)
                 qname = globalScope;

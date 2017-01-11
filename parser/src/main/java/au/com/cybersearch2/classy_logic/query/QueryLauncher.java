@@ -117,7 +117,7 @@ public class QueryLauncher
      */
     protected Template getCalculatorTemplate(Scope scope, QuerySpec querySpec)
     {   // Calculator uses a single template
-        Template template = scope.getTemplate(getCalculatorKeyName(querySpec).getTemplateName());
+        Template template = scope.getTemplate(getCalculatorKeyName(querySpec).getTemplateName().getTemplate());
         Map<String, Object> properties = querySpec.getProperties(template.getName()); 
         if (properties != null)
             template.addProperties(properties);
@@ -132,7 +132,7 @@ public class QueryLauncher
      */
     protected Axiom getCalculatorAxiom(Scope scope, QuerySpec querySpec)
     {
-        String axiomKey = getCalculatorKeyName(querySpec).getAxiomKey();
+        String axiomKey = getCalculatorKeyName(querySpec).getAxiomKey().getName();
         if (!axiomKey.isEmpty())
         {
             Axiom axiom = null;

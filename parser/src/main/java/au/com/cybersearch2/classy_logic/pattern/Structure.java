@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,9 +37,10 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @since 28/09/2010
  * @see Axiom
  */
-public class Structure
+public class Structure implements Serializable
 {
-	protected static final String NAME_INVALID_MESSAGE = "Parameter \"name\" is null or empty";
+	private static final long serialVersionUID = 1L;
+    protected static final String NAME_INVALID_MESSAGE = "Parameter \"name\" is null or empty";
 	protected static final String TERMS_NULL_MESSAGE = "Parameter \"terms\" is null";
     public static List<Term> EMPTY_TERM_LIST;
 
@@ -50,9 +52,9 @@ public class Structure
 	/** The Structure name is required for unification */
     protected String name;
     /** Terms to be paired on unification by position. */
-	protected List<Term> termList;
+	transient protected List<Term> termList;
     /** Terms to be paired on unification by name. */
-	protected Map<String, Term> termMap;
+	transient protected Map<String, Term> termMap;
 
 	/**
 	 * Create Structure as super class. 
@@ -265,4 +267,5 @@ public class Structure
 		};
 		termWalker.visitAllNodes(visitor);
 	}
+
 }

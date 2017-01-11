@@ -32,6 +32,7 @@ import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.TestEvaluator;
 import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 
@@ -111,6 +112,6 @@ public class CalculateChainQueryTest
 
     protected static QualifiedName parseTemplateName(String name)
     {
-        return new QualifiedName(QualifiedName.EMPTY, name, QualifiedName.EMPTY);
+        return new QualifiedTemplateName(QualifiedName.EMPTY, name);
     }
 }
