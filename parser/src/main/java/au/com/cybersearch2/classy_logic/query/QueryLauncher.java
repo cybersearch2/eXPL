@@ -20,6 +20,7 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -50,7 +51,7 @@ public class QueryLauncher
             headQuery = new QueryExecuter(queryParams);
         else
         {   // QueryParams need to be initialized to set up parameter axioms
-            headQuery = new ChainQueryExecuter(scope);
+            headQuery = new ChainQueryExecuter(queryParams);
             if (queryParams.hasInitialSolution())
                 headQuery.setSolution(queryParams.getInitialSolution());
             else
@@ -102,7 +103,12 @@ public class QueryLauncher
      */
     protected void chainCalculator(QueryParams queryParams, QuerySpec chainQuerySpec, ChainQueryExecuter headQuery)
     {   // Calculator uses a single template
-        Template calculatorTemplate = getCalculatorTemplate(queryParams.getScope(), chainQuerySpec);
+        KeyName keyName = getCalculatorKeyName(chainQuerySpec);
+        String scopeName = keyName.getTemplateName().getScope();
+        Scope templateScope = scopeName.isEmpty() ? 
+                              queryParams.getScope() : 
+                              queryParams.getScope().findScope(scopeName);
+        Template calculatorTemplate = getCalculatorTemplate(templateScope, chainQuerySpec);
         Axiom calculatorAxiom = queryParams.getParameter(calculatorTemplate.getQualifiedName());
         if (calculatorAxiom == null)
             calculatorAxiom = getCalculatorAxiom(queryParams.getScope(), chainQuerySpec);
@@ -117,7 +123,7 @@ public class QueryLauncher
      */
     protected Template getCalculatorTemplate(Scope scope, QuerySpec querySpec)
     {   // Calculator uses a single template
-        Template template = scope.getTemplate(getCalculatorKeyName(querySpec).getTemplateName().getTemplate());
+        Template template = scope.getTemplate(getCalculatorKeyName(querySpec).getTemplateName());
         Map<String, Object> properties = querySpec.getProperties(template.getName()); 
         if (properties != null)
             template.addProperties(properties);
@@ -132,14 +138,14 @@ public class QueryLauncher
      */
     protected Axiom getCalculatorAxiom(Scope scope, QuerySpec querySpec)
     {
-        String axiomKey = getCalculatorKeyName(querySpec).getAxiomKey().getName();
-        if (!axiomKey.isEmpty())
+        QualifiedName axiomQualifiedName = getCalculatorKeyName(querySpec).getAxiomKey();
+        if (!axiomQualifiedName.getName().isEmpty())
         {
             Axiom axiom = null;
-            AxiomSource source = scope.findAxiomSource(axiomKey);
+            AxiomSource source = scope.findAxiomSource(axiomQualifiedName);
             if (source == null)
                 // Return empty axiom as placeholder for axiom to come from solution
-                axiom = new Axiom(axiomKey);
+                axiom = new Axiom(axiomQualifiedName.getName());
             else
                 axiom = source.iterator().next();
             return axiom;  

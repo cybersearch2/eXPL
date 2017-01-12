@@ -88,7 +88,7 @@ public class QueryExecuter extends ChainQueryExecuter
 	 */
 	public QueryExecuter(QueryParams queryParams) 
 	{
-		super(queryParams.getScope());
+		super(queryParams);
 		if (queryParams.hasInitialSolution())
 		    setSolution(queryParams.getInitialSolution());
 	    else

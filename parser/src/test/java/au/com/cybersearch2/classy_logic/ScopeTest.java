@@ -50,7 +50,9 @@ public class ScopeTest
 	private static final String TEMPLATE_NAME = "TemplateName";
 	private static final String SCOPE_NAME = "ScopeName";
     static QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, AXIOM_KEY);
+    static QualifiedName Q_TEMPLATE_NAME = new QualifiedTemplateName(SCOPE_NAME, TEMPLATE_NAME);
     static QualifiedName GLOBAL_Q_AXIOM_NAME = new QualifiedName(QualifiedName.EMPTY, AXIOM_KEY);
+    static QualifiedName GLOBAL_Q_TEMPLATE_NAME = new QualifiedTemplateName(QualifiedName.EMPTY, TEMPLATE_NAME);
 
 	@Before
 	public void setUp()
@@ -62,15 +64,18 @@ public class ScopeTest
 	public void test_internal_global_scope()
 	{
 		Scope globalScope = mock(Scope.class);
-		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+        Map<String, Scope> scopeMap = new HashMap<String, Scope>();
+        scopeMap.put(QueryProgram.GLOBAL_SCOPE, globalScope);
+        Scope scope = new Scope(scopeMap, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+        scopeMap.put(SCOPE_NAME, scope);
 		ParserAssembler globalParserAssembler = mock(ParserAssembler.class);
 		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
 		AxiomSource axiomSource = mock(AxiomSource.class);
 		when(globalParserAssembler.getAxiomSource(GLOBAL_Q_AXIOM_NAME)).thenReturn(axiomSource);
 		Template template = mock(Template.class);
 		when(globalParserAssembler.getTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME))).thenReturn(template);
-		assertThat(scope.getAxiomSource(AXIOM_KEY)).isEqualTo(axiomSource);
-		assertThat(scope.getTemplate(TEMPLATE_NAME)).isEqualTo(template);
+		assertThat(scope.getAxiomSource(GLOBAL_Q_AXIOM_NAME)).isEqualTo(axiomSource);
+		assertThat(scope.getTemplate(Q_TEMPLATE_NAME)).isEqualTo(template);
 		scope.getParserAssembler().createAxiom(Q_AXIOM_NAME);
 		scope.getParserAssembler().createTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME), false);
 	}
@@ -79,15 +84,18 @@ public class ScopeTest
 	public void test_global_scope_precedence()
 	{
 		Scope globalScope = mock(Scope.class);
-		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+		Map<String, Scope> scopeMap = new HashMap<String, Scope>();
+		scopeMap.put(QueryProgram.GLOBAL_SCOPE, globalScope);
+		Scope scope = new Scope(scopeMap, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+		scopeMap.put(SCOPE_NAME, scope);
 		ParserAssembler globalParserAssembler = mock(ParserAssembler.class);
 		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
 		scope.getParserAssembler().createAxiom(Q_AXIOM_NAME);
 		scope.getParserAssembler().addAxiom(Q_AXIOM_NAME, new Parameter("x"));
 		scope.getParserAssembler().saveAxiom(Q_AXIOM_NAME);
 		scope.getParserAssembler().createTemplate(new QualifiedTemplateName(SCOPE_NAME, TEMPLATE_NAME), false);
-		assertThat(scope.getAxiomSource(AXIOM_KEY).iterator().next()).isNotNull();
-		assertThat(scope.getTemplate(TEMPLATE_NAME)).isNotNull();
+		assertThat(scope.getAxiomSource(Q_AXIOM_NAME).iterator().next()).isNotNull();
+		assertThat(scope.getTemplate(Q_TEMPLATE_NAME)).isNotNull();
 		verify(globalParserAssembler, times(0)).getAxiomSource(Q_AXIOM_NAME);
 		verify(globalParserAssembler, times(0)).getTemplate(new QualifiedTemplateName(QualifiedName.EMPTY, TEMPLATE_NAME));
 	}
@@ -102,7 +110,7 @@ public class ScopeTest
         Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		try
 		{
-			scope.getAxiomSource(AXIOM_KEY);
+			scope.getAxiomSource(GLOBAL_Q_AXIOM_NAME);
 		    failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch(IllegalArgumentException e)
@@ -118,15 +126,18 @@ public class ScopeTest
         ParserAssembler parserAssembler = mock(ParserAssembler.class);
         when(parserAssembler.getTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME))).thenReturn(null);
         when(globalScope.getParserAssembler()).thenReturn(parserAssembler);
-        Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+        Map<String, Scope> scopeMap = new HashMap<String, Scope>();
+        scopeMap.put(QueryProgram.GLOBAL_SCOPE, globalScope);
+        Scope scope = new Scope(scopeMap, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
+        scopeMap.put(SCOPE_NAME, scope);
 		try
 		{
-			scope.getTemplate(TEMPLATE_NAME);
+			scope.getTemplate(Q_TEMPLATE_NAME);
 		    failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch(IllegalArgumentException e)
 		{
-			assertThat(e.getMessage()).isEqualTo("Template \"" + TEMPLATE_NAME + "\" does not exist");
+			assertThat(e.getMessage()).isEqualTo("Template \"" + SCOPE_NAME + "." + TEMPLATE_NAME + "\" does not exist");
 		}
 	}
 

@@ -54,11 +54,11 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
-import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterTest;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.query.TestQueryExecuter;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -695,7 +695,7 @@ public class ScopeQueryParserTest
 		Parameter term1 = (Parameter) queryParams.getTemplateList().get(1).getTermByName("name");
 		Parameter term2 = null;
 		QueryExecuterAdapter adapter = new QueryExecuterAdapter(queryParams.getAxiomCollection(), queryParams.getTemplateList());
-		QueryExecuter headQuery = new QueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
+		TestQueryExecuter headQuery = new TestQueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
 		if (querySpec.getQueryChainList() != null)
 			for (QuerySpec chainQuerySpec: querySpec.getQueryChainList())
 			{

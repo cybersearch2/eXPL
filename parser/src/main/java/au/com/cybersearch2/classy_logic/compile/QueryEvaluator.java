@@ -100,7 +100,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
     public AxiomTermList evaluate(List<Term> argumentList)
     {
         QuerySpec querySpec = queryParams.getQuerySpec();
-        String templateName = getCalculatorKeyName(querySpec).getTemplateName().getTemplate();
+        QualifiedName templateName = getCalculatorKeyName(querySpec).getTemplateName();
         Scope scope = queryParams.getScope();
         Template template = scope.findTemplate(templateName);
         final String solutionName =  template.getQualifiedName().toString();
@@ -120,7 +120,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         }
         finally
         {   // Clear call properties so query params can be recycled
-            queryParams.clearParameters(templateName);
+            queryParams.clearParameters(templateName.getTemplate());
             if (scopeContext != null)
                // Scope restored to original state
                 scopeContext.resetScope();

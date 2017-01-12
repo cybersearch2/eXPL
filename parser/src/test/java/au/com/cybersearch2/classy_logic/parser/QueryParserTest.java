@@ -63,13 +63,14 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.Calculator;
-import au.com.cybersearch2.classy_logic.query.ChainQueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.query.TestChainQueryExecuter;
+import au.com.cybersearch2.classy_logic.query.TestQueryExecuter;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -678,7 +679,7 @@ public class QueryParserTest
     {
 		QueryProgram queryProgram = new QueryProgram(INSERT_SORT_XPL);
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
-		ChainQueryExecuter queryExecuter = new ChainQueryExecuter(queryProgram.getGlobalScope());
+		TestChainQueryExecuter queryExecuter = new TestChainQueryExecuter(new QueryParams(queryProgram.getGlobalScope(), new QuerySpec("test")));
         Template calcTemplate = parserAssembler.getTemplate("insert_sort");
 		queryExecuter.chainCalculator(null, calcTemplate);
 		queryExecuter.setSolution(new Solution());
@@ -889,7 +890,7 @@ public class QueryParserTest
 		querySpec.addKeyName(keyName);
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
-        QueryExecuter colorsQuery = new QueryExecuter(queryParams);
+        TestQueryExecuter colorsQuery = new TestQueryExecuter(queryParams);
     	//assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude, is_high = altitude>5000)");
  	    if (colorsQuery.execute())
   	    	System.out.println(colorsQuery.getSolution().getAxiom("color_convert").toString());
@@ -1013,7 +1014,7 @@ public class QueryParserTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(agriSource, Collections.singletonList(more_agriculture_y1990_y2010));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter agriculturalQuery = new QueryExecuter(queryParams);
+        TestQueryExecuter agriculturalQuery = new TestQueryExecuter(queryParams);
     	assertThat(agriculturalQuery.toString()).isEqualTo("agri_10y(country?Y2010-Y1990>1.0, Y1990, Y2010)");
     	File agriList = new File("src/test/resources", "agriculture-land.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(agriList));
@@ -1045,7 +1046,7 @@ public class QueryParserTest
 				return true;
 			}};
 
- 	    agriculturalQuery = new QueryExecuter(queryParams2);
+ 	    agriculturalQuery = new TestQueryExecuter(queryParams2);
 	    more_agriculture_y1990_y2010.backup(false);
 	    Template surface_area = parserAssembler.getTemplate("surface_area_increase");
 	    surface_area.setKey("surface_area");
@@ -1066,7 +1067,7 @@ public class QueryParserTest
         QueryExecuterAdapter adapter3 = new QueryExecuterAdapter(new SingleAxiomSource(new Axiom("Data", dataParms)), Collections.singletonList(more_agriculture_y1990_y2010));
  	    QueryParams queryParams3 = new QueryParams(adapter3.getScope(), adapter3.getQuerySpec());
  	    queryParams3.initialize();
-        agriculturalQuery = new QueryExecuter(queryParams3);
+        agriculturalQuery = new TestQueryExecuter(queryParams3);
  	    try
  	    {
  	    	agriculturalQuery.execute();
@@ -1237,7 +1238,7 @@ public class QueryParserTest
 					Template template = parserAssembler.getTemplate(templateName);
 					template.setKey("order");
 				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("order")), Collections.singletonList(template));
-				    QueryExecuter orderQuery = new QueryExecuter(adapter.getQueryParams());
+				    TestQueryExecuter orderQuery = new TestQueryExecuter(adapter.getQueryParams());
 					while (orderQuery.execute())
 						promptMap.get(keyword).add(orderQuery.getSolution().getAxiom(templateName));
 				}
@@ -1247,7 +1248,7 @@ public class QueryParserTest
 					Template template = parserAssembler.getTemplate(templateName);
 					template.setKey("family");
 				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("family")), Collections.singletonList(template));
-				    QueryExecuter orderQuery = new QueryExecuter(adapter.getQueryParams());
+				    TestQueryExecuter orderQuery = new TestQueryExecuter(adapter.getQueryParams());
 					while (orderQuery.execute())
 						promptMap.get(keyword).add(orderQuery.getSolution().getAxiom(templateName));
 				}
@@ -1257,7 +1258,7 @@ public class QueryParserTest
 					Template template = parserAssembler.getTemplate(templateName);
 					template.setKey("bird");
 				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("bird")), Collections.singletonList(template));
-				    QueryExecuter orderQuery = new QueryExecuter(adapter.getQueryParams());
+				    TestQueryExecuter orderQuery = new TestQueryExecuter(adapter.getQueryParams());
 					while (orderQuery.execute())
 						promptMap.get(keyword).add(orderQuery.getSolution().getAxiom(templateName));
 				}
@@ -1313,7 +1314,7 @@ public class QueryParserTest
 				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("bird")));
 				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("family"), axiom.getTermByName("family").getValue().toString()));
 			    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("bird")), Collections.singletonList(template));
-			    QueryExecuter query = new QueryExecuter(adapter.getQueryParams());
+			    TestQueryExecuter query = new TestQueryExecuter(adapter.getQueryParams());
 				while (query.execute())
 					birdsResultsChecker.checkNextResult(query.getSolution().getString("bird", "bird") + " " + keyword + " " + attribute);
 			}
@@ -1323,7 +1324,7 @@ public class QueryParserTest
 				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("family")));
 				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("order"), axiom.getTermByName("order").getValue().toString()));
 			    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("family")), Collections.singletonList(template));
-			    QueryExecuter query = new QueryExecuter(adapter.getQueryParams());
+			    TestQueryExecuter query = new TestQueryExecuter(adapter.getQueryParams());
 				while (query.execute())
 					birdsResultsChecker.checkNextResult("family " + query.getSolution().getString("family", "family") + " " + keyword + " " + attribute);
 			}

@@ -1173,11 +1173,12 @@ public class QueryParser implements QueryParserConstants
     template.addTerm(innerLoop);
       break;
     case CHOICE:
-      qualifiedTemplateName = ChoiceDeclaration(parserAssembler);
+      qualifiedAxiomName = ChoiceDeclaration(parserAssembler);
+    qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
     Template choiceTemplate = parserAssembler.getTemplate(qualifiedTemplateName);
     QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
     QualifiedName qname = QualifiedName.parseName(choiceTemplate.getName(), contextName);
-        Choice choice = new Choice(choiceTemplate.getName(), parserAssembler.getScope());
+        Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     template.addTerm(choiceOperand);
       break;
@@ -1651,15 +1652,14 @@ public class QueryParser implements QueryParserConstants
       }
     }
       QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
-      QualifiedName qualifiedTemplateName = new QualifiedTemplateName(contextName.getScope(), qualifiedAxiomName.getName());
       if (contextName.getTemplate().isEmpty())
-          {if (true) return qualifiedTemplateName;}
+          {if (true) return qualifiedAxiomName;}
       parserAssembler.getOperandMap().setQualifiedContextname(contextName);
       List<String> termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
       for (String termName: termNameList)
           parserAssembler.getOperandMap().addOperand(termName, null);
       operandMap.setQualifiedContextname(contextName);
-      {if (true) return qualifiedTemplateName;}
+      {if (true) return qualifiedAxiomName;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1679,7 +1679,7 @@ public class QueryParser implements QueryParserConstants
     choiceToken = jj_consume_token(IDENTIFIER);
     QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
     parserAssembler.createAxiom(qualifiedChoiceName);
-    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedChoiceName.getName());
+    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(qualifiedChoiceName.getScope(), qualifiedChoiceName.getName());
     Template template = parserAssembler.createTemplate(qualifiedTemplateName, true);
     template.setChoice(true);
     {if (true) return qualifiedChoiceName;}
@@ -2948,13 +2948,13 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_58() {
-    if (jj_3R_64()) return true;
+  private boolean jj_3_1() {
+    if (jj_3R_31()) return true;
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_31()) return true;
+  private boolean jj_3R_58() {
+    if (jj_3R_64()) return true;
     return false;
   }
 

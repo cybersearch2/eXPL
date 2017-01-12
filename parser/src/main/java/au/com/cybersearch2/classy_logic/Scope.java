@@ -54,7 +54,7 @@ public class Scope
 {
     /** scope literal */
     static final protected String SCOPE = "scope";
-	/** Scope name - must be unique to all scopes */
+    /** Scope name - must be unique to all scopes */
     protected String name;
     /** Map QuerySpec objects to query name */
     protected Map<String, QuerySpec> querySpecMap;
@@ -64,147 +64,151 @@ public class Scope
     protected Map<String, Scope> scopeMap;
     /** A scope locale can be different to the system default */
     protected Locale locale;
-	
+    
     static protected Map<String, Object> EMPTY_PROPERTIES;
 
     static
     {
-    	EMPTY_PROPERTIES = Collections.emptyMap();
+        EMPTY_PROPERTIES = Collections.emptyMap();
     }
     
-	/**
-	 * Construct a Scope object with access to the global scope
-	 * @param scopeMap Scopes container
-	 * @param name Scope name - must be unique to all scopes
-	 * @param properties Scope properties 
-	 */
-	public Scope(Map<String, Scope> scopeMap, String name, Map<String, Object> properties) 
-	{
-		this.scopeMap = scopeMap;
-		this.name = name;
-		boolean hasProperties = (properties != null) && (properties.size() > 0);
-		if (hasProperties)
-		{
-			Object language = properties.get(QueryProgram.LANGUAGE);
-			if (language != null)
-		        // Uncomment following if SE7 supported
-				//try 
-				//{
-					locale = getLocale(properties, language.toString());
-				//}
-				//catch (IllformedLocaleException e)
-				//{
-				//	throw new ExpressionException("Scope \"" + name + "\" invalid Locale settings", e);
-				//}
-		}
-		if (locale == null)
-	        // Uncomment following if SE7 supported
-		    locale = Locale.getDefault(/*Locale.Category.FORMAT*/);
-		querySpecMap = new HashMap<String, QuerySpec>();
-		parserAssembler = new ParserAssembler(this);
+    /**
+     * Construct a Scope object with access to the global scope
+     * @param scopeMap Scopes container
+     * @param name Scope name - must be unique to all scopes
+     * @param properties Scope properties 
+     */
+    public Scope(Map<String, Scope> scopeMap, String name, Map<String, Object> properties) 
+    {
+        this.scopeMap = scopeMap;
+        this.name = name;
+        boolean hasProperties = (properties != null) && (properties.size() > 0);
+        if (hasProperties)
+        {
+            Object language = properties.get(QueryProgram.LANGUAGE);
+            if (language != null)
+                // Uncomment following if SE7 supported
+                //try 
+                //{
+                    locale = getLocale(properties, language.toString());
+                //}
+                //catch (IllformedLocaleException e)
+                //{
+                //  throw new ExpressionException("Scope \"" + name + "\" invalid Locale settings", e);
+                //}
+        }
+        if (locale == null)
+            // Uncomment following if SE7 supported
+            locale = Locale.getDefault(/*Locale.Category.FORMAT*/);
+        querySpecMap = new HashMap<String, QuerySpec>();
+        parserAssembler = new ParserAssembler(this);
         if (hasProperties)
             addScopeList(properties);
-	}
-	
-	/**
-	 * Returns locale of scopet
-	 * @return Locale object
-	 */
-	public Locale getLocale() 
-	{
-		return locale;
-	}
-
-	/**
-	 * Set locale of this scope
-	 * @param locale Locale objedt
-	 */
-	public void setLocale(Locale locale) 
-	{
-		this.locale = locale;
-	}
-
-	/**
-	 * Complete construction of a query specification according to type of query and position in chain. 
-	 * If the need is detected, a new head query specification will be return. This is used when a 
-	 * calculator is found as the head query and a logic query needs to be inserted before it to feed
-	 * the calculator axioms one by one.
-	 * Intended only for use by compiler. 
-	 * @param querySpec Query specification under construction
-	 * @param firstKeyname Keyname object at head of query chain
-	 * @param keynameCount Number of keynames in chain so far
-	 * @param properties Query parameters. Optional, so may be empty
-	 * @return QuerySpec The query specification object passed as a parameter or a new head query specifiection object  
-	 */
-	public QuerySpec buildQuerySpec(QuerySpec querySpec, KeyName firstKeyname, int keynameCount, Map<String, Object> properties)
+    }
+    
+    /**
+     * Returns locale of scopet
+     * @return Locale object
+     */
+    public Locale getLocale() 
     {
-	       QualifiedName templateName = firstKeyname.getTemplateName();
-	       Template firstTemplate = getTemplate(templateName);
-	       if (!firstTemplate.isCalculator())
-	           // If the head query is not a calculator, then the build is complete
-	           return querySpec;
-	       // Now deal with the specifics of a calculator query
-	       // Query type
-	       querySpec.setQueryType(QueryType.calculator);
-	       // Query parameters specified as properties
-	       if (properties.size() > 0)
-	          querySpec.putProperties(firstKeyname, properties);
-	       String axiomName = firstKeyname.getAxiomKey().getName();
-	       // Check if logic query needs to be inserted in front of head calculator
-	       if (!querySpec.isHeadQuery() || axiomName.isEmpty())
-	          return querySpec;
-	       // Create new head logic query where axiom and template key names are same
-	       // The original query specification will be discarded
-	       QuerySpec headQuerySpec = new QuerySpec(querySpec.getName());   
-	       headQuerySpec.addKeyName(new KeyName(axiomName, axiomName));
-	       // Append new calculator query spec to head query spec.
-	       QuerySpec chainQuerySpec = headQuerySpec.chain();
-	       // Create new keyname with empty axiom key to indicate get axiom from solution
-	       KeyName calculateKeyname = new KeyName("", firstKeyname.getTemplateName().getTemplate());
-	       chainQuerySpec.addKeyName(calculateKeyname);
-	       chainQuerySpec.setQueryType(QueryType.calculator);
-	       if (properties.size() > 0)
-	          chainQuerySpec.putProperties(calculateKeyname, properties);
-	       firstTemplate.setKey(axiomName);
-	       // Check for logic query template already exists. Not expected to exist.
-	       Template logicTemplate = findTemplate(axiomName);
-	       if (logicTemplate != null)
-	           return headQuerySpec;
-	       // Create new logic query template which will populated with terms to match axiom terms at start of query
+        return locale;
+    }
+
+    /**
+     * Set locale of this scope
+     * @param locale Locale objedt
+     */
+    public void setLocale(Locale locale) 
+    {
+        this.locale = locale;
+    }
+
+    /**
+     * Complete construction of a query specification according to type of query and position in chain. 
+     * If the need is detected, a new head query specification will be returned. This is used when a 
+     * calculator is found as the head query and a logic query needs to be inserted before it to feed
+     * the calculator axioms one by one.
+     * Intended only for use by compiler. 
+     * @param querySpec Query specification under construction
+     * @param firstKeyname Keyname object at head of query chain
+     * @param keynameCount Number of keynames in chain so far
+     * @param properties Query parameters. Optional, so may be empty
+     * @return QuerySpec The query specification object passed as a parameter or a new head query specifiection object  
+     */
+    public QuerySpec buildQuerySpec(QuerySpec querySpec, KeyName firstKeyname, int keynameCount, Map<String, Object> properties)
+    {
+           QualifiedName templateName = firstKeyname.getTemplateName();
+           Template firstTemplate = getTemplate(templateName);
+           if (!firstTemplate.isCalculator())
+               // If the head query is not a calculator, then the build is complete
+               return querySpec;
+           // Now deal with the specifics of a calculator query
+           // Query type
+           querySpec.setQueryType(QueryType.calculator);
+           // Query parameters specified as properties
+           if (properties.size() > 0)
+              querySpec.putProperties(firstKeyname, properties);
+           String axiomName = firstKeyname.getAxiomKey().getName();
+           // Check if logic query needs to be inserted in front of head calculator
+           if (!querySpec.isHeadQuery() || axiomName.isEmpty())
+              return querySpec;
+           // Create new head logic query where axiom and template key names are same
+           // The original query specification will be discarded
+           QuerySpec headQuerySpec = new QuerySpec(querySpec.getName());   
+           headQuerySpec.addKeyName(new KeyName(axiomName, axiomName));
+           // Append new calculator query spec to head query spec.
+           QuerySpec chainQuerySpec = headQuerySpec.chain();
+           // Create new keyname with empty axiom key to indicate get axiom from solution
+           KeyName calculateKeyname = new KeyName("", firstKeyname.getTemplateName().getTemplate());
+           chainQuerySpec.addKeyName(calculateKeyname);
+           chainQuerySpec.setQueryType(QueryType.calculator);
+           if (properties.size() > 0)
+              chainQuerySpec.putProperties(calculateKeyname, properties);
+           firstTemplate.setKey(axiomName);
+           // Check for logic query template already exists. Not expected to exist.
+           // The template name is taken from the axiom key
            QualifiedName qualifiedTemplateName = new QualifiedTemplateName(getAlias(), axiomName);
-	       logicTemplate = parserAssembler.createTemplate(qualifiedTemplateName, false);
-	       logicTemplate.setKey(axiomName);
-	       return headQuerySpec;
-	    }
-	
-	/**
-	 * Add specification of query Axiom(s) and Template(s) names
-	 * @param querySpec QuerySpec object
-	 */
-	public void addQuerySpec(QuerySpec querySpec)
-	{
-		querySpecMap.put(querySpec.getName(), querySpec);
-	}
+           Template logicTemplate = findTemplate(qualifiedTemplateName);
+           if ((logicTemplate == null) && !getAlias().isEmpty())
+               // Use global scope template if scope specified
+               logicTemplate = getGlobalParserAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, axiomName));
+           if (logicTemplate != null)
+               return headQuerySpec;
+           // Create new logic query template which will populated with terms to match axiom terms at start of query
+           logicTemplate = parserAssembler.createTemplate(qualifiedTemplateName, false);
+           logicTemplate.setKey(axiomName);
+           return headQuerySpec;
+        }
+    
+    /**
+     * Add specification of query Axiom(s) and Template(s) names
+     * @param querySpec QuerySpec object
+     */
+    public void addQuerySpec(QuerySpec querySpec)
+    {
+        querySpecMap.put(querySpec.getName(), querySpec);
+    }
 
-	/**
-	 * Returns scope name
-	 * @return String
-	 */
-	public String getName() 
-	{
-		return name;
-	}
+    /**
+     * Returns scope name
+     * @return String
+     */
+    public String getName() 
+    {
+        return name;
+    }
 
-	/**
-	 * Returns name of scope or alias if global scope
-	 * @return Alias
-	 */
-	public String getAlias()
-	{
-	    return name.equals(QueryProgram.GLOBAL_SCOPE) ? QualifiedName.EMPTY : name;
-	}
-	
-	/**
+    /**
+     * Returns name of scope or alias if global scope
+     * @return Alias
+     */
+    public String getAlias()
+    {
+        return name.equals(QueryProgram.GLOBAL_SCOPE) ? QualifiedName.EMPTY : name;
+    }
+    
+    /**
      * Returns scope specified by name.
      * @param name
      * @return Scope object
@@ -229,71 +233,32 @@ public class Scope
     }
 
 
-	/**
-	 * Returns local parser assembler
-	 * @return ParserAssembler object
-	 */
-	public ParserAssembler getParserAssembler() 
-	{
-		return parserAssembler;
-	}
-
-	/**
-	 * Returns Query specification referenced by name
-	 * @param querySpecName
-	 * @return QuerySpec object
-	 */
-	public QuerySpec getQuerySpec(String querySpecName) 
-	{
-		return querySpecMap.get(querySpecName);
-	}
-
-	/**
-	 * Returns query specification map
-	 * @return Map with name keys and QuerySpec values
-	 */
-	public Map<String, QuerySpec> getQuerySpecMap()
-	{
-		return Collections.unmodifiableMap(querySpecMap);
-	}
-
-	/**
-	 * Returns axiom source for specified axiom name
-	 * @param axiomKey
-	 * @return AxiomSource object
-	 */
-    public AxiomSource getAxiomSource(String axiomKey)
+    /**
+     * Returns local parser assembler
+     * @return ParserAssembler object
+     */
+    public ParserAssembler getParserAssembler() 
     {
-		AxiomSource axiomSource = findAxiomSource(axiomKey);
-		if (axiomSource == null)
-			throw new IllegalArgumentException("Axiom \"" + axiomKey + "\" does not exist");
-		return axiomSource;
+        return parserAssembler;
     }
 
     /**
-     * Returns axiom source for specified axiom name
-     * @param axiomKey
-     * @return AxiomSource object or null if it does not exist in scope
+     * Returns Query specification referenced by name
+     * @param querySpecName
+     * @return QuerySpec object
      */
-    public AxiomSource findAxiomSource(String axiomKey)
+    public QuerySpec getQuerySpec(String querySpecName) 
     {
-        QualifiedName qname = QualifiedName.parseName(axiomKey, parserAssembler.getOperandMap().getQualifiedContextname());
-        AxiomSource axiomSource = parserAssembler.getAxiomSource(qname);
-        if ((axiomSource == null) && !qname.getTemplate().isEmpty())
-        {
-            qname.clearTemplate();
-            axiomSource = parserAssembler.getAxiomSource(qname);
-        }
-        if ((axiomSource == null) && (!name.equals(QueryProgram.GLOBAL_SCOPE)))
-        {
-            axiomSource = getGlobalParserAssembler().getAxiomSource(qname);
-            if (axiomSource == null)
-            {
-                qname = QualifiedName.parseGlobalName(axiomKey);
-                axiomSource = getGlobalParserAssembler().getAxiomSource(qname);
-            }
-        }
-        return axiomSource;
+        return querySpecMap.get(querySpecName);
+    }
+
+    /**
+     * Returns query specification map
+     * @return Map with name keys and QuerySpec values
+     */
+    public Map<String, QuerySpec> getQuerySpecMap()
+    {
+        return Collections.unmodifiableMap(querySpecMap);
     }
 
     /**
@@ -341,71 +306,19 @@ public class Scope
         return axiomSource;
     }
 
-	/**
-	 * Returns template with specified name. Will search first in own scope and then in global scope if not found
-	 * @param name Name of template
-	 * @return Template object or null if template not found
-	 */
-	public Template getTemplate(String name)
-    {
-		Template template = findTemplate(name);
-		if (template == null)
-			throw new IllegalArgumentException("Template \"" + name + "\" does not exist");
-	    return template;
-    }
-
-    /**
-     * Returns template with specified name
-     * @param templateName
-     * @return Template object or null if template not found
-     */
-    public Template findTemplate(String templateName)
-    {
-        QualifiedName globalTemplateName = null;
-        String[] parts = templateName.split("\\.");
-        String scopeName = parts.length == 1 ? getAlias() : parts[0];
-        if (parts.length > 1)
-            templateName = parts[1];
-        QualifiedName qualifiedTemplateName = new QualifiedTemplateName(scopeName, templateName);
-        Template template = parserAssembler.getTemplate(qualifiedTemplateName);
-        if ((template == null) && !qualifiedTemplateName.getScope().isEmpty())
-        {
-            globalTemplateName = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, templateName);
-            template = getGlobalParserAssembler().getTemplate(globalTemplateName);
-        }
-        if (template == null)
-        {   // Create template for resource binding, if one exists
-            AxiomProvider axiomProvider = null;
-            QualifiedName globalResourceName = null;
-            QualifiedName resourceName = parserAssembler.getResourceName(qualifiedTemplateName);
-            if (resourceName != null) 
-            {
-                axiomProvider = parserAssembler.getAxiomProvider(resourceName);
-                if (axiomProvider != null)
-                    return createResourceTemplate(qualifiedTemplateName, parserAssembler);
-            }
-            else if (!qualifiedTemplateName.getScope().isEmpty())
-            {
-                globalResourceName =  getGlobalParserAssembler().getResourceName(qualifiedTemplateName);
-                if (globalResourceName != null) 
-                    axiomProvider =  getGlobalParserAssembler().getAxiomProvider(globalResourceName);
-                if (axiomProvider != null)
-                    return createResourceTemplate(qualifiedTemplateName, getGlobalParserAssembler());
-            }
-        }
-        return template;
-    }
-
     /**
      * Returns template with specified name. Will search first in own scope and then in global scope if not found
-     * @param name Name of template
+     * @param templateName Name of template
      * @return Template object or null if template not found
      */
-    public Template getTemplate(QualifiedName name)
+    public Template getTemplate(QualifiedName templateName)
     {
-        Template template = findTemplate(name);
+        Template template = findTemplate(templateName);
+        if ((template == null) && !templateName.getScope().isEmpty())
+            // Use global scope template if scope specified
+            template = getGlobalParserAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, templateName.getTemplate()));
         if (template == null)
-            throw new IllegalArgumentException("Template \"" + name + "\" does not exist");
+            throw new IllegalArgumentException("Template \"" + templateName.toString() + "\" does not exist");
         return template;
     }
 
@@ -454,79 +367,79 @@ public class Scope
      * Returns object containing all axiom listeners belonging to this scope
      * @return  Unmodifiable AxiomListener map object
      */
-	public Map<QualifiedName, List<AxiomListener>> getAxiomListenerMap()
-	{
-		Map<QualifiedName, List<AxiomListener>> axiomListenerMap = null;
-		if ((!name.equals(QueryProgram.GLOBAL_SCOPE)) && (getGlobalParserAssembler().getAxiomListenerMap().size() > 0))
-			axiomListenerMap = getGlobalParserAssembler().getAxiomListenerMap();
-		if (parserAssembler.getAxiomListenerMap().size() > 0)
-		{
-			if (axiomListenerMap != null)
-			{
-				Map<QualifiedName, List<AxiomListener>> newAxiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
-				newAxiomListenerMap.putAll(axiomListenerMap);
-				axiomListenerMap = newAxiomListenerMap;
-				axiomListenerMap.putAll(parserAssembler.getAxiomListenerMap());
-			}
-			else
-				axiomListenerMap = parserAssembler.getAxiomListenerMap();
-		}
-		return axiomListenerMap == null ? null : Collections.unmodifiableMap(axiomListenerMap);
-	}
+    public Map<QualifiedName, List<AxiomListener>> getAxiomListenerMap()
+    {
+        Map<QualifiedName, List<AxiomListener>> axiomListenerMap = null;
+        if ((!name.equals(QueryProgram.GLOBAL_SCOPE)) && (getGlobalParserAssembler().getAxiomListenerMap().size() > 0))
+            axiomListenerMap = getGlobalParserAssembler().getAxiomListenerMap();
+        if (parserAssembler.getAxiomListenerMap().size() > 0)
+        {
+            if (axiomListenerMap != null)
+            {
+                Map<QualifiedName, List<AxiomListener>> newAxiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
+                newAxiomListenerMap.putAll(axiomListenerMap);
+                axiomListenerMap = newAxiomListenerMap;
+                axiomListenerMap.putAll(parserAssembler.getAxiomListenerMap());
+            }
+            else
+                axiomListenerMap = parserAssembler.getAxiomListenerMap();
+        }
+        return axiomListenerMap == null ? null : Collections.unmodifiableMap(axiomListenerMap);
+    }
 
-	/**
-	 * Returns ItemList for specified list name 
-	 * @param listName
-	 * @return ItemList object
-	 */
-	public ItemList<?> getItemList(String listName) 
-	{
-	    // Look first in local scope, then if not found, try global scope
+    /**
+     * Returns ItemList for specified list name 
+     * @param listName
+     * @return ItemList object
+     */
+    public ItemList<?> getItemList(String listName) 
+    {
+        // Look first in local scope, then if not found, try global scope
         String scopeName = name.equals(QueryProgram.GLOBAL_SCOPE) ? QualifiedName.EMPTY : name;
         QualifiedName qualifiedListName = new QualifiedName(scopeName, listName);
-		ItemList<?> itemList = parserAssembler.getOperandMap().getItemList(qualifiedListName);
-		if ((itemList == null) && !scopeName.isEmpty())
-		{
-		    qualifiedListName = new QualifiedName(listName);
-			itemList = getGlobalParserAssembler().getOperandMap().getItemList(qualifiedListName);
-		}
-		return itemList;
-	}
+        ItemList<?> itemList = parserAssembler.getOperandMap().getItemList(qualifiedListName);
+        if ((itemList == null) && !scopeName.isEmpty())
+        {
+            qualifiedListName = new QualifiedName(listName);
+            itemList = getGlobalParserAssembler().getOperandMap().getItemList(qualifiedListName);
+        }
+        return itemList;
+    }
 
-	/**
-	 * Returns context of this scope
-	 * @param isFunctionScope Flag to indicate function scope
-	 * @return ScopeContext object
-	 */
-	public ScopeContext getContext(boolean isFunctionScope) 
-	{
-		return new ScopeContext(this, isFunctionScope);
-	}
+    /**
+     * Returns context of this scope
+     * @param isFunctionScope Flag to indicate function scope
+     * @return ScopeContext object
+     */
+    public ScopeContext getContext(boolean isFunctionScope) 
+    {
+        return new ScopeContext(this, isFunctionScope);
+    }
 
-	/**
-	 * Returns global scope
-	 * @return Scope, which is this object if global scope not already set
-	 */
-	public Scope getGlobalScope() 
-	{
-		return name.equals(QueryProgram.GLOBAL_SCOPE) ? this : scopeMap.get(QueryProgram.GLOBAL_SCOPE);
-	}
+    /**
+     * Returns global scope
+     * @return Scope, which is this object if global scope not already set
+     */
+    public Scope getGlobalScope() 
+    {
+        return name.equals(QueryProgram.GLOBAL_SCOPE) ? this : scopeMap.get(QueryProgram.GLOBAL_SCOPE);
+    }
 
-	/**
-	 * Returns map which provides access to result lists as iterables
-	 * @return Container which maps fully qualified name to list iterable
-	 */
-	public Map<QualifiedName, Iterable<Axiom>> getListMap() 
-	{
-		Map<QualifiedName, Iterable<Axiom>> listMap = new HashMap<QualifiedName, Iterable<Axiom>>();
-    	parserAssembler.copyLists(listMap);
-		return listMap;
-	}
+    /**
+     * Returns map which provides access to result lists as iterables
+     * @return Container which maps fully qualified name to list iterable
+     */
+    public Map<QualifiedName, Iterable<Axiom>> getListMap() 
+    {
+        Map<QualifiedName, Iterable<Axiom>> listMap = new HashMap<QualifiedName, Iterable<Axiom>>();
+        parserAssembler.copyLists(listMap);
+        return listMap;
+    }
 
-	/** 
-	 * Returns container with axioms in scope 
-	 * @return Container which maps QualifiedName to Axiom
-	 */
+    /** 
+     * Returns container with axioms in scope 
+     * @return Container which maps QualifiedName to Axiom
+     */
     public Map<QualifiedName, Axiom> getAxiomMap()
     {
         Map<QualifiedName, Axiom> axiomMap = new HashMap<QualifiedName, Axiom>();
@@ -540,112 +453,112 @@ public class Scope
         return axiomMap;
     }
 
-	/**
-	 * Returns Local specified by properties and language code
-	 * @param properties Script, region and variant values 
-	 * @param language Langauge code eg. "de" for Germany
-	 * @return Locale object
-	 * @throws ExpressionException if locale parameters are invalid
-	 */
-	protected Locale getLocale(Map<String, Object> properties, String language)
-	{
-	    // Uncomment following if SE7 supported
-		//Object script = properties.get(QueryProgram.SCRIPT);
-		Object region = properties.get(QueryProgram.REGION);
-		Object variant = properties.get(QueryProgram.VARIANT);
-		Locale locale = null;
-		//if (script == null)
-		//{
-			if ((region == null) && (variant == null))
-				 locale = new Locale(language);
-			else if (region != null)
-			{
-				if (variant == null)
-					 locale = new Locale(language, region.toString());
-			    else
-					 locale = new Locale(language, region.toString(), variant.toString());
-			}
-		//}
-		//else
-		//{
-		//	Locale.Builder builder = new Locale.Builder();
-		//	builder.setLanguage(language);
-		//	if (region != null)
-		//	{
-		//		builder.setRegion(region.toString());
-		//		if (variant != null)
-		//			builder.setVariant(variant.toString());
-		//	}
-		//	builder.setScript(script.toString());
-		//	locale = builder.build();
-		//}
-		if (locale == null)
-			throw new ExpressionException("Scope \"" + name + "\" invalid Locale settings combination for language " + language);
-		return locale;
-	}
+    /**
+     * Returns Local specified by properties and language code
+     * @param properties Script, region and variant values 
+     * @param language Langauge code eg. "de" for Germany
+     * @return Locale object
+     * @throws ExpressionException if locale parameters are invalid
+     */
+    protected Locale getLocale(Map<String, Object> properties, String language)
+    {
+        // Uncomment following if SE7 supported
+        //Object script = properties.get(QueryProgram.SCRIPT);
+        Object region = properties.get(QueryProgram.REGION);
+        Object variant = properties.get(QueryProgram.VARIANT);
+        Locale locale = null;
+        //if (script == null)
+        //{
+            if ((region == null) && (variant == null))
+                 locale = new Locale(language);
+            else if (region != null)
+            {
+                if (variant == null)
+                     locale = new Locale(language, region.toString());
+                else
+                     locale = new Locale(language, region.toString(), variant.toString());
+            }
+        //}
+        //else
+        //{
+        //  Locale.Builder builder = new Locale.Builder();
+        //  builder.setLanguage(language);
+        //  if (region != null)
+        //  {
+        //      builder.setRegion(region.toString());
+        //      if (variant != null)
+        //          builder.setVariant(variant.toString());
+        //  }
+        //  builder.setScript(script.toString());
+        //  locale = builder.build();
+        //}
+        if (locale == null)
+            throw new ExpressionException("Scope \"" + name + "\" invalid Locale settings combination for language " + language);
+        return locale;
+    }
 
-	/**
-	 * Add locale listener for local axiom identified by key. The supplied axiom listener is
-	 * notified of every change of scope.
-	 * @param qualifiedAxiomName Local axiom qualified name
-	 * @param axiomListener The local axiom listener
-	 */
-	public void addLocalAxiomListener(final QualifiedName qualifiedAxiomName, final AxiomListener axiomListener) 
-	{
-		// Register locale listener with Global scope in which all local axioms must be declared
-		final ParserAssembler parserAssembler = getGlobalScope().getParserAssembler();
-		LocaleListener localeListener = new LocaleListener(){
+    /**
+     * Add locale listener for local axiom identified by key. The supplied axiom listener is
+     * notified of every change of scope.
+     * @param qualifiedAxiomName Local axiom qualified name
+     * @param axiomListener The local axiom listener
+     */
+    public void addLocalAxiomListener(final QualifiedName qualifiedAxiomName, final AxiomListener axiomListener) 
+    {
+        // Register locale listener with Global scope in which all local axioms must be declared
+        final ParserAssembler parserAssembler = getGlobalScope().getParserAssembler();
+        LocaleListener localeListener = new LocaleListener(){
 
-		    /**
-		     * Assign backing axiom to local list. If no axiom source is found, create one
-		     * in which each item is "unknown"
-		     */
-			@Override
-			public void onScopeChange(Scope scope) 
-			{
+            /**
+             * Assign backing axiom to local list. If no axiom source is found, create one
+             * in which each item is "unknown"
+             */
+            @Override
+            public void onScopeChange(Scope scope) 
+            {
                 Axiom localAxiom = null;
-			    QualifiedName qname = new QualifiedName(scope.getName(), qualifiedAxiomName.getName());
-				AxiomSource axiomSource = parserAssembler.getAxiomSource(qname);
-		        if (axiomSource == null)
-		        {
-		            axiomSource = getGlobalParserAssembler().getAxiomSource(qualifiedAxiomName);
-	                if (axiomSource != null)
-	                    localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
-	                else
-	                    throw new ExpressionException("Axiom source \"" + qualifiedAxiomName.toString() + "\" not found");
-		        }
-		        if (localAxiom == null)
-		        {
-                    Iterator<Axiom> iterator = axiomSource.iterator();
-    		        if (iterator.hasNext())
-    		            localAxiom = iterator.next();
-    		        else
+                QualifiedName qname = new QualifiedName(scope.getName(), qualifiedAxiomName.getName());
+                AxiomSource axiomSource = parserAssembler.getAxiomSource(qname);
+                if (axiomSource == null)
+                {
+                    axiomSource = getGlobalParserAssembler().getAxiomSource(qualifiedAxiomName);
+                    if (axiomSource != null)
                         localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
-		        }
-				axiomListener.onNextAxiom(localAxiom);
-			}
-		};
-		// If the local is declared inside a scope, then it's scope never changes and a LocaleListener is not required
+                    else
+                        throw new ExpressionException("Axiom source \"" + qualifiedAxiomName.toString() + "\" not found");
+                }
+                if (localAxiom == null)
+                {
+                    Iterator<Axiom> iterator = axiomSource.iterator();
+                    if (iterator.hasNext())
+                        localAxiom = iterator.next();
+                    else
+                        localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
+                }
+                axiomListener.onNextAxiom(localAxiom);
+            }
+        };
+        // If the local is declared inside a scope, then it's scope never changes and a LocaleListener is not required
         if (!name.equals(QueryProgram.GLOBAL_SCOPE))
-        	localeListener.onScopeChange(this);
+            localeListener.onScopeChange(this);
         else
-		    parserAssembler.registerLocaleListener(localeListener);	
-	}
+            parserAssembler.registerLocaleListener(localeListener); 
+    }
 
-	/**
-	 * Notify change of scope
-	 */
-	public void notifyChange() 
-	{
-		// Notify Locale listeners in Global scope of scope locale
+    /**
+     * Notify change of scope
+     */
+    public void notifyChange() 
+    {
+        // Notify Locale listeners in Global scope of scope locale
         if (!name.equals(QueryProgram.GLOBAL_SCOPE))
-        	getGlobalParserAssembler().onScopeChange(this);
-	}
+            getGlobalParserAssembler().onScopeChange(this);
+    }
 
-	/**
-	 * Returns ParserAssembler belonging to the global scope
-	 * @return ParserAssembler object
-	 */
+    /**
+     * Returns ParserAssembler belonging to the global scope
+     * @return ParserAssembler object
+     */
     public ParserAssembler getGlobalParserAssembler()
     {
         return scopeMap.get(QueryProgram.GLOBAL_SCOPE).getParserAssembler();

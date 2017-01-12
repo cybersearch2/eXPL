@@ -677,11 +677,9 @@ public class ParserAssembler implements LocaleListener
         if (template.isChoice())
         {
             // Get axiom source for this Choice and determine it's scope
-            String axiomKey = qualifiedTemplateName.getTemplate();
-            AxiomSource choiceAxiomSource = 
-                qualifiedTemplateName.getScope().isEmpty() ? 
-                scope.getGlobalScope().getAxiomSource(axiomKey) : 
-                scope.getAxiomSource(axiomKey);
+            QualifiedName qualifiedAxiomName = 
+                new QualifiedName(qualifiedTemplateName.getScope(), qualifiedTemplateName.getTemplate());
+            AxiomSource choiceAxiomSource = scope.getAxiomSource(qualifiedAxiomName);
             return choiceAxiomSource.getAxiomTermNameList();
         }
         if (template != null)

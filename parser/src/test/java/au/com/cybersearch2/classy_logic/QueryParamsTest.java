@@ -74,7 +74,7 @@ public class QueryParamsTest
 		QueryParams queryParams = new QueryParams(scope, querySpec);
 		queryParams.initialize();
 		assertThat(queryParams.getTemplateList().get(0)).isEqualTo(template);
-		verify(scope, never()).getAxiomSource("");
+		verify(scope, never()).getAxiomSource(any(QualifiedName.class));
 		verify(template, never()).setKey("");
 	}
 

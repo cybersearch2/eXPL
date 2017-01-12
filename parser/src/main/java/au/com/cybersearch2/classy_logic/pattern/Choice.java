@@ -48,17 +48,13 @@ public class Choice
 
 	/**
 	 * Construct Choice object
-	 * @param name Key to identify choice
+	 * @param name Qualified name identification
 	 * @param scope Scope
 	 */
-	public Choice(String name, Scope scope) 
+	public Choice(QualifiedName name, Scope scope) 
 	{
 	    // Get axiom source for this Choice and determine it's scope
-	    AxiomSource choiceAxiomSource = scope.getGlobalScope().findAxiomSource(name); 
-	    if (choiceAxiomSource == null)
-	        choiceAxiomSource = scope.getAxiomSource(name);
-	    else
-	        scope = scope.getGlobalScope();
+	    AxiomSource choiceAxiomSource = scope.findAxiomSource(name); 
 	    ParserAssembler parserAssembler = scope.getParserAssembler();
 	    // Populate choiceAxiomList from axiom source with choice identity
 		Iterator<Axiom> iterator = choiceAxiomSource.iterator();
@@ -68,27 +64,13 @@ public class Choice
 		// Populate variableList from operand map using axiom term name keys
 		variableList = new ArrayList<Operand>();
 		termNameList = choiceAxiomSource.getAxiomTermNameList();
+        QualifiedName qualifiedContextname = parserAssembler.getOperandMap().getQualifiedContextname();
 	    for (String termName: termNameList)
 	    {
-	        QualifiedName qualifiedContextname = parserAssembler.getOperandMap().getQualifiedContextname();
 	        QualifiedName qualifiedTermName = QualifiedName.parseName(termName, qualifiedContextname);
 	        Operand operand = parserAssembler.getOperandMap().get(qualifiedTermName);
 	        if (operand == null)
 	            operand = new Variable(qualifiedTermName);
-	        /*
-	        if ((operand == null) && !qualifiedTermName.getTemplate().isEmpty())
-	        {
-	            qualifiedTermName.clearTemplate();
-	            // Variables are placed in global scope
-	            operand = parserAssembler.getOperandMap().get(qualifiedTermName);
-	        }
-            if ((operand == null) && !qualifiedTermName.getScope().isEmpty())
-            {
-                qualifiedTermName.clearScope();
-                // Variables are placed in global scope
-                operand = parserAssembler.getOperandMap().get(qualifiedTermName);
-            }
-            */
 	    	variableList.add(operand);
 	    }
 	}
