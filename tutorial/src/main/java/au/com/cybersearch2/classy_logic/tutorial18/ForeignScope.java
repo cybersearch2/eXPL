@@ -13,7 +13,10 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial13;
+package au.com.cybersearch2.classy_logic.tutorial18;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -35,41 +38,67 @@ public class ForeignScope
 {
 	static final String FOREIGN_SCOPE =
 			"axiom item (amount) : parameter;\n" +
-			"axiom lexicon (Total);\n" +
-            "axiom german.lexicon (Total)\n" +
-	        "  {\"Gesamtkosten\"};\n" +
-	        "local translate(lexicon);" +
-			"template charge(currency amount);\n" +
-			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +
-			"calc format_total(string total_text = translate[Total] + \" + gst: \" + format(charge_plus_gst.total));\n" +
-			"scope german (language=\"de\", region=\"DE\")\n" +
-			"{\n" +
-	        "}\n" +
-            "query item_query(item : charge) >> (german.charge_plus_gst) >> (german.format_total);\n";
+	        "choice tax_rate\n" +
+            "(country, percent)\n" +
+            "    {\"DE\",18.0}\n" +
+            "    {\"FR\",15.0}\n" +
+            "    {\"BE\",11.0};\n" +
+			"axiom lexicon (Total, tax);\n" +
+            "axiom german.lexicon (Total, tax)\n" +
+	        "  {\"Gesamtkosten\",\"Steuer\"};\n" +
+            "axiom french.lexicon (Total, tax)\n" +
+            "  {\"le total\",\"impôt\"};\n" +
+            "axiom belgium_fr.lexicon (Total, tax)\n" +
+            "  {\"le total\",\"impôt\"};\n" +
+            "axiom belgium_nl.lexicon (Total, tax)\n" +
+            "  {\"totale kosten\",\"belasting\"};\n" +
+	        "local translate(lexicon);\n" +
+			"calc charge_plus_gst(\n" +
+	        "  currency amount,\n" +
+            "  template tax_rate(percent) << tax_rate(scope[region]),\n" +
+			"  currency total = amount * (1.0 + (percent / 100))\n" +
+	        ");\n" +
+			"calc format_total(\n" +
+            "  string country = scope[region],\n" +
+			"  string text = \" \" + translate[Total] +\n" +
+			"  \" \" + translate[tax] + \": \" +\n" + 
+			"  format(charge_plus_gst.total)\n" +
+			");\n" +
+			"scope german (language=\"de\", region=\"DE\"){}\n" +
+            "scope french (language=\"fr\", region=\"FR\"){}\n" +
+            "scope belgium_fr (language=\"fr\", region=\"BE\"){}\n" +
+            "scope belgium_nl (language=\"nl\", region=\"BE\"){}\n" +
+            " query item_query(item : german.charge_plus_gst) >> (german.format_total) >>\n" +
+            "  (item : french.charge_plus_gst) >> (french.format_total) >>\n" +
+            "  (item : belgium_fr.charge_plus_gst) >> (belgium_fr.format_total) >>\n" +
+            "  (item : belgium_nl.charge_plus_gst) >> (belgium_nl.format_total);\n";
 
 	/**
-	 * Compiles the GERMAN_SCOPE script and runs the "item_query" query, displaying the solution on the console.<br/>
+	 * Compiles the FOREIGN_SCOPE script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
-    public Axiom getFormatedTotalAmount()
+    public List<Axiom> getFormatedTotalAmount()
 	{
 		QueryProgram queryProgram = new QueryProgram(FOREIGN_SCOPE);
-		// Create QueryParams object for scope "german" and query "item_query"
+		// Create QueryParams object for  query "item_query"
 		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "item_query");
 		// Add an item Axiom with a single "2.345,67 EUR" term
-		// This axiom goes into the Global scope and is removed at the start of the next query.
+		// This axiom goes into the Global scope and is removed at the start of the query.
         Solution initialSolution = queryParams.getInitialSolution();
         initialSolution.put("item", new Axiom("item", new Parameter("amount", "12.345,67 €")));
         // Add a solution handler to display the final Calculator solution
-		final Axiom[] formatedTotalAmountHolder = new Axiom[1];
+        final List<Axiom> solutionList = new ArrayList<Axiom>(4);
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                formatedTotalAmountHolder[0] = solution.getAxiom("format_total");
+                solutionList.add(solution.getAxiom("german.format_total"));
+                solutionList.add(solution.getAxiom("french.format_total"));
+                solutionList.add(solution.getAxiom("belgium_fr.format_total"));
+                solutionList.add(solution.getAxiom("belgium_nl.format_total"));
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
-		return formatedTotalAmountHolder[0];
+        return solutionList;
 	}
 	
     /**
@@ -83,7 +112,9 @@ public class ForeignScope
 		try 
 		{
 	        ForeignScope foreignScope = new ForeignScope();
-            System.out.println(foreignScope.getFormatedTotalAmount().toString());
+	        List<Axiom> solutionList = foreignScope.getFormatedTotalAmount();
+	        for (Axiom formatedTotal: solutionList)
+	            System.out.println(formatedTotal.toString());
 		} 
 		catch (ExpressionException e) 
 		{ 

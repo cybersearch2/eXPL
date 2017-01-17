@@ -20,6 +20,7 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -71,9 +72,11 @@ public class QueryLauncher
                     headQuery.chain(chainQueryParams.getAxiomCollection(), chainQueryParams.getTemplateList());
                 }
             }
+        Solution solution = headQuery.getSolution();
+        solution.setSolutionHandler(solutionHandler);
         while (headQuery.execute())
         {
-            if ((solutionHandler != null) && !solutionHandler.onSolution(headQuery.getSolution()) || isCalculation)
+            if ((solution.evaluate() == EvaluationStatus.SHORT_CIRCUIT) || isCalculation)
                 break;
         }
         // Reset all query templates so they can be recycled
@@ -105,14 +108,20 @@ public class QueryLauncher
     {   // Calculator uses a single template
         KeyName keyName = getCalculatorKeyName(chainQuerySpec);
         String scopeName = keyName.getTemplateName().getScope();
-        Scope templateScope = scopeName.isEmpty() ? 
-                              queryParams.getScope() : 
-                              queryParams.getScope().findScope(scopeName);
+        Scope templateScope = queryParams.getScope();
+        boolean isReplicate = false;
+        if (!scopeName.isEmpty()) 
+        {
+            isReplicate = !scopeName.equals(templateScope.getName());
+            templateScope = queryParams.getScope().findScope(scopeName);
+        }
         Template calculatorTemplate = getCalculatorTemplate(templateScope, chainQuerySpec);
+        if (isReplicate)
+            calculatorTemplate = new Template(calculatorTemplate, keyName.getTemplateName());
         Axiom calculatorAxiom = queryParams.getParameter(calculatorTemplate.getQualifiedName());
         if (calculatorAxiom == null)
             calculatorAxiom = getCalculatorAxiom(queryParams.getScope(), chainQuerySpec);
-        headQuery.chainCalculator(calculatorAxiom, calculatorTemplate);
+        headQuery.chainCalculator(templateScope, calculatorAxiom, calculatorTemplate);
     }
 
     /**

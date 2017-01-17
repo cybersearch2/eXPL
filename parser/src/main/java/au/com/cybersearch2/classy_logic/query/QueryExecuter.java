@@ -131,7 +131,7 @@ public class QueryExecuter extends ChainQueryExecuter
 				// Deliberately fall through to next case
 			case start:
 				if (axiomListenerMap != null)
-					bindAxiomListeners();
+					bindAxiomListeners(scope);
 				if (logicQuery.iterate(solution, templateList.get(0)))
 				{
 					if (super.execute())

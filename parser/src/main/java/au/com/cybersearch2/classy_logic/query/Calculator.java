@@ -141,7 +141,11 @@ public class Calculator implements SolutionFinder
 		if (unificationSuccess)
 		{
 			if (completeSolution(solution, template))
+			{
+			    if (template.isReplicate())
+		            template.backup(true);
 			    return true;
+			}
             template.backup(true);
 		}
 		// Short circuit when solution not available

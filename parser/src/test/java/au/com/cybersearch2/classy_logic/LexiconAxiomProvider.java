@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -66,7 +67,7 @@ public class LexiconAxiomProvider implements AxiomProvider
 		return new AxiomListener()
 		{
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 			}
 		};

@@ -123,15 +123,15 @@ public class VariableType
         if (expression == null)
             expression = (Operand)getProperty(LITERAL);
 		Operand operand = null;
-        String axiomKey = null;
+        QualifiedName axiomKey = null;
         List<OperandParam> initializeList = null;
 
         AxiomListListener axiomListListener = null;
         if (operandType == OperandType.AXIOM || operandType == OperandType.LIST || operandType == OperandType.TERM)
         {
-            axiomKey = getPropertyString(AXIOM_KEY);
+            axiomKey = (QualifiedName)getProperty(AXIOM_KEY);
             if (axiomKey == null)
-                axiomKey = qname.getName();
+                axiomKey = qname;
             axiomListListener = axiomListListener(parserAssembler.getOperandMap());
         }
         if (operandType == OperandType.LIST || operandType == OperandType.TERM)
@@ -222,7 +222,7 @@ public class VariableType
      */
     public ItemList<?> getItemListInstance(ParserAssembler parserAssembler, QualifiedName qname) throws ParseException
     {
-		String axiomKey = getPropertyString(AXIOM_KEY);
+		QualifiedName axiomKey = (QualifiedName)getProperty(AXIOM_KEY);
 		if ((operandType == OperandType.TERM) || 
 			(operandType == OperandType.AXIOM) || 
 			(operandType == OperandType.LOCAL))
@@ -294,10 +294,10 @@ public class VariableType
      * Returns an object which implements CallEvaluator interface returning an AxiomList
      * given a list of axioms to marshall into an axiom list
      * @param qname Qualified name of list to be created
-     * @param axiomKey Key of list to be created
+     * @param axiomKey Qualified name of axiom backing the list
      * @return CallEvaluator object of generic type AxiomList
      */
-    protected CallEvaluator<AxiomList> axiomListGenerator(final QualifiedName qname, final String axiomKey) 
+    protected CallEvaluator<AxiomList> axiomListGenerator(final QualifiedName qname, final QualifiedName axiomKey) 
     {
         return new CallEvaluator<AxiomList>(){
 

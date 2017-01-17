@@ -26,6 +26,7 @@ import java.util.Date;
 import com.thoughtworks.xstream.XStream;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
@@ -53,7 +54,7 @@ public class FileAxiomListener implements AxiomListener
      * @see au.com.cybersearch2.classy_logic.interfaces.AxiomListener#onNextAxiom(au.com.cybersearch2.classy_logic.pattern.Axiom)
      */
     @Override
-    public void onNextAxiom(Axiom axiom)
+    public void onNextAxiom(QualifiedName qname, Axiom axiom)
     {
         try
         {

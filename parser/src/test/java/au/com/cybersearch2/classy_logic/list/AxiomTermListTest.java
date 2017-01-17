@@ -43,15 +43,16 @@ public class AxiomTermListTest
 	private static final String NAME = "ListOperandName";
     static QualifiedName QNAME = QualifiedName.parseName(NAME);
 	private static final String KEY = "AxiomKey";
+	private static final QualifiedName Q_KEY = new QualifiedName(KEY);
 	private static final String OUT_OF_BOUNDS_MESSAGE = "AxiomTermList \"ListOperandName\" index 0 out of bounds";
 	
 	
 	@Test
 	public void test_constructor()
 	{
-		AxiomTermList axiomTermList = new AxiomTermList(QNAME, KEY);
+		AxiomTermList axiomTermList = new AxiomTermList(QNAME, Q_KEY);
 		assertThat(axiomTermList.getName()).isEqualTo(NAME);
-		assertThat(axiomTermList.getKey()).isEqualTo(KEY);
+		assertThat(axiomTermList.getKey()).isEqualTo(Q_KEY);
 		assertThat(axiomTermList.getLength()).isEqualTo(0);
 		assertThat(axiomTermList.hasItem(0)).isFalse();
 		assertThat(axiomTermList.isEmpty()).isTrue();
@@ -78,7 +79,7 @@ public class AxiomTermListTest
 	@Test
 	public void test_verify()
 	{
-		AxiomTermList axiomOperandList = new AxiomTermList(QNAME, KEY);
+		AxiomTermList axiomOperandList = new AxiomTermList(QNAME, Q_KEY);
 		try
 		{
 			axiomOperandList.assignItem(0, new Object());

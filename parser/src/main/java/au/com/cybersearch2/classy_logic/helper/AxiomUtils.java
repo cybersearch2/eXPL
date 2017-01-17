@@ -103,10 +103,10 @@ public class AxiomUtils
      * @param argumentList List of terms
      * @return AxiomList object containing marshalled axiom
      */
-    public static AxiomTermList marshallAxiomTerms(QualifiedName qualifiedListName, String axiomKey, List<Term> argumentList)
+    public static AxiomTermList marshallAxiomTerms(QualifiedName qualifiedListName, QualifiedName axiomKey, List<Term> argumentList)
     {
         // Give axiom same name as operand
-        Axiom axiom = new Axiom(axiomKey);
+        Axiom axiom = new Axiom(axiomKey.getName());
         for (Term arg: argumentList)
         {   // Copy value to Parameter to make it immutable
             Parameter param = new Parameter(arg.getName(), arg.getValue());
@@ -161,7 +161,7 @@ public class AxiomUtils
     {
         List<String> axiomTermNameList = axiomList.getAxiomTermNameList();
         QualifiedName axiomName = axiomList.getQualifiedName();
-        String axiomKey = axiomList.getKey();
+        QualifiedName axiomKey = axiomList.getKey();
         for (int i = 0; i < axioms.size(); i++)
         {   // Each axiom is wrapped in an AxiomTermList to allow access from script
             AxiomTermList axiomTermList = new AxiomTermList(axiomName, axiomKey);
@@ -180,12 +180,12 @@ public class AxiomUtils
     public static AxiomList duplicateAxiomList(AxiomList axiomList)
     {
         List<Axiom> dupAxioms = AxiomUtils.copyItemList(axiomList.getName(), axiomList);
-        AxiomList dupAxiomList = new AxiomList(axiomList.getQualifiedName(), axiomList.getName());
+        AxiomList dupAxiomList = new AxiomList(axiomList.getQualifiedName(), axiomList.getKey());
         dupAxiomList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
         int index = 0;
         for (Axiom dupAxiom: dupAxioms)
         {
-            AxiomTermList axiomTermList = new AxiomTermList(axiomList.getQualifiedName(), axiomList.getName());
+            AxiomTermList axiomTermList = new AxiomTermList(axiomList.getQualifiedName(), axiomList.getKey());
             axiomTermList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
             axiomTermList.setAxiom(dupAxiom);
             dupAxiomList.assignItem(index++, axiomTermList);

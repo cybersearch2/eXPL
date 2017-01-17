@@ -42,23 +42,20 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     protected ParameterList<AxiomTermList> parameterList;
     /** Name of axiom list to be generated */
     protected QualifiedName axiomName;
-    /** The axiom key */  
-    protected String axiomKey;
     /** Root of Operand tree for unification */
     protected Operand paramsTreeRoot;
 
     /**
      * Construct an AxiomParameterOperand object
-     * @param qname Qualified name
-     * @param axiomKey Key of axiom list to be generated
+     * @param qname Qualified name of operand
+     * @param axiomKey Qualified name of backing axiom list
      * @param initializeList List of parameters to initialize this Operand
      */
-    public AxiomParameterOperand(QualifiedName qname, String axiomKey, List<OperandParam> initializeList)
+    public AxiomParameterOperand(QualifiedName qname, QualifiedName axiomName, List<OperandParam> initializeList)
     {
         super(qname.getName());
         this.qname = qname;
-        this.axiomKey = axiomKey;
-        this.axiomName = new QualifiedName(axiomKey, qname);
+        this.axiomName = axiomName;
         if ((initializeList != null) && !initializeList.isEmpty())
         {
             parameterList = new ParameterList<AxiomTermList>(initializeList, axiomGenerator());
@@ -82,7 +79,7 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     {
         if (parameterList == null)
         {
-            AxiomTermList axiomTermList = new AxiomTermList(axiomName, axiomKey);
+            AxiomTermList axiomTermList = new AxiomTermList(axiomName, axiomName);
             setValue(axiomTermList);
             return EvaluationStatus.COMPLETE;
         }
@@ -194,7 +191,7 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
             @Override
             public AxiomTermList evaluate(List<Term> argumentList)
             {
-                return AxiomUtils.marshallAxiomTerms(axiomName, axiomName.getName(), argumentList);
+                return AxiomUtils.marshallAxiomTerms(axiomName, axiomName, argumentList);
             }};
     }
 

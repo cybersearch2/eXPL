@@ -110,7 +110,7 @@ public class LogicQuery implements SolutionFinder
 			Axiom axiom = axiomIterator.next();
 			if (axiomListenerList != null)
 				for (AxiomListener axiomListener: axiomListenerList)
-					axiomListener.onNextAxiom(axiom);
+					axiomListener.onNextAxiom(new QualifiedName(axiom.getName()), axiom);
 			if (emptyTemplate && template.getName().equals(axiom.getName()) && template.getKey().equals(axiom.getName()))
 	        {
 	            for (int i = 0; i < axiom.getTermCount(); i++)

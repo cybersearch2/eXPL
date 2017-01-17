@@ -41,6 +41,8 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	static final QualifiedName DELEGATE_NAME = new QualifiedName("*delegate*", QualifiedName.ANONYMOUS);
 	/** Default delegate only allows assignment */
 	static final AssignOnlyOperand ASSIGN_ONLY_DELEGATE;
+	/** Delegate axiom key - does not match any valid value */
+    static final QualifiedName DELEGATE_KEY = new QualifiedName("*delegate*", "*");
 	
     /** Constant value for no operators permitted */
 	protected static OperatorEnum[] EMPTY_OPERAND_OPS = new OperatorEnum[0];
@@ -66,7 +68,7 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 		delegateClassMap.put(Double.class, new DoubleOperand(DELEGATE_NAME));
 		delegateClassMap.put(BigDecimal.class, new BigDecimalOperand(DELEGATE_NAME));
 		delegateClassMap.put(AxiomTermList.class, ASSIGN_ONLY_DELEGATE);
-        delegateClassMap.put(AxiomList.class, new AxiomOperand(DELEGATE_NAME, "*", null));
+        delegateClassMap.put(AxiomList.class, new AxiomOperand(DELEGATE_NAME, DELEGATE_KEY, null));
 		delegateClassMap.put(Null.class, null);
 	}
 	

@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -27,7 +28,8 @@ public interface AxiomListener
 {
 	/**
 	 * Handle next axiom loaded by processor
+	 * @param qname Qualified name of axiom
 	 * @param axiom Axiom object
 	 */
-	void onNextAxiom(Axiom axiom);
+	void onNextAxiom(QualifiedName qname, Axiom axiom);
 }

@@ -17,7 +17,6 @@ package au.com.cybersearch2.classy_logic.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
-import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 
 /**
@@ -44,7 +42,10 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
  */
 public class ChainQueryExecuter 
 {
+    /**  Query scope */
 	protected Scope scope;
+	/**  Calculator scope tracker while building query chain */
+    protected Scope calcScope;
     /** Head of optional query chain */
 	protected ChainQuery headChainQuery;
 	/** Tail of optional query chain */
@@ -59,32 +60,14 @@ public class ChainQueryExecuter
 	 * @param queryParams Query parameters
 	 */
 	public ChainQueryExecuter(QueryParams queryParams) 
-	{   // Allow a global scope query to engage multiple scopes using 
-	    // first part of 2-part names to identify scope
-	    Set<String> scopeNameSet = new HashSet<String>();
+	{   
 		this.scope = queryParams.getScope();
-		if (scope != null)
-		{   // Copy all axiom listeners in scope to this executer
-		    setAxiomListeners(scope);
-		    if (QueryProgram.GLOBAL_SCOPE.equals(scope.getName()))
-		    {   // Iterate query specification list to engage all scopes referenced in
-		        // 2-part names
-    		    QuerySpec querySpec = queryParams.getQuerySpec();
-    	        if (querySpec.getQueryChainList() != null)
-    	            for (QuerySpec chainQuerySpec: querySpec.getQueryChainList())
-    	            {
-    	                for (KeyName keyname: chainQuerySpec.getKeyNameList())
-    	                {
-    	                    String scopeName = keyname.getTemplateName().getScope();
-    	                    if (!scopeName.isEmpty() && !scopeNameSet.contains(scopeName))
-    	                    {
-    	                        scopeNameSet.add(scopeName);
-    	                        notifyScopes(scopeName);
-    	                    }
-    	                }
-    	            }
-		    }
-		}
+		calcScope = scope;
+        if ((scope != null) && (scope.getAxiomListenerMap() != null))
+        {   // Create a copy of the axiom listener map and remove entries as axiom listeners are bound to processors
+            axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
+            axiomListenerMap.putAll(scope.getAxiomListenerMap());
+        }
     }
 
 	/**
@@ -94,7 +77,7 @@ public class ChainQueryExecuter
 	public boolean execute()
     {
 		if (axiomListenerMap != null)
-			bindAxiomListeners();
+			bindAxiomListeners(scope);
 		if ((headChainQuery == null) ||
 			    // Query chain will add to solution or trigger short circuit
 			    (headChainQuery.executeQuery(solution) == EvaluationStatus.COMPLETE))
@@ -146,10 +129,11 @@ public class ChainQueryExecuter
 
 	/**
 	 * Add a calculate chain query
+	 * @param templateScope Scope specified by first of 2-part name, or query scope
 	 * @param axiom Optional axiom to initialize Calculator
 	 * @param template Template to unify and evaluate
 	 */
-	public void chainCalculator(Axiom axiom, Template template) 
+	public void chainCalculator(final Scope templateScope, Axiom axiom, Template template) 
 	{
 		if (axiom == null)
 		{
@@ -158,14 +142,29 @@ public class ChainQueryExecuter
 		}
 		else
 			template.setKey(axiom.getName());
-		CalculateChainQuery chainQuery = new CalculateChainQuery(axiom, template);
+		// Allow a global scope query to engage multiple scopes using 
+        // first part of 2-part names to identify scope
+		Runnable scopeNotifier = null;
+		if (!templateScope.getName().equals(calcScope.getName()))
+		{   // Create object to pre-execute scope localisation
+		    scopeNotifier = new Runnable(){
+
+                @Override
+                public void run()
+                {
+                    notifyScopes(templateScope.getName());
+                    bindAxiomListeners(templateScope);
+                }};
+                calcScope = templateScope;
+		}
+		CalculateChainQuery chainQuery = new CalculateChainQuery(axiom, template, scopeNotifier);
         QualifiedName qname = template.getQualifiedName();
 		if (template.isChoice())
-		{
+		{   // Pass scope identified by choice name to Choice constructor
 		    Scope choiceScope = qname.getScope().isEmpty() ?
 		                        scope.getGlobalScope() : 
 		                        scope.findScope(qname.getScope());
-			Choice choice = new Choice(new QualifiedName(qname.getScope(), template.getName()), choiceScope);
+			Choice choice = new Choice(new QualifiedName(choiceScope.getName(), template.getName()), choiceScope);
 			chainQuery.setChoice(choice);
 		}
 		if (axiomListenerMap != null)
@@ -290,14 +289,18 @@ public class ChainQueryExecuter
      * Bind axiom listeners to processors. This is a late binding step 
      * for any outstanding outbound list variables. 
      */
-    protected void bindAxiomListeners()
+    protected void bindAxiomListeners(Scope localScope)
     {
+        if (axiomListenerMap == null)
+            return;
         Set<QualifiedName> keys = axiomListenerMap.keySet();
         for (QualifiedName key: keys)
         {
             if (!key.getTemplate().isEmpty())
                 continue;  // Templates are output
-            AxiomSource axiomSource = scope.findAxiomSource(key);
+            AxiomSource axiomSource = localScope.findAxiomSource(key);
+            if ((axiomSource ==null) && !localScope.getName().equals(QueryProgram.GLOBAL_SCOPE))
+                axiomSource = scope.getGlobalScope().findAxiomSource(key);
             // TODO - Log warning if axiom source not found
             if (axiomSource !=null)
             {
@@ -309,7 +312,7 @@ public class ChainQueryExecuter
                         break;
                     Axiom axiom = iterator.next();
                     if (axiom != null)
-                        axiomListener.onNextAxiom(axiom);
+                        axiomListener.onNextAxiom(key, axiom);
                 }
             }
         }

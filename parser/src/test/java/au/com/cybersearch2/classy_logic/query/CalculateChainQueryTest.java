@@ -66,7 +66,7 @@ public class CalculateChainQueryTest
         calcTemplate.addProperties(props);
         Solution solution = new Solution();
         
-        CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate);
+        CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate, null);
         calculateChainQuery.executeQuery(solution);
         assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n = 3, limit = 3)");
 	}
@@ -96,7 +96,7 @@ public class CalculateChainQueryTest
         calcTemplate.addProperties(props);
 
         Solution solution = new Solution();
-        CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate);
+        CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate, null);
         calculateChainQuery.executeQuery(solution);
         assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n = 4, factorial = 24, i = 5)");
         calculateChainQuery.backupToStart();

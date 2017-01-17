@@ -37,8 +37,8 @@ public class FileAxiomListenerTest
         serializeFile.deleteOnExit();
         FileAxiomListener underTest = new FileAxiomListener(NAME, serializeFile);
         Runnable onCloseHandler = underTest.getOnCloseHandler();
-        underTest.onNextAxiom(axiom);
-        underTest.onNextAxiom(axiom2);
+        underTest.onNextAxiom(null, axiom);
+        underTest.onNextAxiom(null, axiom2);
         onCloseHandler.run();
         FileInputStream fis = new FileInputStream(serializeFile);
         ObjectInputStream ois = new ObjectInputStream(fis);

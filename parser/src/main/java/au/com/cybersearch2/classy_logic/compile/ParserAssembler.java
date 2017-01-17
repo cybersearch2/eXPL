@@ -178,11 +178,19 @@ public class ParserAssembler implements LocaleListener
     	return operandMap;
     }
 
+    /**
+     * Set resource provider manager
+     * @param providerManager ProviderManager object 
+     */
     public void setProviderManager(ProviderManager providerManager) 
     {
 		this.providerManager = providerManager;
 	}
 
+    /**
+     * Set function manager
+     * @param functionManager FunctionManager object
+     */
 	public void setFunctionManager(FunctionManager functionManager) 
 	{
 		this.functionManager = functionManager;
@@ -523,7 +531,7 @@ public class ParserAssembler implements LocaleListener
 	public void registerAxiomTermList(AxiomTermList axiomTermList)
 	{
 		AxiomListener axiomListener = axiomTermList.getAxiomListener();
-		QualifiedName qualifiedAxiomName = QualifiedName.parseName(axiomTermList.getKey());
+		QualifiedName qualifiedAxiomName = axiomTermList.getKey();
 		List<AxiomListener> axiomListenerList = getAxiomListenerList(qualifiedAxiomName);
 		axiomListenerList.add(axiomListener);
 		axiomTermList.setAxiomTermNameList(axiomTermNameMap.get(qualifiedAxiomName));
@@ -535,7 +543,7 @@ public class ParserAssembler implements LocaleListener
 	 */
 	public void registerLocalList(AxiomTermList axiomTermList)
 	{
-        QualifiedName qualifiedAxiomName = QualifiedName.parseName(axiomTermList.getKey());
+        QualifiedName qualifiedAxiomName = axiomTermList.getKey();
 		axiomTermList.setAxiomTermNameList(axiomTermNameMap.get(qualifiedAxiomName));
 		scope.addLocalAxiomListener(qualifiedAxiomName, axiomTermList.getAxiomListener());
 	}
@@ -592,7 +600,7 @@ public class ParserAssembler implements LocaleListener
 	public void registerAxiomList(AxiomList axiomList) 
 	{
 		AxiomListener axiomListener = axiomList.getAxiomListener();
-		QualifiedName axiomKey = QualifiedName.parseName(axiomList.getKey());
+		QualifiedName axiomKey = axiomList.getKey();
         QualifiedName qualifiedAxiomName = findQualifiedAxiomName(axiomKey);
         if (qualifiedAxiomName == null)
             // Assume key is for template
@@ -605,7 +613,7 @@ public class ParserAssembler implements LocaleListener
         if (!isChoice && (internalAxiomList != null))
         {
             for (Axiom axiom: internalAxiomList)
-                axiomListener.onNextAxiom(axiom);
+                axiomListener.onNextAxiom(axiomKey, axiom);
         }
         else
         {
@@ -969,18 +977,17 @@ public class ParserAssembler implements LocaleListener
     /**
      * Returns new ItemListVariable instance. 
      * This is wrapped in an assignment evaluator if optional expression parameter needs to be evaluated.
-     * @param listName List name
+     * @param listName List qualified name
      * @param index List index
      * @param expression Optional expression operand
      * @return Operand object
      */
     public Operand setListVariable(String listName, Operand index, Operand expression) 
     {
-        QualifiedName qualifiedListName = QualifiedName.parseGlobalName(listName);
-        ItemList<?> itemList = findItemList(qualifiedListName);
+        ItemList<?> itemList = findItemList(listName);
         if (itemList == null)
         {
-            qualifiedListName = QualifiedName.parseName(listName, operandMap.getQualifiedContextname());
+            QualifiedName qualifiedListName = QualifiedName.parseName(listName, operandMap.getQualifiedContextname());
             qualifiedListName.clearTemplate();
             itemList = findItemList(qualifiedListName);
         }

@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.helper;
 
+import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -66,7 +67,7 @@ public class QualifiedName implements Comparable<QualifiedName>
      */
     public QualifiedName(String scope, String name)
     {
-        this(scope, EMPTY, name);
+        this(QueryProgram.GLOBAL_SCOPE.equals(scope) ? EMPTY : scope, EMPTY, name);
     }
 
     /**

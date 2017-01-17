@@ -224,7 +224,7 @@ public class AxiomListSpec
         {   //Adjust variable parameters to index terms of axiom
             if (termVariable == null)
             {
-                String axiomKey = axiomTermList.getKey();
+                QualifiedName axiomKey = axiomTermList.getKey();
                 QualifiedName axiomName = axiomTermList.getQualifiedName();
                 if ((axiomList == null) || 
                      !axiomList.getName().equals(axiomTermList.getName()) ||

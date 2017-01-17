@@ -64,7 +64,7 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 		return new AxiomListener()
 		{
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 			}
 		};

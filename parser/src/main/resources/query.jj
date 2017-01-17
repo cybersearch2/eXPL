@@ -825,19 +825,18 @@ Operand AxiomVariable(QualifiedName qualifiedAxiomName, ParserAssembler parserAs
 
 List<OperandParam> AxiomList(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
 {
-  String axiomName = qualifiedAxiomName.getName();
   List<OperandParam> operandParamList = new ArrayList<OperandParam>();
   Operand operand;
 }
 {
-  operand = AxiomInitializer(axiomName, axiomName, parserAssembler)
+  operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler)
   {
-    operandParamList.add(new OperandParam(axiomName, operand));
+    operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
   }
   ( 
-    operand = AxiomInitializer(axiomName, axiomName, parserAssembler)
+    operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler)
     {
-      operandParamList.add(new OperandParam(axiomName, operand));
+      operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
     }
   )*
   {
@@ -845,7 +844,7 @@ List<OperandParam> AxiomList(QualifiedName qualifiedAxiomName, ParserAssembler p
   }
 }
 
-Operand AxiomInitializer(String listName, String axiomName, ParserAssembler parserAssembler) :
+Operand AxiomInitializer(String listName, QualifiedName axiomName, ParserAssembler parserAssembler) :
 {
     List<OperandParam> initializeList = null;
 }

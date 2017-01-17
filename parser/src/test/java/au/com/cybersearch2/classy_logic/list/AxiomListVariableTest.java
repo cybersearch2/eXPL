@@ -49,6 +49,7 @@ public class AxiomListVariableTest
 {
 	private static final String NAME = "AxiomListName";
 	static QualifiedName QNAME = QualifiedName.parseName(NAME);
+    static QualifiedName Q_KEY = QualifiedName.parseName("AxiomKey");
 	
 	private static final String[] CITY_NAME_HEIGHT =
 	{
@@ -396,7 +397,7 @@ public class AxiomListVariableTest
 	public void test_integer_operand_ops()
 	{
 		AxiomList axiomList = mock(AxiomList.class);
-		AxiomTermList axiomTermList = new AxiomTermList(QNAME, "AxiomKey");
+		AxiomTermList axiomTermList = new AxiomTermList(QNAME, Q_KEY);
 		axiomTermList.setAxiom(new Axiom("AxiomKey", new IntegerTerm(13)));
 		when(axiomList.getName()).thenReturn(NAME);
         when(axiomList.getQualifiedName()).thenReturn(QNAME);
@@ -414,7 +415,7 @@ public class AxiomListVariableTest
     @Test 
     public void test_cities() throws Exception
     {
-    	AxiomList axiomList = new AxiomList(QualifiedName.parseName("city_height_list"), "city");
+    	AxiomList axiomList = new AxiomList(QualifiedName.parseName("city_height_list"), new QualifiedName("city"));
     	final List<Axiom> cityList = new ArrayList<Axiom>();
 		cityList.add(new Axiom("city", "bilene", 1718));
 		cityList.add(new Axiom("city", "addis ababa", 8000));
@@ -429,7 +430,7 @@ public class AxiomListVariableTest
 		int index = 0;
 		for (Axiom axiom: cityList)
 		{
-			AxiomTermList axiomListOperand = new AxiomTermList(QNAME, axiom.getName());
+			AxiomTermList axiomListOperand = new AxiomTermList(QNAME, Q_KEY);
 			axiomListOperand.setAxiom(axiom);
 			axiomList.assignItem(index, axiomListOperand);
 			++index;

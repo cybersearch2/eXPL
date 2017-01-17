@@ -35,13 +35,15 @@ import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrow
 public class AxiomListTest 
 {
 	private static final String NAME = "ListOperandName";
-	static QualifiedName QNAME = QualifiedName.parseName(NAME);
+	private static QualifiedName QNAME = QualifiedName.parseName(NAME);
 	private static final String KEY = "AxiomKey";
+	private static QualifiedName Q_KEY = QualifiedName.parseName(KEY);
+    private static QualifiedName Q_KEY1 = QualifiedName.parseName(KEY + 1);
 
 	@Test
 	public void test_constructor()
 	{
-		AxiomList axiomList = new AxiomList(QNAME, KEY);
+		AxiomList axiomList = new AxiomList(QNAME, Q_KEY);
 		assertThat(axiomList.getName()).isEqualTo(NAME);
 		assertThat(axiomList.getLength()).isEqualTo(0);
 		assertThat(axiomList.hasItem(0)).isFalse();
@@ -60,11 +62,11 @@ public class AxiomListTest
 	@Test
 	public void test_assign()
 	{
-		AxiomList axiomList = new AxiomList(QNAME, KEY);
-		AxiomTermList axiomTermList = new AxiomTermList(QNAME, KEY);
+		AxiomList axiomList = new AxiomList(QNAME, Q_KEY);
+		AxiomTermList axiomTermList = new AxiomTermList(QNAME, Q_KEY);
 		axiomList.assignItem(0, axiomTermList);
 		assertThat(axiomList.getItem(0)).isEqualTo(axiomTermList);
-		AxiomTermList axiomOperandList2 = new AxiomTermList(QualifiedName.parseName(KEY + 1), KEY + 1);
+		AxiomTermList axiomOperandList2 = new AxiomTermList(QualifiedName.parseName(KEY + 1), Q_KEY1);
 		axiomList.assignItem(0, axiomOperandList2);
 		assertThat(axiomList.getItem(0)).isEqualTo(axiomOperandList2);
 		assertThat(axiomList.getLength()).isEqualTo(1);
@@ -75,13 +77,13 @@ public class AxiomListTest
 	@Test
 	public void test_new_variable_instance()
 	{
-		AxiomList axiomList = new AxiomList(QNAME, KEY);
-		AxiomTermList axiomTermList = new AxiomTermList(QNAME, KEY);
+		AxiomList axiomList = new AxiomList(QNAME, Q_KEY);
+		AxiomTermList axiomTermList = new AxiomTermList(QNAME, Q_KEY);
 		axiomList.assignItem(0, axiomTermList);
 		ItemListVariable<AxiomTermList> axiomListVariable = axiomList.newVariableInstance(0, "0", 1);
 		axiomListVariable.evaluate(1);
 		assertThat(axiomListVariable.getValue()).isEqualTo(axiomTermList);
-		AxiomTermList axiomOperandList2 = new AxiomTermList(QualifiedName.parseName(KEY + 1), KEY + 1);
+		AxiomTermList axiomOperandList2 = new AxiomTermList(QualifiedName.parseName(KEY + 1), Q_KEY1);
 		axiomList.assignItem(0, axiomOperandList2);
 		Operand expression = new TestIntegerOperand("test", Integer.valueOf(0));
 		axiomListVariable = axiomList.newVariableInstance(expression, "test", 1);
@@ -92,14 +94,14 @@ public class AxiomListTest
 	@Test
 	public void test_axiom_listener()
 	{
-		AxiomList axiomList = new AxiomList(QNAME, KEY);
+		AxiomList axiomList = new AxiomList(QNAME, Q_KEY);
 		AxiomListener axiomListener = axiomList.getAxiomListener();
 		Axiom axiom1 = new Axiom("one");
-		axiomListener.onNextAxiom(axiom1);
+		axiomListener.onNextAxiom(Q_KEY, axiom1);
 		AxiomTermList axiomOperandList1 = axiomList.getItem(0);
 		assertThat(axiomOperandList1.toString()).isEqualTo("one()");
 		Axiom axiom2 = new Axiom("two");
-		axiomListener.onNextAxiom(axiom2);
+		axiomListener.onNextAxiom(Q_KEY, axiom2);
 		AxiomTermList axiomOperandList2 = axiomList.getItem(1);
 		assertThat(axiomOperandList2.toString()).isEqualTo("two()");
 	}

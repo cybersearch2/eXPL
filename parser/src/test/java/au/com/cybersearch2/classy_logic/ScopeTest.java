@@ -50,6 +50,7 @@ public class ScopeTest
 	private static final String TEMPLATE_NAME = "TemplateName";
 	private static final String SCOPE_NAME = "ScopeName";
     static QualifiedName Q_AXIOM_NAME = new QualifiedName(SCOPE_NAME, AXIOM_KEY);
+    static QualifiedName Q_AXIOM1_NAME = new QualifiedName(SCOPE_NAME, AXIOM_KEY + 1);
     static QualifiedName Q_TEMPLATE_NAME = new QualifiedTemplateName(SCOPE_NAME, TEMPLATE_NAME);
     static QualifiedName GLOBAL_Q_AXIOM_NAME = new QualifiedName(QualifiedName.EMPTY, AXIOM_KEY);
     static QualifiedName GLOBAL_Q_TEMPLATE_NAME = new QualifiedTemplateName(QualifiedName.EMPTY, TEMPLATE_NAME);
@@ -180,13 +181,13 @@ public class ScopeTest
 		AxiomListener axiomListener2 = mock(AxiomListener.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomTermList.getAxiomListener()).thenReturn(axiomListener2);
-		when(axiomTermList.getKey()).thenReturn(AXIOM_KEY + 1);
+		when(axiomTermList.getKey()).thenReturn(GLOBAL_Q_AXIOM_NAME);
 		QualifiedName qname = QualifiedName.parseName(AXIOM_KEY + 1);
 		when(axiomTermList.getQualifiedName()).thenReturn(qname);
 		scope.getParserAssembler().registerAxiomTermList(axiomTermList);
 
 		assertThat(scope.getAxiomListenerMap().get(Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener);
-		assertThat(scope.getAxiomListenerMap().get(qname).get(0)).isEqualTo(axiomListener2);
+		assertThat(scope.getAxiomListenerMap().get(GLOBAL_Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener2);
 	}
 
 	@Test
@@ -201,11 +202,11 @@ public class ScopeTest
 		AxiomListener axiomListener2 = mock(AxiomListener.class);
 		AxiomTermList axiomTermList = mock(AxiomTermList.class);
 		when(axiomTermList.getAxiomListener()).thenReturn(axiomListener2);
-		when(axiomTermList.getKey()).thenReturn(AXIOM_KEY + 1);
         QualifiedName qname = QualifiedName.parseName(AXIOM_KEY + 1);
+		when(axiomTermList.getKey()).thenReturn(GLOBAL_Q_AXIOM_NAME);
         when(axiomTermList.getQualifiedName()).thenReturn(qname);
 		scope.getParserAssembler().registerAxiomTermList(axiomTermList);
-		assertThat(scope.getAxiomListenerMap().get(qname).get(0)).isEqualTo(axiomListener2);
+		assertThat(scope.getAxiomListenerMap().get(GLOBAL_Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener2);
 	}
 
 	@Ignore // TODO - investigate JRE behaviour

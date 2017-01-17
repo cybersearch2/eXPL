@@ -41,15 +41,17 @@ public class CalculateChainQuery extends ChainQuery
     protected List<AxiomListener> axiomListenerList;
     /** Choice set if template.isChoice() returns true */
     protected Choice choice;
+    protected Runnable scopeNotifier;
 
 	/**
 	 * Create a CalculateChainQuery object
 	 * @param template Template to unify and evaluate
 	 */
-	public CalculateChainQuery(Axiom axiom, Template template) 
+	public CalculateChainQuery(Axiom axiom, Template template, Runnable scopeNotifier) 
 	{
 		this.axiom = axiom;
 		this.template = template;
+		this.scopeNotifier = scopeNotifier;
 	}
 
 	/**
@@ -70,6 +72,8 @@ public class CalculateChainQuery extends ChainQuery
 	@Override
 	public EvaluationStatus executeQuery(Solution solution)
 	{
+	    if (scopeNotifier != null)
+	        scopeNotifier.run();
 		Calculator calculator = new Calculator();
 		if (axiomListenerList != null)
 			for (AxiomListener axiomListener: axiomListenerList)

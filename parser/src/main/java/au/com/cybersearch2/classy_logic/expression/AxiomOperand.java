@@ -36,7 +36,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
 public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concaten<AxiomList>
 {
     /** Axiom key to use when an empty list is created */
-    protected String axiomKey;
+    protected QualifiedName axiomKey;
     /** Parameter container which creates an AxiomList object on evaluation */
     protected ParameterList<AxiomList> parameterList;
     /** Axiom listener to notify when an axiom list is created/assigned */
@@ -50,7 +50,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
      * @param axiomKey Axiom key to use when an empty list is created
      * @param axiomListListener Axiom listener to notify when an axiom list is created/assigned
      */
-    public AxiomOperand(QualifiedName qname, String axiomKey, AxiomListListener axiomListListener) 
+    public AxiomOperand(QualifiedName qname, QualifiedName axiomKey, AxiomListListener axiomListListener) 
     {
         super(qname);
         this.axiomKey = axiomKey;
@@ -75,7 +75,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
      * @param expression Operand which evaluates value
      * @param axiomListListener Axiom listener to notify when an axiom list is created
      */
-    public AxiomOperand(QualifiedName qname, String axiomKey, Operand expression, AxiomListListener axiomListListener) 
+    public AxiomOperand(QualifiedName qname, QualifiedName axiomKey, Operand expression, AxiomListListener axiomListListener) 
     {
         super(qname, expression);
         this.axiomKey = axiomKey;
@@ -89,7 +89,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
      * @param parameterList Parameter container which creates an AxiomList object on evaluation
      * @param axiomListListener Axiom listener to notify when an axiom list is created
      */
-    public AxiomOperand(QualifiedName qname, String axiomKey, ParameterList<AxiomList> parameterList, AxiomListListener axiomListListener) 
+    public AxiomOperand(QualifiedName qname, QualifiedName axiomKey, ParameterList<AxiomList> parameterList, AxiomListListener axiomListListener) 
     {
         super(qname);
         this.axiomKey = axiomKey;

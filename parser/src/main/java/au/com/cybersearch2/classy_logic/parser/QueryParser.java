@@ -1409,11 +1409,10 @@ public class QueryParser implements QueryParserConstants
 
   final public List<OperandParam> AxiomList(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
-  String axiomName = qualifiedAxiomName.getName();
   List<OperandParam> operandParamList = new ArrayList<OperandParam>();
   Operand operand;
-    operand = AxiomInitializer(axiomName, axiomName, parserAssembler);
-    operandParamList.add(new OperandParam(axiomName, operand));
+    operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler);
+    operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
     label_11:
     while (true) 
     {
@@ -1426,14 +1425,14 @@ public class QueryParser implements QueryParserConstants
         jj_la1[46] = jj_gen;
         break label_11;
       }
-      operand = AxiomInitializer(axiomName, axiomName, parserAssembler);
-      operandParamList.add(new OperandParam(axiomName, operand));
+      operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler);
+      operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
     }
     {if (true) return operandParamList;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand AxiomInitializer(String listName, String axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public Operand AxiomInitializer(String listName, QualifiedName axiomName, ParserAssembler parserAssembler) throws ParseException
   {
     List<OperandParam> initializeList = null;
     jj_consume_token(LBRACE);
@@ -2800,6 +2799,21 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(3, xla); }
   }
 
+  private boolean jj_3R_65() {
+    if (jj_scan_token(BANG)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_64() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_65()) {
+    jj_scanpos = xsp;
+    if (jj_3R_66()) return true;
+    }
+    return false;
+  }
+
   private boolean jj_3R_31() {
     if (jj_scan_token(COLON)) return true;
     Token xsp;
@@ -2868,13 +2882,13 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_73() {
-    if (jj_scan_token(LPAREN)) return true;
+  private boolean jj_3R_41() {
+    if (jj_scan_token(STRING)) return true;
     return false;
   }
 
-  private boolean jj_3R_41() {
-    if (jj_scan_token(STRING)) return true;
+  private boolean jj_3R_73() {
+    if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 
@@ -2898,23 +2912,18 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3_3() {
-    if (jj_3R_33()) return true;
-    return false;
-  }
-
   private boolean jj_3R_39() {
     if (jj_scan_token(BOOLEAN)) return true;
     return false;
   }
 
-  private boolean jj_3_2() {
-    if (jj_3R_32()) return true;
+  private boolean jj_3_3() {
+    if (jj_3R_33()) return true;
     return false;
   }
 
-  private boolean jj_3R_71() {
-    if (jj_3R_78()) return true;
+  private boolean jj_3_2() {
+    if (jj_3R_32()) return true;
     return false;
   }
 
@@ -2945,6 +2954,11 @@ public class QueryParser implements QueryParserConstants
     }
     }
     }
+    return false;
+  }
+
+  private boolean jj_3R_71() {
+    if (jj_3R_78()) return true;
     return false;
   }
 
@@ -3183,21 +3197,6 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_49() {
     if (jj_3R_50()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_65() {
-    if (jj_scan_token(BANG)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_64() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_65()) {
-    jj_scanpos = xsp;
-    if (jj_3R_66()) return true;
-    }
     return false;
   }
 

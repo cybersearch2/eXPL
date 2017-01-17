@@ -75,29 +75,41 @@ public class SolutionPairer extends AxiomPairer
 	        return true;
 	    String templateKey = solution.getCurrentKey();
 	    if (!localContext.inSameSpace(qname)) 
-	        templateKey = new QualifiedTemplateName(qname.getScope(), qname.getTemplate()).toString();
+	    {
+ 	        if (!localContext.getScope().isEmpty())
+	        {
+	            String localTemplateKey = new QualifiedTemplateName(localContext.getScope(), qname.getTemplate()).toString();
+	            if (solution.keySet().contains(localTemplateKey))
+	                return processKey(localTemplateKey, qname.getName(), operand);
+	        }
+            templateKey = new QualifiedTemplateName(qname.getScope(), qname.getTemplate()).toString();
+	    }
 		if (solution.keySet().contains(templateKey))
-		{   
-			// Solution has Axiom with key name
-			Term otherTerm = solution.getAxiom(templateKey).getTermByName(qname.getName());
-			if ((otherTerm != null) && !otherTerm.isEmpty())
-			{ 
-			    // Check for exit case: Axiom term contains different value to matching Solution term
-				Term axiomTerm = null;
-				if (owner == null) 
-					axiomTerm = operand;
-				else
-					axiomTerm = owner.getTermByName(qname.getName());
-                if ((axiomTerm != null) && 
-                	!axiomTerm.isEmpty() && localContext.inSameSpace(operand.getQualifiedName()) &&
-                	!axiomTerm.getValue().equals(otherTerm.getValue()))
-                	return false;
-                else if (operand.isEmpty())
-                	// Unify with Solution term
-                	pairList.add(new TermPair(operand, otherTerm));
-			}
-		}
+		    return processKey(templateKey, qname.getName(), operand);
 		return true;
 	}
-	
+
+	private boolean processKey(String templateKey, String termName, Operand operand)
+    {   
+        // Solution has Axiom with key name
+        Term otherTerm = solution.getAxiom(templateKey).getTermByName(termName);
+        if ((otherTerm != null) && !otherTerm.isEmpty())
+        { 
+            // Check for exit case: Axiom term contains different value to matching Solution term
+            Term axiomTerm = null;
+            if (owner == null) 
+                axiomTerm = operand;
+            else
+                axiomTerm = owner.getTermByName(termName);
+            if ((axiomTerm != null) && 
+                !axiomTerm.isEmpty() && localContext.inSameSpace(operand.getQualifiedName()) &&
+                !axiomTerm.getValue().equals(otherTerm.getValue()))
+                return false;
+            else if (operand.isEmpty())
+                // Unify with Solution term
+                pairList.add(new TermPair(operand, otherTerm));
+        }
+        return true;
+    }
+
 }

@@ -77,7 +77,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             KeyName firstKeyname = queryParams.getQuerySpec().getKeyNameList().get(0);
             QualifiedName qname = QualifiedName.parseName(firstKeyname.getTemplateName().getName(), callerOperandMap.getQualifiedContextname());
             // Create empty AxiomTermList to return as query result. 
-            innerTerm = new Parameter(qname.getName(), new AxiomTermList(qname, firstKeyname.getTemplateName().getTemplate()));
+            innerTerm = new Parameter(qname.getName(), new AxiomTermList(qname, firstKeyname.getTemplateName()));
         }
             
     }
@@ -203,7 +203,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
     protected AxiomTermList axiomTermListInstance(int id)
     {
         // Create AxiomTermList to contain query result. 
-        AxiomTermList axiomTermList = new AxiomTermList(innerTemplate.getQualifiedName(), innerTemplate.getKey());
+        AxiomTermList axiomTermList = new AxiomTermList(innerTemplate.getQualifiedName(), innerTemplate.getQualifiedName());
         // The inner term is the axiomTermList container.
         // Over write any previous value, which will be in the solution by now
         Parameter innerTermValue = new Parameter(Term.ANONYMOUS, axiomTermList);

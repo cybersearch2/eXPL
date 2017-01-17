@@ -54,7 +54,7 @@ public class FactOperandTest
         assertThat(factOperand.getId()).isEqualTo(3);
 
         // Create AxiomTermList to contain query result. 
-        AxiomTermList axiomTermList = new AxiomTermList(QNAME, AXIOM_KEY);
+        AxiomTermList axiomTermList = new AxiomTermList(QNAME, new QualifiedName(AXIOM_KEY));
         // Create Variable to be axiomTermList container. Give it the same name as the inner Template 
         // so it is qualified by the name of the enclosing Template
         Variable listVariable = new Variable(QNAME);

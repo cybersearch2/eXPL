@@ -558,7 +558,7 @@ public class QueryExecuterTest
         AxiomListener axiomListener = new AxiomListener(){
         	int i;
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 				//System.out.println(axiom.toString());
 				assertThat(axiom.toString()).isEqualTo(CITY_AXIOMS[i++]);
@@ -625,31 +625,31 @@ public class QueryExecuterTest
 	    final MultQueryTracer multiQueryTracer = new MultQueryTracer();
         AxiomListener axiomListener1 = new AxiomListener(){
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 				multiQueryTracer.trace(axiom);
 			}};
         AxiomListener axiomListener2 = new AxiomListener(){
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 				multiQueryTracer.trace(axiom);
 			}};
         AxiomListener axiomListener3 = new AxiomListener(){
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 				multiQueryTracer.trace(axiom);
 			}};
         AxiomListener axiomListener4 = new AxiomListener(){
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 				multiQueryTracer.trace(axiom);
 			}};
         AxiomListener axiomListener5 = new AxiomListener(){
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 				multiQueryTracer.trace(axiom);
 			}};

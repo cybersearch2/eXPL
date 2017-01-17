@@ -38,7 +38,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     
     static
     {
-        EMPTY_AXIOM_LIST = new AxiomList(QualifiedName.ANONYMOUS, Term.ANONYMOUS);
+        EMPTY_AXIOM_LIST = new AxiomList(QualifiedName.ANONYMOUS, new QualifiedName(Term.ANONYMOUS));
     }
     
 	/** The backing axiom list */

@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
+import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
@@ -42,6 +44,8 @@ public class Solution
 	protected Map<QualifiedName, List<AxiomListener>> axiomListenerMap;
     /** Key used for last put() */
 	protected String[] keyStack;
+	/** Solution handler for self-evaluation */
+	protected SolutionHandler solutionHandler;
 	
 	/**
 	 * Construct a Solution object
@@ -54,7 +58,20 @@ public class Solution
 		keyStack[1] = EMPTY_KEY;
 	}
 
-	public String getCurrentKey()
+	/**
+	 * Set solution handler for self-evaluation
+	 * @param solutionHandler
+	 */
+	public void setSolutionHandler(SolutionHandler solutionHandler)
+    {
+        this.solutionHandler = solutionHandler;
+    }
+
+	/**
+	 * Returns key used for last put()
+	 * @return key or null if not available
+	 */
+    public String getCurrentKey()
     {
         return keyStack[0];
     }
@@ -75,11 +92,11 @@ public class Solution
      */
     public void put(String key, Axiom axiom) 
     {
-        axiomMap.put(key.toString(), axiom);
+        axiomMap.put(key, axiom);
         QualifiedName qname = QualifiedName.parseTemplateName(key);
         if ((axiomListenerMap != null) && axiomListenerMap.containsKey(qname))
             for (AxiomListener axiomListener: axiomListenerMap.get(qname))
-                axiomListener.onNextAxiom(axiom);
+                axiomListener.onNextAxiom(new QualifiedName(key), axiom);
         keyStack[1] = keyStack[0];
         keyStack[0] = key;
     }
@@ -148,6 +165,18 @@ public class Solution
 		return null;
 	}
 
+	/**
+	 * Self evaluate using external solution handler
+	 * @return EvaluationStatus enum COMPLETE or SHORT_CIRCUIT
+	 */
+	public EvaluationStatus evaluate()
+	{
+        if ((solutionHandler != null) &&
+             !solutionHandler.onSolution(this))
+            return EvaluationStatus.SHORT_CIRCUIT;
+        return EvaluationStatus.COMPLETE;
+	}
+	
 	/**
 	 * Returns term value as String referenced by axiom key and term name
 	 * @param key Axiom key

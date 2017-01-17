@@ -656,7 +656,7 @@ public class QueryParserTest
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
         QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
-	    highCitiesQuery.chainCalculator(null, calcTemplate);
+	    highCitiesQuery.chainCalculator(queryProgram.getGlobalScope(), null, calcTemplate);
 	    //System.out.println(highCitiesQuery.toString());
     	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude?altitude>5000)");
  	    while (highCitiesQuery.execute())
@@ -681,7 +681,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 		TestChainQueryExecuter queryExecuter = new TestChainQueryExecuter(new QueryParams(queryProgram.getGlobalScope(), new QuerySpec("test")));
         Template calcTemplate = parserAssembler.getTemplate("insert_sort");
-		queryExecuter.chainCalculator(null, calcTemplate);
+		queryExecuter.chainCalculator(queryProgram.getGlobalScope(), null, calcTemplate);
 		queryExecuter.setSolution(new Solution());
 		queryExecuter.execute();
 		Axiom unsortedAxiom = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("unsorted")).iterator().next();

@@ -25,11 +25,17 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
  */
 public class KeyName 
 {
+    public static QualifiedName EMPTY_QNAME;
+    
 	/** Axiom key - actually name of axiom */
 	protected QualifiedName axiomKey;
 	/** Template name */
 	protected QualifiedName templateName;
-	
+
+	static
+	{
+	    EMPTY_QNAME = new QualifiedName("");
+	}
 	/**
 	 * Construct KeyName object
 	 * @param axiomKey Axiom key
@@ -40,6 +46,16 @@ public class KeyName
 		this.axiomKey = QualifiedName.parseName(axiomKey);
 		this.templateName = QualifiedName.parseTemplateName(templateName);
 	}
+
+	   /**
+     * Construct KeyName object with empty axiom key
+     * @param templateName Qualified name of template
+     */
+    public KeyName(QualifiedName templateName) 
+    {
+        this.axiomKey = EMPTY_QNAME;
+        this.templateName = templateName;
+    }
 
 	/**
 	 * Returns axiom key

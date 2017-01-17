@@ -102,14 +102,32 @@ public class Template extends Structure
     protected boolean isChoice;
     /** Flag true if inner template */
     protected boolean isInnerTemplate;
+    /** Flag true if replicate. Required because terms are re-cycled instead of preserved after evaluation. */
+    protected boolean isReplicate;
     /** Head of call stack */
     protected CallContext headCallContext;
     /** Tail of call stack */
     protected CallContext tailCallContext;
     
+    /**
+     * Construct a replicate Template object. The new template has a unique id and specified qualified name 
+     * @param master Template object to replicate
+     * @param qname New Template qualified name. 
+     */
+    public Template(Template master, QualifiedName qname) 
+    {
+        this(qname);
+        key = master.key;
+        setTerms(master.termList);
+        this.isCalculator = master.isCalculator;
+        this.isChoice = master.isChoice;
+        this.isInnerTemplate = master.isInnerTemplate;
+        isReplicate = true;
+    }
+
 	/**
 	 * Construct Template object
-	 * @param qname Template qualifed name. The axiom key is set to the name part as a default.
+	 * @param qname Template qualified name. The axiom key is set to the name part as a default.
 	 */
 	public Template(QualifiedName qname) 
 	{
@@ -254,6 +272,12 @@ public class Template extends Structure
         this.isInnerTemplate = isInnerTemplate;
     }
 
+    
+    public boolean isReplicate()
+    {
+        return isReplicate;
+    }
+
     /**
 	 * Returns identity of this structure
 	 * @return int
@@ -349,7 +373,8 @@ public class Template extends Structure
 		for (Term term: termList)
 		{
 		    Operand operand = (Operand)term;
-			if (!operand.isEmpty() && !operand.getName().isEmpty() && qname.inSameSpace(operand.getQualifiedName()))
+			if (!operand.isEmpty() && !operand.getName().isEmpty() && 
+			    isReplicate || qname.inSameSpace(operand.getQualifiedName()))
 			{
 				Parameter param = new Parameter(operand.getQualifiedName().getName(), operand.getValue());
 				axiom.addTerm(param);

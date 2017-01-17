@@ -39,7 +39,7 @@ public class AxiomTermList implements ItemList<Object>
 	/** Qualified name of list */
 	protected QualifiedName qname;
     /** Axiom key */
-    protected String key;
+    protected QualifiedName key;
     /** The Axiom being wrapped */
     protected Axiom axiom;
     /** Axiom listener is notified of axiom received each iteration */
@@ -58,9 +58,9 @@ public class AxiomTermList implements ItemList<Object>
 	/**
 	 * Construct an AxiomTermList object. The initial axiom is empty until axiomListener is notified.
 	 * @param qname Qualified name of list
-	 * @param key Axiom key
+	 * @param key Qualified name of Axiom
 	 */
-	public AxiomTermList(QualifiedName qname, String key) 
+	public AxiomTermList(QualifiedName qname, QualifiedName key) 
 	{
 		this.qname = qname;
 		this.key = key;
@@ -68,7 +68,7 @@ public class AxiomTermList implements ItemList<Object>
 		axiomListener = new AxiomListener(){
 
 			@Override
-			public void onNextAxiom(Axiom nextAxiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom nextAxiom) 
 			{
 				axiom = nextAxiom;
 			}};
@@ -78,7 +78,7 @@ public class AxiomTermList implements ItemList<Object>
 	 * Returns Axiom key
 	 * @return String
 	 */
-	public String getKey()
+	public QualifiedName getKey()
 	{
 		return key;
 	}

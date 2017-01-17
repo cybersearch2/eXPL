@@ -305,7 +305,7 @@ public class CalculatorTest
             int result[] = new int[] { 1, 2, 6, 24 };
             int cycle;
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 				//System.out.println(axiom.toString());
 				BigDecimal factorial = (BigDecimal)(axiom.getTermByName("factorial").getValue());

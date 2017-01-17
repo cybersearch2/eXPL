@@ -102,7 +102,15 @@ public class Scope
             locale = Locale.getDefault(/*Locale.Category.FORMAT*/);
         querySpecMap = new HashMap<String, QuerySpec>();
         parserAssembler = new ParserAssembler(this);
-        if (hasProperties)
+        if (properties == null)
+            properties = Collections.emptyMap();
+        if (QueryProgram.GLOBAL_SCOPE.equals(name) && properties.isEmpty())
+        {
+            properties = new HashMap<String, Object>();
+            properties.put("language", locale.getLanguage());
+            properties.put("region", locale.getCountry());
+        }
+        if (!properties.isEmpty())
             addScopeList(properties);
     }
     
@@ -160,7 +168,7 @@ public class Scope
            // Append new calculator query spec to head query spec.
            QuerySpec chainQuerySpec = headQuerySpec.chain();
            // Create new keyname with empty axiom key to indicate get axiom from solution
-           KeyName calculateKeyname = new KeyName("", firstKeyname.getTemplateName().getTemplate());
+           KeyName calculateKeyname = new KeyName(firstKeyname.getTemplateName());
            chainQuerySpec.addKeyName(calculateKeyname);
            chainQuerySpec.setQueryType(QueryType.calculator);
            if (properties.size() > 0)
@@ -276,7 +284,7 @@ public class Scope
 
     /**
      * Returns axiom source for specified axiom name
-     * @param axiomKey
+     * @param axiomKey Axiom qualified name
      * @return AxiomSource object or null if it does not exist in scope
      */
     public AxiomSource findAxiomSource(QualifiedName axiomKey)
@@ -518,7 +526,9 @@ public class Scope
             {
                 Axiom localAxiom = null;
                 QualifiedName qname = new QualifiedName(scope.getName(), qualifiedAxiomName.getName());
-                AxiomSource axiomSource = parserAssembler.getAxiomSource(qname);
+                AxiomSource axiomSource = scope.getParserAssembler().getAxiomSource(qname);
+                if (axiomSource == null)
+                    axiomSource = parserAssembler.getAxiomSource(qname);
                 if (axiomSource == null)
                 {
                     axiomSource = getGlobalParserAssembler().getAxiomSource(qualifiedAxiomName);
@@ -535,7 +545,7 @@ public class Scope
                     else
                         localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
                 }
-                axiomListener.onNextAxiom(localAxiom);
+                axiomListener.onNextAxiom(qualifiedAxiomName, localAxiom);
             }
         };
         // If the local is declared inside a scope, then it's scope never changes and a LocaleListener is not required
@@ -596,8 +606,8 @@ public class Scope
         // Create scope term list 
         VariableType varType = new VariableType(OperandType.TERM);
         varType.setProperty(VariableType.AXIOM_KEY, qname);
-        AxiomTermList localList = new AxiomTermList(qname, qname.toString());
-        parserAssembler.registerAxiomTermList(localList);
+        AxiomTermList localList = new AxiomTermList(qname, qname);
+        parserAssembler.registerLocalList(localList);
         parserAssembler.getOperandMap().addItemList(qname, localList);
     }
  

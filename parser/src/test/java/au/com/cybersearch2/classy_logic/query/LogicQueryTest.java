@@ -548,7 +548,7 @@ public class LogicQueryTest
 		final int[] count = new int[1];
         AxiomListener axiomListener = new AxiomListener(){
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
 				assertThat(axiom).isEqualTo(axioms[count[0]++]);
 			}};
