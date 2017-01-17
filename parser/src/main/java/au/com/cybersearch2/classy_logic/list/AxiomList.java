@@ -35,14 +35,14 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 	/** Axiom term names */
 	protected List<String> axiomTermNameList;
     /** Axiom key */
-    protected String key;
+    protected QualifiedName key;
 
 	/**
 	 * Construct an AxiomList object
 	 * @param qname Name of axiom list
 	 * @param key Axiom key
 	 */
-	public AxiomList(QualifiedName qname, String key) 
+	public AxiomList(QualifiedName qname, QualifiedName key) 
 	{
 		super(AxiomTermList.class, new Variable(qname));
 		this.key = key;
@@ -113,9 +113,9 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 		return new AxiomListener(){
 
 			@Override
-			public void onNextAxiom(Axiom axiom) 
+			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
-				AxiomTermList axiomListOperand = new AxiomTermList(getQualifiedName(), axiom.getName());
+				AxiomTermList axiomListOperand = new AxiomTermList(getQualifiedName(), qname);
 				axiomListOperand.setAxiom(axiom);
 				assignItem(getLength(), axiomListOperand);
 			}};
@@ -125,7 +125,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 	 * Returns Axiom key
 	 * @return String
 	 */
-	public String getKey()
+	public QualifiedName getKey()
 	{
 		return key;
 	}
