@@ -302,11 +302,22 @@ public class ParserAssembler implements LocaleListener
 	/**
 	 * Add a new axiom to this ParserAssembler
 	 * @param qualifiedAxiomName Qualified axiom name
+	 * @return flag set true if new axiom declaration
 	 */
-	public void createAxiom(QualifiedName qualifiedAxiomName)
-	{
-		List<Axiom> axiomList = new ArrayList<Axiom>();
-		axiomListMap.put(qualifiedAxiomName, axiomList);
+	public boolean createAxiom(QualifiedName qualifiedAxiomName)
+	{   // Create new axiom list if one does not already exist
+		List<Axiom> axiomList = axiomListMap.get(qualifiedAxiomName);
+		if (axiomList != null)
+        {
+		    List<String> termNameList = axiomTermNameMap.get(qualifiedAxiomName);  
+		    if (termNameList != null)
+		        termNameList.clear();
+		    axiomList.clear();
+		    return false;
+		}
+        axiomList = new ArrayList<Axiom>();
+        axiomListMap.put(qualifiedAxiomName, axiomList);
+        return true;
 	}
 
 	/**

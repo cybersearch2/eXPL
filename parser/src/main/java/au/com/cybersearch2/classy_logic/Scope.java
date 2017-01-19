@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.compile.VariableType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -54,6 +52,10 @@ public class Scope
 {
     /** scope literal */
     static final protected String SCOPE = "scope";
+    /** Region locale key literal */
+    static final protected String REGION_KEY = "region";
+    /** Language locale key literal */
+    static final protected String LANGUAGE_KEY = "language";
     /** Scope name - must be unique to all scopes */
     protected String name;
     /** Map QuerySpec objects to query name */
@@ -76,28 +78,13 @@ public class Scope
      * Construct a Scope object with access to the global scope
      * @param scopeMap Scopes container
      * @param name Scope name - must be unique to all scopes
-     * @param properties Scope properties 
+     * @param properties Scope properties - may be empty
      */
     public Scope(Map<String, Scope> scopeMap, String name, Map<String, Object> properties) 
     {
         this.scopeMap = scopeMap;
         this.name = name;
-        boolean hasProperties = (properties != null) && (properties.size() > 0);
-        if (hasProperties)
-        {
-            Object language = properties.get(QueryProgram.LANGUAGE);
-            if (language != null)
-                // Uncomment following if SE7 supported
-                //try 
-                //{
-                    locale = getLocale(properties, language.toString());
-                //}
-                //catch (IllformedLocaleException e)
-                //{
-                //  throw new ExpressionException("Scope \"" + name + "\" invalid Locale settings", e);
-                //}
-        }
-        if (locale == null)
+        if (!setLocale(properties))
             // Uncomment following if SE7 supported
             locale = Locale.getDefault(/*Locale.Category.FORMAT*/);
         querySpecMap = new HashMap<String, QuerySpec>();
@@ -107,8 +94,8 @@ public class Scope
         if (QueryProgram.GLOBAL_SCOPE.equals(name) && properties.isEmpty())
         {
             properties = new HashMap<String, Object>();
-            properties.put("language", locale.getLanguage());
-            properties.put("region", locale.getCountry());
+            properties.put(LANGUAGE_KEY, locale.getLanguage());
+            properties.put(REGION_KEY, locale.getCountry());
         }
         if (!properties.isEmpty())
             addScopeList(properties);
@@ -130,6 +117,20 @@ public class Scope
     public void setLocale(Locale locale) 
     {
         this.locale = locale;
+    }
+
+    /**
+     * Update scope properties - only applicable to global scope
+     * @param properties Key=value pairs
+     */
+    public void updateProperties(Map<String, Object> properties)
+    {
+        setLocale(properties);
+        if (!properties.containsKey(LANGUAGE_KEY))
+            properties.put("language", locale.getLanguage());
+        if (!properties.containsKey(REGION_KEY))
+            properties.put("region", locale.getCountry());
+        addScopeList(properties);
     }
 
     /**
@@ -596,17 +597,22 @@ public class Scope
     private void addScopeList(Map<String, Object> properties)
     {   // Add axiom to ParserAssembler
         QualifiedName qname = new QualifiedName(name, SCOPE);
-        parserAssembler.createAxiom(qname);
+        boolean isUpdate = !parserAssembler.createAxiom(qname);
         for (String termName: properties.keySet())
         {
             parserAssembler.addAxiom(qname, new Parameter(termName, properties.get(termName)));
             parserAssembler.addAxiomTermName(qname, termName);
         }
-        parserAssembler.saveAxiom(qname);
-        // Create scope term list 
-        VariableType varType = new VariableType(OperandType.TERM);
-        varType.setProperty(VariableType.AXIOM_KEY, qname);
-        AxiomTermList localList = new AxiomTermList(qname, qname);
+        Axiom localAxiom = parserAssembler.saveAxiom(qname);
+        AxiomTermList localList = null;
+        if (isUpdate)
+        {
+            localList = (AxiomTermList) parserAssembler.getOperandMap().getItemList(qname);
+            localList.getAxiomListener().onNextAxiom(qname, localAxiom);
+            return;
+        }
+        else
+            localList = new AxiomTermList(qname, qname);
         parserAssembler.registerLocalList(localList);
         parserAssembler.getOperandMap().addItemList(qname, localList);
     }
@@ -643,4 +649,26 @@ public class Scope
         }
         return null;
     }
+    
+    private boolean setLocale(Map<String,Object> properties)
+    {
+        boolean hasProperties = (properties != null) && !properties.isEmpty();
+        if (hasProperties)
+        {
+            Object language = properties.get(QueryProgram.LANGUAGE);
+            if (language != null)
+                // Uncomment following if SE7 supported
+                //try 
+                //{
+                    locale = getLocale(properties, language.toString());
+                    return true;
+                //}
+                //catch (IllformedLocaleException e)
+                //{
+                //  throw new ExpressionException("Scope \"" + name + "\" invalid Locale settings", e);
+                //}
+        }
+        return false;
+    }
+
 }

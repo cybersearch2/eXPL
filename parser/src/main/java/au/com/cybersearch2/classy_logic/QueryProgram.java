@@ -164,7 +164,12 @@ public class QueryProgram extends QueryLauncher
     public Scope scopeInstance(String scopeName, Map<String, Object> properties)
     {
         if (scopeName.equals(GLOBAL_SCOPE))
-            throw new ExpressionException("Scope name \"" + GLOBAL_SCOPE + "\" is reserved");
+        {
+            Scope globalScope = scopes.get(GLOBAL_SCOPE);
+            if ((properties != null) && !properties.isEmpty())
+                 globalScope.updateProperties(properties);
+            return globalScope;
+        }
         if (scopes.get(scopeName) != null)
             throw new ExpressionException("Scope named \"" + scopeName + "\" already exists");
        Scope newScope = new Scope(scopes, scopeName, properties);

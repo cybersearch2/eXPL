@@ -169,9 +169,17 @@ public class ChainQueryExecuter
 		}
 		if (axiomListenerMap != null)
 		{
+		    List<AxiomListener> axiomListenerList = null;
 	        if (axiomListenerMap.containsKey(qname))
+	        	axiomListenerList = axiomListenerMap.get(qname);
+	        else if (template.isReplicate()) 
 	        {
-	        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
+	            qname.clearScope();
+	            if (axiomListenerMap.containsKey(qname))
+	                axiomListenerList = axiomListenerMap.get(qname);
+	        }
+	        if (axiomListenerList != null)
+	        {
         		for (AxiomListener axiomListener: axiomListenerList)
         			solution.setAxiomListener(qname, axiomListener);
         		axiomListenerMap.remove(qname);

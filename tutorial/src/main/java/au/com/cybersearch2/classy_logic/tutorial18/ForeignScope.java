@@ -104,7 +104,10 @@ public class ForeignScope
     /**
      * Run tutorial
      * The expected result:<br/>
-     * format_total(total_text = Gesamtkosten + gst: 13.580,24 EUR)<br/>
+        format_total(country = DE, text =  Gesamtkosten Steuer: 14.567,89 EUR)<br/>
+        format_total(country = FR, text =  le total impôt: 14 197,52 EUR)<br/>
+        format_total(country = BE, text =  le total impôt: 13.703,69 EUR)<br/>
+        format_total(country = BE, text =  totale kosten belasting: 13.703,69 EUR)<br/>
      * @param args
      */
 	public static void main(String[] args)
