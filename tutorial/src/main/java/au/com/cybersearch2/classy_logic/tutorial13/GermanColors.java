@@ -37,13 +37,13 @@ public class GermanColors
             "axiom lexicon (aqua, black, blue, white);\n" +
             "axiom german.lexicon (aqua, black, blue, white)\n" +
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
-            "local colors(lexicon);\n" +
             "choice swatch (name, red, green, blue)\n" +
             "{colors[aqua], 0, 255, 255}\n" +
             "{colors[black], 0, 0, 0}\n" +
             "{colors[blue], 0, 0, 255}\n" +
             "{colors[white], 255, 255, 255};\n" +
             "axiom shade (name) : parameter;\n" +
+            "local colors(lexicon);\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
             "  query color_query (shade : swatch);\n" +

@@ -39,14 +39,14 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 public class ForeignColors 
 {
     static final String FOREIGN_LEXICON =
+            "list<term> german_list(german.colors : resource);\n" +
+            "list<term> french_list(french.colors : resource);\n" +
             "scope french (language=\"fr\", region=\"FR\"){}\n" +
             "scope german (language=\"de\", region=\"DE\"){}\n" +
             "axiom french.colors (aqua, black, blue, white)\n" +
             "  {\"bleu vert\", \"noir\", \"bleu\", \"blanc\"};\n" +
             "axiom german.colors (aqua, black, blue, white)\n" +
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
-            "list<term> german_list(german.colors : resource);\n" +
-            "list<term> french_list(french.colors : resource);\n" +
             "query color_query (german.colors:german.colors) >> (french.colors:french.colors);\n";
 
     static final String FOREIGN_COLORS =

@@ -38,6 +38,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.compile.ParserTask;
 import au.com.cybersearch2.classy_logic.compile.VariableType;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
@@ -53,6 +54,7 @@ import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
+import au.com.cybersearch2.classy_logic.list.ItemListVariableOperand;
 import au.com.cybersearch2.classy_logic.list.ListLength;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
@@ -63,6 +65,7 @@ import au.com.cybersearch2.classy_logic.terms.NumberTerm;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.ListVariableFactory;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -105,7 +108,7 @@ public class QueryParser
     QueryProgram queryProgram = new QueryProgram();
     input(queryProgram);
     return queryProgram;
-   }
+  }
 
   /**
    * Include eXPL script from named resource
@@ -115,17 +118,17 @@ public class QueryParser
    */
   public void includeResource(String resourceName, QueryProgram queryProgram) throws ParseException
   {
-     if (resourceName.length() < 3)
-        throw new ParseException("Include resourceName \"\" is invalid");
-     ParserResources parserResources = new ParserResources(queryProgram);
-     try
-     {
-         parserResources.includeResource(resourceName.substring(1, resourceName.length() - 1));
-     }
-     catch (IOException e)
-     {
-         throw new ParseException(e.getMessage());
-     }
+    if (resourceName.length() < 3)
+      throw new ParseException("Include resourceName \"\" is invalid");
+    ParserResources parserResources = new ParserResources(queryProgram);
+    try
+    {
+      parserResources.includeResource(resourceName.substring(1, resourceName.length() - 1));
+    }
+    catch (IOException e)
+    {
+      throw new ParseException(e.getMessage());
+    }
   } 
  
   /**
@@ -137,8 +140,62 @@ public class QueryParser
   {
       return stringLiteral.image.substring(1, stringLiteral.image.length() - 1);
   } 
-}
 
+  protected void listInstance(ParserAssembler parserAssembler, Runnable pending)
+  {
+    ParserTask parserTask = parserAssembler.addPending(pending);
+    parserTask.setPriority(1);
+  }
+
+  protected Operand newListVariable(String name, 
+                                    final ParserAssembler parserAssembler, 
+                                    Operand indexExpression1, 
+                                    Operand indexExpression2)
+  {
+    final ListVariableFactory listVariableFactory = new ListVariableFactory(){
+
+        @Override
+        public Operand operandInstance(String listName, Operand indexExpression,
+                Operand expression2)
+        {
+            return parserAssembler.newListVariableInstance(listName, indexExpression, expression2);
+        }};
+    final ItemListVariableOperand operand = new ItemListVariableOperand(name, listVariableFactory, indexExpression1, indexExpression2);
+    Runnable pending = new Runnable() {
+          @Override
+         public void run()
+         {
+             operand.initialize();
+         }};
+    parserAssembler.addPending(pending);
+    return operand;
+  }
+  
+  protected Operand listItemInstance(String name, 
+          final ParserAssembler parserAssembler, 
+          Operand indexExpression, 
+          Operand assignExpression)
+  {
+    final ListVariableFactory listVariableFactory = new ListVariableFactory(){
+
+          @Override
+          public Operand operandInstance(String listName, Operand indexExpression,
+                  Operand expression2)
+          {
+              return parserAssembler.listItemInstance(listName, indexExpression, expression2);
+          }};
+    final ItemListVariableOperand operand = new ItemListVariableOperand(name, listVariableFactory, indexExpression, assignExpression);
+    Runnable pending = new Runnable() {
+            @Override
+           public void run()
+           {
+               operand.initialize();
+           }};
+    ParserTask parserTask = parserAssembler.addPending(pending);
+    parserTask.setPriority(1);
+    return operand;
+  }
+}
 PARSER_END(QueryParser)
 
 SKIP :
@@ -290,6 +347,9 @@ void input(QueryProgram queryProgram) :
   ( ResourceDeclaration(queryProgram) ";" )*
   ( Statement(queryProgram, queryProgram.getGlobalScope()) | QueryChain(queryProgram.getGlobalScope()) | ScopeDeclaration(queryProgram) )+
   <EOF>
+  {
+    queryProgram.runPending();
+  }
 }
 
 void ScopeDeclaration(QueryProgram queryProgram) :
@@ -424,8 +484,12 @@ void ListDeclaration(ParserAssembler parserAssembler) :
     if (qualifiedAxiomName != null)
         varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
     ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
-    parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
-  }
+    Runnable pending = varType.getPending();
+    if (pending != null)
+        listInstance(parserAssembler, pending);
+    else
+        parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
+   }
 }
 
 VariableType Type(OperandMap operandMap) :
@@ -564,7 +628,7 @@ Operand VariableDeclaration(ParserAssembler parserAssembler) :
   {
      String name = nameToken.image;
      if (index !=null)
-         return parserAssembler.setListVariable(name, index, expression);
+         return parserAssembler.listItemInstance(name, index, expression);
      if (varType == null)
          varType = new VariableType(OperandType.UNKNOWN);
      boolean isLiteral = (expression != null) &&
@@ -651,7 +715,7 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
      if (expression != null)
          varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
      if (index !=null)
-         var = parserAssembler.setListVariable(name, index, null);
+         var = listItemInstance(name, parserAssembler, index, null);
      else if (regexOp != null)
          var = new RegExOperand(qname, regexOp, 0, group);
      else if (scToken != null) 
@@ -1489,7 +1553,7 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
   |
   <SCOPE> param1=IndexExpression(parserAssembler)
   {
-    return parserAssembler.setListVariable("scope", param1, null);
+    return listItemInstance("scope", parserAssembler, param1, null);
   }
   |
   "(" ( param1 = Expression(parserAssembler) ) ")" 
@@ -1540,7 +1604,7 @@ Operand NamedExpression(String name, ParserAssembler parserAssembler) :
 {
   param1=IndexExpression(parserAssembler) ( LOOKAHEAD(2) param2=IndexExpression(parserAssembler) )?
   {
-    return parserAssembler.newListVariableInstance(name, param1, param2);
+    return newListVariable(name, parserAssembler, param1, param2);
   }
   |
   "(" ( operandParamList = ArgumentList(parserAssembler, true) )? ")"

@@ -75,8 +75,8 @@ public class Scope
     }
     
     /**
-     * Construct a Scope object with access to the global scope
-     * @param scopeMap Scopes container
+     * Construct a Scope object
+     * @param scopeMap Scopes container for access to all scopes
      * @param name Scope name - must be unique to all scopes
      * @param properties Scope properties - may be empty
      */
@@ -92,7 +92,7 @@ public class Scope
         if (properties == null)
             properties = Collections.emptyMap();
         if (QueryProgram.GLOBAL_SCOPE.equals(name) && properties.isEmpty())
-        {
+        {   // Global scope is assigned the default locale if not set by properties
             properties = new HashMap<String, Object>();
             properties.put(LANGUAGE_KEY, locale.getLanguage());
             properties.put(REGION_KEY, locale.getCountry());
@@ -649,7 +649,12 @@ public class Scope
         }
         return null;
     }
-    
+
+    /**
+     * Set scope locale from properties
+     * @param properties
+     * @return flag set true if properties are valid
+     */
     private boolean setLocale(Map<String,Object> properties)
     {
         boolean hasProperties = (properties != null) && !properties.isEmpty();

@@ -376,7 +376,7 @@ public class Template extends Structure
 			if (!operand.isEmpty() && !operand.getName().isEmpty() && 
 			    isReplicate || qname.inSameSpace(operand.getQualifiedName()))
 			{
-				Parameter param = new Parameter(operand.getQualifiedName().getName(), operand.getValue());
+				Parameter param = new Parameter(operand.getName(), operand.getValue());
 				axiom.addTerm(param);
 			}
 		}

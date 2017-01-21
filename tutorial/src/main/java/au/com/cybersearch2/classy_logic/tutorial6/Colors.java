@@ -29,12 +29,12 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class Colors {
 
     static final String AXIOM_COLORS =
+            "list<term> color(swatch);\n" +
     		"axiom swatch (name, red, green, blue)\n" +
     		"{\"aqua\", 0, 255, 255}\n" +
     		"{\"black\", 0, 0, 0}\n" +
     		"{\"blue\", 0, 0, 255};\n" +
-            "list<term> color(swatch);\n" +
-    		"template shade(name, color[red], color[green], color[blue]);\n" +
+     		"template shade(name, color[red], color[green], color[blue]);\n" +
     		"query colors(swatch : shade);"
     		;
 

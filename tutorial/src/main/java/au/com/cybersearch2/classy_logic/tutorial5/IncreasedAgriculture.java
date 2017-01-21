@@ -37,13 +37,13 @@ public class IncreasedAgriculture
 	static final String AGRICULTURAL_LAND = 
 		"include \"agriculture-land.xpl\";" +
 		"include \"surface-land.xpl\";" +
+        "list nation_list(surface_area_increase);\n" +
 	    "template agri_10y (country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);" +
 		"template surface_area_increase (\n" +
 	    "  country? country == agri_10y.country,\n" +
 		"  double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100\n" +
 	    "    * surface_area_Km2);" +
 	    "// Specify term list which writes to persistence resource 'agriculture'\n" +
-		"list nation_list(surface_area_increase);\n" +
 	    "query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);"; 
 
    public IncreasedAgriculture()

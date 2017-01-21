@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.ProviderManager;
@@ -144,7 +145,8 @@ public class ParserAssembler implements LocaleListener
 	protected ProviderManager providerManager;
 	/** Optional FunctionManager for library operands */
 	protected FunctionManager functionManager;
-
+	/** Tasks delayed until parsing complete */
+	protected ArrayList<ParserTask> pendingList;
 
 	/** Axiom provider connects to persistence back end */
 	ExternalAxiomSource externalAxiomSource;
@@ -536,18 +538,28 @@ public class ParserAssembler implements LocaleListener
 	}
 
 	/**
-	 * Register axiom term list by adding it's axiom listener to this ParserAssembler object
-	 * @param axiomTermList The term list
+	 * Store axiom term list in container using it's qualified name as the key
+	 * @param axiomTermList Axiom term list object
 	 */
 	public void registerAxiomTermList(AxiomTermList axiomTermList)
 	{
-		AxiomListener axiomListener = axiomTermList.getAxiomListener();
-		QualifiedName qualifiedAxiomName = axiomTermList.getKey();
-		List<AxiomListener> axiomListenerList = getAxiomListenerList(qualifiedAxiomName);
-		axiomListenerList.add(axiomListener);
-		axiomTermList.setAxiomTermNameList(axiomTermNameMap.get(qualifiedAxiomName));
+        operandMap.addItemList(axiomTermList.getQualifiedName(), axiomTermList);
+		//axiomTermList.setAxiomTermNameList(axiomTermNameMap.get(axiomTermList.getKey()));
 	}
 
+    /**
+     * Bind listener and term names for axiom term list. This method should be invoked in
+     * a ParserTask post compilation
+     * @param axiomTermList The term list
+     */
+	public void bindAxiomTermList(AxiomTermList axiomTermList)
+	{
+        axiomTermList.setAxiomTermNameList(axiomTermNameMap.get(axiomTermList.getKey()));
+        List<AxiomListener> axiomListenerList = getAxiomListenerList(axiomTermList.getKey());
+        AxiomListener axiomListener = axiomTermList.getAxiomListener();
+        axiomListenerList.add(axiomListener);
+	}
+	
 	/**
 	 * Register axiom term list for local axiom
 	 * @param axiomTermList The term list
@@ -590,8 +602,8 @@ public class ParserAssembler implements LocaleListener
 	
 	/**
 	 * Returns list of axiom listeners for specified key
-	 * @param qname
-	 * @return List containing AxiomListener objects 
+	 * @param qname Qualified name key
+	 * @return List containing AxiomListener objects or null if list not found
 	 */
 	protected List<AxiomListener> getAxiomListenerList(QualifiedName qname)
 	{
@@ -603,12 +615,22 @@ public class ParserAssembler implements LocaleListener
 		}
 		return axiomListenerList;
 	}
-	
+
+    /**
+     * Store axiom list in container using it's qualified name as the key
+     * @param axiomList The axiom list
+     */
+    public void registerAxiomList(AxiomList axiomList) 
+    {
+        operandMap.addItemList(axiomList.getQualifiedName(), axiomList);
+    }
+    
 	/**
-	 * Register axiom list by adding it's axiom listener to this ParserAssembler object
+     * Bind listener and term names for axiom list. This method should be invoked in
+     * a ParserTask post compilation
 	 * @param axiomList The axiom list
 	 */
-	public void registerAxiomList(AxiomList axiomList) 
+	public void bindAxiomList(AxiomList axiomList) 
 	{
 		AxiomListener axiomListener = axiomList.getAxiomListener();
 		QualifiedName axiomKey = axiomList.getKey();
@@ -642,7 +664,7 @@ public class ParserAssembler implements LocaleListener
 
 	/**
 	 * Returns qualified name of axiom source specified by qname
-	 * @param qname
+	 * @param qname Qualified name
 	 * @return QualifiedName object or null if axiom source not found
 	 */
 	public QualifiedName findQualifiedAxiomName(QualifiedName qname)
@@ -993,7 +1015,7 @@ public class ParserAssembler implements LocaleListener
      * @param expression Optional expression operand
      * @return Operand object
      */
-    public Operand setListVariable(String listName, Operand index, Operand expression) 
+    public Operand listItemInstance(String listName, Operand index, Operand expression) 
     {
         ItemList<?> itemList = findItemList(listName);
         if (itemList == null)
@@ -1048,5 +1070,41 @@ public class ParserAssembler implements LocaleListener
     public QualifiedName getResourceName(QualifiedName qname)
     {
         return axiomResourceMap.get(qname);
+    }
+ 
+    /**
+     * Add ParserTask to pending list
+     * @param pending ParserTask object
+     */
+    public ParserTask addPending()
+    {
+        ParserTask parserTask = new ParserTask(scope.getName(), operandMap.getQualifiedContextname());
+        if (pendingList == null)
+            pendingList = new ArrayList<ParserTask>();
+        pendingList.add(parserTask);
+        return parserTask;
+    }
+
+    /**
+     * Add Runnable to pending list
+     * @param pending Runnable to execute parser task
+     */
+    public ParserTask addPending(Runnable pending)
+    {
+        ParserTask parserTask = addPending();
+        parserTask.setPending(pending);
+        return parserTask;
+    }
+
+    /**
+     * Collect pending parser tasks into priority queue
+     */
+    public void getPending(PriorityQueue<ParserTask> priorityQueue)
+    {
+        if (pendingList != null)
+        {
+            priorityQueue.addAll(pendingList);
+            pendingList.clear();
+        }
     }
 }

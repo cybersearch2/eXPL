@@ -20,8 +20,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 
+import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserTask;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -88,22 +91,36 @@ public class QueryProgram extends QueryLauncher
 	/** Resource path base */
 	protected File resourceBase;
 
+	/**
+	 * Default QueryProgram constructor
+	 */
 	public QueryProgram() 
 	{
 		this(null, null);
 	}
+	
+	/**
+	 * Construct QueryProgram object for resource binding
+	 * @param providerManager Resource provider aggregator
+	 */
 	public QueryProgram(ProviderManager providerManager) 
 	{
 		this(providerManager, null);
 	}
+	
+    /**
+     * Construct QueryProgram object with function support
+     * @param FunctionManager function aggregator
+     */
 	public QueryProgram(FunctionManager functionManager) 
 	{
 		this(null, functionManager);
 	}
 	
 	/**
-	 * Construct a QueryProgram object. It is initially empty and populated by QueryParser
-	 * @see au.com.cybersearch2.classy_logic.parser.QueryParser
+     * Construct QueryProgram object for resource binding and function support
+     * @param providerManager Resource provider aggregator
+     * @param FunctionManager function aggregator
 	 */
 	public QueryProgram(ProviderManager providerManager, FunctionManager functionManager) 
 	{
@@ -114,7 +131,9 @@ public class QueryProgram extends QueryLauncher
 			resourceBase = providerManager.getResourceBase();
 		else
 			resourceBase = new File(".");
+		// Scope container provides intra-scope access
 		scopes = new HashMap<String, Scope>();
+		// Create global scope
 		Scope globalScope = new Scope(scopes, GLOBAL_SCOPE, Scope.EMPTY_PROPERTIES);
 		injectScope(globalScope);
 		scopes.put(GLOBAL_SCOPE, globalScope);
@@ -122,24 +141,37 @@ public class QueryProgram extends QueryLauncher
 
     /**
      * Construct a QueryProgram object compiled to specified script. 
-     * @see au.com.cybersearch2.classy_logic.parser.QueryParser
+     * @param script eXPL program 
      */
     public QueryProgram(String script) 
     {
         this(null, null);
         parseScript(script);
     }
-    
+
+    /**
+     * Returns File set to resource path
+     * @return File object
+     */
     public File getResourceBase() 
     {
 		return resourceBase;
 	}
-    
+ 
+    /**
+     * Set  resource path File
+     * @param resourceBase File object set to resource path
+     */
 	public void setResourceBase(File resourceBase) 
 	{
 		this.resourceBase = resourceBase;
 	}
-	
+
+	/**
+	 * Compile eXPL program
+	 * @param script eXPL program
+	 * @throws ExpressionException if parse error encountered
+	 */
 	public void parseScript(String script) 
     {
 	    InputStream stream = new ByteArrayInputStream(script.getBytes());
@@ -155,7 +187,7 @@ public class QueryProgram extends QueryLauncher
     }
 
     /**
-     * Construct a new Scope instance
+     * Returns new Scope instance
      * @param scopeName
      * @param properties Optional properties eg. Locale
      * @return Scope object
@@ -164,7 +196,7 @@ public class QueryProgram extends QueryLauncher
     public Scope scopeInstance(String scopeName, Map<String, Object> properties)
     {
         if (scopeName.equals(GLOBAL_SCOPE))
-        {
+        {   // Global properties are updateable
             Scope globalScope = scopes.get(GLOBAL_SCOPE);
             if ((properties != null) && !properties.isEmpty())
                  globalScope.updateProperties(properties);
@@ -172,21 +204,12 @@ public class QueryProgram extends QueryLauncher
         }
         if (scopes.get(scopeName) != null)
             throw new ExpressionException("Scope named \"" + scopeName + "\" already exists");
-       Scope newScope = new Scope(scopes, scopeName, properties);
-       scopes.put(scopeName, newScope);
-       injectScope(newScope);
-       return newScope;
+        Scope newScope = new Scope(scopes, scopeName, properties);
+        scopes.put(scopeName, newScope);
+        injectScope(newScope);
+        return newScope;
     }
 
-    private void injectScope(Scope scope)
-    {
-    	ParserAssembler parserAssembler = scope.getParserAssembler();
-        if (providerManager != null)
-        	parserAssembler.setProviderManager(providerManager);
-        if (functionManager != null)
-        	parserAssembler.setFunctionManager(functionManager);
-    }
-    
 	/**
 	 * Returns global scope
 	 * @return Scope
@@ -311,6 +334,39 @@ public class QueryProgram extends QueryLauncher
         return axiomProvider;
     }
 
+    /**
+     * Run all parser tasks, which completes compilation after entire program has been input
+     */
+    public void runPending()
+    {   
+        PriorityQueue<ParserTask> priorityQueue = new PriorityQueue<ParserTask>();
+        for (Scope scope: scopes.values())
+            scope.getParserAssembler().getPending(priorityQueue);
+        
+        ParserTask parserTask = priorityQueue.poll();
+        while (parserTask !=null)
+        {
+            Scope scope = scopes.get(parserTask.getScopeName());
+            OperandMap operandMap = scope.getParserAssembler().getOperandMap();
+            QualifiedName savedQName = operandMap.getQualifiedContextname();
+            operandMap.setQualifiedContextname(parserTask.getQualifiedContextname());
+            parserTask.run();
+            operandMap.setQualifiedContextname(savedQName);
+            parserTask = priorityQueue.poll();
+        }
+    }
 
-
+    /**
+     * Set scope resource binding and function support aggregators
+     * @param scope Scope object to set
+     */
+    private void injectScope(Scope scope)
+    {
+        ParserAssembler parserAssembler = scope.getParserAssembler();
+        if (providerManager != null)
+            parserAssembler.setProviderManager(providerManager);
+        if (functionManager != null)
+            parserAssembler.setFunctionManager(functionManager);
+    }
+    
 }

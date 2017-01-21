@@ -185,6 +185,7 @@ public class ScopeTest
 		QualifiedName qname = QualifiedName.parseName(AXIOM_KEY + 1);
 		when(axiomTermList.getQualifiedName()).thenReturn(qname);
 		scope.getParserAssembler().registerAxiomTermList(axiomTermList);
+		scope.getParserAssembler().bindAxiomTermList(axiomTermList);
 
 		assertThat(scope.getAxiomListenerMap().get(Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener);
 		assertThat(scope.getAxiomListenerMap().get(GLOBAL_Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener2);
@@ -206,6 +207,7 @@ public class ScopeTest
 		when(axiomTermList.getKey()).thenReturn(GLOBAL_Q_AXIOM_NAME);
         when(axiomTermList.getQualifiedName()).thenReturn(qname);
 		scope.getParserAssembler().registerAxiomTermList(axiomTermList);
+        scope.getParserAssembler().bindAxiomTermList(axiomTermList);
 		assertThat(scope.getAxiomListenerMap().get(GLOBAL_Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener2);
 	}
 

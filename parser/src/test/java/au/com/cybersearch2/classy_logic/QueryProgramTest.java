@@ -111,6 +111,7 @@ public class QueryProgramTest
 		{
 			assertThat(e.getMessage()).isEqualTo("Scope named \"" + SCOPE_NAME + "\" already exists");
 		}
+		/* TODO - Test for global scope properties
         try
         {
             Map<String, Object> properties2 = new HashMap<String, Object>();
@@ -121,6 +122,7 @@ public class QueryProgramTest
         {
             assertThat(e.getMessage()).isEqualTo("Scope name \"" + QueryProgram.GLOBAL_SCOPE + "\" is reserved");
         }
+        */
 	}
 	
 	@Test
