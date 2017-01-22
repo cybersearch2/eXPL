@@ -23,26 +23,41 @@ import au.com.cybersearch2.classy_logic.ScopeContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
+import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryLauncher;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
+import au.com.cybersearch2.classy_logic.query.QueryType;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * QueryEvaluator
  * Adapter to run a query as a function call and return result as an AxiomTermList.
+ * Construction is completed in a parser task to allow a choice to be called before it is declared.
  * @author Andrew Bowley
  * 1 Aug 2015
  */
-public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<AxiomTermList>
+public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<AxiomTermList>, ParserRunner
 {
+    /**
+     * Library defined by name and function scope
+     */
+    private class Library
+    {
+        public String name;
+        public Scope functionScope;
+    }
+    
+    /** Qualified query name - can be qualified by the name of a scope */
+    protected QualifiedName qualifiedQueryName;
     /** Query parameters */
     protected QueryParams queryParams;
     /** Caller's scope */
@@ -56,16 +71,39 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
 
     /**
      * Construct a QueryEvaluator object for a query specified by query parameters
-     * @param queryParams  Query parameters
-     * @param scope The caller's scope
+     * @param qualifiedQueryName Qualified query name - can be qualified by the name of a scope
      * @param innerTemplate Optional inner Template to receive query results
      */
-    public QueryEvaluator(QueryParams queryParams, Scope scope, Template innerTemplate)
+    public QueryEvaluator(QualifiedName qualifiedQueryName, Template innerTemplate)
     {
-        this.queryParams = queryParams;
-        this.callerScope = scope;
-        this.isCallInScope = queryParams.getScope() == scope;
+        this.qualifiedQueryName = qualifiedQueryName;
         this.innerTemplate = innerTemplate;
+    }
+
+    /**
+     * @see au.com.cybersearch2.classy_logic.interfaces.ParserRunner#run(au.com.cybersearch2.classy_logic.compile.ParserAssembler)
+     */
+    @Override
+    public void run(ParserAssembler parserAssembler)
+    {
+        callerScope = parserAssembler.getScope();
+        Library library = getLibrary(parserAssembler);
+        final String queryName = qualifiedQueryName.getName();
+        String callName = library.name + "." + queryName;
+        if (library.functionScope == null)
+            throw new ExpressionException("Scope \"" + queryName + "\" not found");
+        QuerySpec querySpec = library.functionScope.getQuerySpec(queryName);
+        if (querySpec == null)
+        {
+            QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library.name, queryName);
+            if ((library.functionScope == callerScope) && (parserAssembler.getTemplate(qualifiedTemplateName) == null))
+                throw new ExpressionException("Query \"" + queryName + "\" not found in scope \"" + library + "\"");
+            querySpec = new QuerySpec(callName);
+            querySpec.addKeyName(new KeyName("", queryName));
+            querySpec.setQueryType(QueryType.calculator);
+        }
+        queryParams = new QueryParams(library.functionScope, querySpec);
+        isCallInScope = queryParams.getScope() == callerScope;
         OperandMap callerOperandMap = callerScope.getParserAssembler().getOperandMap();
         if (innerTemplate != null)
         {   // Get term belonging to inner template 
@@ -79,7 +117,17 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             // Create empty AxiomTermList to return as query result. 
             innerTerm = new Parameter(qname.getName(), new AxiomTermList(qname, firstKeyname.getTemplateName()));
         }
-            
+    }
+
+    /**
+     * Returns name of library
+     * @param parserAssembler Parser assembler
+     * @return String
+     */
+    public String getLibrayName(ParserAssembler parserAssembler)
+    {
+        Library library = getLibrary(parserAssembler);
+        return library.name;
     }
     
     /**
@@ -130,6 +178,27 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         return (AxiomTermList) innerTerm.getValue();
     }
 
+    /**
+     * Returns library and function scope
+     * @param parserAssembler
+     * @return
+     */
+    protected Library getLibrary(ParserAssembler parserAssembler)
+    {
+        Library library = new Library();
+        Scope scope = parserAssembler.getScope();
+        library.name = qualifiedQueryName.getScope();
+        if (library.name.isEmpty())
+        {
+            // Inner call
+            library.functionScope = scope;
+            library.name = scope.getAlias();
+        }
+        else
+            library.functionScope = scope.findScope(library.name);
+        return library;
+    }
+    
     /**
      * Set query parameters object with query arguments packed into an axiom
      * @param argumentList List of terms holding argument values
@@ -211,4 +280,5 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         innerTerm.assign(innerTermValue);
         return axiomTermList;
     }
+
 }

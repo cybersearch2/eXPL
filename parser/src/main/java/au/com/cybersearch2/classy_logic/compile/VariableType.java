@@ -55,8 +55,6 @@ public class VariableType
 	protected OperandType operandType;
 	/** Type qualifier properties eg. Currency country */
 	protected Map<String, Object> properties;
-	/** Task to run when compilation is complete */
-	protected Runnable pending;
 	
 	/** Key value for axiom name property */
 	public final static String AXIOM_KEY = "AxiomKey";
@@ -200,15 +198,6 @@ public class VariableType
 	    return operand;
     }
 
-    /**
-     * Returns pending parser task
-     * @return Runnable object or null if no task pending
-     */
-    public Runnable getPending()
-    {
-        return pending;
-    }
-    
 	/**
 	 * Returns ItemList object for this type in current scope. 
 	 * NOTE: AxiomKey proptery must be set for Term, Axiom or Local type
@@ -263,12 +252,6 @@ public class VariableType
         case TERM:
             final AxiomTermList itemList = new AxiomTermList(qname, axiomKey);
             parserAssembler.registerAxiomTermList(itemList);
-            pending = new Runnable(){
-                @Override
-                public void run()
-                {
-                    parserAssembler.bindAxiomTermList(itemList);
-                }};
             return itemList;
         case LOCAL:
         	AxiomTermList localList = new AxiomTermList(qname, axiomKey);
@@ -277,12 +260,6 @@ public class VariableType
         case AXIOM:
             final AxiomList axiomList = new AxiomList(qname, axiomKey);
             parserAssembler.registerAxiomList(axiomList);
-            pending = new Runnable(){
-                @Override
-                public void run()
-                {
-                    parserAssembler.bindAxiomList(axiomList);
-                }};
             return axiomList;
         case UNKNOWN:   
         default:

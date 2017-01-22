@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.tutorial12;
 import java.io.File;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;

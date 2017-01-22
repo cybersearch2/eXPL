@@ -13,12 +13,10 @@ import java.util.PriorityQueue;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.ProviderManager;
-import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
-import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -31,18 +29,14 @@ import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.pattern.KeyName;
-import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.query.AxiomListSource;
-import au.com.cybersearch2.classy_logic.query.QuerySpec;
-import au.com.cybersearch2.classy_logic.query.QueryType;
-import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
-import au.com.cybersearch2.classy_logic.list.AxiomListSpec;
-import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.query.AxiomListSource;
+import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
 
 
 /**
@@ -538,13 +532,19 @@ public class ParserAssembler implements LocaleListener
 	}
 
 	/**
-	 * Store axiom term list in container using it's qualified name as the key
+     * Queue task to bind list to it's source which may not yet be declared
 	 * @param axiomTermList Axiom term list object
 	 */
-	public void registerAxiomTermList(AxiomTermList axiomTermList)
+	public void registerAxiomTermList(final AxiomTermList axiomTermList)
 	{
-        operandMap.addItemList(axiomTermList.getQualifiedName(), axiomTermList);
-		//axiomTermList.setAxiomTermNameList(axiomTermNameMap.get(axiomTermList.getKey()));
+        ParserTask parserTask = addPending(new ParserRunner(){
+            @Override
+            public void run(ParserAssembler parserAssember)
+            {
+                parserAssember.bindAxiomTermList(axiomTermList);
+            }});
+        // Boost priority so list is processed before any variables which reference it
+        parserTask.setPriority(2);
 	}
 
     /**
@@ -560,6 +560,22 @@ public class ParserAssembler implements LocaleListener
         axiomListenerList.add(axiomListener);
 	}
 	
+    /**
+     * Queue task to bind list to it's source which may not yet be declared
+     * @param axiomList The axiom list
+     */
+    public void registerAxiomList(final AxiomList axiomList) 
+    {
+        ParserTask parserTask = addPending(new ParserRunner(){
+            @Override
+            public void run(ParserAssembler parserAssember)
+            {
+                parserAssember.bindAxiomList(axiomList);
+            }});
+        // Boost priority so list is processed before any variables which reference it
+        parserTask.setPriority(2);
+    }
+    
 	/**
 	 * Register axiom term list for local axiom
 	 * @param axiomTermList The term list
@@ -600,31 +616,6 @@ public class ParserAssembler implements LocaleListener
           scopeAxiomMap.clear();
 	}
 	
-	/**
-	 * Returns list of axiom listeners for specified key
-	 * @param qname Qualified name key
-	 * @return List containing AxiomListener objects or null if list not found
-	 */
-	protected List<AxiomListener> getAxiomListenerList(QualifiedName qname)
-	{
-		List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
-		if (axiomListenerList == null)
-		{
-			axiomListenerList = new ArrayList<AxiomListener>();
-			axiomListenerMap.put(qname, axiomListenerList);
-		}
-		return axiomListenerList;
-	}
-
-    /**
-     * Store axiom list in container using it's qualified name as the key
-     * @param axiomList The axiom list
-     */
-    public void registerAxiomList(AxiomList axiomList) 
-    {
-        operandMap.addItemList(axiomList.getQualifiedName(), axiomList);
-    }
-    
 	/**
      * Bind listener and term names for axiom list. This method should be invoked in
      * a ParserTask post compilation
@@ -805,7 +796,7 @@ public class ParserAssembler implements LocaleListener
 	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
 	    if (callEvaluator == null)
 	        throw new ExpressionException("Function \"" + name + "\" not supported");
-        return new CallOperand(QualifiedName.parseName(callName, qname), callEvaluator, operandParamList);
+        return new ParameterOperand(QualifiedName.parseName(callName, qname), operandParamList, callEvaluator);
 	}
 
 	/**
@@ -818,37 +809,15 @@ public class ParserAssembler implements LocaleListener
 	 */
     public Operand getQueryOperand(QualifiedName qualifiedQueryName, List<OperandParam> operandParamList, Template innerTemplate)
     {
-        Scope functionScope = null;
-        String library = qualifiedQueryName.getScope();
-        final String queryName = qualifiedQueryName.getName();
-        if (library.isEmpty())
-        {
-            // Inner call
-            functionScope = scope;
-            library = scope.getAlias();
-        }
-        else
-            functionScope = scope.findScope(library);
-        String callName = library + "." + queryName;
-        if (functionScope == null)
-            throw new ExpressionException("Scope \"" + queryName + "\" not found");
-        QuerySpec querySpec = functionScope.getQuerySpec(queryName);
-        if (querySpec == null)
-        {
-            QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library, queryName);
-            if ((functionScope == scope) && (getTemplate(qualifiedTemplateName) == null))
-                throw new ExpressionException("Query \"" + queryName + "\" not found in scope \"" + library + "\"");
-            querySpec = new QuerySpec(callName);
-            querySpec.addKeyName(new KeyName("", queryName));
-            querySpec.setQueryType(QueryType.calculator);
-        }
-        QueryParams queryParams = new QueryParams(functionScope, querySpec);
-        if (innerTemplate != null)
+        if ((innerTemplate != null) && !operandMap.hasOperand(innerTemplate.getQualifiedName()))
             addInnerTemplate(innerTemplate);
         QueryEvaluator queryEvaluator = 
-                new QueryEvaluator(queryParams, scope, innerTemplate);
-        QualifiedName qualifiedCallName = new QualifiedName(library, queryName);
-        return new CallOperand<AxiomTermList>(qualifiedCallName, queryEvaluator, operandParamList);
+             new QueryEvaluator(qualifiedQueryName, innerTemplate);
+        ParserTask parserTask = addPending(queryEvaluator);
+        parserTask.setPriority(1);
+        String library = queryEvaluator.getLibrayName(this);
+        QualifiedName qualifiedCallName = new QualifiedName(library, qualifiedQueryName.getName());
+        return new ParameterOperand<AxiomTermList>(qualifiedCallName, operandParamList, queryEvaluator);
     }
 
 	/**
@@ -944,60 +913,6 @@ public class ParserAssembler implements LocaleListener
     }
     
     /**
-     * Returns Operand which accesses a list
-     * @param listName Name of list
-     * @param param1 Operand of first index
-     * @param param2 Operand of second index or null if not specified
-     * @return Operand from package au.com.cybersearch2.classy_logic.list
-     */
-    public Operand newListVariableInstance(String listName, Operand param1, Operand param2)
-    {
-        QualifiedName qualifiedListName = null;
-        ItemList<?> itemList = findItemList(listName);
-        if (itemList != null)
-            qualifiedListName = itemList.getQualifiedName(); 
-        else 
-        {
-            Operand operand = findOperandByName(listName);
-            if (operand != null)
-                 qualifiedListName = operand.getQualifiedName();
-        }
-        if (qualifiedListName == null)
-            throw new ExpressionException("List \"" + listName + "\" cannot be found");
-        return newListVariableInstance(qualifiedListName, param1, param2);
-    }
-
-    /**
-     * Returns Operand which accesses a list
-     * @param qualifiedListName Qualified name of list
-     * @param param1 Operand of first index
-     * @param param2 Operand of second index or null if not specified
-     * @return Operand from package au.com.cybersearch2.classy_logic.list
-     */
-    public Operand newListVariableInstance(QualifiedName qualifiedListName, Operand param1, Operand param2)
-    {
-        if ((param2 != null) && (param1 instanceof StringOperand))
-            throw new ExpressionException("List \"" + qualifiedListName.toString() + "\" cannot be indexed by name");
-        ItemList<?> itemList = null;
-        AxiomListSpec axiomListSpec = null;
-        // When an axiom parameter is specified, then initialization of the list variable must be delayed 
-        // until evaluation occurs when running the first query.
-        boolean isAxiomListVariable = isParameter(qualifiedListName) || (operandMap.get(qualifiedListName) != null);
-        if (isAxiomListVariable)
-        {   // Return dynamic AxiomListVariable instance
-            axiomListSpec = new AxiomListSpec(qualifiedListName, operandMap.get(qualifiedListName), param1, param2);
-            return new AxiomListVariable(axiomListSpec);
-        }
-        // A normal list should be ready to go
-        itemList = getItemList(qualifiedListName);
-        //operandMap.addItemList(listName, itemList);
-        if (param2 == null) // Single index case is easy
-            return operandMap.newListVariableInstance(itemList, param1);
-        axiomListSpec = new AxiomListSpec((AxiomList)itemList, param1, param2);
-        return operandMap.newListVariableInstance(axiomListSpec);
-    }
-
-    /**
      * Returns qualified name for name in current context
      * @param name
      * @return QualifiedName object
@@ -1007,28 +922,6 @@ public class ParserAssembler implements LocaleListener
         return QualifiedName.parseName(name, operandMap.getQualifiedContextname());
     }
     
-    /**
-     * Returns new ItemListVariable instance. 
-     * This is wrapped in an assignment evaluator if optional expression parameter needs to be evaluated.
-     * @param listName List qualified name
-     * @param index List index
-     * @param expression Optional expression operand
-     * @return Operand object
-     */
-    public Operand listItemInstance(String listName, Operand index, Operand expression) 
-    {
-        ItemList<?> itemList = findItemList(listName);
-        if (itemList == null)
-        {
-            QualifiedName qualifiedListName = QualifiedName.parseName(listName, operandMap.getQualifiedContextname());
-            qualifiedListName.clearTemplate();
-            itemList = findItemList(qualifiedListName);
-        }
-        if (itemList != null)
-            return operandMap.setListVariable(itemList, index, expression);
-        return newListVariableInstance(listName, index, expression);
-    }
-
     /**
      * Copy result axiom lists as iterables to supplied container
      * @param listMap Container to receive lists
@@ -1089,7 +982,7 @@ public class ParserAssembler implements LocaleListener
      * Add Runnable to pending list
      * @param pending Runnable to execute parser task
      */
-    public ParserTask addPending(Runnable pending)
+    public ParserTask addPending(ParserRunner pending)
     {
         ParserTask parserTask = addPending();
         parserTask.setPending(pending);
@@ -1107,4 +1000,21 @@ public class ParserAssembler implements LocaleListener
             pendingList.clear();
         }
     }
+
+    /**
+     * Returns list of axiom listeners for specified key
+     * @param qname Qualified name key
+     * @return List containing AxiomListener objects or null if list not found
+     */
+    protected List<AxiomListener> getAxiomListenerList(QualifiedName qname)
+    {
+        List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
+        if (axiomListenerList == null)
+        {
+            axiomListenerList = new ArrayList<AxiomListener>();
+            axiomListenerMap.put(qname, axiomListenerList);
+        }
+        return axiomListenerList;
+    }
+
 }

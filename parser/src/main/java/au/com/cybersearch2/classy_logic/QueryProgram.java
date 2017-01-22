@@ -347,10 +347,11 @@ public class QueryProgram extends QueryLauncher
         while (parserTask !=null)
         {
             Scope scope = scopes.get(parserTask.getScopeName());
-            OperandMap operandMap = scope.getParserAssembler().getOperandMap();
+            ParserAssembler parserAssembler = scope.getParserAssembler();
+            OperandMap operandMap = parserAssembler.getOperandMap();
             QualifiedName savedQName = operandMap.getQualifiedContextname();
             operandMap.setQualifiedContextname(parserTask.getQualifiedContextname());
-            parserTask.run();
+            parserTask.run(parserAssembler);
             operandMap.setQualifiedContextname(savedQName);
             parserTask = priorityQueue.poll();
         }

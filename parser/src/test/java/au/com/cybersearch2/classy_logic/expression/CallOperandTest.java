@@ -382,6 +382,14 @@ public class CallOperandTest
             "query average_height (average_height);"
            ;
     static final String GERMAN_COLORS =
+            "calc german_colors\n" +
+            "(\n" +
+            "  template aqua(red, green, blue) << german.swatch(shade=\"Wasser\"),\n" + 
+            "  template blue(red, green, blue) << german.swatch(shade=\"blau\"),\n" + 
+            "  axiom colors =\n" +
+            "     { \"Aqua\", aqua }\n" +
+            "     { \"Blue\", blue }\n" +
+            ");\n" +
             "axiom lexicon (aqua, black, blue, white);\n" +
             "axiom german.lexicon (aqua, black, blue, white)\n" +
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
@@ -394,14 +402,6 @@ public class CallOperandTest
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
             "}\n" +
-            "calc german_colors\n" +
-            "(\n" +
-            "  template aqua(red, green, blue) << german.swatch(shade=\"Wasser\"),\n" + 
-            "  template blue(red, green, blue) << german.swatch(shade=\"blau\"),\n" + 
-            "  axiom colors =\n" +
-            "     { \"Aqua\", aqua }\n" +
-            "     { \"Blue\", blue }\n" +
-            ");\n" +
             "query german_colors (german_colors);\n" +
             "calc german_orange\n" +
             "(\n" +

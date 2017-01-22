@@ -54,7 +54,8 @@ import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
-import au.com.cybersearch2.classy_logic.list.ItemListVariableOperand;
+import au.com.cybersearch2.classy_logic.list.AxiomOperand;
+import au.com.cybersearch2.classy_logic.list.ItemListOperand;
 import au.com.cybersearch2.classy_logic.list.ListLength;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
@@ -65,7 +66,6 @@ import au.com.cybersearch2.classy_logic.terms.NumberTerm;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.ListVariableFactory;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -141,58 +141,25 @@ public class QueryParser
       return stringLiteral.image.substring(1, stringLiteral.image.length() - 1);
   } 
 
-  protected void listInstance(ParserAssembler parserAssembler, Runnable pending)
+  protected Operand axiomOperand(String name, 
+                                         ParserAssembler parserAssembler, 
+                                         Operand indexExpression1, 
+                                         Operand indexExpression2)
   {
-    ParserTask parserTask = parserAssembler.addPending(pending);
-    parserTask.setPriority(1);
-  }
-
-  protected Operand newListVariable(String name, 
-                                    final ParserAssembler parserAssembler, 
-                                    Operand indexExpression1, 
-                                    Operand indexExpression2)
-  {
-    final ListVariableFactory listVariableFactory = new ListVariableFactory(){
-
-        @Override
-        public Operand operandInstance(String listName, Operand indexExpression,
-                Operand expression2)
-        {
-            return parserAssembler.newListVariableInstance(listName, indexExpression, expression2);
-        }};
-    final ItemListVariableOperand operand = new ItemListVariableOperand(name, listVariableFactory, indexExpression1, indexExpression2);
-    Runnable pending = new Runnable() {
-          @Override
-         public void run()
-         {
-             operand.initialize();
-         }};
-    parserAssembler.addPending(pending);
+    AxiomOperand operand = new AxiomOperand(name, indexExpression1, indexExpression2);
+    ParserTask parserTask = parserAssembler.addPending(operand);
+    //parserTask.setPriority(1);
     return operand;
   }
   
-  protected Operand listItemInstance(String name, 
-          final ParserAssembler parserAssembler, 
-          Operand indexExpression, 
-          Operand assignExpression)
+  protected Operand listItemOperand(String name, 
+                                    ParserAssembler parserAssembler, 
+                                    Operand indexExpression, 
+                                    Operand assignExpression)
   {
-    final ListVariableFactory listVariableFactory = new ListVariableFactory(){
-
-          @Override
-          public Operand operandInstance(String listName, Operand indexExpression,
-                  Operand expression2)
-          {
-              return parserAssembler.listItemInstance(listName, indexExpression, expression2);
-          }};
-    final ItemListVariableOperand operand = new ItemListVariableOperand(name, listVariableFactory, indexExpression, assignExpression);
-    Runnable pending = new Runnable() {
-            @Override
-           public void run()
-           {
-               operand.initialize();
-           }};
-    ParserTask parserTask = parserAssembler.addPending(pending);
-    parserTask.setPriority(1);
+    ItemListOperand operand = new ItemListOperand(name, indexExpression, assignExpression);
+    ParserTask parserTask = parserAssembler.addPending(operand);
+    //parserTask.setPriority(1);
     return operand;
   }
 }
@@ -484,12 +451,8 @@ void ListDeclaration(ParserAssembler parserAssembler) :
     if (qualifiedAxiomName != null)
         varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
     ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
-    Runnable pending = varType.getPending();
-    if (pending != null)
-        listInstance(parserAssembler, pending);
-    else
-        parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
-   }
+    parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
+  }
 }
 
 VariableType Type(OperandMap operandMap) :
@@ -628,7 +591,7 @@ Operand VariableDeclaration(ParserAssembler parserAssembler) :
   {
      String name = nameToken.image;
      if (index !=null)
-         return parserAssembler.listItemInstance(name, index, expression);
+         return listItemOperand(name, parserAssembler, index, expression);
      if (varType == null)
          varType = new VariableType(OperandType.UNKNOWN);
      boolean isLiteral = (expression != null) &&
@@ -715,7 +678,7 @@ void TemplateExpression(Template template, ParserAssembler parserAssembler) :
      if (expression != null)
          varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
      if (index !=null)
-         var = listItemInstance(name, parserAssembler, index, null);
+         var = listItemOperand(name, parserAssembler, index, null);
      else if (regexOp != null)
          var = new RegExOperand(qname, regexOp, 0, group);
      else if (scToken != null) 
@@ -1553,7 +1516,7 @@ Operand PrimaryExpression(ParserAssembler parserAssembler) :
   |
   <SCOPE> param1=IndexExpression(parserAssembler)
   {
-    return listItemInstance("scope", parserAssembler, param1, null);
+    return listItemOperand("scope", parserAssembler, param1, null);
   }
   |
   "(" ( param1 = Expression(parserAssembler) ) ")" 
@@ -1604,7 +1567,7 @@ Operand NamedExpression(String name, ParserAssembler parserAssembler) :
 {
   param1=IndexExpression(parserAssembler) ( LOOKAHEAD(2) param2=IndexExpression(parserAssembler) )?
   {
-    return newListVariable(name, parserAssembler, param1, param2);
+    return axiomOperand(name, parserAssembler, param1, param2);
   }
   |
   "(" ( operandParamList = ArgumentList(parserAssembler, true) )? ")"

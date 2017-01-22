@@ -231,6 +231,16 @@ public class OperandMap
 		return false;
 	}
 
+    /**
+     * Returns flag to indicate if this map contains operand with specified name
+     * @param name
+     * @return boolean
+     */
+    public boolean hasOperand(QualifiedName qname)
+    {
+        return operandMap.containsKey(qname);
+    }
+
 	/**
 	 * Returns operand of specified name or null if not found
      * @param qname Qualified name
@@ -378,28 +388,6 @@ public class OperandMap
 	{
 		operandMap.putAll(operandMap2.operandMap);
 		listMap.putAll(operandMap2.listMap);
-	}
-
-	/**
-	 * Returns new ItemListVariable instance. 
-	 * This is wrapped in an assignment evaluator if optional expression parameter needs to be evaluated.
-	 * @param itemList The list
-	 * @param index List index
-	 * @param expression Optional expression operand
-	 * @return Operand object
-	 */
-	public Operand setListVariable(ItemList<?> itemList, Operand index, Operand expression) 
-	{
-		ItemListVariable<?> variable = newListVariableInstance(itemList, index);
-		if (expression != null)
-		{
-			if (expression.isEmpty() || (expression instanceof Evaluator))
-			    // Expression needs evaluation
-				return new Evaluator(itemList.getQualifiedName(), variable, "=", expression);
-			// Expression has a value which will be assigned to the list item
-			variable.assign(expression);
-		}
-		return variable;
 	}
 
 	/**

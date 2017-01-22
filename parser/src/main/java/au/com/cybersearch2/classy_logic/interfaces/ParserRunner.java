@@ -15,20 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+
 /**
- * ListVariableFactory
- * Constructs ListVariableOperand object
+ * ParserRunner
+ * Executes parser tasks
  * @author Andrew Bowley
- * 20Jan.,2017
+ * 21Jan.,2017
  */
-public interface ListVariableFactory
+public interface ParserRunner
 {
-    /**
-     * Returns ListVariableOperand object instance
-     * @param listName The name of the list
-     * @param indexExpression Operand to select item
-     * @param expression2 Optional operand for 2nd index or assignment
-     * @return Operand object
-     */
-    Operand operandInstance(String listName, Operand indexExpression, Operand expression2);
+    void run(ParserAssembler parserAssembler);
 }

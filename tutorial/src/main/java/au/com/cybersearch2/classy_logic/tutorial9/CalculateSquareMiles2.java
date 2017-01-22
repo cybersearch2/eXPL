@@ -56,11 +56,10 @@ public class CalculateSquareMiles2
 	}
 	
 	/**
-	 * Display country surface areas
+	 * Display surface areas of Australia and United States in locale-specific units
 	 * The expected results:</br>
-	    filter_area(country = Afghanistan, surface_area = 251826.003)</br>
-        filter_area(country = Albania, surface_area = 11100.375)</br>
-        filter_area(country = Algeria, surface_area = 919589.814)</br>
+       filter_area(country = Australia, surface_area = 7741220, units = km2, false)</br>
+       filter_area(country = United States, surface_area = 3795946.011, units = mi2, true)</br>
 	 */
 	public void displaySurfaceArea()
 	{
