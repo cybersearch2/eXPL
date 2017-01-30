@@ -28,28 +28,6 @@
             </execution>
          </executions>
        </plugin>       
-       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <executions>
-          <execution>
-             <goals>
-               <goal>jar</goal>
-             </goals>
-             <configuration>
-               <additionalparam>-tag inheritDoc:X</additionalparam>
-             </configuration>
-           </execution>
-        </executions>
-        <configuration>
-          <doctitle>eXPL Compiler/Engine API</doctitle>
-          <windowtitle>eXPL Compiler/Engine API</windowtitle> 
-          <links>
-           <link>http://cybersearch2.com.au/apidocs/</link>
-           <link>http://docs.oracle.com/javase/8/docs/api/</link>
-          </links>
-         </configuration>
-       </plugin>
     </plugins>
   </build>
 
