@@ -1582,13 +1582,7 @@ Operand IndexExpression(ParserAssembler parserAssembler) :
   Operand param;
 }
 {
-  <LBRACKET> 
-  (
-    ( 
-    param=Expression(parserAssembler)
-    )
-   )
-  <RBRACKET> 
+  <LBRACKET> param=Expression(parserAssembler) <RBRACKET> 
   {
     return param;
   }

@@ -1,3 +1,60 @@
+eXPL v1.4.0
+
+Change version to 1.4.0-SNAPSHOT
+Change local list to backed by one axiom per scope
+Allow 2-part name for axioms and resources so axiom for any scope can be defined in global scope
+Allow empty axiom to be declared so only term names are defined
+When scope is missing axiom declaration, insert placeholder with "unkown" entries
+Allow option to place resource declaration as a leading statement
+Describe association of axiom to a resource as "binding" and remove "resource" keyword from format
+Add "resource" keyword as allowed resource binding for case name same as axiom name
+Add "scope" builtin term list to access scope properties
+Add plugin to pom.xml to produce source jars
+Fix assignment in VariableType
+
+Allow automatic template creation for term list bound to resource with axiom binding
+Add axiom key parameter to AxiomProvider.getAxiomListener() for same purpose as for getAxiomSource()
+For resource bindings use template qualified name instead of axiom form.
+Registration of a term list bound to a resource now adds an axiom listener only for a template binding
+Implement axiom serialization and add new TermStore class
+Fix ChainQueryExecuter.bindAxiomListeners() bug where iterator.next() called without preceding hasNext()
+Fix parser syntax error in KeyName declaration and change name types from String to QualifiedName
+Add support for two-part names in query keynames
+
+Update axiom and template searches to use qualified names as keys instead of simple names
+Use a qualified name to identify a choice
+Allow a global scope query to engage multiple scopes using first part of 2-part names to identify scope
+
+Change axiom key type in lists to QualifiedName 
+Add locale properties to global scope
+Only install scope term list if properties specified
+Add KeyName constructor with single template qualified name parameter for query construction
+On scope change, search for axiom sources in previous scope if not found in new scope
+Register scope term list as local list
+New Template constructor to replicate objects which has new id and qualified name
+Enhance SolutionPairer to pair axioms converted from replicated Templates
+Add SolutionHandler to Solution and add self-evaluation
+Complete implementation of dynamic scope switching
+Backup a replicate Template after solution is set to allow reuse in same chain query
+Create tutorial 18 with ForeignScope and ForeignColors examples
+
+Allow global scope to be declared so to override default properties
+Allow axiom to be recreated to support global scope properties override
+Allow replicate template to set global solution
+
+Implement prioritized parser task queue to permit lists and list items to be located anywhere in the script
+Update parser task to pass ParserAssembler object as a parameter to the run method
+Create list variable classes which complete construction using a parser task
+Move parser task creation for Axiom and Axiom Term lists to registration in ParserAssembler
+Update QueryEvaluator so it completes construction using a parser task
+Remove CallOperand as it serves no purpose
+_____________________________________________________________________________________________________________________
+
+eXPL v1.3.2
+
+Update to Classy Tools v1.3.2
+______________________________________________________________________________________________________________________
+
 eXPL v1.2
 
 1. Upgrade to Dagger 2 and remove parser and tutorial dependency on Classy Tools. 
