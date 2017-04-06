@@ -46,6 +46,8 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 	protected Operand indexExpression;
 	/** Curent index value. Will be constant if indexExpression is null.  */
 	protected int index;
+    /** Flag set true if operand not visible in solution */
+    protected boolean isPrivate;
 
 	/**
 	 * Construct a fixed index ItemListVariable object
@@ -310,6 +312,26 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 		return null;
 	}
 
+    /**
+     * Set this operand private - not visible in solution
+     * @param isPrivate Flag set true if operand not visible in solution
+     */
+    @Override
+    public void setPrivate(boolean isPrivate)
+    {
+        this.isPrivate = isPrivate;
+    }
+    
+    /**
+     * Returns flag set true if this operand is private
+     * @return
+     */
+    @Override
+    public boolean isPrivate()
+    {
+        return isPrivate;
+    }
+    
 	/**
 	 * Returns variable name given list name and suffix
 	 * @param listName

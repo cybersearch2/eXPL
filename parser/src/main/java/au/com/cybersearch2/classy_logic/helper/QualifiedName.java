@@ -237,6 +237,12 @@ public class QualifiedName implements Comparable<QualifiedName>
     public static QualifiedName parseGlobalName(String text)
     {
         String[] parts = text.split("\\.");
+        if (parts.length == 0)
+        {
+            // Make parts valid
+            parts = new String[1];
+            parts[0] = text;
+        }
         if (parts.length > 3)
             throw new ExpressionException("Qualified name \"" + text + "\" is invalid");
         final String name = parts[parts.length - 1];

@@ -50,8 +50,8 @@ public class Template extends Structure
         new ObjectStreamField("id", Integer.class)
     };
     
-    public static final String ITERABLE = "iterable";
-    public static final String TERMNAMES = "termnames";
+    //public static final String ITERABLE = "iterable";
+    //public static final String TERMNAMES = "termnames";
     public static List<String>  EMPTY_NAMES_LIST;
     public static Iterable<AxiomTermList> EMPTY_ITERABLE;
     /** Unique identity generator */
@@ -373,14 +373,20 @@ public class Template extends Structure
 		for (Term term: termList)
 		{
 		    Operand operand = (Operand)term;
-			if (!operand.isEmpty() && !operand.getName().isEmpty() && 
-			    isReplicate || qname.inSameSpace(operand.getQualifiedName()))
+            if (!operand.isEmpty() && !operand.isPrivate()  && 
+			    (isReplicate || qname.inSameSpace(operand.getQualifiedName())))
 			{
 				Parameter param = new Parameter(operand.getName(), operand.getValue());
 				axiom.addTerm(param);
 			}
 		}
 		return axiom;
+	}
+
+	protected boolean isAnonymous(String name)
+	{
+	    int index = name.indexOf('.');
+	    return name.isEmpty() || (index == 0); 
 	}
 	
 	/**

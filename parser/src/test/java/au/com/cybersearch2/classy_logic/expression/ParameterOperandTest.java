@@ -45,7 +45,7 @@ public class ParameterOperandTest
             "integer int = 123,\n" +       
             "double real = 1.456,\n" +       
             "decimal dec = 5.00,\n" +       
-            "currency(\"AU\") amount = 19.76,\n" +       
+            "currency $\"AU\" amount = 19.76,\n" +       
             "string text = \"To be, or not to be\"\n" +       
             "} );\n" +
             "query all_types_arg_query (test);";
@@ -55,16 +55,16 @@ public class ParameterOperandTest
             "integer int = 123;\n" +       
             "double real = 1.456;\n" +       
             "decimal dec = 5.00;\n" +       
-            "currency(\"AU\") amount = 19.76;\n" +       
+            "currency $ \"AU\" amount = 19.76;\n" +       
             "string text = \"To be, or not to be\";\n" +       
             "calc test (\n" +
             "axiom all_types = {\n" +
-            "a = bool,\n" +       
-            "b = int,\n" +       
-            "c = real,\n" +       
-            "d = dec,\n" +       
-            "e = amount,\n" +       
-            "f = text\n" +       
+            "term a = bool,\n" +       
+            "term b = int,\n" +       
+            "term c = real,\n" +       
+            "term d = dec,\n" +       
+            "term e = amount,\n" +       
+            "term f = text\n" +       
             "} );\n" +
             "query all_types_vars_arg_query (test);";
 

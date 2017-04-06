@@ -31,6 +31,8 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 	protected Operand expression;
     /** Qualified name of operand */
     protected QualifiedName qname;
+    /** Flag set true if operand not visible in solution */
+    protected boolean isPrivate;
 	
 	/**
 	 * Construct a ExpressionOperand object using given name 
@@ -113,6 +115,26 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 		return super.backup(id);
 	}
 	
+    /**
+     * Set this operand private - not visible in solution
+     * @param isPrivate Flag set true if operand not visible in solution
+     */
+    @Override
+    public void setPrivate(boolean isPrivate)
+    {
+        this.isPrivate = isPrivate;
+    }
+    
+    /**
+     * Returns flag set true if this operand is private
+     * @return
+     */
+    @Override
+    public boolean isPrivate()
+    {
+        return isPrivate;
+    }
+    
 	/**
 	 * Execute operation for expression
 	 * @param id Identity of caller, which must be provided for backup()

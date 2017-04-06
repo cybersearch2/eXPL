@@ -56,6 +56,8 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	protected Operand delegate;
 	/** Qualified name of operand */
 	protected QualifiedName qname;
+	/** Flag set true if operand not visible in solution */
+	protected boolean isPrivate;
 
 	static
 	{
@@ -258,6 +260,26 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
         return backupOccurred;
     }
 
+    /**
+     * Set this operand private - not visible in solution
+     * @param isPrivate Flag set true if operand not visible in solution
+     */
+    @Override
+    public void setPrivate(boolean isPrivate)
+    {
+        this.isPrivate = isPrivate;
+    }
+    
+    /**
+     * Returns flag set true if this operand is private
+     * @return
+     */
+    @Override
+    public boolean isPrivate()
+    {
+        return isPrivate;
+    }
+    
 	/**
      * Set value to null, mark Parameter as empty and set id to 0. 
      * Do full backup for left and right operands to allow re-evaluation.

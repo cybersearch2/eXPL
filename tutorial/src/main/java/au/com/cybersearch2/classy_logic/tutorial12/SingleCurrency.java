@@ -34,9 +34,9 @@ public class SingleCurrency
 {
 	static final String CURRENCY =
 		"axiom item() {\"$1234.56\"};\n" +
-		"template charge(currency(\"AU\") amount);\n" +
+		"template charge(currency $ \"AU\" amount);\n" +
 	    "calc charge_plus_gst(\n" +
-	    "  currency(\"AU\") total = amount * 1.1,\n" +
+	    "  currency $ \"AU\" total = amount * 1.1,\n" +
 	    "  string total_text = \"Total + gst: \" + format(total));\n" +
 		"query item_query(item : charge) >> (charge_plus_gst);";
 

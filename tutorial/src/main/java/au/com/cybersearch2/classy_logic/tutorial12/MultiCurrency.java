@@ -42,8 +42,8 @@ public class MultiCurrency
 			"include \"world_currency.xpl\";\n" +
 	        "calc charge_plus_gst(\n" +
 			"  country,\n" +
-			"  currency(country) charge = amount,\n" +
-			"  currency(country) total = charge * 1.1,\n" +
+			"  currency $ country charge = amount,\n" +
+			"  currency $ country total = charge * 1.1,\n" +
 			"  string total_text = country + \" Total + gst: \" + format(total)\n" +
 	        ");\n" +
 	        "list world_list(charge_plus_gst);\n" +

@@ -488,7 +488,7 @@ public class CallOperandTest
             "    {\n" +
             "       candidates += person_list[i]\n" +
             "    },\n" +
-            "    ++i\n" +
+            "    (++i)\n" +
             "  }\n" +
             ");\n" +
             "calc match(\n" +
@@ -531,25 +531,37 @@ public class CallOperandTest
             "       age = person_list[i][age],\n" +
             "       ? age < 18\n" +
             "       { age = unknown },\n" +
-            "       axiom person = { name = person_list[i][name], sex = person_list[i][sex], age, starsign =  person_list[i][starsign] },\n" +
+            "       axiom person =\n" +
+            "       {\n" +
+            "         string name = person_list[i][name],\n" +
+            "         string sex = person_list[i][sex],\n" +
+            "         age,\n" +
+            "         string starsign =  person_list[i][starsign]\n" +
+            "       },\n" +
             "       candidates += person\n" +
             "    },\n" +
-            "    ++i\n" +
+            "    (++i)\n" +
             "  }\n" +
             ");\n" +
             "calc match(\n" +
             "  axiom eligible = {},\n" +
             "  template perfect(candidates) << people_by_starsign(\"gemini\"),\n" +
-            "  system.print(\"Perfect is fact = \" + fact(perfect)),\n" +
-            "  system.print(perfect[candidates]),\n" +
+            "  //system.print(\"Perfect is fact = \" + fact(perfect)),\n" +
+            "  //system.print(perfect[candidates]),\n" +
             "  integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(candidates),\n" +
             "    gemini = candidates[i++],\n" +
             "    ? fact(gemini)\n" +
             "    {\n" +
-            "      // system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign]) )\n" +
-            "      axiom person = { name = gemini[name] , sex = gemini[sex], age = gemini[age] , starsign = gemini[starsign] },\n" +
+            "      axiom person =\n" +
+            "      {\n" + 
+            "       string name = gemini[name],\n" +
+            "       string sex = gemini[sex],\n" +
+            "       integer age = gemini[age],\n" +
+            "       string starsign = gemini[starsign]\n" +
+            "      },\n" +
+            "      system.print(person),\n" +
             "      eligible += person\n" +
             "    }\n" +
             "  }\n" +

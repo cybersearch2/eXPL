@@ -14,6 +14,7 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.compile.Group;
@@ -35,6 +36,7 @@ import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
+import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.list.AxiomOperand;
 import au.com.cybersearch2.classy_logic.list.ItemListOperand;
 import au.com.cybersearch2.classy_logic.list.ListLength;
@@ -147,6 +149,7 @@ public class QueryParser implements QueryParserConstants
 /** Root production. */
   final public void input(QueryProgram queryProgram) throws ParseException
   {
+  ParserContext context = new ParserContext(queryProgram);
     label_1:
     while (true) 
     {
@@ -159,7 +162,7 @@ public class QueryParser implements QueryParserConstants
         jj_la1[0] = jj_gen;
         break label_1;
       }
-      ResourceDeclaration(queryProgram);
+      ResourceDeclaration(context);
       jj_consume_token(SEMICOLON);
     }
     label_2:
@@ -182,13 +185,13 @@ public class QueryParser implements QueryParserConstants
       case LOCAL:
       case CHOICE:
       case IDENTIFIER:
-        Statement(queryProgram, queryProgram.getGlobalScope());
+        Statement(context);
         break;
       case QUERY:
-        QueryChain(queryProgram.getGlobalScope());
+        QueryChain(context);
         break;
       case SCOPE:
-        ScopeDeclaration(queryProgram);
+        ScopeDeclaration(context);
         break;
       default:
         jj_la1[1] = jj_gen;
@@ -225,11 +228,30 @@ public class QueryParser implements QueryParserConstants
     queryProgram.runPending();
   }
 
-  final public void ScopeDeclaration(QueryProgram queryProgram) throws ParseException
+  final public void ResourceDeclaration(ParserContext context) throws ParseException
   {
-  Scope scope;
+  Token nameToken;
+  Map<String, Object> properties = new HashMap<String, Object>();
+    jj_consume_token(RESOURCE);
+    nameToken = jj_consume_token(STRING_LITERAL);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case LPAREN:
+      jj_consume_token(LPAREN);
+      InitialiserList(properties);
+      jj_consume_token(RPAREN);
+      break;
+    default:
+      jj_la1[3] = jj_gen;
+      ;
+    }
+    context.getQueryProgram().openResource(getText(nameToken), properties);
+  }
+
+  final public void ScopeDeclaration(ParserContext context) throws ParseException
+  {
     jj_consume_token(SCOPE);
-    scope = Scope(queryProgram);
+    Scope(context);
     jj_consume_token(LBRACE);
     label_3:
     while (true) 
@@ -255,7 +277,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[3] = jj_gen;
+        jj_la1[4] = jj_gen;
         break label_3;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -275,22 +297,22 @@ public class QueryParser implements QueryParserConstants
       case LOCAL:
       case CHOICE:
       case IDENTIFIER:
-        Statement(queryProgram, scope);
+        Statement(context);
         break;
       case QUERY:
-        QueryChain(scope);
+        QueryChain(context);
         break;
       default:
-        jj_la1[4] = jj_gen;
+        jj_la1[5] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     }
     jj_consume_token(RBRACE);
-
+    context.resetScope();
   }
 
-  final public Scope Scope(QueryProgram queryProgram) throws ParseException
+  final public void Scope(ParserContext context) throws ParseException
   {
   Token scopeToken;
   Map<String, Object> properties = new HashMap<String, Object>();
@@ -303,16 +325,16 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(RPAREN);
       break;
     default:
-      jj_la1[5] = jj_gen;
+      jj_la1[6] = jj_gen;
       ;
     }
-      {if (true) return queryProgram.scopeInstance(scopeToken.image , properties);}
-    throw new Error("Missing return statement in function");
+      context.setScope(context.getQueryProgram().scopeInstance(scopeToken.image , properties));
   }
 
-  final public void QueryChain(Scope scope) throws ParseException
+  final public void QueryChain(ParserContext context) throws ParseException
   {
-    QuerySpec querySpec;
+  QuerySpec querySpec;
+  Scope scope = context.getScope();
     jj_consume_token(QUERY);
     querySpec = Query();
     querySpec = QueryDeclaration(querySpec, scope);
@@ -325,14 +347,22 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[6] = jj_gen;
+        jj_la1[7] = jj_gen;
         break label_4;
       }
       jj_consume_token(78);
       QueryDeclaration(querySpec.chain(), scope);
     }
     jj_consume_token(SEMICOLON);
-      scope.addQuerySpec(querySpec);
+    scope.addQuerySpec(querySpec);
+  }
+
+  final public QuerySpec Query() throws ParseException
+  {
+   Token queryToken;
+    queryToken = jj_consume_token(IDENTIFIER);
+    {if (true) return new QuerySpec(queryToken.image);}
+    throw new Error("Missing return statement in function");
   }
 
   final public QuerySpec QueryDeclaration(QuerySpec querySpec, Scope scope) throws ParseException
@@ -351,7 +381,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[7] = jj_gen;
+        jj_la1[8] = jj_gen;
         break label_5;
       }
       jj_consume_token(COMMA);
@@ -367,25 +397,40 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(RPAREN);
       break;
     default:
-      jj_la1[8] = jj_gen;
+      jj_la1[9] = jj_gen;
       ;
     }
         {if (true) return scope.buildQuerySpec(querySpec, firstKeyname, keynameCount, properties);}
     throw new Error("Missing return statement in function");
   }
 
-  final public QuerySpec Query() throws ParseException
+  final public KeyName KeyName(QuerySpec querySpec) throws ParseException
   {
-    Token queryToken;
-    queryToken = jj_consume_token(IDENTIFIER);
-    {if (true) return new QuerySpec(queryToken.image);}
+  String name1;
+  String name2 = null;
+    name1 = Name();
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case COLON:
+      jj_consume_token(COLON);
+      name2 = Name();
+      break;
+    default:
+      jj_la1[10] = jj_gen;
+      ;
+    }
+    boolean isBinary = name2 != null;
+    String axiomKey = isBinary  ? name1 : "";
+    String templateName = isBinary  ? name2 : name1;
+    KeyName keyname = new KeyName(axiomKey, templateName);
+    querySpec.addKeyName(keyname);
+    {if (true) return keyname;}
     throw new Error("Missing return statement in function");
   }
 
-  final public void Statement(QueryProgram queryProgram, Scope scope) throws ParseException
+  final public void Statement(ParserContext context) throws ParseException
   {
   Operand var;
-  ParserAssembler parserAssembler = scope.getParserAssembler();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case INTEGER:
@@ -396,200 +441,196 @@ public class QueryParser implements QueryParserConstants
     case TERM:
     case CURRENCY:
     case IDENTIFIER:
-      var = VariableDeclaration(parserAssembler);
+      var = VariableDeclaration(context);
       jj_consume_token(SEMICOLON);
-      parserAssembler.getOperandMap().addOperand(var);
+      context.getOperandMap().addOperand(var);
       break;
     case TEMPLATE:
-      TemplateDeclaration(parserAssembler);
+      TemplateDeclaration(context);
       jj_consume_token(SEMICOLON);
       break;
     case CALC:
-      CalculatorTemplate(parserAssembler);
+      CalculatorTemplate(context);
       jj_consume_token(SEMICOLON);
       break;
     case AXIOM:
-      AxiomDeclaration(parserAssembler);
+      AxiomDeclaration(context);
       jj_consume_token(SEMICOLON);
       break;
     case CHOICE:
-      ChoiceDeclaration(parserAssembler);
+      ChoiceDeclaration(context);
       jj_consume_token(SEMICOLON);
       break;
     case LIST:
     case LOCAL:
-      ListDeclaration(parserAssembler);
+      ListDeclaration(context);
       jj_consume_token(SEMICOLON);
       break;
     case INCLUDE:
-      Include(queryProgram);
+      Include(context);
       jj_consume_token(SEMICOLON);
       break;
     default:
-      jj_la1[9] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-  }
-
-  final public void Include(QueryProgram queryProgram) throws ParseException
-  {
-  Token includeToken = null;
-    jj_consume_token(INCLUDE);
-    includeToken = jj_consume_token(STRING_LITERAL);
-    includeResource(includeToken.image, queryProgram);
-  }
-
-  final public void ListDeclaration(ParserAssembler parserAssembler) throws ParseException
-  {
-    Token keywordToken;
-    Token nameToken;
-    VariableType varType = null;
-    QualifiedName qualifiedBindingName = null;
-    QualifiedName qualifiedAxiomName = null;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case LIST:
-      keywordToken = jj_consume_token(LIST);
-      break;
-    case LOCAL:
-      keywordToken = jj_consume_token(LOCAL);
-      break;
-    default:
-      jj_la1[10] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case LT:
-      jj_consume_token(LT);
-      varType = Type(parserAssembler.getOperandMap());
-      jj_consume_token(GT);
-      break;
-    default:
       jj_la1[11] = jj_gen;
-      ;
+      jj_consume_token(-1);
+      throw new ParseException();
     }
-    nameToken = jj_consume_token(IDENTIFIER);
+  }
+
+  final public void AxiomDeclaration(ParserContext context) throws ParseException
+  {
+  QualifiedName qualifiedAxiomName;
+  Operand operand = null;
+    jj_consume_token(AXIOM);
+    qualifiedAxiomName = Axiom(context);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LPAREN:
-      jj_consume_token(LPAREN);
-      qualifiedAxiomName = Axiom(parserAssembler);
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COLON:
-        qualifiedBindingName = ResourceBinding(QueryParserConstants.TEMPLATE, qualifiedAxiomName, parserAssembler);
-        break;
-      default:
-        jj_la1[12] = jj_gen;
-        ;
-      }
-      jj_consume_token(RPAREN);
+      AxiomSpecification(qualifiedAxiomName, context);
+      break;
+    case ASSIGN:
+      operand = AxiomVariable(qualifiedAxiomName, context);
       break;
     default:
-      jj_la1[13] = jj_gen;
-      ;
-    }
-    String listName = nameToken.image;
-    boolean isLocal = keywordToken.kind == QueryParserConstants.LOCAL;
-    boolean isTermList = (varType != null) && varType.getOperandType() == OperandType.TERM;
-    if ((varType == null) && (qualifiedAxiomName == null))
-        {if (true) throw new ParseException("Invalid declaration for list \u005c"" + listName + "\u005c". Missing type or axiom name.");}
-    if ((varType != null) && isLocal)
-        {if (true) throw new ParseException("Invalid declaration for local \u005c"" + listName + "\u005c". Type in declaration not allowed.");}
-    if ((qualifiedBindingName != null) && !isTermList)
-        {if (true) throw new ParseException("Invalid declaration for local \u005c"" + listName + "\u005c". Only Term Type list can be bound to a resource");}
-    if (qualifiedBindingName != null)
-        qualifiedAxiomName = qualifiedBindingName;
-    if (varType == null)
-        varType = isLocal ? new VariableType(OperandType.LOCAL) : new VariableType(OperandType.AXIOM);
-    if (qualifiedAxiomName != null)
-        varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
-    ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
-    parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
-  }
-
-  final public VariableType Type(OperandMap operandMap) throws ParseException
-  {
-    Token qualifierLit = null;
-    String qualifierId = null;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case INTEGER:
-      jj_consume_token(INTEGER);
-      {if (true) return new VariableType(OperandType.INTEGER);}
-      break;
-    case BOOLEAN:
-      jj_consume_token(BOOLEAN);
-      {if (true) return new VariableType(OperandType.BOOLEAN);}
-      break;
-    case DOUBLE:
-      jj_consume_token(DOUBLE);
-      {if (true) return new VariableType(OperandType.DOUBLE);}
-      break;
-    case STRING:
-      jj_consume_token(STRING);
-      {if (true) return new VariableType(OperandType.STRING);}
-      break;
-    case DECIMAL:
-      jj_consume_token(DECIMAL);
-      {if (true) return new VariableType(OperandType.DECIMAL);}
-      break;
-    case TERM:
-      jj_consume_token(TERM);
-      {if (true) return new VariableType(OperandType.TERM);}
-      break;
-    case CURRENCY:
-      jj_consume_token(CURRENCY);
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case LPAREN:
-        jj_consume_token(LPAREN);
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-        {
-        case STRING_LITERAL:
-          qualifierLit = jj_consume_token(STRING_LITERAL);
-          break;
-        case IDENTIFIER:
-          qualifierId = Name();
-          break;
-        default:
-          jj_la1[14] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
-        jj_consume_token(RPAREN);
-        break;
-      default:
-        jj_la1[15] = jj_gen;
-        ;
-      }
-      VariableType varType = new VariableType(OperandType.CURRENCY);
-      if (qualifierLit != null)
-         varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
-      else if (qualifierId != null)
-         varType.setProperty(VariableType.QUALIFIER_OPERAND, operandMap.addOperand(qualifierId, null));
-      {if (true) return varType;}
-      break;
-    default:
-      jj_la1[16] = jj_gen;
+      jj_la1[12] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    if (operand != null)
+      context.getOperandMap().addOperand(operand);
+  }
+
+  final public QualifiedName Axiom(ParserContext context) throws ParseException
+  {
+  String axiomName;
+    axiomName = Name();
+    {if (true) return axiomName.indexOf(".") == -1 ?
+        context.getParserAssembler().getContextName(axiomName) :
+        QualifiedName.parseName(axiomName);}
     throw new Error("Missing return statement in function");
   }
 
-  final public void TemplateDeclaration(ParserAssembler parserAssembler) throws ParseException
+  final public void AxiomSpecification(QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
   {
-    Template template;
-    QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
-    jj_consume_token(TEMPLATE);
-    template = Template(parserAssembler, false);
+  ParserAssembler parserAssembler = context.getParserAssembler();
+  parserAssembler.createAxiom(qualifiedAxiomName);
     jj_consume_token(LPAREN);
-    TemplateExpression(template, parserAssembler);
-    label_6:
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case IDENTIFIER:
+      TermName(qualifiedAxiomName, parserAssembler);
+      label_6:
+      while (true) 
+      {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+        {
+        case COMMA:
+          ;
+          break;
+        default:
+          jj_la1[13] = jj_gen;
+          break label_6;
+        }
+        jj_consume_token(COMMA);
+        TermName(qualifiedAxiomName, parserAssembler);
+      }
+      break;
+    default:
+      jj_la1[14] = jj_gen;
+      ;
+    }
+    jj_consume_token(RPAREN);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case LBRACE:
+    case COLON:
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COLON:
+        jj_consume_token(COLON);
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+        {
+        case RESOURCE:
+        case STRING_LITERAL:
+          ResourceBinding(QueryParserConstants.AXIOM, qualifiedAxiomName, parserAssembler);
+          break;
+        case PARAMETER:
+          ParameterDeclaration(qualifiedAxiomName, parserAssembler);
+          break;
+        default:
+          jj_la1[15] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
+        break;
+      case LBRACE:
+        label_7:
+        while (true) 
+        {
+          jj_consume_token(LBRACE);
+          AxiomItem(qualifiedAxiomName, parserAssembler);
+          jj_consume_token(RBRACE);
+          switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+          {
+          case LBRACE:
+            ;
+            break;
+          default:
+            jj_la1[16] = jj_gen;
+            break label_7;
+          }
+        }
+        break;
+      default:
+        jj_la1[17] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      break;
+    default:
+      jj_la1[18] = jj_gen;
+      ;
+    }
+  }
+
+  final public void TermName(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
+  {
+  Token nameToken;
+    nameToken = jj_consume_token(IDENTIFIER);
+    parserAssembler.addAxiomTermName(qualifiedAxiomName, nameToken.image);
+  }
+
+  final public QualifiedName ResourceBinding(int kind, QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
+  {
+  Token nameToken = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case STRING_LITERAL:
+      nameToken = jj_consume_token(STRING_LITERAL);
+      break;
+    case RESOURCE:
+      jj_consume_token(RESOURCE);
+      break;
+    default:
+      jj_la1[19] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    QualifiedName qualifiedBindingName =
+        kind == QueryParserConstants.TEMPLATE ?
+        new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName()) :
+        qualifiedAxiomName;
+    AxiomProvider axiomProvider = (nameToken != null) ?
+        parserAssembler.bindResource(QualifiedName.parseName(getText(nameToken)), qualifiedBindingName) :
+        parserAssembler.bindResource(qualifiedBindingName);
+    {if (true) return qualifiedBindingName;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public void AxiomItem(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
+  {
+    Fact(qualifiedAxiomName, parserAssembler);
+    label_8:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -598,34 +639,216 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[17] = jj_gen;
-        break label_6;
+        jj_la1[20] = jj_gen;
+        break label_8;
       }
       jj_consume_token(COMMA);
-      TemplateExpression(template, parserAssembler);
+      Fact(qualifiedAxiomName, parserAssembler);
     }
-    jj_consume_token(RPAREN);
-      parserAssembler.getOperandMap().setQualifiedContextname(contextName);
+    parserAssembler.saveAxiom(qualifiedAxiomName);
   }
 
-  final public Template Template(ParserAssembler parserAssembler, boolean isCalculator) throws ParseException
+  final public void Fact(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
-    Token templateToken;
-    templateToken = jj_consume_token(IDENTIFIER);
-      QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), templateToken.image);
-      parserAssembler.getOperandMap().setQualifiedContextname(qualifiedTemplateName);
-      {if (true) return parserAssembler.createTemplate(qualifiedTemplateName, isCalculator);}
+  Parameter param = null;
+  Token lit = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case INTEGER_LITERAL:
+    case FLOATING_POINT_LITERAL:
+    case STRING_LITERAL:
+    case TRUE:
+    case FALSE:
+    case UNKNOWN:
+      param = LiteralTerm();
+    parserAssembler.addAxiom(qualifiedAxiomName, param);
+      break;
+    case NUMBER_LITERAL:
+      lit = jj_consume_token(NUMBER_LITERAL);
+    parserAssembler.addAxiom(qualifiedAxiomName, new NumberTerm(getText(lit), parserAssembler.getScopeLocale()));
+      break;
+    case NAN:
+      jj_consume_token(NAN);
+    parserAssembler.addAxiom(qualifiedAxiomName, new DoubleTerm("NaN"));
+      break;
+    default:
+      jj_la1[21] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  final public Operand AxiomVariable(QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
+  {
+  Operand expression = null;
+  List<OperandParam> axiomList = null;
+  ParserAssembler parserAssembler = context.getParserAssembler();
+    jj_consume_token(ASSIGN);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case SCOPE:
+    case FACT:
+    case LENGTH:
+    case FORMAT:
+    case INTEGER_LITERAL:
+    case FLOATING_POINT_LITERAL:
+    case NUMBER_LITERAL:
+    case STRING_LITERAL:
+    case TRUE:
+    case FALSE:
+    case UNKNOWN:
+    case IDENTIFIER:
+    case LPAREN:
+    case BANG:
+    case INCR:
+    case DECR:
+    case PLUS:
+    case MINUS:
+    case 82:
+      expression = Expression(parserAssembler);
+      break;
+    case LBRACE:
+      axiomList = AxiomList(qualifiedAxiomName, parserAssembler);
+      break;
+    default:
+      jj_la1[22] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+     VariableType varType = new VariableType(axiomList == null ? OperandType.AXIOM : OperandType.LIST);
+     if (expression != null)
+         varType.setProperty(VariableType.EXPRESSION, expression);
+     else
+         varType.setProperty(VariableType.PARAMS, axiomList);
+     Operand operand = varType.getInstance(parserAssembler, qualifiedAxiomName);
+     if (expression != null)
+         parserAssembler.setParameter(operand.getQualifiedName());
+     {if (true) return operand;}
     throw new Error("Missing return statement in function");
   }
 
-  final public void CalculatorTemplate(ParserAssembler parserAssembler) throws ParseException
+  final public List<OperandParam> AxiomList(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
   {
-    Template template;
-    Map<String, Object> properties = new HashMap<String, Object>();
-    int loopNumber = 0;
-    QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
+  List<OperandParam> operandParamList = new ArrayList<OperandParam>();
+  Operand operand;
+    operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler);
+    operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
+    label_9:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case LBRACE:
+        ;
+        break;
+      default:
+        jj_la1[23] = jj_gen;
+        break label_9;
+      }
+      operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler);
+      operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
+    }
+    {if (true) return operandParamList;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand AxiomInitializer(String listName, QualifiedName axiomName, ParserAssembler parserAssembler) throws ParseException
+  {
+  List<OperandParam> initializeList = null;
+    jj_consume_token(LBRACE);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case INTEGER:
+    case DOUBLE:
+    case DECIMAL:
+    case BOOLEAN:
+    case STRING:
+    case SCOPE:
+    case FACT:
+    case LENGTH:
+    case TERM:
+    case CURRENCY:
+    case FORMAT:
+    case INTEGER_LITERAL:
+    case FLOATING_POINT_LITERAL:
+    case NUMBER_LITERAL:
+    case STRING_LITERAL:
+    case TRUE:
+    case FALSE:
+    case UNKNOWN:
+    case IDENTIFIER:
+    case LPAREN:
+    case BANG:
+    case INCR:
+    case DECR:
+    case PLUS:
+    case MINUS:
+    case 82:
+      initializeList = ArgumentList(parserAssembler, true);
+      break;
+    default:
+      jj_la1[24] = jj_gen;
+      ;
+    }
+    jj_consume_token(RBRACE);
+     VariableType varType = new VariableType(OperandType.TERM);
+     varType.setProperty(VariableType.AXIOM_KEY, axiomName);
+     if (initializeList != null)
+        varType.setProperty(VariableType.PARAMS, initializeList);
+     Operand operand = varType.getInstance(parserAssembler, listName);
+     {if (true) return operand;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public void TemplateDeclaration(ParserContext context) throws ParseException
+  {
+  Template template;
+  Operand expression;
+  QualifiedName contextName = context.getContextName();
+    jj_consume_token(TEMPLATE);
+    template = Template(context, false);
+    jj_consume_token(LPAREN);
+    expression = TemplateExpression(template, context);
+        template.addTerm(expression);
+    label_10:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[25] = jj_gen;
+        break label_10;
+      }
+      jj_consume_token(COMMA);
+      expression = TemplateExpression(template, context);
+        template.addTerm(expression);
+    }
+    jj_consume_token(RPAREN);
+    context.setContextName(contextName);
+  }
+
+  final public Template Template(ParserContext context, boolean isCalculator) throws ParseException
+  {
+  Token templateToken;
+    templateToken = jj_consume_token(IDENTIFIER);
+    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(context.getScope().getAlias(), templateToken.image);
+    context.setContextName(qualifiedTemplateName);
+    {if (true) return context.getParserAssembler().createTemplate(qualifiedTemplateName, isCalculator);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public void CalculatorTemplate(ParserContext context) throws ParseException
+  {
+  Template template;
+  Map<String, Object> properties = new HashMap<String, Object>();
+  int loopNumber = 0;
+  ParserAssembler parserAssembler = context.getParserAssembler();
+  QualifiedName contextName = context.getContextName();
     jj_consume_token(CALC);
-    template = Template(parserAssembler, true);
+    template = Template(context, true);
     jj_consume_token(LPAREN);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
@@ -652,6 +875,7 @@ public class QueryParser implements QueryParserConstants
     case IDENTIFIER:
     case LPAREN:
     case LBRACE:
+    case DOT:
     case BANG:
     case COLON:
     case INCR:
@@ -659,19 +883,19 @@ public class QueryParser implements QueryParserConstants
     case PLUS:
     case MINUS:
     case 79:
-    case 81:
-      CalculatorExpression(loopNumber, template, template.getName(), parserAssembler);
+    case 82:
+      CalculatorExpression(loopNumber, template, template.getName(), context);
       break;
     case TEMPLATE:
     case 80:
-      CalculatorQuery(template, parserAssembler);
+      CalculatorQuery(template, context);
       break;
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[26] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-    label_7:
+    label_11:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -680,8 +904,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[19] = jj_gen;
-        break label_7;
+        jj_la1[27] = jj_gen;
+        break label_11;
       }
       jj_consume_token(COMMA);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -709,6 +933,7 @@ public class QueryParser implements QueryParserConstants
       case IDENTIFIER:
       case LPAREN:
       case LBRACE:
+      case DOT:
       case BANG:
       case COLON:
       case INCR:
@@ -716,15 +941,15 @@ public class QueryParser implements QueryParserConstants
       case PLUS:
       case MINUS:
       case 79:
-      case 81:
-        CalculatorExpression(loopNumber, template, template.getName(), parserAssembler);
+      case 82:
+        CalculatorExpression(loopNumber, template, template.getName(), context);
         break;
       case TEMPLATE:
       case 80:
-        CalculatorQuery(template, parserAssembler);
+        CalculatorQuery(template, context);
         break;
       default:
-        jj_la1[20] = jj_gen;
+        jj_la1[28] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -738,113 +963,29 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(RPAREN);
       break;
     default:
-      jj_la1[21] = jj_gen;
+      jj_la1[29] = jj_gen;
       ;
     }
-      if (properties.size() > 0)
-          template.addProperties(properties);
-      parserAssembler.getOperandMap().setQualifiedContextname(contextName);
+    if (properties.size() > 0)
+        template.addProperties(properties);
+    context.setContextName(contextName);
   }
 
-  final public void InitialiserList(Map<String, Object> properties) throws ParseException
-  {
-    InitialiserDeclaration(properties);
-    label_8:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COMMA:
-        ;
-        break;
-      default:
-        jj_la1[22] = jj_gen;
-        break label_8;
-      }
-      jj_consume_token(COMMA);
-      InitialiserDeclaration(properties);
-    }
-  }
-
-  final public void InitialiserDeclaration(Map<String, Object> properties) throws ParseException
-  {
-    String name;
-    Parameter param;
-    name = Name();
-    jj_consume_token(ASSIGN);
-    param = LiteralTerm();
-     properties.put(name, param.getValue());
-  }
-
-  final public Operand VariableDeclaration(ParserAssembler parserAssembler) throws ParseException
-  {
-    Token nameToken;
-    VariableType varType = null;
-    Operand index = null;
-    Operand expression = null;
-    OperandMap operandMap = parserAssembler.getOperandMap();
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case INTEGER:
-    case DOUBLE:
-    case DECIMAL:
-    case BOOLEAN:
-    case STRING:
-    case TERM:
-    case CURRENCY:
-      varType = Type(operandMap);
-      break;
-    default:
-      jj_la1[23] = jj_gen;
-      ;
-    }
-    nameToken = jj_consume_token(IDENTIFIER);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case LBRACKET:
-      index = IndexExpression(parserAssembler);
-      break;
-    default:
-      jj_la1[24] = jj_gen;
-      ;
-    }
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case ASSIGN:
-      jj_consume_token(ASSIGN);
-      expression = Expression(parserAssembler);
-      break;
-    default:
-      jj_la1[25] = jj_gen;
-      ;
-    }
-     String name = nameToken.image;
-     if (index !=null)
-         {if (true) return listItemOperand(name, parserAssembler, index, expression);}
-     if (varType == null)
-         varType = new VariableType(OperandType.UNKNOWN);
-     boolean isLiteral = (expression != null) &&
-                          !expression.isEmpty() && !(expression instanceof Evaluator);
-     if (expression != null)
-         varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
-     Operand operand = varType.getInstance(parserAssembler, name);
-     {if (true) return operand;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public void TemplateExpression(Template template, ParserAssembler parserAssembler) throws ParseException
+  final public Operand TemplateExpression(Template template, ParserContext context) throws ParseException
   {
     String name;
     VariableType varType = null;
     Operand index = null;
     Operand var = null;
     Token scToken = null;
+    Token privateToken = null;
     Token assignToken = null;
     Token equalsToken = null;
     Token regexLit = null;
     Token regexId = null;
     Operand expression = null;
     Group group = null;
+    ParserAssembler parserAssembler = context.getParserAssembler();
     OperandMap operandMap = parserAssembler.getOperandMap();
     List<Parameter> literalList = null;
     List<OperandParam> axiomList = null;
@@ -862,18 +1003,18 @@ public class QueryParser implements QueryParserConstants
       varType = Type(operandMap);
       break;
     default:
-      jj_la1[26] = jj_gen;
+      jj_la1[30] = jj_gen;
       ;
     }
     name = Name();
-       qname = parserAssembler.getContextName(name);
+    qname = parserAssembler.getContextName(name);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LBRACKET:
       index = IndexExpression(parserAssembler);
       break;
     default:
-      jj_la1[27] = jj_gen;
+      jj_la1[31] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -895,69 +1036,17 @@ public class QueryParser implements QueryParserConstants
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case ASSIGN:
-      case COLON:
       case PLUSASSIGN:
-      case MINUSASSIGN:
-      case STARASSIGN:
-      case SLASHASSIGN:
-      case ANDASSIGN:
-      case ORASSIGN:
-      case XORASSIGN:
-      case REMASSIGN:
-      case 79:
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
         {
-        case COLON:
-          scToken = jj_consume_token(COLON);
-          break;
-        case 79:
-          scToken = jj_consume_token(79);
-          break;
         case ASSIGN:
           equalsToken = jj_consume_token(ASSIGN);
           break;
         case PLUSASSIGN:
-        case MINUSASSIGN:
-        case STARASSIGN:
-        case SLASHASSIGN:
-        case ANDASSIGN:
-        case ORASSIGN:
-        case XORASSIGN:
-        case REMASSIGN:
-          switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-          {
-          case PLUSASSIGN:
-            assignToken = jj_consume_token(PLUSASSIGN);
-            break;
-          case MINUSASSIGN:
-            assignToken = jj_consume_token(MINUSASSIGN);
-            break;
-          case STARASSIGN:
-            assignToken = jj_consume_token(STARASSIGN);
-            break;
-          case SLASHASSIGN:
-            assignToken = jj_consume_token(SLASHASSIGN);
-            break;
-          case ANDASSIGN:
-            assignToken = jj_consume_token(ANDASSIGN);
-            break;
-          case ORASSIGN:
-            assignToken = jj_consume_token(ORASSIGN);
-            break;
-          case XORASSIGN:
-            assignToken = jj_consume_token(XORASSIGN);
-            break;
-          case REMASSIGN:
-            assignToken = jj_consume_token(REMASSIGN);
-            break;
-          default:
-            jj_la1[28] = jj_gen;
-            jj_consume_token(-1);
-            throw new ParseException();
-          }
+          assignToken = jj_consume_token(PLUSASSIGN);
           break;
         default:
-          jj_la1[29] = jj_gen;
+          jj_la1[32] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -966,9 +1055,9 @@ public class QueryParser implements QueryParserConstants
         case AXIOM:
           jj_consume_token(AXIOM);
           axiomList = AxiomList(qname, parserAssembler);
-          VariableType axiomListVarType = new VariableType(OperandType.LIST);
-          axiomListVarType.setProperty(VariableType.PARAMS, axiomList);
-          expression = axiomListVarType.getInstance(parserAssembler, qname);
+         VariableType axiomListVarType = new VariableType(OperandType.LIST);
+         axiomListVarType.setProperty(VariableType.PARAMS, axiomList);
+         expression = axiomListVarType.getInstance(parserAssembler, qname);
           break;
         case SCOPE:
         case FACT:
@@ -988,14 +1077,59 @@ public class QueryParser implements QueryParserConstants
         case DECR:
         case PLUS:
         case MINUS:
-        case 81:
+        case 82:
           expression = Expression(parserAssembler);
           break;
         default:
-          jj_la1[30] = jj_gen;
+          jj_la1[33] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
+        break;
+      case COLON:
+      case MINUSASSIGN:
+      case STARASSIGN:
+      case SLASHASSIGN:
+      case ANDASSIGN:
+      case ORASSIGN:
+      case XORASSIGN:
+      case REMASSIGN:
+      case 79:
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+        {
+        case COLON:
+          scToken = jj_consume_token(COLON);
+          break;
+        case 79:
+          scToken = jj_consume_token(79);
+          break;
+        case MINUSASSIGN:
+          assignToken = jj_consume_token(MINUSASSIGN);
+          break;
+        case STARASSIGN:
+          assignToken = jj_consume_token(STARASSIGN);
+          break;
+        case SLASHASSIGN:
+          assignToken = jj_consume_token(SLASHASSIGN);
+          break;
+        case ANDASSIGN:
+          assignToken = jj_consume_token(ANDASSIGN);
+          break;
+        case ORASSIGN:
+          assignToken = jj_consume_token(ORASSIGN);
+          break;
+        case XORASSIGN:
+          assignToken = jj_consume_token(XORASSIGN);
+          break;
+        case REMASSIGN:
+          assignToken = jj_consume_token(REMASSIGN);
+          break;
+        default:
+          jj_la1[34] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
+        expression = Expression(parserAssembler);
         break;
       case REGEX:
         jj_consume_token(REGEX);
@@ -1009,7 +1143,7 @@ public class QueryParser implements QueryParserConstants
           regexId = jj_consume_token(IDENTIFIER);
           break;
         default:
-          jj_la1[31] = jj_gen;
+          jj_la1[35] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1019,7 +1153,7 @@ public class QueryParser implements QueryParserConstants
           group = GroupDeclaration(template, name, parserAssembler);
           break;
         default:
-          jj_la1[32] = jj_gen;
+          jj_la1[36] = jj_gen;
           ;
         }
         jj_consume_token(RPAREN);
@@ -1058,74 +1192,103 @@ public class QueryParser implements QueryParserConstants
         case DECR:
         case PLUS:
         case MINUS:
-        case 81:
+        case 82:
           operandParamList = ArgumentList(parserAssembler, true);
           break;
         default:
-          jj_la1[33] = jj_gen;
+          jj_la1[37] = jj_gen;
           ;
         }
         jj_consume_token(RPAREN);
              template.addTerm(parserAssembler.getCallOperand(qname, operandParamList));
         break;
       default:
-        jj_la1[34] = jj_gen;
+        jj_la1[38] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[35] = jj_gen;
+      jj_la1[39] = jj_gen;
       ;
     }
      if (varType == null)
-         varType = new VariableType(OperandType.UNKNOWN);
+       varType = new VariableType(OperandType.UNKNOWN);
      Operand assignExpression = (assignToken != null) ? expression : null;
      Operand regexOp = null;
      if (regexLit != null)
-         regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
+       regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
      else if (regexId != null)
-         regexOp = operandMap.addOperand(regexId.image, null);
+       regexOp = operandMap.addOperand(regexId.image, null);
      if (assignToken != null)
-         expression = null;
+       expression = null;
      boolean isLiteral = (expression != null) && !expression.isEmpty() && (equalsToken != null);
      if (expression != null)
-         varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
+       varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
      if (index !=null)
-         var = listItemOperand(name, parserAssembler, index, null);
+       var = listItemOperand(name, parserAssembler, index, null);
      else if (regexOp != null)
-         var = new RegExOperand(qname, regexOp, 0, group);
+       var = new RegExOperand(qname, regexOp, 0, group);
      else if (scToken != null)
-         var = new Evaluator(qname, expression, (scToken.image == "?" ? "&&" : "||"));
+       var = new Evaluator(qname, expression, (scToken.image == "?" ? "&&" : "||"));
      else if (literalList != null)
-         var = new LiteralListOperand(qname, literalList);
+       var = new LiteralListOperand(qname, literalList);
      else if (!operandMap.hasOperand(name))
-         var = varType.getInstance(parserAssembler, name);
+       var = varType.getInstance(parserAssembler, name);
      else
-         var = operandMap.addOperand(name, expression);
+       var = operandMap.addOperand(name, expression);
      if ((index == null) && (!operandMap.hasOperand(name)))
-         operandMap.addOperand(var);
+       operandMap.addOperand(var);
      if (assignToken != null)
-         var = new Evaluator(qname, var, assignToken.image, assignExpression);
+       var = new Evaluator(qname, var, assignToken.image, assignExpression);
      if ((index !=null) && (equalsToken != null) && !isLiteral)
-         var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
-     template.addTerm(var);
+       var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
+      {if (true) return var;}
+    throw new Error("Missing return statement in function");
   }
 
-  final public void CalculatorExpression(int loop_number, Template template, String templateName, ParserAssembler parserAssembler) throws ParseException
+  final public void CalculatorExpression(int loop_number, Template template, String templateName, ParserContext context) throws ParseException
   {
   Token scToken = null;
+  Token privateToken = null;
   Operand expression = null;
   Operand innerLoop = null;
   QualifiedName qualifiedAxiomName;
   QualifiedName qualifiedTemplateName;
+  ParserAssembler parserAssembler = context.getParserAssembler();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
-    case AXIOM:
-      jj_consume_token(AXIOM);
-      qualifiedAxiomName = Axiom(parserAssembler);
-      expression = AxiomVariable(qualifiedAxiomName, parserAssembler);
-    parserAssembler.getOperandMap().addOperand(expression);
+    case COLON:
+    case 79:
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COLON:
+        scToken = jj_consume_token(COLON);
+        break;
+      case 79:
+        scToken = jj_consume_token(79);
+        break;
+      default:
+        jj_la1[40] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      expression = Expression(parserAssembler);
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case LBRACE:
+        innerLoop = InnerCalculator(loop_number + 1, templateName, context, scToken != null);
+        break;
+      default:
+        jj_la1[41] = jj_gen;
+        ;
+      }
+    if (scToken != null)
+      expression = new Evaluator(expression, (scToken.image == "?" ? "&&" : "||"), innerLoop);
+    if (scToken != null)
+      expression.setPrivate(true);
+    if (privateToken != null)
+        expression.setPrivate(true);
     template.addTerm(expression);
       break;
     case INTEGER:
@@ -1133,14 +1296,11 @@ public class QueryParser implements QueryParserConstants
     case DECIMAL:
     case BOOLEAN:
     case STRING:
-    case TERM:
-    case CURRENCY:
-    case IDENTIFIER:
-      TemplateExpression(template, parserAssembler);
-      break;
     case SCOPE:
     case FACT:
     case LENGTH:
+    case TERM:
+    case CURRENCY:
     case FORMAT:
     case INTEGER_LITERAL:
     case FLOATING_POINT_LITERAL:
@@ -1149,100 +1309,94 @@ public class QueryParser implements QueryParserConstants
     case TRUE:
     case FALSE:
     case UNKNOWN:
+    case IDENTIFIER:
     case LPAREN:
+    case DOT:
     case BANG:
-    case COLON:
     case INCR:
     case DECR:
     case PLUS:
     case MINUS:
-    case 79:
-    case 81:
+    case 82:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
-      case COLON:
-      case 79:
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-        {
-        case COLON:
-          scToken = jj_consume_token(COLON);
-          break;
-        case 79:
-          scToken = jj_consume_token(79);
-          break;
-        default:
-          jj_la1[36] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
+      case DOT:
+        privateToken = jj_consume_token(DOT);
         break;
       default:
-        jj_la1[37] = jj_gen;
+        jj_la1[42] = jj_gen;
         ;
       }
-      expression = Expression(parserAssembler);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
-      case LBRACE:
-        innerLoop = InnerCalculator(loop_number + 1, templateName, parserAssembler, scToken != null);
+      case INTEGER:
+      case DOUBLE:
+      case DECIMAL:
+      case BOOLEAN:
+      case STRING:
+      case TERM:
+      case CURRENCY:
+      case IDENTIFIER:
+        expression = TemplateExpression(template, context);
+        break;
+      case SCOPE:
+      case FACT:
+      case LENGTH:
+      case FORMAT:
+      case INTEGER_LITERAL:
+      case FLOATING_POINT_LITERAL:
+      case NUMBER_LITERAL:
+      case STRING_LITERAL:
+      case TRUE:
+      case FALSE:
+      case UNKNOWN:
+      case LPAREN:
+      case BANG:
+      case INCR:
+      case DECR:
+      case PLUS:
+      case MINUS:
+      case 82:
+        expression = Expression(parserAssembler);
         break;
       default:
-        jj_la1[38] = jj_gen;
-        ;
+        jj_la1[43] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
-    if (scToken != null)
-      expression = new Evaluator(expression, (scToken.image == "?" ? "&&" : "||"), innerLoop);
+    if (privateToken != null)
+      expression.setPrivate(true);
     template.addTerm(expression);
       break;
     case LBRACE:
-      innerLoop = InnerCalculator(loop_number + 1, templateName, parserAssembler, false);
+      innerLoop = InnerCalculator(loop_number + 1, templateName, context, false);
     template.addTerm(innerLoop);
       break;
+    case AXIOM:
+      jj_consume_token(AXIOM);
+      qualifiedAxiomName = Axiom(context);
+      expression = AxiomVariable(qualifiedAxiomName, context);
+    parserAssembler.getOperandMap().addOperand(expression);
+    template.addTerm(expression);
+      break;
     case CHOICE:
-      qualifiedAxiomName = ChoiceDeclaration(parserAssembler);
+      qualifiedAxiomName = ChoiceDeclaration(context);
     qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
     Template choiceTemplate = parserAssembler.getTemplate(qualifiedTemplateName);
-    QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
+    QualifiedName contextName = context.getContextName();
     QualifiedName qname = QualifiedName.parseName(choiceTemplate.getName(), contextName);
         Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     template.addTerm(choiceOperand);
       break;
     default:
-      jj_la1[39] = jj_gen;
+      jj_la1[44] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
   }
 
-  final public Operand InnerCalculator(int loop_number, String templateName, ParserAssembler parserAssembler, boolean runOnce) throws ParseException
-  {
-  String loopName = templateName + loop_number;
-  QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), templateName);
-  Template template = parserAssembler.chainTemplate(qualifiedTemplateName, loopName);
-    jj_consume_token(LBRACE);
-    CalculatorExpression(loop_number, template, templateName, parserAssembler);
-    label_9:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COMMA:
-        ;
-        break;
-      default:
-        jj_la1[40] = jj_gen;
-        break label_9;
-      }
-      jj_consume_token(COMMA);
-      CalculatorExpression(loop_number, template, templateName, parserAssembler);
-    }
-    jj_consume_token(RBRACE);
-    {if (true) return new LoopEvaluator(template, runOnce);}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public void CalculatorQuery(Template template, ParserAssembler parserAssembler) throws ParseException
+  final public void CalculatorQuery(Template template, ParserContext context) throws ParseException
   {
   String queryName;
   List<OperandParam> operandParamList = null;
@@ -1250,10 +1404,10 @@ public class QueryParser implements QueryParserConstants
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case TEMPLATE:
-      innerTemplate = InnerTemplateDeclaration(template.getQualifiedName(), parserAssembler);
+      innerTemplate = InnerTemplateDeclaration(template.getQualifiedName(), context);
       break;
     default:
-      jj_la1[41] = jj_gen;
+      jj_la1[45] = jj_gen;
       ;
     }
     jj_consume_token(80);
@@ -1286,231 +1440,30 @@ public class QueryParser implements QueryParserConstants
     case DECR:
     case PLUS:
     case MINUS:
-    case 81:
-      operandParamList = ArgumentList(parserAssembler, false);
+    case 82:
+      operandParamList = ArgumentList(context.getParserAssembler(), false);
       break;
     default:
-      jj_la1[42] = jj_gen;
+      jj_la1[46] = jj_gen;
       ;
     }
     jj_consume_token(RPAREN);
     QualifiedName qname = QualifiedName.parseName(queryName);
-    Operand queryOperand = parserAssembler.getQueryOperand(qname, operandParamList, innerTemplate);
+    Operand queryOperand = context.getParserAssembler().getQueryOperand(qname, operandParamList, innerTemplate);
     template.addTerm(queryOperand);
     if (innerTemplate != null)
         template.setNext(innerTemplate);
   }
 
-  final public Operand CalculatorFunction(ParserAssembler parserAssembler) throws ParseException
+  final public Template InnerTemplateDeclaration(QualifiedName ownerQualifiedName, ParserContext context) throws ParseException
   {
-    String fnName;
-    List<OperandParam> operandParamList = null;
-    fnName = Name();
-    jj_consume_token(LPAREN);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case INTEGER:
-    case DOUBLE:
-    case DECIMAL:
-    case BOOLEAN:
-    case STRING:
-    case SCOPE:
-    case FACT:
-    case LENGTH:
-    case TERM:
-    case CURRENCY:
-    case FORMAT:
-    case INTEGER_LITERAL:
-    case FLOATING_POINT_LITERAL:
-    case NUMBER_LITERAL:
-    case STRING_LITERAL:
-    case TRUE:
-    case FALSE:
-    case UNKNOWN:
-    case IDENTIFIER:
-    case LPAREN:
-    case BANG:
-    case INCR:
-    case DECR:
-    case PLUS:
-    case MINUS:
-    case 81:
-      operandParamList = ArgumentList(parserAssembler, true);
-      break;
-    default:
-      jj_la1[43] = jj_gen;
-      ;
-    }
-    jj_consume_token(RPAREN);
-    {if (true) return parserAssembler.getCallOperand(parserAssembler.getContextName(fnName), operandParamList);}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Template InnerTemplateDeclaration(QualifiedName ownerQualifiedName, ParserAssembler parserAssembler) throws ParseException
-  {
-    Template template;
+  Template template;
+  Operand expression;
     jj_consume_token(TEMPLATE);
-    template = InnerTemplate(ownerQualifiedName, parserAssembler);
+    template = InnerTemplate(ownerQualifiedName, context);
     jj_consume_token(LPAREN);
-    TemplateExpression(template, parserAssembler);
-    label_10:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COMMA:
-        ;
-        break;
-      default:
-        jj_la1[44] = jj_gen;
-        break label_10;
-      }
-      jj_consume_token(COMMA);
-      TemplateExpression(template, parserAssembler);
-    }
-    jj_consume_token(RPAREN);
-        {if (true) return template;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Template InnerTemplate(QualifiedName ownerQualifiedName, ParserAssembler parserAssembler) throws ParseException
-  {
-    Token templateToken;
-    templateToken = jj_consume_token(IDENTIFIER);
-    QualifiedName qualifiedTemplateName = new QualifiedName(templateToken.image, ownerQualifiedName);
-    Template innerTemplate = parserAssembler.createTemplate(qualifiedTemplateName, false);
-    innerTemplate.setInnerTemplate(true);
-    innerTemplate.setKey(templateToken.image);
-    {if (true) return innerTemplate;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand AxiomVariable(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-    Operand expression = null;
-    List<OperandParam> axiomList = null;
-    jj_consume_token(ASSIGN);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case SCOPE:
-    case FACT:
-    case LENGTH:
-    case FORMAT:
-    case INTEGER_LITERAL:
-    case FLOATING_POINT_LITERAL:
-    case NUMBER_LITERAL:
-    case STRING_LITERAL:
-    case TRUE:
-    case FALSE:
-    case UNKNOWN:
-    case IDENTIFIER:
-    case LPAREN:
-    case BANG:
-    case INCR:
-    case DECR:
-    case PLUS:
-    case MINUS:
-    case 81:
-      expression = Expression(parserAssembler);
-      break;
-    case LBRACE:
-      axiomList = AxiomList(qualifiedAxiomName, parserAssembler);
-      break;
-    default:
-      jj_la1[45] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-     VariableType varType = new VariableType(axiomList == null ? OperandType.AXIOM : OperandType.LIST);
-     if (expression != null)
-         varType.setProperty(VariableType.EXPRESSION, expression);
-     else
-         varType.setProperty(VariableType.PARAMS, axiomList);
-     Operand operand = varType.getInstance(parserAssembler, qualifiedAxiomName);
-     if (expression != null)
-         parserAssembler.setParameter(operand.getQualifiedName());
-     {if (true) return operand;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public List<OperandParam> AxiomList(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-  List<OperandParam> operandParamList = new ArrayList<OperandParam>();
-  Operand operand;
-    operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler);
-    operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
-    label_11:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case LBRACE:
-        ;
-        break;
-      default:
-        jj_la1[46] = jj_gen;
-        break label_11;
-      }
-      operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler);
-      operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
-    }
-    {if (true) return operandParamList;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand AxiomInitializer(String listName, QualifiedName axiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-    List<OperandParam> initializeList = null;
-    jj_consume_token(LBRACE);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case INTEGER:
-    case DOUBLE:
-    case DECIMAL:
-    case BOOLEAN:
-    case STRING:
-    case SCOPE:
-    case FACT:
-    case LENGTH:
-    case TERM:
-    case CURRENCY:
-    case FORMAT:
-    case INTEGER_LITERAL:
-    case FLOATING_POINT_LITERAL:
-    case NUMBER_LITERAL:
-    case STRING_LITERAL:
-    case TRUE:
-    case FALSE:
-    case UNKNOWN:
-    case IDENTIFIER:
-    case LPAREN:
-    case BANG:
-    case INCR:
-    case DECR:
-    case PLUS:
-    case MINUS:
-    case 81:
-      initializeList = ArgumentList(parserAssembler, true);
-      break;
-    default:
-      jj_la1[47] = jj_gen;
-      ;
-    }
-    jj_consume_token(RBRACE);
-     VariableType varType = new VariableType(OperandType.TERM);
-     varType.setProperty(VariableType.AXIOM_KEY, axiomName);
-     if (initializeList != null)
-        varType.setProperty(VariableType.PARAMS, initializeList);
-     Operand operand = varType.getInstance(parserAssembler, listName);
-     {if (true) return operand;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Group GroupDeclaration(Template template, String name, ParserAssembler parserAssembler) throws ParseException
-  {
-  Group group = new Group(name);
-    jj_consume_token(LBRACE);
-    Group(group, template, name, parserAssembler);
+    expression = TemplateExpression(template, context);
+            template.addTerm(expression);
     label_12:
     while (true) 
     {
@@ -1520,8 +1473,208 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[48] = jj_gen;
+        jj_la1[47] = jj_gen;
         break label_12;
+      }
+      jj_consume_token(COMMA);
+      expression = TemplateExpression(template, context);
+            template.addTerm(expression);
+    }
+    jj_consume_token(RPAREN);
+        {if (true) return template;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Template InnerTemplate(QualifiedName ownerQualifiedName, ParserContext context) throws ParseException
+  {
+  Token templateToken;
+    templateToken = jj_consume_token(IDENTIFIER);
+    QualifiedName qualifiedTemplateName = new QualifiedName(templateToken.image, ownerQualifiedName);
+    Template innerTemplate = context.getParserAssembler().createTemplate(qualifiedTemplateName, false);
+    innerTemplate.setInnerTemplate(true);
+    innerTemplate.setKey(templateToken.image);
+    {if (true) return innerTemplate;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public QualifiedName Choice(ParserAssembler parserAssembler) throws ParseException
+  {
+    Token choiceToken;
+    choiceToken = jj_consume_token(IDENTIFIER);
+    QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
+    parserAssembler.createAxiom(qualifiedChoiceName);
+    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(qualifiedChoiceName.getScope(), qualifiedChoiceName.getName());
+    Template template = parserAssembler.createTemplate(qualifiedTemplateName, true);
+    template.setChoice(true);
+    {if (true) return qualifiedChoiceName;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand ChoiceExpression(String name, ParserAssembler parserAssembler) throws ParseException
+  {
+    Operand operand;
+    QualifiedName qname = parserAssembler.getContextName(name);
+    operand = Expression(parserAssembler);
+      if (operand instanceof Evaluator)
+          {if (true) return new Evaluator(qname, operand, "&&" );}
+      if (operand instanceof StringOperand)
+          {if (true) return new RegExOperand(qname, operand, 0, null);}
+      {if (true) return new MatchOperand(qname, operand);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand InnerCalculator(int loop_number, String templateName, ParserContext context, boolean runOnce) throws ParseException
+  {
+  String loopName = templateName + loop_number;
+  QualifiedName qualifiedTemplateName = new QualifiedTemplateName(context.getScope().getAlias(), templateName);
+  Template template = context.getParserAssembler().chainTemplate(qualifiedTemplateName, loopName);
+    jj_consume_token(LBRACE);
+    CalculatorExpression(loop_number, template, templateName, context);
+    label_13:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[48] = jj_gen;
+        break label_13;
+      }
+      jj_consume_token(COMMA);
+      CalculatorExpression(loop_number, template, templateName, context);
+    }
+    jj_consume_token(RBRACE);
+    {if (true) return new LoopEvaluator(template, runOnce);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public QualifiedName ChoiceDeclaration(ParserContext context) throws ParseException
+  {
+    QualifiedName qualifiedAxiomName;
+    int selection = 0;
+    ParserAssembler parserAssembler = context.getParserAssembler();
+    OperandMap operandMap = parserAssembler.getOperandMap();
+    jj_consume_token(CHOICE);
+    qualifiedAxiomName = Choice(parserAssembler);
+    jj_consume_token(LPAREN);
+    TermName(qualifiedAxiomName, parserAssembler);
+    label_14:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[49] = jj_gen;
+        break label_14;
+      }
+      jj_consume_token(COMMA);
+      TermName(qualifiedAxiomName, parserAssembler);
+    }
+    jj_consume_token(RPAREN);
+    label_15:
+    while (true) 
+    {
+      ChoiceItem(selection, qualifiedAxiomName, parserAssembler);
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case LBRACE:
+        ;
+        break;
+      default:
+        jj_la1[50] = jj_gen;
+        break label_15;
+      }
+    }
+      QualifiedName contextName = context.getContextName();
+      if (contextName.getTemplate().isEmpty())
+          {if (true) return qualifiedAxiomName;}
+      List<String> termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
+      for (String termName: termNameList)
+          operandMap.addOperand(termName, null);
+      context.setContextName(contextName);
+      {if (true) return qualifiedAxiomName;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
+  {
+    Operand operand;
+    String name = parserAssembler.getAxiomTermName(qualifiedAxiomName, 0);
+    parserAssembler.addAxiom(qualifiedAxiomName, new Parameter(Term.ANONYMOUS, new Null()));
+    jj_consume_token(LBRACE);
+    operand = ChoiceExpression(name, parserAssembler);
+    label_16:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[51] = jj_gen;
+        break label_16;
+      }
+      jj_consume_token(COMMA);
+      Fact(qualifiedAxiomName, parserAssembler);
+    }
+    jj_consume_token(RBRACE);
+       parserAssembler.saveAxiom(qualifiedAxiomName);
+       QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName());
+       parserAssembler.addTemplate(qualifiedTemplateName, operand);
+  }
+
+  final public void InitialiserList(Map<String, Object> properties) throws ParseException
+  {
+    InitialiserDeclaration(properties);
+    label_17:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[52] = jj_gen;
+        break label_17;
+      }
+      jj_consume_token(COMMA);
+      InitialiserDeclaration(properties);
+    }
+  }
+
+  final public void InitialiserDeclaration(Map<String, Object> properties) throws ParseException
+  {
+    String name;
+    Parameter param;
+    name = Name();
+    jj_consume_token(ASSIGN);
+    param = LiteralTerm();
+     properties.put(name, param.getValue());
+  }
+
+  final public Group GroupDeclaration(Template template, String name, ParserAssembler parserAssembler) throws ParseException
+  {
+  Group group = new Group(name);
+    jj_consume_token(LBRACE);
+    Group(group, template, name, parserAssembler);
+    label_18:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[53] = jj_gen;
+        break label_18;
       }
       jj_consume_token(COMMA);
       Group(group, template, name, parserAssembler);
@@ -1540,379 +1693,168 @@ public class QueryParser implements QueryParserConstants
     group.addGroup(var);
   }
 
-  final public void AxiomDeclaration(ParserAssembler parserAssembler) throws ParseException
+  final public List<Parameter> LiteralList() throws ParseException
   {
-    QualifiedName qualifiedAxiomName;
-    Operand operand = null;
-    jj_consume_token(AXIOM);
-    qualifiedAxiomName = Axiom(parserAssembler);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case LPAREN:
-      AxiomSpecification(qualifiedAxiomName, parserAssembler);
-      break;
-    case ASSIGN:
-      operand = AxiomVariable(qualifiedAxiomName, parserAssembler);
-      break;
-    default:
-      jj_la1[49] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-        if (operand != null)
-            parserAssembler.getOperandMap().addOperand(operand);
-  }
-
-  final public void AxiomSpecification(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-    parserAssembler.createAxiom(qualifiedAxiomName);
-    jj_consume_token(LPAREN);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case IDENTIFIER:
-      TermName(qualifiedAxiomName, parserAssembler);
-      label_13:
-      while (true) 
-      {
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-        {
-        case COMMA:
-          ;
-          break;
-        default:
-          jj_la1[50] = jj_gen;
-          break label_13;
-        }
-        jj_consume_token(COMMA);
-        TermName(qualifiedAxiomName, parserAssembler);
-      }
-      break;
-    default:
-      jj_la1[51] = jj_gen;
-      ;
-    }
-    jj_consume_token(RPAREN);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case LBRACE:
-    case COLON:
-      if (jj_2_1(2)) 
-      {
-        ResourceBinding(QueryParserConstants.AXIOM, qualifiedAxiomName, parserAssembler);
-      } else if (jj_2_2(2)) 
-      {
-        ParameterDeclaration(qualifiedAxiomName, parserAssembler);
-      } else 
-      {
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-        {
-        case LBRACE:
-          label_14:
-          while (true) 
-          {
-            jj_consume_token(LBRACE);
-            AxiomItem(qualifiedAxiomName, parserAssembler);
-            jj_consume_token(RBRACE);
-            switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-            {
-            case LBRACE:
-              ;
-              break;
-            default:
-              jj_la1[52] = jj_gen;
-              break label_14;
-            }
-          }
-          break;
-        default:
-          jj_la1[53] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
-      }
-      break;
-    default:
-      jj_la1[54] = jj_gen;
-      ;
-    }
-  }
-
-  final public QualifiedName ChoiceDeclaration(ParserAssembler parserAssembler) throws ParseException
-  {
-    QualifiedName qualifiedAxiomName;
-    int selection = 0;
-    OperandMap operandMap = parserAssembler.getOperandMap();
-    jj_consume_token(CHOICE);
-    qualifiedAxiomName = Choice(parserAssembler);
-    jj_consume_token(LPAREN);
-    TermName(qualifiedAxiomName, parserAssembler);
-    label_15:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COMMA:
-        ;
-        break;
-      default:
-        jj_la1[55] = jj_gen;
-        break label_15;
-      }
-      jj_consume_token(COMMA);
-      TermName(qualifiedAxiomName, parserAssembler);
-    }
-    jj_consume_token(RPAREN);
-    label_16:
-    while (true) 
-    {
-      ChoiceItem(selection, qualifiedAxiomName, parserAssembler);
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case LBRACE:
-        ;
-        break;
-      default:
-        jj_la1[56] = jj_gen;
-        break label_16;
-      }
-    }
-      QualifiedName contextName = parserAssembler.getOperandMap().getQualifiedContextname();
-      if (contextName.getTemplate().isEmpty())
-          {if (true) return qualifiedAxiomName;}
-      parserAssembler.getOperandMap().setQualifiedContextname(contextName);
-      List<String> termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
-      for (String termName: termNameList)
-          parserAssembler.getOperandMap().addOperand(termName, null);
-      operandMap.setQualifiedContextname(contextName);
-      {if (true) return qualifiedAxiomName;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public QualifiedName Axiom(ParserAssembler parserAssembler) throws ParseException
-  {
-    String axiomName;
-    axiomName = Name();
-    {if (true) return axiomName.indexOf(".") == -1 ?
-        parserAssembler.getContextName(axiomName) :
-        QualifiedName.parseName(axiomName);}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public QualifiedName Choice(ParserAssembler parserAssembler) throws ParseException
-  {
-    Token choiceToken;
-    choiceToken = jj_consume_token(IDENTIFIER);
-    QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
-    parserAssembler.createAxiom(qualifiedChoiceName);
-    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(qualifiedChoiceName.getScope(), qualifiedChoiceName.getName());
-    Template template = parserAssembler.createTemplate(qualifiedTemplateName, true);
-    template.setChoice(true);
-    {if (true) return qualifiedChoiceName;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public void TermName(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-    Token nameToken;
-    nameToken = jj_consume_token(IDENTIFIER);
-      parserAssembler.addAxiomTermName(qualifiedAxiomName, nameToken.image);
-  }
-
-  final public void AxiomItem(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-    Fact(qualifiedAxiomName, parserAssembler);
-    label_17:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COMMA:
-        ;
-        break;
-      default:
-        jj_la1[57] = jj_gen;
-        break label_17;
-      }
-      jj_consume_token(COMMA);
-      Fact(qualifiedAxiomName, parserAssembler);
-    }
-      parserAssembler.saveAxiom(qualifiedAxiomName);
-  }
-
-  final public void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-    Operand operand;
-    String name = parserAssembler.getAxiomTermName(qualifiedAxiomName, 0);
-    parserAssembler.addAxiom(qualifiedAxiomName, new Parameter(Term.ANONYMOUS, new Null()));
-    jj_consume_token(LBRACE);
-    operand = ChoiceExpression(name, parserAssembler);
-    label_18:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COMMA:
-        ;
-        break;
-      default:
-        jj_la1[58] = jj_gen;
-        break label_18;
-      }
-      jj_consume_token(COMMA);
-      Fact(qualifiedAxiomName, parserAssembler);
-    }
-    jj_consume_token(RBRACE);
-       parserAssembler.saveAxiom(qualifiedAxiomName);
-       QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName());
-       parserAssembler.addTemplate(qualifiedTemplateName, operand);
-  }
-
-  final public Operand ChoiceExpression(String name, ParserAssembler parserAssembler) throws ParseException
-  {
-    Operand operand;
-    QualifiedName qname = parserAssembler.getContextName(name);
-    operand = Expression(parserAssembler);
-      if (operand instanceof Evaluator)
-          {if (true) return new Evaluator(qname, operand, "&&" );}
-      if (operand instanceof StringOperand)
-          {if (true) return new RegExOperand(qname, operand, 0, null);}
-      {if (true) return new MatchOperand(qname, operand);}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public void ResourceDeclaration(QueryProgram queryProgram) throws ParseException
-  {
-  Token nameToken;
-  Map<String, Object> properties = new HashMap<String, Object>();
-    jj_consume_token(RESOURCE);
-    nameToken = jj_consume_token(STRING_LITERAL);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case LPAREN:
-      jj_consume_token(LPAREN);
-      InitialiserList(properties);
-      jj_consume_token(RPAREN);
-      break;
-    default:
-      jj_la1[59] = jj_gen;
-      ;
-    }
-    queryProgram.openResource(getText(nameToken), properties);
-  }
-
-  final public QualifiedName ResourceBinding(int kind, QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-  Token nameToken = null;
-    jj_consume_token(COLON);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case STRING_LITERAL:
-      nameToken = jj_consume_token(STRING_LITERAL);
-      break;
-    case RESOURCE:
-      jj_consume_token(RESOURCE);
-      break;
-    default:
-      jj_la1[60] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    QualifiedName qualifiedBindingName =
-        kind == QueryParserConstants.TEMPLATE ?
-        new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName()) :
-        qualifiedAxiomName;
-    AxiomProvider axiomProvider = (nameToken != null) ?
-        parserAssembler.bindResource(QualifiedName.parseName(getText(nameToken)), qualifiedBindingName) :
-        parserAssembler.bindResource(qualifiedBindingName);
-    {if (true) return qualifiedBindingName;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public void ParameterDeclaration(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-    jj_consume_token(COLON);
-    jj_consume_token(PARAMETER);
-    parserAssembler.setParameter(qualifiedAxiomName);
-  }
-
-  final public void Fact(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
-  {
-  Parameter param = null;
-  Token lit = null;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case INTEGER_LITERAL:
-    case FLOATING_POINT_LITERAL:
-    case STRING_LITERAL:
-    case TRUE:
-    case FALSE:
-    case UNKNOWN:
-      param = LiteralTerm();
-    parserAssembler.addAxiom(qualifiedAxiomName, param);
-      break;
-    case NUMBER_LITERAL:
-      lit = jj_consume_token(NUMBER_LITERAL);
-    parserAssembler.addAxiom(qualifiedAxiomName, new NumberTerm(getText(lit), parserAssembler.getScopeLocale()));
-      break;
-    case NAN:
-      jj_consume_token(NAN);
-    parserAssembler.addAxiom(qualifiedAxiomName, new DoubleTerm("NaN"));
-      break;
-    default:
-      jj_la1[61] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-  }
-
-  final public String Name() throws ParseException
-  {
-  String name;
-  Token partToken;
-    partToken = jj_consume_token(IDENTIFIER);
-    name = partToken.image;
+  List<Parameter>  literalList = new ArrayList<Parameter>();
+  Parameter parameter;
+    parameter = LiteralTerm();
+    literalList.add(parameter);
     label_19:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
-      case DOT:
+      case COMMA:
         ;
         break;
       default:
-        jj_la1[62] = jj_gen;
+        jj_la1[54] = jj_gen;
         break label_19;
       }
-      jj_consume_token(DOT);
-      partToken = jj_consume_token(IDENTIFIER);
-      name += ("." + partToken.image);
+      jj_consume_token(COMMA);
+      parameter = LiteralTerm();
+      literalList.add(parameter);
     }
-    {if (true) return name;}
+    {if (true) return literalList;}
     throw new Error("Missing return statement in function");
   }
 
-  final public KeyName KeyName(QuerySpec querySpec) throws ParseException
+  final public Operand VariableDeclaration(ParserContext context) throws ParseException
   {
-  String name1;
-  String name2 = null;
-    name1 = Name();
+  Token nameToken;
+  VariableType varType = null;
+  Operand index = null;
+  Operand expression = null;
+  ParserAssembler parserAssembler = context.getParserAssembler();
+  OperandMap operandMap = parserAssembler.getOperandMap();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
-    case COLON:
-      jj_consume_token(COLON);
-      name2 = Name();
+    case INTEGER:
+    case DOUBLE:
+    case DECIMAL:
+    case BOOLEAN:
+    case STRING:
+    case TERM:
+    case CURRENCY:
+      varType = Type(operandMap);
       break;
     default:
-      jj_la1[63] = jj_gen;
+      jj_la1[55] = jj_gen;
       ;
     }
-    boolean isBinary = name2 != null;
-    String axiomKey = isBinary  ? name1 : "";
-    String templateName = isBinary  ? name2 : name1;
-    KeyName keyname = new KeyName(axiomKey, templateName);
-    querySpec.addKeyName(keyname);
-    {if (true) return keyname;}
+    nameToken = jj_consume_token(IDENTIFIER);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case LBRACKET:
+      index = IndexExpression(parserAssembler);
+      break;
+    default:
+      jj_la1[56] = jj_gen;
+      ;
+    }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case ASSIGN:
+      jj_consume_token(ASSIGN);
+      expression = Expression(parserAssembler);
+      break;
+    default:
+      jj_la1[57] = jj_gen;
+      ;
+    }
+     String name = nameToken.image;
+     if (index !=null)
+         {if (true) return listItemOperand(name, parserAssembler, index, expression);}
+     if (varType == null)
+         varType = new VariableType(OperandType.UNKNOWN);
+     boolean isLiteral = (expression != null) &&
+                          !expression.isEmpty() && !(expression instanceof Evaluator);
+     if (expression != null)
+         varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
+     Operand operand = varType.getInstance(parserAssembler, name);
+     {if (true) return operand;}
     throw new Error("Missing return statement in function");
+  }
+
+  final public void ListDeclaration(ParserContext context) throws ParseException
+  {
+  Token keywordToken;
+  Token nameToken;
+  VariableType varType = null;
+  QualifiedName qualifiedBindingName = null;
+  QualifiedName qualifiedAxiomName = null;
+  ParserAssembler parserAssembler = context.getParserAssembler();
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case LIST:
+      keywordToken = jj_consume_token(LIST);
+      break;
+    case LOCAL:
+      keywordToken = jj_consume_token(LOCAL);
+      break;
+    default:
+      jj_la1[58] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case LT:
+      jj_consume_token(LT);
+      varType = Type(parserAssembler.getOperandMap());
+      jj_consume_token(GT);
+      break;
+    default:
+      jj_la1[59] = jj_gen;
+      ;
+    }
+    nameToken = jj_consume_token(IDENTIFIER);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case LPAREN:
+      jj_consume_token(LPAREN);
+      qualifiedAxiomName = Axiom(context);
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COLON:
+        jj_consume_token(COLON);
+        qualifiedBindingName = ResourceBinding(QueryParserConstants.TEMPLATE, qualifiedAxiomName, parserAssembler);
+        break;
+      default:
+        jj_la1[60] = jj_gen;
+        ;
+      }
+      jj_consume_token(RPAREN);
+      break;
+    default:
+      jj_la1[61] = jj_gen;
+      ;
+    }
+    String listName = nameToken.image;
+    boolean isLocal = keywordToken.kind == QueryParserConstants.LOCAL;
+    boolean isTermList = (varType != null) && varType.getOperandType() == OperandType.TERM;
+    if ((varType == null) && (qualifiedAxiomName == null))
+        {if (true) throw new ParseException("Invalid declaration for list \u005c"" + listName + "\u005c". Missing type or axiom name.");}
+    if ((varType != null) && isLocal)
+        {if (true) throw new ParseException("Invalid declaration for local \u005c"" + listName + "\u005c". Type in declaration not allowed.");}
+    if ((qualifiedBindingName != null) && !isTermList)
+        {if (true) throw new ParseException("Invalid declaration for " + keywordToken.image + " \u005c"" + listName + "\u005c". Only Term type list can be bound to a resource");}
+    if (qualifiedBindingName != null)
+        qualifiedAxiomName = qualifiedBindingName;
+    if (varType == null)
+        varType = isLocal ? new VariableType(OperandType.LOCAL) : new VariableType(OperandType.AXIOM);
+    if (qualifiedAxiomName != null)
+        varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
+    ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
+    parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
+  }
+
+  final public void Include(ParserContext context) throws ParseException
+  {
+  Token includeToken = null;
+    jj_consume_token(INCLUDE);
+    includeToken = jj_consume_token(STRING_LITERAL);
+    includeResource(includeToken.image, context.getQueryProgram());
   }
 
   final public Operand Expression(ParserAssembler parserAssembler) throws ParseException
@@ -1962,470 +1904,19 @@ public class QueryParser implements QueryParserConstants
         assignToken = jj_consume_token(REMASSIGN);
         break;
       default:
-        jj_la1[64] = jj_gen;
+        jj_la1[62] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       assignOperand = Expression(parserAssembler);
       break;
     default:
-      jj_la1[65] = jj_gen;
+      jj_la1[63] = jj_gen;
       ;
     }
     if (assignOperand == null)
       {if (true) return param;}
     {if (true) return new Evaluator(param, assignToken.image, assignOperand);}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand ConditionalOrExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand[] params = new Operand[2];
-  Token op;
-    params[0] = ConditionalAndExpression(parserAssembler);
-    label_20:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case SC_OR:
-        ;
-        break;
-      default:
-        jj_la1[66] = jj_gen;
-        break label_20;
-      }
-      op = jj_consume_token(SC_OR);
-      params[1] = ConditionalAndExpression(parserAssembler);
-      params[0] = new Evaluator(params[0], op.image, params[1]);
-    }
-    {if (true) return params[0];}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand ConditionalAndExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand[] params = new Operand[2];
-  Token op;
-    params[0] = InclusiveOrExpression(parserAssembler);
-    label_21:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case SC_AND:
-        ;
-        break;
-      default:
-        jj_la1[67] = jj_gen;
-        break label_21;
-      }
-      op = jj_consume_token(SC_AND);
-      params[1] = InclusiveOrExpression(parserAssembler);
-      params[0] = new Evaluator(params[0], op.image, params[1]);
-    }
-    {if (true) return params[0];}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand InclusiveOrExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand[] params = new Operand[2];
-  Token op;
-    params[0] = ExclusiveOrExpression(parserAssembler);
-    label_22:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case BIT_OR:
-        ;
-        break;
-      default:
-        jj_la1[68] = jj_gen;
-        break label_22;
-      }
-      op = jj_consume_token(BIT_OR);
-      params[1] = ExclusiveOrExpression(parserAssembler);
-      params[0] = new Evaluator(params[0], op.image, params[1]);
-    }
-    {if (true) return params[0];}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand ExclusiveOrExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand[] params = new Operand[2];
-  Token op;
-    params[0] = AndExpression(parserAssembler);
-    label_23:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case XOR:
-        ;
-        break;
-      default:
-        jj_la1[69] = jj_gen;
-        break label_23;
-      }
-      op = jj_consume_token(XOR);
-      params[1] = AndExpression(parserAssembler);
-      params[0] = new Evaluator(params[0], op.image, params[1]);
-    }
-    {if (true) return params[0];}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand AndExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand[] params = new Operand[2];
-  Token op;
-    params[0] = EqualityExpression(parserAssembler);
-    label_24:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case BIT_AND:
-        ;
-        break;
-      default:
-        jj_la1[70] = jj_gen;
-        break label_24;
-      }
-      op = jj_consume_token(BIT_AND);
-      params[1] = EqualityExpression(parserAssembler);
-      params[0] = new Evaluator(params[0], op.image, params[1]);
-    }
-    {if (true) return params[0];}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand EqualityExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand[] params = new Operand[2];
-  Token op;
-    params[0] = RelationalExpression(parserAssembler);
-    label_25:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case EQ:
-      case NE:
-        ;
-        break;
-      default:
-        jj_la1[71] = jj_gen;
-        break label_25;
-      }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case EQ:
-        op = jj_consume_token(EQ);
-        break;
-      case NE:
-        op = jj_consume_token(NE);
-        break;
-      default:
-        jj_la1[72] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      params[1] = RelationalExpression(parserAssembler);
-      params[0] = new Evaluator(params[0], op.image, params[1]);
-    }
-    {if (true) return params[0];}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand RelationalExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand[] params = new Operand[2];
-  Token op;
-    params[0] = AdditiveExpression(parserAssembler);
-    label_26:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case GT:
-      case LT:
-      case LE:
-      case GE:
-        ;
-        break;
-      default:
-        jj_la1[73] = jj_gen;
-        break label_26;
-      }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case LT:
-        op = jj_consume_token(LT);
-        break;
-      case GT:
-        op = jj_consume_token(GT);
-        break;
-      case LE:
-        op = jj_consume_token(LE);
-        break;
-      case GE:
-        op = jj_consume_token(GE);
-        break;
-      default:
-        jj_la1[74] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      params[1] = AdditiveExpression(parserAssembler);
-      params[0] = new Evaluator(params[0], op.image, params[1]);
-    }
-    {if (true) return params[0];}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand AdditiveExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand[] params = new Operand[2];
-  Token op;
-    params[0] = MultiplicativeExpression(parserAssembler);
-    label_27:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case PLUS:
-      case MINUS:
-        ;
-        break;
-      default:
-        jj_la1[75] = jj_gen;
-        break label_27;
-      }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case PLUS:
-        op = jj_consume_token(PLUS);
-        break;
-      case MINUS:
-        op = jj_consume_token(MINUS);
-        break;
-      default:
-        jj_la1[76] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      params[1] = MultiplicativeExpression(parserAssembler);
-      params[0] = new Evaluator(params[0], op.image, params[1]);
-    }
-    {if (true) return params[0];}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand MultiplicativeExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand[] params = new Operand[2];
-  Token op;
-    params[0] = UnaryExpression(parserAssembler);
-    label_28:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case STAR:
-      case SLASH:
-      case REM:
-        ;
-        break;
-      default:
-        jj_la1[77] = jj_gen;
-        break label_28;
-      }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case STAR:
-        op = jj_consume_token(STAR);
-        break;
-      case SLASH:
-        op = jj_consume_token(SLASH);
-        break;
-      case REM:
-        op = jj_consume_token(REM);
-        break;
-      default:
-        jj_la1[78] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      params[1] = UnaryExpression(parserAssembler);
-      params[0] = new Evaluator(params[0], op.image, params[1]);
-    }
-    {if (true) return params[0];}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand UnaryExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand param;
-  boolean plus = false;
-  boolean minus = false;
-  boolean tilde = false;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case PLUS:
-    case MINUS:
-    case 81:
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case PLUS:
-        jj_consume_token(PLUS);
-    plus = true;
-        break;
-      case MINUS:
-        jj_consume_token(MINUS);
-    minus = true;
-        break;
-      case 81:
-        jj_consume_token(81);
-    tilde = true;
-        break;
-      default:
-        jj_la1[79] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      param = UnaryExpression(parserAssembler);
-    if (plus)
-      {if (true) return new Evaluator("+", param);}
-    else if (minus)
-      {if (true) return new Evaluator("-", param);}
-    else if (tilde)
-      {if (true) return new Evaluator("~", param);}
-    {if (true) return param;}
-      break;
-    case INCR:
-      param = PreIncrementExpression(parserAssembler);
-    {if (true) return param;}
-      break;
-    case DECR:
-      param = PreDecrementExpression(parserAssembler);
-    {if (true) return param;}
-      break;
-    case SCOPE:
-    case FACT:
-    case LENGTH:
-    case FORMAT:
-    case INTEGER_LITERAL:
-    case FLOATING_POINT_LITERAL:
-    case NUMBER_LITERAL:
-    case STRING_LITERAL:
-    case TRUE:
-    case FALSE:
-    case UNKNOWN:
-    case IDENTIFIER:
-    case LPAREN:
-    case BANG:
-      param = UnaryExpressionNotPlusMinus(parserAssembler);
-    {if (true) return param;}
-      break;
-    default:
-      jj_la1[80] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand PreIncrementExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand param;
-    jj_consume_token(INCR);
-    param = PrimaryExpression(parserAssembler);
-    {if (true) return new Evaluator("++", param);}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand PreDecrementExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand param;
-    jj_consume_token(DECR);
-    param = PrimaryExpression(parserAssembler);
-    {if (true) return new Evaluator("--", param);}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand UnaryExpressionNotPlusMinus(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand param;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case BANG:
-      jj_consume_token(BANG);
-      param = UnaryExpression(parserAssembler);
-    {if (true) return new Evaluator("!", param);}
-      break;
-    case SCOPE:
-    case FACT:
-    case LENGTH:
-    case FORMAT:
-    case INTEGER_LITERAL:
-    case FLOATING_POINT_LITERAL:
-    case NUMBER_LITERAL:
-    case STRING_LITERAL:
-    case TRUE:
-    case FALSE:
-    case UNKNOWN:
-    case IDENTIFIER:
-    case LPAREN:
-      param = PostfixExpression(parserAssembler);
-    {if (true) return param;}
-      break;
-    default:
-      jj_la1[81] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand PostfixExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand param;
-  boolean incr = false;
-  boolean decr = false;
-    param = PrimaryExpression(parserAssembler);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case INCR:
-    case DECR:
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case INCR:
-        jj_consume_token(INCR);
-    incr = true;
-        break;
-      case DECR:
-        jj_consume_token(DECR);
-    decr = true;
-        break;
-      default:
-        jj_la1[82] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      break;
-    default:
-      jj_la1[83] = jj_gen;
-      ;
-    }
-    if (incr)
-       {if (true) return new Evaluator(param, "++");}
-    else if (decr)
-       {if (true) return new Evaluator(param, "--");}
-    {if (true) return param;}
     throw new Error("Missing return statement in function");
   }
 
@@ -2464,7 +1955,7 @@ public class QueryParser implements QueryParserConstants
         param1 = NamedExpression(name, parserAssembler);
         break;
       default:
-        jj_la1[84] = jj_gen;
+        jj_la1[64] = jj_gen;
         ;
       }
     if (param1 == null)
@@ -2521,10 +2012,271 @@ public class QueryParser implements QueryParserConstants
         {if (true) throw new ParseException("Operand " + name + " not found");}
       break;
     default:
-      jj_la1[85] = jj_gen;
+      jj_la1[65] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public List<OperandParam> ArgumentList(ParserAssembler parserAssembler, boolean nameRequired) throws ParseException
+  {
+  List<OperandParam> operandParamList = new ArrayList<OperandParam>();
+  OperandParam operandParam;
+    operandParam = Argument(parserAssembler, nameRequired);
+    operandParamList.add(operandParam);
+    label_20:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[66] = jj_gen;
+        break label_20;
+      }
+      jj_consume_token(COMMA);
+      operandParam = Argument(parserAssembler, nameRequired);
+      operandParamList.add(operandParam);
+    }
+    {if (true) return operandParamList;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public OperandParam Argument(ParserAssembler parserAssembler, boolean nameRequired) throws ParseException
+  {
+  VariableType varType = null;
+  Operand expression;
+  OperandMap operandMap = parserAssembler.getOperandMap();
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case INTEGER:
+    case DOUBLE:
+    case DECIMAL:
+    case BOOLEAN:
+    case STRING:
+    case TERM:
+    case CURRENCY:
+      varType = Type(operandMap);
+      break;
+    default:
+      jj_la1[67] = jj_gen;
+      ;
+    }
+    expression = Expression(parserAssembler);
+     boolean isAssign = false;
+     Operand leftOperand = expression.getLeftOperand();
+     if ((leftOperand != null) && (expression instanceof Evaluator))
+       isAssign =  ((Evaluator)expression).getOperator() == OperatorEnum.ASSIGN;
+     String name = Term.ANONYMOUS;
+     if (nameRequired)
+       name = expression.getName();
+     if (!isAssign)
+       {if (true) return new OperandParam(name, expression);}
+     name = leftOperand.getName();
+     expression = expression.getRightOperand();
+     boolean isLiteral = !expression.isEmpty();
+     if (varType == null)
+       varType = new VariableType(OperandType.UNKNOWN);
+     if (varType.getOperandType() == OperandType.TERM)
+       varType.setUnknownType();
+     varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
+     Operand operand = varType.getInstance(parserAssembler, name);
+     {if (true) return new OperandParam(name, operand);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand IndexExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand param;
+    jj_consume_token(LBRACKET);
+    param = Expression(parserAssembler);
+    jj_consume_token(RBRACKET);
+    {if (true) return param;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand Literal() throws ParseException
+  {
+  Token lit;
+  boolean flag;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case INTEGER_LITERAL:
+      lit = jj_consume_token(INTEGER_LITERAL);
+    Long litValue = Long.decode(lit.image);
+    {if (true) return new IntegerOperand(QualifiedName.ANONYMOUS, litValue);}
+      break;
+    case FLOATING_POINT_LITERAL:
+      lit = jj_consume_token(FLOATING_POINT_LITERAL);
+    {if (true) return new DoubleOperand(QualifiedName.ANONYMOUS, Double.valueOf(lit.image));}
+      break;
+    case STRING_LITERAL:
+      lit = jj_consume_token(STRING_LITERAL);
+    {if (true) return new StringOperand(QualifiedName.ANONYMOUS, getText(lit));}
+      break;
+    case TRUE:
+    case FALSE:
+      flag = BooleanLiteral();
+    {if (true) return new BooleanOperand(QualifiedName.ANONYMOUS, flag);}
+      break;
+    case UNKNOWN:
+      UnknownLiteral();
+    {if (true) return new NullOperand(QualifiedName.ANONYMOUS, new Unknown());}
+      break;
+    default:
+      jj_la1[68] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public VariableType Type(OperandMap operandMap) throws ParseException
+  {
+  Token qualifierLit = null;
+  String qualifierId = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case INTEGER:
+      jj_consume_token(INTEGER);
+      {if (true) return new VariableType(OperandType.INTEGER);}
+      break;
+    case BOOLEAN:
+      jj_consume_token(BOOLEAN);
+      {if (true) return new VariableType(OperandType.BOOLEAN);}
+      break;
+    case DOUBLE:
+      jj_consume_token(DOUBLE);
+      {if (true) return new VariableType(OperandType.DOUBLE);}
+      break;
+    case STRING:
+      jj_consume_token(STRING);
+      {if (true) return new VariableType(OperandType.STRING);}
+      break;
+    case DECIMAL:
+      jj_consume_token(DECIMAL);
+      {if (true) return new VariableType(OperandType.DECIMAL);}
+      break;
+    case TERM:
+      jj_consume_token(TERM);
+      {if (true) return new VariableType(OperandType.TERM);}
+      break;
+    case CURRENCY:
+      jj_consume_token(CURRENCY);
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case 81:
+        jj_consume_token(81);
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+        {
+        case STRING_LITERAL:
+          qualifierLit = jj_consume_token(STRING_LITERAL);
+          break;
+        case IDENTIFIER:
+          qualifierId = Name();
+          break;
+        default:
+          jj_la1[69] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
+        break;
+      default:
+        jj_la1[70] = jj_gen;
+        ;
+      }
+      VariableType varType = new VariableType(OperandType.CURRENCY);
+      if (qualifierLit != null)
+         varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
+      else if (qualifierId != null)
+         varType.setProperty(VariableType.QUALIFIER_OPERAND, operandMap.addOperand(qualifierId, null));
+      {if (true) return varType;}
+      break;
+    default:
+      jj_la1[71] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand CalculatorFunction(ParserAssembler parserAssembler) throws ParseException
+  {
+    String fnName;
+    List<OperandParam> operandParamList = null;
+    fnName = Name();
+    jj_consume_token(LPAREN);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case INTEGER:
+    case DOUBLE:
+    case DECIMAL:
+    case BOOLEAN:
+    case STRING:
+    case SCOPE:
+    case FACT:
+    case LENGTH:
+    case TERM:
+    case CURRENCY:
+    case FORMAT:
+    case INTEGER_LITERAL:
+    case FLOATING_POINT_LITERAL:
+    case NUMBER_LITERAL:
+    case STRING_LITERAL:
+    case TRUE:
+    case FALSE:
+    case UNKNOWN:
+    case IDENTIFIER:
+    case LPAREN:
+    case BANG:
+    case INCR:
+    case DECR:
+    case PLUS:
+    case MINUS:
+    case 82:
+      operandParamList = ArgumentList(parserAssembler, true);
+      break;
+    default:
+      jj_la1[72] = jj_gen;
+      ;
+    }
+    jj_consume_token(RPAREN);
+    {if (true) return parserAssembler.getCallOperand(parserAssembler.getContextName(fnName), operandParamList);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public void ParameterDeclaration(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
+  {
+    jj_consume_token(PARAMETER);
+    parserAssembler.setParameter(qualifiedAxiomName);
+  }
+
+  final public String Name() throws ParseException
+  {
+  String name;
+  Token partToken;
+    partToken = jj_consume_token(IDENTIFIER);
+    name = partToken.image;
+    label_21:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case DOT:
+        ;
+        break;
+      default:
+        jj_la1[73] = jj_gen;
+        break label_21;
+      }
+      jj_consume_token(DOT);
+      partToken = jj_consume_token(IDENTIFIER);
+      name += ("." + partToken.image);
+    }
+    {if (true) return name;}
     throw new Error("Missing return statement in function");
   }
 
@@ -2538,7 +2290,7 @@ public class QueryParser implements QueryParserConstants
     {
     case LBRACKET:
       param1 = IndexExpression(parserAssembler);
-      if (jj_2_3(2)) 
+      if (jj_2_1(2)) 
       {
         param2 = IndexExpression(parserAssembler);
       } else 
@@ -2576,11 +2328,11 @@ public class QueryParser implements QueryParserConstants
       case DECR:
       case PLUS:
       case MINUS:
-      case 81:
+      case 82:
         operandParamList = ArgumentList(parserAssembler, true);
         break;
       default:
-        jj_la1[86] = jj_gen;
+        jj_la1[74] = jj_gen;
         ;
       }
       jj_consume_token(RPAREN);
@@ -2588,123 +2340,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return parserAssembler.getCallOperand(qname, operandParamList);}
       break;
     default:
-      jj_la1[87] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand IndexExpression(ParserAssembler parserAssembler) throws ParseException
-  {
-  Operand param;
-    jj_consume_token(LBRACKET);
-    param = Expression(parserAssembler);
-    jj_consume_token(RBRACKET);
-    {if (true) return param;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public List<OperandParam> ArgumentList(ParserAssembler parserAssembler, boolean nameRequired) throws ParseException
-  {
-  List<OperandParam> operandParamList = new ArrayList<OperandParam>();
-  OperandParam operandParam;
-    operandParam = Argument(parserAssembler, nameRequired);
-    operandParamList.add(operandParam);
-    label_29:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COMMA:
-        ;
-        break;
-      default:
-        jj_la1[88] = jj_gen;
-        break label_29;
-      }
-      jj_consume_token(COMMA);
-      operandParam = Argument(parserAssembler, nameRequired);
-      operandParamList.add(operandParam);
-    }
-    {if (true) return operandParamList;}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public OperandParam Argument(ParserAssembler parserAssembler, boolean nameRequired) throws ParseException
-  {
-    Token nameToken = null;
-    VariableType varType = null;
-    Operand operand = null;
-    Operand expression;
-    OperandMap operandMap = parserAssembler.getOperandMap();
-    if (jj_2_4(2)) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case INTEGER:
-      case DOUBLE:
-      case DECIMAL:
-      case BOOLEAN:
-      case STRING:
-      case TERM:
-      case CURRENCY:
-        varType = Type(operandMap);
-        break;
-      default:
-        jj_la1[89] = jj_gen;
-        ;
-      }
-      nameToken = jj_consume_token(IDENTIFIER);
-      jj_consume_token(ASSIGN);
-    } else 
-    {
-      ;
-    }
-    expression = Expression(parserAssembler);
-     String name = nameToken == null ? Term.ANONYMOUS : nameToken.image;
-     if (nameRequired && name.isEmpty())
-         name = expression.getName();
-     if ((nameToken == null) ||(varType == null))
-         {if (true) return new OperandParam(name, expression);}
-     boolean isLiteral = !expression.isEmpty();
-     if (varType != null)
-         varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
-     operand = varType.getInstance(parserAssembler, name);
-     {if (true) return new OperandParam(name, operand);}
-    throw new Error("Missing return statement in function");
-  }
-
-  final public Operand Literal() throws ParseException
-  {
-  Token lit;
-  boolean flag;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case INTEGER_LITERAL:
-      lit = jj_consume_token(INTEGER_LITERAL);
-    Long litValue = Long.decode(lit.image);
-    {if (true) return new IntegerOperand(QualifiedName.ANONYMOUS, litValue);}
-      break;
-    case FLOATING_POINT_LITERAL:
-      lit = jj_consume_token(FLOATING_POINT_LITERAL);
-    {if (true) return new DoubleOperand(QualifiedName.ANONYMOUS, Double.valueOf(lit.image));}
-      break;
-    case STRING_LITERAL:
-      lit = jj_consume_token(STRING_LITERAL);
-    {if (true) return new StringOperand(QualifiedName.ANONYMOUS, getText(lit));}
-      break;
-    case TRUE:
-    case FALSE:
-      flag = BooleanLiteral();
-    {if (true) return new BooleanOperand(QualifiedName.ANONYMOUS, flag);}
-      break;
-    case UNKNOWN:
-      UnknownLiteral();
-    {if (true) return new NullOperand(QualifiedName.ANONYMOUS, new Unknown());}
-      break;
-    default:
-      jj_la1[90] = jj_gen;
+      jj_la1[75] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2739,36 +2375,10 @@ public class QueryParser implements QueryParserConstants
     {if (true) return new Parameter(Term.ANONYMOUS, new Unknown());}
       break;
     default:
-      jj_la1[91] = jj_gen;
+      jj_la1[76] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-    throw new Error("Missing return statement in function");
-  }
-
-  final public List<Parameter> LiteralList() throws ParseException
-  {
-  List<Parameter>  literalList = new ArrayList<Parameter>();
-  Parameter parameter;
-    parameter = LiteralTerm();
-    literalList.add(parameter);
-    label_30:
-    while (true) 
-    {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COMMA:
-        ;
-        break;
-      default:
-        jj_la1[92] = jj_gen;
-        break label_30;
-      }
-      jj_consume_token(COMMA);
-      parameter = LiteralTerm();
-      literalList.add(parameter);
-    }
-    {if (true) return literalList;}
     throw new Error("Missing return statement in function");
   }
 
@@ -2785,7 +2395,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return false;}
       break;
     default:
-      jj_la1[93] = jj_gen;
+      jj_la1[77] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2797,6 +2407,457 @@ public class QueryParser implements QueryParserConstants
     jj_consume_token(UNKNOWN);
   }
 
+  final public Operand ConditionalOrExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand[] params = new Operand[2];
+  Token op;
+    params[0] = ConditionalAndExpression(parserAssembler);
+    label_22:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case SC_OR:
+        ;
+        break;
+      default:
+        jj_la1[78] = jj_gen;
+        break label_22;
+      }
+      op = jj_consume_token(SC_OR);
+      params[1] = ConditionalAndExpression(parserAssembler);
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+    {if (true) return params[0];}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand ConditionalAndExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand[] params = new Operand[2];
+  Token op;
+    params[0] = InclusiveOrExpression(parserAssembler);
+    label_23:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case SC_AND:
+        ;
+        break;
+      default:
+        jj_la1[79] = jj_gen;
+        break label_23;
+      }
+      op = jj_consume_token(SC_AND);
+      params[1] = InclusiveOrExpression(parserAssembler);
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+    {if (true) return params[0];}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand InclusiveOrExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand[] params = new Operand[2];
+  Token op;
+    params[0] = ExclusiveOrExpression(parserAssembler);
+    label_24:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case BIT_OR:
+        ;
+        break;
+      default:
+        jj_la1[80] = jj_gen;
+        break label_24;
+      }
+      op = jj_consume_token(BIT_OR);
+      params[1] = ExclusiveOrExpression(parserAssembler);
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+    {if (true) return params[0];}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand ExclusiveOrExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand[] params = new Operand[2];
+  Token op;
+    params[0] = AndExpression(parserAssembler);
+    label_25:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case XOR:
+        ;
+        break;
+      default:
+        jj_la1[81] = jj_gen;
+        break label_25;
+      }
+      op = jj_consume_token(XOR);
+      params[1] = AndExpression(parserAssembler);
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+    {if (true) return params[0];}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand AndExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand[] params = new Operand[2];
+  Token op;
+    params[0] = EqualityExpression(parserAssembler);
+    label_26:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case BIT_AND:
+        ;
+        break;
+      default:
+        jj_la1[82] = jj_gen;
+        break label_26;
+      }
+      op = jj_consume_token(BIT_AND);
+      params[1] = EqualityExpression(parserAssembler);
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+    {if (true) return params[0];}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand EqualityExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand[] params = new Operand[2];
+  Token op;
+    params[0] = RelationalExpression(parserAssembler);
+    label_27:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case EQ:
+      case NE:
+        ;
+        break;
+      default:
+        jj_la1[83] = jj_gen;
+        break label_27;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case EQ:
+        op = jj_consume_token(EQ);
+        break;
+      case NE:
+        op = jj_consume_token(NE);
+        break;
+      default:
+        jj_la1[84] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      params[1] = RelationalExpression(parserAssembler);
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+    {if (true) return params[0];}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand RelationalExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand[] params = new Operand[2];
+  Token op;
+    params[0] = AdditiveExpression(parserAssembler);
+    label_28:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case GT:
+      case LT:
+      case LE:
+      case GE:
+        ;
+        break;
+      default:
+        jj_la1[85] = jj_gen;
+        break label_28;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case LT:
+        op = jj_consume_token(LT);
+        break;
+      case GT:
+        op = jj_consume_token(GT);
+        break;
+      case LE:
+        op = jj_consume_token(LE);
+        break;
+      case GE:
+        op = jj_consume_token(GE);
+        break;
+      default:
+        jj_la1[86] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      params[1] = AdditiveExpression(parserAssembler);
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+    {if (true) return params[0];}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand AdditiveExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand[] params = new Operand[2];
+  Token op;
+    params[0] = MultiplicativeExpression(parserAssembler);
+    label_29:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case PLUS:
+      case MINUS:
+        ;
+        break;
+      default:
+        jj_la1[87] = jj_gen;
+        break label_29;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case PLUS:
+        op = jj_consume_token(PLUS);
+        break;
+      case MINUS:
+        op = jj_consume_token(MINUS);
+        break;
+      default:
+        jj_la1[88] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      params[1] = MultiplicativeExpression(parserAssembler);
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+    {if (true) return params[0];}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand MultiplicativeExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand[] params = new Operand[2];
+  Token op;
+    params[0] = UnaryExpression(parserAssembler);
+    label_30:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case STAR:
+      case SLASH:
+      case REM:
+        ;
+        break;
+      default:
+        jj_la1[89] = jj_gen;
+        break label_30;
+      }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case STAR:
+        op = jj_consume_token(STAR);
+        break;
+      case SLASH:
+        op = jj_consume_token(SLASH);
+        break;
+      case REM:
+        op = jj_consume_token(REM);
+        break;
+      default:
+        jj_la1[90] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      params[1] = UnaryExpression(parserAssembler);
+      params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+    {if (true) return params[0];}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand UnaryExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand param;
+  boolean plus = false;
+  boolean minus = false;
+  boolean tilde = false;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case PLUS:
+    case MINUS:
+    case 82:
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case PLUS:
+        jj_consume_token(PLUS);
+    plus = true;
+        break;
+      case MINUS:
+        jj_consume_token(MINUS);
+    minus = true;
+        break;
+      case 82:
+        jj_consume_token(82);
+    tilde = true;
+        break;
+      default:
+        jj_la1[91] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      param = UnaryExpression(parserAssembler);
+    if (plus)
+      {if (true) return new Evaluator("+", param);}
+    else if (minus)
+      {if (true) return new Evaluator("-", param);}
+    else if (tilde)
+      {if (true) return new Evaluator("~", param);}
+    {if (true) return param;}
+      break;
+    case INCR:
+      param = PreIncrementExpression(parserAssembler);
+    {if (true) return param;}
+      break;
+    case DECR:
+      param = PreDecrementExpression(parserAssembler);
+    {if (true) return param;}
+      break;
+    case SCOPE:
+    case FACT:
+    case LENGTH:
+    case FORMAT:
+    case INTEGER_LITERAL:
+    case FLOATING_POINT_LITERAL:
+    case NUMBER_LITERAL:
+    case STRING_LITERAL:
+    case TRUE:
+    case FALSE:
+    case UNKNOWN:
+    case IDENTIFIER:
+    case LPAREN:
+    case BANG:
+      param = UnaryExpressionNotPlusMinus(parserAssembler);
+    {if (true) return param;}
+      break;
+    default:
+      jj_la1[92] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand PreIncrementExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand param;
+    jj_consume_token(INCR);
+    param = PrimaryExpression(parserAssembler);
+    {if (true) return new Evaluator("++", param);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand PreDecrementExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand param;
+    jj_consume_token(DECR);
+    param = PrimaryExpression(parserAssembler);
+    {if (true) return new Evaluator("--", param);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand UnaryExpressionNotPlusMinus(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand param;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case BANG:
+      jj_consume_token(BANG);
+      param = UnaryExpression(parserAssembler);
+    {if (true) return new Evaluator("!", param);}
+      break;
+    case SCOPE:
+    case FACT:
+    case LENGTH:
+    case FORMAT:
+    case INTEGER_LITERAL:
+    case FLOATING_POINT_LITERAL:
+    case NUMBER_LITERAL:
+    case STRING_LITERAL:
+    case TRUE:
+    case FALSE:
+    case UNKNOWN:
+    case IDENTIFIER:
+    case LPAREN:
+      param = PostfixExpression(parserAssembler);
+    {if (true) return param;}
+      break;
+    default:
+      jj_la1[93] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Operand PostfixExpression(ParserAssembler parserAssembler) throws ParseException
+  {
+  Operand param;
+  boolean incr = false;
+  boolean decr = false;
+    param = PrimaryExpression(parserAssembler);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case INCR:
+    case DECR:
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case INCR:
+        jj_consume_token(INCR);
+    incr = true;
+        break;
+      case DECR:
+        jj_consume_token(DECR);
+    decr = true;
+        break;
+      default:
+        jj_la1[94] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      break;
+    default:
+      jj_la1[95] = jj_gen;
+      ;
+    }
+    if (incr)
+       {if (true) return new Evaluator(param, "++");}
+    else if (decr)
+       {if (true) return new Evaluator(param, "--");}
+    {if (true) return param;}
+    throw new Error("Missing return statement in function");
+  }
+
   private boolean jj_2_1(int xla) {
     jj_la = xla; jj_lastpos = jj_scanpos = token;
     try { return !jj_3_1(); }
@@ -2804,74 +2865,222 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_2_2(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_2(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(1, xla); }
-  }
-
-  private boolean jj_2_3(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_3(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(2, xla); }
-  }
-
-  private boolean jj_2_4(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_4(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(3, xla); }
-  }
-
-  private boolean jj_3R_39() {
-    if (jj_scan_token(BOOLEAN)) return true;
+  private boolean jj_3R_45() {
+    if (jj_3R_51()) return true;
     return false;
   }
 
-  private boolean jj_3_3() {
+  private boolean jj_3R_44() {
+    if (jj_3R_50()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_32() {
     if (jj_3R_33()) return true;
     return false;
   }
 
-  private boolean jj_3_2() {
-    if (jj_3R_32()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_38() {
-    if (jj_scan_token(INTEGER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_36() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_38()) {
-    jj_scanpos = xsp;
-    if (jj_3R_39()) {
-    jj_scanpos = xsp;
-    if (jj_3R_40()) {
-    jj_scanpos = xsp;
-    if (jj_3R_41()) {
-    jj_scanpos = xsp;
-    if (jj_3R_42()) {
-    jj_scanpos = xsp;
-    if (jj_3R_43()) {
-    jj_scanpos = xsp;
-    if (jj_3R_44()) return true;
-    }
-    }
-    }
-    }
-    }
-    }
+  private boolean jj_3R_39() {
+    if (jj_3R_40()) return true;
     return false;
   }
 
   private boolean jj_3R_71() {
-    if (jj_3R_78()) return true;
+    if (jj_scan_token(37)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_34() {
+    if (jj_3R_35()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_49() {
+    if (jj_scan_token(82)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_70() {
+    if (jj_3R_72()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_64() {
+    if (jj_scan_token(FACT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_48() {
+    if (jj_scan_token(MINUS)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_69() {
+    if (jj_scan_token(STRING_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_47() {
+    if (jj_scan_token(PLUS)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_68() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_43() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_47()) {
+    jj_scanpos = xsp;
+    if (jj_3R_48()) {
+    jj_scanpos = xsp;
+    if (jj_3R_49()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_42() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_43()) {
+    jj_scanpos = xsp;
+    if (jj_3R_44()) {
+    jj_scanpos = xsp;
+    if (jj_3R_45()) {
+    jj_scanpos = xsp;
+    if (jj_3R_46()) return true;
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_66() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_63() {
+    if (jj_scan_token(FORMAT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_33() {
+    if (jj_3R_34()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_38() {
+    if (jj_3R_39()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_67() {
+    if (jj_scan_token(INTEGER_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_65() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_67()) {
+    jj_scanpos = xsp;
+    if (jj_3R_68()) {
+    jj_scanpos = xsp;
+    if (jj_3R_69()) {
+    jj_scanpos = xsp;
+    if (jj_3R_70()) {
+    jj_scanpos = xsp;
+    if (jj_3R_71()) return true;
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_55() {
+    if (jj_3R_56()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_62() {
+    if (jj_scan_token(LENGTH)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_31() {
+    if (jj_scan_token(LBRACKET)) return true;
+    if (jj_3R_32()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_61() {
+    if (jj_scan_token(LPAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_54() {
+    if (jj_3R_55()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_74() {
+    if (jj_scan_token(FALSE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_60() {
+    if (jj_scan_token(SCOPE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_37() {
+    if (jj_3R_38()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_52() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_53()) {
+    jj_scanpos = xsp;
+    if (jj_3R_54()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_53() {
+    if (jj_scan_token(BANG)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_41() {
+    if (jj_3R_42()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_73() {
+    if (jj_scan_token(TRUE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_72() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_73()) {
+    jj_scanpos = xsp;
+    if (jj_3R_74()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_59() {
+    if (jj_3R_66()) return true;
     return false;
   }
 
@@ -2880,349 +3089,71 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_58() {
-    if (jj_3R_64()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_47() {
-    if (jj_3R_48()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_57() {
-    if (jj_3R_63()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_70() {
-    if (jj_scan_token(NUMBER_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_56() {
-    if (jj_3R_62()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_78() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_69() {
-    if (jj_3R_77()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_68() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_69()) {
-    jj_scanpos = xsp;
-    if (jj_3R_70()) {
-    jj_scanpos = xsp;
-    if (jj_3R_71()) {
-    jj_scanpos = xsp;
-    if (jj_3R_72()) {
-    jj_scanpos = xsp;
-    if (jj_3R_73()) {
-    jj_scanpos = xsp;
-    if (jj_3R_74()) {
-    jj_scanpos = xsp;
-    if (jj_3R_75()) {
-    jj_scanpos = xsp;
-    if (jj_3R_76()) return true;
-    }
-    }
-    }
-    }
-    }
-    }
-    }
-    return false;
-  }
-
   private boolean jj_3R_51() {
-    if (jj_3R_52()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_33() {
-    if (jj_scan_token(LBRACKET)) return true;
-    if (jj_3R_35()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_45() {
-    if (jj_3R_47()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_61() {
-    if (jj_scan_token(81)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_60() {
-    if (jj_scan_token(MINUS)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_83() {
-    if (jj_scan_token(37)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_59() {
-    if (jj_scan_token(PLUS)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_82() {
-    if (jj_3R_84()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_54() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_55()) {
-    jj_scanpos = xsp;
-    if (jj_3R_56()) {
-    jj_scanpos = xsp;
-    if (jj_3R_57()) {
-    jj_scanpos = xsp;
-    if (jj_3R_58()) return true;
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_55() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_59()) {
-    jj_scanpos = xsp;
-    if (jj_3R_60()) {
-    jj_scanpos = xsp;
-    if (jj_3R_61()) return true;
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_81() {
-    if (jj_scan_token(STRING_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_37() {
-    if (jj_3R_45()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_50() {
-    if (jj_3R_51()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_67() {
-    if (jj_3R_68()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_80() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_32() {
-    if (jj_scan_token(COLON)) return true;
-    if (jj_scan_token(PARAMETER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_79() {
-    if (jj_scan_token(INTEGER_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_77() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_79()) {
-    jj_scanpos = xsp;
-    if (jj_3R_80()) {
-    jj_scanpos = xsp;
-    if (jj_3R_81()) {
-    jj_scanpos = xsp;
-    if (jj_3R_82()) {
-    jj_scanpos = xsp;
-    if (jj_3R_83()) return true;
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_76() {
-    if (jj_scan_token(FACT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_34() {
-    if (jj_3R_36()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_86() {
-    if (jj_scan_token(FALSE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_66() {
-    if (jj_3R_67()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_46() {
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_85() {
-    if (jj_scan_token(TRUE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_84() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_85()) {
-    jj_scanpos = xsp;
-    if (jj_3R_86()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_49() {
-    if (jj_3R_50()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_65() {
-    if (jj_scan_token(BANG)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_64() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_65()) {
-    jj_scanpos = xsp;
-    if (jj_3R_66()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_31() {
-    if (jj_scan_token(COLON)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(34)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(22)) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_53() {
-    if (jj_3R_54()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_35() {
-    if (jj_3R_37()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_75() {
-    if (jj_scan_token(FORMAT)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_44() {
-    if (jj_scan_token(CURRENCY)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_46()) jj_scanpos = xsp;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_34()) jj_scanpos = xsp;
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(ASSIGN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_63() {
     if (jj_scan_token(DECR)) return true;
     return false;
   }
 
-  private boolean jj_3R_43() {
-    if (jj_scan_token(TERM)) return true;
+  private boolean jj_3R_58() {
+    if (jj_scan_token(NUMBER_LITERAL)) return true;
     return false;
   }
 
-  private boolean jj_3R_74() {
-    if (jj_scan_token(LENGTH)) return true;
+  private boolean jj_3R_36() {
+    if (jj_3R_37()) return true;
     return false;
   }
 
-  private boolean jj_3R_42() {
-    if (jj_scan_token(DECIMAL)) return true;
+  private boolean jj_3R_56() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_57()) {
+    jj_scanpos = xsp;
+    if (jj_3R_58()) {
+    jj_scanpos = xsp;
+    if (jj_3R_59()) {
+    jj_scanpos = xsp;
+    if (jj_3R_60()) {
+    jj_scanpos = xsp;
+    if (jj_3R_61()) {
+    jj_scanpos = xsp;
+    if (jj_3R_62()) {
+    jj_scanpos = xsp;
+    if (jj_3R_63()) {
+    jj_scanpos = xsp;
+    if (jj_3R_64()) return true;
+    }
+    }
+    }
+    }
+    }
+    }
+    }
     return false;
   }
 
-  private boolean jj_3R_48() {
-    if (jj_3R_49()) return true;
+  private boolean jj_3R_57() {
+    if (jj_3R_65()) return true;
     return false;
   }
 
-  private boolean jj_3R_41() {
-    if (jj_scan_token(STRING)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_73() {
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_62() {
+  private boolean jj_3R_50() {
     if (jj_scan_token(INCR)) return true;
     return false;
   }
 
   private boolean jj_3R_40() {
-    if (jj_scan_token(DOUBLE)) return true;
+    if (jj_3R_41()) return true;
     return false;
   }
 
-  private boolean jj_3R_52() {
-    if (jj_3R_53()) return true;
+  private boolean jj_3R_46() {
+    if (jj_3R_52()) return true;
     return false;
   }
 
-  private boolean jj_3R_72() {
-    if (jj_scan_token(SCOPE)) return true;
+  private boolean jj_3R_35() {
+    if (jj_3R_36()) return true;
     return false;
   }
 
@@ -3237,7 +3168,7 @@ public class QueryParser implements QueryParserConstants
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[94];
+  final private int[] jj_la1 = new int[96];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -3249,17 +3180,17 @@ public class QueryParser implements QueryParserConstants
   }
   private static void jj_la1_init_0() 
   {
-    jj_la1_0 = new int[] { 0x400000,0x6a7dfc0,0x6a7dfc0,0x6a75fc0,0x6a75fc0,0x0,0x0,0x0,0x0,0x6a65fc0,0x2040000,0x0,0x0,0x0,0x0,0x0,0xa007c0,0x0,0x95b89fc0,0x0,0x95b89fc0,0x0,0x0,0xa007c0,0x0,0x0,0xa007c0,0x0,0x0,0x0,0x91189000,0x0,0x0,0x91b887c0,0x2000,0x2000,0x0,0x0,0x0,0x95b897c0,0x0,0x800,0x91b887c0,0x91b887c0,0x0,0x91188000,0x0,0x91b887c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x400000,0x90000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x91188000,0x91188000,0x0,0x0,0x0,0x91188000,0x91b887c0,0x0,0x0,0xa007c0,0x90000000,0x90000000,0x0,0x0, };
+    jj_la1_0 = new int[] { 0x400000,0x6a7dfc0,0x6a7dfc0,0x0,0x6a75fc0,0x6a75fc0,0x0,0x0,0x0,0x0,0x0,0x6a65fc0,0x0,0x0,0x0,0x8400000,0x0,0x0,0x0,0x400000,0x0,0x90000000,0x91188000,0x0,0x91b887c0,0x0,0x95b89fc0,0x0,0x95b89fc0,0x0,0xa007c0,0x0,0x0,0x91189000,0x0,0x0,0x0,0x91b887c0,0x2000,0x2000,0x0,0x0,0x0,0x91b887c0,0x95b897c0,0x800,0x91b887c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xa007c0,0x0,0x0,0x2040000,0x0,0x0,0x0,0x0,0x0,0x0,0x91188000,0x0,0xa007c0,0x90000000,0x0,0x0,0xa007c0,0x91b887c0,0x0,0x91b887c0,0x0,0x90000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x91188000,0x91188000,0x0,0x0, };
   }
   private static void jj_la1_init_1() 
   {
-    jj_la1_1 = new int[] { 0x0,0x80,0x80,0x80,0x80,0x100,0x0,0x8000,0x100,0x80,0x0,0x80000,0x200000,0x100,0x84,0x100,0x0,0x8000,0xf03005bd,0x8000,0xf03005bd,0x100,0x8000,0x0,0x1000,0x20000,0x0,0x1000,0x0,0x220000,0xf01001bd,0x84,0x400,0xf01001bd,0x220500,0x220500,0x200000,0x200000,0x400,0xf03005bd,0x8000,0x0,0xf01001bd,0xf01001bd,0x8000,0xf01005bd,0x400,0xf01001bd,0x8000,0x20100,0x8000,0x80,0x400,0x400,0x200400,0x8000,0x400,0x8000,0x8000,0x100,0x4,0x7d,0x10000,0x200000,0x20000,0x20000,0x4000000,0x8000000,0x0,0x0,0x0,0x2400000,0x2400000,0x18c0000,0x18c0000,0xc0000000,0xc0000000,0x0,0x0,0xc0000000,0xf01001bd,0x1001bd,0x30000000,0x30000000,0x1100,0x1bd,0xf01001bd,0x1100,0x8000,0x0,0x3c,0x3c,0x8000,0x18, };
+    jj_la1_1 = new int[] { 0x0,0x80,0x80,0x100,0x80,0x80,0x100,0x0,0x8000,0x100,0x200000,0x80,0x20100,0x8000,0x80,0x4,0x400,0x200400,0x200400,0x4,0x8000,0x7d,0xf01005bd,0x400,0xf01001bd,0x8000,0xf03105bd,0x8000,0xf03105bd,0x100,0x0,0x1000,0x20000,0xf01001bd,0x200000,0x84,0x400,0xf01001bd,0x220500,0x220500,0x200000,0x400,0x10000,0xf01001bd,0xf03105bd,0x0,0xf01001bd,0x8000,0x8000,0x8000,0x400,0x8000,0x8000,0x8000,0x8000,0x0,0x1000,0x20000,0x0,0x80000,0x200000,0x100,0x20000,0x20000,0x1100,0x1bd,0x8000,0x0,0x3c,0x84,0x0,0x0,0xf01001bd,0x10000,0xf01001bd,0x1100,0x3c,0x18,0x4000000,0x8000000,0x0,0x0,0x0,0x2400000,0x2400000,0x18c0000,0x18c0000,0xc0000000,0xc0000000,0x0,0x0,0xc0000000,0xf01001bd,0x1001bd,0x30000000,0x30000000, };
   }
   private static void jj_la1_init_2() 
   {
-    jj_la1_2 = new int[] { 0x0,0x0,0x0,0x0,0x0,0x0,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x38000,0x0,0x38000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fc0,0xbfc0,0x20000,0x0,0x0,0x20000,0xbfc0,0xbfc0,0x8000,0x8000,0x0,0x28000,0x0,0x0,0x20000,0x20000,0x0,0x20000,0x0,0x20000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fc0,0x3fc0,0x0,0x0,0x8,0x10,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x23,0x23,0x20000,0x20000,0x0,0x0,0x0,0x0,0x0,0x20000,0x0,0x0,0x0,0x0,0x0,0x0,0x0, };
+    jj_la1_2 = new int[] { 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40000,0x0,0x40000,0x0,0x58000,0x0,0x58000,0x0,0x0,0x0,0x40,0x40000,0xbf80,0x0,0x0,0x40000,0xbfc0,0xbfc0,0x8000,0x0,0x0,0x40000,0x48000,0x0,0x40000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fc0,0x3fc0,0x0,0x0,0x0,0x0,0x0,0x0,0x20000,0x0,0x40000,0x0,0x40000,0x0,0x0,0x0,0x0,0x0,0x8,0x10,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x23,0x23,0x40000,0x40000,0x0,0x0,0x0, };
   }
-  final private JJCalls[] jj_2_rtns = new JJCalls[4];
+  final private JJCalls[] jj_2_rtns = new JJCalls[1];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
 
@@ -3283,7 +3214,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 94; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 96; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -3307,7 +3238,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 94; i++)
+    for (int i = 0; i < 96; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3321,7 +3252,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 94; i++)
+    for (int i = 0; i < 96; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3335,7 +3266,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 94; i++)
+    for (int i = 0; i < 96; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3348,7 +3279,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 94; i++)
+    for (int i = 0; i < 96; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3361,7 +3292,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 94; i++)
+    for (int i = 0; i < 96; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3505,13 +3436,13 @@ public class QueryParser implements QueryParserConstants
   public ParseException generateParseException() 
   {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[82];
+    boolean[] la1tokens = new boolean[83];
     if (jj_kind >= 0) 
     {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 94; i++) 
+    for (int i = 0; i < 96; i++) 
     {
       if (jj_la1[i] == jj_gen) 
       {
@@ -3532,7 +3463,7 @@ public class QueryParser implements QueryParserConstants
         }
       }
     }
-    for (int i = 0; i < 82; i++) 
+    for (int i = 0; i < 83; i++) 
     {
       if (la1tokens[i]) 
       {
@@ -3565,7 +3496,7 @@ public class QueryParser implements QueryParserConstants
   private void jj_rescan_token() 
   {
     jj_rescan = true;
-    for (int i = 0; i < 4; i++) 
+    for (int i = 0; i < 1; i++) 
     {
     try 
       {
@@ -3578,9 +3509,6 @@ public class QueryParser implements QueryParserConstants
           switch (i) 
             {
             case 0: jj_3_1(); break;
-            case 1: jj_3_2(); break;
-            case 2: jj_3_3(); break;
-            case 3: jj_3_4(); break;
           }
         }
         p = p.next;

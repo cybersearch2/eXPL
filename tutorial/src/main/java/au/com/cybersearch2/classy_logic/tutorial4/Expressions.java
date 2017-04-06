@@ -15,7 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial4;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -43,42 +46,53 @@ public class Expressions
         ");\n" +
        "query expressions (evaluate);";
 
+    protected QueryProgramParser queryProgramParser;
+    
+    public Expressions()
+    {
+        File resourcePath = new File("src/main/resources/tutorial4");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+     }
+
     /**
-     * Compiles the EXPRESSIONS script and runs the "evaluate" query, displaying a success summary flag on the console.
+     * Compiles the expressions.xpl script and runs the "expressions" query
+     */
+    public void checkExpressions(SolutionHandler solutionHandler) 
+    {
+        QueryProgram queryProgram = queryProgramParser.loadScript("expressions.xpl");
+        queryProgram.executeQuery("expressions", solutionHandler);
+    }
+
+    /**
+     * Displays expressions success summary flag on the console.
      * Note this sample uses a calculator instead of a template, as it does not require an axiom source in order to do a unification+evaluation step.
      * <br/>
      * The expected result:<br/>
         can_evaluate = true<br/>
 	 */
-	public void displayEvaluations()
-	{
-		QueryProgram queryProgram = new QueryProgram(EXPRESSIONS);
-		queryProgram.executeQuery("expressions", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				Term evaluateTerm = solution.getAxiom("evaluate").getTermByName("can_evaluate");
-					System.out.println(evaluateTerm.toString());
-				return true;
-			}});
-	}
-	
-	public static void main(String[] args)
-	{
-		try 
-		{
-	        Expressions expressions = new Expressions();
-			expressions.displayEvaluations();
-		} 
-		catch (ExpressionException e) 
-		{
-			e.printStackTrace();
-			System.exit(1);
-		}
+    public static void main(String[] args)
+    {
+        try 
+        {
+            Expressions expressions = new Expressions();
+            expressions.checkExpressions(new SolutionHandler(){
+                @Override
+                public boolean onSolution(Solution solution) {
+                    Term evaluateTerm = solution.getAxiom("evaluate").getTermByName("can_evaluate");
+                    System.out.println(evaluateTerm.toString());
+                    return true;
+                }});
+        } 
+        catch (ExpressionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
         catch (QueryExecutionException e) 
         {
             e.printStackTrace();
             System.exit(1);
         }
-		System.exit(0);
-	}
+        System.exit(0);
+    }
 }

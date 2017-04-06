@@ -46,7 +46,7 @@ public class RegexGroups
 		"calc in_words (\n" +
 		"  word regex(wordRegex), definition regex(defRegex { part, def }),\n" +
         "  axiom in_word = { word + \", \" + expand[part] + \"- \" + def },\n" +
-		"  word_definitions += in_word" +
+		"  (word_definitions += in_word)" +
 		");\n" +
 		"query query_in_words(lexicon : in_words);";
  

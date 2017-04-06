@@ -241,6 +241,7 @@ public interface QueryParserConstants {
     "\">>\"",
     "\"?\"",
     "\"<<\"",
+    "\"$\"",
     "\"~\"",
   };
 

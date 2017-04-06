@@ -209,6 +209,11 @@ public class Evaluator extends DelegateOperand
 	   	return setResult(result, id);
 	}
 
+    public OperatorEnum getOperator()
+    {
+        return operatorEnum;
+    }
+    
 	/**
 	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 
 	 * @param modifierId Identity of caller. 

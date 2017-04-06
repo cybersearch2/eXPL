@@ -55,6 +55,8 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	protected Operand termExpression;
 	/** AxiomList specification used for dynamic AxiomList */
 	protected AxiomListSpec axiomListSpec;
+    /** Flag set true if operand not visible in solution */
+    protected boolean isPrivate;
 	
 	/** OperatorEnum const array for no operations permitted */
 	protected static OperatorEnum[] EMPTY_OPERAND_OPS = new OperatorEnum[0];
@@ -331,6 +333,26 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 		return EvaluationStatus.COMPLETE;
 	}
 
+    /**
+     * Set this operand private - not visible in solution
+     * @param isPrivate Flag set true if operand not visible in solution
+     */
+    @Override
+    public void setPrivate(boolean isPrivate)
+    {
+        this.isPrivate = isPrivate;
+    }
+    
+    /**
+     * Returns flag set true if this operand is private
+     * @return
+     */
+    @Override
+    public boolean isPrivate()
+    {
+        return isPrivate;
+    }
+    
 	/**
 	 * Update this object's axiom term list variable
      * @param modifierId Identity of caller, which must be provided for backup()

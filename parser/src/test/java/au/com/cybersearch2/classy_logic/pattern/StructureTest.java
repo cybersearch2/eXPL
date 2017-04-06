@@ -414,6 +414,17 @@ public class StructureTest
             public void clearValue()
             {
             }
+
+            @Override
+            public void setPrivate(boolean isPrivate)
+            {
+            }
+
+            @Override
+            public boolean isPrivate()
+            {
+                return false;
+            }
 		};
 		testStructure.addTerm(term4);
 		assertThat(testStructure.getTermCount()).isEqualTo(2);
@@ -533,6 +544,17 @@ public class StructureTest
             @Override
             public void clearValue()
             {
+            }
+
+            @Override
+            public void setPrivate(boolean isPrivate)
+            {
+            }
+
+            @Override
+            public boolean isPrivate()
+            {
+                return false;
             }
 			
 		};

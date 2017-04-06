@@ -279,7 +279,10 @@ public class AxiomListSpec
         List<String> axiomTermNameList = axiomList.getAxiomTermNameList();
         if (axiomTermNameList != null)
         {
-            termIndex = getIndexForName(suffix, axiomTermNameList);
+            if (!termExpression.isEmpty() && termExpression.getValueClass().equals(String.class))
+                termIndex = getIndexForName(termExpression.getValue().toString(), axiomTermNameList);
+            if (termIndex == -1)
+                termIndex = getIndexForName(suffix, axiomTermNameList);
             if (termIndex == -1)
                  throw new ExpressionException("List \"" + qualifiedListName.toString() + "\" does not have term named \"" + suffix + "\"");
             termExpression = null;

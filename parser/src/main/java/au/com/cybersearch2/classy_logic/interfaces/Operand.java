@@ -91,4 +91,15 @@ public interface Operand extends Term
 	 */
 	Operand getRightOperand();
 
+	/**
+	 * Set this operand private - not visible in solution
+	 * @param isPrivate Flag set true if operand not visible in solution
+	 */
+	void setPrivate(boolean isPrivate);
+	
+	/**
+	 * Returns flag set true if this operand is private
+	 * @return
+	 */
+	boolean isPrivate();
 }

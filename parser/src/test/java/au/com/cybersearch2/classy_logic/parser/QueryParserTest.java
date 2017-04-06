@@ -348,18 +348,19 @@ public class QueryParserTest
 			"template high_city(string name, altitude ? altitude > 5000);\n" +
             "list city_list(high_city);\n" +
     		"calc insert_sort (\n" +
-    		"integer i = length(city_list) - 1, \n" +
-    		": i < 1, \n" +
-    		"integer j = i - 1, \n" +
-    		"integer altitude = city_list[i][altitude], \n" +
-    		"temp = city_list[i],\n" +
-    		"{\n" +
-    		"  ? altitude < city_list[j][altitude],\n" +
-       		"  city_list[j + 1] = city_list[j],\n" +
-    		"  ? --j >= 0\n" +
-    		"},\n" +
-     		"city_list[j + 1] = temp,\n" +
-    		"++i);"
+    		"  integer i = length(city_list) - 1, \n" +
+    		"  : i < 1, \n" +
+    		"  integer j = i - 1, \n" +
+    		"  integer altitude = city_list[i][altitude], \n" +
+    		"  . temp = city_list[i],\n" +
+    		"  {\n" +
+    		"    ? altitude < city_list[j][altitude],\n" +
+       		"    city_list[j + 1] = city_list[j],\n" +
+    		"    ? --j >= 0\n" +
+    		"  },\n" +
+     		"  . city_list[j + 1] = temp,\n" +
+    		"  . ++i\n" +
+     		");"
 			;
 
 	static final String HIGH_CITIES_JPA_XPL =
@@ -369,14 +370,14 @@ public class QueryParserTest
 
 	static final String CURRENCY_XPL =
 			"axiom item() {\"$1234.56\"};\n" +
-			"template charge(currency(\"AU\") amount);\n" +
-	        "calc charge_plus_gst(currency(\"AU\") total = charge.amount * 1.1);\n" +
+			"template charge(currency $ \"AU\" amount);\n" +
+	        "calc charge_plus_gst(currency $ \"AU\" total = charge.amount * 1.1);\n" +
 	        "calc format_total(string total_text = \"Total + gst: \" + format(charge_plus_gst.total));\n" +
 			"query item_query(item : charge) >> (charge_plus_gst) >> (format_total);";
 	
 	static final String WORLD_CURRENCY_XPL =
 			"include \"world_currency.xpl\";\n" +
-			"template charge(currency(country) amount);\n" +
+			"template charge(currency $ country amount);\n" +
 	        "calc charge_plus_gst(currency(charge.country) total = charge.amount * 1.1);\n" +
 	        "calc format_total(string total_text = charge.country + \" Total + gst: \" + format(charge_plus_gst.total));\n" +
 	        "list world_list(format_total);\n" +
@@ -661,6 +662,8 @@ public class QueryParserTest
     	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude?altitude>5000)");
  	    while (highCitiesQuery.execute())
  	    {
+ 	        Axiom axiom = calcTemplate.toAxiom();
+            System.out.println(axiom.toString());
  	    	System.out.println(highCitiesQuery.toString());
  	    	System.out.println(parserAssembler.getOperandMap().getItemList(QualifiedName.parseGlobalName("city_list")).toString());
  	    	System.out.println();

@@ -18,8 +18,8 @@ package au.com.cybersearch2.classy_logic.tutorial4;
 import java.io.File;
 
 import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
-import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -34,54 +34,68 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class InWords 
 {
-	static final String LEXICAL_SEARCH = 
-		// Use an external axiom source which is bound in TestAxiomProvider dependency class
-	    // to AxiomSource class LexiconSource
-		"axiom lexicon (word, definition) : resource;\n" +
-		"template in_words (word regex(\"^in[^ ]+\"), string definition);\n" +
-		"query query_in_words(lexicon : in_words);";
-
-	protected ProviderManager providerManager;
+/* definitions.txt - converted to axioms with terms "word" and "definition"
+abbey - n. a monastery ruled by an abbot
+abide - v. dwell; inhabit or live in
+abound - v. be abundant or plentiful; exist in large quantities
+absence - n. the state of being absent
+absorb - v. assimilate or take in
+abstinence - n. practice of refraining from indulging an appetite especially alcohol
+absurd - j. inconsistent with reason or logic or common sense
+...
+*/
+/* query_in_words.xpl
+axiom lexicon (word, definition) : resource;
+template in_words (word regex("^in[^ ]+"), string definition);
+query query_in_words(lexicon : in_words); 
+*/
+    protected QueryProgramParser queryProgramParser;
 	
 	public InWords()
 	{
-		providerManager = new ProviderManager(new File("src/main/resources"));
-		providerManager.putAxiomProvider(new LexiconAxiomProvider());
+        File resourcePath = new File("src/main/resources/tutorial4");
+        // Use an external axiom source which is bound in TestAxiomProvider dependency class
+        // to AxiomSource class LexiconSource
+        queryProgramParser = new QueryProgramParser(resourcePath, new LexiconAxiomProvider());
 	}
 	
-	public void displayInWords()
-	{
-		// Expected 54 results can be found in /src/test/resources/in_words.lst. 
-		// Here is the first result: 
-		// in_words(Word = inadequate, Definition = j. not sufficient to meet a need)
-		QueryProgram queryProgram = new QueryProgram(providerManager);
-		queryProgram.parseScript(LEXICAL_SEARCH);
-		queryProgram.executeQuery("query_in_words", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				Axiom wordAxiom = solution.getAxiom("in_words");
-					System.out.println(wordAxiom.toString());
-				return true;
-			}});
-	}
-	
-	public static void main(String[] args)
-	{
-		try 
-		{
-	        InWords inWords = new InWords();
-			inWords.displayInWords();
-		} 
-		catch (ExpressionException e) 
-		{
-			e.printStackTrace();
-			System.exit(1);
-		}
+    /**
+     * Compiles the query_in_words.xpl script and runs the "query_in_words" query
+     */
+    public void findInWords(SolutionHandler solutionHandler) 
+    {
+        QueryProgram queryProgram = queryProgramParser.loadScript("query_in_words.xpl");
+        queryProgram.executeQuery("query_in_words", solutionHandler);
+    }
+
+	/*
+     * Expected 54 results can be found in /src/test/resources/in_words.lst. 
+     * Here is the first result: </br>
+     * in_words(Word = inadequate, Definition = j. not sufficient to meet a need)</br>
+	 */
+    public static void main(String[] args)
+    {
+        try 
+        {
+            InWords inWords = new InWords();
+            inWords.findInWords(new SolutionHandler(){
+                @Override
+                public boolean onSolution(Solution solution) {
+                    Axiom wordAxiom = solution.getAxiom("in_words");
+                    System.out.println(wordAxiom.toString());
+                    return true;
+                }});
+        } 
+        catch (ExpressionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
         catch (QueryExecutionException e) 
         {
             e.printStackTrace();
             System.exit(1);
         }
-		System.exit(0);
-	}
+        System.exit(0);
+    }
 }

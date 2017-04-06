@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -34,67 +35,63 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class IncreasedAgriculture 
 {
-	static final String AGRICULTURAL_LAND = 
-		"include \"agriculture-land.xpl\";" +
-		"include \"surface-land.xpl\";" +
-        "list nation_list(surface_area_increase);\n" +
-	    "template agri_10y (country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);" +
-		"template surface_area_increase (\n" +
-	    "  country? country == agri_10y.country,\n" +
-		"  double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100\n" +
-	    "    * surface_area_Km2);" +
-	    "// Specify term list which writes to persistence resource 'agriculture'\n" +
-	    "query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);"; 
+/* more_agriculture.xpl
+include "agriculture-land.xpl";
+include "surface-land.xpl";
+list nation_list(surface_area_increase);
+template agri_10y (country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);
+template surface_area_increase (
+  country? country == agri_10y.country,
+  double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100
+    * surface_area_Km2);
+query more_agriculture(Data : agri_10y, surface_area : surface_area_increase); 
+*/
+    protected QueryProgramParser queryProgramParser;
+    
+    public IncreasedAgriculture()
+    {
+        queryProgramParser = new QueryProgramParser(new File("src/main/resources/"));
+     }
 
-   public IncreasedAgriculture()
-   {   // Set up dependency injection so file mega_city.xpl can be located in project folder src/test/resources
-   }
+    /**
+     * Compiles the more_agriculture.xpl script and runs the "more_agriculture" query
+     * @return Axiom iterator
+     */
+    public Iterator<Axiom>  findIncreasedAgriculture() 
+    {
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial5/more_agriculture.xpl");
+        Result result = queryProgram.executeQuery("more_agriculture");
+        return result.getIterator(QualifiedName.parseGlobalName("nation_list"));
+    }
 
 
 	/**
-	 * Compiles the AGRICULTURAL_LAND script and runs the "more_agriculture" query, 
-	 * displaying the solution on the console.<br/>
+     * Displays the solution on the console.<br/>
 	 * The expected result first 3 lines:<br/>
         increased(country = Albania, surface_area = 986.1249999999999, id = 0)<br/>
         increased(country = Algeria, surface_area = 25722.79200000004, id = 1)<br/>
         increased(country = American Samoa, surface_area = 10.0, id = 2)<br/><br/>
-     * The full result can be viewed in file src/main/resources/increased-agri-list.txt
-     * @return Axiom iterator
-	 */
-	public Iterator<Axiom> displayIncreasedAgri()
-	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.setResourceBase(new File("src/main/resources"));
-
-		queryProgram.parseScript(AGRICULTURAL_LAND);
-		Result result = queryProgram.executeQuery("more_agriculture");
-		return result.getIterator(QualifiedName.parseGlobalName("nation_list"));
-	}
-
-	/**
-	 * Run tutorial
-	 * @param args
-	 */
-	public static void main(String[] args)
-	{
-		try 
-		{
-	        IncreasedAgriculture increasedAgri = new IncreasedAgriculture();
-		    Iterator<Axiom> iterator = increasedAgri.displayIncreasedAgri();
-            while(iterator.hasNext())
-                System.out.println(iterator.next().toString());
-
-		} 
-		catch (ExpressionException e) 
-		{ 
-			e.printStackTrace();
-			System.exit(1);
-		}
+     * The full result can be viewed in file src/main/resources/tutorial5/more_agriculture.txt
+ 	 */
+    public static void main(String[] args)
+    {
+        try 
+        {
+            IncreasedAgriculture increasedAgriculture = new IncreasedAgriculture();
+            Iterator<Axiom> iterator = increasedAgriculture.findIncreasedAgriculture();
+            while (iterator.hasNext())
+                System.out.println(iterator.next());
+        } 
+        catch (ExpressionException e) 
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
         catch (QueryExecutionException e) 
         {
             e.printStackTrace();
             System.exit(1);
         }
-		System.exit(0);
-	}
+        System.exit(0);
+    }
 }

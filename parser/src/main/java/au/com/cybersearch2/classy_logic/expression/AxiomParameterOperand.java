@@ -44,6 +44,8 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     protected QualifiedName axiomName;
     /** Root of Operand tree for unification */
     protected Operand paramsTreeRoot;
+    /** Flag set true if operand not visible in solution */
+    protected boolean isPrivate;
 
     /**
      * Construct an AxiomParameterOperand object
@@ -173,6 +175,26 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
         return null;
     }
 
+    /**
+     * Set this operand private - not visible in solution
+     * @param isPrivate Flag set true if operand not visible in solution
+     */
+    @Override
+    public void setPrivate(boolean isPrivate)
+    {
+        this.isPrivate = isPrivate;
+    }
+    
+    /**
+     * Returns flag set true if this operand is private
+     * @return
+     */
+    @Override
+    public boolean isPrivate()
+    {
+        return isPrivate;
+    }
+    
     /**
      * Returns an object which implements CallEvaluator interface returning an AxiomList
      * given a list of terms to marshall into an axiom

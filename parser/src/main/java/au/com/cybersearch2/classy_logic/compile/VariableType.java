@@ -88,6 +88,13 @@ public class VariableType
 	}
 
 	/**
+	 * Set type to UNKNOWN to force Variable instance creation
+	 */
+	public void setUnknownType()
+	{
+	    operandType = OperandType.UNKNOWN;
+	}
+	/**
 	 * Set property
 	 * @param key  Key - AxiomKey, Expression, QualifierString or QualifierOperand
 	 * @param value Object
