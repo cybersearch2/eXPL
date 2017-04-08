@@ -37,6 +37,7 @@ import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
@@ -363,7 +364,8 @@ public class QueryExecuterTest
 		InputStream stream = new ByteArrayInputStream(GREEK_CONSTRUCTION.getBytes());
 		QueryParser queryParser = new QueryParser(stream);
 		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+		ParserContext context = new ParserContext(queryProgram);
+		queryParser.input(context);
 	    final ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
         QuerySpec querySpec = new QuerySpec("TEST");
  	    Variable city = new TestVariable("city");
@@ -732,7 +734,8 @@ public class QueryExecuterTest
         queryParser.enable_tracing();
         QueryProgram queryProgram = new QueryProgram();
         queryProgram.setResourceBase(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
-        queryParser.input(queryProgram);
+        ParserContext context = new ParserContext(queryProgram);
+        queryParser.input(context);
         return queryProgram.getGlobalScope().getParserAssembler();
     }
     

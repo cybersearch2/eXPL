@@ -50,7 +50,8 @@ public class ColorSwatch
 	 */
 	public String getColorSwatch(int hexColor)
 	{
-        QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(CHOICE_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term

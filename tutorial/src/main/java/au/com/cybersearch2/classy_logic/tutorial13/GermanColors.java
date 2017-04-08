@@ -55,7 +55,8 @@ public class GermanColors
 	 */
     public String getColorSwatch(String name)
 	{
-        QueryProgram queryProgram = new QueryProgram(GERMAN_COLORS);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(GERMAN_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams("german", "color_query");
         // Add a shade Axiom with a single "aqua" term

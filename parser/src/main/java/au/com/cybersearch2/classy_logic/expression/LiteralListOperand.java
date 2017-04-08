@@ -23,13 +23,20 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * LiteralListOperand
+ * Compares a value to a list of literals to match on and short circuits if no match found
  * @author Andrew Bowley
  * 8 Sep 2015
  */
 public class LiteralListOperand extends Variable
 {
+    /** Parameter list containing values to match on */
     protected List<Parameter> literalList;
-    
+
+    /**
+     * Construct LiteralListOperand object
+     * @param qname Qualified name of this operand
+     * @param literalList Parameter list containing values to match on
+     */
     public LiteralListOperand(QualifiedName qname, List<Parameter> literalList)
     {
         super(qname);
@@ -58,4 +65,30 @@ public class LiteralListOperand extends Variable
         return match ? EvaluationStatus.COMPLETE : EvaluationStatus.SHORT_CIRCUIT;
     }
 
+    /**
+     * toString()
+     * @see au.com.cybersearch2.classy_logic.expression.Variable#toString()
+     */
+    @Override
+    public String toString()
+    {
+        String string = super.toString();
+        if (empty)
+        {
+            StringBuilder builder = new StringBuilder(string);
+            builder.append(" {");
+            boolean firstTime = true;
+            for (Parameter param: literalList)
+            {
+                if (firstTime)
+                    firstTime = false;
+                else
+                    builder.append(',');
+                builder.append(param.getValue().toString());
+            }
+            builder.append('}');
+            string = builder.toString();
+        }
+        return string;
+    }
 }

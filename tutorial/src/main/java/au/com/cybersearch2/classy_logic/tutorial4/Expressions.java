@@ -19,6 +19,7 @@ import java.io.File;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -32,35 +33,36 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class Expressions 
 {
-	static final String EXPRESSIONS =
-       "integer x = 1;\n" +
-       "integer y = 2;\n" +
-       "calc evaluate(\n" +
-       "  boolean can_add = x + y == 3,\n" +
-       "  boolean can_subtract = y - x == 1,\n" +
-       "  boolean can_multiply = x * y == 2,\n" +
-       "  boolean can_divide = 6 / y == 3,\n" +
-       "  boolean can_override_precedence = (y + 1) * 2 > x * 5,\n" +
-       "  boolean can_assign = (y *= 3) == 6 && y == 6,\n" +
-       "  boolean can_evaluate = can_add && can_subtract && can_multiply && can_divide && can_override_precedence && can_assign\n" +
-        ");\n" +
-       "query expressions (evaluate);";
-
+	/* expressions.xpl
+       integer x = 1;\n" +
+       integer y = 2;\n" +
+       calc evaluate(\n" +
+         boolean can_add = x + y == 3,
+         boolean can_subtract = y - x == 1,
+         boolean can_multiply = x * y == 2,
+         boolean can_divide = 6 / y == 3,
+         boolean can_override_precedence = (y + 1) * 2 > x * 5,
+         boolean can_assign = (y *= 3) == 6 && y == 6,
+         boolean can_evaluate = can_add && can_subtract && can_multiply && can_divide && can_override_precedence && can_assign
+        );
+       query expressions (evaluate);
+    */
     protected QueryProgramParser queryProgramParser;
     
     public Expressions()
     {
         File resourcePath = new File("src/main/resources/tutorial4");
         queryProgramParser = new QueryProgramParser(resourcePath);
-     }
+    }
 
     /**
      * Compiles the expressions.xpl script and runs the "expressions" query
      */
-    public void checkExpressions(SolutionHandler solutionHandler) 
+    public ParserContext checkExpressions(SolutionHandler solutionHandler) 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("expressions.xpl");
         queryProgram.executeQuery("expressions", solutionHandler);
+        return queryProgramParser.getContext();
     }
 
     /**

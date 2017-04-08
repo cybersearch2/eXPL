@@ -84,7 +84,8 @@ public class ChoiceTest
     @Test
     public void test_stamp_duty()
     {
-        QueryProgram queryProgram = new QueryProgram(STAMP_DUTY);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(STAMP_DUTY);
         queryProgram.executeQuery("stamp_duty_query", new SolutionHandler(){
             int index = 0;
             @Override
@@ -99,7 +100,8 @@ public class ChoiceTest
     @Test
     public void test_choice_colors()
     {
-        QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(CHOICE_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         queryProgram.executeQuery("color_query", new SolutionHandler(){
             int index = 0;

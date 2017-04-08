@@ -47,7 +47,8 @@ public class SingleCurrency
 	 */
 	public String getFormatedTotalAmount()
 	{
-		QueryProgram queryProgram = new QueryProgram(CURRENCY);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(CURRENCY);
 		final String[] formatedTotalAmountHolder = new String[1];
 		queryProgram.executeQuery("item_query", new SolutionHandler(){
 			@Override

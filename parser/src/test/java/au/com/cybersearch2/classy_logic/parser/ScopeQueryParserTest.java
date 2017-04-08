@@ -47,6 +47,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -314,7 +315,8 @@ public class ScopeQueryParserTest
     @Test
     public void test_choice_string_colors()
     { 
-        QueryProgram queryProgram = new QueryProgram(GERMAN_COLORS);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(GERMAN_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams("german", "color_query");
         // Add a shade Axiom with a single "aqua" term
@@ -383,7 +385,8 @@ public class ScopeQueryParserTest
 		InputStream stream = new ByteArrayInputStream(GERMAN_CURRENCY_XPL.getBytes());
 		QueryParser queryParser = new QueryParser(stream);
 		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+		ParserContext context = new ParserContext(queryProgram);
+		queryParser.input(context);
 		queryProgram.executeQuery("german.item_query", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -401,7 +404,8 @@ public class ScopeQueryParserTest
         InputStream stream = new ByteArrayInputStream(GERMAN_SCOPE_XPL.getBytes());
         QueryParser queryParser = new QueryParser(stream);
         QueryProgram queryProgram = new QueryProgram();
-        queryParser.input(queryProgram);
+        ParserContext context = new ParserContext(queryProgram);
+        queryParser.input(context);
         queryProgram.executeQuery("german.properties_query", new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
@@ -718,6 +722,7 @@ public class ScopeQueryParserTest
 		InputStream stream = new ByteArrayInputStream(script.getBytes());
 		QueryParser queryParser = new QueryParser(stream);
 		queryParser.enable_tracing();
-		queryParser.input(queryProgram);
+		ParserContext context = new ParserContext(queryProgram);
+		queryParser.input(context);
 	}
 }

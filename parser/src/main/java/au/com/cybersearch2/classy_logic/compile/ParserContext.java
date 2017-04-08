@@ -15,9 +15,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.compile;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
+import au.com.cybersearch2.classy_logic.parser.Token;
 
 /**
  * ParserContext
@@ -36,11 +46,33 @@ public class ParserContext
     ParserAssembler parserAssembler;
     /** Current operand map */
     OperandMap operandMap;
+    /** List of source documents */
+    List<String> sourceDocumentList;
+    /** Index of current source document in list */
+    int sourceDocumentId;
+    /** Stack to retain nested source documents */
+    Deque<Integer> documentStack;
+    /** Set of source markers collated by qualified name */
+    Set<SourceMarker> sourceMarkerSet;
+    /** Flag set true if waiting for source item start token */
+    boolean isSourceItemPending;
+    /** Source item start token */
+    Token itemToken;
     
     public ParserContext(QueryProgram queryProgram)
     {
         this.queryProgram = queryProgram;
+        sourceMarkerSet = new TreeSet<SourceMarker>();
+        documentStack = new ArrayDeque<Integer>();
         resetScope();
+    }
+
+    public ParserContext(QueryProgram queryProgram, String sourceDocument)
+    {
+        this(queryProgram);
+        sourceDocumentList = new ArrayList<String>();
+        sourceDocumentList.add(sourceDocument);
+        documentStack.push(0);
     }
 
     public void setScope(Scope scope)
@@ -69,13 +101,109 @@ public class ParserContext
     }
 
     /**
+     * Set current source marker, set it's source document id and add to marker set
      * @param sourceMarker the sourceMarker to set
      */
-    public void setSourceMarker(SourceMarker sourceMarker)
+    private void setSourceMarker(SourceMarker sourceMarker)
     {
         this.sourceMarker = sourceMarker;
+        sourceMarker.setSourceDocumentId(sourceDocumentId);
+        sourceMarkerSet.add(sourceMarker);
+        isSourceItemPending = true;
     }
 
+    public void setSourceMarker(Token token, String name)
+    {
+        SourceMarker sourceMarker = new SourceMarker(token);
+        sourceMarker.setQualifiedName(QualifiedName.parseName(name, getContextName()));
+        setSourceMarker(sourceMarker);
+        // Use marker token to initialize item token to avoid possible NPE if parser has bugs
+        if (itemToken == null)
+            itemToken = token;
+    }
+    
+    public void setSourceMarker(Token token, QualifiedName qname)
+    {
+        SourceMarker sourceMarker = new SourceMarker(token);
+        sourceMarker.setQualifiedName(qname);
+        setSourceMarker(sourceMarker);
+        if (itemToken == null)
+            itemToken = token;
+    }
+
+    /**
+     * Possible source item start token encountered
+     * @param token Parser token
+     */
+    public void onTokenIntercept(Token token)
+    {
+        if (isSourceItemPending)
+        {
+            itemToken = token;
+            isSourceItemPending = false;
+        }
+    }
+
+
+    /**
+     * Add SourceItem object for operand to current source marker 
+     * @param operand Operand object
+     * @return SourceItem object
+     */
+    public SourceItem addSourceItem(Operand operand)
+    {
+        SourceItem sourceItem = addSourceItem(operand.toString());
+        if (operand instanceof SourceInfo)
+            // Update information when operand is completed in a parser task
+            ((SourceInfo)operand).setSourceItem(sourceItem);
+        return sourceItem;
+    }
+    
+    /**
+     * Add SourceItem object to current source marker
+     * @param information
+     * @return SourceItem object
+     */
+    public SourceItem addSourceItem(String information)
+    {
+        SourceItem sourceItem = new SourceItem(itemToken, information);
+        if ((sourceMarker != null) && (sourceItem != null))
+            sourceMarker.addSourceItem(sourceItem);
+        if (itemToken.next != null)
+            // Advance to next token if available
+            itemToken = itemToken.next;
+        isSourceItemPending = true;
+        return sourceItem;
+    }
+    
+    /**
+     * Push source document on stack
+     * @param sourceDocument Source document resource name
+     * @return id of source document
+     */
+    public int pushSourceDocument(String sourceDocument)
+    {
+        if (sourceDocumentList == null)
+        {   // Opening source document not specified, so set to empty string
+            sourceDocumentList = new ArrayList<String>();
+            sourceDocumentList.add("");
+            documentStack.push(0);
+        }
+        sourceDocumentId = sourceDocumentList.size();
+        documentStack.push(sourceDocumentId);
+        sourceDocumentList.add(sourceDocument);
+        return sourceDocumentId;
+    }
+ 
+    /**
+     * Pop source document stack to reference previous document
+     */
+    public void popSourceDocument()
+    {
+        if (documentStack.size() > 0)
+            sourceDocumentId = documentStack.pop();
+    }
+    
     /**
      * @return the parserAssembler
      */
@@ -113,6 +241,46 @@ public class ParserContext
     public QueryProgram getQueryProgram()
     {
         return queryProgram;
+    }
+
+    /**
+     * @return the sourceDocumentList
+     */
+    public List<String> getSourceDocumentList()
+    {
+        return sourceDocumentList;
+    }
+
+    /**
+     * @return the sourceDocumentId
+     */
+    public int getSourceDocumentId()
+    {
+        return sourceDocumentId;
+    }
+
+    /**
+     * @return the sourceMarkerSet
+     */
+    public Set<SourceMarker> getSourceMarkerSet()
+    {
+        return sourceMarkerSet;
+    }
+
+    /**
+     * @param isSourceItemPending the isSourceItemPending to set
+     */
+    public void setSourceItemPending(boolean isSourceItemPending)
+    {
+        this.isSourceItemPending = isSourceItemPending;
+    }
+
+    /**
+     * @return the itemToken
+     */
+    public Token getItemToken()
+    {
+        return itemToken;
     }
 
 }

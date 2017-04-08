@@ -79,7 +79,8 @@ public class ForeignScope
 	 */
     public List<Axiom> getFormatedTotalAmount()
 	{
-		QueryProgram queryProgram = new QueryProgram(FOREIGN_SCOPE);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(FOREIGN_SCOPE);
 		// Create QueryParams object for  query "item_query"
 		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "item_query");
 		// Add an item Axiom with a single "2.345,67 EUR" term

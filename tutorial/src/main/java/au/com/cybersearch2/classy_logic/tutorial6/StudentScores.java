@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
@@ -71,7 +72,8 @@ public class StudentScores
 	 */
 	public void displayLists()
 	{
-		QueryProgram queryProgram = new QueryProgram(LISTS);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(LISTS);
 		queryProgram.executeQuery("marks", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -85,7 +87,8 @@ public class StudentScores
 		InputStream stream = new ByteArrayInputStream(script.getBytes());
 		QueryParser queryParser = new QueryParser(stream);
 		QueryProgram queryProgram = new QueryProgram();
-		queryParser.input(queryProgram);
+	    ParserContext context = new ParserContext(queryProgram);
+		queryParser.input(context);
 		return queryProgram;
 	}
 	

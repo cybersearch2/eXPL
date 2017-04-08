@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.tutorial3;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -84,10 +85,11 @@ query euro_megacities (mega_city : euro_megacities);
     /**
      * Compiles the euro_megacities.xpl script and runs the "euro_megacities" query
      */
-    public void findEuroMegaCities(SolutionHandler solutionHandler) 
+    public ParserContext findEuroMegaCities(SolutionHandler solutionHandler) 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("euro_megacities.xpl");
         queryProgram.executeQuery("euro_megacities", solutionHandler);
+        return queryProgramParser.getContext();
     }
 
 	/**

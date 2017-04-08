@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 
@@ -32,26 +31,26 @@ import au.com.cybersearch2.classy_logic.parser.QueryParser;
  */
 public class ParserResources 
 {
-    /** Main compiler object to parse */
-	protected QueryProgram queryProgram;
+    /** Context for parse operation */
+	protected ParserContext context;
     protected File resourceBase;
 
     /**
      * Construct ParserResources object
      * @param queryProgram Main compiler object
      */
-	public ParserResources(final QueryProgram queryProgram) 
+	public ParserResources(ParserContext context) 
 	{
-		this(queryProgram, queryProgram.getResourceBase());
+		this(context, context.getQueryProgram().getResourceBase());
 	}
 
     /**
      * Construct ParserResources object
      * @param queryProgram Main compiler object
      */
-	public ParserResources(QueryProgram queryProgram, File resourceBase) 
+	public ParserResources(ParserContext context, File resourceBase) 
 	{
-		this.queryProgram = queryProgram;
+		this.context = context;
 		this.resourceBase = resourceBase;
 	}
 
@@ -65,13 +64,15 @@ public class ParserResources
 	{	
 		InputStream instream = openResource(resourceName);
 		QueryParser parser = new QueryParser(instream);
+		context.pushSourceDocument(resourceName);
 		try
 		{
-			parser.input(queryProgram);
+			parser.input(context);
 		}
 		finally
 		{
 			close(instream, resourceName);
+			context.popSourceDocument();
 		}
 	}
 

@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.tutorial1;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -51,21 +52,6 @@ public class HighCities2
 template high_city(name ? altitude > 5000, altitude);
 query high_cities (city : high_city); 
 */
-	static final String CITY_EVELATIONS =
-	    "axiom city(altitude, name)\n" + 
-	        "    {1718, \"bilene\"}\n" +
-	        "    {8000, \"addis ababa\"}\n" +
-	        "    {5280, \"denver\"}\n" +
-	        "    {6970, \"flagstaff\"}\n" +
-	        "    {8, \"jacksonville\"}\n" +
-	        "    {10200, \"leadville\"}\n" +
-	        "    {1305, \"madrid\"}\n" +
-	        "    {19, \"richmond\"}\n" +
-	        "    {1909, \"spokane\"}\n" +
-	        "    {1305, \"wichita\"};\n" +
-		"template high_city(name ? altitude > 5000, altitude);\n" +
-	    "query high_cities (city : high_city);\n"; 
-
     protected QueryProgramParser queryProgramParser;
     
     public HighCities2()
@@ -77,10 +63,11 @@ query high_cities (city : high_city);
     /**
      * Compiles the high_cities.xpl script and runs the "high_city" query
      */
-    public void findHighCities(SolutionHandler solutionHandler) 
+    public ParserContext findHighCities(SolutionHandler solutionHandler) 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
         queryProgram.executeQuery("high_cities", solutionHandler);
+        return queryProgramParser.getContext();
     }
 
 	/**

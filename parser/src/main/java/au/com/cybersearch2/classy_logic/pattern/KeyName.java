@@ -75,4 +75,17 @@ public class KeyName
 		return templateName;
 	}
 
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        if (axiomKey.equals(EMPTY_QNAME))
+            return templateName.toString();
+        StringBuilder builder = new StringBuilder(axiomKey.toString());
+        builder.append(':').append(templateName.toString());
+        return builder.toString();
+    }
+
 }

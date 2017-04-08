@@ -53,7 +53,8 @@ public class GermanScope
 	 */
     public Axiom getFormatedTotalAmount()
 	{
-		QueryProgram queryProgram = new QueryProgram(GERMAN_SCOPE);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(GERMAN_SCOPE);
 		// Create QueryParams object for scope "german" and query "item_query"
 		QueryParams queryParams = queryProgram.getQueryParams("german", "item_query");
 		// Add an item Axiom with a single "2.345,67 EUR" term

@@ -72,7 +72,8 @@ public class GreekConstruction3
 	 */
 	public void displayCustomerCharges()
 	{
-		QueryProgram queryProgram = new QueryProgram(GREEK_CONSTRUCTION);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(GREEK_CONSTRUCTION);
 		queryProgram.executeQuery("greek_business", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {

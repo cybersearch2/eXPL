@@ -55,7 +55,8 @@ public class StampDuty
 	 */
 	public Axiom getStampDuty()
 	{
-		QueryProgram queryProgram = new QueryProgram(STAMP_DUTY);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(STAMP_DUTY);
 		// Create QueryParams object for Global scope and query "stamp_duty_query"
 		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "stamp_duty_query");
 		// Add a transacton_amount Axiom with a single 123,458 term

@@ -15,14 +15,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.debug;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import java.util.Iterator;
 
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.compile.SourceItem;
+import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * DebugClientTest
@@ -56,6 +63,14 @@ public class DebugClientTest
             "list rated(age_rating);\n" +
             "query rate_age (person : age_rating);";
 
+    static final String FRUITS_POKER=
+            "axiom spin (r1, r2, r3, r4) {3,2,0,1};\n" +
+            "axiom fruit() {\"apple\", \"orange\", \"banana\", \"lemon\"};\n" +
+            
+            "list<term> combo(fruit);\n" +
+            "template spin(combo[(r1)], combo[(r2)], combo[(r3)], combo[(r4)]);\n" +
+            "query spin(spin : spin);"
+            ;
     /**
      * Compiles the PERSON_RATING script and runs the "rate_age" query which gives each person 
      * over the age of 20 an age rating and excludes those aged 20 and under.<br/>
@@ -67,8 +82,11 @@ public class DebugClientTest
      */
     public Iterator<Axiom> getAgeRating()
     {
-        QueryProgram queryProgram = new QueryProgram(PERSON_RATING);
+        QueryProgram queryProgram = new QueryProgram();
+        ParserContext context = queryProgram.parseScript(PERSON_RATING);
         Result result = queryProgram.executeQuery("rate_age");
+        SourceMarker sourceMarker = context.getSourceMarker();
+        assertThat(sourceMarker).isNotNull();
         return result.getIterator(QualifiedName.parseGlobalName("rated"));
     }
     
@@ -79,6 +97,40 @@ public class DebugClientTest
         while(iterator.hasNext())
         {
             System.out.println(iterator.next().toString());
+        }
+    }
+
+    @Test
+    public void textDisplayFruit()
+    {
+        QueryProgram queryProgram = new QueryProgram();
+        ParserContext context = queryProgram.parseScript(FRUITS_POKER);
+        queryProgram.executeQuery("spin", new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                System.out.println(solution.getAxiom("spin").toString());
+                return true;
+            }});
+        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        assertThat(iterator.hasNext()).isTrue();
+        SourceMarker sourceMarker = iterator.next();
+        System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
+        SourceItem sourceItem = sourceMarker.getHeadSourceItem();
+        while (sourceItem != null)
+        {
+            System.out.println(sourceItem.toString());
+            sourceItem = sourceItem.getNext();
+        }
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
+        sourceItem = sourceMarker.getHeadSourceItem();
+        while (sourceItem != null)
+        {
+            System.out.println(sourceItem.toString());
+            sourceItem = sourceItem.getNext();
         }
     }
 }

@@ -71,7 +71,8 @@ public class ParameterOperandTest
     @Test
     public void testNoArgs()
     {
-        QueryProgram queryProgram = new QueryProgram(NO_ARG_CALC);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(NO_ARG_CALC);
         queryProgram.executeQuery("no_arg_query", new SolutionHandler(){
 
             @Override
@@ -86,7 +87,8 @@ public class ParameterOperandTest
     @Test
     public void testAllTypesArgs()
     {
-        QueryProgram queryProgram = new QueryProgram(ALL_TYPES_ARG_CALC);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(ALL_TYPES_ARG_CALC);
         queryProgram.executeQuery("all_types_arg_query", new SolutionHandler(){
 
             @Override
@@ -103,7 +105,8 @@ public class ParameterOperandTest
     @Test
     public void testAllTypesVarsArgs()
     {
-        QueryProgram queryProgram = new QueryProgram(ALL_TYPES_VARS_ARG_CALC);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(ALL_TYPES_VARS_ARG_CALC);
         queryProgram.executeQuery("all_types_vars_arg_query", new SolutionHandler(){
 
             @Override

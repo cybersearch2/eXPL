@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -97,7 +98,8 @@ public class ResourceAxiomProvider implements AxiomProvider
             QueryParser queryParser = new QueryParser(stream);
             queryProgram = new QueryProgram();
             queryProgram.setResourceBase(resourcePath);
-            queryParser.input(queryProgram);
+            ParserContext context = new ParserContext(queryProgram);
+            queryParser.input(context);
         }
         catch (IOException e)
         {

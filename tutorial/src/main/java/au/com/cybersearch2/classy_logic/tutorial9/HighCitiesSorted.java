@@ -85,7 +85,8 @@ public class HighCitiesSorted
 	 */
 	public void displayHighCities()
 	{
-		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities");
 		Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("high_cities"));
         while(iterator.hasNext())

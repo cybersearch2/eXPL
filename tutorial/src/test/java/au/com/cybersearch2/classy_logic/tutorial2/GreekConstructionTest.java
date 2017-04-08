@@ -23,9 +23,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.compile.SourceItem;
+import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
@@ -42,14 +46,51 @@ public class GreekConstructionTest
         File testFile = new File("src/main/resources/tutorial2", "customer_charge.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         GreekConstruction greekConstruction = new GreekConstruction();
-        greekConstruction.findCustomerCharges(new SolutionHandler(){
+        ParserContext context = greekConstruction.findCustomerCharges(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
                 checkSolution(reader, solution.getAxiom("freight").toString(), solution.getAxiom("customer_freight").toString());
                 return true;
             }});
         reader.close();
-    }
+        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        assertThat(iterator.hasNext()).isTrue();
+        SourceMarker sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("query customer_charge (6,1)");
+        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
+        SourceItem sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("charge:freight (6,23) (6,36)");
+        sourceItem = sourceItem.getNext();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("customer:customer_freight (6,39) (6,63)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("template customer_freight (4,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("name (4,27) (4,30)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("city?city==city (4,33) (4,59)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("charge (4,62) (4,67)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("template freight (3,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("city (3,18) (3,21)");
+     }
     
     protected void checkSolution(BufferedReader reader, String freight, String customerFreight)
     {

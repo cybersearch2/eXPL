@@ -65,7 +65,8 @@ public class HighCitiesAxioms
 	 */
 	public Iterator<Axiom> getHighCities()
 	{
-		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(CITY_EVELATIONS);
 		Result result = queryProgram.executeQuery("high_cities"); 
 		return result.getIterator(QualifiedName.parseGlobalName("high_cities"));
 	}

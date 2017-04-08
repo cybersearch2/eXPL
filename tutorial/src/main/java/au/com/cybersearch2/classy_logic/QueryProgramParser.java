@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
@@ -34,6 +35,7 @@ public class QueryProgramParser
 {
     protected ProviderManager providerManager;
     protected File resourcePath;
+    protected ParserContext context;
 
     public QueryProgramParser(ResourceAxiomProvider resourceAxiomProvider)
     {
@@ -65,7 +67,8 @@ public class QueryProgramParser
             QueryParser queryParser = new QueryParser(stream);
             queryProgram = new QueryProgram(providerManager);
             queryProgram.setResourceBase(resourcePath);
-            queryParser.input(queryProgram);
+            context = new ParserContext(queryProgram, filePath.toString());
+            queryParser.input(context);
             return queryProgram;
         }
         catch (IOException e)
@@ -88,5 +91,13 @@ public class QueryProgramParser
                     e.printStackTrace();
                 }
         }
+    }
+
+    /**
+     * @return the context
+     */
+    public ParserContext getContext()
+    {
+        return context;
     }
 }

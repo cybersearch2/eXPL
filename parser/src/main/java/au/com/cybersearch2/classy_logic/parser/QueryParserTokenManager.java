@@ -20,6 +20,8 @@ import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserTask;
+import au.com.cybersearch2.classy_logic.compile.SourceMarker;
+import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.VariableType;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;

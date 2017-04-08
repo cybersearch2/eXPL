@@ -46,7 +46,8 @@ public class Gaming {
 	 */
 	public void displayFruit()
 	{
-		QueryProgram queryProgram = new QueryProgram(FRUITS_POKER);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(FRUITS_POKER);
 		queryProgram.executeQuery("spin", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {

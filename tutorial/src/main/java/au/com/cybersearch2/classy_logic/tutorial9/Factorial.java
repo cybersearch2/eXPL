@@ -51,7 +51,8 @@ public class Factorial
 	 */
 	public void display4Factorial()
 	{
-		QueryProgram queryProgram = new QueryProgram(FACTORIAL_CALCULATE);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(FACTORIAL_CALCULATE);
 		queryProgram.executeQuery("factorial", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {

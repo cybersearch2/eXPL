@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.tutorial2;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -62,13 +63,14 @@ query customer_charge(charge:freight, customer:customer_freight);
     /**
      * Compiles the "customer_charge.xpl" script and runs the "customer_charge" query, displaying the solution on the console.
      */
-    public void findCustomerCharges(SolutionHandler solutionHandler) 
+    public ParserContext findCustomerCharges(SolutionHandler solutionHandler) 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("customer_charge.xpl");
         // The first unification fills in variables "city" and "charge".
         // Both templates here share variables "city" and "charge", so only the "name" term
         // empty in the second unification.
         queryProgram.executeQuery("customer_charge", solutionHandler);
+        return queryProgramParser.getContext();
     }
 
 

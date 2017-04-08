@@ -62,7 +62,8 @@ public class NamedGreekConstruction
 	 */
 	public void displayCustomerCharges()
 	{
-		QueryProgram queryProgram = new QueryProgram(GREEK_CONSTRUCTION);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(GREEK_CONSTRUCTION);
 		// The first unification fills in variables "city" and "charge".
 		// Both templates here share variables "city" and "charge", so only the "name" term
 		// empty in the second unification.

@@ -21,6 +21,8 @@ import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserTask;
+import au.com.cybersearch2.classy_logic.compile.SourceMarker;
+import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.VariableType;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
@@ -75,7 +77,8 @@ public class QueryParser implements QueryParserConstants
   {
     QueryParser parser = new QueryParser(System.in);
     QueryProgram queryProgram = new QueryProgram();
-    parser.input(queryProgram);
+    ParserContext context = new ParserContext(queryProgram);
+    parser.input(context);
   }
 
 
@@ -89,7 +92,8 @@ public class QueryParser implements QueryParserConstants
   {
     ReInit(inputStream);
     QueryProgram queryProgram = new QueryProgram();
-    input(queryProgram);
+    ParserContext context = new ParserContext(queryProgram);
+    input(context);
     return queryProgram;
   }
 
@@ -99,11 +103,11 @@ public class QueryParser implements QueryParserConstants
    * @param queryProgram QueryProgram object accumulating the compiled result
    * @throws ParseException
    */
-  public void includeResource(String resourceName, QueryProgram queryProgram) throws ParseException
+  public void includeResource(String resourceName, ParserContext context) throws ParseException
   {
     if (resourceName.length() < 3)
       throw new ParseException("Include resourceName \u005c"\u005c" is invalid");
-    ParserResources parserResources = new ParserResources(queryProgram);
+    ParserResources parserResources = new ParserResources(context);
     try
     {
       parserResources.includeResource(resourceName.substring(1, resourceName.length() - 1));
@@ -147,9 +151,8 @@ public class QueryParser implements QueryParserConstants
   }
 
 /** Root production. */
-  final public void input(QueryProgram queryProgram) throws ParseException
+  final public void input(ParserContext context) throws ParseException
   {
-  ParserContext context = new ParserContext(queryProgram);
     label_1:
     while (true) 
     {
@@ -225,7 +228,7 @@ public class QueryParser implements QueryParserConstants
       }
     }
     jj_consume_token(0);
-    queryProgram.runPending();
+    context.getQueryProgram().runPending();
   }
 
   final public void ResourceDeclaration(ParserContext context) throws ParseException
@@ -238,7 +241,7 @@ public class QueryParser implements QueryParserConstants
     {
     case LPAREN:
       jj_consume_token(LPAREN);
-      InitialiserList(properties);
+      InitialiserList(properties, context);
       jj_consume_token(RPAREN);
       break;
     default:
@@ -321,7 +324,7 @@ public class QueryParser implements QueryParserConstants
     {
     case LPAREN:
       jj_consume_token(LPAREN);
-      InitialiserList(properties);
+      InitialiserList(properties, context);
       jj_consume_token(RPAREN);
       break;
     default:
@@ -334,10 +337,11 @@ public class QueryParser implements QueryParserConstants
   final public void QueryChain(ParserContext context) throws ParseException
   {
   QuerySpec querySpec;
-  Scope scope = context.getScope();
-    jj_consume_token(QUERY);
-    querySpec = Query();
-    querySpec = QueryDeclaration(querySpec, scope);
+  Token queryToken;
+    queryToken = jj_consume_token(QUERY);
+    querySpec = Query(context);
+    context.setSourceMarker(queryToken, querySpec.getName());
+    querySpec = QueryDeclaration(querySpec, context);
     label_4:
     while (true) 
     {
@@ -351,13 +355,13 @@ public class QueryParser implements QueryParserConstants
         break label_4;
       }
       jj_consume_token(78);
-      QueryDeclaration(querySpec.chain(), scope);
+      QueryDeclaration(querySpec.chain(), context);
     }
     jj_consume_token(SEMICOLON);
-    scope.addQuerySpec(querySpec);
+    context.getScope().addQuerySpec(querySpec);
   }
 
-  final public QuerySpec Query() throws ParseException
+  final public QuerySpec Query(ParserContext context) throws ParseException
   {
    Token queryToken;
     queryToken = jj_consume_token(IDENTIFIER);
@@ -365,13 +369,17 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public QuerySpec QueryDeclaration(QuerySpec querySpec, Scope scope) throws ParseException
+  final public QuerySpec QueryDeclaration(QuerySpec querySpec, ParserContext context) throws ParseException
   {
   KeyName firstKeyname;
+  KeyName keyname;
+  Token delimitToken;
+  SourceItem sourceItem;
   int keynameCount = 1;
   Map<String, Object> properties = new HashMap<String, Object>();
     jj_consume_token(LPAREN);
-    firstKeyname = KeyName(querySpec);
+    firstKeyname = KeyName(querySpec, context);
+          sourceItem = context.addSourceItem(firstKeyname.toString());
     label_5:
     while (true) 
     {
@@ -384,36 +392,39 @@ public class QueryParser implements QueryParserConstants
         jj_la1[8] = jj_gen;
         break label_5;
       }
-      jj_consume_token(COMMA);
-      KeyName(querySpec);
+      delimitToken = jj_consume_token(COMMA);
+          sourceItem.setEnd(delimitToken);
+      keyname = KeyName(querySpec, context);
+          sourceItem = context.addSourceItem(keyname.toString());
             ++keynameCount;
     }
-    jj_consume_token(RPAREN);
+    delimitToken = jj_consume_token(RPAREN);
+        sourceItem.setEnd(delimitToken);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LPAREN:
       jj_consume_token(LPAREN);
-      InitialiserList(properties);
+      InitialiserList(properties, context);
       jj_consume_token(RPAREN);
       break;
     default:
       jj_la1[9] = jj_gen;
       ;
     }
-        {if (true) return scope.buildQuerySpec(querySpec, firstKeyname, keynameCount, properties);}
+        {if (true) return context.getScope().buildQuerySpec(querySpec, firstKeyname, keynameCount, properties);}
     throw new Error("Missing return statement in function");
   }
 
-  final public KeyName KeyName(QuerySpec querySpec) throws ParseException
+  final public KeyName KeyName(QuerySpec querySpec, ParserContext context) throws ParseException
   {
   String name1;
   String name2 = null;
-    name1 = Name();
+    name1 = Name(context);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case COLON:
       jj_consume_token(COLON);
-      name2 = Name();
+      name2 = Name(context);
       break;
     default:
       jj_la1[10] = jj_gen;
@@ -433,18 +444,6 @@ public class QueryParser implements QueryParserConstants
   Operand var;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
-    case INTEGER:
-    case DOUBLE:
-    case DECIMAL:
-    case BOOLEAN:
-    case STRING:
-    case TERM:
-    case CURRENCY:
-    case IDENTIFIER:
-      var = VariableDeclaration(context);
-      jj_consume_token(SEMICOLON);
-      context.getOperandMap().addOperand(var);
-      break;
     case TEMPLATE:
       TemplateDeclaration(context);
       jj_consume_token(SEMICOLON);
@@ -469,6 +468,16 @@ public class QueryParser implements QueryParserConstants
     case INCLUDE:
       Include(context);
       jj_consume_token(SEMICOLON);
+      break;
+    case INTEGER:
+    case DOUBLE:
+    case DECIMAL:
+    case BOOLEAN:
+    case STRING:
+    case TERM:
+    case CURRENCY:
+    case IDENTIFIER:
+      VariableInitialization(context);
       break;
     default:
       jj_la1[11] = jj_gen;
@@ -503,7 +512,7 @@ public class QueryParser implements QueryParserConstants
   final public QualifiedName Axiom(ParserContext context) throws ParseException
   {
   String axiomName;
-    axiomName = Name();
+    axiomName = Name(context);
     {if (true) return axiomName.indexOf(".") == -1 ?
         context.getParserAssembler().getContextName(axiomName) :
         QualifiedName.parseName(axiomName);}
@@ -705,10 +714,10 @@ public class QueryParser implements QueryParserConstants
     case PLUS:
     case MINUS:
     case 82:
-      expression = Expression(parserAssembler);
+      expression = Expression(context);
       break;
     case LBRACE:
-      axiomList = AxiomList(qualifiedAxiomName, parserAssembler);
+      axiomList = AxiomList(qualifiedAxiomName, context);
       break;
     default:
       jj_la1[22] = jj_gen;
@@ -727,11 +736,11 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public List<OperandParam> AxiomList(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
+  final public List<OperandParam> AxiomList(QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
   {
   List<OperandParam> operandParamList = new ArrayList<OperandParam>();
   Operand operand;
-    operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler);
+    operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, context);
     operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
     label_9:
     while (true) 
@@ -745,14 +754,14 @@ public class QueryParser implements QueryParserConstants
         jj_la1[23] = jj_gen;
         break label_9;
       }
-      operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, parserAssembler);
+      operand = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, context);
       operandParamList.add(new OperandParam(qualifiedAxiomName.getName(), operand));
     }
     {if (true) return operandParamList;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand AxiomInitializer(String listName, QualifiedName axiomName, ParserAssembler parserAssembler) throws ParseException
+  final public Operand AxiomInitializer(String listName, QualifiedName axiomName, ParserContext context) throws ParseException
   {
   List<OperandParam> initializeList = null;
     jj_consume_token(LBRACE);
@@ -784,7 +793,7 @@ public class QueryParser implements QueryParserConstants
     case PLUS:
     case MINUS:
     case 82:
-      initializeList = ArgumentList(parserAssembler, true);
+      initializeList = ArgumentList(context, true);
       break;
     default:
       jj_la1[24] = jj_gen;
@@ -795,7 +804,7 @@ public class QueryParser implements QueryParserConstants
      varType.setProperty(VariableType.AXIOM_KEY, axiomName);
      if (initializeList != null)
         varType.setProperty(VariableType.PARAMS, initializeList);
-     Operand operand = varType.getInstance(parserAssembler, listName);
+     Operand operand = varType.getInstance(context.getParserAssembler(), listName);
      {if (true) return operand;}
     throw new Error("Missing return statement in function");
   }
@@ -804,12 +813,17 @@ public class QueryParser implements QueryParserConstants
   {
   Template template;
   Operand expression;
+  Token templateToken;
+  Token delimitToken;
+  SourceItem sourceItem;
   QualifiedName contextName = context.getContextName();
-    jj_consume_token(TEMPLATE);
+    templateToken = jj_consume_token(TEMPLATE);
     template = Template(context, false);
     jj_consume_token(LPAREN);
+    context.setSourceMarker(templateToken, template.getQualifiedName());
     expression = TemplateExpression(template, context);
-        template.addTerm(expression);
+      template.addTerm(expression);
+      sourceItem = context.addSourceItem(expression);
     label_10:
     while (true) 
     {
@@ -822,12 +836,15 @@ public class QueryParser implements QueryParserConstants
         jj_la1[25] = jj_gen;
         break label_10;
       }
-      jj_consume_token(COMMA);
+      delimitToken = jj_consume_token(COMMA);
+      sourceItem.setEnd(delimitToken);
       expression = TemplateExpression(template, context);
         template.addTerm(expression);
+        sourceItem = context.addSourceItem(expression);
     }
-    jj_consume_token(RPAREN);
+    delimitToken = jj_consume_token(RPAREN);
     context.setContextName(contextName);
+    sourceItem.setEnd(delimitToken);
   }
 
   final public Template Template(ParserContext context, boolean isCalculator) throws ParseException
@@ -843,13 +860,18 @@ public class QueryParser implements QueryParserConstants
   final public void CalculatorTemplate(ParserContext context) throws ParseException
   {
   Template template;
+  Token calcToken;
+  Token delimitToken;
+  Operand operand;
+  SourceItem sourceItem;
   Map<String, Object> properties = new HashMap<String, Object>();
   int loopNumber = 0;
   ParserAssembler parserAssembler = context.getParserAssembler();
   QualifiedName contextName = context.getContextName();
-    jj_consume_token(CALC);
+    calcToken = jj_consume_token(CALC);
     template = Template(context, true);
     jj_consume_token(LPAREN);
+    context.setSourceMarker(calcToken, template.getQualifiedName());
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case INTEGER:
@@ -884,17 +906,18 @@ public class QueryParser implements QueryParserConstants
     case MINUS:
     case 79:
     case 82:
-      CalculatorExpression(loopNumber, template, template.getName(), context);
+      operand = CalculatorExpression(loopNumber, template, template.getName(), context);
       break;
     case TEMPLATE:
     case 80:
-      CalculatorQuery(template, context);
+      operand = CalculatorQuery(template, context);
       break;
     default:
       jj_la1[26] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+      sourceItem = context.addSourceItem(operand);
     label_11:
     while (true) 
     {
@@ -907,7 +930,8 @@ public class QueryParser implements QueryParserConstants
         jj_la1[27] = jj_gen;
         break label_11;
       }
-      jj_consume_token(COMMA);
+      delimitToken = jj_consume_token(COMMA);
+       sourceItem.setEnd(delimitToken);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case INTEGER:
@@ -942,24 +966,26 @@ public class QueryParser implements QueryParserConstants
       case MINUS:
       case 79:
       case 82:
-        CalculatorExpression(loopNumber, template, template.getName(), context);
+        operand = CalculatorExpression(loopNumber, template, template.getName(), context);
         break;
       case TEMPLATE:
       case 80:
-        CalculatorQuery(template, context);
+        operand = CalculatorQuery(template, context);
         break;
       default:
         jj_la1[28] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
+        sourceItem = context.addSourceItem(operand);
     }
-    jj_consume_token(RPAREN);
+    delimitToken = jj_consume_token(RPAREN);
+         sourceItem.setEnd(delimitToken);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LPAREN:
       jj_consume_token(LPAREN);
-      InitialiserList(properties);
+      InitialiserList(properties, context);
       jj_consume_token(RPAREN);
       break;
     default:
@@ -974,7 +1000,7 @@ public class QueryParser implements QueryParserConstants
   final public Operand TemplateExpression(Template template, ParserContext context) throws ParseException
   {
     String name;
-    VariableType varType = null;
+     VariableType varType = null;
     Operand index = null;
     Operand var = null;
     Token scToken = null;
@@ -983,6 +1009,7 @@ public class QueryParser implements QueryParserConstants
     Token equalsToken = null;
     Token regexLit = null;
     Token regexId = null;
+    Token interceptToken = null;
     Operand expression = null;
     Group group = null;
     ParserAssembler parserAssembler = context.getParserAssembler();
@@ -1000,18 +1027,18 @@ public class QueryParser implements QueryParserConstants
     case STRING:
     case TERM:
     case CURRENCY:
-      varType = Type(operandMap);
+      varType = Type(context);
       break;
     default:
       jj_la1[30] = jj_gen;
       ;
     }
-    name = Name();
+    name = Name(context);
     qname = parserAssembler.getContextName(name);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LBRACKET:
-      index = IndexExpression(parserAssembler);
+      index = IndexExpression(context);
       break;
     default:
       jj_la1[31] = jj_gen;
@@ -1054,7 +1081,7 @@ public class QueryParser implements QueryParserConstants
         {
         case AXIOM:
           jj_consume_token(AXIOM);
-          axiomList = AxiomList(qname, parserAssembler);
+          axiomList = AxiomList(qname, context);
          VariableType axiomListVarType = new VariableType(OperandType.LIST);
          axiomListVarType.setProperty(VariableType.PARAMS, axiomList);
          expression = axiomListVarType.getInstance(parserAssembler, qname);
@@ -1078,7 +1105,7 @@ public class QueryParser implements QueryParserConstants
         case PLUS:
         case MINUS:
         case 82:
-          expression = Expression(parserAssembler);
+          expression = Expression(context);
           break;
         default:
           jj_la1[33] = jj_gen;
@@ -1129,10 +1156,10 @@ public class QueryParser implements QueryParserConstants
           jj_consume_token(-1);
           throw new ParseException();
         }
-        expression = Expression(parserAssembler);
+        expression = Expression(context);
         break;
       case REGEX:
-        jj_consume_token(REGEX);
+        interceptToken = jj_consume_token(REGEX);
         jj_consume_token(LPAREN);
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
         {
@@ -1159,7 +1186,7 @@ public class QueryParser implements QueryParserConstants
         jj_consume_token(RPAREN);
         break;
       case LBRACE:
-        jj_consume_token(LBRACE);
+        interceptToken = jj_consume_token(LBRACE);
         literalList = LiteralList();
         jj_consume_token(RBRACE);
         break;
@@ -1193,7 +1220,7 @@ public class QueryParser implements QueryParserConstants
         case PLUS:
         case MINUS:
         case 82:
-          operandParamList = ArgumentList(parserAssembler, true);
+          operandParamList = ArgumentList(context, true);
           break;
         default:
           jj_la1[37] = jj_gen;
@@ -1243,12 +1270,15 @@ public class QueryParser implements QueryParserConstants
        var = new Evaluator(qname, var, assignToken.image, assignExpression);
      if ((index !=null) && (equalsToken != null) && !isLiteral)
        var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
+      if (interceptToken != null)
+        context.onTokenIntercept(interceptToken);
       {if (true) return var;}
     throw new Error("Missing return statement in function");
   }
 
-  final public void CalculatorExpression(int loop_number, Template template, String templateName, ParserContext context) throws ParseException
+  final public Operand CalculatorExpression(int loop_number, Template template, String templateName, ParserContext context) throws ParseException
   {
+  Token axiomToken;
   Token scToken = null;
   Token privateToken = null;
   Operand expression = null;
@@ -1273,7 +1303,7 @@ public class QueryParser implements QueryParserConstants
         jj_consume_token(-1);
         throw new ParseException();
       }
-      expression = Expression(parserAssembler);
+      expression = Expression(context);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case LBRACE:
@@ -1283,13 +1313,13 @@ public class QueryParser implements QueryParserConstants
         jj_la1[41] = jj_gen;
         ;
       }
-    if (scToken != null)
-      expression = new Evaluator(expression, (scToken.image == "?" ? "&&" : "||"), innerLoop);
-    if (scToken != null)
-      expression.setPrivate(true);
+    expression = new Evaluator(expression, (scToken.image == "?" ? "&&" : "||"), innerLoop);
+    expression.setPrivate(true);
     if (privateToken != null)
         expression.setPrivate(true);
     template.addTerm(expression);
+    context.onTokenIntercept(scToken);
+    {if (true) return expression;}
       break;
     case INTEGER:
     case DOUBLE:
@@ -1357,7 +1387,7 @@ public class QueryParser implements QueryParserConstants
       case PLUS:
       case MINUS:
       case 82:
-        expression = Expression(parserAssembler);
+        expression = Expression(context);
         break;
       default:
         jj_la1[43] = jj_gen;
@@ -1367,17 +1397,21 @@ public class QueryParser implements QueryParserConstants
     if (privateToken != null)
       expression.setPrivate(true);
     template.addTerm(expression);
+    {if (true) return expression;}
       break;
     case LBRACE:
       innerLoop = InnerCalculator(loop_number + 1, templateName, context, false);
     template.addTerm(innerLoop);
+    {if (true) return innerLoop;}
       break;
     case AXIOM:
-      jj_consume_token(AXIOM);
+      axiomToken = jj_consume_token(AXIOM);
       qualifiedAxiomName = Axiom(context);
       expression = AxiomVariable(qualifiedAxiomName, context);
     parserAssembler.getOperandMap().addOperand(expression);
     template.addTerm(expression);
+    context.onTokenIntercept(axiomToken);
+    {if (true) return expression;}
       break;
     case CHOICE:
       qualifiedAxiomName = ChoiceDeclaration(context);
@@ -1388,15 +1422,17 @@ public class QueryParser implements QueryParserConstants
         Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     template.addTerm(choiceOperand);
+    {if (true) return choiceOperand;}
       break;
     default:
       jj_la1[44] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    throw new Error("Missing return statement in function");
   }
 
-  final public void CalculatorQuery(Template template, ParserContext context) throws ParseException
+  final public Operand CalculatorQuery(Template template, ParserContext context) throws ParseException
   {
   String queryName;
   List<OperandParam> operandParamList = null;
@@ -1411,7 +1447,7 @@ public class QueryParser implements QueryParserConstants
       ;
     }
     jj_consume_token(80);
-    queryName = Name();
+    queryName = Name(context);
     jj_consume_token(LPAREN);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
@@ -1441,7 +1477,7 @@ public class QueryParser implements QueryParserConstants
     case PLUS:
     case MINUS:
     case 82:
-      operandParamList = ArgumentList(context.getParserAssembler(), false);
+      operandParamList = ArgumentList(context, false);
       break;
     default:
       jj_la1[46] = jj_gen;
@@ -1453,6 +1489,8 @@ public class QueryParser implements QueryParserConstants
     template.addTerm(queryOperand);
     if (innerTemplate != null)
         template.setNext(innerTemplate);
+    {if (true) return queryOperand;}
+    throw new Error("Missing return statement in function");
   }
 
   final public Template InnerTemplateDeclaration(QualifiedName ownerQualifiedName, ParserContext context) throws ParseException
@@ -1510,11 +1548,11 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand ChoiceExpression(String name, ParserAssembler parserAssembler) throws ParseException
+  final public Operand ChoiceExpression(String name, ParserContext context) throws ParseException
   {
     Operand operand;
-    QualifiedName qname = parserAssembler.getContextName(name);
-    operand = Expression(parserAssembler);
+    QualifiedName qname = context.getParserAssembler().getContextName(name);
+    operand = Expression(context);
       if (operand instanceof Evaluator)
           {if (true) return new Evaluator(qname, operand, "&&" );}
       if (operand instanceof StringOperand)
@@ -1579,7 +1617,7 @@ public class QueryParser implements QueryParserConstants
     label_15:
     while (true) 
     {
-      ChoiceItem(selection, qualifiedAxiomName, parserAssembler);
+      ChoiceItem(selection, qualifiedAxiomName, context);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case LBRACE:
@@ -1601,13 +1639,14 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) throws ParseException
+  final public void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
   {
     Operand operand;
+    ParserAssembler parserAssembler = context.getParserAssembler();
     String name = parserAssembler.getAxiomTermName(qualifiedAxiomName, 0);
     parserAssembler.addAxiom(qualifiedAxiomName, new Parameter(Term.ANONYMOUS, new Null()));
     jj_consume_token(LBRACE);
-    operand = ChoiceExpression(name, parserAssembler);
+    operand = ChoiceExpression(name, context);
     label_16:
     while (true) 
     {
@@ -1629,9 +1668,9 @@ public class QueryParser implements QueryParserConstants
        parserAssembler.addTemplate(qualifiedTemplateName, operand);
   }
 
-  final public void InitialiserList(Map<String, Object> properties) throws ParseException
+  final public void InitialiserList(Map<String, Object> properties, ParserContext context) throws ParseException
   {
-    InitialiserDeclaration(properties);
+    InitialiserDeclaration(properties, context);
     label_17:
     while (true) 
     {
@@ -1645,15 +1684,15 @@ public class QueryParser implements QueryParserConstants
         break label_17;
       }
       jj_consume_token(COMMA);
-      InitialiserDeclaration(properties);
+      InitialiserDeclaration(properties, context);
     }
   }
 
-  final public void InitialiserDeclaration(Map<String, Object> properties) throws ParseException
+  final public void InitialiserDeclaration(Map<String, Object> properties, ParserContext context) throws ParseException
   {
     String name;
     Parameter param;
-    name = Name();
+    name = Name(context);
     jj_consume_token(ASSIGN);
     param = LiteralTerm();
      properties.put(name, param.getValue());
@@ -1719,6 +1758,19 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
+  final public void VariableInitialization(ParserContext context) throws ParseException
+  {
+  Operand var;
+  SourceItem sourceItem;
+  Token delimitToken;
+    var = VariableDeclaration(context);
+    delimitToken = jj_consume_token(SEMICOLON);
+      context.getOperandMap().addOperand(var);
+      context.setSourceMarker(context.getItemToken(), var.getQualifiedName());
+      sourceItem = context.addSourceItem(var);
+      sourceItem.setEnd(delimitToken);
+  }
+
   final public Operand VariableDeclaration(ParserContext context) throws ParseException
   {
   Token nameToken;
@@ -1727,6 +1779,7 @@ public class QueryParser implements QueryParserConstants
   Operand expression = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
   OperandMap operandMap = parserAssembler.getOperandMap();
+  context.setSourceItemPending(true);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case INTEGER:
@@ -1736,7 +1789,7 @@ public class QueryParser implements QueryParserConstants
     case STRING:
     case TERM:
     case CURRENCY:
-      varType = Type(operandMap);
+      varType = Type(context);
       break;
     default:
       jj_la1[55] = jj_gen;
@@ -1746,7 +1799,7 @@ public class QueryParser implements QueryParserConstants
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LBRACKET:
-      index = IndexExpression(parserAssembler);
+      index = IndexExpression(context);
       break;
     default:
       jj_la1[56] = jj_gen;
@@ -1756,7 +1809,7 @@ public class QueryParser implements QueryParserConstants
     {
     case ASSIGN:
       jj_consume_token(ASSIGN);
-      expression = Expression(parserAssembler);
+      expression = Expression(context);
       break;
     default:
       jj_la1[57] = jj_gen;
@@ -1772,6 +1825,7 @@ public class QueryParser implements QueryParserConstants
      if (expression != null)
          varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
      Operand operand = varType.getInstance(parserAssembler, name);
+
      {if (true) return operand;}
     throw new Error("Missing return statement in function");
   }
@@ -1801,7 +1855,7 @@ public class QueryParser implements QueryParserConstants
     {
     case LT:
       jj_consume_token(LT);
-      varType = Type(parserAssembler.getOperandMap());
+      varType = Type(context);
       jj_consume_token(GT);
       break;
     default:
@@ -1854,15 +1908,15 @@ public class QueryParser implements QueryParserConstants
   Token includeToken = null;
     jj_consume_token(INCLUDE);
     includeToken = jj_consume_token(STRING_LITERAL);
-    includeResource(includeToken.image, context.getQueryProgram());
+    includeResource(includeToken.image, context);
   }
 
-  final public Operand Expression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand Expression(ParserContext context) throws ParseException
   {
   Operand param;
   Token assignToken = null;
   Operand assignOperand = null;
-    param = ConditionalOrExpression(parserAssembler);
+    param = ConditionalOrExpression(context);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case ASSIGN:
@@ -1908,7 +1962,7 @@ public class QueryParser implements QueryParserConstants
         jj_consume_token(-1);
         throw new ParseException();
       }
-      assignOperand = Expression(parserAssembler);
+      assignOperand = Expression(context);
       break;
     default:
       jj_la1[63] = jj_gen;
@@ -1920,13 +1974,14 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand PrimaryExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand PrimaryExpression(ParserContext context) throws ParseException
   {
   String name = null;
   QualifiedName qname;
   Token literal = null;
   Operand param1 = null;
   Operand operand;
+  ParserAssembler parserAssembler = context.getParserAssembler();
   OperandMap operandMap = parserAssembler.getOperandMap();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
@@ -1947,12 +2002,12 @@ public class QueryParser implements QueryParserConstants
     {if (true) return var;}
       break;
     case IDENTIFIER:
-      name = Name();
+      name = Name(context);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case LPAREN:
       case LBRACKET:
-        param1 = NamedExpression(name, parserAssembler);
+        param1 = NamedExpression(name, context);
         break;
       default:
         jj_la1[64] = jj_gen;
@@ -1964,19 +2019,19 @@ public class QueryParser implements QueryParserConstants
       break;
     case SCOPE:
       jj_consume_token(SCOPE);
-      param1 = IndexExpression(parserAssembler);
+      param1 = IndexExpression(context);
     {if (true) return listItemOperand("scope", parserAssembler, param1, null);}
       break;
     case LPAREN:
       jj_consume_token(LPAREN);
-      param1 = Expression(parserAssembler);
+      param1 = Expression(context);
       jj_consume_token(RPAREN);
     {if (true) return param1;}
       break;
     case LENGTH:
       jj_consume_token(LENGTH);
       jj_consume_token(LPAREN);
-      name = Name();
+      name = Name(context);
       jj_consume_token(RPAREN);
     qname = parserAssembler.getContextName(name);
     operand = parserAssembler.findOperandByName(name);
@@ -1988,7 +2043,7 @@ public class QueryParser implements QueryParserConstants
     case FORMAT:
       jj_consume_token(FORMAT);
       jj_consume_token(LPAREN);
-      name = Name();
+      name = Name(context);
       jj_consume_token(RPAREN);
     qname = parserAssembler.getContextName(name + "_format");
     operand = parserAssembler.findOperandByName(name);
@@ -2003,7 +2058,7 @@ public class QueryParser implements QueryParserConstants
     case FACT:
       jj_consume_token(FACT);
       jj_consume_token(LPAREN);
-      name = Name();
+      name = Name(context);
       jj_consume_token(RPAREN);
     Operand factOperand = parserAssembler.findOperandByName(name);
     if (factOperand != null)
@@ -2019,11 +2074,11 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public List<OperandParam> ArgumentList(ParserAssembler parserAssembler, boolean nameRequired) throws ParseException
+  final public List<OperandParam> ArgumentList(ParserContext context, boolean nameRequired) throws ParseException
   {
   List<OperandParam> operandParamList = new ArrayList<OperandParam>();
   OperandParam operandParam;
-    operandParam = Argument(parserAssembler, nameRequired);
+    operandParam = Argument(context, nameRequired);
     operandParamList.add(operandParam);
     label_20:
     while (true) 
@@ -2038,17 +2093,18 @@ public class QueryParser implements QueryParserConstants
         break label_20;
       }
       jj_consume_token(COMMA);
-      operandParam = Argument(parserAssembler, nameRequired);
+      operandParam = Argument(context, nameRequired);
       operandParamList.add(operandParam);
     }
     {if (true) return operandParamList;}
     throw new Error("Missing return statement in function");
   }
 
-  final public OperandParam Argument(ParserAssembler parserAssembler, boolean nameRequired) throws ParseException
+  final public OperandParam Argument(ParserContext context, boolean nameRequired) throws ParseException
   {
   VariableType varType = null;
   Operand expression;
+  ParserAssembler parserAssembler = context.getParserAssembler();
   OperandMap operandMap = parserAssembler.getOperandMap();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
@@ -2059,13 +2115,13 @@ public class QueryParser implements QueryParserConstants
     case STRING:
     case TERM:
     case CURRENCY:
-      varType = Type(operandMap);
+      varType = Type(context);
       break;
     default:
       jj_la1[67] = jj_gen;
       ;
     }
-    expression = Expression(parserAssembler);
+    expression = Expression(context);
      boolean isAssign = false;
      Operand leftOperand = expression.getLeftOperand();
      if ((leftOperand != null) && (expression instanceof Evaluator))
@@ -2088,11 +2144,11 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand IndexExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand IndexExpression(ParserContext context) throws ParseException
   {
   Operand param;
     jj_consume_token(LBRACKET);
-    param = Expression(parserAssembler);
+    param = Expression(context);
     jj_consume_token(RBRACKET);
     {if (true) return param;}
     throw new Error("Missing return statement in function");
@@ -2134,38 +2190,52 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public VariableType Type(OperandMap operandMap) throws ParseException
+  final public VariableType Type(ParserContext context) throws ParseException
   {
+  Token literalToken;
+  VariableType varType;
   Token qualifierLit = null;
   String qualifierId = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case INTEGER:
-      jj_consume_token(INTEGER);
-      {if (true) return new VariableType(OperandType.INTEGER);}
+      literalToken = jj_consume_token(INTEGER);
+      varType = new VariableType(OperandType.INTEGER);
+      context.onTokenIntercept(literalToken);
+      {if (true) return varType;}
       break;
     case BOOLEAN:
-      jj_consume_token(BOOLEAN);
-      {if (true) return new VariableType(OperandType.BOOLEAN);}
+      literalToken = jj_consume_token(BOOLEAN);
+      varType = new VariableType(OperandType.BOOLEAN);
+      context.onTokenIntercept(literalToken);
+      {if (true) return varType;}
       break;
     case DOUBLE:
-      jj_consume_token(DOUBLE);
-      {if (true) return new VariableType(OperandType.DOUBLE);}
+      literalToken = jj_consume_token(DOUBLE);
+      varType = new VariableType(OperandType.DOUBLE);
+      context.onTokenIntercept(literalToken);
+      {if (true) return varType;}
       break;
     case STRING:
-      jj_consume_token(STRING);
-      {if (true) return new VariableType(OperandType.STRING);}
+      literalToken = jj_consume_token(STRING);
+      varType = new VariableType(OperandType.STRING);
+      context.onTokenIntercept(literalToken);
+      {if (true) return varType;}
       break;
     case DECIMAL:
-      jj_consume_token(DECIMAL);
-      {if (true) return new VariableType(OperandType.DECIMAL);}
+      literalToken = jj_consume_token(DECIMAL);
+      varType = new VariableType(OperandType.DECIMAL);
+      context.onTokenIntercept(literalToken);
+      {if (true) return varType;}
       break;
     case TERM:
-      jj_consume_token(TERM);
-      {if (true) return new VariableType(OperandType.TERM);}
+      literalToken = jj_consume_token(TERM);
+      varType = new VariableType(OperandType.TERM);
+      context.onTokenIntercept(literalToken);
+      {if (true) return varType;}
       break;
     case CURRENCY:
-      jj_consume_token(CURRENCY);
+      literalToken = jj_consume_token(CURRENCY);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case 81:
@@ -2176,7 +2246,7 @@ public class QueryParser implements QueryParserConstants
           qualifierLit = jj_consume_token(STRING_LITERAL);
           break;
         case IDENTIFIER:
-          qualifierId = Name();
+          qualifierId = Name(context);
           break;
         default:
           jj_la1[69] = jj_gen;
@@ -2188,11 +2258,12 @@ public class QueryParser implements QueryParserConstants
         jj_la1[70] = jj_gen;
         ;
       }
-      VariableType varType = new VariableType(OperandType.CURRENCY);
+      varType = new VariableType(OperandType.CURRENCY);
       if (qualifierLit != null)
          varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
       else if (qualifierId != null)
-         varType.setProperty(VariableType.QUALIFIER_OPERAND, operandMap.addOperand(qualifierId, null));
+         varType.setProperty(VariableType.QUALIFIER_OPERAND, context.getOperandMap().addOperand(qualifierId, null));
+      context.onTokenIntercept(literalToken);
       {if (true) return varType;}
       break;
     default:
@@ -2203,11 +2274,12 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand CalculatorFunction(ParserAssembler parserAssembler) throws ParseException
+  final public Operand CalculatorFunction(ParserContext context) throws ParseException
   {
     String fnName;
     List<OperandParam> operandParamList = null;
-    fnName = Name();
+    ParserAssembler parserAssembler = context.getParserAssembler();
+    fnName = Name(context);
     jj_consume_token(LPAREN);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
@@ -2237,7 +2309,7 @@ public class QueryParser implements QueryParserConstants
     case PLUS:
     case MINUS:
     case 82:
-      operandParamList = ArgumentList(parserAssembler, true);
+      operandParamList = ArgumentList(context, true);
       break;
     default:
       jj_la1[72] = jj_gen;
@@ -2254,12 +2326,13 @@ public class QueryParser implements QueryParserConstants
     parserAssembler.setParameter(qualifiedAxiomName);
   }
 
-  final public String Name() throws ParseException
+  final public String Name(ParserContext context) throws ParseException
   {
   String name;
   Token partToken;
     partToken = jj_consume_token(IDENTIFIER);
     name = partToken.image;
+    context.onTokenIntercept(partToken);
     label_21:
     while (true) 
     {
@@ -2280,19 +2353,20 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand NamedExpression(String name, ParserAssembler parserAssembler) throws ParseException
+  final public Operand NamedExpression(String name, ParserContext context) throws ParseException
   {
   Operand param1 = null;
   Operand param2 = null;
   List<OperandParam> operandParamList = null;
   QualifiedName qname;
+  ParserAssembler parserAssembler = context.getParserAssembler();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LBRACKET:
-      param1 = IndexExpression(parserAssembler);
+      param1 = IndexExpression(context);
       if (jj_2_1(2)) 
       {
-        param2 = IndexExpression(parserAssembler);
+        param2 = IndexExpression(context);
       } else 
       {
         ;
@@ -2329,7 +2403,7 @@ public class QueryParser implements QueryParserConstants
       case PLUS:
       case MINUS:
       case 82:
-        operandParamList = ArgumentList(parserAssembler, true);
+        operandParamList = ArgumentList(context, true);
         break;
       default:
         jj_la1[74] = jj_gen;
@@ -2407,11 +2481,11 @@ public class QueryParser implements QueryParserConstants
     jj_consume_token(UNKNOWN);
   }
 
-  final public Operand ConditionalOrExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand ConditionalOrExpression(ParserContext context) throws ParseException
   {
   Operand[] params = new Operand[2];
   Token op;
-    params[0] = ConditionalAndExpression(parserAssembler);
+    params[0] = ConditionalAndExpression(context);
     label_22:
     while (true) 
     {
@@ -2425,18 +2499,18 @@ public class QueryParser implements QueryParserConstants
         break label_22;
       }
       op = jj_consume_token(SC_OR);
-      params[1] = ConditionalAndExpression(parserAssembler);
+      params[1] = ConditionalAndExpression(context);
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
     {if (true) return params[0];}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand ConditionalAndExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand ConditionalAndExpression(ParserContext context) throws ParseException
   {
   Operand[] params = new Operand[2];
   Token op;
-    params[0] = InclusiveOrExpression(parserAssembler);
+    params[0] = InclusiveOrExpression(context);
     label_23:
     while (true) 
     {
@@ -2450,18 +2524,18 @@ public class QueryParser implements QueryParserConstants
         break label_23;
       }
       op = jj_consume_token(SC_AND);
-      params[1] = InclusiveOrExpression(parserAssembler);
+      params[1] = InclusiveOrExpression(context);
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
     {if (true) return params[0];}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand InclusiveOrExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand InclusiveOrExpression(ParserContext context) throws ParseException
   {
   Operand[] params = new Operand[2];
   Token op;
-    params[0] = ExclusiveOrExpression(parserAssembler);
+    params[0] = ExclusiveOrExpression(context);
     label_24:
     while (true) 
     {
@@ -2475,18 +2549,18 @@ public class QueryParser implements QueryParserConstants
         break label_24;
       }
       op = jj_consume_token(BIT_OR);
-      params[1] = ExclusiveOrExpression(parserAssembler);
+      params[1] = ExclusiveOrExpression(context);
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
     {if (true) return params[0];}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand ExclusiveOrExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand ExclusiveOrExpression(ParserContext context) throws ParseException
   {
   Operand[] params = new Operand[2];
   Token op;
-    params[0] = AndExpression(parserAssembler);
+    params[0] = AndExpression(context);
     label_25:
     while (true) 
     {
@@ -2500,18 +2574,18 @@ public class QueryParser implements QueryParserConstants
         break label_25;
       }
       op = jj_consume_token(XOR);
-      params[1] = AndExpression(parserAssembler);
+      params[1] = AndExpression(context);
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
     {if (true) return params[0];}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand AndExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand AndExpression(ParserContext context) throws ParseException
   {
   Operand[] params = new Operand[2];
   Token op;
-    params[0] = EqualityExpression(parserAssembler);
+    params[0] = EqualityExpression(context);
     label_26:
     while (true) 
     {
@@ -2525,18 +2599,18 @@ public class QueryParser implements QueryParserConstants
         break label_26;
       }
       op = jj_consume_token(BIT_AND);
-      params[1] = EqualityExpression(parserAssembler);
+      params[1] = EqualityExpression(context);
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
     {if (true) return params[0];}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand EqualityExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand EqualityExpression(ParserContext context) throws ParseException
   {
   Operand[] params = new Operand[2];
   Token op;
-    params[0] = RelationalExpression(parserAssembler);
+    params[0] = RelationalExpression(context);
     label_27:
     while (true) 
     {
@@ -2563,18 +2637,18 @@ public class QueryParser implements QueryParserConstants
         jj_consume_token(-1);
         throw new ParseException();
       }
-      params[1] = RelationalExpression(parserAssembler);
+      params[1] = RelationalExpression(context);
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
     {if (true) return params[0];}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand RelationalExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand RelationalExpression(ParserContext context) throws ParseException
   {
   Operand[] params = new Operand[2];
   Token op;
-    params[0] = AdditiveExpression(parserAssembler);
+    params[0] = AdditiveExpression(context);
     label_28:
     while (true) 
     {
@@ -2609,18 +2683,18 @@ public class QueryParser implements QueryParserConstants
         jj_consume_token(-1);
         throw new ParseException();
       }
-      params[1] = AdditiveExpression(parserAssembler);
+      params[1] = AdditiveExpression(context);
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
     {if (true) return params[0];}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand AdditiveExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand AdditiveExpression(ParserContext context) throws ParseException
   {
   Operand[] params = new Operand[2];
   Token op;
-    params[0] = MultiplicativeExpression(parserAssembler);
+    params[0] = MultiplicativeExpression(context);
     label_29:
     while (true) 
     {
@@ -2647,18 +2721,18 @@ public class QueryParser implements QueryParserConstants
         jj_consume_token(-1);
         throw new ParseException();
       }
-      params[1] = MultiplicativeExpression(parserAssembler);
+      params[1] = MultiplicativeExpression(context);
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
     {if (true) return params[0];}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand MultiplicativeExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand MultiplicativeExpression(ParserContext context) throws ParseException
   {
   Operand[] params = new Operand[2];
   Token op;
-    params[0] = UnaryExpression(parserAssembler);
+    params[0] = UnaryExpression(context);
     label_30:
     while (true) 
     {
@@ -2689,14 +2763,14 @@ public class QueryParser implements QueryParserConstants
         jj_consume_token(-1);
         throw new ParseException();
       }
-      params[1] = UnaryExpression(parserAssembler);
+      params[1] = UnaryExpression(context);
       params[0] = new Evaluator(params[0], op.image, params[1]);
     }
     {if (true) return params[0];}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand UnaryExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand UnaryExpression(ParserContext context) throws ParseException
   {
   Operand param;
   boolean plus = false;
@@ -2726,7 +2800,7 @@ public class QueryParser implements QueryParserConstants
         jj_consume_token(-1);
         throw new ParseException();
       }
-      param = UnaryExpression(parserAssembler);
+      param = UnaryExpression(context);
     if (plus)
       {if (true) return new Evaluator("+", param);}
     else if (minus)
@@ -2736,11 +2810,11 @@ public class QueryParser implements QueryParserConstants
     {if (true) return param;}
       break;
     case INCR:
-      param = PreIncrementExpression(parserAssembler);
+      param = PreIncrementExpression(context);
     {if (true) return param;}
       break;
     case DECR:
-      param = PreDecrementExpression(parserAssembler);
+      param = PreDecrementExpression(context);
     {if (true) return param;}
       break;
     case SCOPE:
@@ -2757,7 +2831,7 @@ public class QueryParser implements QueryParserConstants
     case IDENTIFIER:
     case LPAREN:
     case BANG:
-      param = UnaryExpressionNotPlusMinus(parserAssembler);
+      param = UnaryExpressionNotPlusMinus(context);
     {if (true) return param;}
       break;
     default:
@@ -2768,32 +2842,32 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand PreIncrementExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand PreIncrementExpression(ParserContext context) throws ParseException
   {
   Operand param;
     jj_consume_token(INCR);
-    param = PrimaryExpression(parserAssembler);
+    param = PrimaryExpression(context);
     {if (true) return new Evaluator("++", param);}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand PreDecrementExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand PreDecrementExpression(ParserContext context) throws ParseException
   {
   Operand param;
     jj_consume_token(DECR);
-    param = PrimaryExpression(parserAssembler);
+    param = PrimaryExpression(context);
     {if (true) return new Evaluator("--", param);}
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand UnaryExpressionNotPlusMinus(ParserAssembler parserAssembler) throws ParseException
+  final public Operand UnaryExpressionNotPlusMinus(ParserContext context) throws ParseException
   {
   Operand param;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case BANG:
       jj_consume_token(BANG);
-      param = UnaryExpression(parserAssembler);
+      param = UnaryExpression(context);
     {if (true) return new Evaluator("!", param);}
       break;
     case SCOPE:
@@ -2809,7 +2883,7 @@ public class QueryParser implements QueryParserConstants
     case UNKNOWN:
     case IDENTIFIER:
     case LPAREN:
-      param = PostfixExpression(parserAssembler);
+      param = PostfixExpression(context);
     {if (true) return param;}
       break;
     default:
@@ -2820,12 +2894,12 @@ public class QueryParser implements QueryParserConstants
     throw new Error("Missing return statement in function");
   }
 
-  final public Operand PostfixExpression(ParserAssembler parserAssembler) throws ParseException
+  final public Operand PostfixExpression(ParserContext context) throws ParseException
   {
   Operand param;
   boolean incr = false;
   boolean decr = false;
-    param = PrimaryExpression(parserAssembler);
+    param = PrimaryExpression(context);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case INCR:
@@ -2865,28 +2939,13 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(0, xla); }
   }
 
-  private boolean jj_3R_45() {
-    if (jj_3R_51()) return true;
-    return false;
-  }
-
   private boolean jj_3R_44() {
     if (jj_3R_50()) return true;
     return false;
   }
 
-  private boolean jj_3R_32() {
-    if (jj_3R_33()) return true;
-    return false;
-  }
-
   private boolean jj_3R_39() {
     if (jj_3R_40()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_71() {
-    if (jj_scan_token(37)) return true;
     return false;
   }
 
@@ -2900,33 +2959,18 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_70() {
-    if (jj_3R_72()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_64() {
-    if (jj_scan_token(FACT)) return true;
-    return false;
-  }
-
   private boolean jj_3R_48() {
     if (jj_scan_token(MINUS)) return true;
     return false;
   }
 
-  private boolean jj_3R_69() {
-    if (jj_scan_token(STRING_LITERAL)) return true;
+  private boolean jj_3R_32() {
+    if (jj_3R_33()) return true;
     return false;
   }
 
   private boolean jj_3R_47() {
     if (jj_scan_token(PLUS)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_68() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
     return false;
   }
 
@@ -2959,13 +3003,8 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_66() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_63() {
-    if (jj_scan_token(FORMAT)) return true;
+  private boolean jj_3R_71() {
+    if (jj_scan_token(37)) return true;
     return false;
   }
 
@@ -2976,6 +3015,51 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_38() {
     if (jj_3R_39()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_66() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_70() {
+    if (jj_3R_72()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_55() {
+    if (jj_3R_56()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_64() {
+    if (jj_scan_token(FACT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_69() {
+    if (jj_scan_token(STRING_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_68() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_54() {
+    if (jj_3R_55()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_63() {
+    if (jj_scan_token(FORMAT)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_74() {
+    if (jj_scan_token(FALSE)) return true;
     return false;
   }
 
@@ -3000,42 +3084,6 @@ public class QueryParser implements QueryParserConstants
     }
     }
     }
-    return false;
-  }
-
-  private boolean jj_3R_55() {
-    if (jj_3R_56()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_62() {
-    if (jj_scan_token(LENGTH)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_31() {
-    if (jj_scan_token(LBRACKET)) return true;
-    if (jj_3R_32()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_61() {
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_54() {
-    if (jj_3R_55()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_74() {
-    if (jj_scan_token(FALSE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_60() {
-    if (jj_scan_token(SCOPE)) return true;
     return false;
   }
 
@@ -3079,13 +3127,14 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_59() {
-    if (jj_3R_66()) return true;
+  private boolean jj_3R_62() {
+    if (jj_scan_token(LENGTH)) return true;
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_31()) return true;
+  private boolean jj_3R_31() {
+    if (jj_scan_token(LBRACKET)) return true;
+    if (jj_3R_32()) return true;
     return false;
   }
 
@@ -3094,13 +3143,48 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_58() {
-    if (jj_scan_token(NUMBER_LITERAL)) return true;
+  private boolean jj_3R_61() {
+    if (jj_scan_token(LPAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_31()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_60() {
+    if (jj_scan_token(SCOPE)) return true;
     return false;
   }
 
   private boolean jj_3R_36() {
     if (jj_3R_37()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_50() {
+    if (jj_scan_token(INCR)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_59() {
+    if (jj_3R_66()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_40() {
+    if (jj_3R_41()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_58() {
+    if (jj_scan_token(NUMBER_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_46() {
+    if (jj_3R_52()) return true;
     return false;
   }
 
@@ -3137,23 +3221,13 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_50() {
-    if (jj_scan_token(INCR)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_40() {
-    if (jj_3R_41()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_46() {
-    if (jj_3R_52()) return true;
-    return false;
-  }
-
   private boolean jj_3R_35() {
     if (jj_3R_36()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_45() {
+    if (jj_3R_51()) return true;
     return false;
   }
 

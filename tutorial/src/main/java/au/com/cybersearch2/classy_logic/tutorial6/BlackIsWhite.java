@@ -54,7 +54,8 @@ public class BlackIsWhite {
 	 */
 	public void displayShades()
 	{
-		QueryProgram queryProgram = new QueryProgram(AXIOM_COLORS);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(AXIOM_COLORS);
 		queryProgram.executeQuery("colors", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {

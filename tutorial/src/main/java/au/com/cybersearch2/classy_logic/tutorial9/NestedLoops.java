@@ -60,7 +60,8 @@ public class NestedLoops
 	 */
 	public void displayAxiomSort()
 	{
-		QueryProgram queryProgram = new QueryProgram(INSERT_SORT);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(INSERT_SORT);
 		Result result = queryProgram.executeQuery("sort_axiom");
 		Axiom axiom = result.getAxiom(QualifiedName.parseGlobalName("sorted"));
 		System.out.println(axiom.toString());

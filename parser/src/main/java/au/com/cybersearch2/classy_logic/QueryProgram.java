@@ -24,6 +24,7 @@ import java.util.PriorityQueue;
 
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.ParserTask;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
@@ -140,16 +141,6 @@ public class QueryProgram extends QueryLauncher
 	}
 
     /**
-     * Construct a QueryProgram object compiled to specified script. 
-     * @param script eXPL program 
-     */
-    public QueryProgram(String script) 
-    {
-        this(null, null);
-        parseScript(script);
-    }
-
-    /**
      * Returns File set to resource path
      * @return File object
      */
@@ -172,13 +163,15 @@ public class QueryProgram extends QueryLauncher
 	 * @param script eXPL program
 	 * @throws ExpressionException if parse error encountered
 	 */
-	public void parseScript(String script) 
+	public ParserContext parseScript(String script) 
     {
 	    InputStream stream = new ByteArrayInputStream(script.getBytes());
         QueryParser queryParser = new QueryParser(stream);
+        ParserContext context = new ParserContext(this);
         try
         {
-            queryParser.input(this);
+            queryParser.input(context);
+            return context;
         }
         catch (ParseException e)
         {

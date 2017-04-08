@@ -37,7 +37,11 @@ public class SourceMarker implements Comparable<SourceMarker>
     int column;
     /** Source document identity */
     int sourceDocumentId;
-    
+    /** Head source item in list of contained items */
+    SourceItem headSourceItem;
+    /** Tail source item in list of contained items */
+    SourceItem tailSourceItem;
+   
 
     /**
      * Construct SourceMarker object
@@ -62,6 +66,10 @@ public class SourceMarker implements Comparable<SourceMarker>
         this.sourceDocumentId = sourceDocumentId;
     }
 
+    /**
+     * Construct SourceMarker from parser token
+     * @param token Parser token
+     */
     public SourceMarker(Token token)
     {
         this.line = token.beginLine;
@@ -143,6 +151,22 @@ public class SourceMarker implements Comparable<SourceMarker>
     }
     
     /**
+     * @param qualifiedName the qualifiedName to set
+     */
+    public void setQualifiedName(QualifiedName qualifiedName)
+    {
+        this.qualifiedName = qualifiedName;
+    }
+
+    /**
+     * @param sourceDocumentId the sourceDocumentId to set
+     */
+    public void setSourceDocumentId(int sourceDocumentId)
+    {
+        this.sourceDocumentId = sourceDocumentId;
+    }
+
+    /**
      * @return the qualifiedName
      */
     public QualifiedName getQualifiedName()
@@ -190,6 +214,54 @@ public class SourceMarker implements Comparable<SourceMarker>
     public int compareTo(SourceMarker other)
     {
         return qualifiedName.compareTo(other.qualifiedName);
+    }
+
+    public void addSourceItem(SourceItem sourceItem)
+    {
+        if (headSourceItem == null)
+        {
+            headSourceItem = sourceItem;
+            tailSourceItem = sourceItem;
+        }
+        else
+        {
+            tailSourceItem.setNext(sourceItem);
+            tailSourceItem = sourceItem;
+        }
+    }
+    
+    /**
+     * @return the headSourceItem
+     */
+    public SourceItem getHeadSourceItem()
+    {
+        return headSourceItem;
+    }
+
+    /**
+     * @return the tailSourceItem
+     */
+    public SourceItem getTailSourceItem()
+    {
+        return tailSourceItem;
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append(literal.toString())
+                .append(' ')
+                .append(qualifiedName)
+                .append(" (")
+                .append(line)
+                .append(',')
+                .append(column)
+                .append(')');
+        return builder.toString();
     }
 
 }

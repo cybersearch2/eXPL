@@ -17,20 +17,23 @@ package au.com.cybersearch2.classy_logic.list;
 
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
+import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
 
 /**
  * ItemListOperand
  * @author Andrew Bowley
  * 22Jan.,2017
  */
-public class ItemListOperand extends ListVariableOperand implements ParserRunner
+public class ItemListOperand extends ListVariableOperand implements ParserRunner, SourceInfo
 {
-
+    protected SourceItem sourceItem;
+    
     public ItemListOperand(String listName, Operand indexExpression,
             Operand expression2)
     {
@@ -52,6 +55,8 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
             expression = setListVariable(operandMap, itemList);
         else
             expression = newListVariableInstance(parserAssembler);
+        if (sourceItem != null)
+            sourceItem.setInformation(toString());
     }
 
     /**
@@ -71,6 +76,12 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
             variable.assign(expression2);
         }
         return variable;
+    }
+
+    @Override
+    public void setSourceItem(SourceItem sourceItem)
+    {
+        this.sourceItem = sourceItem;
     }
 
 

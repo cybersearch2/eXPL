@@ -49,6 +49,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
@@ -480,7 +481,8 @@ public class QueryParserTest
     @Test
     public void test_choice_string_colors()
     {
-        QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(CHOICE_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
@@ -520,7 +522,8 @@ public class QueryParserTest
     @Test
     public void test_choice_hex_colors()
     {
-        QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS2);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(CHOICE_COLORS2);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
@@ -559,7 +562,8 @@ public class QueryParserTest
     @Test
     public void test_choice_unknown_hex_color()
     {
-        QueryProgram queryProgram = new QueryProgram(CHOICE_COLORS3);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(CHOICE_COLORS3);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
@@ -598,7 +602,8 @@ public class QueryParserTest
    @Test
     public void test_stamp_duty()
     {
-		QueryProgram queryProgram = new QueryProgram(STAMP_DUTY_XPL);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(STAMP_DUTY_XPL);
 		queryProgram.executeQuery("stamp_duty_query", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -612,7 +617,8 @@ public class QueryParserTest
     @Test
     public void test_world_currency_Format() throws IOException
     {
-		QueryProgram queryProgram = new QueryProgram(WORLD_CURRENCY_XPL);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(WORLD_CURRENCY_XPL);
 		//queryProgram.executeQuery("price_query", new SolutionHandler(){
 		//	@Override
 		//	public boolean onSolution(Solution solution) {
@@ -635,7 +641,8 @@ public class QueryParserTest
     @Test
     public void test_currency_Format()
     {
-		QueryProgram queryProgram = new QueryProgram(CURRENCY_XPL);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(CURRENCY_XPL);
 		queryProgram.executeQuery("item_query", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {
@@ -648,7 +655,8 @@ public class QueryParserTest
 	@Test
 	public void test_high_cities_sorted() throws Exception
 	{
-		QueryProgram queryProgram = new QueryProgram(CITY_EVELATIONS_SORTED);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(CITY_EVELATIONS_SORTED);
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 		QuerySpec querySpec = new QuerySpec("Test");
 		KeyName keyName1 = new KeyName("city", "high_city");
@@ -680,7 +688,8 @@ public class QueryParserTest
     @Test
     public void test_insert_sort() throws ParseException
     {
-		QueryProgram queryProgram = new QueryProgram(INSERT_SORT_XPL);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(INSERT_SORT_XPL);
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 		TestChainQueryExecuter queryExecuter = new TestChainQueryExecuter(new QueryParams(queryProgram.getGlobalScope(), new QuerySpec("test")));
         Template calcTemplate = parserAssembler.getTemplate("insert_sort");
@@ -887,7 +896,8 @@ public class QueryParserTest
 	@Test
 	public void test_colors() throws Exception
 	{
-		QueryProgram queryProgram = new QueryProgram(AXIOM_WRAPPER_XPL);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(AXIOM_WRAPPER_XPL);
 		QuerySpec querySpec = new QuerySpec("test");
 		KeyName keyName = new KeyName("colors", "color_convert");
 		querySpec.addKeyName(keyName);
@@ -1341,7 +1351,8 @@ public class QueryParserTest
 		queryParser.enable_tracing();
 		QueryProgram queryProgram = new QueryProgram();
 		queryProgram.setResourceBase(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
-		queryParser.input(queryProgram);
+	    ParserContext context = new ParserContext(queryProgram);
+		queryParser.input(context);
         return queryProgram.getGlobalScope().getParserAssembler();
 	}
 	

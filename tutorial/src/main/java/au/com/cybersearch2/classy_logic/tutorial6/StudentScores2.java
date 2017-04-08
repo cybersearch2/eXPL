@@ -57,7 +57,8 @@ public class StudentScores2
 	 */
 	public void displayLists()
 	{
-		QueryProgram queryProgram = new QueryProgram(LISTS);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(LISTS);
 		queryProgram.executeQuery("marks", new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {

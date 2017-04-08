@@ -69,7 +69,8 @@ public class StampDuty2
 	 */
 	public Iterator<Axiom> getStampDuty()
 	{
-		QueryProgram queryProgram = new QueryProgram(STAMP_DUTY);
+		QueryProgram queryProgram = new QueryProgram();
+		queryProgram.parseScript(STAMP_DUTY);
         Result result = queryProgram.executeQuery("stamp_duty_query");
         return result.getIterator(QualifiedName.parseGlobalName("payable"));
 	}

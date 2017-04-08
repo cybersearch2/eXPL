@@ -23,9 +23,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.compile.SourceItem;
+import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
@@ -42,14 +46,39 @@ public class EuropeanMegaCitiesTest
         File testFile = new File("src/main/resources/tutorial3", "euro_megacities.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         EuropeanMegaCities europeanMegaCities = new EuropeanMegaCities();
-        europeanMegaCities.findEuroMegaCities(new SolutionHandler(){
+        ParserContext context = europeanMegaCities.findEuroMegaCities(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
                 checkSolution(reader, solution.getAxiom("euro_megacities").toString());
                 return true;
             }});
         reader.close();
-    }
+        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        assertThat(iterator.hasNext()).isTrue();
+        SourceMarker sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("query euro_megacities (3,1)");
+        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
+        SourceItem sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("mega_city:euro_megacities (3,24) (3,50)");
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("template euro_megacities (2,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("Megacity (2,27) (2,34)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("Country (2,37) (2,43)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("Continent {Europe} (2,46) (2,68)");
+     }
     
     protected void checkSolution(BufferedReader reader, String city)
     {

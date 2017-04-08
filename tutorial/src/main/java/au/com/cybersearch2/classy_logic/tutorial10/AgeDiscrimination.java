@@ -67,7 +67,8 @@ public class AgeDiscrimination
      */
     public Iterator<Axiom> getAgeRating()
     {
-        QueryProgram queryProgram = new QueryProgram(PERSON_RATING);
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(PERSON_RATING);
         Result result = queryProgram.executeQuery("rate_age");
         return result.getIterator(QualifiedName.parseGlobalName("rated"));
     }
