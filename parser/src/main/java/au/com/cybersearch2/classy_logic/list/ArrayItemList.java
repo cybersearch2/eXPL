@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -58,6 +59,8 @@ public class ArrayItemList<T> implements ItemList<T>
     protected Operand proxy;
     /** The list items */
     protected ArrayList<Object> valueList;
+    /** Source item to be updated in parser task */
+    protected SourceItem sourceItem;
  
     static
     {
@@ -211,6 +214,8 @@ public class ArrayItemList<T> implements ItemList<T>
 			for (int i = valueList.size(); i < index; i++)
 				valueList.add(null);
 			valueList.add(index, value);
+	        if (sourceItem != null)
+	            sourceItem.setInformation(toString());
 		}
 	}
 
@@ -311,6 +316,8 @@ public class ArrayItemList<T> implements ItemList<T>
 	public void clear() 
 	{
 		valueList.clear();
+        if (sourceItem != null)
+            sourceItem.setInformation(toString());
 	}
 
 	/**
@@ -323,4 +330,19 @@ public class ArrayItemList<T> implements ItemList<T>
         return clazz;
     }
 
+    @Override
+    public void setSourceItem(SourceItem sourceItem)
+    {
+        this.sourceItem = sourceItem;
+    }
+
+    /**
+     * toString
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() 
+    {
+        return "List <" + clazz.getSimpleName() + ">[" + valueList.size() + "]";
+    }
 }

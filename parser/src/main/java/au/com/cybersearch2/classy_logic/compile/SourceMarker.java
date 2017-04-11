@@ -145,6 +145,9 @@ public class SourceMarker implements Comparable<SourceMarker>
         case QueryParserConstants.UNKNOWN:
             literal = XplLiteral.unknown; 
             break;
+        case QueryParserConstants.IDENTIFIER:
+            literal = XplLiteral.variable; 
+            break;
         default:
             literal = XplLiteral.post_release; 
         }
@@ -213,7 +216,10 @@ public class SourceMarker implements Comparable<SourceMarker>
     @Override
     public int compareTo(SourceMarker other)
     {
-        return qualifiedName.compareTo(other.qualifiedName);
+        int comparison = qualifiedName.compareTo(other.qualifiedName);
+        if (comparison == 0)
+            return literal.compareTo(other.literal);
+        return comparison;
     }
 
     public void addSourceItem(SourceItem sourceItem)

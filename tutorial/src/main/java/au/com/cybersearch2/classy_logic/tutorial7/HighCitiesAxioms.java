@@ -15,10 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial7;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -35,25 +38,36 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class HighCitiesAxioms
 {
-	static final String CITY_EVELATIONS =
-	    "axiom city (name, altitude)\n" + 
-        "    {\"bilene\", 1718}\n" +
-        "    {\"addis ababa\", 8000}\n" +
-        "    {\"denver\", 5280}\n" +
-        "    {\"flagstaff\", 6970}\n" +
-        "    {\"jacksonville\", 8}\n" +
-        "    {\"leadville\", 10200}\n" +
-        "    {\"madrid\", 1305}\n" +
-        "    {\"richmond\",19}\n" +
-        "    {\"spokane\", 1909}\n" +
-        "    {\"wichita\", 1305};\n" +
-        "axiom high_cities = {};\n" +
-        "// Template for name and altitude of a high city\n" +
-        "template high_city(\n" +
-        "  altitude ? altitude > 5000,\n" +
-        "  high_cities += axiom { name , altitude }\n" +
-        ");\n" +
-	    "query high_cities (city : high_city);\n"; 
+/* high-cities-listed.xpl
+axiom city (name, altitude) 
+    {"bilene", 1718}
+    {"addis ababa", 8000}
+    {"denver", 5280}
+    {"flagstaff", 6970}
+    {"jacksonville", 8}
+    {"leadville", 10200}
+    {"madrid", 1305}
+    {"richmond",19}
+    {"spokane", 1909}
+    {"wichita", 1305};
+axiom high_cities = {};
+// Template for name and altitude of a high city
+template high_city(
+  altitude ? altitude > 5000,
+  high_cities += axiom { name , altitude }
+);
+query high_cities (city : high_city);
+
+*/
+    
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public HighCitiesAxioms()
+    {
+        File resourcePath = new File("src/main/resources/tutorial7");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
 
 	/**
 	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
@@ -65,13 +79,18 @@ public class HighCitiesAxioms
 	 */
 	public Iterator<Axiom> getHighCities()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(CITY_EVELATIONS);
+        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-axioms.xpl");
+        parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("high_cities"); 
 		return result.getIterator(QualifiedName.parseGlobalName("high_cities"));
 	}
 
-	public static void main(String[] args)
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+
+    public static void main(String[] args)
 	{
 		try 
 		{

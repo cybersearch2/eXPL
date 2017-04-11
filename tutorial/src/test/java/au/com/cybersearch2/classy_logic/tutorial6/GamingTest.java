@@ -13,16 +13,10 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial3;
+package au.com.cybersearch2.classy_logic.tutorial6;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Iterator;
 
 import org.junit.Test;
@@ -34,73 +28,68 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * EuropeanMegaCitiesTest
+ * GamingTest
  * @author Andrew Bowley
- * 5Feb.,2017
+ * 10Apr.,2017
  */
-public class EuropeanMegaCitiesTest
+public class GamingTest
 {
     @Test
-    public void testEuropeanMegaCities() throws Exception
+    public void testGaming() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial3", "euro_megacities.txt");
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        EuropeanMegaCities europeanMegaCities = new EuropeanMegaCities();
-        ParserContext context = europeanMegaCities.findEuroMegaCities(new SolutionHandler(){
+        Gaming gaming = new Gaming();
+        ParserContext context = gaming.displayFruit(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("euro_megacities").toString());
+                String spin = solution.getAxiom("spin").toString();
+                assertThat(spin).isEqualTo("spin(combo_r1 = lemon, combo_r2 = banana, combo_r3 = apple, combo_r4 = orange)");
                 return true;
             }});
-        reader.close();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query euro_megacities (3,1)");
-        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
+        assertThat(sourceMarker.toString()).isEqualTo("list combo (3,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mega_city:euro_megacities (3,24) (3,50)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> fruit() (3,1) (3,23)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom mega_city (1,1)");
-        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
+        assertThat(sourceMarker.toString()).isEqualTo("axiom fruit (2,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mega_city(Rank,Megacity,Country,Continent,Population):resource (1,1) (1,71)");
+        assertThat(sourceItem.toString()).isEqualTo("fruit()[1] (2,1) (2,52)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template euro_megacities (2,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom spin (1,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("Megacity (2,27) (2,34)");
+        assertThat(sourceItem.toString()).isEqualTo("spin(r1,r2,r3,r4)[1] (1,1) (1,37)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("query spin (5,1)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("template spin (4,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("combo_var1 = combo_r1 = <empty> (4,15) (4,25)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("Country (2,37) (2,43)");
+        assertThat(sourceItem.toString()).isEqualTo("combo_var2 = combo_r2 = <empty> (4,28) (4,38)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("Continent {Europe} (2,46) (2,68)");
-     }
-    
-    protected void checkSolution(BufferedReader reader, String city)
-    {
-        try
-        {
-            String line = reader.readLine();
-            assertThat(city).isEqualTo(line);
-        }
-        catch (IOException e)
-        {
-            fail(e.getMessage());
-        }
-
-    }
+        assertThat(sourceItem.toString()).isEqualTo("combo_var3 = combo_r3 = <empty> (4,41) (4,51)");
+        assertThat(iterator.hasNext()).isFalse();
+   }
 }

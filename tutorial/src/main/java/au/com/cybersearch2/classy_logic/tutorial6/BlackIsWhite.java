@@ -15,7 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial6;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -26,20 +30,37 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 27 Feb 2015
  */
-public class BlackIsWhite {
+public class BlackIsWhite 
+{
+    /* colors.xpl
+    list<term> color(swatch);
+    list<term> rgb(swatch);
+    axiom swatch (name, red, green, blue)
+                {"aqua",  0, 255,   255}
+                {"black", 0,   0,     0}
+                {"blue",  0,   0,   255};
+    template shade
+    (
+      name, 
+      // Invert colors
+      color[red] ^= 255, 
+      color[green] ^= 255, 
+      color[blue] ^= 255, 
+      // Check colors have expected values
+      integer r = rgb[red], 
+      integer g = rgb[green], 
+      integer b = rgb[blue]
+    );
+    query colors(swatch : shade);
+     */
+    protected QueryProgramParser queryProgramParser;
 
-    static final String AXIOM_COLORS =
-            "list<term> color(swatch);\n" +
-            "list<term> rgb(swatch);\n" +
-    		"axiom swatch (name, red, green, blue)\n" +
-    		"{\"aqua\", 0, 255, 255}\n" +
-    		"{\"black\", 0, 0, 0}\n" +
-    		"{\"blue\", 0, 0, 255};\n" +
-    		"template shade(name, color[red] ^= 255, color[green] ^= 255, color[blue] ^= 255," +
-            "               integer r = rgb[red], integer g = rgb[green], integer b = rgb[blue]);\n" +
-    		"query colors(swatch : shade);"
-    		;
-
+    public BlackIsWhite()
+    {
+        File resourcePath = new File("src/main/resources/tutorial6");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+    
 	/**
 	 * Compiles the AXIOM_COLORS script and runs the "colors" query, displaying the solution on the console.<br/>
 	 * Here each color is reversed by xor with 255, which turns black into white etc.
@@ -52,16 +73,11 @@ public class BlackIsWhite {
 		shade(name = blue, color_red = 255, color_green = 255, color_blue = 0,<br/> 
 		      r = 255, g = 255, b = 0)<br/>	 
 	 */
-	public void displayShades()
+	public ParserContext displayShades(SolutionHandler solutionHandler)
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(AXIOM_COLORS);
-		queryProgram.executeQuery("colors", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("shade").toString());
-				return true;
-			}});
+        QueryProgram queryProgram = queryProgramParser.loadScript("black-is-white.xpl");
+		queryProgram.executeQuery("colors", solutionHandler);
+        return queryProgramParser.getContext();
 	}
 
 	public static void main(String[] args)
@@ -69,7 +85,12 @@ public class BlackIsWhite {
 		try 
 		{
 	        BlackIsWhite blackIsWhite = new BlackIsWhite();
-			blackIsWhite.displayShades();
+			blackIsWhite.displayShades(new SolutionHandler(){
+	            @Override
+	            public boolean onSolution(Solution solution) {
+	                System.out.println(solution.getAxiom("shade").toString());
+	                return true;
+	            }});
 		} 
 		catch (ExpressionException e) 
 		{

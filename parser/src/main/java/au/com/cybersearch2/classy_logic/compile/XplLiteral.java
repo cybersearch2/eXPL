@@ -46,5 +46,6 @@ public enum XplLiteral
     template, 
     term, 
     unknown,
+    variable,
     post_release // Defined in more recent release
 }

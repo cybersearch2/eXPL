@@ -15,7 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial6;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -28,32 +32,34 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class Gaming {
 
-    static final String FRUITS_POKER=
-    		"axiom spin (r1, r2, r3, r4) {3,2,0,1};\n" +
-    		"axiom fruit() {\"apple\", \"orange\", \"banana\", \"lemon\"};\n" +
-    	    
-            "list<term> combo(fruit);\n" +
-    		"template spin(combo[(r1)], combo[(r2)], combo[(r3)], combo[(r4)]);\n" +
-    		"query spin(spin : spin);"
-    		;
+/* gaming.xpl
+axiom spin (r1, r2, r3, r4) {3,2,0,1};
+axiom fruit() {"apple", "orange", "banana", "lemon"};
+list<term> combo(fruit);
+template spin(combo[(r1)], combo[(r2)], combo[(r3)], combo[(r4)]);
+query spin(spin : spin);
 
-	/**
+*/
+    protected QueryProgramParser queryProgramParser;
+
+    public Gaming()
+    {
+        File resourcePath = new File("src/main/resources/tutorial6");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+
+    /**
 	 * Compiles the FRUITS_POKER script and runs the "spin" query, displaying the solution on the console.<br/>
 	 * The sample demonstrates enclosing a variable in parentheses to avoid it being interpreted as a term name.<br/>
 	 * Class StudentScores2 provides another example of parentheses.<\br>
 	 * The expected result:<br/>
 	 * spin(combo_r1 = lemon, combo_r2 = banana, combo_r3 = apple, combo_r4 = orange)<br/>
 	 */
-	public void displayFruit()
+	public ParserContext displayFruit(SolutionHandler solutionHandler)
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(FRUITS_POKER);
-		queryProgram.executeQuery("spin", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("spin").toString());
-				return true;
-			}});
+        QueryProgram queryProgram = queryProgramParser.loadScript("gaming.xpl");
+		queryProgram.executeQuery("spin", solutionHandler);
+        return queryProgramParser.getContext();
 	}
 
 	public static void main(String[] args)
@@ -61,7 +67,12 @@ public class Gaming {
 		try 
 		{
 	        Gaming gaming = new Gaming();
-			gaming.displayFruit();
+			gaming.displayFruit(new SolutionHandler(){
+	            @Override
+	            public boolean onSolution(Solution solution) {
+	                System.out.println(solution.getAxiom("spin").toString());
+	                return true;
+	            }});
 		} 
 		catch (ExpressionException e) 
 		{

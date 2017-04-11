@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2016  www.cybersearch2.com.au
+    Copyright (C) 2017  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial4;
+package au.com.cybersearch2.classy_logic.tutorial7;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -30,71 +30,50 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * InWordsTest
+ * HighCitiesListedTest
  * @author Andrew Bowley
- * 5Feb.,2017
+ * 11Apr.,2017
  */
-public class InWordsTest
+public class HighCitiesListedTest
 {
     @Test
-    public void testInWords() throws Exception
+    public void testHighCities() throws Exception
     {
-        InWords inWords = new InWords();
-        File testFile = new File("src/main/resources/tutorial4", "query_in_words.txt");
+        File testFile = new File("src/main/resources/tutorial7", "high-cities-listed.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        int[] count = new int[1];
-        count[0] = 0;
-        ParserContext context = inWords.findInWords(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                Axiom wordAxiom = solution.getAxiom("in_words");
-                checkSolution(reader, wordAxiom.toString());
-                return true;
-            }});
+        HighCitiesListed highCities = new HighCitiesListed();
+        Iterator<Axiom> cityIterator = highCities.getHighCities();
+        while (cityIterator.hasNext())
+            checkSolution(reader, cityIterator.next().toString());
+        ParserContext context = highCities.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom lexicon (1,1)");
-        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
+        assertThat(sourceMarker.toString()).isEqualTo("axiom city (1,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon(word,definition):resource (1,1) (1,43)");
+        assertThat(sourceItem.toString()).isEqualTo("city()[10] (1,1) (11,21)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query query_in_words (3,1)");
-        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
+        assertThat(sourceMarker.toString()).isEqualTo("list city_list (15,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon:in_words (3,22) (3,39)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template in_words (2,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\ (2,20) (2,41)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("definition (2,44) (2,60)");
+        assertThat(sourceItem.toString()).isEqualTo("list<axiom> city_list(high_city) (15,1) (15,25)");
     }
     
-    protected void checkSolution(BufferedReader reader, String word)
+    protected void checkSolution(BufferedReader reader, String shade)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(word).isEqualTo(line);
+            assertThat(shade).isEqualTo(line);
         }
         catch (IOException e)
         {
@@ -102,4 +81,5 @@ public class InWordsTest
         }
 
     }
+
 }

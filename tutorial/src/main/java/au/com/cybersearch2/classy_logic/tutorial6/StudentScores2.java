@@ -15,7 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial6;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -28,25 +32,35 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class StudentScores2 
 {
-	static final String LISTS = 
-		"axiom grades (student, english, maths, history)\n" +
-		" {\"George\", 15, 13, 16}\n" +
-		" {\"Sarah\", 12, 17, 15}\n" +
-		" {\"Amy\", 14, 16, 6};\n" +
-		" axiom alpha_marks()\n" +
-		"{\n" +
-		" \"f-\", \"f\", \"f+\",\n" +
-		" \"e-\", \"e\", \"e+\",\n" +
-		" \"d-\", \"d\", \"d+\",\n" +
-		" \"c-\", \"c\", \"c+\",\n" +
-		" \"b-\", \"b\", \"b+\",\n" +
-		" \"a-\", \"a\", \"a+\"\n" +
-		"};\n" +
-		" list<term> mark(alpha_marks);\n" +
-		" template score(student, english = mark[(english)-1], maths = mark[(maths)-1], history = mark[(history)-1]);\n" +
-		" query marks(grades : score);"
-		;
+/* student-scores2.xpl
+axiom grades (student, english, maths, history)
+ {"George", 15, 13, 16}
+ {"Sarah", 12, 17, 15}
+ {"Amy", 14, 16, 6};
+ axiom alpha_marks()
+{
+ "", // Start at index 1
+ "f-", "f", "f+",
+ "e-", "e", "e+",
+ "d-", "d", "d+",
+ "c-", "c", "c+",
+ "b-", "b", "b+",
+ "a-", "a", "a+"
+};
+ list<term> mark(alpha_marks);
+ template score(student, english = mark[(english)], maths = mark[(maths)], history = mark[(history)]);
+ query marks(grades : score);
 
+*/
+
+    protected QueryProgramParser queryProgramParser;
+
+    public StudentScores2()
+    {
+        File resourcePath = new File("src/main/resources/tutorial6");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+    
 	/**
 	 * Compiles the LISTS script and runs the "marks" query, displaying the solution on the console.<br/>
 	 * This sample demonstrates using an Axiom Term list as a value list.
@@ -55,16 +69,11 @@ public class StudentScores2
 	 *	score(student = Sarah, english = c+, maths = a, history = b+)<br/>
 	 *	score(student = Amy, english = b, maths = a-, history = e+)<br/>
 	 */
-	public void displayLists()
-	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(LISTS);
-		queryProgram.executeQuery("marks", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("score").toString());
-				return true;
-			}});
+    public ParserContext displayLists(SolutionHandler solutionHandler)
+    {
+        QueryProgram queryProgram = queryProgramParser.loadScript("student-scores2.xpl");
+		queryProgram.executeQuery("marks", solutionHandler);
+        return queryProgramParser.getContext();
 	}
 
 	public static void main(String[] args)
@@ -72,7 +81,12 @@ public class StudentScores2
 		try 
 		{
 	        StudentScores2 listsDemo = new StudentScores2();
-			listsDemo.displayLists();
+			listsDemo.displayLists(new SolutionHandler(){
+	            @Override
+	            public boolean onSolution(Solution solution) {
+	                System.out.println(solution.getAxiom("score").toString());
+	                return true;
+	            }});
 		} 
 		catch (ExpressionException e) 
 		{

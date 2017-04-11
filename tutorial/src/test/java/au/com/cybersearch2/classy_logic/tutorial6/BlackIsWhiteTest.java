@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial2;
+package au.com.cybersearch2.classy_logic.tutorial6;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -34,90 +34,76 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * GreekConstructionTest
+ * BlackIsWhiteTest
  * @author Andrew Bowley
- * 5Feb.,2017
+ * 8Apr.,2017
  */
-public class GreekConstructionTest
+public class BlackIsWhiteTest
 {
+
     @Test
-    public void testGreekConstruction() throws Exception
+    public void testBlackIsWhite() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial2", "customer_charge.txt");
+        File testFile = new File("src/main/resources/tutorial6", "black-is-white.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        GreekConstruction greekConstruction = new GreekConstruction();
-        ParserContext context = greekConstruction.findCustomerCharges(new SolutionHandler(){
+        BlackIsWhite blackIsWhite = new BlackIsWhite();
+        ParserContext context = blackIsWhite.displayShades(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("freight").toString(), solution.getAxiom("customer_freight").toString());
+                checkSolution(reader, solution.getAxiom("shade").toString());
                 return true;
             }});
-        reader.close();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom charge (1,1)");
-        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
+        assertThat(sourceMarker.toString()).isEqualTo("list color (1,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("charge():\"greek_construction\" (1,1) (1,37)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> swatch() (1,1) (1,24)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom customer (2,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query colors (19,1)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("list rgb (2,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("list<term> swatch() (2,1) (2,22)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("axiom swatch (3,1)");
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("customer():\"greek_construction\" (2,7) (2,39)");
+        assertThat(sourceItem.toString()).isEqualTo("swatch(name,red,green,blue)[3] (3,1) (6,36)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query customer_charge (6,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template shade (7,1)");
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("charge:freight (6,23) (6,36)");
-        sourceItem = sourceItem.getNext();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("customer:customer_freight (6,39) (6,63)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template customer_freight (4,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("name (4,27) (4,30)");
+        assertThat(sourceItem.toString()).isEqualTo("name (9,3) (9,6)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city?city==city (4,33) (4,59)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("charge (4,62) (4,67)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template freight (3,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city (3,18) (3,21)");
-     }
-    
-    protected void checkSolution(BufferedReader reader, String freight, String customerFreight)
+        assertThat(sourceItem.toString()).isEqualTo("color_var1^=255 (11,3) (11,19)");
+    }
+
+    protected void checkSolution(BufferedReader reader, String shade)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(freight).isEqualTo(line);
-            line = reader.readLine();
-            assertThat(customerFreight).isEqualTo(line);
+            assertThat(shade).isEqualTo(line);
         }
         catch (IOException e)
         {

@@ -175,7 +175,6 @@ public class VariableType
             // Expression is an initializer list 
             ParameterList<AxiomList> parameterList = new ParameterList<AxiomList>(initializeList, axiomListGenerator(qname, axiomKey));
             operand = new AxiomOperand(qname, axiomKey, parameterList, axiomListListener);
-            hasExpression = true;
             break;
         case CURRENCY:
         	operand = !hasExpression ? 

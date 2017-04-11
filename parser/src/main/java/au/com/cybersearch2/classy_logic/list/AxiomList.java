@@ -131,6 +131,21 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 	}
 
 	/**
+	 * Allow key to be updated when set to list qname
+	 * @param key Qualified name of axioms in list
+	 * @return flag set true if name changed
+	 */
+	public boolean setKey(QualifiedName key)
+	{
+	    if (this.key.equals(getQualifiedName()))
+	    {
+	        this.key = key;
+	        return true;
+	    }
+	    return false;
+	}
+	
+	/**
 	 * Returns axiom term name list
 	 * @return List of axiom term names
 	 */
@@ -164,16 +179,11 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 	@Override
 	public String toString()
 	{
-		StringBuilder builder = new StringBuilder();
-		boolean firstTime = true;
-		for (int i = 0; i < getLength(); ++i)
-		{
-			if (firstTime)
-				firstTime = false;
-			else
-				builder.append(System.getProperty("line.separator"));
-			builder.append(getItem(i).toString());
-		}
+		StringBuilder builder = new StringBuilder("list<axiom> ");
+		builder.append(getQualifiedName().toString());
+		builder.append('(').append(key.toString()).append(')');
+		if (getLength() > 0)
+		    builder.append('[').append(Integer.toString(getLength())).append(']');
 		return builder.toString();
 	}
 }

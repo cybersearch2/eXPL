@@ -1,6 +1,5 @@
 include "agriculture-land.xpl";
 include "surface-land.xpl";
-list nation_list(surface_area_increase);
 template agri_10y (country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);
 template surface_area_increase (
   country? country == agri_10y.country,

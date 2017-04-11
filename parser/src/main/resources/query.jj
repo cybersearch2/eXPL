@@ -451,29 +451,43 @@ void Statement(ParserContext context):
   Operand var;
 }
 {
-    TemplateDeclaration(context) ";" 
+    VariableInitialization(context) 
+  | AxiomDeclaration(context) 
+  | ListDeclaration(context)
+  | TemplateDeclaration(context) ";" 
   | CalculatorTemplate(context) ";"   
-  | AxiomDeclaration(context) ";" 
   | ChoiceDeclaration(context) ";"
-  | ListDeclaration(context) ";"
   | Include(context) ";"
-  | VariableInitialization(context) 
 }
 
 void AxiomDeclaration(ParserContext context) :
 {
   QualifiedName qualifiedAxiomName;
+  SourceItem sourceItem;
+  Token axiomToken;
+  Token delimitToken;
+  String axiomSpec;
   Operand operand = null;
 }
 {
-  <AXIOM> qualifiedAxiomName=Axiom(context) 
-          ( AxiomSpecification(qualifiedAxiomName, context) 
-            |
-            operand=AxiomVariable(qualifiedAxiomName, context) 
-          )
+  axiomToken=<AXIOM> qualifiedAxiomName=Axiom(context) 
   {
-    if (operand != null)
-      context.getOperandMap().addOperand(operand);
+    context.setSourceMarker(axiomToken, qualifiedAxiomName);
+  }
+  ( 
+    axiomSpec = AxiomSpecification(qualifiedAxiomName, context) 
+    {
+      sourceItem = context.addSourceItem(axiomSpec);
+    }
+    |
+    operand=AxiomVariable(qualifiedAxiomName, context) 
+    {
+       context.getOperandMap().addOperand(operand);
+       sourceItem = context.addSourceItem(operand);
+    }
+  ) delimitToken=";"
+  {
+     sourceItem.setEnd(delimitToken);
   }
 } 
 
@@ -490,23 +504,69 @@ QualifiedName Axiom(ParserContext context) :
   }
 }
 
-void AxiomSpecification(QualifiedName qualifiedAxiomName, ParserContext context) :
+String AxiomSpecification(QualifiedName qualifiedAxiomName, ParserContext context) :
 {
+  String termName;
+  Token resouceToken;
+  QualifiedName resourceBinding;
+  int index = 0;
+  StringBuilder builder = new StringBuilder(qualifiedAxiomName.getName());
   ParserAssembler parserAssembler = context.getParserAssembler();
   parserAssembler.createAxiom(qualifiedAxiomName);
 }
 {
-  "(" ( TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )* )?  ")"  
+  "(" 
+  {
+    builder.append('(');
+  } 
+     ( termName=TermName(qualifiedAxiomName, parserAssembler) 
+        {
+          builder.append(termName);
+        }
+        ( 
+          "," termName=TermName(qualifiedAxiomName, parserAssembler)
+          {
+            builder.append(',').append(termName);
+          } 
+        )* 
+      )?  
+  ")" 
+  {
+    builder.append(')');
+  } 
   (
-    ":" (ResourceBinding(QueryParserConstants.AXIOM, qualifiedAxiomName, parserAssembler)
-         |
-         ParameterDeclaration(qualifiedAxiomName, parserAssembler) )
+    resouceToken=":" ( 
+          resourceBinding=ResourceBinding(QueryParserConstants.AXIOM, qualifiedAxiomName, parserAssembler)
+          {
+            builder.append(':');
+            if (resouceToken.next != null)
+            	builder.append(resouceToken.next);
+          }
+          |
+          ParameterDeclaration(qualifiedAxiomName, parserAssembler) 
+          {
+            builder.append(":parameter");
+          }
+        )
     |
-    ( <LBRACE> AxiomItem(qualifiedAxiomName, parserAssembler) <RBRACE> )+
+    ( 
+      <LBRACE> 
+      AxiomItem(qualifiedAxiomName, parserAssembler)
+      {
+        ++index;
+      }
+      <RBRACE> 
+    )+
+    {
+      builder.append('[').append(Integer.toString(index)).append(']');
+    }
   )?
+  {
+    return builder.toString();
+  }
 }
 
-void TermName(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
+String TermName(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
 {
   Token nameToken;
 }
@@ -514,6 +574,7 @@ void TermName(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler)
   nameToken=<IDENTIFIER>
   {
     parserAssembler.addAxiomTermName(qualifiedAxiomName, nameToken.image);
+    return nameToken.image;
   }
 }
 
@@ -734,7 +795,10 @@ void CalculatorTemplate(ParserContext context) :
 Operand TemplateExpression(Template template, ParserContext context) :
 {
     String name;
-     VariableType varType = null;
+    QualifiedName qname;
+    QualifiedName axiomQname;
+    String axiomName = null;
+    VariableType varType = null;
     Operand index = null;
     Operand var = null;
     Token scToken = null;
@@ -750,23 +814,32 @@ Operand TemplateExpression(Template template, ParserContext context) :
     OperandMap operandMap = parserAssembler.getOperandMap();
     List<Parameter> literalList = null;
     List<OperandParam> axiomList = null;
-    QualifiedName qname = null;
     List<OperandParam> operandParamList = null;
 }
 {
   ( varType=Type(context) )? name=Name(context) 
   {
     qname = parserAssembler.getContextName(name);
+    axiomQname = qname;
   }
   ( index=IndexExpression(context) )? 
   (
      ( 
        ( equalsToken="=" | assignToken=<PLUSASSIGN> )
-       ( <AXIOM> axiomList=AxiomList(qname, context) 
+       ( <AXIOM> 
+         ( 
+           axiomName=Name(context) 
+           {
+             axiomQname = QualifiedName.parseName(axiomName);
+           }
+         ) ? 
+         axiomList=AxiomList(axiomQname, context) 
        {
          VariableType axiomListVarType = new VariableType(OperandType.LIST);
          axiomListVarType.setProperty(VariableType.PARAMS, axiomList);
-         expression = axiomListVarType.getInstance(parserAssembler, qname);
+         if (axiomName != null)
+           axiomListVarType.setProperty(VariableType.AXIOM_KEY, axiomQname);
+         expression = axiomListVarType.getInstance(parserAssembler, axiomQname);
        } 
        |
        expression=Expression(context) )
@@ -1136,17 +1209,19 @@ Operand VariableDeclaration(ParserContext context) :
 {
   ( varType=Type(context) )? nameToken=<IDENTIFIER> ( index=IndexExpression(context) )? ( "=" expression=Expression(context) )?
   {
+     boolean isUntyped = (varType == null);
+     if (isUntyped)
+       context.onTokenIntercept(nameToken);
      String name = nameToken.image;
      if (index !=null)
          return listItemOperand(name, parserAssembler, index, expression);
-     if (varType == null)
+     if (isUntyped)
          varType = new VariableType(OperandType.UNKNOWN);
      boolean isLiteral = (expression != null) &&
                           !expression.isEmpty() && !(expression instanceof Evaluator);
      if (expression != null)
          varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
      Operand operand = varType.getInstance(parserAssembler, name);
-     
      return operand;
   }
 }
@@ -1155,6 +1230,8 @@ void ListDeclaration(ParserContext context) :
 {
   Token keywordToken;
   Token nameToken;
+  Token delimitToken;
+  String listName;
   VariableType varType = null;
   QualifiedName qualifiedBindingName = null;
   QualifiedName qualifiedAxiomName = null;
@@ -1164,9 +1241,14 @@ void ListDeclaration(ParserContext context) :
   ( keywordToken=<LIST> | keywordToken=<LOCAL> ) 
   [ "<" varType=Type(context) ">" ] 
   nameToken=<IDENTIFIER> 
-  [ "(" qualifiedAxiomName=Axiom(context)  ( ":" qualifiedBindingName = ResourceBinding(QueryParserConstants.TEMPLATE, qualifiedAxiomName, parserAssembler) )? ")" ]
   {
-    String listName = nameToken.image;
+    listName = nameToken.image;
+    context.setSourceMarker(keywordToken, listName);
+    context.setSourceItemPending(false);
+  }
+  [ "(" qualifiedAxiomName=Axiom(context)  ( ":" qualifiedBindingName = ResourceBinding(QueryParserConstants.TEMPLATE, qualifiedAxiomName, parserAssembler) )? ")" ]
+  delimitToken = ";"
+  {
     boolean isLocal = keywordToken.kind == QueryParserConstants.LOCAL;
     boolean isTermList = (varType != null) && varType.getOperandType() == OperandType.TERM;
     if ((varType == null) && (qualifiedAxiomName == null))
@@ -1183,6 +1265,7 @@ void ListDeclaration(ParserContext context) :
         varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
     ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
     parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
+    context.addSourceItem(itemList).setEnd(delimitToken);
   }
 }
 

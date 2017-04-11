@@ -16,15 +16,14 @@
 package au.com.cybersearch2.classy_logic.tutorial5;
 
 import java.io.File;
-import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
-import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
+import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * IncreasedAgriculture demonstrates evaluation for the purpose of numerical analysis.
@@ -57,11 +56,11 @@ query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);
      * Compiles the more_agriculture.xpl script and runs the "more_agriculture" query
      * @return Axiom iterator
      */
-    public Iterator<Axiom>  findIncreasedAgriculture() 
+    public ParserContext  findIncreasedAgriculture(SolutionHandler solutionHandler) 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("tutorial5/more_agriculture.xpl");
-        Result result = queryProgram.executeQuery("more_agriculture");
-        return result.getIterator(QualifiedName.parseGlobalName("nation_list"));
+        queryProgram.executeQuery("more_agriculture", solutionHandler);
+        return queryProgramParser.getContext();
     }
 
 
@@ -75,12 +74,16 @@ query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);
  	 */
     public static void main(String[] args)
     {
+        SolutionHandler solutionHandler = new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                System.out.println(solution.getAxiom("surface_area_increase").toString());
+                return true;
+            }};
         try 
         {
             IncreasedAgriculture increasedAgriculture = new IncreasedAgriculture();
-            Iterator<Axiom> iterator = increasedAgriculture.findIncreasedAgriculture();
-            while (iterator.hasNext())
-                System.out.println(iterator.next());
+            increasedAgriculture.findIncreasedAgriculture(solutionHandler);
         } 
         catch (ExpressionException e) 
         {

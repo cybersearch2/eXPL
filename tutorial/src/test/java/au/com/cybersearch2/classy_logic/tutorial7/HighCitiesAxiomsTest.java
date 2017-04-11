@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial1;
+package au.com.cybersearch2.classy_logic.tutorial7;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -30,85 +30,66 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * HighCitiesTest
+ * HighCitiesAxiomsTest
  * @author Andrew Bowley
- * 5Feb.,2017
+ * 11Apr.,2017
  */
-public class HighCitiesTest
+public class HighCitiesAxiomsTest
 {
     @Test
     public void testHighCities() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial1", "high_cities.txt");
+        File testFile = new File("src/main/resources/tutorial7", "high-cities-listed.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        HighCities highCities = new HighCities();
-        highCities.findHighCities(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("high_city").toString());
-                return true;
-            }});
-        reader.close();
-    }
-    
-    @Test
-    public void testHighCities2() throws Exception
-    {
-        File testFile = new File("src/main/resources/tutorial1", "high_cities.txt");
-        final BufferedReader reader2 = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        HighCities2 highCities2 = new HighCities2();
-        ParserContext context = highCities2.findHighCities(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader2, solution.getAxiom("high_city").toString());
-                return true;
-            }});
-        reader2.close();
-        assertThat(context.getSourceDocumentList()).isNotNull();
-        assertThat(context.getSourceDocumentList().size()).isEqualTo(1);
-        assertThat(context.getSourceDocumentList().get(0).replace('\\', '/')).isEqualTo("src/main/resources/tutorial1/high_cities.xpl");
-         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        HighCitiesAxioms highCities = new HighCitiesAxioms();
+        Iterator<Axiom> cityIterator = highCities.getHighCities();
+        while (cityIterator.hasNext())
+            checkSolution(reader, cityIterator.next().toString());
+        ParserContext context = highCities.getParserContext();
+        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("axiom city (1,1)");
-        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city():resource (1,1) (1,23)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        assertThat(sourceMarker.toString()).isEqualTo("query high_cities (3,1)");
-        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city:high_city (3,20) (3,35)");
+        assertThat(sourceItem.toString()).isEqualTo("city(name,altitude)[10] (1,1) (11,21)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template high_city (2,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom high_cities (12,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("name?altitude>5000 (2,20) (2,41)");
-        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem.toString()).isEqualTo("list<axiom> high_cities[1] (12,1) (12,22)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("query high_cities (18,1)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("template high_city (14,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("altitude (2,44) (2,51)");
+        assertThat(sourceItem.toString()).isEqualTo("altitude?altitude>5000 (15,3) (15,28)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        System.out.println(sourceItem.toString());
+        //assertThat(sourceItem.toString()).isEqualTo("altitude?altitude>5000 (15,3) (15,28)");
     }
     
-    protected void checkSolution(BufferedReader reader, String city)
+    protected void checkSolution(BufferedReader reader, String shade)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(city).isEqualTo(line);
+            assertThat(shade).isEqualTo(line);
         }
         catch (IOException e)
         {

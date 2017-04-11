@@ -62,9 +62,10 @@ public class ParserResources
      */
 	public void includeResource(String resourceName) throws IOException, ParseException
 	{	
-		InputStream instream = openResource(resourceName);
+	    File resourceFile = name2File(resourceName);
+		InputStream instream =  new FileInputStream(resourceFile);
 		QueryParser parser = new QueryParser(instream);
-		context.pushSourceDocument(resourceName);
+		context.pushSourceDocument(resourceFile.toString());
 		try
 		{
 			parser.input(context);
@@ -94,9 +95,9 @@ public class ParserResources
             }
     }
     
-    private InputStream openResource(String resourceName) throws IOException 
+    private File name2File(String resourceName) throws IOException 
     {
-        return new FileInputStream(new File(resourceBase, resourceName));
+        return new File(resourceBase, resourceName);
     }
 
 }

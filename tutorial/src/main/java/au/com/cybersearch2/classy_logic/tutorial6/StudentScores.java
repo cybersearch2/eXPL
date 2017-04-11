@@ -16,9 +16,11 @@
 package au.com.cybersearch2.classy_logic.tutorial6;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -34,34 +36,42 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class StudentScores 
 {
-	static final String LISTS = 
-		"axiom grades (student, english, maths, history)\n" +
-		" {\"George\", 15, 13, 16}\n" +
-		" {\"Sarah\", 12, 17, 15}\n" +
-		" {\"Amy\", 14, 16, 6};\n" +
-		" list<string> mark;\n" +
-		" mark[0] = \"f-\";\n" +
-		" mark[1] = \"f\";\n" +
-		" mark[2] = \"f+\";\n" +
-		" mark[3] = \"e-\";\n" +
-		" mark[4] = \"e\";\n" +
-		" mark[5] = \"e+\";\n" +
-		" mark[6] = \"d-\";\n" +
-		" mark[7] = \"d\";\n" +
-		" mark[8] = \"d+\";\n" +
-		" mark[9] = \"c-\";\n" +
-		" mark[10] = \"c\";\n" +
-		" mark[11] = \"c+\";\n" +
-		" mark[12] = \"b-\";\n" +
-		" mark[13] = \"b\";\n" +
-		" mark[14] = \"b+\"\n;" +
-		" mark[15] = \"a-\"\n;" +
-		" mark[16] = \"a\";\n" +
-		" mark[17] = \"a+\";\n" +
-		" template score(student, mark[english], mark[maths], mark[history]);\n" +
-		" query marks(grades : score);"
-		;
+/* student-scores.xpl
+axiom grades (student, english, maths, history)
+ {"George", 15, 13, 16}
+ {"Sarah", 12, 17, 15}
+ {"Amy", 14, 16, 6};
+ list<string> mark;
+ mark[0]  = "f-";
+ mark[1]  = "f";
+ mark[2]  = "f+";
+ mark[3]  = "e-";
+ mark[4]  = "e";
+ mark[5]  = "e+";
+ mark[6]  = "d-";
+ mark[7]  = "d";
+ mark[8]  = "d+";
+ mark[9]  = "c-";
+ mark[10] = "c";
+ mark[11] = "c+";
+ mark[12] = "b-";
+ mark[13] = "b";
+ mark[14] = "b+"
+ mark[15] = "a-"
+ mark[16] = "a";
+ mark[17] = "a+";
+ template score(student, mark[english], mark[maths], mark[history]);
+ query marks(grades : score);
 
+*/
+    protected QueryProgramParser queryProgramParser;
+
+    public StudentScores()
+    {
+        File resourcePath = new File("src/main/resources/tutorial6");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+    
 	/**
 	 * Compiles the LISTS script and runs the "marks" query, displaying the solution on the console.<br/>
 	 * Demonstrates a values list. See StudentScores2 for perhaps a better alternative to using a values list.
@@ -70,16 +80,11 @@ public class StudentScores
 	 *	score(student = Sarah, mark_english = b-, mark_maths = a+, mark_history = a-)<br/>
 	 *	score(student = Amy, mark_english = b+, mark_maths = a, mark_history = d-)<br/>
 	 */
-	public void displayLists()
+	public ParserContext displayLists(SolutionHandler solutionHandler)
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(LISTS);
-		queryProgram.executeQuery("marks", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("score").toString());
-				return true;
-			}});
+        QueryProgram queryProgram = queryProgramParser.loadScript("student-scores.xpl");
+		queryProgram.executeQuery("marks", solutionHandler);
+        return queryProgramParser.getContext();
 	}
 
 	protected QueryProgram compileScript(String script) throws ParseException
@@ -97,7 +102,12 @@ public class StudentScores
 		try 
 		{
 	        StudentScores listsDemo = new StudentScores();
-			listsDemo.displayLists();
+			listsDemo.displayLists(new SolutionHandler(){
+	            @Override
+	            public boolean onSolution(Solution solution) {
+	                System.out.println(solution.getAxiom("score").toString());
+	                return true;
+	            }});
 		} 
 		catch (ExpressionException e) 
 		{

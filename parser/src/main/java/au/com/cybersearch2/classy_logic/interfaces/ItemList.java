@@ -24,7 +24,7 @@ import au.com.cybersearch2.classy_logic.list.ItemListVariable;
  * @author Andrew Bowley
  * 19 Jan 2015
  */
-public interface ItemList<T> extends Iterable<T> 
+public interface ItemList<T> extends Iterable<T>, SourceInfo 
 {
 
     /**

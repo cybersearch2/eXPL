@@ -20,6 +20,7 @@ import java.io.File;
 import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -62,10 +63,11 @@ query query_in_words(lexicon : in_words);
     /**
      * Compiles the query_in_words.xpl script and runs the "query_in_words" query
      */
-    public void findInWords(SolutionHandler solutionHandler) 
+    public ParserContext findInWords(SolutionHandler solutionHandler) 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("query_in_words.xpl");
         queryProgram.executeQuery("query_in_words", solutionHandler);
+        return queryProgramParser.getContext();
     }
 
 	/*

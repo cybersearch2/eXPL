@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.list;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -46,6 +47,8 @@ public class AxiomTermList implements ItemList<Object>
 	protected AxiomListener axiomListener;
 	/** Axiom term names */
 	protected List<String> axiomTermNameList;
+    /** Source item to be updated in parser task */
+    protected SourceItem sourceItem;
 
 	/** Empty Axiom constant */
 	static Axiom EMPTY_AXIOM;
@@ -71,6 +74,8 @@ public class AxiomTermList implements ItemList<Object>
 			public void onNextAxiom(QualifiedName qname, Axiom nextAxiom) 
 			{
 				axiom = nextAxiom;
+		        if (sourceItem != null)
+		            sourceItem.setInformation(toString());
 			}};
 	}
 
@@ -124,10 +129,24 @@ public class AxiomTermList implements ItemList<Object>
 	public void setAxiom(Axiom axiom)
 	{
 		this.axiom = axiom;
+		if (sourceItem != null)
+		    sourceItem.setInformation(toString());
 	}
 
+    /**
+     * clear
+     * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#clear()
+     */
+    @Override
+    public void clear() 
+    {
+        axiom = EMPTY_AXIOM;
+        if (sourceItem != null)
+            sourceItem.setInformation(toString());
+    }
+
 	/**
-	 * 
+	 * getLength
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getLength()
 	 */
 	@Override
@@ -137,7 +156,7 @@ public class AxiomTermList implements ItemList<Object>
 	}
 
 	/**
-	 * 
+	 * getQualifiedName
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getQualifiedName()
 	 */
     @Override
@@ -148,7 +167,7 @@ public class AxiomTermList implements ItemList<Object>
 
 
 	/**
-	 * 
+	 * getName
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getName()
 	 */
 	@Override
@@ -158,7 +177,7 @@ public class AxiomTermList implements ItemList<Object>
 	}
 
 	/**
-	 * 
+	 * isEmpty
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#isEmpty()
 	 */
 	@Override
@@ -168,7 +187,7 @@ public class AxiomTermList implements ItemList<Object>
 	}
 
 	/**
-	 * 
+	 * assignItem
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#assignItem(int, java.lang.Object)
 	 */
 	@Override
@@ -179,7 +198,7 @@ public class AxiomTermList implements ItemList<Object>
 	}
 
 	/**
-	 * 
+	 * newVariableInstance
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String, int)
 	 */
 	@Override
@@ -210,23 +229,13 @@ public class AxiomTermList implements ItemList<Object>
 	}
 
 	/**
-	 * 
+	 * hasItem
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#hasItem(int)
 	 */
 	@Override
 	public boolean hasItem(int index) 
 	{
 		return (index >= 0) && (index < axiom.getTermCount());
-	}
-
-	/**
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() 
-	{
-		return axiom.toString();
 	}
 
 	/**
@@ -239,7 +248,7 @@ public class AxiomTermList implements ItemList<Object>
 	}
 
 	/**
-	 * 
+	 * iterator
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
@@ -249,7 +258,7 @@ public class AxiomTermList implements ItemList<Object>
 	}
 
 	/**
-	 * 
+	 * getIterable
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getIterable()
 	 */
 	@Override
@@ -290,23 +299,33 @@ public class AxiomTermList implements ItemList<Object>
 	}
 
 	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#clear()
-	 */
-	@Override
-	public void clear() 
-	{
-		axiom = EMPTY_AXIOM;
-	}
-
-	/**
-	 * 
+	 * getItemClass
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getItemClass()
 	 */
     @Override
     public Class<?> getItemClass()
     {
         return Term.class;
+    }
+
+    /**
+     * setSourceItem
+     * @see au.com.cybersearch2.classy_logic.interfaces.SourceInfo#setSourceItem(au.com.cybersearch2.classy_logic.compile.SourceItem)
+     */
+    @Override
+    public void setSourceItem(SourceItem sourceItem)
+    {
+        this.sourceItem = sourceItem;
+    }
+
+    /**
+     * toString
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() 
+    {
+        return "list<term> " + (axiom.equals(EMPTY_AXIOM) ? (key.toString() + "()") : axiom.toString());
     }
 
 }

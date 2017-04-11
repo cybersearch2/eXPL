@@ -236,6 +236,12 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
     @Override
     public AxiomList concatenate(Operand rightOperand)
     {
+        AxiomList leftList = (AxiomList)getValue();
+        if (leftList.getLength() == 0)
+        {
+            AxiomList rightList = (AxiomList)rightOperand.getValue();
+            leftList.setKey(rightList.getKey());
+        }
         return AxiomUtils.concatenate(this, rightOperand);
     }
 
@@ -249,5 +255,22 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         return paramsTreeRoot;
     }
  
-
+    /**
+     * Override toString() to incorporate intialization list
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
+     */
+    @Override
+    public String toString()
+    {
+        if (parameterList != null)
+        {
+            StringBuilder builder = new StringBuilder("list<axiom> ");
+            builder.append(qname.toString());
+            int length = empty ? parameterList.getOperandParamList().size() : ((AxiomList)getValue()).getLength();
+            builder.append('[').append(Integer.toString(length)).append(']');
+            return builder.toString();
+        }
+        else
+            return super.toString();
+    }
 }

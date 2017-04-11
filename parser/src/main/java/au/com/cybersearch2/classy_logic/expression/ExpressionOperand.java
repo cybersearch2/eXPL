@@ -157,7 +157,7 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 	}
 	
 	/**
-	 * Override toString() to report &lt;empty&gt;, null or value
+	 * Override toString() to incorporate expression
 	 * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
 	 */
 	@Override

@@ -117,9 +117,8 @@ public class ParserContext
         SourceMarker sourceMarker = new SourceMarker(token);
         sourceMarker.setQualifiedName(QualifiedName.parseName(name, getContextName()));
         setSourceMarker(sourceMarker);
-        // Use marker token to initialize item token to avoid possible NPE if parser has bugs
-        if (itemToken == null)
-            itemToken = token;
+        // Innitialize item token for cane of single item starting at source marker
+        itemToken = token;
     }
     
     public void setSourceMarker(Token token, QualifiedName qname)
@@ -127,8 +126,8 @@ public class ParserContext
         SourceMarker sourceMarker = new SourceMarker(token);
         sourceMarker.setQualifiedName(qname);
         setSourceMarker(sourceMarker);
-        if (itemToken == null)
-            itemToken = token;
+        // Innitialize item token for cane of single item starting at source marker
+        itemToken = token;
     }
 
     /**
@@ -146,6 +145,19 @@ public class ParserContext
 
 
     /**
+     * Add SourceItem object for SourceInfo interface to current source marker 
+     * @param operand Operand object
+     * @return SourceItem object
+     */
+    public SourceItem addSourceItem(SourceInfo sourceInfo)
+    {
+        SourceItem sourceItem = addSourceItem(sourceInfo.toString());
+        // Update information when operand is completed in a parser task
+        sourceInfo.setSourceItem(sourceItem);
+        return sourceItem;
+    }
+    
+    /**
      * Add SourceItem object for operand to current source marker 
      * @param operand Operand object
      * @return SourceItem object
@@ -153,8 +165,8 @@ public class ParserContext
     public SourceItem addSourceItem(Operand operand)
     {
         SourceItem sourceItem = addSourceItem(operand.toString());
+        // Update information when operand is completed in a parser task
         if (operand instanceof SourceInfo)
-            // Update information when operand is completed in a parser task
             ((SourceInfo)operand).setSourceItem(sourceItem);
         return sourceItem;
     }
@@ -167,7 +179,7 @@ public class ParserContext
     public SourceItem addSourceItem(String information)
     {
         SourceItem sourceItem = new SourceItem(itemToken, information);
-        if ((sourceMarker != null) && (sourceItem != null))
+        if (sourceMarker != null)
             sourceMarker.addSourceItem(sourceItem);
         if (itemToken.next != null)
             // Advance to next token if available
@@ -175,7 +187,7 @@ public class ParserContext
         isSourceItemPending = true;
         return sourceItem;
     }
-    
+
     /**
      * Push source document on stack
      * @param sourceDocument Source document resource name
@@ -201,7 +213,10 @@ public class ParserContext
     public void popSourceDocument()
     {
         if (documentStack.size() > 0)
-            sourceDocumentId = documentStack.pop();
+        {
+            documentStack.removeFirst();
+            sourceDocumentId = documentStack.getFirst();
+        }
     }
     
     /**
@@ -282,5 +297,7 @@ public class ParserContext
     {
         return itemToken;
     }
+
+    
 
 }

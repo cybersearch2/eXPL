@@ -151,7 +151,7 @@ public class RegExOperand extends StringOperand
 	public String toString()
 	{
 		if (empty)
-			return "\"" + regex + "\"";
+			return getName() + " \\" + regex + "\\";
 		return super.toString();
 	}
 

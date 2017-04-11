@@ -15,7 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial6;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -26,18 +30,27 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 27 Feb 2015
  */
-public class Colors {
+public class Colors 
+{
+    /* colors.xpl
+    list<term> color(swatch);
+    axiom swatch (name, red, green, blue)
+    {"aqua", 0, 255, 255}
+    {"black", 0, 0, 0}
+    {"blue", 0, 0, 255};
+    template shade(name, color[red], color[green], color[blue]);
+    query colors(swatch : shade);
 
-    static final String AXIOM_COLORS =
-            "list<term> color(swatch);\n" +
-    		"axiom swatch (name, red, green, blue)\n" +
-    		"{\"aqua\", 0, 255, 255}\n" +
-    		"{\"black\", 0, 0, 0}\n" +
-    		"{\"blue\", 0, 0, 255};\n" +
-     		"template shade(name, color[red], color[green], color[blue]);\n" +
-    		"query colors(swatch : shade);"
-    		;
+    */
 
+    protected QueryProgramParser queryProgramParser;
+
+    public Colors()
+    {
+        File resourcePath = new File("src/main/resources/tutorial6");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+    
 	/**
 	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
@@ -45,16 +58,11 @@ public class Colors {
 		shade(name = black, color_red = 0, color_green = 0, color_blue = 0)<br/>
 		shade(name = blue, color_red = 0, color_green = 0, color_blue = 255)<br/>
 	 */
-	public void displayShades()
+	public ParserContext displayShades(SolutionHandler solutionHandler)
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(AXIOM_COLORS);
-		queryProgram.executeQuery("colors", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("shade").toString());
-				return true;
-			}});
+        QueryProgram queryProgram = queryProgramParser.loadScript("colors.xpl");
+		queryProgram.executeQuery("colors", solutionHandler);
+        return queryProgramParser.getContext();
 	}
 
 	public static void main(String[] args)
@@ -62,7 +70,12 @@ public class Colors {
 		try 
 		{
 	        Colors colorsDemo = new Colors();
-			colorsDemo.displayShades();
+			colorsDemo.displayShades(new SolutionHandler(){
+	            @Override
+	            public boolean onSolution(Solution solution) {
+	                System.out.println(solution.getAxiom("shade").toString());
+	                return true;
+	            }});
 		} 
 		catch (ExpressionException e) 
 		{

@@ -32,6 +32,7 @@ import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
  */
 public class ItemListOperand extends ListVariableOperand implements ParserRunner, SourceInfo
 {
+    /** Source item to be updated in parser task */
     protected SourceItem sourceItem;
     
     public ItemListOperand(String listName, Operand indexExpression,
