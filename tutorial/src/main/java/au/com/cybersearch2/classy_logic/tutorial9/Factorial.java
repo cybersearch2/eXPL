@@ -15,7 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
@@ -30,35 +34,44 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class Factorial 
 {
-    static final String FACTORIAL_CALCULATE =
-	 	"calc factorial (\n" +
-	 	"integer i,\n" +
-		"integer n,\n" +
-		"decimal factorial = 1,\n" +
-	    "{\n" +
-		"  factorial *= i,\n" +
- 		"  ? i++ < n\n" +
-	    "}\n" +
-		")(factorial = 1, i = 1);\n" +
-	    "query factorial (factorial)(n = 4);\n" 
-	    ;
+/*
+calc factorial 
+(
+  integer n,
+  integer i = 1,
+  decimal factorial = 1,
+  {
+    factorial *= i,
+    ? i++ < n
+  }
+);
+query factorial4 (factorial)(n = 4); 
+query factorial5 (factorial)(n = 5); 
 
-	/**
+*/
+
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public Factorial()
+    {
+        queryProgramParser = new QueryProgramParser(new File("src/main/resources/tutorial9"));
+    }
+    
+    /**
 	 * Compiles the FACTORIAL_CALCULATE script and runs the "factorial" query, displaying the solution on the console.<br/>
+	 * Also shows use of query parameter to set a variable.<br/>
 	 * The expected result:<br/>
-	 * factorial(i = 5, n = 4, factorial = 24)<br/>
+	 * factorial(n = 4, i = 5, factorial = 24)<br/>
+	 * factorial(n = 5, i = 6, factorial = 120)<br/>
 	 * @throws ParseException
 	 */
-	public void display4Factorial()
+	public ParserContext display4Factorial(SolutionHandler solutionHandler)
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(FACTORIAL_CALCULATE);
-		queryProgram.executeQuery("factorial", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("factorial").toString());
-				return true;
-			}});
+        QueryProgram queryProgram = queryProgramParser.loadScript("factorial.xpl");
+		queryProgram.executeQuery("factorial4", solutionHandler);
+        queryProgram.executeQuery("factorial5", solutionHandler);
+        return queryProgramParser.getContext();
 	}
 
 	public static void main(String[] args)
@@ -66,7 +79,12 @@ public class Factorial
 		Factorial factorial = new Factorial();
 		try 
 		{
-			factorial.display4Factorial();
+			factorial.display4Factorial(new SolutionHandler(){
+	            @Override
+	            public boolean onSolution(Solution solution) {
+	                System.out.println(solution.getAxiom("factorial").toString());
+	                return true;
+	            }});
 		} 
 		catch (ExpressionException e) 
 		{

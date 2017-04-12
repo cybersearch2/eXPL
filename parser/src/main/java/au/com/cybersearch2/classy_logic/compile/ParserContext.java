@@ -18,7 +18,9 @@ package au.com.cybersearch2.classy_logic.compile;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -58,12 +60,15 @@ public class ParserContext
     boolean isSourceItemPending;
     /** Source item start token */
     Token itemToken;
+    /** Store for qualified names which employ reference counting eg. lists */
+    Map<QualifiedName, QualifiedName> qnameMap; 
     
     public ParserContext(QueryProgram queryProgram)
     {
         this.queryProgram = queryProgram;
         sourceMarkerSet = new TreeSet<SourceMarker>();
         documentStack = new ArrayDeque<Integer>();
+        qnameMap = new HashMap<QualifiedName, QualifiedName>();
         resetScope();
     }
 
@@ -298,6 +303,13 @@ public class ParserContext
         return itemToken;
     }
 
-    
+    public QualifiedName getQualifiedName(String name)  
+    {
+        QualifiedName qname = QualifiedName.parseName(name);
+        if (qnameMap.containsKey(qname))
+            return (qnameMap.get(qname));
+        qnameMap.put(qname, qname);
+        return qname;
+    }
 
 }

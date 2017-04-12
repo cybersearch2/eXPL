@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial9;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -30,78 +30,75 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * ColorsTest
+ * CalculateSquareMilesTest
  * @author Andrew Bowley
- * 10Apr.,2017
+ * 11Apr.,2017
  */
-public class ColorsTest
+public class CalculateSquareMilesTest
 {
     @Test
-    public void testColors() throws Exception
+    public void testSquareMiles() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial6", "colors.txt");
+        File testFile = new File("src/main/resources/tutorial9", "calculate-square-miles.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        Colors colors = new Colors();
-        ParserContext context = colors.displayShades(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("shade").toString());
-                return true;
-            }});
+        CalculateSquareMiles squareMiles = new CalculateSquareMiles();
+        Iterator<Axiom> countryIterator = squareMiles.getSurfaceAreas();
+        while (countryIterator.hasNext())
+            checkSolution(reader, countryIterator.next().toString());
+        reader.close();
+        ParserContext context =  squareMiles.getParserContext();  
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list color (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom surface_area (1,1)");
+        assertThat(sourceMarker.getSourceDocumentId()).isEqualTo(1);
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> swatch() (1,1) (1,24)");
+        assertThat(sourceItem.toString()).isEqualTo("surface_area(country,surface_area_Km2)[213] (1,1) (215,29)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query colors (7,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom swatch (2,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("list surface_area (6,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("swatch(name,red,green,blue)[3] (2,1) (5,19)");
-        assertThat(iterator.hasNext()).isTrue();
+        assertThat(sourceItem.toString()).isEqualTo("list<axiom> surface_area(km2_to_mi2) (6,1) (6,29)");
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template shade (6,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query surface_area_mi2 (8,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("name (6,16) (6,19)");
+        assertThat(sourceItem.toString()).isEqualTo("surface_area:surface_area (8,24) (8,50)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("color_var0 = color_red = <empty> (6,22) (6,31)");
-        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem.toString()).isEqualTo("km2_to_mi2 (9,3) (9,16)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc km2_to_mi2 (4,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("color_var1 = color_green = <empty> (6,34) (6,45)");
+        assertThat(sourceItem.toString()).isEqualTo("country (4,18) (4,24)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("color_var2 = color_blue = <empty> (6,48) (6,58)");
-        assertThat(iterator.hasNext()).isFalse();
-   }
+        System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("double surface_area_mi2 = surface_area_Km2*=0.3861 (4,27) (4,91)");
+    }
     
-    protected void checkSolution(BufferedReader reader, String shade)
+    protected void checkSolution(BufferedReader reader, String country)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(shade).isEqualTo(line);
+            assertThat(country).isEqualTo(line);
         }
         catch (IOException e)
         {
@@ -109,4 +106,5 @@ public class ColorsTest
         }
 
     }
+
 }

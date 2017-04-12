@@ -128,7 +128,7 @@ public class ParameterOperandTest
         for (String param: params)
         {
             Object item = iterator.next();
-            assertThat(item.toString()).isEqualTo(param);
+            assertThat(item.toString()).isEqualTo("list<term> " + param);
         }
         assertThat(iterator.hasNext()).isFalse();
         //System.out.println(result.getTermByName(Template.TERMNAMES).toString());

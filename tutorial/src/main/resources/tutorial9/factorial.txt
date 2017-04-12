@@ -1,0 +1,2 @@
+factorial(n = 4, i = 5, factorial = 24)
+factorial(n = 5, i = 6, factorial = 120)

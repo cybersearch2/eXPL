@@ -1,0 +1,8 @@
+account(name = Marathon Marble, fee = 61)
+delivery(city = Sparta, freight = 16)
+account(name = Acropolis Construction, fee = 47)
+delivery(city = Athens, freight = 5)
+account(name = Agora Imports, fee = 49)
+delivery(city = Sparta, freight = 16)
+account(name = Spiros Theodolites, fee = 57)
+delivery(city = Milos, freight = 22)

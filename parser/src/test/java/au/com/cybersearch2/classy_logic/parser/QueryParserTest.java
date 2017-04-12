@@ -1100,7 +1100,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(LEXICAL_SEARCH);
 		Template inWordsTemplate = parserAssembler.getTemplate("in_words");
 		inWordsTemplate.setKey("Lexicon");
-		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(\"^in[^ ]+\", Definition)");
+		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\, Definition)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
@@ -1192,7 +1192,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(NOUN_LEXICAL_SEARCH);
 		Template inWordsTemplate = parserAssembler.getTemplate("in_words");
 		inWordsTemplate.setKey("Lexicon");
-		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(\"^in[^ ]+\", \"^n\")");
+		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\, Definition \\^n\\)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();

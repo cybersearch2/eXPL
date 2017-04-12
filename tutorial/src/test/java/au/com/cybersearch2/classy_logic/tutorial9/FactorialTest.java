@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial9;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -34,74 +34,86 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * ColorsTest
+ * FactorialTest
  * @author Andrew Bowley
- * 10Apr.,2017
+ * 12Apr.,2017
  */
-public class ColorsTest
+public class FactorialTest
 {
     @Test
-    public void testColors() throws Exception
+    public void testFactorial() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial6", "colors.txt");
+        File testFile = new File("src/main/resources/tutorial9", "factorial.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        Colors colors = new Colors();
-        ParserContext context = colors.displayShades(new SolutionHandler(){
+        Factorial factorial = new Factorial();
+        ParserContext context = factorial.display4Factorial(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("shade").toString());
+                checkSolution(reader, solution.getAxiom("factorial").toString());
                 return true;
             }});
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list color (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query factorial4 (11,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> swatch() (1,1) (1,24)");
+        assertThat(sourceItem.toString()).isEqualTo("factorial (11,19) (11,27)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("n=4 (11,30) (11,34)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query colors (7,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom swatch (2,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query factorial5 (12,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("swatch(name,red,green,blue)[3] (2,1) (5,19)");
+        assertThat(sourceItem.toString()).isEqualTo("factorial (12,19) (12,27)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("n=5 (12,30) (12,34)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template shade (6,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("calc factorial (1,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("name (6,16) (6,19)");
+        assertThat(sourceItem.toString()).isEqualTo("integer n (3,3) (3,11)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("color_var0 = color_red = <empty> (6,22) (6,31)");
+        assertThat(sourceItem.toString()).isEqualTo("integer i = 1 (4,3) (4,15)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("color_var1 = color_green = <empty> (6,34) (6,45)");
+        assertThat(sourceItem.toString()).isEqualTo("decimal factorial = 1 (5,3) (5,23)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("color_var2 = color_blue = <empty> (6,48) (6,58)");
-        assertThat(iterator.hasNext()).isFalse();
-   }
+        assertThat(sourceItem.toString()).isEqualTo("1*=1 (7,5) (7,18)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("?1++<n (8,5) (9,2)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("factorial1(1*=1, ?1++<n) (6,3) (10,0)");
+        assertThat(sourceItem.getNext()).isNull();
+    }
     
-    protected void checkSolution(BufferedReader reader, String shade)
+    protected void checkSolution(BufferedReader reader, String factorial)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(shade).isEqualTo(line);
+            assertThat(factorial).isEqualTo(line);
         }
         catch (IOException e)
         {

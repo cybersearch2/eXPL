@@ -19,7 +19,9 @@ import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -33,26 +35,33 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class CalculateSquareMiles2 
 {
-    // The surface-land.xpl file has country and surface_area terms eg.  ("United States",{9,831,510.00})
-    // Note the braces indicate the surface area is formatted, so must be parsed to get numeric value
-	static final String COUNTRY_SURFACE_AREA = 
-			"include \"surface-land.xpl\";\n" +
-			"calc filter_area (\n" +
-			"country { \"United States\" , \"Australia\" },\n" +
-			"double surface_area = surface_area_Km2,\n" +
-			"string units = \"km2\",\n" +
-            "// Use imperial measurements if country is USA\n" +
-			"? country == \"United States\"\n" +
-			"{\n" +
-			"  surface_area *= 0.3861,\n" +
-			"  units = \"mi2\"\n" +
-			"}\n" +
-			");\n" +
-			"list surface_area_by_country(filter_area);\n" +
-		    "query surface_area_query(surface_area : filter_area);";
+// The surface-land.xpl file has country and surface_area terms eg.  ("United States",{9,831,510.00})
+// Note the braces indicate the surface area is formatted, so must be parsed to get numeric value
+    
+/* calculate-square-miles.xpl
+include "surface-land.xpl";
+calc filter_area 
+(
+  country { "United States" , "Australia" },
+  double surface_area = surface_area_Km2,
+  string units = "km2",
+  // Use imperial measurements if country is USA
+  ? country == "United States"
+  {
+    surface_area *= 0.3861,
+    units = "mi2"
+  }
+);
+list surface_area_by_country(filter_area);
+query surface_area_query(surface_area : filter_area);
+
+*/
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 
 	public CalculateSquareMiles2()
 	{
+        queryProgramParser = new QueryProgramParser(new File("src/main/resources/"));
 	}
 	
 	/**
@@ -61,24 +70,27 @@ public class CalculateSquareMiles2
        filter_area(country = Australia, surface_area = 7741220, units = km2, false)</br>
        filter_area(country = United States, surface_area = 3795946.011, units = mi2, true)</br>
 	 */
-	public void displaySurfaceArea()
+	public Iterator<Axiom> displaySurfaceArea()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.setResourceBase(new File("src/main/resources"));
-
-		queryProgram.parseScript(COUNTRY_SURFACE_AREA);
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial9/calculate-square-miles2.xpl");
+        parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("surface_area_query");
-		Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("surface_area_by_country"));
-        while(iterator.hasNext())
-		    System.out.println(iterator.next().toString());
+		return result.getIterator(QualifiedName.parseGlobalName("surface_area_by_country"));
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	public static void main(String[] args)
 	{
 		CalculateSquareMiles2 calculateSquareMiles = new CalculateSquareMiles2();
 		try 
 		{
-				calculateSquareMiles.displaySurfaceArea();
+	        Iterator<Axiom> iterator = calculateSquareMiles.displaySurfaceArea();
+	        while(iterator.hasNext())
+	            System.out.println(iterator.next().toString());
 		} 
 		catch (ExpressionException e) 
 		{

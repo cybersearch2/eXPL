@@ -62,25 +62,25 @@ public class ExpressionsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("x = 1 (1,1) (1,13)");
+        assertThat(sourceItem.toString()).isEqualTo("integer x = 1 (1,1) (1,13)");
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("integer y (2,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("y = 2 (2,1) (2,13)");
+        assertThat(sourceItem.toString()).isEqualTo("integer y = 2 (2,1) (2,13)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         assertThat(sourceMarker.toString()).isEqualTo("calc evaluate (3,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("can_add = 1+2==3 (4,3) (4,30)");
+        assertThat(sourceItem.toString()).isEqualTo("boolean can_add = 1+2==3 (4,3) (4,30)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("can_subtract = 2-1==1 (5,3) (5,35)");
+        assertThat(sourceItem.toString()).isEqualTo("boolean can_subtract = 2-1==1 (5,3) (5,35)");
     }
     
 }

@@ -37,9 +37,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public abstract class ListVariableOperand extends ExpressionOperand<Object> implements Concaten<String>
 {
-    /** Unique identity generator */
-    static protected int referenceCount;
-
     /** Name of list */
     protected String listName;
     /** Operand which evaluates the list index */
@@ -49,17 +46,17 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
     
     /**
      * Construct ListVariableOperand object
-     * @param listName Name of list
+     * @param listName Qualified name of list
      * @param listOperandFactory Factory to construct list variable
      * @param indexExpression Operand which evaluates the list index
      * @param expression2 Second expression for selection or assignment depending on usage
      */
-    public ListVariableOperand(String listName, 
+    public ListVariableOperand(QualifiedName listName, 
                                 Operand indexExpression, 
                                 Operand expression2)
     {
         super(getQualifiedName(listName), null);
-        this.listName = listName;
+        this.listName = listName.getName();
         this.indexExpression = indexExpression;
         this.expression2 = expression2;
     }
@@ -209,8 +206,8 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
      * @param name List name
      * @return QualifiedName object
      */
-    static protected QualifiedName getQualifiedName(String name)
+    static protected QualifiedName getQualifiedName(QualifiedName listName)
     {
-        return new QualifiedName(name + "_var" + ++referenceCount);
+        return new QualifiedName(listName.getName() + "_var" + Integer.toString(listName.incrementReferenceCount()), listName);
     }
 }

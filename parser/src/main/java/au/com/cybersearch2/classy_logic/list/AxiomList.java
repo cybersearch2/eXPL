@@ -181,9 +181,15 @@ public class AxiomList extends ArrayItemList<AxiomTermList>
 	{
 		StringBuilder builder = new StringBuilder("list<axiom> ");
 		builder.append(getQualifiedName().toString());
-		builder.append('(').append(key.toString()).append(')');
+		if (!getQualifiedName().equals(key))
+		    builder.append('(').append(key.toString()).append(')');
 		if (getLength() > 0)
-		    builder.append('[').append(Integer.toString(getLength())).append(']');
+		{
+		    if (getLength() == 1)
+		        builder.append(": ").append(getItem(0).toString());
+		    else
+		        builder.append('[').append(Integer.toString(getLength())).append(']');
+		}
 		return builder.toString();
 	}
 }

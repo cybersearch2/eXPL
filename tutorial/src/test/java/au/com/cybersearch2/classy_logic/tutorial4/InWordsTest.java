@@ -86,7 +86,7 @@ public class InWordsTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("definition (2,44) (2,60)");
+        assertThat(sourceItem.toString()).isEqualTo("string definition (2,44) (2,60)");
     }
     
     protected void checkSolution(BufferedReader reader, String word)

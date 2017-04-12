@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.list;
 
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 
@@ -33,7 +34,7 @@ public class AxiomOperand extends ListVariableOperand implements ParserRunner
      * @param indexExpression
      * @param expression2
      */
-    public AxiomOperand(String listName, Operand indexExpression,
+    public AxiomOperand(QualifiedName listName, Operand indexExpression,
             Operand expression2)
     {
         super(listName, indexExpression, expression2);

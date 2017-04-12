@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.helper;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -40,6 +42,7 @@ public class QualifiedName implements Comparable<QualifiedName>
     protected String scope;
     protected String template;
     protected String name;
+    protected AtomicInteger referenceCount;
 
     /**
      * Construct name-only QualifiedName in global namespace
@@ -287,4 +290,10 @@ public class QualifiedName implements Comparable<QualifiedName>
         return false;
     }
 
+    public int incrementReferenceCount()
+    {
+        if (referenceCount == null)
+            referenceCount = new AtomicInteger();
+        return referenceCount.getAndIncrement();
+    }
 }

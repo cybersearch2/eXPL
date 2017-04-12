@@ -13,10 +13,16 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 
 import org.junit.Test;
@@ -28,68 +34,67 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * GamingTest
+ * GreekConstructionTest
  * @author Andrew Bowley
- * 10Apr.,2017
+ * 11Apr.,2017
  */
-public class GamingTest
+public class GreekConstructionTest
 {
     @Test
-    public void testGaming() throws Exception
+    public void testGreekConstruction() throws Exception
     {
-        Gaming gaming = new Gaming();
-        ParserContext context = gaming.displayFruit(new SolutionHandler(){
+        File testFile = new File("src/main/resources/tutorial8", "greek-construction.txt");
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
+        GreekConstruction3 greekConstruction = new GreekConstruction3();
+        ParserContext context = greekConstruction.displayCustomerCharges(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                String spin = solution.getAxiom("spin").toString();
-                assertThat(spin).isEqualTo("spin(combo_r1 = lemon, combo_r2 = banana, combo_r3 = apple, combo_r4 = orange)");
+                checkSolution(reader, solution.getAxiom("account").toString(), solution.getAxiom("delivery").toString());
                 return true;
             }});
+        reader.close();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list combo (3,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom customer (1,1)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("axiom fee (7,1)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("axiom freight (13,1)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("query greek_business (22,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> fruit() (3,1) (3,23)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom fruit (2,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("fruit()[1] (2,1) (2,52)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom spin (1,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("spin(r1,r2,r3,r4)[1] (1,1) (1,37)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query spin (5,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template spin (4,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo_var0 = combo_r1 = <empty> (4,15) (4,25)");
+        assertThat(sourceItem.toString()).isEqualTo("customer:customer (22,22) (22,38)");
         sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo_var1 = combo_r2 = <empty> (4,28) (4,38)");
+        assertThat(sourceItem.toString()).isEqualTo("fee:account (23,3) (23,17)");
         sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo_var2 = combo_r3 = <empty> (4,41) (4,51)");
-        assertThat(iterator.hasNext()).isFalse();
-   }
+        assertThat(sourceItem.toString()).isEqualTo("freight:delivery (23,20) (23,39)");
+    }
+
+    protected void checkSolution(BufferedReader reader, String account, String delivery)
+    {
+        try
+        {
+            String line = reader.readLine();
+            assertThat(account).isEqualTo(line);
+            line = reader.readLine();
+            assertThat(delivery).isEqualTo(line);
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+
+    }
 }

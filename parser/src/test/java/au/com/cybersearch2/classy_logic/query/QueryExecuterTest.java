@@ -490,7 +490,7 @@ public class QueryExecuterTest
         //System.out.println(it.next().toString());
 	    assertThat(it.next().toString()).isEqualTo("account(name?name==name, fee), delivery(city?city==city, freight)");
         //System.out.println(it.next().toString());
-	    assertThat(it.next().toString()).isEqualTo("sparta_only(city)");
+	    assertThat(it.next().toString()).isEqualTo("sparta_only(city {Sparta})");
 	    //while (it.hasNext())
 		//    System.out.println(">>" + it.next().toString());
 	    assertThat(query.execute()).isTrue();
@@ -710,7 +710,7 @@ public class QueryExecuterTest
     	assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
 	    Iterator<ChainQuery> it = query.chainQueryIterator();
 	    assertThat(it.next().toString()).isEqualTo("account(name?name==name, fee), delivery(city?city==city, freight)");
-	    assertThat(it.next().toString()).isEqualTo("sparta_only(city)");
+	    assertThat(it.next().toString()).isEqualTo("sparta_only(city {Sparta})");
 	    while (it.hasNext())
 		    System.out.println(">>" + it.next().toString());
 	    assertThat(query.execute()).isTrue();

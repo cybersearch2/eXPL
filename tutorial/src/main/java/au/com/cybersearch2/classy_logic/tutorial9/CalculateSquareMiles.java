@@ -19,7 +19,9 @@ import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -35,19 +37,24 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class CalculateSquareMiles 
 {
-	static final String COUNTRY_SURFACE_AREA = 
-			"include \"surface-land.xpl\";\n" +
-			"template surface_area(country, double surface_area_Km2);\n" +
-			"// Calculator declaration:\n" +
-			"calc km2_to_mi2 (country, double surface_area_mi2 = surface_area.surface_area_Km2 *= 0.3861);" +
-			"// Result list receives calculator solution\n" +
-			"list surface_area(km2_to_mi2);\n" +
-            "// Chained query with calculator performing conversion:\n" +
-		    "query surface_area_mi2(surface_area : surface_area)\n" + 
-		    "  >> (km2_to_mi2);";
+    /* calculate-square-miles.xpl
+    include "surface-land.xpl";
+    template surface_area(country, double surface_area_Km2);
+    // Calculator declaration:
+    calc km2_to_mi2 (country, double surface_area_mi2 = surface_area.surface_area_Km2 *= 0.3861);
+    // Result list receives calculator solution
+    list surface_area(km2_to_mi2);
+    // Chained query with calculator performing conversion:
+    query surface_area_mi2(surface_area : surface_area)
+      >> (km2_to_mi2);
+      
+*/
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 
-	public CalculateSquareMiles()
+    public CalculateSquareMiles()
 	{	
+        queryProgramParser = new QueryProgramParser(new File("src/main/resources/"));
 	}
 	
     /**
@@ -59,15 +66,13 @@ public class CalculateSquareMiles
      */
 	public Iterator<Axiom> getSurfaceAreas()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.setResourceBase(new File("src/main/resources"));
-
-		queryProgram.parseScript(COUNTRY_SURFACE_AREA);
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial9/calculate-square-miles.xpl");
+        parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("surface_area_mi2", new SolutionHandler(){
 
             @Override
             public boolean onSolution(Solution solution)
-            {
+            {   // Uncomment to see intermediate results
                 //System.out.println(solution.getAxiom("surface_area"));
                 //System.out.println(solution.getAxiom("km2_to_mi2"));
                 return true;
@@ -75,6 +80,11 @@ public class CalculateSquareMiles
 		return  result.getIterator(QualifiedName.parseGlobalName("surface_area"));
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	public static void main(String[] args)
 	{
 		try 

@@ -34,8 +34,14 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
 {
     /** Source item to be updated in parser task */
     protected SourceItem sourceItem;
-    
-    public ItemListOperand(String listName, Operand indexExpression,
+
+    /**
+     * Construct an ItemListOperand object
+     * @param listName
+     * @param indexExpression
+     * @param expression2
+     */
+    public ItemListOperand(QualifiedName listName, Operand indexExpression,
             Operand expression2)
     {
         super(listName, indexExpression, expression2);

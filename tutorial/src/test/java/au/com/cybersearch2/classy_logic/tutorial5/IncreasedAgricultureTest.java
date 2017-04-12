@@ -117,15 +117,15 @@ public class IncreasedAgricultureTest
         assertThat(sourceItem.toString()).isEqualTo("country?country==country (5,3) (5,38)");
         sourceItem = sourceItem.getNext();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area = Y2010-Y1990/100*surface_area_Km2 (6,3) (7,22)");
+        assertThat(sourceItem.toString()).isEqualTo("double surface_area = Y2010-Y1990/100*surface_area_Km2 (6,3) (7,22)");
     }
     
-    protected void checkSolution(BufferedReader reader, String city)
+    protected void checkSolution(BufferedReader reader, String increase)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(city).isEqualTo(line);
+            assertThat(increase).isEqualTo(line);
         }
         catch (IOException e)
         {

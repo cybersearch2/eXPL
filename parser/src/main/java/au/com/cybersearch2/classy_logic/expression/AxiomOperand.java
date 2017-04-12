@@ -24,6 +24,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 
 /**
  * AxiomOperand
@@ -239,8 +240,18 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         AxiomList leftList = (AxiomList)getValue();
         if (leftList.getLength() == 0)
         {
-            AxiomList rightList = (AxiomList)rightOperand.getValue();
-            leftList.setKey(rightList.getKey());
+            QualifiedName key;
+            if (rightOperand.getValueClass().equals(AxiomList.class))
+            {
+                AxiomList rightList = (AxiomList)rightOperand.getValue();
+                key = rightList.getKey();
+            }
+            else
+            {
+                AxiomTermList rightList = (AxiomTermList)rightOperand.getValue();
+                key = rightList.getKey();
+            }
+            leftList.setKey(key);
         }
         return AxiomUtils.concatenate(this, rightOperand);
     }

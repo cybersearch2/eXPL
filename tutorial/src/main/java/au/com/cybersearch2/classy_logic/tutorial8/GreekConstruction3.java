@@ -15,7 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial8;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -29,34 +33,42 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class GreekConstruction3 
 {
 
-	static final String GREEK_CONSTRUCTION =
-			
-		"axiom customer()\n" +
-		"  {\"Marathon Marble\", \"Sparta\"}\n" +
-		"  {\"Acropolis Construction\", \"Athens\"}\n" +
-		"  {\"Agora Imports\", \"Sparta\"}\n" +
-		"  {\"Spiros Theodolites\", \"Milos\"};\n" +
-		
-		"axiom fee (name, fee)\n" +
-		"  {\"Marathon Marble\", 61}\n" +
-		"  {\"Acropolis Construction\", 47}\n" +
-		"  {\"Agora Imports\", 49}\n" +
-		"  {\"Spiros Theodolites\", 57};\n" + 
-		
-		"axiom freight (city, freight) \n" +
-		"  {\"Athens\", 5 }\n" +
-		"  {\"Sparta\", 16 }\n" +
-		"  {\"Milos\", 22};\n" +
-		
-		"template customer(name, city);\n" +
-		"template account(name ? name == customer.name, fee);\n" +
-		"template delivery(city ? city == customer.city, freight);\n" +
-		
-	    "  query greek_business(customer:customer)\n" + 
-		"  >> (fee:account) >> (freight:delivery);";
+/* greek-construction.xpl
+axiom customer()
+  {"Marathon Marble", "Sparta"}
+  {"Acropolis Construction", "Athens"}
+  {"Agora Imports", "Sparta"}
+  {"Spiros Theodolites", "Milos"};
+        
+axiom fee (name, fee)
+  {"Marathon Marble", 61}
+  {"Acropolis Construction", 47}
+  {"Agora Imports", 49}
+  {"Spiros Theodolites", 57}; 
+        
+axiom freight (city, freight) 
+  {"Athens", 5 }
+  {"Sparta", 16 }
+  {"Milos", 22};
+        
+template customer(name, city);
+template account(name ? name == customer.name, fee);
+template delivery(city ? city == customer.city, freight);
+        
+query greek_business(customer:customer) 
+  >> (fee:account) >> (freight:delivery);
+  
+*/
 
+    protected QueryProgramParser queryProgramParser;
 
-	/**
+    public GreekConstruction3()
+    {
+        File resourcePath = new File("src/main/resources/tutorial8");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+    
+    /**
 	 * Compiles the GREEK_CONSTRUCTION script and runs the "customer_charge" query, displaying the solution on the console.<br/>
 	 * The query has 2 unification steps. The first unifies "charge" axiom with "freight" template.<br/>
 	 * The second unifies "customer" axiom with "customer_freight" template.
@@ -70,17 +82,11 @@ public class GreekConstruction3
 		account(name = Spiros Theodolites, fee = 57)<br/>
 		delivery(city = Milos, freight = 22)<br/>	 
 	 */
-	public void displayCustomerCharges()
+	public ParserContext displayCustomerCharges(SolutionHandler solutionHandler)
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(GREEK_CONSTRUCTION);
-		queryProgram.executeQuery("greek_business", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-				System.out.println(solution.getAxiom("account").toString());
-				System.out.println(solution.getAxiom("delivery").toString());
-				return true;
-			}});
+        QueryProgram queryProgram = queryProgramParser.loadScript("greek-construction.xpl");
+ 		queryProgram.executeQuery("greek_business", solutionHandler);
+        return queryProgramParser.getContext();
 	}
 
 	public static void main(String[] args)
@@ -88,7 +94,13 @@ public class GreekConstruction3
 		try 
 		{
 	        GreekConstruction3 greekConstruction = new GreekConstruction3();
-			greekConstruction.displayCustomerCharges();
+			greekConstruction.displayCustomerCharges(new SolutionHandler(){
+	            @Override
+	            public boolean onSolution(Solution solution) {
+	                System.out.println(solution.getAxiom("account").toString());
+	                System.out.println(solution.getAxiom("delivery").toString());
+	                return true;
+	            }});
 		} 
 		catch (ExpressionException e) 
 		{
