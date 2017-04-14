@@ -103,6 +103,14 @@ public class SourceItem
     }
 
     /**
+     * @return the information
+     */
+    public String getInformation()
+    {
+        return information;
+    }
+
+    /**
      * @return the next
      */
     public SourceItem getNext()

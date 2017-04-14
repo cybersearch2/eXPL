@@ -30,94 +30,117 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * FactorialTest
+ * HighCitiesSortedTest
  * @author Andrew Bowley
  * 12Apr.,2017
  */
-public class FactorialTest
+public class HighCitiesSortedTest
 {
+
     @Test
-    public void testFactorial() throws Exception
+    public void testHighCities() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial9", "factorial.txt");
+        File testFile = new File("src/main/resources/tutorial9", "high-cities-sorted.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        Factorial factorial = new Factorial();
-        ParserContext context = factorial.display4Factorial(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("factorial").toString());
-                return true;
-            }});
+        HighCitiesSorted highCities = new HighCitiesSorted();
+        Iterator<Axiom> cityIterator = highCities.displayHighCities();
+        while (cityIterator.hasNext())
+            checkSolution(reader, cityIterator.next().toString());
+        ParserContext context = highCities.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query factorial4 (11,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom city (1,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("factorial (11,19) (11,27)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("n=4 (11,30) (11,34)");
+        assertThat(sourceItem.toString()).isEqualTo("city(name,altitude)[10] (1,1) (11,21)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query factorial5 (12,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom high_cities (14,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("factorial (12,19) (12,27)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("n=5 (12,30) (12,34)");
+        assertThat(sourceItem.toString()).isEqualTo("list<axiom> high_cities[1] (14,1) (14,22)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc factorial (1,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer n (3,3) (3,11)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer i = 1 (4,3) (4,15)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("decimal factorial = 1 (5,3) (5,23)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("factorial1(1*=1 ... ?1++<n) (6,3) (10,0)");
+        assertThat(sourceMarker.toString()).isEqualTo("query high_cities (46,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc factorial1 (6,3)");
+        assertThat(sourceMarker.toString()).isEqualTo("template high_city (17,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("1*=1 (7,5) (7,18)");
+        assertThat(sourceItem.toString()).isEqualTo("altitude?altitude>5000 (19,3) (19,28)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?1++<n (8,5) (9,2)");
-        assertThat(sourceItem.getNext()).isNull();
-    }
-    
-    protected void checkSolution(BufferedReader reader, String factorial)
+        assertThat(sourceItem.toString()).isEqualTo("high_cities+=high_city (20,3) (21,0)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc insert_sort (24,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("integer i = high_cities_length-1 (27,3) (27,37)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo(":i<1 (29,3) (29,9)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("integer j = i-1 (31,3) (31,19)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("integer altitude=high_cities_var0 (33,3) (33,45)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("temp = high_cities_var1 (35,3) (35,23)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("insert_sort1(?altitude<high_cities_var2 ... ?--j>=0) (37,3) (41,3)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("high_cities_var5=temp (43,3) (44,0)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc insert_sort1 (37,3)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("?altitude<high_cities_var2 (38,5) (38,41)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("high_cities_var4=high_cities_var3 (39,5) (39,39)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("?--j>=0 (40,5) (41,2)");
+        sourceItem = sourceItem.getNext();
+        assertThat(iterator.hasNext()).isFalse();
+   }
+
+    protected void checkSolution(BufferedReader reader, String city)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(factorial).isEqualTo(line);
+            assertThat(city).isEqualTo(line);
         }
         catch (IOException e)
         {

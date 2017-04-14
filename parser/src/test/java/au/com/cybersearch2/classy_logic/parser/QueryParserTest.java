@@ -720,7 +720,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(SIMPLE_LIST_CALCULATE);
 		assertThat(parserAssembler.getTemplate("increment_n")
 			.toString()).isEqualTo(
-				"increment_n(n, limit, increment_n1(number_list_0=n++, number_list_1=n++, number_list_2=n++, ?number_list_2<limit))");
+				"increment_n(n, limit, increment_n1(number_list_0=n++ ... ?number_list_2<limit))");
 		//System.out.println(parserAssembler.getTemplate("increment_n"));
         Template calcTemplate = parserAssembler.getTemplate("increment_n");
         Solution solution = new Solution();
@@ -734,7 +734,7 @@ public class QueryParserTest
     public void test_simple_variable_index_list_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(SIMPLE_VARIABLE_INDEX_LIST_CALCULATE);
-		assertThat(parserAssembler.getTemplate("increment_n").toString()).isEqualTo("increment_n(n, i, limit, increment_n1(number_list_i++=n++, ?i<limit))");
+		assertThat(parserAssembler.getTemplate("increment_n").toString()).isEqualTo("increment_n(n, i, limit, increment_n1(number_list_i++=n++ ... ?i<limit))");
 		//System.out.println(parserAssembler.getTemplate("increment_n"));
         Template calcTemplate = parserAssembler.getTemplate("increment_n");
         Solution solution = new Solution();
@@ -750,7 +750,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(SIMPLE_LIST_LENGTH_CALCULATE);
 		assertThat(parserAssembler.getTemplate("increment_n")
 				.toString()).isEqualTo(
-						"increment_n(n, i, limit, increment_n1(number_list_i++=n++, ?number_list_length<limit))");
+						"increment_n(n, i, limit, increment_n1(number_list_i++=n++ ... ?number_list_length<limit))");
 		//System.out.println(parserAssembler.getTemplate("increment_n"));
         Template calcTemplate = parserAssembler.getTemplate("increment_n");
         Solution solution = new Solution();
@@ -764,7 +764,7 @@ public class QueryParserTest
     public void test_factorial_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(FACTORIAL_CALCULATE);
-		assertThat(parserAssembler.getTemplate("factorial").toString()).isEqualTo("factorial(i, n, factorial, factorial1(factorial*=i, ?i++<n))");
+		assertThat(parserAssembler.getTemplate("factorial").toString()).isEqualTo("factorial(i, n, factorial, factorial1(factorial*=i ... ?i++<n))");
 		//System.out.println(parserAssembler.getTemplate("factorial").toString());
         Template calcTemplate = parserAssembler.getTemplate("factorial");
         Solution solution = new Solution();

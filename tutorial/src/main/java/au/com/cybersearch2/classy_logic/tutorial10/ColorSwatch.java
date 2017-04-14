@@ -15,10 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial10;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -32,43 +37,55 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class ColorSwatch 
 {
-    static final String CHOICE_COLORS =
-            "// Uninitialized variable matches to any value\n" +
-            "// Choice selects on hex color value to get color name and rgb values\n" +
-            "choice swatch (rgb, color, red, green, blue)\n" +
-            "{0x00FFFF, \"aqua\", 0, 255, 255}\n" +
-            "{0x000000, \"black\", 0, 0, 0}\n" +
-            "{0x0000FF, \"blue\", 0, 0, 255}\n" +
-            "{0xFFFFFF, \"white\", 255, 255, 255}\n" +
-            "{unknown,  \"unknown\", 0, 0, 0};\n" +
-            "axiom shade (rgb) : parameter;\n" +
-            "query color_query (shade : swatch);\n";
-            ;
+/* color-swatch.xpl
+// Uninitialized variable matches to any value
+// Choice selects on hex color value to get color name and rgb values
+choice swatch 
+(rgb,      color,   red, green, blue)
+{0x00FFFF, "aqua",    0, 255, 255}
+{0x000000, "black",   0,   0,   0}
+{0x0000FF, "blue",    0,   0, 255}
+{0xFFFFFF, "white", 255, 255, 255}
+{unknown,  "unknown", 0,   0,   0};
+
+axiom shade (rgb) : parameter;
+list<term> color(swatch);
+
+query color_query (shade : swatch);
+
+*/
+
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public ColorSwatch()
+    {
+        File resourcePath = new File("src/main/resources/tutorial10");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
 
 	/**
 	 * Compiles the CHOICE_COLORS script and runs the "color_query" query, displaying the solution on the console.<br/>
 	 */
 	public String getColorSwatch(int hexColor)
 	{
-        QueryProgram queryProgram = new QueryProgram();
-        queryProgram.parseScript(CHOICE_COLORS);
+        QueryProgram queryProgram = queryProgramParser.loadScript("color-swatch.xpl");
+        parserContext = queryProgramParser.getContext();
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         Solution initialSolution = queryParams.getInitialSolution();
-        initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", Long.valueOf(hexColor)))); // aqua
-        final StringBuilder builder = new StringBuilder();
-        queryParams.setSolutionHandler(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                builder.append(solution.getAxiom("swatch").toString());
-                return true;
-            }});
-        queryProgram.executeQuery(queryParams);
-        return builder.toString();
+        initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", hexColor))); 
+        Result result = queryProgram.executeQuery(queryParams);
+        return result.getAxiom(QualifiedName.parseGlobalName("color")).toString();
 	}
 	
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * The expected result:<br/>
@@ -81,10 +98,10 @@ public class ColorSwatch
 	{
 		try 
 		{
-	        ColorSwatch ColorSwatch = new ColorSwatch();
-            System.out.println(ColorSwatch.getColorSwatch(0x00ffff).toString());
-            System.out.println(ColorSwatch.getColorSwatch(0x0000ff).toString());
-            System.out.println(ColorSwatch.getColorSwatch(0x77ffff).toString());
+	        ColorSwatch colorSwatch = new ColorSwatch();
+            System.out.println(colorSwatch.getColorSwatch(0x00ffff).toString());
+            System.out.println(colorSwatch.getColorSwatch(0x0000ff).toString());
+            System.out.println(colorSwatch.getColorSwatch(0x77ffff).toString());
 		} 
         catch (ExpressionException e) 
         { 

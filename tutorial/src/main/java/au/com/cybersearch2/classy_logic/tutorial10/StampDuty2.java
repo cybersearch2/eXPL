@@ -15,10 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial10;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -32,30 +35,14 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class StampDuty2 
 {
-	static final String STAMP_DUTY =
-            "axiom transacton_amount (amount)\n" +
-            "{123458.00}\n" +
-            "{55876.33}\n" +
-            "{1245890.00};\n" +
-            "calc stamp_duty_payable(\n" +
-            "  currency amount,\n" +
-            "  choice bracket\n"
-            +   "(amount,       threshold,  base,    percent)\n" +
-            "    {amount <  12000,      0,     0.00, 1.00}\n" +
-            "    {amount <  30000,  12000,   120.00, 2.00}\n" +
-            "    {amount <  50000,  30000,   480.00, 3.00}\n" +
-            "    {amount < 100000,  50000,  1080.00, 3.50}\n" +
-            "    {amount < 200000, 100000,  2830.00, 4.00}\n" +
-            "    {amount < 250000, 200000,  6830.00, 4.25}\n" +
-            "    {amount < 300000, 250000,  8955.00, 4.75}\n" +
-            "    {amount < 500000, 300000, 11330.00, 5.00}\n" +
-            "    {amount > 500000, 500000, 21330.00, 5.50},\n" +
-            "\n" +
-            "  currency duty = base + (amount - threshold) * (percent / 100),\n" +
-            "  string display = format(duty)\n" +
-            ");\n" +
-            "list payable(stamp_duty_payable);\n" +
-            "query stamp_duty_query (transacton_amount : stamp_duty_payable);\n";
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public StampDuty2()
+    {
+        File resourcePath = new File("src/main/resources/tutorial10");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
 
 	/**
 	 * Compiles the STAMP_DUTY script and runs the "stamp_duty_query" query. 
@@ -69,12 +56,17 @@ public class StampDuty2
 	 */
 	public Iterator<Axiom> getStampDuty()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(STAMP_DUTY);
+        QueryProgram queryProgram = queryProgramParser.loadScript("stamp-duty2.xpl");
+        parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("stamp_duty_query");
         return result.getIterator(QualifiedName.parseGlobalName("payable"));
 	}
 	
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * @param args

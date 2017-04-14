@@ -19,6 +19,7 @@ import java.util.Date;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Calculator;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -110,7 +111,30 @@ public class LoopEvaluator extends BooleanOperand
 	@Override
 	public String toString() 
 	{
-		return template.toString();
+	    StringBuilder builder = new StringBuilder(template.getName());
+	    int termCount = template.getTermCount();
+        if ( termCount > 0)
+        {
+            builder.append('(');
+            boolean firstTime = true;
+            for (int i = 0; i < termCount; ++i)
+            {
+                Term param = template.getTermByIndex(i);
+                if (firstTime)
+                {
+                    firstTime = false;
+                    builder.append(param.toString());
+                }
+                else if (i == termCount - 1)
+                {
+                    builder.append(" ... ").append(param.toString());
+                }
+            }
+            builder.append(')');
+        }
+        else
+            builder.append("()");
+        return builder.toString();
 	}
 
 	

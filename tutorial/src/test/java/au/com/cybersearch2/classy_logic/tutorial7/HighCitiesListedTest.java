@@ -68,12 +68,12 @@ public class HighCitiesListedTest
         assertThat(sourceItem.toString()).isEqualTo("list<axiom> city_list(high_city) (15,1) (15,25)");
     }
     
-    protected void checkSolution(BufferedReader reader, String shade)
+    protected void checkSolution(BufferedReader reader, String city)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(shade).isEqualTo(line);
+            assertThat(city).isEqualTo(line);
         }
         catch (IOException e)
         {

@@ -28,7 +28,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 5 Sep 2015
  */
-public class ChoiceOperand extends BooleanOperand
+public class ChoiceOperand extends IntegerOperand
 {
     protected Template template;
     protected Choice choice;
@@ -53,12 +53,12 @@ public class ChoiceOperand extends BooleanOperand
         this.id = id;
         Parameter param = null;
         if (choice.completeSolution(template, id))
-            param = new Parameter(Term.ANONYMOUS, Boolean.TRUE); // Value indicates successful completion
+            param = new Parameter(Term.ANONYMOUS, (long)choice.getSelection()); // Value indicates row index
         else
         {    
             // Only backup local changes
             template.backup(true);
-            param = new Parameter(Term.ANONYMOUS, Boolean.FALSE); // Value indicates no match
+            param = new Parameter(Term.ANONYMOUS, Choice.NO_MATCH); // Value indicates no match
         }
         param.setId(id);
         assign(param);

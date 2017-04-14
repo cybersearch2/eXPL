@@ -15,10 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -34,46 +37,57 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class HighCitiesSorted 
 {
-	static final String CITY_EVELATIONS =
-	    "axiom city (name, altitude)\n" + 
-        "    {\"bilene\", 1718}\n" +
-        "    {\"addis ababa\", 8000}\n" +
-        "    {\"denver\", 5280}\n" +
-        "    {\"flagstaff\", 6970}\n" +
-        "    {\"jacksonville\", 8}\n" +
-        "    {\"leadville\", 10200}\n" +
-        "    {\"madrid\", 1305}\n" +
-        "    {\"richmond\",19}\n" +
-        "    {\"spokane\", 1909}\n" +
-        "    {\"wichita\", 1305};\n" +
-        "// Solution is a list named 'high_cities'\n" +
-        "axiom high_cities = {};\n" +
-        "// Template to filter high cities\n" +
-        "template high_city(\n" +
-        "  altitude ? altitude > 5000,\n" +
-        "  high_cities += axiom { name, altitude }\n" +
-        ");\n" +
-        "// Calculator to perform insert sort on high_cities\n" +
-        "calc insert_sort (\n" +
-        "// i is index to last item appended to the list\n" +
-        "integer i = length(high_cities) - 1,\n" +
-        "// Skip first time when only one item in list\n" +
-        ": i < 1,\n" +
-        "// j is the swap index\n" + 
-        "integer j = i - 1,\n" +
-        "// Get last altitude for sort comparison\n" + 
-        "integer altitude = high_cities[i][altitude],\n" +
-        "// Save axiom to swap\n" +
-        "temp = high_cities[i],\n" +
-        "// Shuffle list until sort order restored\n" + 
-        "{\n" +
-        "  ? altitude < high_cities[j][altitude],\n" +
-        "  high_cities[j + 1] = high_cities[j],\n" +
-        "  ? --j >= 0\n" +
-        "},\n" +
-        "// Insert saved axiom in correct position\n" +
-        "high_cities[j + 1] = temp);\n" +
-	    "query high_cities (city : high_city) >> (insert_sort);\n"; 
+/* high-cities-sorted.xpl
+ * axiom city (name, altitude)
+    {"bilene", 1718}
+    {"addis ababa", 8000}
+    {"denver", 5280}
+    {"flagstaff", 6970}
+    {"jacksonville", 8}
+    {"leadville", 10200}
+    {"madrid", 1305}
+    {"richmond",19}
+    {"spokane", 1909}
+    {"wichita", 1305};
+// Solution is a list named 'high_cities'
+axiom high_cities = {};
+// Template to filter high cities
+template high_city(
+  altitude ? altitude > 5000,
+  high_cities += axiom { name, altitude }
+);
+// Calculator to perform insert sort on high_cities
+calc insert_sort (
+// i is index to last item appended to the list
+integer i = length(high_cities) - 1,
+// Skip first time when only one item in list
+: i < 1,
+// j is the swap index
+integer j = i - 1,
+// Get last altitude for sort comparison
+integer altitude = high_cities[i][altitude],
+// Save axiom to swap
+temp = high_cities[i],
+// Shuffle list until sort order restored
+{
+  ? altitude < high_cities[j][altitude],
+  high_cities[j + 1] = high_cities[j],
+  ? --j >= 0
+},
+// Insert saved axiom in correct position
+high_cities[j + 1] = temp);
+query high_cities (city : high_city) >> (insert_sort); 
+
+*/
+
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public HighCitiesSorted()
+    {
+        File resourcePath = new File("src/main/resources/tutorial9");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
 
 	/**
 	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
@@ -83,22 +97,27 @@ public class HighCitiesSorted
 	 * high_city(name = addis ababa, altitude = 8000)<br/>
 	 * high_city(name = leadville, altitude = 10200)<br/>
 	 */
-	public void displayHighCities()
+	public Iterator<Axiom> displayHighCities()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(CITY_EVELATIONS);
+        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-sorted.xpl");
+        parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("high_cities");
-		Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("high_cities"));
-        while(iterator.hasNext())
-		    System.out.println(iterator.next().toString());
+		return result.getIterator(QualifiedName.parseGlobalName("high_cities"));
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	public static void main(String[] args)
 	{
 		HighCitiesSorted highCities = new HighCitiesSorted();
 		try 
 		{
-			highCities.displayHighCities();
+	        Iterator<Axiom> iterator = highCities.displayHighCities();
+	        while(iterator.hasNext())
+	            System.out.println(iterator.next().toString());
 		} 
 		catch (ExpressionException e) 
 		{

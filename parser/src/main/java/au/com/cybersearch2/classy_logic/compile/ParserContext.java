@@ -29,6 +29,7 @@ import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
+import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.Token;
 
 /**
@@ -52,6 +53,8 @@ public class ParserContext
     List<String> sourceDocumentList;
     /** Index of current source document in list */
     int sourceDocumentId;
+    /** Stack to nest calls */
+    Deque<SourceMarker> markerStack;
     /** Stack to retain nested source documents */
     Deque<Integer> documentStack;
     /** Set of source markers collated by qualified name */
@@ -62,16 +65,26 @@ public class ParserContext
     Token itemToken;
     /** Store for qualified names which employ reference counting eg. lists */
     Map<QualifiedName, QualifiedName> qnameMap; 
-    
+
+    /**
+     * Contruct ParserContext with empty source document path
+     * @param queryProgram Main query object
+     */
     public ParserContext(QueryProgram queryProgram)
     {
         this.queryProgram = queryProgram;
         sourceMarkerSet = new TreeSet<SourceMarker>();
+        markerStack = new ArrayDeque<SourceMarker>();
         documentStack = new ArrayDeque<Integer>();
         qnameMap = new HashMap<QualifiedName, QualifiedName>();
         resetScope();
     }
 
+    /**
+     * Contruct ParserContext
+     * @param queryProgram Main query object
+     * @param sourceDocument Source document path
+     */
     public ParserContext(QueryProgram queryProgram, String sourceDocument)
     {
         this(queryProgram);
@@ -80,6 +93,10 @@ public class ParserContext
         documentStack.push(0);
     }
 
+    /**
+     * Set current scope - call {@link #resetScope()}resetScope on exit from this scope
+     * @param scope
+     */
     public void setScope(Scope scope)
     {
         this.scope = scope;
@@ -87,11 +104,18 @@ public class ParserContext
         operandMap = parserAssembler.getOperandMap();
     }
 
+    /**
+     * Switch to global scope
+     */
     public void resetScope()
     {
         setScope(queryProgram.getGlobalScope());
     }
 
+    /**
+     * Returns current scope
+     * @return Scope object
+     */
     public Scope getScope()
     {
         return scope;
@@ -106,35 +130,65 @@ public class ParserContext
     }
 
     /**
-     * Set current source marker, set it's source document id and add to marker set
-     * @param sourceMarker the sourceMarker to set
+     * Create source marker for item identified by name
+     * @param token Parser token for start of construct
+     * @param name Identifier in text format
      */
-    private void setSourceMarker(SourceMarker sourceMarker)
-    {
-        this.sourceMarker = sourceMarker;
-        sourceMarker.setSourceDocumentId(sourceDocumentId);
-        sourceMarkerSet.add(sourceMarker);
-        isSourceItemPending = true;
-    }
-
     public void setSourceMarker(Token token, String name)
     {
         SourceMarker sourceMarker = new SourceMarker(token);
+        // Convert name to qualified name using current context
         sourceMarker.setQualifiedName(QualifiedName.parseName(name, getContextName()));
         setSourceMarker(sourceMarker);
         // Innitialize item token for cane of single item starting at source marker
         itemToken = token;
     }
     
+    /**
+     * Create source marker for item identified by qualified name
+     * @param token Parser token for start of construct
+     * @param name Identifier as qualified name
+     */
     public void setSourceMarker(Token token, QualifiedName qname)
     {
         SourceMarker sourceMarker = new SourceMarker(token);
         sourceMarker.setQualifiedName(qname);
         setSourceMarker(sourceMarker);
-        // Innitialize item token for cane of single item starting at source marker
+        // Innitialize item token for case of single item starting at source marker
         itemToken = token;
     }
 
+    /**
+     * Push current source marker on a stack
+     */
+    public void pushSourceMarker()
+    {
+        markerStack.push(sourceMarker);
+    }
+
+    /**
+     * Pop source marker off stack
+     */
+    public void popSourceMarker()
+    {
+        sourceMarker = markerStack.pop();
+    }
+
+    /**
+     * Checks that current source marker has at least one item with a short circuit.
+     * @throws ParseException 
+     */
+    public void checkForShortCircuit() throws ParseException
+    {
+        SourceItem sourceItem = sourceMarker.getHeadSourceItem();
+        while (sourceItem != null)
+        {
+            if (sourceItem.getInformation().startsWith("?") || sourceItem.getInformation().startsWith(":"))
+                return;
+            sourceItem = sourceItem.getNext();
+        }
+        throw new ParseException(sourceMarker.getLiteral().toString() + " " + sourceMarker.getQualifiedName().toString() + " has loop with no short circuit");
+    }
     /**
      * Possible source item start token encountered
      * @param token Parser token
@@ -147,7 +201,6 @@ public class ParserContext
             isSourceItemPending = false;
         }
     }
-
 
     /**
      * Add SourceItem object for SourceInfo interface to current source marker 
@@ -237,6 +290,10 @@ public class ParserContext
         return operandMap;
     }
 
+    /**
+     * Returns qualified name of current context
+     * @return QualifiedName object
+     */
     public QualifiedName getContextName()
     {
         return operandMap.getQualifiedContextname();
@@ -296,6 +353,14 @@ public class ParserContext
     }
 
     /**
+     * @return the isSourceItemPending
+     */
+    public boolean isSourceItemPending()
+    {
+        return isSourceItemPending;
+    }
+
+    /**
      * @return the itemToken
      */
     public Token getItemToken()
@@ -303,6 +368,11 @@ public class ParserContext
         return itemToken;
     }
 
+    /**
+     * Returns qualified name stored in context for given identifier
+     * @param name Identifier in text format
+     * @return QualifiedName object
+     */
     public QualifiedName getQualifiedName(String name)  
     {
         QualifiedName qname = QualifiedName.parseName(name);
@@ -310,6 +380,41 @@ public class ParserContext
             return (qnameMap.get(qname));
         qnameMap.put(qname, qname);
         return qname;
+    }
+
+    /**
+     * Add choice declaration source item, which includes term names
+     * @param qualifiedAxionName Qualified axiom name of choice
+     * @return SourceItem object added to current source marker
+     */
+    public SourceItem addChoiceItem(QualifiedName qualifiedAxionName)
+    {
+        StringBuilder builder = new StringBuilder("choice ");
+        builder.append(qualifiedAxionName).append('(');
+        List<String> termNames = parserAssembler.getAxiomTermNameList(qualifiedAxionName);
+        boolean firstTime = true;
+        for (String termname: termNames)
+        {
+            if (firstTime)
+                firstTime = false;
+            else
+                builder.append(',');
+            builder.append(termname);
+        }
+        builder.append(')');
+        return addSourceItem(builder.toString());
+    }
+    
+    /**
+     * Set current source marker, set it's source document id and add to marker set
+     * @param sourceMarker the sourceMarker to set
+     */
+    protected void setSourceMarker(SourceMarker sourceMarker)
+    {
+        this.sourceMarker = sourceMarker;
+        sourceMarker.setSourceDocumentId(sourceDocumentId);
+        sourceMarkerSet.add(sourceMarker);
+        isSourceItemPending = true;
     }
 
 }

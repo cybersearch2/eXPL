@@ -21,6 +21,7 @@ import java.util.List;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -35,7 +36,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  * @author Andrew Bowley
  * 19 Jan 2015
  */
-public class AxiomTermList implements ItemList<Object> 
+public class AxiomTermList implements ItemList<Object>, AxiomContainer 
 {
 	/** Qualified name of list */
 	protected QualifiedName qname;
@@ -83,6 +84,7 @@ public class AxiomTermList implements ItemList<Object>
 	 * Returns Axiom key
 	 * @return String
 	 */
+    @Override
 	public QualifiedName getKey()
 	{
 		return key;
@@ -100,6 +102,7 @@ public class AxiomTermList implements ItemList<Object>
 	/**
 	 * @return the axiomTermNameList
 	 */
+    @Override
 	public List<String> getAxiomTermNameList() 
 	{
 		return axiomTermNameList;
@@ -108,6 +111,7 @@ public class AxiomTermList implements ItemList<Object>
 	/**
 	 * @param axiomTermNameList the axiomTermNameList to set
 	 */
+    @Override
 	public void setAxiomTermNameList(List<String> axiomTermNameList) 
 	{
 		this.axiomTermNameList = axiomTermNameList;
@@ -117,6 +121,7 @@ public class AxiomTermList implements ItemList<Object>
 	 * Returns axiom listener
 	 * @return AxiomListener object
 	 */
+    @Override
 	public AxiomListener getAxiomListener()
 	{
 		return axiomListener;
@@ -325,7 +330,11 @@ public class AxiomTermList implements ItemList<Object>
     @Override
     public String toString() 
     {
-        return "list<term> " + (axiom.equals(EMPTY_AXIOM) ? (key.toString() + "()") : axiom.toString());
+        StringBuilder builder = new StringBuilder("list<term> ");
+        builder.append(qname.toString()).append('(').append(key.toString()).append(')');
+        if (!axiom.equals(EMPTY_AXIOM))
+            builder.append(" = ").append(axiom.toString());
+        return builder.toString();
     }
 
 }

@@ -188,6 +188,14 @@ public class QueryParser
          return context.addSourceItem(var);
      }
   }
+  
+  protected QualifiedName createInnerTemplateName(QualifiedName outerTemplateName)
+  {
+  	return new QualifiedTemplateName(
+  	    outerTemplateName.getScope(), 
+  	    outerTemplateName.getTemplate() + 
+  	    Integer.toString(outerTemplateName.incrementReferenceCount() + 1));
+  }
 }
 PARSER_END(QueryParser)
 
@@ -478,6 +486,7 @@ KeyName KeyName(QuerySpec querySpec, ParserContext context) :
 void Statement(ParserContext context):
 {
   Operand var;
+  context.setSourceItemPending(false);
 }
 {
     VariableInitialization(context) 
@@ -502,6 +511,7 @@ void AxiomDeclaration(ParserContext context) :
   axiomToken=<AXIOM> qualifiedAxiomName=Axiom(context) 
   {
     context.setSourceMarker(axiomToken, qualifiedAxiomName);
+    context.setSourceItemPending(false);
   }
   ( 
     axiomSpec = AxiomSpecification(qualifiedAxiomName, context) 
@@ -580,7 +590,7 @@ String AxiomSpecification(QualifiedName qualifiedAxiomName, ParserContext contex
     |
     ( 
       <LBRACE> 
-      AxiomItem(qualifiedAxiomName, parserAssembler)
+      AxiomItem(qualifiedAxiomName, context)
       {
         ++index;
       }
@@ -625,35 +635,39 @@ QualifiedName ResourceBinding(int kind, QualifiedName qualifiedAxiomName, Parser
   }
 }
 
-void AxiomItem(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
+void AxiomItem(QualifiedName qualifiedAxiomName, ParserContext context) :
 {
 }
 {
-  Fact(qualifiedAxiomName, parserAssembler) ("," Fact(qualifiedAxiomName, parserAssembler) )*  
+  Fact(qualifiedAxiomName, context) ("," Fact(qualifiedAxiomName, context) )*  
   {
-    parserAssembler.saveAxiom(qualifiedAxiomName);
+    context.getParserAssembler().saveAxiom(qualifiedAxiomName);
   }
 }
 
-void Fact(QualifiedName qualifiedAxiomName, ParserAssembler parserAssembler) :
+String Fact(QualifiedName qualifiedAxiomName, ParserContext context) :
 {
   Parameter param = null;
   Token lit = null;
+  ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
-  param=LiteralTerm()
+  param=LiteralTerm(context)
   {
     parserAssembler.addAxiom(qualifiedAxiomName, param);
+    return param.getValue().toString();
   }
   |
   lit=<NUMBER_LITERAL>
   {
     parserAssembler.addAxiom(qualifiedAxiomName, new NumberTerm(getText(lit), parserAssembler.getScopeLocale()));
+    return getText(lit);
   }
   |
   <NAN>
   {
     parserAssembler.addAxiom(qualifiedAxiomName, new DoubleTerm("NaN"));
+    return "NaN";
   }
 }
 
@@ -781,7 +795,6 @@ void CalculatorTemplate(ParserContext context) :
   Operand operand;
   SourceItem sourceItem;
   Map<String, Object> properties = new HashMap<String, Object>();
-  int loopNumber = 0;
   ParserAssembler parserAssembler = context.getParserAssembler();
   QualifiedName contextName = context.getContextName();
 }
@@ -791,7 +804,7 @@ void CalculatorTemplate(ParserContext context) :
     context.setSourceMarker(calcToken, template.getQualifiedName());
   }
   (  
-    ( operand = CalculatorExpression(loopNumber, template, template.getName(), context) |
+    ( operand = CalculatorExpression(template, template.getQualifiedName(), context) |
       operand = CalculatorQuery(template, context))
     )
     {
@@ -803,7 +816,7 @@ void CalculatorTemplate(ParserContext context) :
        sourceItem.setEnd(delimitToken);
      }
       (  
-        ( operand = CalculatorExpression(loopNumber, template, template.getName(), context) |
+        ( operand = CalculatorExpression(template, template.getQualifiedName(), context) |
           operand = CalculatorQuery(template, context))
       )
       {
@@ -888,7 +901,7 @@ Operand TemplateExpression(Template template, ParserContext context) :
     |
         interceptToken=<REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(template, name, parserAssembler) )? ")"
     |
-        interceptToken=<LBRACE> literalList = LiteralList() <RBRACE> 
+        interceptToken=<LBRACE> literalList = LiteralList(context) <RBRACE> 
     |
      "(" ( operandParamList = ArgumentList(context, true) )? ")"
 	{
@@ -933,10 +946,11 @@ Operand TemplateExpression(Template template, ParserContext context) :
   }
 }
 
-Operand CalculatorExpression(int loop_number, Template template, String templateName, ParserContext context) :
+Operand CalculatorExpression(Template template, QualifiedName outerTemplateName, ParserContext context) :
 {
-  Token axiomToken;
+  Token literalToken;
   Token delimitToken;
+  Token choiceToken;
   Token scToken = null;
   Token privateToken = null;
   Operand expression = null;
@@ -954,10 +968,18 @@ Operand CalculatorExpression(int loop_number, Template template, String template
     ( 
       delimitToken="{"
       {
+        QualifiedName innerTemplateName = createInnerTemplateName(outerTemplateName);
+        Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, innerTemplateName);
         context.addSourceItem(scToken.image+expression.toString()).setEnd(delimitToken);
+        context.pushSourceMarker();
+        Token token = Token.newToken(QueryParserConstants.CALC);
+        token.beginLine = delimitToken.beginLine;
+        token.beginColumn = delimitToken.beginColumn;
+        context.setSourceMarker(token, innerTemplateName);
       }
-      innerLoop=InnerCalculator(loop_number + 1, templateName, context, true) 
+      innerLoop=InnerCalculator(innerTemplate, outerTemplateName, context, true) 
       {
+      context.popSourceMarker();
       context.onTokenIntercept(delimitToken);
       }
      )?  
@@ -979,7 +1001,21 @@ Operand CalculatorExpression(int loop_number, Template template, String template
   |
   (
     delimitToken="{"
-    innerLoop=InnerCalculator(loop_number + 1, templateName, context, false)
+    {
+      context.pushSourceMarker();
+      QualifiedName innerTemplateName = createInnerTemplateName(outerTemplateName);
+      Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, innerTemplateName);
+      Token token = Token.newToken(QueryParserConstants.CALC);
+      token.beginLine = delimitToken.beginLine;
+      token.beginColumn = delimitToken.beginColumn;
+      context.setSourceMarker(token, innerTemplateName);
+    }
+    innerLoop=InnerCalculator(innerTemplate, outerTemplateName, context, false)
+    {
+      context.checkForShortCircuit();
+      context.popSourceMarker();
+      context.onTokenIntercept(delimitToken);
+    }
   )
   {
     template.addTerm(innerLoop);
@@ -987,23 +1023,28 @@ Operand CalculatorExpression(int loop_number, Template template, String template
     return innerLoop;
   }
   |
-  axiomToken=<AXIOM> qualifiedAxiomName=Axiom(context) expression = AxiomVariable(qualifiedAxiomName, context) 
+  literalToken=<AXIOM> qualifiedAxiomName=Axiom(context) expression = AxiomVariable(qualifiedAxiomName, context) 
   {
     parserAssembler.getOperandMap().addOperand(expression);
     template.addTerm(expression);
-    context.onTokenIntercept(axiomToken);
+    context.onTokenIntercept(literalToken);
     return expression;
   }
   |
-  qualifiedAxiomName = ChoiceDeclaration(context)
+  literalToken=<CHOICE> choiceToken=<IDENTIFIER>
   {
+    qualifiedAxiomName = QualifiedName.parseName(choiceToken.image);
     qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
     Template choiceTemplate = parserAssembler.getTemplate(qualifiedTemplateName);
+    OperandMap operandMap = parserAssembler.getOperandMap();
+    for (String termName: parserAssembler.getAxiomTermNameList(qualifiedAxiomName))
+      operandMap.addOperand(termName, null);
     QualifiedName contextName = context.getContextName();
     QualifiedName qname = QualifiedName.parseName(choiceTemplate.getName(), contextName); 
  	Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     template.addTerm(choiceOperand);
+    context.onTokenIntercept(literalToken);
     return choiceOperand;
   }
 }
@@ -1069,6 +1110,66 @@ Template InnerTemplate(QualifiedName ownerQualifiedName, ParserContext context) 
   }
 }
 
+Operand InnerCalculator(Template template, QualifiedName outerTemplateName, ParserContext context, boolean runOnce) :
+{
+
+  Operand expression;
+  SourceItem sourceItem;
+  Token delimitToken;
+  context.setSourceItemPending(true);
+}
+{
+  expression=CalculatorExpression(template, outerTemplateName, context)
+  {
+     sourceItem=addSourceVariable(expression, context);
+  }
+  (
+    delimitToken="," 
+    {
+      sourceItem.setEnd(delimitToken);
+    }
+    expression=CalculatorExpression(template, outerTemplateName, context)
+    {
+      sourceItem=addSourceVariable(expression, context);
+    }
+  )* 
+  delimitToken="}"
+  {
+    LoopEvaluator loopEvaluator = new LoopEvaluator(template, runOnce);
+    sourceItem.setEnd(delimitToken);
+    return loopEvaluator;
+  }
+}
+
+QualifiedName ChoiceDeclaration(ParserContext context) :
+{
+    Token choiceToken;
+    Token delimitToken;
+    QualifiedName qualifiedAxiomName;
+    int selection = 0;
+    boolean isSourceItemPending = context.isSourceItemPending();
+    ParserAssembler parserAssembler = context.getParserAssembler();
+    OperandMap operandMap = parserAssembler.getOperandMap();
+}
+{
+  choiceToken=<CHOICE> qualifiedAxiomName=Choice(parserAssembler) 
+  {
+    if (!isSourceItemPending)
+      context.setSourceMarker(choiceToken, qualifiedAxiomName);
+  }
+  "(" 
+    TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )*  
+  delimitToken=")" 
+  {
+    context.addChoiceItem(qualifiedAxiomName).setEnd(delimitToken); 
+  }
+  ( ChoiceItem(selection, qualifiedAxiomName, context) )+ 
+  {
+      QualifiedName contextName = context.getContextName();
+      return qualifiedAxiomName;
+  }
+} 
+
 QualifiedName Choice(ParserAssembler parserAssembler) :
 {
     Token choiceToken;
@@ -1085,6 +1186,36 @@ QualifiedName Choice(ParserAssembler parserAssembler) :
   }
 }
  
+void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserContext context) :
+{
+    Operand operand;
+    String fact;
+    Token delimToken;
+    ParserAssembler parserAssembler = context.getParserAssembler();
+    String name = parserAssembler.getAxiomTermName(qualifiedAxiomName, 0);
+    parserAssembler.addAxiom(qualifiedAxiomName, new Parameter(Term.ANONYMOUS, new Null()));
+    StringBuilder builder = new StringBuilder();
+}
+{
+   <LBRACE> operand=ChoiceExpression(name, context)
+   {
+     builder.append('{').append(operand.toString());
+   }
+    ( "," 
+      fact=Fact(qualifiedAxiomName, context) 
+      {
+        builder.append(',').append(fact);
+      }
+    )* delimToken=<RBRACE> 
+    {
+       parserAssembler.saveAxiom(qualifiedAxiomName);
+       QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName());
+       parserAssembler.addTemplate(qualifiedTemplateName, operand);
+       builder.append('}');
+       context.addSourceItem(builder.toString()).setEnd(delimToken);
+    }
+}
+
 Operand ChoiceExpression(String name, ParserContext context) :
 {
     Operand operand;
@@ -1101,77 +1232,6 @@ Operand ChoiceExpression(String name, ParserContext context) :
     }
 }
 
-Operand InnerCalculator(int loop_number, String templateName, ParserContext context, boolean runOnce) :
-{
-
-  Operand expression;
-  SourceItem sourceItem;
-  Token delimitToken;
-  String loopName = templateName + loop_number;
-  QualifiedName qualifiedTemplateName = new QualifiedTemplateName(context.getScope().getAlias(), templateName);
-  Template template = context.getParserAssembler().chainTemplate(qualifiedTemplateName, loopName);
-  context.setSourceItemPending(true);
-}
-{
-  expression=CalculatorExpression(loop_number, template, templateName, context)
-  {
-     sourceItem=context.addSourceItem(expression);
-  }
-  (
-    delimitToken="," 
-    {
-      sourceItem.setEnd(delimitToken);
-    }
-    expression=CalculatorExpression(loop_number, template, templateName, context)
-    {
-      sourceItem=context.addSourceItem(expression);
-    }
-  )* 
-  delimitToken="}"
-  {
-    LoopEvaluator loopEvaluator = new LoopEvaluator(template, runOnce);
-    sourceItem.setEnd(delimitToken);
-    return loopEvaluator;
-  }
-}
-
-QualifiedName ChoiceDeclaration(ParserContext context) :
-{
-    QualifiedName qualifiedAxiomName;
-    int selection = 0;
-    ParserAssembler parserAssembler = context.getParserAssembler();
-    OperandMap operandMap = parserAssembler.getOperandMap();
-}
-{
-  <CHOICE> qualifiedAxiomName=Choice(parserAssembler) "(" TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )*  ")" 
-                                                        ( ChoiceItem(selection, qualifiedAxiomName, context) )+ 
-  {
-      QualifiedName contextName = context.getContextName();
-      if (contextName.getTemplate().isEmpty())
-          return qualifiedAxiomName;
-      List<String> termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
-      for (String termName: termNameList)
-          operandMap.addOperand(termName, null);
-      context.setContextName(contextName);
-      return qualifiedAxiomName;
-  }
-} 
-
-void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserContext context) :
-{
-    Operand operand;
-    ParserAssembler parserAssembler = context.getParserAssembler();
-    String name = parserAssembler.getAxiomTermName(qualifiedAxiomName, 0);
-    parserAssembler.addAxiom(qualifiedAxiomName, new Parameter(Term.ANONYMOUS, new Null()));
-}
-{
-   <LBRACE> operand=ChoiceExpression(name, context) ("," Fact(qualifiedAxiomName, parserAssembler) )* <RBRACE> 
-    {
-       parserAssembler.saveAxiom(qualifiedAxiomName);
-       QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName());
-       parserAssembler.addTemplate(qualifiedTemplateName, operand);
-    }
-}
 
 void InitialiserList(Map<String, Object> properties, ParserContext context) :
 {
@@ -1207,7 +1267,7 @@ String InitialiserDeclaration(Map<String, Object> properties, ParserContext cont
   Parameter param;
 }
 {
-  name=Name(context) "=" param=LiteralTerm()
+  name=Name(context) "=" param=LiteralTerm(context)
   {
      properties.put(name, param.getValue());
      return name + "=" + param.getValue().toString();
@@ -1239,19 +1299,19 @@ void Group(Group group, Template template, String name, ParserAssembler parserAs
   }
 }
 
-List<Parameter> LiteralList() :
+List<Parameter> LiteralList(ParserContext context) :
 {
   List<Parameter>  literalList = new ArrayList<Parameter>();
   Parameter parameter;
 }
 {
-  parameter=LiteralTerm()
+  parameter=LiteralTerm(context)
   {
     literalList.add(parameter);
   }
   ( 
     "," 
-    parameter = LiteralTerm() 
+    parameter = LiteralTerm(context) 
     {
       literalList.add(parameter);
     }
@@ -1396,7 +1456,7 @@ Operand PrimaryExpression(ParserContext context) :
   OperandMap operandMap = parserAssembler.getOperandMap();
 }
 {
-  param1=Literal()
+  param1=Literal(context)
   {
     return param1;
   }
@@ -1406,6 +1466,7 @@ Operand PrimaryExpression(ParserContext context) :
     NumberTerm numberTerm = new NumberTerm(getText(literal), parserAssembler.getScopeLocale());
     Variable var = new Variable(QualifiedName.ANONYMOUS);
     var.assign(numberTerm);
+    context.onTokenIntercept(literal);
     return var;
   }
   |
@@ -1416,9 +1477,11 @@ Operand PrimaryExpression(ParserContext context) :
     return param1;
   }
   |
-  <SCOPE> param1=IndexExpression(context)
+  literal=<SCOPE> param1=IndexExpression(context)
   {
-    return listItemOperand(context.getQualifiedName("scope"), parserAssembler, param1, null);
+    operand = listItemOperand(context.getQualifiedName("scope"), parserAssembler, param1, null);
+    context.onTokenIntercept(literal);
+    return operand;
   }
   |
   "(" ( param1 = Expression(context) ) ")" 
@@ -1426,17 +1489,18 @@ Operand PrimaryExpression(ParserContext context) :
     return param1;
   }
   |
-  <LENGTH> "("  name=Name(context) ")"
+  literal=<LENGTH> "("  name=Name(context) ")"
   {
     qname = parserAssembler.getContextName(name);
     operand = parserAssembler.findOperandByName(name);
+    context.onTokenIntercept(literal);
     if (operand != null)
         return new ListLength(qname, operand);
     else 
         return new ListLength(qname, parserAssembler.getItemList(name));
   }
   |
-  <FORMAT> "("  name=Name(context) ")"
+  literal=<FORMAT> "("  name=Name(context) ")"
   {
     qname = parserAssembler.getContextName(name + "_format");
     operand = parserAssembler.findOperandByName(name);
@@ -1446,12 +1510,14 @@ Operand PrimaryExpression(ParserContext context) :
     FormatterOperand formatter = new FormatterOperand(qname, operand, parserAssembler.getScopeLocale());
     if (scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
         parserAssembler.registerLocaleListener(formatter);
+    context.onTokenIntercept(literal);
     return formatter;
   }
   |
-  <FACT> "("  name=Name(context) ")"
+  literal=<FACT> "("  name=Name(context) ")"
   {
     Operand factOperand = parserAssembler.findOperandByName(name);
+    context.onTokenIntercept(literal);
     if (factOperand != null)
         return new FactOperand(factOperand);
     else 
@@ -1524,34 +1590,41 @@ Operand IndexExpression(ParserContext context) :
   }
 }
 
-Operand Literal() :
+Operand Literal(ParserContext context) :
 {
   Token lit;
+  Operand operand;
   boolean flag;
 }
 {
   lit=<INTEGER_LITERAL>
   {
     Long litValue = Long.decode(lit.image);
-    return new IntegerOperand(QualifiedName.ANONYMOUS, litValue);
+    operand = new IntegerOperand(QualifiedName.ANONYMOUS, litValue);
+    context.onTokenIntercept(lit);
+    return operand;
   }
   |
   lit=<FLOATING_POINT_LITERAL>
   {
-    return new DoubleOperand(QualifiedName.ANONYMOUS, Double.valueOf(lit.image));
+    operand = new DoubleOperand(QualifiedName.ANONYMOUS, Double.valueOf(lit.image));
+    context.onTokenIntercept(lit);
+    return operand;
   }
   |
   lit=<STRING_LITERAL>
   {
-    return new StringOperand(QualifiedName.ANONYMOUS, getText(lit));
+    operand = new StringOperand(QualifiedName.ANONYMOUS, getText(lit));
+    context.onTokenIntercept(lit);
+    return operand;
   }
   |
-  flag=BooleanLiteral()
+  flag=BooleanLiteral(context)
   {
     return new BooleanOperand(QualifiedName.ANONYMOUS, flag);
   }
   |
-  UnknownLiteral()
+  UnknownLiteral(context)
   {
     return new NullOperand(QualifiedName.ANONYMOUS, new Unknown());
   }
@@ -1680,56 +1753,72 @@ Operand NamedExpression(String name, ParserContext context) :
   }
 }
 
-Parameter LiteralTerm() :
+Parameter LiteralTerm(ParserContext context) :
 {
   Token lit;
+  Parameter param;
   boolean flag;
 }
 {
   lit=<INTEGER_LITERAL>
   {
-    return new IntegerTerm(lit.image);
+    param = new IntegerTerm(lit.image);
+    context.onTokenIntercept(lit);
+    return param;
   }
   |
   lit=<FLOATING_POINT_LITERAL>
   {
-    return new DoubleTerm(lit.image);
+    param = new DoubleTerm(lit.image);
+    context.onTokenIntercept(lit);
+    return param;
   }
   |
   lit=<STRING_LITERAL>
   {
-    return new StringTerm(getText(lit));
+    param = new StringTerm(getText(lit));
+    context.onTokenIntercept(lit);
+    return param;
   }
   |
-  flag=BooleanLiteral()
+  flag=BooleanLiteral(context)
   {
     return new BooleanTerm(flag);
   }
   |
-  UnknownLiteral()
+  UnknownLiteral(context)
   {
     return new Parameter(Term.ANONYMOUS, new Unknown());
   }
 }
 
-boolean BooleanLiteral() :
-{}
+boolean BooleanLiteral(ParserContext context) :
 {
-  <TRUE> 
+  Token lit;
+}
+{
+  lit=<TRUE> 
   { 
+    context.onTokenIntercept(lit);
     return true; 
   }
   |
-  <FALSE> 
+  lit=<FALSE> 
   { 
+    context.onTokenIntercept(lit);
     return false; 
   }
 }
 
-void UnknownLiteral() :
-{}
+void UnknownLiteral(ParserContext context) :
 {
-  <UNKNOWN>
+  Token lit;
+}
+{
+  lit=<UNKNOWN>
+  {
+    context.onTokenIntercept(lit);
+  }
 }
 
 Operand ConditionalOrExpression(ParserContext context) :

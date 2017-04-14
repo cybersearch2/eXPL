@@ -15,10 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial10;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -31,31 +34,42 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class AgeDiscrimination
 {
-    static final String PERSON_RATING = 
-            "axiom person (name, sex, age, starsign)\n" +
-            "             {\"John\", \"m\", 23, \"gemini\"}\n" + 
-            "             {\"Sue\", \"f\", 19, \"cancer\"}\n" + 
-            "             {\"Sam\", \"m\", 34, \"scorpio\"}\n" + 
-            "             {\"Jenny\", \"f\", 28, \"gemini\"}\n" + 
-            "             {\"Andrew\", \"m\", 26, \"virgo\"}\n" + 
-            "             {\"Alice\", \"f\", 20, \"pices\"}\n" + 
-            "             {\"Ingrid\", \"f\", 23, \"cancer\"}\n" + 
-            "             {\"Jack\", \"m\", 32, \"pices\"}\n" + 
-            "             {\"Sonia\", \"f\", 33, \"gemini\"}\n" + 
-            "             {\"Alex\", \"m\", 22, \"aquarius\"}\n" + 
-            "             {\"Jill\", \"f\", 33, \"cancer\"}\n" + 
-            "             {\"Fiona\", \"f\", 29, \"gemini\"}\n" + 
-            "             {\"melissa\", \"f\", 30, \"virgo\"}\n" + 
-            "             {\"Tom\", \"m\", 22, \"cancer\"}\n" + 
-            "             {\"Bill\", \"m\", 19, \"virgo\"};\n" + 
-            "choice age_rating\n" +
-            "  (age     , age_weight, name)\n" +
-            "  {age > 29, 0.3}\n" +
-            "  {age > 25, 0.6}\n" +
-            "  {age > 20, 1.0};\n" +
-            "list rated(age_rating);\n" +
-            "query rate_age (person : age_rating);";
+ /* age-discrimination.xpl
+ axiom person (name, sex, age, starsign)
+              {"John", "m", 23, "gemini"} 
+              {"Sue", "f", 19, "cancer"} 
+              {"Sam", "m", 34, "scorpio"} 
+              {"Jenny", "f", 28, "gemini"} 
+              {"Andrew", "m", 26, "virgo"} 
+              {"Alice", "f", 20, "pices"} 
+              {"Ingrid", "f", 23, "cancer"} 
+              {"Jack", "m", 32, "pices"} 
+              {"Sonia", "f", 33, "gemini"} 
+              {"Alex", "m", 22, "aquarius"} 
+              {"Jill", "f", 33, "cancer"} 
+              {"Fiona", "f", 29, "gemini"} 
+              {"melissa", "f", 30, "virgo"} 
+              {"Tom", "m", 22, "cancer"} 
+              {"Bill", "m", 19, "virgo"}; 
+ choice age_rating
+   (age     , age_weight, name)
+   {age > 29, 0.3}
+   {age > 25, 0.6}
+   {age > 20, 1.0};
+ list rated(age_rating);
+ query rate_age (person : age_rating);
+ 
+ */
             
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public AgeDiscrimination()
+    {
+        File resourcePath = new File("src/main/resources/tutorial10");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+
     /**
      * Compiles the PERSON_RATING script and runs the "rate_age" query which gives each person 
      * over the age of 20 an age rating and excludes those aged 20 and under.<br/>
@@ -67,12 +81,17 @@ public class AgeDiscrimination
      */
     public Iterator<Axiom> getAgeRating()
     {
-        QueryProgram queryProgram = new QueryProgram();
-        queryProgram.parseScript(PERSON_RATING);
+        QueryProgram queryProgram = queryProgramParser.loadScript("age-discrimination.xpl");
+        parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("rate_age");
         return result.getIterator(QualifiedName.parseGlobalName("rated"));
     }
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * @param args

@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -541,13 +542,14 @@ public class ParserAssembler implements LocaleListener
             @Override
             public void run(ParserAssembler parserAssember)
             {
-                parserAssember.bindAxiomTermList(axiomTermList);
+                parserAssember.bindAxiomList(axiomTermList);
             }});
         // Boost priority so list is processed before any variables which reference it
         parserTask.setPriority(2);
 	}
 
     /**
+     * TODO - Remove this method. Only used by test classes
      * Bind listener and term names for axiom term list. This method should be invoked in
      * a ParserTask post compilation
      * @param axiomTermList The term list
@@ -580,7 +582,7 @@ public class ParserAssembler implements LocaleListener
 	 * Register axiom term list for local axiom
 	 * @param axiomTermList The term list
 	 */
-	public void registerLocalList(AxiomTermList axiomTermList)
+	public void registerLocalList(final AxiomTermList axiomTermList)
 	{
         QualifiedName qualifiedAxiomName = axiomTermList.getKey();
 		axiomTermList.setAxiomTermNameList(axiomTermNameMap.get(qualifiedAxiomName));
@@ -619,12 +621,12 @@ public class ParserAssembler implements LocaleListener
 	/**
      * Bind listener and term names for axiom list. This method should be invoked in
      * a ParserTask post compilation
-	 * @param axiomList The axiom list
+	 * @param axiomContainer The axiom container
 	 */
-	public void bindAxiomList(AxiomList axiomList) 
+	public void bindAxiomList(AxiomContainer axiomContainer) 
 	{
-		AxiomListener axiomListener = axiomList.getAxiomListener();
-		QualifiedName axiomKey = axiomList.getKey();
+		AxiomListener axiomListener = axiomContainer.getAxiomListener();
+		QualifiedName axiomKey = axiomContainer.getKey();
         QualifiedName qualifiedAxiomName = findQualifiedAxiomName(axiomKey);
         if (qualifiedAxiomName == null)
             // Assume key is for template
@@ -647,10 +649,10 @@ public class ParserAssembler implements LocaleListener
 		List<String> axiomTermNameList = axiomTermNameMap.get(qualifiedAxiomName);
 		if (axiomTermNameList != null)
 		{
-	        axiomList.setAxiomTermNameList(axiomTermNameList);
+		    axiomContainer.setAxiomTermNameList(axiomTermNameList);
 	        return;
 		}
-		setAxiomTermNameList(qualifiedTemplateName, axiomList);
+		setAxiomTermNameList(qualifiedTemplateName, axiomContainer);
 	}
 
 	/**
@@ -700,7 +702,7 @@ public class ParserAssembler implements LocaleListener
 	 * @param axiomList Axiom list to be updated
 	 * @return List of term names
 	 */
-	public List<String> setAxiomTermNameList(QualifiedName qualifiedTemplateName, AxiomList axiomList)
+	public List<String> setAxiomTermNameList(QualifiedName qualifiedTemplateName, AxiomContainer axiomContainer)
     {
 	    List<String> axiomTermNameList = null;
         Template template = templateMap.get(qualifiedTemplateName);
@@ -725,7 +727,7 @@ public class ParserAssembler implements LocaleListener
                 axiomTermNameList.add(term.getName());
             }
             if (axiomTermNameList.size() > 0)
-                axiomList.setAxiomTermNameList(axiomTermNameList);
+                axiomContainer.setAxiomTermNameList(axiomTermNameList);
         }
         return axiomTermNameList;
     }
@@ -755,16 +757,16 @@ public class ParserAssembler implements LocaleListener
 
 	/**
 	 * Create new template and add to head template chain
-	 * @param qualifiedTemplateName Qualified name of head template
-	 * @param chainName Name of template to add to chain
+	 * @param outerTemplateName Qualified name of head template
+	 * @param innerTemplateName Qualified name of inner template
 	 * @return Template object
 	 */
-	public Template chainTemplate(QualifiedName qualifiedTemplateName, String chainName) 
+	public Template chainTemplate(QualifiedName outerTemplateName, QualifiedName innerTemplateName) 
 	{
-		Template template = getTemplate(qualifiedTemplateName);
-		Template chainTemplate = new Template(new QualifiedTemplateName(qualifiedTemplateName.getScope(), chainName));
+		Template template = getTemplate(outerTemplateName);
+		Template chainTemplate = new Template(innerTemplateName);
 		template.setNext(chainTemplate);
-		templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
+		templateMap.put(innerTemplateName, chainTemplate);
 		return chainTemplate;
 	}
 

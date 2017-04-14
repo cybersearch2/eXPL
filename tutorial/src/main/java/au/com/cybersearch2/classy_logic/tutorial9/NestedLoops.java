@@ -15,8 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial9;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -31,48 +35,64 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class NestedLoops 
 {
-    static final String INSERT_SORT =
-    		"axiom unsorted() {12, 3, 1, 5, 8};\n" +
-            "list<term> sorted(unsorted);\n" +
-    		"calc insert_sort (\n" +
-    		"integer i = 1, \n" +
-    		"{\n" +
-    		"  integer j = i - 1, \n" +
-    		"  integer temp = sorted[i], \n" +
-    		"  {\n" +
-    		"    ? temp < sorted[j],\n" +
-       		"    sorted[j + 1] = sorted[j],\n" +
-    		"    ? --j >= 0\n" +
-    		"  },\n" +
-     		"  sorted[j + 1] = temp,\n" +
-    		"  ? ++i < length(sorted)\n" +
-    		"}\n" +
-            ")\n;" +
-    	    "query sort_axiom (insert_sort);\n" 
-    		;
+/* nested-loops.xpl
+axiom unsorted() {12, 3, 1, 5, 8};
+list<term> sorted(unsorted);
+calc insert_sort 
+(
+  integer i = 1, 
+  {
+    integer j = i - 1, 
+    integer temp = sorted[i], 
+    {
+      ? temp < sorted[j],
+         sorted[j + 1] = sorted[j],
+      ? --j >= 0
+    },
+    sorted[j + 1] = temp,
+    ? ++i < length(sorted)
+  }
+)
+query sort_axiom (insert_sort);
 
-	/**
+*/
+
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public NestedLoops()
+    {
+        File resourcePath = new File("src/main/resources/tutorial9");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+
+/**
 	 * Compiles the INSERT_SORT script and runs the "sort_axiom" query, displaying the solution on the console.<br/>
 	 * Demonstrates one loop nested inside another. The inner loop does an insert sort 
 	 * while the outer loop advances to the next axiom term to be sorted.
 	 * The expected result:<br/>
 	 * 1, 3, 5, 8, 12<br/>
 	 */
-	public void displayAxiomSort()
+	public Axiom displayAxiomSort()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(INSERT_SORT);
+        QueryProgram queryProgram = queryProgramParser.loadScript("nested-loops.xpl");
+        parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("sort_axiom");
-		Axiom axiom = result.getAxiom(QualifiedName.parseGlobalName("sorted"));
-		System.out.println(axiom.toString());
+		return result.getAxiom(QualifiedName.parseGlobalName("sorted"));
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	public static void main(String[] args)
 	{
 		NestedLoops nestedLoops = new NestedLoops();
 		try 
 		{
-			nestedLoops.displayAxiomSort();
+			Axiom axiom = nestedLoops.displayAxiomSort();
+	        System.out.println(axiom.toString());
 		} 
 		catch (ExpressionException e) 
 		{

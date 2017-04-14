@@ -45,6 +45,8 @@ public class Choice
     protected List<Operand> variableList;
     /** Choice term names */
     protected List<String> termNameList;
+    /** Choice selection is row index or -1 for no match */
+    protected int selection;
 
 	/**
 	 * Construct Choice object
@@ -73,9 +75,18 @@ public class Choice
 	            operand = new Variable(qualifiedTermName);
 	    	variableList.add(operand);
 	    }
+	    selection = NO_MATCH;
 	}
 
-	/**
+    /**
+     * @return the selection
+     */
+    public int getSelection()
+    {
+        return selection;
+    }
+
+    /**
 	 * Returns the list of choice axioms
 	 * @return the choiceAxiomList
 	 */
@@ -103,13 +114,13 @@ public class Choice
 	public boolean completeSolution(Solution solution, Template template, Axiom axiom)
 	{
 	    // The emplate performs selection
-		int position = template.select();
-		if (position == NO_MATCH)
+		selection = template.select();
+		if (selection == NO_MATCH)
 		    return false;
 		// Get selected axiom
-        Axiom choiceAxiom = choiceAxiomList.get(position);
+        Axiom choiceAxiom = choiceAxiomList.get(selection);
         // Get selection value
-        Term term = template.getTermByIndex(position);
+        Term term = template.getTermByIndex(selection);
         if (term.getValue() instanceof Null) // Ensure value is valid
         {   // Use initializer axiom term as fallback
             Term selectionTerm = axiom.getTermByName(choiceAxiom.getTermByIndex(0).getName());
@@ -169,12 +180,12 @@ public class Choice
                 break; // Term is already populated so proceed to selection
             term.unifyTerm(operand, id);
         }
-        int position = template.select();
-        if (position == NO_MATCH)
+        selection = template.select();
+        if (selection == NO_MATCH)
             return false;
         // Get selected axiom, default being last one in choice axiom list
-        Axiom choiceAxiom = choiceAxiomList.get(position);
-        operand.unifyTerm(template.getTermByIndex(position), id);
+        Axiom choiceAxiom = choiceAxiomList.get(selection);
+        operand.unifyTerm(template.getTermByIndex(selection), id);
         while (index < choiceAxiom.getTermCount())
         {
             operand = variableList.get(index);
