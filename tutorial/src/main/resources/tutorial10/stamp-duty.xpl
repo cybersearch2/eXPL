@@ -11,8 +11,7 @@ choice bracket
   {amount > 500000, 500000, 21330.00, 5.50};
 
 axiom transaction_amount (amount) : parameter;
-list<term> stamp_duty(payable);
 
 calc payable(duty = base + (amount - threshold) * (percent / 100));
 
-query stamp_duty_query (transaction_amount : bracket) >> (payable);
+query<term> stamp_duty(transaction_amount : bracket) >> (payable);

@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -56,8 +55,8 @@ public class AgeDiscrimination
    {age > 29, 0.3}
    {age > 25, 0.6}
    {age > 20, 1.0};
- list rated(age_rating);
- query rate_age (person : age_rating);
+ 
+ query<axiom> rate_age (person : age_rating);
  
  */
             
@@ -84,7 +83,7 @@ public class AgeDiscrimination
         QueryProgram queryProgram = queryProgramParser.loadScript("age-discrimination.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("rate_age");
-        return result.getIterator(QualifiedName.parseGlobalName("rated"));
+        return result.getIterator("rate_age");
     }
 
     public ParserContext getParserContext()

@@ -100,15 +100,19 @@ public class CalculateSquareMiles2Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("country==United States&&run_once (9,3) (13,0)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc filter_area1 (9,3)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("surface_area*=0.3861 (10,5) (10,26)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("km2=mi2 (11,5) (12,2)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("country==United States&&run_once (9,3) (13,0)");
         assertThat(iterator.hasNext()).isFalse();
   }
     

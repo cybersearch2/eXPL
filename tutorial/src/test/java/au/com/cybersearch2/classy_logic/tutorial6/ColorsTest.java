@@ -27,11 +27,9 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * ColorsTest
@@ -46,13 +44,10 @@ public class ColorsTest
         File testFile = new File("src/main/resources/tutorial6", "colors.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         Colors colors = new Colors();
-        ParserContext context = colors.displayShades(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("shade").toString());
-                return true;
-            }});
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Iterator<Axiom> colorIterator = colors.displayShades();
+        while (colorIterator.hasNext())
+            checkSolution(reader, colorIterator.next().toString());
+        Iterator<SourceMarker> iterator = colors.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -60,11 +55,15 @@ public class ColorsTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> swatch() (1,1) (1,24)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> color(swatch) (1,1) (1,24)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("query colors (7,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("swatch:shade (7,21) (7,34)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

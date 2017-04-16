@@ -9,5 +9,4 @@ axiom city()
     {"richmond",19}
     {"spokane", 1909}
     {"wichita", 1305};
-template high_city(name ? altitude > 5000, altitude);
-query high_cities (city : high_city); 
+

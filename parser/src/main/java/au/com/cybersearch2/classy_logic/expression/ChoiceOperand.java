@@ -58,7 +58,7 @@ public class ChoiceOperand extends IntegerOperand
         {    
             // Only backup local changes
             template.backup(true);
-            param = new Parameter(Term.ANONYMOUS, Choice.NO_MATCH); // Value indicates no match
+            param = new Parameter(Term.ANONYMOUS, (long)Choice.NO_MATCH); // Value indicates no match
         }
         param.setId(id);
         assign(param);
@@ -100,7 +100,7 @@ public class ChoiceOperand extends IntegerOperand
     @Override
     public String toString() 
     {
-        return name;
+        return "choice " + name;
     }
 
     /**

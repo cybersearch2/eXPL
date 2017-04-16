@@ -27,10 +27,9 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * StudentScores2Test
@@ -45,13 +44,10 @@ public class StudentScores2Test
         File testFile = new File("src/main/resources/tutorial6", "student-scores2.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         StudentScores2 scores = new StudentScores2();
-        ParserContext context = scores.displayLists(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("score").toString());
-                return true;
-            }});
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Iterator<Axiom> scoreIterator = scores.displayLists();
+        while (scoreIterator.hasNext())
+            checkSolution(reader, scoreIterator.next().toString());
+        Iterator<SourceMarker> iterator = scores.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -73,6 +69,22 @@ public class StudentScores2Test
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("template score (16,2)");
         assertThat(iterator.hasNext()).isFalse();
+        SourceItem sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("student (16,17) (16,23)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("english=mark_var0 (16,26) (16,50)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("maths=mark_var1 (16,53) (16,73)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("history=mark_var2 (16,76) (16,100)");
    }
 
     protected void checkSolution(BufferedReader reader, String shade)

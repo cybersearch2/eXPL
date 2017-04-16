@@ -27,11 +27,9 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * EuropeanMegaCitiesTest
@@ -46,14 +44,11 @@ public class EuropeanMegaCitiesTest
         File testFile = new File("src/main/resources/tutorial3", "euro_megacities.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         EuropeanMegaCities europeanMegaCities = new EuropeanMegaCities();
-        ParserContext context = europeanMegaCities.findEuroMegaCities(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("euro_megacities").toString());
-                return true;
-            }});
+        Iterator<Axiom> cityIterator = europeanMegaCities.findEuroMegaCities();
+        while (cityIterator.hasNext())
+            checkSolution(reader, cityIterator.next().toString());
         reader.close();
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Iterator<SourceMarker> iterator = europeanMegaCities.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -62,7 +57,7 @@ public class EuropeanMegaCitiesTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mega_city:euro_megacities (3,24) (3,50)");
+        assertThat(sourceItem.toString()).isEqualTo("mega_city:euro_megacities (3,31) (3,57)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

@@ -82,14 +82,6 @@ public class AgeDiscriminationTest
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("query rate_age (23,2)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list rated (22,2)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> rated(age_rating) (22,2) (22,23)");
         assertThat(iterator.hasNext()).isFalse();
     }
 

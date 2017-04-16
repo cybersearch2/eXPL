@@ -15,13 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial5;
 
+import java.util.Iterator;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
+import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * EuropeanMegaCities
@@ -72,9 +75,11 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 axiom mega_city (Rank,Megacity,Country,Continent,Population): resource;
 integer count = 0;
 template asia_top_ten (Megacity ? Continent == "Asia" && count++ < 10, Country, Population); 
-query asia_top_ten (mega_city : asia_top_ten); 
+query<axiom> asia_top_ten (mega_city : asia_top_ten); 
 */
+    
     protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
     
     public MegaCities()
     {
@@ -85,12 +90,19 @@ query asia_top_ten (mega_city : asia_top_ten);
     /**
      * Compiles the asia_top_ten.xpl script and runs the "asia_top_ten" query
      */
-    public void findMegaCities(SolutionHandler solutionHandler) 
+    public Iterator<Axiom> findMegaCities() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("asia_top_ten.xpl");
-        queryProgram.executeQuery("asia_top_ten", solutionHandler);
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("asia_top_ten");
+        return result.getIterator("asia_top_ten");
     }
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	/**
 	 * Displays the asia_top_ten solution on the console.<br/>
 	 * The expected result:<br/>
@@ -107,19 +119,18 @@ query asia_top_ten (mega_city : asia_top_ten);
 	 */
     public static void main(String[] args)
     {
-        SolutionHandler solutionHandler = new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                System.out.println(solution.getAxiom("asia_top_ten").toString());
-                return true;
-            }};
         try 
         {
             MegaCities megaCities = new MegaCities();
-            megaCities.findMegaCities(solutionHandler);
+            Iterator<Axiom> iterator = megaCities.findMegaCities();
+            while (iterator.hasNext())
+                System.out.println(iterator.next().toString());
             /* Uncomment to run query a second time to check the count variable 
              * is reset back to initial value of 0
-            queryProgram.executeQuery("asia_top_ten", solutionHandler));
+            iterator = megaCities.findMegaCities();
+            while (iterator.hasNext())
+                System.out.println(iterator.next().toString());
+
              */
         } 
         catch (ExpressionException e) 

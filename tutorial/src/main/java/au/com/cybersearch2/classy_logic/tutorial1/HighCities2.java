@@ -15,14 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial1;
 
+import java.util.Iterator;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * HighCities2
@@ -50,9 +52,10 @@ public class HighCities2
  */
 /* high_cities.xpl
 template high_city(name ? altitude > 5000, altitude);
-query high_cities (city : high_city); 
+query<axiom> high_cities (city : high_city); 
 */
     protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
     
     public HighCities2()
     {
@@ -63,13 +66,19 @@ query high_cities (city : high_city);
     /**
      * Compiles the high_cities.xpl script and runs the "high_city" query
      */
-    public ParserContext findHighCities(SolutionHandler solutionHandler) 
+    public Iterator<Axiom> findHighCities() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
-        queryProgram.executeQuery("high_cities", solutionHandler);
-        return queryProgramParser.getContext();
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("high_cities");
+        return result.getIterator("high_cities");
     }
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	/**
 	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
@@ -83,12 +92,9 @@ query high_cities (city : high_city);
         try 
         {
             HighCities2 highCities = new HighCities2();
-            highCities.findHighCities(new SolutionHandler(){
-                @Override
-                public boolean onSolution(Solution solution) {
-                    System.out.println(solution.getAxiom("high_city").toString());
-                    return true;
-                }});
+            Iterator<Axiom> iterator = highCities.findHighCities();
+            while (iterator.hasNext())
+                System.out.println(iterator.next().toString());
         } 
         catch (ExpressionException e) 
         {

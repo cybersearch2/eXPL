@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial11;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -32,87 +32,97 @@ import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * FactorialTest
+ * RegexGroupsTest
  * @author Andrew Bowley
- * 12Apr.,2017
+ * 16Apr.,2017
  */
-public class FactorialTest
+public class RegexGroupsTest
 {
     @Test
-    public void testFactorial() throws Exception
+    public void testRegexGroups() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial9", "factorial.txt");
+        RegexGroups regexGroups = new RegexGroups();
+        File testFile = new File("src/main/resources/tutorial11", "regex-groups.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        Factorial factorial = new Factorial();
-        Axiom[] factorials = factorial.displayFactorial4and5();
-        checkSolution(reader, factorials[0].toString());
-        checkSolution(reader, factorials[1].toString());
-        Iterator<SourceMarker> iterator = factorial.getParserContext().getSourceMarkerSet().iterator();
+        Iterator<Axiom> axiomIterator = regexGroups.getRegexGroups();
+        while (axiomIterator.hasNext()) 
+              checkSolution(reader, axiomIterator.next().getTermByIndex(0).getValue().toString());
+        Iterator<SourceMarker> iterator = regexGroups.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query factorial4 (11,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("string defRegex (5,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("factorial (11,25) (11,33)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("n=4 (11,36) (11,40)");
+        assertThat(sourceItem.toString()).isEqualTo("string defRegex = ^(.)\\. (.*+) (5,1) (5,32)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query factorial5 (12,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom expand (8,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("factorial (12,25) (12,33)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("n=5 (12,36) (12,40)");
+        assertThat(sourceItem.toString()).isEqualTo("list<axiom> expand[1] (8,1) (14,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc factorial (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom lexicon (2,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer n (3,3) (3,11)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer i = 1 (4,3) (4,15)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("decimal factorial = 1 (5,3) (5,23)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("factorial1(1*=1 ... ?1++<n) (6,3) (10,0)");
+        assertThat(sourceItem.toString()).isEqualTo("lexicon(Word,Definition):\"lexicon\" (2,1) (2,44)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc factorial1 (6,3)");
+        assertThat(sourceMarker.toString()).isEqualTo("query query_in_words (26,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("1*=1 (7,5) (7,18)");
+        assertThat(sourceItem.toString()).isEqualTo("lexicon:in_words (26,22) (26,39)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("string wordRegex (4,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("string wordRegex = ^in[^ ]+ (4,1) (4,29)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("axiom word_definitions (17,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("list<axiom> word_definitions[1] (17,1) (17,27)");
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc in_words (19,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\ (21,3) (21,23)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?1++<n (8,5) (9,2)");
-        assertThat(sourceItem.getNext()).isNull();
-    }
-    
-    protected void checkSolution(BufferedReader reader, String factorial)
+        assertThat(sourceItem.toString()).isEqualTo("definition \\^(.)\\. (.*+)\\ (21,26) (21,65)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("list<axiom> in_words.in_word[1] (22,3) (22,61)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("word_definitions+=in_word (23,3) (24,0)");
+   }
+
+    protected void checkSolution(BufferedReader reader, String word)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(factorial).isEqualTo(line);
+            assertThat(word).isEqualTo(line);
         }
         catch (IOException e)
         {

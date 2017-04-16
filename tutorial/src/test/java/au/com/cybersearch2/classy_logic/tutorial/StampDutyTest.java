@@ -33,7 +33,7 @@ public class StampDutyTest
     public void test_StampDuty() throws Exception
     {
         StampDuty stampDuty = new StampDuty();
-        assertThat(stampDuty.getStampDuty().toString()).isEqualTo("payable(duty = 3768.32)");
+        assertThat(stampDuty.getStampDuty().toString()).isEqualTo("stamp_duty(duty = 3768.32)");
     }
 
 }

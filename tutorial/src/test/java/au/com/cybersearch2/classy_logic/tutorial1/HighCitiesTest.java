@@ -31,6 +31,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -61,12 +62,10 @@ public class HighCitiesTest
         File testFile = new File("src/main/resources/tutorial1", "high_cities.txt");
         final BufferedReader reader2 = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         HighCities2 highCities2 = new HighCities2();
-        ParserContext context = highCities2.findHighCities(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader2, solution.getAxiom("high_city").toString());
-                return true;
-            }});
+        Iterator<Axiom> cityIterator = highCities2.findHighCities();
+        while (cityIterator.hasNext())
+            checkSolution(reader2, cityIterator.next().toString());
+        ParserContext context = highCities2.getParserContext();
         reader2.close();
         assertThat(context.getSourceDocumentList()).isNotNull();
         assertThat(context.getSourceDocumentList().size()).isEqualTo(1);
@@ -88,7 +87,7 @@ public class HighCitiesTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city:high_city (3,20) (3,35)");
+        assertThat(sourceItem.toString()).isEqualTo("city:high_city (3,27) (3,42)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

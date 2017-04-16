@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -78,7 +77,7 @@ query sort_axiom (insert_sort);
         QueryProgram queryProgram = queryProgramParser.loadScript("nested-loops.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("sort_axiom");
-		return result.getAxiom(QualifiedName.parseGlobalName("sorted"));
+		return result.getAxiom("sorted");
 	}
 
     public ParserContext getParserContext()

@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -49,9 +48,8 @@ choice swatch
 {unknown,  "unknown", 0,   0,   0};
 
 axiom shade (rgb) : parameter;
-list<term> color(swatch);
 
-query color_query (shade : swatch);
+query<term> color(shade : swatch);
 
 */
 
@@ -72,13 +70,13 @@ query color_query (shade : swatch);
         QueryProgram queryProgram = queryProgramParser.loadScript("color-swatch.xpl");
         parserContext = queryProgramParser.getContext();
         // Create QueryParams object for Global scope and query "stamp_duty_query"
-        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
+        QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         Solution initialSolution = queryParams.getInitialSolution();
         initialSolution.put("shade", new Axiom("shade", new Parameter("rgb", hexColor))); 
         Result result = queryProgram.executeQuery(queryParams);
-        return result.getAxiom(QualifiedName.parseGlobalName("color")).toString();
+        return result.getAxiom("color").toString();
 	}
 	
     public ParserContext getParserContext()
@@ -89,9 +87,9 @@ query color_query (shade : swatch);
     /**
      * Run tutorial
      * The expected result:<br/>
-        swatch(rgb = 65535, color = aqua, red = 0, green = 255, blue = 255)<br/>
-        swatch(rgb = 255, color = blue, red = 0, green = 0, blue = 255)<br/>
-        swatch(rgb = 7864319, color = unknown, red = 0, green = 0, blue = 0)<br/>
+        color(rgb = 65535, color = aqua, red = 0, green = 255, blue = 255)<br/>
+        color(rgb = 255, color = blue, red = 0, green = 0, blue = 255)<br/>
+        color(rgb = 7864319, color = unknown, red = 0, green = 0, blue = 0)<br/>
      * @param args
      */
 	public static void main(String[] args)

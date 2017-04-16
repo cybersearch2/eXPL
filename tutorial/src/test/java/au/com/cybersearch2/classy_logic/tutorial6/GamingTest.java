@@ -21,11 +21,9 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * GamingTest
@@ -38,14 +36,10 @@ public class GamingTest
     public void testGaming() throws Exception
     {
         Gaming gaming = new Gaming();
-        ParserContext context = gaming.displayFruit(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                String spin = solution.getAxiom("spin").toString();
-                assertThat(spin).isEqualTo("spin(combo_r1 = lemon, combo_r2 = banana, combo_r3 = apple, combo_r4 = orange)");
-                return true;
-            }});
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Axiom axiom = gaming.displayFruit();
+        String spin = axiom.toString();
+        assertThat(spin).isEqualTo("spin(combo_r1 = lemon, combo_r2 = banana, combo_r3 = apple, combo_r4 = orange)");
+        Iterator<SourceMarker> iterator = gaming.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -53,7 +47,7 @@ public class GamingTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> fruit() (3,1) (3,23)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> combo(fruit) (3,1) (3,23)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -77,7 +71,7 @@ public class GamingTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template spin (4,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template play (4,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

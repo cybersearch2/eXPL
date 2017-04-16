@@ -16,16 +16,16 @@
 package au.com.cybersearch2.classy_logic.tutorial4;
 
 import java.io.File;
+import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * InWords
@@ -48,9 +48,10 @@ absurd - j. inconsistent with reason or logic or common sense
 /* query_in_words.xpl
 axiom lexicon (word, definition) : resource;
 template in_words (word regex("^in[^ ]+"), string definition);
-query query_in_words(lexicon : in_words); 
+query<axiom> query_in_words(lexicon : in_words); 
 */
     protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 	
 	public InWords()
 	{
@@ -63,13 +64,19 @@ query query_in_words(lexicon : in_words);
     /**
      * Compiles the query_in_words.xpl script and runs the "query_in_words" query
      */
-    public ParserContext findInWords(SolutionHandler solutionHandler) 
+    public Iterator<Axiom> findInWords() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("query_in_words.xpl");
-        queryProgram.executeQuery("query_in_words", solutionHandler);
-        return queryProgramParser.getContext();
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("query_in_words");
+        return result.getIterator("query_in_words");
     }
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	/*
      * Expected 54 results can be found in /src/test/resources/in_words.lst. 
      * Here is the first result: </br>
@@ -80,13 +87,9 @@ query query_in_words(lexicon : in_words);
         try 
         {
             InWords inWords = new InWords();
-            inWords.findInWords(new SolutionHandler(){
-                @Override
-                public boolean onSolution(Solution solution) {
-                    Axiom wordAxiom = solution.getAxiom("in_words");
-                    System.out.println(wordAxiom.toString());
-                    return true;
-                }});
+            Iterator<Axiom> iterator = inWords.findInWords();
+            while(iterator.hasNext()) 
+                System.out.println(iterator.next().toString());
         } 
         catch (ExpressionException e) 
         {

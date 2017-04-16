@@ -61,6 +61,7 @@ query greek_business(customer:customer)
 */
 
     protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 
     public GreekConstruction3()
     {
@@ -82,13 +83,18 @@ query greek_business(customer:customer)
 		account(name = Spiros Theodolites, fee = 57)<br/>
 		delivery(city = Milos, freight = 22)<br/>	 
 	 */
-	public ParserContext displayCustomerCharges(SolutionHandler solutionHandler)
+	public void displayCustomerCharges(SolutionHandler solutionHandler)
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("greek-construction.xpl");
+        parserContext = queryProgramParser.getContext();
  		queryProgram.executeQuery("greek_business", solutionHandler);
-        return queryProgramParser.getContext();
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	public static void main(String[] args)
 	{
 		try 

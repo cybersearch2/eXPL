@@ -9,6 +9,5 @@ choice swatch
 {unknown,  "unknown", 0,   0,   0};
 
 axiom shade (rgb) : parameter;
-list<term> color(swatch);
 
-query color_query (shade : swatch);
+query<term> color(shade : swatch);

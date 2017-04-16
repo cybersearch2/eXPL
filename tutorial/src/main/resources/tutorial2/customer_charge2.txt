@@ -1,0 +1,8 @@
+freight(charge = 23, city = Athens)
+customer_freight(name = Acropolis Construction, city = Athens, charge = 23)
+freight(charge = 13, city = Sparta)
+customer_freight(name = Marathon Marble, city = Sparta, charge = 13)
+freight(charge = 13, city = Sparta)
+customer_freight(name = Agora Imports, city = Sparta, charge = 13)
+freight(charge = 17, city = Milos)
+customer_freight(name = Spiros Theodolites, city = Milos, charge = 17)

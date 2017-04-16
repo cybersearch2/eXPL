@@ -9,4 +9,4 @@ calc evaluate(
   boolean can_assign = (y *= 3) == 6 && y == 6,
   boolean can_evaluate = can_add && can_subtract && can_multiply && can_divide && can_override_precedence && can_assign
  );
-query expressions (evaluate);
+query<term> expressions (evaluate);

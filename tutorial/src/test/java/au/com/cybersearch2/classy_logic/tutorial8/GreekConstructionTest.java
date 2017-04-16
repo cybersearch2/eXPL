@@ -27,7 +27,6 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -46,14 +45,14 @@ public class GreekConstructionTest
         File testFile = new File("src/main/resources/tutorial8", "greek-construction.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         GreekConstruction3 greekConstruction = new GreekConstruction3();
-        ParserContext context = greekConstruction.displayCustomerCharges(new SolutionHandler(){
+        greekConstruction.displayCustomerCharges(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
                 checkSolution(reader, solution.getAxiom("account").toString(), solution.getAxiom("delivery").toString());
                 return true;
             }});
         reader.close();
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Iterator<SourceMarker> iterator = greekConstruction.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

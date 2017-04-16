@@ -99,10 +99,10 @@ public class AxiomListTest
 		Axiom axiom1 = new Axiom("one");
 		axiomListener.onNextAxiom(Q_KEY, axiom1);
 		AxiomTermList axiomOperandList1 = axiomList.getItem(0);
-		assertThat(axiomOperandList1.toString()).isEqualTo("list<term> one()");
+		assertThat(axiomOperandList1.toString()).isEqualTo("list<term> ListOperandName(AxiomKey) = one()");
 		Axiom axiom2 = new Axiom("two");
 		axiomListener.onNextAxiom(Q_KEY, axiom2);
 		AxiomTermList axiomOperandList2 = axiomList.getItem(1);
-		assertThat(axiomOperandList2.toString()).isEqualTo("list<term> two()");
+		assertThat(axiomOperandList2.toString()).isEqualTo("list<term> ListOperandName(AxiomKey) = two()");
 	}
 }

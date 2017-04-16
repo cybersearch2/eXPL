@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -75,7 +74,7 @@ query surface_area_query(surface_area : filter_area);
         QueryProgram queryProgram = queryProgramParser.loadScript("tutorial9/calculate-square-miles2.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("surface_area_query");
-		return result.getIterator(QualifiedName.parseGlobalName("surface_area_by_country"));
+		return result.getIterator("surface_area_by_country");
 	}
 
     public ParserContext getParserContext()

@@ -16,14 +16,15 @@
 package au.com.cybersearch2.classy_logic.tutorial6;
 
 import java.io.File;
+import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * Lists
@@ -49,11 +50,12 @@ axiom grades (student, english, maths, history)
 };
  list<term> mark(alpha_marks);
  template score(student, english = mark[(english)], maths = mark[(maths)], history = mark[(history)]);
- query marks(grades : score);
+ query<axiom> marks(grades : score);
 
 */
 
     protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 
     public StudentScores2()
     {
@@ -69,24 +71,27 @@ axiom grades (student, english, maths, history)
 	 *	score(student = Sarah, english = c+, maths = a, history = b+)<br/>
 	 *	score(student = Amy, english = b, maths = a-, history = e+)<br/>
 	 */
-    public ParserContext displayLists(SolutionHandler solutionHandler)
+    public Iterator<Axiom> displayLists()
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("student-scores2.xpl");
-		queryProgram.executeQuery("marks", solutionHandler);
-        return queryProgramParser.getContext();
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("marks");
+        return result.getIterator("marks");
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	public static void main(String[] args)
 	{
 		try 
 		{
 	        StudentScores2 listsDemo = new StudentScores2();
-			listsDemo.displayLists(new SolutionHandler(){
-	            @Override
-	            public boolean onSolution(Solution solution) {
-	                System.out.println(solution.getAxiom("score").toString());
-	                return true;
-	            }});
+            Iterator<Axiom> iterator = listsDemo.displayLists();
+            while (iterator.hasNext())
+                System.out.println(iterator.next().toString());
 		} 
 		catch (ExpressionException e) 
 		{

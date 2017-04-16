@@ -22,4 +22,4 @@ axiom grades (student, english, maths, history)
  mark[17] = "a";
  mark[18] = "a+";
  template score(student, mark[english], mark[maths], mark[history]);
- query marks(grades : score);
+ query<axiom> marks(grades : score);

@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -50,11 +49,10 @@ choice bracket
   {amount > 500000, 500000, 21330.00, 5.50};
 
 axiom transacton_amount (amount) : parameter;
-list<term> stamp_duty(payable);
 
 calc payable(duty = base + (amount - threshold) * (percent / 100));
 
-query stamp_duty_query (transacton_amount : bracket) >> (payable);
+query<term> stamp_duty(transaction_amount : bracket) >> (payable);
 
 */
 
@@ -70,19 +68,19 @@ query stamp_duty_query (transacton_amount : bracket) >> (payable);
 	/**
 	 * Compiles the STAMP_DUTY script and runs the "stamp_duty_query" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
-	 * payable(duty = 3768.32)<br/>
+	 * stamp_duty(duty = 3768.32)<br/>
 	 */
 	public String getStampDuty()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("stamp-duty.xpl");
         parserContext = queryProgramParser.getContext();
-		// Create QueryParams object for Global scope and query "stamp_duty_query"
-		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "stamp_duty_query");
+		// Create QueryParams object for Global scope and query "stamp_duty"
+		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "stamp_duty");
 		// Add a transacton_amount Axiom with a single 123,458 term
         Solution initialSolution = queryParams.getInitialSolution();
         initialSolution.put("transaction_amount", new Axiom("transaction_amount", new Parameter("amount", 123458))); 
 		Result result = queryProgram.executeQuery(queryParams);
-        return result.getAxiom(QualifiedName.parseGlobalName("stamp_duty")).toString();
+        return result.getAxiom("stamp_duty").toString();
 	}
 	
     public ParserContext getParserContext()

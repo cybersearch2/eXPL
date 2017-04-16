@@ -15,11 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial1;
 
+import java.util.Iterator;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
@@ -31,7 +35,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 20 Feb 2015
  */
-public class HighCities 
+public class HighCities implements SolutionHandler
 {
 /* cities.xpl
 axiom city() 
@@ -49,7 +53,7 @@ axiom city()
 /* high_cities.xpl
 axiom city() : resource;
 template high_city(name ? altitude > 5000, altitude);
-query high_cities (city : high_city); 
+query<axiom> high_cities (city : high_city); 
 */
 
     protected QueryProgramParser queryProgramParser;
@@ -60,6 +64,16 @@ query high_cities (city : high_city);
         queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
      }
 
+    /**
+     * Compiles the high_cities.xpl script and runs the "high_city" query
+     */
+    public Iterator<Axiom> findHighCities() 
+    {
+        QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
+        Result result = queryProgram.executeQuery("high_cities");
+        return result.getIterator("high_cities");
+    }
+
 	/**
 	 * Compiles the high_cities.xpl script and runs the "high_city" query
 	 */
@@ -69,6 +83,18 @@ query high_cities (city : high_city);
 		queryProgram.executeQuery("high_cities", solutionHandler);
 	}
 
+	/**
+	 * onSolution - Handler for alternative query solution collection
+	 * @see au.com.cybersearch2.classy_logic.interfaces.SolutionHandler#onSolution(au.com.cybersearch2.classy_logic.query.Solution)
+	 */
+    @Override
+    public boolean onSolution(Solution solution) 
+    {
+        System.out.println(solution.getAxiom("high_city").toString());
+        // Return false if you want to terminaate query when a particular solution has been found
+        return true;
+    }
+    
 	/**
      * Displays the solution to the high_cities query on the console.<br/>
      * The expected result:<br/>
@@ -82,12 +108,13 @@ query high_cities (city : high_city);
 		try 
 		{
 	        HighCities highCities = new HighCities();
-			highCities.findHighCities(new SolutionHandler(){
-	            @Override
-	            public boolean onSolution(Solution solution) {
-	                System.out.println(solution.getAxiom("high_city").toString());
-	                return true;
-	            }});
+	        Iterator<Axiom> iterator = highCities.findHighCities();
+	        while (iterator.hasNext())
+	            System.out.println(iterator.next().toString());
+	        
+	        /* Alternative approach using SolutionHandler, which HighCities implements
+			highCities.findHighCities(highCities);
+	        */
 		} 
 		catch (ExpressionException e) 
 		{

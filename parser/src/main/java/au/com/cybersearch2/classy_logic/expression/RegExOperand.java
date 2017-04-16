@@ -77,7 +77,7 @@ public class RegExOperand extends StringOperand
 		this.flags = flags;
 		this.group = group;
 		this.regexOp = regexOp;
-		if ((regexOp != null) && !regexOp.isEmpty() && Term.ANONYMOUS.equals(regexOp.getName()))
+		if ((regexOp != null) && !regexOp.isEmpty())
 			regex = regexOp.getValue().toString();
 		else
 			regex = "";

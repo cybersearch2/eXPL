@@ -19,12 +19,12 @@ import java.io.File;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * Expressions
@@ -45,9 +45,10 @@ public class Expressions
          boolean can_assign = (y *= 3) == 6 && y == 6,
          boolean can_evaluate = can_add && can_subtract && can_multiply && can_divide && can_override_precedence && can_assign
         );
-       query expressions (evaluate);
+       query<term> expressions (evaluate);
     */
     protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
     
     public Expressions()
     {
@@ -58,13 +59,19 @@ public class Expressions
     /**
      * Compiles the expressions.xpl script and runs the "expressions" query
      */
-    public ParserContext checkExpressions(SolutionHandler solutionHandler) 
+    public Axiom checkExpressions() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("expressions.xpl");
-        queryProgram.executeQuery("expressions", solutionHandler);
-        return queryProgramParser.getContext();
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("expressions");
+        return result.getAxiom("expressions");
     }
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Displays expressions success summary flag on the console.
      * Note this sample uses a calculator instead of a template, as it does not require an axiom source in order to do a unification+evaluation step.
@@ -77,13 +84,9 @@ public class Expressions
         try 
         {
             Expressions expressions = new Expressions();
-            expressions.checkExpressions(new SolutionHandler(){
-                @Override
-                public boolean onSolution(Solution solution) {
-                    Term evaluateTerm = solution.getAxiom("evaluate").getTermByName("can_evaluate");
-                    System.out.println(evaluateTerm.toString());
-                    return true;
-                }});
+            Axiom axiom = expressions.checkExpressions();
+            Term evaluateTerm = axiom.getTermByName("can_evaluate");
+            System.out.println(evaluateTerm.toString());
         } 
         catch (ExpressionException e) 
         {

@@ -15,14 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial3;
 
+import java.util.Iterator;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * EuropeanMegaCities
@@ -72,9 +74,10 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 /* euro_megacities.xpl
 axiom mega_city (Rank,Megacity,Country,Continent,Population) : resource;
 template euro_megacities (Megacity, Country, Continent { "Europe" } );
-query euro_megacities (mega_city : euro_megacities);
+query<axiom> euro_megacities (mega_city : euro_megacities);
 */
     protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 	 
     public EuropeanMegaCities()
     {
@@ -85,13 +88,19 @@ query euro_megacities (mega_city : euro_megacities);
     /**
      * Compiles the euro_megacities.xpl script and runs the "euro_megacities" query
      */
-    public ParserContext findEuroMegaCities(SolutionHandler solutionHandler) 
+    public Iterator<Axiom> findEuroMegaCities() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("euro_megacities.xpl");
-        queryProgram.executeQuery("euro_megacities", solutionHandler);
-        return queryProgramParser.getContext();
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("euro_megacities");
+        return result.getIterator("euro_megacities");
     }
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	/**
 	 * Displays the euro_megacities solution on the console.<br/>
 	 * The expected result:<br/>
@@ -106,12 +115,9 @@ query euro_megacities (mega_city : euro_megacities);
         try 
         {
             EuropeanMegaCities europeanMegaCities = new EuropeanMegaCities();
-            europeanMegaCities.findEuroMegaCities(new SolutionHandler(){
-                @Override
-                public boolean onSolution(Solution solution) {
-                    System.out.println(solution.getAxiom("euro_megacities").toString());
-                    return true;
-                }});
+            Iterator<Axiom> iterator = europeanMegaCities.findEuroMegaCities();
+            while (iterator.hasNext())
+                System.out.println(iterator.next().toString());
         } 
         catch (ExpressionException e) 
         {

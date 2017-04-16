@@ -19,5 +19,5 @@
    {age > 29, 0.3}
    {age > 25, 0.6}
    {age > 20, 1.0};
- list rated(age_rating);
- query rate_age (person : age_rating);
+ 
+ query<axiom> rate_age (person : age_rating);

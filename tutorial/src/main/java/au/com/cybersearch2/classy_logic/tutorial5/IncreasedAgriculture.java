@@ -16,14 +16,15 @@
 package au.com.cybersearch2.classy_logic.tutorial5;
 
 import java.io.File;
+import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * IncreasedAgriculture demonstrates evaluation for the purpose of numerical analysis.
@@ -37,16 +38,18 @@ public class IncreasedAgriculture
 /* more_agriculture.xpl
 include "agriculture-land.xpl";
 include "surface-land.xpl";
-list nation_list(surface_area_increase);
+
 template agri_10y (country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);
 template surface_area_increase (
   country? country == agri_10y.country,
   double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100
     * surface_area_Km2);
-query more_agriculture(Data : agri_10y, surface_area : surface_area_increase); 
+query<axiom> more_agriculture(Data : agri_10y, surface_area : surface_area_increase); 
+
 */
     protected QueryProgramParser queryProgramParser;
-    
+    ParserContext parserContext;
+   
     public IncreasedAgriculture()
     {
         queryProgramParser = new QueryProgramParser(new File("src/main/resources/"));
@@ -56,14 +59,19 @@ query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);
      * Compiles the more_agriculture.xpl script and runs the "more_agriculture" query
      * @return Axiom iterator
      */
-    public ParserContext  findIncreasedAgriculture(SolutionHandler solutionHandler) 
+    public Iterator<Axiom> findIncreasedAgriculture() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("tutorial5/more_agriculture.xpl");
-        queryProgram.executeQuery("more_agriculture", solutionHandler);
-        return queryProgramParser.getContext();
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("more_agriculture");
+        return result.getIterator("more_agriculture");
     }
 
-
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	/**
      * Displays the solution on the console.<br/>
 	 * The expected result first 3 lines:<br/>
@@ -74,16 +82,12 @@ query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);
  	 */
     public static void main(String[] args)
     {
-        SolutionHandler solutionHandler = new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                System.out.println(solution.getAxiom("surface_area_increase").toString());
-                return true;
-            }};
         try 
         {
             IncreasedAgriculture increasedAgriculture = new IncreasedAgriculture();
-            increasedAgriculture.findIncreasedAgriculture(solutionHandler);
+            Iterator<Axiom> iterator = increasedAgriculture.findIncreasedAgriculture();
+            while (iterator.hasNext())
+                System.out.println(iterator.next().toString());
         } 
         catch (ExpressionException e) 
         {

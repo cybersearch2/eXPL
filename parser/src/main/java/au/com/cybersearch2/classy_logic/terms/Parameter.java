@@ -52,6 +52,20 @@ public class Parameter implements Term
 	}
 
     /**
+     * Construct a non-empty named Parameter object containing an integer
+     * @param name String
+     * @param value Value 
+     */
+    public Parameter(String name, int value)
+    {
+        if (name == null)
+            throw new IllegalArgumentException(INVALID_NAME_MESSAGE);
+        this.name = name;
+        id = 0;
+        setValue((long)value);
+    }
+
+    /**
 	 * Construct an empty named Parameter object
 	 * @param name String
 	 */

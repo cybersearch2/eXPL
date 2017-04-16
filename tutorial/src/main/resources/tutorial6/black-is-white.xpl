@@ -16,4 +16,4 @@ template shade
   integer g = rgb[green], 
   integer b = rgb[blue]
 );
-query colors(swatch : shade);
+query<axiom> colors(swatch : shade);

@@ -442,7 +442,7 @@ public class AxiomListVariableTest
     	while (index < cityList.size())
     	{
     		variable.evaluate(1);
-	    	assertThat(variable.getValue().toString()).isEqualTo("list<term> " + CITY_NAME_HEIGHT[index++]);
+	    	assertThat(variable.getValue().toString()).isEqualTo("list<term> AxiomListName(AxiomKey) = " + CITY_NAME_HEIGHT[index++]);
 	    	variable.backup(1);
     	}
     	x.setValue(Long.valueOf(0));

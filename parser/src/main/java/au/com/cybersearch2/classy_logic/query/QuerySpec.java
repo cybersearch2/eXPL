@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 
 /**
@@ -62,6 +63,23 @@ public class QuerySpec
         keyNameList.add(keyName);
 	}
 
+	/**
+	 * Returns qualified name of final template in query chain
+	 * returns qualified name 
+	 */
+	public QualifiedName getKey()
+	{
+	    QuerySpec querySpec = 
+	        queryChainList != null ? 
+	        queryChainList.get(queryChainList.size() - 1) : 
+	        this;
+	    List<KeyName> tailKeyNameList = querySpec.getKeyNameList();
+	    if (tailKeyNameList.size() == 0)
+	        // Key is qualified name of query until first keyname is added
+	        return QualifiedName.parseName(name);
+	    return tailKeyNameList.get(tailKeyNameList.size() - 1).getTemplateName();
+	}
+	
 	/**
 	 * Add axiom key / template name pair for specified query type
 	 * @param queryType
@@ -156,6 +174,4 @@ public class QuerySpec
 		queryChainList.add(queryChain);
 		return queryChain;
 	}
-
-
 }

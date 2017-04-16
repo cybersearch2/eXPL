@@ -21,12 +21,10 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * ExpressionsTest
@@ -39,14 +37,10 @@ public class ExpressionsTest
     public void testExpressions() throws Exception
     {
         Expressions expressions = new Expressions();
-        ParserContext context = expressions.checkExpressions(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                Term evaluateTerm = solution.getAxiom("evaluate").getTermByName("can_evaluate");
-                assertThat(((Boolean)evaluateTerm.getValue()).booleanValue()).isTrue();
-                return true;
-            }});
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Axiom axiom = expressions.checkExpressions();
+        Term evaluateTerm = axiom.getTermByName("can_evaluate");
+        assertThat(((Boolean)evaluateTerm.getValue()).booleanValue()).isTrue();
+        Iterator<SourceMarker> iterator = expressions.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -55,7 +49,7 @@ public class ExpressionsTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("evaluate (12,20) (12,27)");
+        assertThat(sourceItem.toString()).isEqualTo("evaluate (12,26) (12,33)");
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("integer x (1,1)");

@@ -19,47 +19,57 @@ import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
-import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 public class RegexGroups 
 {
-	static final String LEXICAL_SEARCH = 
-		// Use an external axiom source which is bound in TestAxiomProvider dependency class
-	    // to AxiomSource class LexiconSource
-		"axiom lexicon (Word, Definition) : \"lexicon\";\n" +
-		"string wordRegex = \"^in[^ ]+\";\n" +
-	    "string defRegex = \"^(.)\\. (.*+)\";\n" +
-	    "// Convert single letter part of speech to word\n" +
-	    "axiom expand =  \n" +
-		" { n = \"noun\",  \n" +
-		"   v = \"verb\",  \n" +
-        "   a = \"adv.\",  \n" +
-		"   j = \"adj.\" };\n" +
-		"// Collect words starting with 'in' along with other details\n" +
-		"axiom word_definitions = {};\n" +
-		"calc in_words (\n" +
-		"  word regex(wordRegex), definition regex(defRegex { part, def }),\n" +
-        "  axiom in_word = { word + \", \" + expand[part] + \"- \" + def },\n" +
-		"  (word_definitions += in_word)" +
-		");\n" +
-		"query query_in_words(lexicon : in_words);";
- 
-	/** ProviderManager object wihich is axiom source for the compiler */
-	ProviderManager providerManager;
+/* regex-groups.xpl
+// Use an external axiom source (class LexiconSource)
+axiom lexicon (Word, Definition) : "lexicon";
+
+string wordRegex = "^in[^ ]+";
+string defRegex = "^(.)\. (.*+)";
+
+// Convert single letter part of speech to word
+axiom expand =
+{ 
+   n = "noun",
+   v = "verb",
+   a = "adv.",
+   j = "adj." 
+};
+   
+// Collect words starting with 'in' along with other details
+axiom word_definitions = {};
+
+calc in_words 
+(
+  word regex(wordRegex), definition regex(defRegex { part, def }),
+  axiom in_word = { word + ", " + expand[part] + "- " + def },
+  (word_definitions += in_word)
+);
+
+query query_in_words(lexicon : in_words);
+
+*/
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 
 	/**
 	 * Construct RegexGroups object
 	 */
 	public RegexGroups()
 	{
-		providerManager = new ProviderManager(new File("src/main/resources"));
-		providerManager.putAxiomProvider(new LexiconAxiomProvider());
+        File resourcePath = new File("src/main/resources/tutorial11");
+        // Use an external axiom source which is bound in TestAxiomProvider dependency class
+        // to AxiomSource class LexiconSource
+        queryProgramParser = new QueryProgramParser(resourcePath, new LexiconAxiomProvider());
 	}
 	
     /**
@@ -76,12 +86,17 @@ public class RegexGroups
 		// Expected 54 results can be found in /src/test/resources/in_words.lst. 
 		// Here is the first solution: 
 		// word = inadequate, part = adj., def = not sufficient to meet a need
-		QueryProgram queryProgram = new QueryProgram(providerManager);
-		queryProgram.parseScript(LEXICAL_SEARCH);
+        QueryProgram queryProgram = queryProgramParser.loadScript("regex-groups.xpl");
+        parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("query_in_words");
-		return result.getIterator(QualifiedName.parseGlobalName("word_definitions"));
+		return result.getIterator("word_definitions");
  	}
 	
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * @param args

@@ -23,11 +23,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * MegaCitiesTest
@@ -42,12 +42,9 @@ public class MegaCitiesTest
         File testFile = new File("src/main/resources/tutorial5", "asia_top_ten.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         MegaCities megaCities = new MegaCities();
-        megaCities.findMegaCities(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("asia_top_ten").toString());
-                return true;
-            }});
+        Iterator<Axiom> iterator = megaCities.findMegaCities();
+        while (iterator.hasNext())
+            checkSolution(reader, iterator.next().toString());
         reader.close();
     }
     

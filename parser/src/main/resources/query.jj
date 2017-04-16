@@ -395,9 +395,10 @@ void QueryChain(ParserContext context) :
   QuerySpec querySpec;
   Token queryToken;
   Token chainToken;
+  Token typeToken = null;
 }
 {  
-  queryToken=<QUERY> querySpec=Query(context)
+  queryToken=<QUERY> ( "<" (typeToken=<AXIOM> | typeToken=<TERM>) ">" )? querySpec=Query(context)
   {
     context.setSourceMarker(queryToken, querySpec.getName());
   }
@@ -411,6 +412,13 @@ void QueryChain(ParserContext context) :
   )* ";"
   {
     context.getScope().addQuerySpec(querySpec);
+    if (typeToken == null)
+      return;
+    ParserAssembler parserAssembler = context.getParserAssembler();
+    VariableType varType = typeToken.kind == QueryParserConstants.AXIOM ? new VariableType(OperandType.AXIOM) : new VariableType(OperandType.TERM);
+    varType.setProperty(VariableType.AXIOM_KEY, querySpec.getKey());
+    ItemList<?> itemList = varType.getItemListInstance(parserAssembler, querySpec.getName());
+    parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
   }  
 }
 
@@ -419,7 +427,7 @@ QuerySpec Query(ParserContext context) :
    Token queryToken;
 }
 {
-  queryToken=<IDENTIFIER>
+  queryToken=<IDENTIFIER> 
   {
     return new QuerySpec(queryToken.image);
   }    
@@ -1023,15 +1031,22 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
     return innerLoop;
   }
   |
-  literalToken=<AXIOM> qualifiedAxiomName=Axiom(context) expression = AxiomVariable(qualifiedAxiomName, context) 
+  literalToken=<AXIOM> 
+  {
+    context.onTokenIntercept(literalToken);
+  }
+  qualifiedAxiomName=Axiom(context) expression = AxiomVariable(qualifiedAxiomName, context) 
   {
     parserAssembler.getOperandMap().addOperand(expression);
     template.addTerm(expression);
-    context.onTokenIntercept(literalToken);
     return expression;
   }
   |
-  literalToken=<CHOICE> choiceToken=<IDENTIFIER>
+  literalToken=<CHOICE>
+  {
+    context.onTokenIntercept(literalToken);
+  }
+  choiceToken=<IDENTIFIER>
   {
     qualifiedAxiomName = QualifiedName.parseName(choiceToken.image);
     qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
@@ -1044,7 +1059,6 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
  	Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     template.addTerm(choiceOperand);
-    context.onTokenIntercept(literalToken);
     return choiceOperand;
   }
 }
@@ -1338,6 +1352,7 @@ void VariableInitialization(ParserContext context) :
 Operand VariableDeclaration(ParserContext context) :
 {
   Token nameToken;
+  boolean isUntyped = true;
   VariableType varType = null;
   Operand index = null;
   Operand expression = null;
@@ -1346,11 +1361,18 @@ Operand VariableDeclaration(ParserContext context) :
   context.setSourceItemPending(true);
 }
 {
-  ( varType=Type(context) )? nameToken=<IDENTIFIER> ( index=IndexExpression(context) )? ( "=" expression=Expression(context) )?
+  ( varType=Type(context)
+    {
+      isUntyped = false;
+    }
+  )? 
+  nameToken=<IDENTIFIER> 
   {
-     boolean isUntyped = (varType == null);
-     if (isUntyped)
-       context.onTokenIntercept(nameToken);
+    if (isUntyped)
+      context.onTokenIntercept(nameToken);
+  }
+  ( index=IndexExpression(context) )? ( "=" expression=Expression(context) )?
+  {
      String name = nameToken.image;
      if (index !=null)
          return listItemOperand(context.getQualifiedName(name), parserAssembler, index, expression);

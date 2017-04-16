@@ -27,12 +27,9 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * InWordsTest
@@ -47,16 +44,10 @@ public class InWordsTest
         InWords inWords = new InWords();
         File testFile = new File("src/main/resources/tutorial4", "query_in_words.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        int[] count = new int[1];
-        count[0] = 0;
-        ParserContext context = inWords.findInWords(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                Axiom wordAxiom = solution.getAxiom("in_words");
-                checkSolution(reader, wordAxiom.toString());
-                return true;
-            }});
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Iterator<Axiom> axiomIterator = inWords.findInWords();
+        while (axiomIterator.hasNext()) 
+              checkSolution(reader, axiomIterator.next().toString());
+        Iterator<SourceMarker> iterator = inWords.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -74,7 +65,7 @@ public class InWordsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon:in_words (3,22) (3,39)");
+        assertThat(sourceItem.toString()).isEqualTo("lexicon:in_words (3,29) (3,46)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

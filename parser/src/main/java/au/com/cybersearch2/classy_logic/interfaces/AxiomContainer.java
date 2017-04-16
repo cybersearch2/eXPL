@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.interfaces;
 
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 
 /**
@@ -31,4 +32,5 @@ public interface AxiomContainer
     AxiomListener getAxiomListener();
     void setAxiomTermNameList(List<String> axiomTermNameList);
     List<String> getAxiomTermNameList();
+    OperandType getOperandType();
 }

@@ -27,11 +27,9 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * StudentScoresTest
@@ -51,13 +49,10 @@ public class StudentScoresTest
         File testFile = new File("src/main/resources/tutorial6", "student-scores.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         StudentScores scores = new StudentScores();
-        ParserContext context = scores.displayLists(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                checkSolution(reader, solution.getAxiom("score").toString());
-                return true;
-            }});
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Iterator<Axiom> scoreIterator = scores.displayLists();
+        while (scoreIterator.hasNext())
+            checkSolution(reader, scoreIterator.next().toString());
+        Iterator<SourceMarker> iterator = scores.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -131,12 +126,12 @@ public class StudentScoresTest
         assertThat(iterator.hasNext()).isFalse();
      }
 
-    protected void checkSolution(BufferedReader reader, String shade)
+    protected void checkSolution(BufferedReader reader, String scores)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(shade).isEqualTo(line);
+            assertThat(scores).isEqualTo(line);
         }
         catch (IOException e)
         {

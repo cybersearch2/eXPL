@@ -810,8 +810,8 @@ public class CallOperandTest
                 Axiom germanColors = solution.getAxiom("german_colors");
                 AxiomList colorsList = (AxiomList)germanColors.getTermByName("colors").getValue();
                 Iterator<AxiomTermList> iterator = colorsList.iterator();
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors(Aqua, aqua = list<term> aqua(red = 0, green = 255, blue = 255))");
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors(Blue, blue = list<term> blue(red = 0, green = 0, blue = 255))");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors(Aqua, aqua = list<term> german_colors.aqua(german_colors.aqua) = aqua(red = 0, green = 255, blue = 255))");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors(Blue, blue = list<term> german_colors.blue(german_colors.blue) = blue(red = 0, green = 0, blue = 255))");
                 assertThat(iterator.hasNext()).isFalse();
                 assertThat(colorsList.getAxiomTermNameList()).isEmpty();
                 return true;
@@ -825,7 +825,7 @@ public class CallOperandTest
                 Axiom germanOrange = solution.getAxiom("german_orange");
                 AxiomList colorsList = (AxiomList)germanOrange.getTermByName("orange_color").getValue();
                 Iterator<AxiomTermList> iterator = colorsList.iterator();
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("orange_color(Orange, orange = list<term> orange(red = <empty>, green = <empty>, blue = <empty>))");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("orange_color(Orange, orange = list<term> german_orange.orange(german_orange.orange) = orange(red = <empty>, green = <empty>, blue = <empty>))");
                 assertThat(iterator.hasNext()).isFalse();
                 assertThat(colorsList.getAxiomTermNameList()).isEmpty();
                 return true;

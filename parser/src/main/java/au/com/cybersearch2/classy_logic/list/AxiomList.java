@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.list;
 
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
@@ -197,4 +198,10 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 		}
 		return builder.toString();
 	}
+
+    @Override
+    public OperandType getOperandType()
+    {
+        return OperandType.AXIOM;
+    }
 }

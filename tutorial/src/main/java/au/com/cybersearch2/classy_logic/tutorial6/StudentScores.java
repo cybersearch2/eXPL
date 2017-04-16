@@ -18,16 +18,17 @@ package au.com.cybersearch2.classy_logic.tutorial6;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * Lists
@@ -61,10 +62,12 @@ axiom grades (student, english, maths, history)
  mark[16] = "a";
  mark[17] = "a+";
  template score(student, mark[english], mark[maths], mark[history]);
- query marks(grades : score);
+ query<axiom> marks(grades : score);
 
 */
+    
     protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 
     public StudentScores()
     {
@@ -76,17 +79,23 @@ axiom grades (student, english, maths, history)
 	 * Compiles the LISTS script and runs the "marks" query, displaying the solution on the console.<br/>
 	 * Demonstrates a values list. See StudentScores2 for perhaps a better alternative to using a values list.
 	 * The expected result:<br/>
-	 * 	score(student = George, mark_english = a-, mark_maths = b, mark_history = a)<br/>
-	 *	score(student = Sarah, mark_english = b-, mark_maths = a+, mark_history = a-)<br/>
-	 *	score(student = Amy, mark_english = b+, mark_maths = a, mark_history = d-)<br/>
+        score(student = George, mark_english = b+, mark_maths = b-, mark_history = a-)<br/>
+        score(student = Sarah, mark_english = c+, mark_maths = a, mark_history = b+)<br/>
+        score(student = Amy, mark_english = b, mark_maths = a-, mark_history = e+)<br/>
 	 */
-	public ParserContext displayLists(SolutionHandler solutionHandler)
+	public Iterator<Axiom> displayLists()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("student-scores.xpl");
-		queryProgram.executeQuery("marks", solutionHandler);
-        return queryProgramParser.getContext();
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("marks");
+        return result.getIterator("marks");
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	protected QueryProgram compileScript(String script) throws ParseException
 	{
 		InputStream stream = new ByteArrayInputStream(script.getBytes());
@@ -102,12 +111,9 @@ axiom grades (student, english, maths, history)
 		try 
 		{
 	        StudentScores listsDemo = new StudentScores();
-			listsDemo.displayLists(new SolutionHandler(){
-	            @Override
-	            public boolean onSolution(Solution solution) {
-	                System.out.println(solution.getAxiom("score").toString());
-	                return true;
-	            }});
+			Iterator<Axiom> iterator = listsDemo.displayLists();
+			while (iterator.hasNext())
+	            System.out.println(iterator.next().toString());
 		} 
 		catch (ExpressionException e) 
 		{

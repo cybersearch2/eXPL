@@ -19,12 +19,12 @@ import java.io.File;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * Factorial
@@ -45,8 +45,8 @@ calc factorial
     ? i++ < n
   }
 );
-query factorial4 (factorial)(n = 4); 
-query factorial5 (factorial)(n = 5); 
+query<term> factorial4 (factorial)(n = 4); 
+query<term> factorial5 (factorial)(n = 5); 
 
 */
 
@@ -66,25 +66,31 @@ query factorial5 (factorial)(n = 5);
 	 * factorial(n = 5, i = 6, factorial = 120)<br/>
 	 * @throws ParseException
 	 */
-	public ParserContext display4Factorial(SolutionHandler solutionHandler)
+	public Axiom[] displayFactorial4and5()
 	{
+	    Axiom[] factorials = new Axiom[2];
         QueryProgram queryProgram = queryProgramParser.loadScript("factorial.xpl");
-		queryProgram.executeQuery("factorial4", solutionHandler);
-        queryProgram.executeQuery("factorial5", solutionHandler);
-        return queryProgramParser.getContext();
+        parserContext = queryProgramParser.getContext();
+		Result result = queryProgram.executeQuery("factorial4");
+		factorials[0] = result.getAxiom("factorial4");
+		result = queryProgram.executeQuery("factorial5");
+        factorials[1] = result.getAxiom("factorial5");
+        return factorials;
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	public static void main(String[] args)
 	{
 		Factorial factorial = new Factorial();
 		try 
 		{
-			factorial.display4Factorial(new SolutionHandler(){
-	            @Override
-	            public boolean onSolution(Solution solution) {
-	                System.out.println(solution.getAxiom("factorial").toString());
-	                return true;
-	            }});
+		    Axiom[] factorials = factorial.displayFactorial4and5();
+			System.out.println(factorials[0].toString());
+            System.out.println(factorials[1].toString());
 		} 
 		catch (ExpressionException e) 
 		{

@@ -64,6 +64,26 @@ public class Result
 	}
 
     /**
+     * Returns axiom result specified by global namespace key
+     * @param name Name of axiom
+     * @return Axiom object
+     */
+    public Axiom getAxiom(String name)
+    {
+        return axiomMap.get(QualifiedName.parseGlobalName(name));
+    }
+
+    /**
+     * Returns iterator for result list specified by global namespace key
+     * @param name Name of list
+     * @return Axiom Iterator
+     */
+    public Iterator<Axiom> getIterator(String name)
+    {
+        return getList(QualifiedName.parseGlobalName(name)).iterator();
+    }
+
+    /**
      * Returns axiom result specified by key
      * @param qname Qualified name of axiom
      * @return Axiom object

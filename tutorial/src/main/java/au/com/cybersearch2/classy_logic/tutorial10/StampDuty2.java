@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -35,6 +34,36 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class StampDuty2 
 {
+/* stamp-duty2.xpl
+choice bracket
+    (    amount,     threshold, base, percent)
+    {amount <  12000,      0,     0.00, 1.00}
+    {amount <  30000,  12000,   120.00, 2.00}
+    {amount <  50000,  30000,   480.00, 3.00}
+    {amount < 100000,  50000,  1080.00, 3.50}
+    {amount < 200000, 100000,  2830.00, 4.00}
+    {amount < 250000, 200000,  6830.00, 4.25}
+    {amount < 300000, 250000,  8955.00, 4.75}
+    {amount < 500000, 300000, 11330.00, 5.00}
+    {amount > 500000, 500000, 21330.00, 5.50};
+
+axiom transaction_amount 
+  (  amount  )
+   {123458.00}
+    {55876.33}
+  {1245890.00};
+  
+calc stamp_duty_payable(
+  currency amount,
+  choice bracket,
+  currency duty = base + (amount - threshold) * (percent / 100),
+  string display = format(duty)
+);
+
+query<axiom> stamp_duty_query (transaction_amount : stamp_duty_payable);
+
+*/
+    
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
@@ -48,7 +77,7 @@ public class StampDuty2
 	 * Compiles the STAMP_DUTY script and runs the "stamp_duty_query" query. 
 	 * Choice named "bracket" here is a term of the "stamp_duty_payable"a calculator.
 	 * Note how selection term "amount" is declared preceding the Choice so as to give it a specific type.<br/>
-	 * The expected results:<br/>
+	 * The expected results (with locale currency code, here "AUD":<br/>
         stamp_duty_payable(amount = 123458.0, bracket = true, duty = 3768.320, display = AUD3,768.32)<br/>
         stamp_duty_payable(amount = 55876.33, bracket = true, duty = 1285.67155, display = AUD1,285.67)<br/>
         stamp_duty_payable(amount = 1245890.0, bracket = true, duty = 62353.9500, display = AUD62,353.95)
@@ -59,7 +88,7 @@ public class StampDuty2
         QueryProgram queryProgram = queryProgramParser.loadScript("stamp-duty2.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("stamp_duty_query");
-        return result.getIterator(QualifiedName.parseGlobalName("payable"));
+        return result.getIterator("stamp_duty_query");
 	}
 	
     public ParserContext getParserContext()

@@ -29,7 +29,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 22 Feb 2015
  */
-public class GreekConstruction 
+public class GreekConstruction implements SolutionHandler
 {
 
 /*
@@ -73,6 +73,17 @@ query customer_charge(charge:freight, customer:customer_freight);
         return queryProgramParser.getContext();
     }
 
+    /**
+     * onSolution - Print solution of both templates
+     * @see au.com.cybersearch2.classy_logic.interfaces.SolutionHandler#onSolution(au.com.cybersearch2.classy_logic.query.Solution)
+     */
+    @Override
+    public boolean onSolution(Solution solution) 
+    {
+        System.out.println(solution.getAxiom("freight").toString());
+        System.out.println(solution.getAxiom("customer_freight").toString());
+        return true;
+    }
 
 	/**
 	 * The query has 2 unification steps. The first unifies "charge" axiom with "freight" template.<br/>
@@ -92,13 +103,7 @@ customer_freight(name = Spiros Theodolites, city = Milos, charge = 17)<br/>
         try 
         {
             GreekConstruction greekConstruction = new GreekConstruction();
-            greekConstruction.findCustomerCharges(new SolutionHandler(){
-                @Override
-                public boolean onSolution(Solution solution) {
-                    System.out.println(solution.getAxiom("freight").toString());
-                    System.out.println(solution.getAxiom("customer_freight").toString());
-                    return true;
-                }});
+            greekConstruction.findCustomerCharges(greekConstruction);
         } 
         catch (ExpressionException e) 
         {

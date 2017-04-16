@@ -10,7 +10,7 @@ choice bracket
     {amount < 500000, 300000, 11330.00, 5.00}
     {amount > 500000, 500000, 21330.00, 5.50};
 
-axiom transacton_amount 
+axiom transaction_amount 
   (  amount  )
    {123458.00}
     {55876.33}
@@ -23,6 +23,4 @@ calc stamp_duty_payable(
   string display = format(duty)
 );
 
-list payable(stamp_duty_payable);
-
-query stamp_duty_query (transacton_amount : stamp_duty_payable);
+query<axiom> stamp_duty_query (transaction_amount : stamp_duty_payable);

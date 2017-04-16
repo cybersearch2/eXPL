@@ -41,6 +41,21 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class GreekConstructionTest
 {
     @Test
+    public void testNamedGreekConstruction() throws Exception
+    {
+        File testFile = new File("src/main/resources/tutorial2", "customer_charge2.txt");
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
+        NamedGreekConstruction greekConstruction = new NamedGreekConstruction();
+        greekConstruction.displayCustomerCharges(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                checkSolution(reader, solution.getAxiom("freight").toString(), solution.getAxiom("customer_freight").toString());
+                return true;
+            }});
+        reader.close();
+    }
+    
+    @Test
     public void testGreekConstruction() throws Exception
     {
         File testFile = new File("src/main/resources/tutorial2", "customer_charge.txt");

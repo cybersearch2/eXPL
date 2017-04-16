@@ -14,4 +14,4 @@ axiom grades (student, english, maths, history)
 };
  list<term> mark(alpha_marks);
  template score(student, english = mark[(english)], maths = mark[(maths)], history = mark[(history)]);
- query marks(grades : score);
+ query<axiom> marks(grades : score);

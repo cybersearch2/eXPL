@@ -16,14 +16,15 @@
 package au.com.cybersearch2.classy_logic.tutorial6;
 
 import java.io.File;
+import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * Colors
@@ -51,9 +52,10 @@ public class BlackIsWhite
       integer g = rgb[green], 
       integer b = rgb[blue]
     );
-    query colors(swatch : shade);
+    query<axiom> colors(swatch : shade);
      */
     protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 
     public BlackIsWhite()
     {
@@ -73,24 +75,27 @@ public class BlackIsWhite
 		shade(name = blue, color_red = 255, color_green = 255, color_blue = 0,<br/> 
 		      r = 255, g = 255, b = 0)<br/>	 
 	 */
-	public ParserContext displayShades(SolutionHandler solutionHandler)
+	public Iterator<Axiom> displayShades()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("black-is-white.xpl");
-		queryProgram.executeQuery("colors", solutionHandler);
-        return queryProgramParser.getContext();
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("colors");
+        return result.getIterator("colors");
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	public static void main(String[] args)
 	{
 		try 
 		{
 	        BlackIsWhite blackIsWhite = new BlackIsWhite();
-			blackIsWhite.displayShades(new SolutionHandler(){
-	            @Override
-	            public boolean onSolution(Solution solution) {
-	                System.out.println(solution.getAxiom("shade").toString());
-	                return true;
-	            }});
+			Iterator<Axiom> iterator = blackIsWhite.displayShades();
+			while (iterator.hasNext())
+	                System.out.println(iterator.next().toString());
 		} 
 		catch (ExpressionException e) 
 		{
