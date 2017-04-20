@@ -19,9 +19,10 @@ import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -38,22 +39,33 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class MultiCurrency 
 {
-	static final String WORLD_CURRENCY =
-			"include \"world_currency.xpl\";\n" +
-	        "calc charge_plus_gst(\n" +
-			"  country,\n" +
-			"  currency $ country charge = amount,\n" +
-			"  currency $ country total = charge * 1.1,\n" +
-			"  string total_text = country + \" Total + gst: \" + format(total)\n" +
-	        ");\n" +
-	        "list world_list(charge_plus_gst);\n" +
-			"query price_query(price : charge_plus_gst);";
+/* multi-currency.xpl
+include "world_currency.xpl";
 
-	/**
+calc charge_plus_gst
+(
+  country,
+  currency $ country charge = amount,
+  currency $ country total = charge * 1.1,
+  string total_text = country + " Total + gst: " + format(total)
+);
+
+list world_list(charge_plus_gst);
+
+query<axiom> price_query(price : charge_plus_gst);
+
+*/
+
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+    
+    /**
 	 * Construct MultiCurrency object
 	 */
 	public MultiCurrency() 
 	{
+        File resourcePath = new File("src/main/resources");
+        queryProgramParser = new QueryProgramParser(resourcePath);
 	}
 
 	/**
@@ -67,16 +79,19 @@ public class MultiCurrency
 	 */
 	public Iterator<Axiom> getFormatedAmounts()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.setResourceBase(new File("src/main/resources"));
-
-		queryProgram.parseScript(WORLD_CURRENCY);
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial12/multi-currency.xpl");
+        parserContext = queryProgramParser.getContext();
 		// Use this query to see the total amount before it is formatted
 		// Note adjustment of decimal places to suite currency.
 		Result result = queryProgram.executeQuery("price_query");
-		return result.getIterator(QualifiedName.parseGlobalName("world_list"));
+		return result.getIterator("price_query");
 	}
 	
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * @param args

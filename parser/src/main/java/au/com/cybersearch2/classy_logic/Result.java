@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -30,6 +31,21 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  */
 public class Result 
 {
+    private static final Iterator<Axiom> EMPTY_ITERATOR = 
+        new Iterator<Axiom>(){
+
+            @Override
+            public boolean hasNext()
+            {
+                return false;
+            }
+
+            @Override
+            public Axiom next()
+            {
+                return null;
+            }};
+            
     /** Empty collection */
     static Map<QualifiedName, Iterable<Axiom>> EMPTY_LIST_MAP;
     /** Container of result lists accessible by Iterable interface */
@@ -70,7 +86,34 @@ public class Result
      */
     public Axiom getAxiom(String name)
     {
-        return axiomMap.get(QualifiedName.parseGlobalName(name));
+        Axiom axiom  = axiomMap.get(QualifiedName.parseGlobalName(name));
+        return axiom != null ? axiom : new Axiom(name);
+    }
+
+    /**
+     * Returns iterator for result list specified by global namespace key
+     * @param name Name of list
+     * @return Axiom Iterator
+     */
+    public Iterator<Axiom> getIterator(String scope, String name)
+    {
+        Iterable<Axiom> axiomListIterable = listMap.get(new QualifiedName(scope, name));
+        if (axiomListIterable == null)
+            axiomListIterable = getList(new QualifiedTemplateName(scope, name));
+        return axiomListIterable != null ? axiomListIterable.iterator() : EMPTY_ITERATOR;
+    }
+
+    /**
+     * Returns axiom result specified by global namespace key
+     * @param name Name of axiom
+     * @return Axiom object
+     */
+    public Axiom getAxiom(String scope, String name)
+    {
+        Axiom axiom  = axiomMap.get(new QualifiedName(scope, name));
+        if (axiom == null)
+            axiom  = axiomMap.get(new QualifiedTemplateName(scope, name));
+        return axiom != null ? axiom : new Axiom(name);
     }
 
     /**
@@ -90,7 +133,8 @@ public class Result
      */
     public Axiom getAxiom(QualifiedName qname)
     {
-        return axiomMap.get(qname);
+        Axiom axiom  = axiomMap.get(qname);
+        return axiom != null ? axiom : new Axiom(qname.getName());
     }
 
     /**

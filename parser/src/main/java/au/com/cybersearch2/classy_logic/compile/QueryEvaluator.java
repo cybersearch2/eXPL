@@ -26,6 +26,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -58,6 +59,8 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
     
     /** Qualified query name - can be qualified by the name of a scope */
     protected QualifiedName qualifiedQueryName;
+    /** Name used to identify query */
+    protected String queryName;
     /** Query parameters */
     protected QueryParams queryParams;
     /** Caller's scope */
@@ -68,14 +71,17 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
     protected Template innerTemplate;
     /** Term belonging to inner template - holds AxiomTermList */
     protected Term innerTerm;
+    /** Axiom listeners for results */
+    protected List<AxiomListener> axiomListenerList;
 
     /**
      * Construct a QueryEvaluator object for a query specified by query parameters
      * @param qualifiedQueryName Qualified query name - can be qualified by the name of a scope
      * @param innerTemplate Optional inner Template to receive query results
      */
-    public QueryEvaluator(QualifiedName qualifiedQueryName, Template innerTemplate)
+    public QueryEvaluator(String queryName, QualifiedName qualifiedQueryName, Template innerTemplate)
     {
+        this.queryName = queryName;
         this.qualifiedQueryName = qualifiedQueryName;
         this.innerTemplate = innerTemplate;
     }
@@ -86,20 +92,21 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
     @Override
     public void run(ParserAssembler parserAssembler)
     {
+        // The queyName may be 2-part, so extract name component using QualifiedName utility
+        QualifiedName qualifiedCallName = QualifiedName.parseName(queryName);
         callerScope = parserAssembler.getScope();
         Library library = getLibrary(parserAssembler);
-        final String queryName = qualifiedQueryName.getName();
-        String callName = library.name + "." + queryName;
+        String callName = library.name + "." + qualifiedCallName.getName();
         if (library.functionScope == null)
             throw new ExpressionException("Scope \"" + queryName + "\" not found");
-        QuerySpec querySpec = library.functionScope.getQuerySpec(queryName);
+        QuerySpec querySpec = library.functionScope.getQuerySpec(qualifiedCallName.getName());
         if (querySpec == null)
         {
             QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library.name, queryName);
             if ((library.functionScope == callerScope) && (parserAssembler.getTemplate(qualifiedTemplateName) == null))
-                throw new ExpressionException("Query \"" + queryName + "\" not found in scope \"" + library + "\"");
+                throw new ExpressionException("Query \"" + qualifiedCallName.getName() + "\" not found in scope \"" + library + "\"");
             querySpec = new QuerySpec(callName);
-            querySpec.addKeyName(new KeyName("", queryName));
+            querySpec.addKeyName(new KeyName("", qualifiedCallName.getName()));
             querySpec.setQueryType(QueryType.calculator);
         }
         queryParams = new QueryParams(library.functionScope, querySpec);
@@ -109,6 +116,11 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         {   // Get term belonging to inner template 
             QualifiedName innerTemplateName = innerTemplate.getQualifiedName();
             innerTerm = callerOperandMap.get(innerTemplateName);
+            QualifiedName axiomKey = QualifiedName.parseName(innerTemplate.getKey());
+            axiomListenerList = parserAssembler.getAxiomListenerList(axiomKey);
+            AxiomTermList itemList = parserAssembler.getAxiomTermList(axiomKey);
+            parserAssembler.setAxiomTermNameList(innerTemplate, itemList);
+            axiomListenerList.add(itemList.getAxiomListener());
         }
         else
         {   // Create empty AxiomTermList to avoid null issues
@@ -175,7 +187,11 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             else
                 template.pop();
         }
-        return (AxiomTermList) innerTerm.getValue();
+        AxiomTermList axiomTermList = (AxiomTermList) innerTerm.getValue();
+        if (axiomListenerList != null)
+            for (AxiomListener listener: axiomListenerList)
+                listener.onNextAxiom(qualifiedQueryName, axiomTermList.getAxiom());
+        return axiomTermList; 
     }
 
     /**

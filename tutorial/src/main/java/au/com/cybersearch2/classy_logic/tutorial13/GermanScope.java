@@ -15,10 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial13;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -33,19 +37,15 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class GermanScope 
 {
-	static final String GERMAN_SCOPE =
-			"axiom item (amount) : parameter;\n" +
-			"axiom lexicon (Total);\n" +
-            "axiom german.lexicon (Total)\n" +
-	        "  {\"Gesamtkosten\"};\n" +
-			"template charge(currency amount);\n" +
-			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +
-			"calc format_total(string total_text = translate[Total] + \" + gst: \" + format(charge_plus_gst.total));\n" +
-            "local translate(lexicon);" +
-			"scope german (language=\"de\", region=\"DE\")\n" +
-			"{\n" +
-			"  query item_query(item : charge) >> (charge_plus_gst) >> (format_total);\n" +
-	        "}";
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public GermanScope()
+    {
+        File resourcePath = new File("src/main/resources/tutorial13");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+
 
 	/**
 	 * Compiles the GERMAN_SCOPE script and runs the "item_query" query, displaying the solution on the console.<br/>
@@ -53,26 +53,23 @@ public class GermanScope
 	 */
     public Axiom getFormatedTotalAmount()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(GERMAN_SCOPE);
+        QueryProgram queryProgram = queryProgramParser.loadScript("german-scope.xpl");
+        parserContext = queryProgramParser.getContext();
 		// Create QueryParams object for scope "german" and query "item_query"
 		QueryParams queryParams = queryProgram.getQueryParams("german", "item_query");
 		// Add an item Axiom with a single "2.345,67 EUR" term
 		// This axiom goes into the Global scope and is removed at the start of the next query.
         Solution initialSolution = queryParams.getInitialSolution();
         initialSolution.put("item", new Axiom("item", new Parameter("amount", "12.345,67 €")));
-        // Add a solution handler to display the final Calculator solution
-		final Axiom[] formatedTotalAmountHolder = new Axiom[1];
-        queryParams.setSolutionHandler(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                formatedTotalAmountHolder[0] = solution.getAxiom("format_total");
-                return true;
-            }});
-        queryProgram.executeQuery(queryParams);
-		return formatedTotalAmountHolder[0];
+        Result result = queryProgram.executeQuery(queryParams);
+        return result.getAxiom("german", "item_query");
 	}
 	
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * The expected result:<br/>

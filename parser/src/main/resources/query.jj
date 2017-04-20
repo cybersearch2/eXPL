@@ -367,17 +367,17 @@ void ResourceDeclaration(ParserContext context) :
 void ScopeDeclaration(ParserContext context) :
 {
   Token scopeToken;
+  Token nameToken;
   Map<String, Object> properties = new HashMap<String, Object>();
 }
 {
-  scopeToken=<SCOPE> scopeToken = <IDENTIFIER>   
+  scopeToken=<SCOPE> nameToken=<IDENTIFIER>   
   {
-    context.setSourceMarker(scopeToken, scopeToken.image);
-  
+    context.setSourceMarker(scopeToken, nameToken.image);
   }
   [ InitialiserList(properties, context) ]
   {
-    Scope scope = context.getQueryProgram().scopeInstance(scopeToken.image , properties);
+    Scope scope = context.getQueryProgram().scopeInstance(nameToken.image , properties);
     context.setScope(scope);
   }
   "{" 
@@ -802,6 +802,7 @@ void CalculatorTemplate(ParserContext context) :
   Token delimitToken;
   Operand operand;
   SourceItem sourceItem;
+  Token privateToken = null;
   Map<String, Object> properties = new HashMap<String, Object>();
   ParserAssembler parserAssembler = context.getParserAssembler();
   QualifiedName contextName = context.getContextName();
@@ -811,30 +812,40 @@ void CalculatorTemplate(ParserContext context) :
   {
     context.setSourceMarker(calcToken, template.getQualifiedName());
   }
-  (  
-    ( operand = CalculatorExpression(template, template.getQualifiedName(), context) |
-      operand = CalculatorQuery(template, context))
+  ( privateToken="." )?  
+  ( 
+    operand = CalculatorExpression(template, template.getQualifiedName(), context) 
+    |
+    operand = CalculatorQuery(template, context)
+  )
+  {
+    if (privateToken != null)
+      operand.setPrivate(true);
+    privateToken = null;
+    sourceItem = addSourceVariable(operand, context);
+  }        
+  (
+    delimitToken="," 
+    {
+      sourceItem.setEnd(delimitToken);
+    }
+    ( privateToken="." )?  
+    (  
+      operand = CalculatorExpression(template, template.getQualifiedName(), context) |
+      operand = CalculatorQuery(template, context)
     )
     {
+      if (privateToken != null)
+        operand.setPrivate(true);
+      privateToken = null;
       sourceItem = addSourceVariable(operand, context);
     }        
-    (
-     delimitToken="," 
-     {
-       sourceItem.setEnd(delimitToken);
-     }
-      (  
-        ( operand = CalculatorExpression(template, template.getQualifiedName(), context) |
-          operand = CalculatorQuery(template, context))
-      )
-      {
-        sourceItem = addSourceVariable(operand, context);
-      }        
-    )* delimitToken=")" 
-       {
-         sourceItem.setEnd(delimitToken);
-       }
-    [ InitialiserList(properties, context) ]
+  )* 
+  delimitToken=")" 
+    {
+      sourceItem.setEnd(delimitToken);
+    }
+  [ InitialiserList(properties, context) ]
   {
     if (properties.size() > 0)
         template.addProperties(properties);
@@ -852,7 +863,6 @@ Operand TemplateExpression(Template template, ParserContext context) :
     Operand index = null;
     Operand var = null;
     Token scToken = null;
-    Token privateToken = null;
     Token assignToken = null;
     Token equalsToken = null;
     Token regexLit = null;
@@ -960,7 +970,6 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
   Token delimitToken;
   Token choiceToken;
   Token scToken = null;
-  Token privateToken = null;
   Operand expression = null;
   Operand innerLoop = null;
   QualifiedName qualifiedAxiomName;
@@ -998,11 +1007,9 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
     return expression;
   }
   |
-  ( privateToken="." )? (expression=TemplateExpression(template, context) |
-                         expression=Expression(context))
+  (expression=TemplateExpression(template, context) |
+   expression=Expression(context))
   {
-    if (privateToken != null)
-      expression.setPrivate(true);
     template.addTerm(expression);
     return expression;
   }
@@ -1010,6 +1017,7 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
   (
     delimitToken="{"
     {
+      context.onTokenIntercept(delimitToken);
       context.pushSourceMarker();
       QualifiedName innerTemplateName = createInnerTemplateName(outerTemplateName);
       Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, innerTemplateName);
@@ -1022,7 +1030,6 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
     {
       context.checkForShortCircuit();
       context.popSourceMarker();
-      context.onTokenIntercept(delimitToken);
     }
   )
   {
@@ -1065,63 +1072,95 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
 
 Operand CalculatorQuery(Template template, ParserContext context) :
 {
+  Token queryToken;
+  Token delimitToken;
   String queryName;
+  String callName;
+  QualifiedName qname;
+  QualifiedName outerTemplateName = template.getQualifiedName();
   List<OperandParam> operandParamList = null;
   Template innerTemplate = null;
 }
 {
-  ( innerTemplate=InnerTemplateDeclaration(template.getQualifiedName(), context) )? "<<" queryName=Name(context)  
-   "(" ( operandParamList = ArgumentList(context, false) )? ")"
+    queryToken="<<"
+    {
+      context.onTokenIntercept(queryToken);
+      context.pushSourceMarker();
+    }
+    queryName=Name(context)  
+    {
+      Token token = Token.newToken(QueryParserConstants.QUERY);
+      token.beginLine = queryToken.beginLine;
+      token.beginColumn = queryToken.beginColumn;
+      context.setSourceMarker(token, queryName);
+      context.setSourceItemPending(false);
+    }
+   "(" ( operandParamList = ArgumentList(context, false) )? delimitToken=")"
+   {
+     qname = context.getQualifiedName(queryName);
+     callName = qname.getName();
+     int reference = qname.incrementReferenceCount();
+     if (reference > 0)
+       qname = new QualifiedName(qname.getName() + reference, qname);
+     context.addCalcQuery(qname, operandParamList).setEnd(delimitToken);
+   }
+   ( innerTemplate=InnerTemplateDeclaration(outerTemplateName.getTemplate() + "." + callName, new QualifiedName(callName, createInnerTemplateName(outerTemplateName)), context) )?
   {
-    QualifiedName qname = QualifiedName.parseName(queryName);
-    Operand queryOperand = context.getParserAssembler().getQueryOperand(qname, operandParamList, innerTemplate);
+    Operand queryOperand = context.getParserAssembler().getQueryOperand(queryName, qname, operandParamList, innerTemplate);
     template.addTerm(queryOperand);
     if (innerTemplate != null)
         template.setNext(innerTemplate);
+    context.popSourceMarker();
     return queryOperand;
   }
 }
 
-Template InnerTemplateDeclaration(QualifiedName ownerQualifiedName, ParserContext context) :
+Template InnerTemplateDeclaration(String queryKey, QualifiedName qualifiedTemplateName, ParserContext context) :
 {
   Template template;
   Operand expression;
+  Token templateToken;
+  Token delimitToken;
+  SourceItem sourceItem;
 }
 {
-    <TEMPLATE> template=InnerTemplate(ownerQualifiedName, context) "(" 
+    templateToken=">>"
+    {
+      ParserAssembler parserAssembler = context.getParserAssembler();
+      template = parserAssembler.createTemplate(qualifiedTemplateName, false);
+      template.setInnerTemplate(true);
+      template.setKey( queryKey);
+      context.onTokenIntercept(templateToken);
+    }
+    delimitToken="(" 
+    {
+      context.addSourceItem(">> " + qualifiedTemplateName.toString()).setEnd(delimitToken);
+    }
       ( 
         expression=TemplateExpression(template, context)
-        {
-            template.addTerm(expression);
+        { 
+          template.addTerm(expression);
+          sourceItem=context.addSourceItem(expression);
         }
       )
       (
-        "," 
+        delimitToken="," 
+        {
+          sourceItem.setEnd(delimitToken);
+        }
         (
           expression=TemplateExpression(template, context)
         {
-            template.addTerm(expression);
+          template.addTerm(expression);
+          sourceItem=context.addSourceItem(expression);
         }
         )
-      )* ")" 
+      )* 
+      delimitToken=")" 
     {
+        sourceItem.setEnd(delimitToken);
         return template;
     }
-}
-
-Template InnerTemplate(QualifiedName ownerQualifiedName, ParserContext context) :
-{
-  Token templateToken;
-}
-{
-  templateToken=<IDENTIFIER>
-  { 
-    QualifiedName qualifiedTemplateName = new QualifiedName(templateToken.image, ownerQualifiedName);
-    Template innerTemplate = context.getParserAssembler().createTemplate(qualifiedTemplateName, false);
-    innerTemplate.setInnerTemplate(true);
-    innerTemplate.setKey(templateToken.image);
-    return innerTemplate; 
-  }
 }
 
 Operand InnerCalculator(Template template, QualifiedName outerTemplateName, ParserContext context, boolean runOnce) :
@@ -1310,6 +1349,7 @@ void Group(Group group, Template template, String name, ParserAssembler parserAs
     Operand var = parserAssembler.getOperandMap().addOperand(groupToken.image, null);   
     template.addTerm(var);
     group.addGroup(var);
+    var.setPrivate(true);
   }
 }
 
@@ -1495,7 +1535,7 @@ Operand PrimaryExpression(ParserContext context) :
   name=Name(context) ( param1=NamedExpression(name, context) )?
   {
     if (param1 == null)
-        return operandMap.addOperand(name, null);
+        return parserAssembler.addOperand(name);
     return param1;
   }
   |
@@ -1696,15 +1736,18 @@ VariableType Type(ParserContext context) :
       context.onTokenIntercept(literalToken);
       return varType; 
     }
-|   literalToken=<CURRENCY> ( "$" ( qualifierLit=<STRING_LITERAL> | qualifierId=Name(context) ))?
+|   literalToken=<CURRENCY>
+    {
+      context.onTokenIntercept(literalToken);
+    }
+    ( "$" ( qualifierLit=<STRING_LITERAL> | qualifierId=Name(context) ))?
     { 
       varType = new VariableType(OperandType.CURRENCY);
       if (qualifierLit != null)
          varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
       else if (qualifierId != null)
          varType.setProperty(VariableType.QUALIFIER_OPERAND, context.getOperandMap().addOperand(qualifierId, null));
-      context.onTokenIntercept(literalToken);
-      return varType; 
+       return varType; 
     }
 }
 

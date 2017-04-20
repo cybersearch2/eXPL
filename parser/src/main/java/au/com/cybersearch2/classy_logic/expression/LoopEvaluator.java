@@ -52,7 +52,7 @@ public class LoopEvaluator extends BooleanOperand
 
 	public LoopEvaluator(Template template, boolean runOnce) 
 	{
-		super(new QualifiedName(runOnce ? "run_once" : "loop", template.getQualifiedName()));
+		super(new QualifiedName((template.getQualifiedName().getTemplate()) + (runOnce ? "_run_once" : "_loop"), template.getQualifiedName()));
 		this.template = template;
 		this.runOnce = runOnce; 
 	}

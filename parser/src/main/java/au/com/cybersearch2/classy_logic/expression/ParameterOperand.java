@@ -23,6 +23,8 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * ParameterOperand
@@ -59,7 +61,18 @@ public class ParameterOperand<R> extends Variable
      */
     public EvaluationStatus evaluate(int id)
     {
-        setValue(parameterList.evaluate(id));
+        R returnValue = parameterList.evaluate(id);
+        if ((returnValue != null) && (returnValue instanceof AxiomTermList))
+        {
+            AxiomTermList axiomTermList = (AxiomTermList)returnValue;
+            Axiom axiom = axiomTermList.getAxiom();
+            if (axiom.getTermCount() == 1)
+                setValue(axiom.getTermByIndex(0).getValue());
+            else
+                setValue(axiom);
+        }
+        else
+            setValue(returnValue);
         this.id = id;
         return EvaluationStatus.COMPLETE;
     }
@@ -88,5 +101,34 @@ public class ParameterOperand<R> extends Variable
     {
         return paramsTreeRoot;
     }
-    
+
+    /**
+     * @see au.com.cybersearch2.classy_logic.expression.Variable#toString()
+     */
+    @Override
+    public String toString()
+    {
+        if (empty)
+        {
+            StringBuilder builder = new StringBuilder(qname.toString());
+            builder.append('(');
+            if (paramsTreeRoot != null)
+            {
+                List<OperandParam> opParamList = parameterList.getOperandParamList();
+                OperandParam op1 = opParamList.get(0);
+                builder.append(getOperandText(op1));
+                if (opParamList.size() > 1)
+                    builder.append(" ... ").append(getOperandText(opParamList.get(opParamList.size() - 1)));
+            }
+            builder.append(')');
+            return builder.toString();
+        }
+        return super.toString();
+    }
+ 
+    protected String getOperandText(OperandParam param)
+    {
+       return param.getName().isEmpty() ? param.getOperand().toString() : param.getName(); 
+    }
+
 }

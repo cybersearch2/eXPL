@@ -15,11 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial12;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * SingleCurrency
@@ -32,14 +35,29 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class SingleCurrency 
 {
-	static final String CURRENCY =
-		"axiom item() {\"$1234.56\"};\n" +
-		"template charge(currency $ \"AU\" amount);\n" +
-	    "calc charge_plus_gst(\n" +
-	    "  currency $ \"AU\" total = amount * 1.1,\n" +
-	    "  string total_text = \"Total + gst: \" + format(total));\n" +
-		"query item_query(item : charge) >> (charge_plus_gst);";
+/* single-currency.xpl
+axiom item() {"$1234.56"};
 
+template charge(currency $ "AU" amount);
+
+calc charge_plus_gst
+(
+  currency $ "AU" total = amount * 1.1,
+  string total_text = "Total + gst: " + format(total)
+);
+
+query<term> item_query(item : charge) >> (charge_plus_gst);
+
+*/
+
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public SingleCurrency()
+    {
+        queryProgramParser = new QueryProgramParser(new File("src/main/resources/tutorial12"));
+    }
+    
 	/**
 	 * Compiles the CURRENCY script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
@@ -47,18 +65,17 @@ public class SingleCurrency
 	 */
 	public String getFormatedTotalAmount()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.parseScript(CURRENCY);
-		final String[] formatedTotalAmountHolder = new String[1];
-		queryProgram.executeQuery("item_query", new SolutionHandler(){
-			@Override
-			public boolean onSolution(Solution solution) {
-			    formatedTotalAmountHolder[0] = solution.getString("charge_plus_gst", "total_text");
-				return true;
-			}});
-		return formatedTotalAmountHolder[0];
+        QueryProgram queryProgram = queryProgramParser.loadScript("single-currency.xpl");
+        parserContext = queryProgramParser.getContext();
+        Result result = queryProgram.executeQuery("item_query");
+	    return result.getAxiom("item_query").getTermByName("total_text").getValue().toString();
 	}
 	
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * @param args

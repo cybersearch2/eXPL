@@ -13,15 +13,12 @@ axiom expand =
    j = "adj." 
 };
    
-// Collect words starting with 'in' along with other details
-axiom word_definitions = {};
-
 calc in_words 
 (
-  word regex(wordRegex), definition regex(defRegex { part, def }),
-  axiom in_word = { word + ", " + expand[part] + "- " + def },
-  word_definitions += in_word
+. word regex(wordRegex), 
+. definition regex(defRegex { part, def }),
+  string in_word = word + ", " + expand[part] + "- " + def
 );
 
-query query_in_words(lexicon : in_words);
+query<axiom> in_words(lexicon : in_words);
 

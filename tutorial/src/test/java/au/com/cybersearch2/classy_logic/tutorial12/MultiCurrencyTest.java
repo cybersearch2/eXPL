@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial7;
+package au.com.cybersearch2.classy_logic.tutorial12;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -33,47 +33,67 @@ import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * HighCitiesListedTest
+ * MultiCurrencyTest
  * @author Andrew Bowley
- * 11Apr.,2017
+ * 17Apr.,2017
  */
-public class HighCitiesListedTest
+public class MultiCurrencyTest
 {
     @Test
-    public void testHighCities() throws Exception
+    public void testAgeDiscrimination() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial7", "high-cities-listed.txt");
+        File testFile = new File("src/main/resources/tutorial12", "multi-currency.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        HighCitiesListed highCities = new HighCitiesListed();
-        Iterator<Axiom> cityIterator = highCities.getHighCities();
-        while (cityIterator.hasNext())
-            checkSolution(reader, cityIterator.next().toString());
-        ParserContext context = highCities.getParserContext();
+        MultiCurrency multiCurrency = new MultiCurrency();
+        Iterator<Axiom> priceIterator = multiCurrency.getFormatedAmounts();
+        while (priceIterator.hasNext())
+            checkSolution(reader, priceIterator.next().getTermByName("total_text").getValue().toString());
+        ParserContext context = multiCurrency.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom city (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom price (1,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city()[10] (1,1) (11,21)");
+        assertThat(sourceItem.toString()).isEqualTo("price(country,amount)[104] (1,1) (105,23)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list city_list (17,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query price_query (11,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> city_list(high_city) (17,1) (17,25)");
-    }
+        assertThat(sourceItem.toString()).isEqualTo("price:charge_plus_gst (11,26) (11,48)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc charge_plus_gst (3,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("country (5,3) (5,9)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("currency charge = amount (6,3) (6,36)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("currency total = charge*1.1 (7,3) (7,41)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("string total_text = country+ Total + gst: +total_format (8,3) (9,0)");
+   }
     
-    protected void checkSolution(BufferedReader reader, String city)
+    protected void checkSolution(BufferedReader reader, String price)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(city).isEqualTo(line);
+            assertThat(price).isEqualTo(line);
         }
         catch (IOException e)
         {
@@ -81,5 +101,4 @@ public class HighCitiesListedTest
         }
 
     }
-
 }

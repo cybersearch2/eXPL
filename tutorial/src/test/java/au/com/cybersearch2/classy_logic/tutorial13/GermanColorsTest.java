@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial11;
+package au.com.cybersearch2.classy_logic.tutorial13;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -27,50 +27,49 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * RegexGroupsTest
+ * GermanColorsTest
  * @author Andrew Bowley
- * 16Apr.,2017
+ * 17Apr.,2017
  */
-public class RegexGroupsTest
+public class GermanColorsTest
 {
     @Test
-    public void testRegexGroups() throws Exception
+    public void testGermanColors() throws Exception
     {
-        RegexGroups regexGroups = new RegexGroups();
-        File testFile = new File("src/main/resources/tutorial11", "regex-groups.txt");
+        File testFile = new File("src/main/resources/tutorial13", "german-colors.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        Iterator<Axiom> axiomIterator = regexGroups.getRegexGroups();
-        while (axiomIterator.hasNext()) 
-              checkSolution(reader, axiomIterator.next().getTermByName("in_word").toString().substring(10));
-        Iterator<SourceMarker> iterator = regexGroups.getParserContext().getSourceMarkerSet().iterator();
+        GermanColors germanColors = new GermanColors();
+        checkSolution(reader, germanColors.getColorSwatch("Wasser"));
+        checkSolution(reader,germanColors.getColorSwatch("schwarz"));
+        checkSolution(reader,germanColors.getColorSwatch("weiß"));
+        checkSolution(reader,germanColors.getColorSwatch("blau"));
+        ParserContext context = germanColors.getParserContext();
+        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("string defRegex (5,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("local colors (17,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string defRegex = ^(.)\\. (.*+) (5,1) (5,32)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> colors(lexicon) (17,1) (17,21)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom expand (8,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("scope german (19,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> expand[1] (8,1) (14,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        assertThat(sourceMarker.toString()).isEqualTo("query in_words (23,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem.toString()).isEqualTo("language=de (19,15) (19,27)");
+        sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon:in_words (23,23) (23,40)");
+        assertThat(sourceItem.toString()).isEqualTo("region=DE (19,30) (19,40)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -78,40 +77,55 @@ public class RegexGroupsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon(Word,Definition):\"lexicon\" (2,1) (2,44)");
-        //System.out.println(sourceMarker.toString());
-       assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("string wordRegex (4,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string wordRegex = ^in[^ ]+ (4,1) (4,29)");
+        assertThat(sourceItem.toString()).isEqualTo("lexicon(aqua,black,blue,white) (2,1) (2,40)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc in_words (16,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom shade (15,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\ (18,3) (18,23)");
+        assertThat(sourceItem.toString()).isEqualTo("shade(name):parameter (15,1) (15,30)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("choice swatch (8,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("choice swatch(name,red,green,blue) (8,1) (9,33)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("definition \\^(.)\\. (.*+)\\ (19,3) (19,42)");
+        assertThat(sourceItem.toString()).isEqualTo("{name = colors_var0,0,255,255} (10,4) (10,31)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string in_word = word+, +expand_var0+- +def (20,3) (21,0)");
+        assertThat(sourceItem.toString()).isEqualTo("{name = colors_var1,0,0,0} (11,4) (11,31)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{name = colors_var2,0,0,255} (12,4) (12,31)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{name = colors_var3,255,255,255} (13,4) (13,31)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        ///System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("query german.color_query (21,3)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("shade:swatch (21,28) (21,41)");
    }
 
-    protected void checkSolution(BufferedReader reader, String word)
+    protected void checkSolution(BufferedReader reader, String color)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(word).isEqualTo(line);
+            assertThat(color).isEqualTo(line);
         }
         catch (IOException e)
         {

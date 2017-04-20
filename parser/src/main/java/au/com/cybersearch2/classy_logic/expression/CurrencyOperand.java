@@ -37,6 +37,8 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 	protected LocaleCurrency localeCurrency;
 	/** Operand to evaluate currency country */
 	protected Operand countryOperand;
+	/** Country code */
+	protected String country;
 	
 	/**
 	 * Construct CurrencyOperand object for specified locale
@@ -109,9 +111,11 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 		String[] parts = country.split("_|-");
 		if (parts.length == 2)
 		{
+		    this.country = parts[1];
 			localeCurrency.setLocale(new Locale(parts[0], parts[1]));
 			return;
 		}
+		this.country = country;
 		// Match to first Locale found by country. 
 		// Language is usually irrelevant for currency.
 		Locale matchedByCountry = null;
@@ -217,4 +221,15 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 	{
 		localeCurrency.setLocale(scope.getLocale());
 	}
+
+    /**
+     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return country != null ? country + " " + super.toString() : super.toString();
+    }
+
+
 }

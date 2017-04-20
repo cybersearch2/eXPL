@@ -15,12 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial17;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -32,55 +34,73 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class AgeDiscrimination2
 {
-    static final String STAR_PERSON = 
-            "axiom person (name, sex, age, starsign)\n" +
-            "             {\"John\", \"m\", 23, \"gemini\"}\n" + 
-            "             {\"Sue\", \"f\", 19, \"cancer\"}\n" + 
-            "             {\"Sam\", \"m\", 34, \"scorpio\"}\n" + 
-            "             {\"Jenny\", \"f\", 28, \"gemini\"}\n" + 
-            "             {\"Andrew\", \"m\", 26, \"virgo\"}\n" + 
-            "             {\"Alice\", \"f\", 20, \"pices\"}\n" + 
-            "             {\"Ingrid\", \"f\", 23, \"cancer\"}\n" + 
-            "             {\"Jack\", \"m\", 32, \"pices\"}\n" + 
-            "             {\"Sonia\", \"f\", 33, \"gemini\"}\n" + 
-            "             {\"Alex\", \"m\", 22, \"aquarius\"}\n" + 
-            "             {\"Jill\", \"f\", 33, \"cancer\"}\n" + 
-            "             {\"Fiona\", \"f\", 29, \"gemini\"}\n" + 
-            "             {\"melissa\", \"f\", 30, \"virgo\"}\n" + 
-            "             {\"Tom\", \"m\", 22, \"cancer\"}\n" + 
-            "             {\"Bill\", \"m\", 19, \"virgo\"};\n" + 
-            "choice age_rating\n" +
-            "  (age     , age_weight)\n" +
-            "  {age > 29, 0.3}\n" +
-            "  {age > 25, 0.6}\n" +
-            "  {age > 20, 1.0};\n" +
-            "axiom star_people = {}\n;" +
-            "calc perfect_match(\n" +
-            "  template age_rating(age_weight) << age_rating(age),\n" +
-            "  ? fact(age_rating),\n" +
-            "  double rating = age_weight + 0.2 * (starsign == \"gemini\"),\n" +
-            "  axiom star_person = { name, sex, starsign, rating  },\n" +
-            "  star_people += star_person\n" +
-            ");\n" +
-           "query star_people(person : perfect_match);";
+/* age-discrimination2.xpl
+ axiom person (name, sex, age, starsign)
+              {"John", "m", 23, "gemini"} 
+              {"Sue", "f", 19, "cancer"} 
+              {"Sam", "m", 34, "scorpio"} 
+              {"Jenny", "f", 28, "gemini"} 
+              {"Andrew", "m", 26, "virgo"} 
+              {"Alice", "f", 20, "pices"} 
+              {"Ingrid", "f", 23, "cancer"} 
+              {"Jack", "m", 32, "pices"} 
+              {"Sonia", "f", 33, "gemini"} 
+              {"Alex", "m", 22, "aquarius"} 
+              {"Jill", "f", 33, "cancer"} 
+              {"Fiona", "f", 29, "gemini"} 
+              {"melissa", "f", 30, "virgo"} 
+              {"Tom", "m", 22, "cancer"} 
+              {"Bill", "m", 19, "virgo"}; 
+              
+ choice age_rating
+   (age     , age_weight)
+   {age > 29, 0.3}
+   {age > 25, 0.6}
+   {age > 20, 1.0};
+   
+ calc perfect_match
+ (
+.  template age_rating(age_weight) << age_rating(age),
+   ? fact(age_rating),
+   name, sex, starsign,
+   double rating = age_weight + 0.2 * (starsign == "gemini")
+ );
+ 
+query<axiom> star_people(person : perfect_match);
+
+*/
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public AgeDiscrimination2()
+    {
+        File resourcePath = new File("src/main/resources/tutorial17");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
+
             
     /**
      * Compiles the STAR_PERSON script and runs the "star_people" query which gives each person 
      * over the age of 20 an age rating and excludes those aged 20 and under.<br/>
      * The first 3 expected results:<br/>
-     star_person(name = John, sex = m, starsign = gemini, rating = 1.2)<br/>
-     star_person(name = Sam, sex = m, starsign = scorpio, rating = 0.3)<br/>
-     star_person(name = Jenny, sex = f, starsign = gemini, rating = 0.8)<br/>
+     perfect_match(name = John, sex = m, starsign = gemini, rating = 1.2)<br/>
+     perfect_match(name = Sam, sex = m, starsign = scorpio, rating = 0.3)<br/>
+     perfect_match(name = Jenny, sex = f, starsign = gemini, rating = 0.8)<br/>
      * @return Axiom iterator
      */
     public Iterator<Axiom> getAgeRating()
     {
-        QueryProgram queryProgram = new QueryProgram();
-        queryProgram.parseScript(STAR_PERSON);
+        QueryProgram queryProgram = queryProgramParser.loadScript("age-discrimination2.xpl");
+        parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("star_people");
-        return result.getIterator(QualifiedName.parseGlobalName("star_people"));
+        return result.getIterator("star_people");
     }
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * @param args

@@ -15,13 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial16;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -33,14 +35,26 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class SchoolMarks
 {
-    static final String GRADES_SUM = 
-            "axiom grades (student, english, math, history)\n" +
-                " {\"Amy\", 14, 16, 6}\n" +
-                " {\"George\", 15, 13, 16}\n" +
-                " {\"Sarah\", 12, 17, 14};\n" +
-            "template score(student, integer total = math.add(english, math, history));\n" +
-            "list report(score);\n" +
-            "query marks(grades : score);";
+/* school-marks.xpl
+axiom grades 
+  (student, english, math, history)
+  {"Amy",    14, 16, 6}
+  {"George", 15, 13, 16}
+  {"Sarah",  12, 17, 14};
+  
+template score(student, integer total = math.add(english, math, history));
+
+query<axiom> marks(grades : score); 
+ 
+*/
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public SchoolMarks()
+    {
+        File resourcePath = new File("src/main/resources/tutorial16");
+        queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
+    }
 
     /**
      * Compiles the GRADES_SUM script and runs the "marks" query.<br/>
@@ -52,10 +66,10 @@ public class SchoolMarks
      */
     public Iterator<Axiom>  generateReport()
     {
-        QueryProgram queryProgram = new QueryProgram(provideFunctionManager());
-        queryProgram.parseScript(GRADES_SUM);
+        QueryProgram queryProgram = queryProgramParser.loadScript("school-marks.xpl");
+        parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("marks");
-        return result.getIterator(QualifiedName.parseGlobalName("report"));
+        return result.getIterator("marks");
     }
 
     FunctionManager provideFunctionManager()
@@ -66,6 +80,11 @@ public class SchoolMarks
         return functionManager;
     }
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * @param args

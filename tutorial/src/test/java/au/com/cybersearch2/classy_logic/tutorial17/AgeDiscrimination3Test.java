@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial17;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -33,95 +33,118 @@ import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * CalculateSquareMiles2Test
+ * AgeDiscrimination3Test
  * @author Andrew Bowley
- * 11Apr.,2017
+ * 18Apr.,2017
  */
-public class CalculateSquareMiles2Test
+public class AgeDiscrimination3Test
 {
-
     @Test
-    public void testSquareMiles() throws Exception
+    public void testAgeDiscrimination3() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial9", "calculate-square-miles2.txt");
+        File testFile = new File("src/main/resources/tutorial17", "age-discrimination3.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        CalculateSquareMiles2 squareMiles = new CalculateSquareMiles2();
-        Iterator<Axiom> countryIterator = squareMiles.displaySurfaceArea();
-        while (countryIterator.hasNext())
-            checkSolution(reader, countryIterator.next().toString());
-        reader.close();
-        ParserContext context =  squareMiles.getParserContext();  
+        AgeDiscrimination3 ageDiscrimination3 = new AgeDiscrimination3();
+        Iterator<Axiom> personIterator = ageDiscrimination3.getAgeRating();
+        while (personIterator.hasNext())
+            checkSolution(reader, personIterator.next().toString().substring(13));
+        ParserContext context = ageDiscrimination3.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom surface_area (1,1)");
-        assertThat(sourceMarker.getSourceDocumentId()).isEqualTo(1);
+        assertThat(sourceMarker.toString()).isEqualTo("choice age_rating (18,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area(country,surface_area_Km2)[213] (1,1) (215,29)");
+        assertThat(sourceItem.toString()).isEqualTo("choice age_rating(age,age_weight) (18,1) (19,23)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{age?age>29,0.3} (20,4) (20,16)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{age?age>25,0.6} (21,4) (21,16)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{age?age>20,1.0} (22,4) (22,16)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{age?age<21,NaN} (23,4) (23,16)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list surface_area_by_country (14,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom person (1,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> surface_area_by_country(filter_area) (14,1) (14,41)");
+        assertThat(sourceItem.toString()).isEqualTo("person(name,sex,age,starsign)[15] (1,1) (16,39)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query surface_area_query (15,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query star_people (33,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area:filter_area (15,26) (15,51)");
+        assertThat(sourceItem.toString()).isEqualTo("person:perfect_match (33,26) (33,47)");
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc perfect_match (25,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("rating = unknown (27,3) (27,18)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("age_rating(age) (28,3) (28,36)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("?is_age_weight_fact = age_weight (29,3) (29,21)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("is_age_weight_fact&&perfect_match2_run_once (29,22) (29,42)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("name (30,3) (30,6)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("sex (30,9) (30,11)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("starsign (30,14) (30,21)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc filter_area (2,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query perfect_match.age_rating (28,3)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("country {United States,Australia} (4,3) (4,43)");
+        assertThat(sourceItem.toString()).isEqualTo("<< age_rating(age) (28,3) (28,19)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double surface_area = surface_area_Km2 (5,3) (5,40)");
+        assertThat(sourceItem.toString()).isEqualTo(">> perfect_match1.age_rating (28,22) (28,24)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string units = km2 (6,3) (6,22)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?country==United States (8,3) (9,2)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("country==United States&&filter_area1_run_once (9,3) (13,0)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc filter_area1 (9,3)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area*=0.3861 (10,5) (10,26)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("km2=mi2 (11,5) (12,2)");
-        assertThat(iterator.hasNext()).isFalse();
-  }
+        assertThat(sourceItem.toString()).isEqualTo("age_weight (28,26) (28,35)");
+    }
     
-    protected void checkSolution(BufferedReader reader, String country)
+    protected void checkSolution(BufferedReader reader, String person)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(country).isEqualTo(line);
+            assertThat(person).isEqualTo(line);
         }
         catch (IOException e)
         {

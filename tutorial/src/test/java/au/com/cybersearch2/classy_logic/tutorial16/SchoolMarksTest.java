@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial7;
+package au.com.cybersearch2.classy_logic.tutorial16;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -33,47 +33,62 @@ import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * HighCitiesListedTest
+ * SchoolMarksTest
  * @author Andrew Bowley
- * 11Apr.,2017
+ * 17Apr.,2017
  */
-public class HighCitiesListedTest
+public class SchoolMarksTest
 {
     @Test
-    public void testHighCities() throws Exception
+    public void testSchoolMarks() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial7", "high-cities-listed.txt");
+        File testFile = new File("src/main/resources/tutorial16", "school-marks.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        HighCitiesListed highCities = new HighCitiesListed();
-        Iterator<Axiom> cityIterator = highCities.getHighCities();
-        while (cityIterator.hasNext())
-            checkSolution(reader, cityIterator.next().toString());
-        ParserContext context = highCities.getParserContext();
+        SchoolMarks schoolMarks = new SchoolMarks();
+        Iterator<Axiom> scoreIterator = schoolMarks.generateReport();
+        while(scoreIterator.hasNext())
+        {
+            checkSolution(reader, scoreIterator.next().toString());
+        }
+        ParserContext context = schoolMarks.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom city (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom grades (1,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city()[10] (1,1) (11,21)");
+        assertThat(sourceItem.toString()).isEqualTo("grades(student,english,math,history)[3] (1,1) (5,24)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list city_list (17,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query marks (9,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> city_list(high_city) (17,1) (17,25)");
-    }
-    
-    protected void checkSolution(BufferedReader reader, String city)
+        assertThat(sourceItem.toString()).isEqualTo("grades:score (9,20) (9,33)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("template score (7,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("student (7,16) (7,22)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("integer total = math.add(english ... history) (7,25) (7,72)");
+        assertThat(iterator.hasNext()).isFalse();
+    } 
+
+    protected void checkSolution(BufferedReader reader, String score)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(city).isEqualTo(line);
+            assertThat(score).isEqualTo(line);
         }
         catch (IOException e)
         {
@@ -81,5 +96,4 @@ public class HighCitiesListedTest
         }
 
     }
-
 }

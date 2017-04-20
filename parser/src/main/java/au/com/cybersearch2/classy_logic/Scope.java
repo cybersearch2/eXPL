@@ -292,7 +292,10 @@ public class Scope
     {
         String scopeName = axiomKey.getScope();
         if (!scopeName.isEmpty() && (scopeMap.get(scopeName) == null))
-            throw new ExpressionException("Scope \"" + scopeName + "\"  in axiom key \"" + axiomKey.toString() + "\" is not found");
+        {
+            if (!isTemplateName(scopeName))
+                throw new ExpressionException("Scope \"" + scopeName + "\"  in axiom key \"" + axiomKey.toString() + "\" is not found");
+        }
         AxiomSource axiomSource = parserAssembler.getAxiomSource(axiomKey);
         if (axiomSource != null)
             return axiomSource;
@@ -313,6 +316,27 @@ public class Scope
             }
         }
         return axiomSource;
+    }
+
+    public boolean isTemplateName(String templateName)
+    {
+        boolean isTemplateKey = false;
+        for (QualifiedName qame: parserAssembler.getTemplateNames())
+            if (qame.getTemplate().equals(templateName))
+            {
+                isTemplateKey = true;
+                break;
+            }
+        if (!isTemplateKey && !name.equals(QueryProgram.GLOBAL_SCOPE))
+        {
+            for (QualifiedName qame: getGlobalParserAssembler().getTemplateNames())
+                if (qame.getTemplate().equals(templateName))
+                {
+                    isTemplateKey = true;
+                    break;
+                }
+        }
+        return isTemplateKey;
     }
 
     /**

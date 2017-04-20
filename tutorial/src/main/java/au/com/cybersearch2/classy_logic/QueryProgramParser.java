@@ -34,6 +34,7 @@ import au.com.cybersearch2.classy_logic.parser.QueryParser;
 public class QueryProgramParser
 {
     protected ProviderManager providerManager;
+    protected FunctionManager functionManager;
     protected File resourcePath;
     protected ParserContext context;
 
@@ -56,6 +57,13 @@ public class QueryProgramParser
         providerManager.putAxiomProvider(axiomProvider);
     }
     
+    public QueryProgramParser(File resourcePath, FunctionManager functionManager)
+    {
+        this.resourcePath = resourcePath;
+        providerManager = new ProviderManager(resourcePath);
+        this.functionManager = functionManager;
+    }
+    
     public QueryProgram loadScript(String programFile)
     {
         File filePath = new File(resourcePath, programFile);
@@ -65,7 +73,11 @@ public class QueryProgramParser
         {
             stream = new FileInputStream(filePath);
             QueryParser queryParser = new QueryParser(stream);
-            queryProgram = new QueryProgram(providerManager);
+            if (functionManager != null)
+                queryProgram = new QueryProgram(providerManager, functionManager);
+            else
+                queryProgram = new QueryProgram(providerManager);
+            queryProgram.setResourceBase(resourcePath);
             queryProgram.setResourceBase(resourcePath);
             context = new ParserContext(queryProgram, filePath.toString());
             queryParser.input(context);

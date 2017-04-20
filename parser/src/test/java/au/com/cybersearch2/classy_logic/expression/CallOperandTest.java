@@ -231,6 +231,20 @@ public class CallOperandTest
         "Total score: 44"
     };
  
+    static final String[] MARKS_GRADES_RESULTS2 = 
+    {
+        "total = 36",
+        "total = 44",
+        "total = 44"
+    };
+    
+    static final String[] MATH_SCORES =
+    {
+        "math_score = list<term> subjects.marks_list() = marks_list(Math, mark_var1 = a-)",
+        "math_score = list<term> subjects.marks_list() = marks_list(Math, mark_var1 = b-)",
+        "math_score = list<term> subjects.marks_list() = marks_list(Math, mark_var1 = a)"
+    };
+    
     static final String[] SCHOOL_REPORT = 
     {
         "English b",
@@ -276,8 +290,8 @@ public class CallOperandTest
         "  );\n" +
          "}\n"  +
         "calc score(\n" +
-        "    template total(label, value) << school.total_score(english,math,history),\n" +
-        "    string total_text = total[label] + \": \" + total[value]\n" +
+        "    << school.total_score(english,math,history) >> (label, value),\n" +
+        "    string total_text = label + \": \" + value\n" +
         ");\n" +
         "query marks(grades : score);";
 
@@ -302,13 +316,13 @@ public class CallOperandTest
         "  );\n" +
         "}\n"  +
         "calc score(\n" +
-        "    template marks(marks_list) << school.subjects(english, math, history),\n" +
-        "    template total(label, value) << school.total_score(english, math, history),\n" +
-        "    axiom report = { score.marks, score.total[label] + \": \" + score.total[value] }\n" +
+        "    << school.subjects(english, math, history) >> (marks_list),\n" +
+        "    << school.total_score(english, math, history) >> (label, value),\n" +
+        "    axiom report = { marks_list, label + \": \" + value }\n" +
         ");\n" +
         "query marks(grades : score);";
 
-    static final String SCHOOL_REPORT_IN_SCOPE= GRADES + ALPHA_MARKS +
+    static final String SCHOOL_REPORT_IN_SCOPE = GRADES + ALPHA_MARKS +
             "  calc subjects(\n" +
             "    integer english,\n" +
             "    integer math,\n" +
@@ -325,12 +339,15 @@ public class CallOperandTest
             "    string label = \"Total score\",\n" +
             "    integer value = english + math + history\n" +
             "  );\n" +
+            "\n" +
             "calc score(\n" +
-            "    template marks(marks_list) << subjects(english, math, history),\n" +
-            "    template total(label, value) << total_score(english, math, history),\n" +
-            "    axiom report = { score.marks, score.total[label] + \": \" + score.total[value] }\n" +
+            "    << subjects(english, math, history) >> (marks_list),\n" +
+            "    math_score = score.subjects[1],\n" +
+            "    << total_score(english, math, history) >> (label, value),\n" +
+            "    total = score.total_score[value],\n" +
+            "    axiom report = { marks_list, label + \": \" + value }\n" +
             ");\n" +
-            "query marks(grades : score);";
+            "query<axiom> marks(grades : score);";
 
     static final String CITY_EVELATIONS =
         "axiom city (name, altitude)\n" + 
@@ -376,19 +393,20 @@ public class CallOperandTest
             "  );\n" +
             "}\n"  +
             "calc average_height(\n" +
-            "  template city_info(average) << city.average_height(),\n" +
-            "  average = city_info[average]\n" +
+            "  << city.average_height() >> (average),\n" +
+            "  average\n" +
             ");\n" +
             "query average_height (average_height);"
            ;
     static final String GERMAN_COLORS =
             "calc german_colors\n" +
             "(\n" +
-            "  template aqua(red, green, blue) << german.swatch(shade=\"Wasser\"),\n" + 
-            "  template blue(red, green, blue) << german.swatch(shade=\"blau\"),\n" + 
-            "  axiom colors =\n" +
-            "     { \"Aqua\", aqua }\n" +
-            "     { \"Blue\", blue }\n" +
+            "  axiom colors = {},\n" +
+            "  << german.swatch(shade=\"Wasser\") >> (red, green, blue),\n" + 
+            "  colors += axiom aqua { red, green, blue },\n" +
+            "  << german.swatch(shade=\"blau\") >> (red, green, blue),\n" + 
+            "  colors += axiom blue { red, green, blue }\n" +
+            "  \n" + 
             ");\n" +
             "axiom lexicon (aqua, black, blue, white);\n" +
             "axiom german.lexicon (aqua, black, blue, white)\n" +
@@ -405,10 +423,11 @@ public class CallOperandTest
             "query german_colors (german_colors);\n" +
             "calc german_orange\n" +
             "(\n" +
-            "  template orange(red, green, blue) << german.swatch(shade=\"Orange\"),\n" + 
-            "  axiom orange_color =\n" +
-            "     { \"Orange\", german_orange.orange }\n" +
-             ");\n" +
+            "  << german.swatch(shade=\"Orange\") >> (red, green, blue),\n" + 
+            "  boolean hasRed = fact(red),\n" +
+            "  boolean hasGreen = fact(green),\n" +
+            "  boolean hasBlue = fact(blue)\n" +
+            ");\n" +
             "query german_orange (german_orange);"
             ;
     static final String SORTED_CITIES = CITY_EVELATIONS +
@@ -492,15 +511,15 @@ public class CallOperandTest
             "  }\n" +
             ");\n" +
             "calc match(\n" +
-            "  template perfect(candidates) << people_by_starsign(\"gemini\"),\n" +
+            "  << people_by_starsign(\"gemini\") >> (candidates),\n" +
+            "  candidate_list = match.people_by_starsign,\n" +
              " integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(candidates),\n" +
             "    geminis += candidates[i++]\n" +
-            "    //system.print(gemini[name] + \", \" + gemini[sex] + \", \" + gemini[age] + \", \" + gemini[starsign])\n" +
             "  }\n" +
             " );\n" +
-            "query match(match);";
+            "query<axiom> match(match);";
     
     static final String FACTUAL_MATCH = 
             " axiom person (name, sex, age, starsign)\n" +
@@ -545,9 +564,7 @@ public class CallOperandTest
             ");\n" +
             "calc match(\n" +
             "  axiom eligible = {},\n" +
-            "  template perfect(candidates) << people_by_starsign(\"gemini\"),\n" +
-            "  //system.print(\"Perfect is fact = \" + fact(perfect)),\n" +
-            "  //system.print(perfect[candidates]),\n" +
+            "  << people_by_starsign(\"gemini\") >> (candidates),\n" +
             "  integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(candidates),\n" +
@@ -561,7 +578,6 @@ public class CallOperandTest
             "       integer age = gemini[age],\n" +
             "       string starsign = gemini[starsign]\n" +
             "      },\n" +
-            "      system.print(person),\n" +
             "      eligible += person\n" +
             "    }\n" +
             "  }\n" +
@@ -599,12 +615,19 @@ public class CallOperandTest
         queryProgram.parseScript(PERFECT_MATCH);
         Result result = queryProgram.executeQuery("match");
         QualifiedName qname = QualifiedName.parseGlobalName("geminis");
-        
         Iterator<Axiom> iterator = result.getIterator(qname);
         int index = 0;
         while(iterator.hasNext())
             //System.out.println(iterator.next().toString());
             assertThat(iterator.next().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
+        assertThat(index).isEqualTo(4);
+        qname = QualifiedName.parseGlobalName("match");
+        iterator = result.getIterator(qname);
+        //System.out.println(iterator.next().getTermByName("candidate_list").getValue());
+        AxiomList axiomList = (AxiomList) (iterator.next().getTermByName("candidate_list").getValue());
+        for (index = 0; index < axiomList.getLength(); ++index)
+            // System.out.println(axiomList.getItem(index).getAxiom().toString());
+            assertThat(axiomList.getItem(index).getAxiom().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
         assertThat(index).isEqualTo(4);
     }
     
@@ -732,13 +755,23 @@ public class CallOperandTest
     @Test
     public void test_school_report_in_scope()
     {
-        test_school_report(SCHOOL_REPORT_IN_SCOPE);
+        Result result = test_school_report(SCHOOL_REPORT_IN_SCOPE);
+        Iterator<Axiom> iterator = result.getIterator("marks");
+        int index = 0;
+        while (iterator.hasNext())
+        {
+            Axiom score = iterator.next();
+            //System.out.println(score.getTermByName("math_score"));
+            assertThat(score.getTermByName("math_score").toString()).isEqualTo(MATH_SCORES[index]);
+            //System.out.println(score.getTermByName("total"));
+            assertThat(score.getTermByName("total").toString()).isEqualTo(MARKS_GRADES_RESULTS2[index++]);
+        }
     }
     
-    protected void test_school_report(String xpl)
+    protected Result test_school_report(String xpl)
     {
         queryProgram.parseScript(xpl);
-        queryProgram.executeQuery("marks", new SolutionHandler(){
+        Result result = queryProgram.executeQuery("marks", new SolutionHandler(){
             int index1 = 0;  
             int index2 = 0;  
             @Override
@@ -749,9 +782,7 @@ public class CallOperandTest
                 assertThat(solution.getString("grades", "student")).isEqualTo(STUDENTS[index1++]);
                 Iterator<AxiomTermList> iterator = report.iterator();
                 AxiomTermList item = iterator.next();
-                AxiomTermList marks = (AxiomTermList) item.getAxiom().getTermByName("marks").getValue();
-                //System.out.println(marks);
-                AxiomList marksList = (AxiomList) marks.getAxiom().getTermByName("marks_list").getValue();
+                AxiomList marksList = (AxiomList) item.getAxiom().getTermByName("marks_list").getValue();
                 Iterator<AxiomTermList> subjects = marksList.iterator();
                 while (subjects.hasNext())
                 {
@@ -763,6 +794,7 @@ public class CallOperandTest
                 assertThat(item.getAxiom().getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
                 return true;
             }});
+        return result;
     }
 
     @Test
@@ -789,11 +821,9 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                System.out.println(solution.getAxiom("average_height").toString());
+                //System.out.println(solution.getAxiom("average_height").toString());
                 Axiom result = solution.getAxiom("average_height");
                 assertThat(result.toString()).isEqualTo("average_height(average = " + averageHeight + ")");
-                Long average = (Long) result.getTermByIndex(0).getValue();
-                assertThat(average).isEqualTo(averageHeight);
                 return true;
             }});
     }
@@ -810,10 +840,11 @@ public class CallOperandTest
                 Axiom germanColors = solution.getAxiom("german_colors");
                 AxiomList colorsList = (AxiomList)germanColors.getTermByName("colors").getValue();
                 Iterator<AxiomTermList> iterator = colorsList.iterator();
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors(Aqua, aqua = list<term> german_colors.aqua(german_colors.aqua) = aqua(red = 0, green = 255, blue = 255))");
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("colors(Blue, blue = list<term> german_colors.blue(german_colors.blue) = blue(red = 0, green = 0, blue = 255))");
+                //System.out.println(iterator.next().getAxiom().toString());
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("aqua(red = 0, green = 255, blue = 255)");
+                //System.out.println(iterator.next().getAxiom().toString());
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("blue(red = 0, green = 0, blue = 255)");
                 assertThat(iterator.hasNext()).isFalse();
-                assertThat(colorsList.getAxiomTermNameList()).isEmpty();
                 return true;
             }});
            
@@ -821,15 +852,11 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                //System.out.println(solution.getAxiom("calc_german_orange").toString());
                 Axiom germanOrange = solution.getAxiom("german_orange");
-                AxiomList colorsList = (AxiomList)germanOrange.getTermByName("orange_color").getValue();
-                Iterator<AxiomTermList> iterator = colorsList.iterator();
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("orange_color(Orange, orange = list<term> german_orange.orange(german_orange.orange) = orange(red = <empty>, green = <empty>, blue = <empty>))");
-                assertThat(iterator.hasNext()).isFalse();
-                assertThat(colorsList.getAxiomTermNameList()).isEmpty();
+                //System.out.println(germanOrange.toString());
+                assertThat(germanOrange.toString()).isEqualTo("german_orange(hasRed = false, hasGreen = false, hasBlue = false)");
                 return true;
-            }}); 
+            }});
     }
     FunctionManager provideFunctionManager()
     {

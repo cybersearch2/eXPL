@@ -19,7 +19,6 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,14 +28,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -168,53 +164,6 @@ public class ScopeTest
 		when(globalParserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
 		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		assertThat(scope.getAxiomListenerMap().get(Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener);
-	}
-
-	@Test
-	public void test_merge_AxiomListenerMap()
-	{
-		Scope globalScope = mock(Scope.class);
-		ParserAssembler globalParserAssembler = mock(ParserAssembler.class);
-		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
-		Map<QualifiedName, List<AxiomListener>> axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
-		AxiomListener axiomListener = mock(AxiomListener.class);
-		axiomListenerMap.put(Q_AXIOM_NAME, Collections.singletonList(axiomListener));
-		when(globalParserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
-		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
-		when(scope.getGlobalParserAssembler()).thenReturn(globalParserAssembler);
-		when(globalParserAssembler.getAxiomList(isA(QualifiedName.class))).thenReturn(new ArrayList<Axiom>());
-		AxiomListener axiomListener2 = mock(AxiomListener.class);
-		AxiomTermList axiomTermList = mock(AxiomTermList.class);
-		when(axiomTermList.getAxiomListener()).thenReturn(axiomListener2);
-		when(axiomTermList.getKey()).thenReturn(GLOBAL_Q_AXIOM_NAME);
-		when(axiomTermList.getOperandType()).thenReturn(OperandType.TERM);
-		QualifiedName qname = QualifiedName.parseName(AXIOM_KEY + 1);
-		when(axiomTermList.getQualifiedName()).thenReturn(qname);
-		scope.getParserAssembler().registerAxiomTermList(axiomTermList);
-		scope.getParserAssembler().bindAxiomList(axiomTermList);
-
-		assertThat(scope.getAxiomListenerMap().get(Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener);
-		assertThat(scope.getAxiomListenerMap().get(GLOBAL_Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener2);
-	}
-
-	@Test
-	public void test_empty_global_map_AxiomListenerMap()
-	{
-		Scope globalScope = mock(Scope.class);
-		ParserAssembler globalParserAssembler = mock(ParserAssembler.class);
-		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
-		Map<QualifiedName, List<AxiomListener>> axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
-		when(globalParserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
-		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
-		AxiomListener axiomListener2 = mock(AxiomListener.class);
-		AxiomTermList axiomTermList = mock(AxiomTermList.class);
-		when(axiomTermList.getAxiomListener()).thenReturn(axiomListener2);
-        QualifiedName qname = QualifiedName.parseName(AXIOM_KEY + 1);
-		when(axiomTermList.getKey()).thenReturn(GLOBAL_Q_AXIOM_NAME);
-        when(axiomTermList.getQualifiedName()).thenReturn(qname);
-		scope.getParserAssembler().registerAxiomTermList(axiomTermList);
-        scope.getParserAssembler().bindAxiomList(axiomTermList);
-		assertThat(scope.getAxiomListenerMap().get(GLOBAL_Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener2);
 	}
 
 	@Ignore // TODO - investigate JRE behaviour

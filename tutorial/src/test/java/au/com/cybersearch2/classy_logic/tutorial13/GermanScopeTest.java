@@ -13,110 +13,98 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial11;
+package au.com.cybersearch2.classy_logic.tutorial13;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Iterator;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * RegexGroupsTest
+ * GermanScopeTest
  * @author Andrew Bowley
- * 16Apr.,2017
+ * 17Apr.,2017
  */
-public class RegexGroupsTest
+public class GermanScopeTest
 {
     @Test
-    public void testRegexGroups() throws Exception
+    public void testGermanScope()
     {
-        RegexGroups regexGroups = new RegexGroups();
-        File testFile = new File("src/main/resources/tutorial11", "regex-groups.txt");
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        Iterator<Axiom> axiomIterator = regexGroups.getRegexGroups();
-        while (axiomIterator.hasNext()) 
-              checkSolution(reader, axiomIterator.next().getTermByName("in_word").toString().substring(10));
-        Iterator<SourceMarker> iterator = regexGroups.getParserContext().getSourceMarkerSet().iterator();
+        GermanScope germanScope = new GermanScope();
+        assertThat(germanScope.getFormatedTotalAmount().toString()).isEqualTo("item_query(total_text = Gesamtkosten + gst: 13.580,24 EUR)");
+        ParserContext context = germanScope.getParserContext();
+        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("string defRegex (5,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("scope german (16,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string defRegex = ^(.)\\. (.*+) (5,1) (5,32)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom expand (8,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> expand[1] (8,1) (14,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        assertThat(sourceMarker.toString()).isEqualTo("query in_words (23,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon:in_words (23,23) (23,40)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom lexicon (2,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon(Word,Definition):\"lexicon\" (2,1) (2,44)");
-        //System.out.println(sourceMarker.toString());
-       assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("string wordRegex (4,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string wordRegex = ^in[^ ]+ (4,1) (4,29)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc in_words (16,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\ (18,3) (18,23)");
+        assertThat(sourceItem.toString()).isEqualTo("language=de (16,15) (16,27)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("definition \\^(.)\\. (.*+)\\ (19,3) (19,42)");
-        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem.toString()).isEqualTo("region=DE (16,30) (16,40)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("axiom item (1,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string in_word = word+, +expand_var0+- +def (20,3) (21,0)");
+        assertThat(sourceItem.toString()).isEqualTo("item(amount):parameter (1,1) (1,31)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("axiom lexicon (3,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("lexicon(Total) (3,1) (3,21)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("local translate (14,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("list<term> translate(lexicon) (14,1) (14,24)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("template charge (8,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("currency amount (8,17) (8,31)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc charge_plus_gst (10,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("currency total = amount*1.1 (10,22) (10,57)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc format_total (12,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("string total_text = translate_var0+ + gst: +total_format (12,19) (12,99)");
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("query german.item_query (18,3)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("item:charge (18,26) (18,38)");
    }
-
-    protected void checkSolution(BufferedReader reader, String word)
-    {
-        try
-        {
-            String line = reader.readLine();
-            assertThat(word).isEqualTo(line);
-        }
-        catch (IOException e)
-        {
-            fail(e.getMessage());
-        }
-
-    }
 }

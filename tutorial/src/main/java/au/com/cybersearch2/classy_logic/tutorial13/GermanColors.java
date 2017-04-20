@@ -15,10 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial13;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -33,21 +37,39 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class GermanColors 
 {
-    static final String GERMAN_COLORS =
-            "axiom lexicon (aqua, black, blue, white);\n" +
-            "axiom german.lexicon (aqua, black, blue, white)\n" +
-            "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
-            "choice swatch (name, red, green, blue)\n" +
-            "{colors[aqua], 0, 255, 255}\n" +
-            "{colors[black], 0, 0, 0}\n" +
-            "{colors[blue], 0, 0, 255}\n" +
-            "{colors[white], 255, 255, 255};\n" +
-            "axiom shade (name) : parameter;\n" +
-            "local colors(lexicon);\n" +
-            "scope german (language=\"de\", region=\"DE\")\n" +
-            "{\n" +
-            "  query color_query (shade : swatch);\n" +
-            "}";
+/* german-colors.xpl
+// Define lexicon term names
+axiom lexicon (aqua, black, blue, white);
+
+axiom german.lexicon 
+  (    aqua,    black,    blue,  white)
+  {"Wasser", "schwarz", "blau", "weiß"};
+ 
+choice swatch 
+  (   name,      red, green, blue)
+  {colors[aqua],    0, 255, 255}
+  {colors[black],   0,   0,   0}
+  {colors[blue],    0  , 0, 255}
+  {colors[white], 255, 255, 255};
+  
+axiom shade (name) : parameter;
+
+local colors(lexicon);
+
+scope german (language="de", region="DE")
+{
+  query<term> color_query (shade : swatch);
+}
+  
+*/
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
+
+    public GermanColors()
+    {
+        File resourcePath = new File("src/main/resources/tutorial13");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
 
 	/**
 	 * Compiles the GERMAN_COLORS script and runs the "color_query" query, displaying the solution on the console.
@@ -55,25 +77,24 @@ public class GermanColors
 	 */
     public String getColorSwatch(String name)
 	{
-        QueryProgram queryProgram = new QueryProgram();
-        queryProgram.parseScript(GERMAN_COLORS);
+        QueryProgram queryProgram = queryProgramParser.loadScript("german-colors.xpl");
+        parserContext = queryProgramParser.getContext();
+         
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams("german", "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         Solution initialSolution = queryParams.getInitialSolution();
         initialSolution.put("shade", new Axiom("shade", new Parameter("name", name)));
-        final StringBuilder builder = new StringBuilder();
-        queryParams.setSolutionHandler(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                builder.append(solution.getAxiom("swatch").toString());
-                return true;
-            }});
-        queryProgram.executeQuery(queryParams);
-        return builder.toString();
+        Result result = queryProgram.executeQuery(queryParams);
+        return result.getAxiom("german", "color_query").toString();
 	}
 	
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
     /**
      * Run tutorial
      * The expected result:<br/>

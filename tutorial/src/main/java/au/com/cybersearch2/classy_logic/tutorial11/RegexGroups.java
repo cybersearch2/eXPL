@@ -45,17 +45,14 @@ axiom expand =
    j = "adj." 
 };
    
-// Collect words starting with 'in' along with other details
-axiom word_definitions = {};
-
 calc in_words 
 (
-  word regex(wordRegex), definition regex(defRegex { part, def }),
-  axiom in_word = { word + ", " + expand[part] + "- " + def },
-  (word_definitions += in_word)
+. word regex(wordRegex), 
+. definition regex(defRegex { part, def }),
+  string in_word = word + ", " + expand[part] + "- " + def
 );
 
-query query_in_words(lexicon : in_words);
+query<axiom> in_words(lexicon : in_words);
 
 */
     protected QueryProgramParser queryProgramParser;
@@ -88,8 +85,8 @@ query query_in_words(lexicon : in_words);
 		// word = inadequate, part = adj., def = not sufficient to meet a need
         QueryProgram queryProgram = queryProgramParser.loadScript("regex-groups.xpl");
         parserContext = queryProgramParser.getContext();
-		Result result = queryProgram.executeQuery("query_in_words");
-		return result.getIterator("word_definitions");
+		Result result = queryProgram.executeQuery("in_words");
+		return result.getIterator("in_words");
  	}
 	
     public ParserContext getParserContext()
@@ -108,7 +105,7 @@ query query_in_words(lexicon : in_words);
 	        RegexGroups regexGroups = new RegexGroups();
 	        Iterator<Axiom> iterator = regexGroups.getRegexGroups();
 	        while(iterator.hasNext())
-	            System.out.println(iterator.next().getTermByIndex(0).getValue().toString());
+	            System.out.println(iterator.next().getTermByName("in_word").toString().substring(10));
 		} 
         catch (ExpressionException e) 
         { // Display nested ParseException

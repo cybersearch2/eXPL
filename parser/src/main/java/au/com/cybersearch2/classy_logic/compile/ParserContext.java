@@ -26,6 +26,7 @@ import java.util.TreeSet;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
@@ -40,6 +41,18 @@ import au.com.cybersearch2.classy_logic.parser.Token;
  */
 public class ParserContext
 {
+    static class MarkerPair
+    {
+        public SourceMarker sourceMarker;
+        public Token itemToken;
+        
+        public MarkerPair(SourceMarker sourceMarker, Token itemToken)
+        {
+            this.sourceMarker = sourceMarker;
+            this.itemToken = itemToken;
+        }
+    }
+    
     QueryProgram queryProgram;
     /** Current source marker */
     SourceMarker sourceMarker;
@@ -54,7 +67,7 @@ public class ParserContext
     /** Index of current source document in list */
     int sourceDocumentId;
     /** Stack to nest calls */
-    Deque<SourceMarker> markerStack;
+    Deque<MarkerPair> markerStack;
     /** Stack to retain nested source documents */
     Deque<Integer> documentStack;
     /** Set of source markers collated by qualified name */
@@ -74,7 +87,7 @@ public class ParserContext
     {
         this.queryProgram = queryProgram;
         sourceMarkerSet = new TreeSet<SourceMarker>();
-        markerStack = new ArrayDeque<SourceMarker>();
+        markerStack = new ArrayDeque<MarkerPair>();
         documentStack = new ArrayDeque<Integer>();
         qnameMap = new HashMap<QualifiedName, QualifiedName>();
         resetScope();
@@ -163,7 +176,7 @@ public class ParserContext
      */
     public void pushSourceMarker()
     {
-        markerStack.push(sourceMarker);
+        markerStack.push(new MarkerPair(sourceMarker, itemToken));
     }
 
     /**
@@ -171,7 +184,9 @@ public class ParserContext
      */
     public void popSourceMarker()
     {
-        sourceMarker = markerStack.pop();
+        MarkerPair markerPair = markerStack.pop();
+        sourceMarker = markerPair.sourceMarker;
+        itemToken = markerPair.itemToken;
     }
 
     /**
@@ -404,7 +419,20 @@ public class ParserContext
         builder.append(')');
         return addSourceItem(builder.toString());
     }
-    
+
+    public SourceItem addCalcQuery(QualifiedName qname, List<OperandParam> operandParamList)
+    {
+        StringBuilder builder = new StringBuilder("<< ");
+        builder.append(qname.toString()).append('(');
+        if ((operandParamList != null) && (operandParamList.size() > 0))
+        {
+            builder.append(getOperandText(operandParamList.get(0)));
+            if (operandParamList.size() > 1)
+                builder.append(" ... ").append(getOperandText(operandParamList.get(operandParamList.size() - 1)));
+        }
+        builder.append(')');
+        return addSourceItem(builder.toString());
+    }
     /**
      * Set current source marker, set it's source document id and add to marker set
      * @param sourceMarker the sourceMarker to set
@@ -417,4 +445,8 @@ public class ParserContext
         isSourceItemPending = true;
     }
 
+    protected String getOperandText(OperandParam param)
+    {
+       return param.getName().isEmpty() ? param.getOperand().toString() : param.getName(); 
+    }
 }
