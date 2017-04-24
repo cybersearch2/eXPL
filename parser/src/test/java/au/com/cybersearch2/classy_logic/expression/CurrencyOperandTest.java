@@ -101,7 +101,7 @@ public class CurrencyOperandTest
 					country = locale.getLanguage() + "_" + country;
 				CurrencyOperand currencyOperand = new CurrencyOperand(QNAME, testAmount, Locale.getDefault(/*Category.FORMAT*/));
 				currencyOperand.setCountry(country);
-				assertThat(currencyOperand.formatValue().contains(Currency.getInstance(locale).getCurrencyCode())).isTrue();
+				assertThat(currencyOperand.formatValue(currencyOperand.getValue()).contains(Currency.getInstance(locale).getCurrencyCode())).isTrue();
 			}
 		}
 	}

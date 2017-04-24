@@ -19,6 +19,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * AxiomListVariable
@@ -29,7 +30,8 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class AxiomTermListVariable extends ItemListVariable<Object> implements Concaten<String>
 {
-
+    protected AxiomTermList axiomTermList;
+    
 	/**
 	 * Construct an AxiomTermListVariable instance
 	 * @param axiomTermList The axiom term list being referenced
@@ -41,6 +43,7 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 	public AxiomTermListVariable(AxiomTermList axiomTermList, Operand proxy, int index, String suffix, int id) 
 	{
 		super(axiomTermList, proxy, index, suffix);
+		this.axiomTermList = axiomTermList;
 		this.id = id;
 	}
 
@@ -56,6 +59,7 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 			Operand indexExpression, String suffix, int id) 
 	{
 		super(axiomTermList, proxy, indexExpression, suffix);
+        this.axiomTermList = axiomTermList;
 		this.id = id;
 	}
 	
@@ -111,6 +115,19 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
     @Override
     protected int getIndexForName(String itemName)
     {
+        Axiom axiom = axiomTermList.getAxiom();
+        if (axiomTermList.getAxiomTermNameList() != null)
+        {
+            for (String termName: axiomTermList.getAxiomTermNameList())
+                if (termName.equals(itemName))
+                    return index;
+        }
+        else if (axiom != null)
+        {
+            for (int index = 0; index < axiom.getTermCount(); ++index)
+                if (axiom.getTermByIndex(index).getName().equals(itemName))
+                    return index;
+        }
         return -1;
     }
 

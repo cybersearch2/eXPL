@@ -15,10 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * StringOperand
@@ -27,6 +30,15 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class StringOperand  extends ExpressionOperand<String> implements Concaten<String>
 {
+    static Trait STRING_TRAIT;
+    
+    static
+    {
+        STRING_TRAIT = new DefaultTrait(OperandType.STRING);
+    }
+    
+    /** Localization and specialization */
+    protected Trait trait;
 
 	/**
 	 * Construct StringOperand with given expression Operand
@@ -36,7 +48,7 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
 	public StringOperand(QualifiedName qname, Operand expression) 
 	{
 		super(qname, expression);
-		
+		this.trait = STRING_TRAIT;
 	}
 
 	/**
@@ -47,6 +59,7 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
 	public StringOperand(QualifiedName qname, String value) 
 	{
 		super(qname, value);
+        this.trait = STRING_TRAIT;
 	}
 
 	/**
@@ -56,6 +69,7 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
 	public StringOperand(QualifiedName qname) 
 	{
 		super(qname);
+        this.trait = STRING_TRAIT;
 	}
 
 	/**
@@ -159,6 +173,18 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
     public String concatenate(Operand rightOperand)
     {
         return value.toString() + rightOperand.getValue().toString();
+    }
+
+    @Override
+    public void setTrait(Trait trait)
+    {
+        this.trait = trait;
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return trait;
     }
 
 }

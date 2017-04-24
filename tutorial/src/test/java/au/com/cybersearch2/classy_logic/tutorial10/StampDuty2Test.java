@@ -109,11 +109,11 @@ public class StampDuty2Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency duty = base+amount-threshold*percent/100 (22,3) (22,63)");
+        assertThat(sourceItem.toString()).isEqualTo("currency duty=base+amount-threshold*percent/100 (22,3) (22,63)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string display = duty_format (23,3) (24,0)");
+        assertThat(sourceItem.toString()).isEqualTo("string display=duty_format (23,3) (24,0)");
     }
 
     protected void checkSolution(BufferedReader reader, String payable)

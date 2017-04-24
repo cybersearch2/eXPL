@@ -32,6 +32,6 @@ public class GermanScopeTest
     public void test_GermanScope() throws Exception
     {
         GermanScope germanScope = new GermanScope();
-        assertThat(germanScope.getFormatedTotalAmount().toString()).isEqualTo("item_query(total_text = Gesamtkosten + gst: 13.580,24 EUR)");
+        assertThat(germanScope.getFormatedTotalAmount().toString()).isEqualTo("item_query(total_text=Gesamtkosten + gst: 13.580,24 EUR)");
     }
 }

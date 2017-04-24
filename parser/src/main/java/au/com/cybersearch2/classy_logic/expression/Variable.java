@@ -134,11 +134,11 @@ public class Variable extends DelegateOperand
         if (empty)
         {
             if (expression != null)
-                return (!name.isEmpty() ? name + " = " : "") + (expression.toString());
+                return (!name.isEmpty() ? name + "=" : "") + (expression.toString());
             return name;
         }
         String valueText = ( value == null ? "null" : value.toString());
-        return (!name.isEmpty() ? name + " = " : "") + valueText;
+        return (!name.isEmpty() ? name + "=" : "") + valueText;
     }
 
 }

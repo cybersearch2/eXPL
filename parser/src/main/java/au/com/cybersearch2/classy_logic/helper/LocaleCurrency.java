@@ -113,10 +113,10 @@ public class LocaleCurrency
 
     /**
      * Returns text representation of amount specified in text
-     * @param amount BigDecial currency value
+     * @param amount Currency value in type compatible with NumberFormat eg. BigDecimal
      * @return String
      */
-    public String format(BigDecimal amount)
+    public String format(Object amount)
     {
     	DecimalFormat numberFormat = (DecimalFormat)NumberFormat.getCurrencyInstance(locale);
     	DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);

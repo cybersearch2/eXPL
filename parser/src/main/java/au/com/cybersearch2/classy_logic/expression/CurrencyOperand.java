@@ -92,11 +92,11 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 	 * @see au.com.cybersearch2.classy_logic.interfaces.TextFormat#formatValue()
 	 */
 	@Override
-	public String formatValue()
+	public String formatValue(Object value)
 	{   // Refresh locale-dependent currency component in case it has changed
 	    if ((countryOperand != null)  && !countryOperand.isEmpty())
 	        setCountry(countryOperand.getValue().toString());
-		return localeCurrency.format(getValue());
+		return localeCurrency.format(value);
 	}
 	
 	/**

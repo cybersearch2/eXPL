@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2017  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,12 +15,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
+import java.util.Locale;
+
+import au.com.cybersearch2.classy_logic.compile.OperandType;
+
 /**
- * TextFormat
+ * Trait
+ * Behaviours for localization and specialization of operands
  * @author Andrew Bowley
- * 10 Mar 2015
+ * 21Apr.,2017
  */
-public interface TextFormat 
+public interface Trait extends TextFormat
 {
-	String formatValue(Object value);
+    Locale getLocale();
+    void setLocale(Locale locale);
+    OperandType getOperandType();
 }

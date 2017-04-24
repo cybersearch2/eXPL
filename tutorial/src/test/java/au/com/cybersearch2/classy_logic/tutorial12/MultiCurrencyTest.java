@@ -40,7 +40,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 public class MultiCurrencyTest
 {
     @Test
-    public void testAgeDiscrimination() throws Exception
+    public void testMultiCurrency() throws Exception
     {
         File testFile = new File("src/main/resources/tutorial12", "multi-currency.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
@@ -77,15 +77,15 @@ public class MultiCurrencyTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency charge = amount (6,3) (6,36)");
+        assertThat(sourceItem.toString()).isEqualTo("currency charge=amount (6,3) (6,36)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency total = charge*1.1 (7,3) (7,41)");
+        assertThat(sourceItem.toString()).isEqualTo("currency total=charge*1.1 (7,3) (7,41)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string total_text = country+ Total + gst: +total_format (8,3) (9,0)");
+        assertThat(sourceItem.toString()).isEqualTo("string total_text=country+ Total + gst: +total_format (8,3) (9,0)");
    }
     
     protected void checkSolution(BufferedReader reader, String price)

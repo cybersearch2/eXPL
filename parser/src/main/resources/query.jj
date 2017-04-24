@@ -125,7 +125,7 @@ public class QueryParser
   public void includeResource(String resourceName, ParserContext context) throws ParseException
   {
     if (resourceName.length() < 3)
-      throw new ParseException("Include resourceName \"\" is invalid");
+      throw new ParseException("Include resourceName \"" + resourceName + "\" is invalid");
     ParserResources parserResources = new ParserResources(context);
     try
     {
@@ -159,12 +159,18 @@ public class QueryParser
   }
   
   protected Operand listItemOperand(QualifiedName qname, 
-                                    ParserAssembler parserAssembler, 
+                                    ParserContext context, 
                                     Operand indexExpression, 
-                                    Operand assignExpression)
+                                    Operand assignExpression) throws ParseException
   {
+    if (context.isQueryName(qname))
+    {
+      if (assignExpression != null)
+         throw new ParseException("Query variablee \"" + qname.toString() + "\" is read-only");
+      return axiomOperand(qname, context.getParserAssembler(), indexExpression, null);
+    }
     ItemListOperand operand = new ItemListOperand(qname, indexExpression, assignExpression);
-    ParserTask parserTask = parserAssembler.addPending(operand);
+    ParserTask parserTask = context.getParserAssembler().addPending(operand);
     //parserTask.setPriority(1);
     return operand;
   }
@@ -927,40 +933,47 @@ Operand TemplateExpression(Template template, ParserContext context) :
 	}
   )?
   {
-     if (varType == null)
-       varType = new VariableType(OperandType.UNKNOWN);
-     Operand assignExpression = (assignToken != null) ? expression : null;
-     Operand regexOp = null;
-     if (regexLit != null)
-       regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
-     else if (regexId != null)
-       regexOp = operandMap.addOperand(regexId.image, null);
-     if (assignToken != null)
-       expression = null;
-     boolean isLiteral = (expression != null) && !expression.isEmpty() && (equalsToken != null);
-     if (expression != null)
-       varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
-     if (index !=null)
-       var = listItemOperand(context.getQualifiedName(name), parserAssembler, index, null);
-     else if (regexOp != null)
-       var = new RegExOperand(qname, regexOp, 0, group);
-     else if (scToken != null) 
-       var = new Evaluator(qname, expression, (scToken.image == "?" ? "&&" : "||"));
-     else if (literalList != null)
-       var = new LiteralListOperand(qname, literalList);
-     else if (!operandMap.hasOperand(name))
-       var = varType.getInstance(parserAssembler, name);
-     else
-       var = operandMap.addOperand(name, expression);
-     if ((index == null) && (!operandMap.hasOperand(name)))
-       operandMap.addOperand(var);
-     if (assignToken != null) 
-       var = new Evaluator(qname, var, assignToken.image, assignExpression);
-     if ((index !=null) && (equalsToken != null) && !isLiteral) 
-       var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
-      if (interceptToken != null)
-        context.onTokenIntercept(interceptToken);
-      return var;
+    boolean isDeclaration = varType != null; 
+    boolean hasOperand = operandMap.hasOperand(name);
+    if (!isDeclaration)
+      varType = new VariableType(OperandType.UNKNOWN);
+    Operand assignExpression = (assignToken != null) ? expression : null;
+    Operand regexOp = null;
+    if (regexLit != null)
+      regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
+    else if (regexId != null)
+      regexOp = operandMap.addOperand(regexId.image, null);
+    if (assignToken != null)
+      expression = null;
+    if (expression != null)
+      varType.setProperty(VariableType.EXPRESSION, expression);
+    if (index !=null)
+      var = listItemOperand(context.getQualifiedName(name), context, index, null);
+    else if (regexOp != null)
+      var = new RegExOperand(qname, regexOp, 0, group);
+    else if (scToken != null) 
+      var = new Evaluator(qname, expression, (scToken.image == "?" ? "&&" : "||"));
+    else if (literalList != null)
+      var = new LiteralListOperand(qname, literalList);
+    else 
+      var = operandMap.getOperand(qname);
+    if ((var != null) && isDeclaration)
+       operandMap.duplicateOperandCheck(qname); 
+    if ((var == null) && !hasOperand)
+      var = varType.getInstance(parserAssembler, name);
+    if (var == null)
+      var = operandMap.addOperand(name, expression);
+    if ((index == null) && (!hasOperand))
+      operandMap.addOperand(var);
+    if (assignToken != null) 
+      var = new Evaluator(qname, var, assignToken.image, assignExpression);
+    if ((equalsToken != null) && (index !=null))
+      var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
+    else if (hasOperand && (equalsToken != null))
+      var = new Evaluator(parserAssembler.getContextName(var.getName() + var.getQualifiedName().incrementReferenceCount()), var, "=", expression);
+    if (interceptToken != null)
+      context.onTokenIntercept(interceptToken);
+    return var;
   }
 }
 
@@ -1196,16 +1209,17 @@ Operand InnerCalculator(Template template, QualifiedName outerTemplateName, Pars
 
 QualifiedName ChoiceDeclaration(ParserContext context) :
 {
-    Token choiceToken;
-    Token delimitToken;
-    QualifiedName qualifiedAxiomName;
-    int selection = 0;
-    boolean isSourceItemPending = context.isSourceItemPending();
-    ParserAssembler parserAssembler = context.getParserAssembler();
-    OperandMap operandMap = parserAssembler.getOperandMap();
+  Token choiceToken;
+  Token delimitToken;
+  QualifiedName qualifiedAxiomName;
+  int selection = 0;
+  boolean isSourceItemPending = context.isSourceItemPending();
+  ParserAssembler parserAssembler = context.getParserAssembler();
+  OperandMap operandMap = parserAssembler.getOperandMap();
+  QualifiedName contextName = context.getContextName();
 }
 {
-  choiceToken=<CHOICE> qualifiedAxiomName=Choice(parserAssembler) 
+  choiceToken=<CHOICE> qualifiedAxiomName=Choice(context) 
   {
     if (!isSourceItemPending)
       context.setSourceMarker(choiceToken, qualifiedAxiomName);
@@ -1218,23 +1232,26 @@ QualifiedName ChoiceDeclaration(ParserContext context) :
   }
   ( ChoiceItem(selection, qualifiedAxiomName, context) )+ 
   {
-      QualifiedName contextName = context.getContextName();
-      return qualifiedAxiomName;
+    context.setContextName(contextName);
+    return qualifiedAxiomName;
   }
 } 
 
-QualifiedName Choice(ParserAssembler parserAssembler) :
+QualifiedName Choice(ParserContext context) :
 {
     Token choiceToken;
+    ParserAssembler parserAssembler = context.getParserAssembler();
+    Scope scope = context.getScope();
 }
 {
   choiceToken=<IDENTIFIER>
   { 
     QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
     parserAssembler.createAxiom(qualifiedChoiceName);
-    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(qualifiedChoiceName.getScope(), qualifiedChoiceName.getName());
+    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), qualifiedChoiceName.getName());
     Template template = parserAssembler.createTemplate(qualifiedTemplateName, true);
     template.setChoice(true);
+    context.setContextName(new QualifiedTemplateName(scope.getAlias(), choiceToken.image));
     return qualifiedChoiceName;
   }
 }
@@ -1415,13 +1432,11 @@ Operand VariableDeclaration(ParserContext context) :
   {
      String name = nameToken.image;
      if (index !=null)
-         return listItemOperand(context.getQualifiedName(name), parserAssembler, index, expression);
+         return listItemOperand(context.getQualifiedName(name), context, index, expression);
      if (isUntyped)
          varType = new VariableType(OperandType.UNKNOWN);
-     boolean isLiteral = (expression != null) &&
-                          !expression.isEmpty() && !(expression instanceof Evaluator);
-     if (expression != null)
-         varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
+     if (expression != null) //  Need literal condition? && !(expression instanceof Evaluator)
+         varType.setProperty(expression.isEmpty() ? VariableType.EXPRESSION : VariableType.LITERAL, expression);
      Operand operand = varType.getInstance(parserAssembler, name);
      return operand;
   }
@@ -1532,7 +1547,7 @@ Operand PrimaryExpression(ParserContext context) :
     return var;
   }
   |
-  name=Name(context) ( param1=NamedExpression(name, context) )?
+  name=Name(context) (LOOKAHEAD(2) param1=NamedExpression(name, context) )?
   {
     if (param1 == null)
         return parserAssembler.addOperand(name);
@@ -1541,7 +1556,7 @@ Operand PrimaryExpression(ParserContext context) :
   |
   literal=<SCOPE> param1=IndexExpression(context)
   {
-    operand = listItemOperand(context.getQualifiedName("scope"), parserAssembler, param1, null);
+    operand = listItemOperand(context.getQualifiedName("scope"), context, param1, null);
     context.onTokenIntercept(literal);
     return operand;
   }
@@ -1630,12 +1645,11 @@ OperandParam Argument(ParserContext context, boolean nameRequired) :
        return new OperandParam(name, expression);
      name = leftOperand.getName();
      expression = expression.getRightOperand();
-     boolean isLiteral = !expression.isEmpty();
      if (varType == null)
        varType = new VariableType(OperandType.UNKNOWN);
      if (varType.getOperandType() == OperandType.TERM)
        varType.setUnknownType();
-     varType.setProperty(isLiteral ? VariableType.LITERAL : VariableType.EXPRESSION, expression);
+     varType.setProperty(VariableType.EXPRESSION, expression);
      Operand operand = varType.getInstance(parserAssembler, name);
      return new OperandParam(name, operand);
   }
@@ -1644,11 +1658,17 @@ OperandParam Argument(ParserContext context, boolean nameRequired) :
 Operand IndexExpression(ParserContext context) :
 {
   Operand param;
+  Token name;
 }
 {
   <LBRACKET> param=Expression(context) <RBRACKET> 
   {
     return param;
+  }
+  | 
+  ( "^" name=<IDENTIFIER> )
+  {
+    return new StringOperand(context.getParserAssembler().getContextName(name.image), name.image);
   }
 }
 
@@ -1785,7 +1805,7 @@ String Name(ParserContext context) :
     name = partToken.image;
     context.onTokenIntercept(partToken);
   }
-  ( 
+  (
     "." 
     partToken=<IDENTIFIER>
     {

@@ -62,12 +62,12 @@ public class VariableType
 	public final static String EXPRESSION = "Expression";
     /** Key value for parameter initialization property */
     public final static String PARAMS = "Params";
-    /** Key value for literal initialization property */
-    public final static String LITERAL = "Literal";
     /** Key value for Currency country property */
 	public final static String QUALIFIER_STRING = "QualifierString";
     /** Key value for Currency country evaluation operand property */
 	public final static String QUALIFIER_OPERAND = "QualifierOperand";
+    /** Key value for literal operand property - used only for global variables */
+    public final static String LITERAL = "Literal";
 	
 	/**
 	 * Construct VariableType object
@@ -127,8 +127,7 @@ public class VariableType
     public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname)
     {
         Operand expression = (Operand)getProperty(EXPRESSION);
-        if (expression == null)
-            expression = (Operand)getProperty(LITERAL);
+        boolean hasExpression = expression != null;
 		Operand operand = null;
         QualifiedName axiomKey = null;
         List<OperandParam> initializeList = null;
@@ -143,7 +142,6 @@ public class VariableType
         }
         if (operandType == OperandType.LIST || operandType == OperandType.TERM)
             initializeList = (List<OperandParam>)getProperty(PARAMS);
-        boolean hasExpression = expression != null;
 	    switch (operandType)
 	    {
 	    case INTEGER:
@@ -197,10 +195,9 @@ public class VariableType
 	    	else
 	    		parserAssembler.registerLocaleListener(currencyOperand);
 	    }
-	    Operand literal = (Operand) getProperty(LITERAL);
-	    if (literal != null)
-	        // Expression is a literal
-	        operand.assign(new Parameter(Term.ANONYMOUS, literal.getValue()));
+	    Operand literalOperand = (Operand)getProperty(LITERAL);
+	    if (literalOperand != null)
+	        operand.assign(new Parameter(Term.ANONYMOUS, literalOperand.getValue()));
 	    return operand;
     }
 

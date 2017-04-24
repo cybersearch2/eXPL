@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
@@ -23,8 +24,10 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * AxiomOperand
@@ -36,6 +39,13 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
  */
 public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concaten<AxiomList>
 {
+    static Trait AXIOM_TRAIT;
+    
+    static
+    {
+        AXIOM_TRAIT = new DefaultTrait(OperandType.AXIOM);
+    }
+    
     /** Axiom key to use when an empty list is created */
     protected QualifiedName axiomKey;
     /** Parameter container which creates an AxiomList object on evaluation */
@@ -283,5 +293,17 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         }
         else
             return super.toString();
+    }
+
+    @Override
+    public void setTrait(Trait trait)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return AXIOM_TRAIT;
     }
 }

@@ -85,18 +85,18 @@ public class ScopeQueryParserTest
 
 	static final String[] HIGH_CITIES =
 	{
-		"high_city(name = addis ababa, altitude = 8000)",
-		"high_city(name = denver, altitude = 5280)",
-		"high_city(name = flagstaff, altitude = 6970)",
-		"high_city(name = leadville, altitude = 10200)"
+		"high_city(name=addis ababa, altitude=8000)",
+		"high_city(name=denver, altitude=5280)",
+		"high_city(name=flagstaff, altitude=6970)",
+		"high_city(name=leadville, altitude=10200)"
 	};
 
 	static final String AGRICULTURAL_LAND = 
 		"include \"agriculture-land.xpl\";\n" +
 		"include \"surface-land.xpl\";\n" +
-		"template agri_10y(country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);\n" +
-		"template surface_area_increase(country ? country == agri_10y.country, double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);\n" +
-		"calc km2_to_mi2 (decimal mi2, mi2 = surface_area_increase.surface_area * 0.3861);" +
+		"template agri_10y(double Y1990, double Y2010, country ? Y2010 - Y1990 > 1.0);\n" +
+		"template surface_area_increase(country ? country == agri_10y.country, double surface_area=(agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);\n" +
+		"calc km2_to_mi2 (decimal mi2, mi2=surface_area_increase.surface_area * 0.3861);" +
         "scope countries\n" +
 	    "{\n" +
 	    "  query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);\n" + 
@@ -120,14 +120,14 @@ public class ScopeQueryParserTest
 
 	static final String[] FEE_AND_FREIGHT =
 	{
-        "account(name = Marathon Marble, fee = 61)",
-        "delivery(city = Sparta, freight = 16)",
-		"account(name = Acropolis Construction, fee = 47)",
-		"delivery(city = Athens, freight = 5)",
-		"account(name = Agora Imports, fee = 49)",
-		"delivery(city = Sparta, freight = 16)",
-		"account(name = Spiros Theodolites, fee = 57)",
-		"delivery(city = Milos, freight = 22)"
+        "account(name=Marathon Marble, fee=61)",
+        "delivery(city=Sparta, freight=16)",
+		"account(name=Acropolis Construction, fee=47)",
+		"delivery(city=Athens, freight=5)",
+		"account(name=Agora Imports, fee=49)",
+		"delivery(city=Sparta, freight=16)",
+		"account(name=Spiros Theodolites, fee=57)",
+		"delivery(city=Milos, freight=22)"
 	};
 
 	static final String BIRDS = 
@@ -327,7 +327,7 @@ public class ScopeQueryParserTest
             @Override
             public boolean onSolution(Solution solution) {
                 //System.out.println(solution.getAxiom("swatch").toString());
-                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name = Wasser, red = 0, green = 255, blue = 255)");
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name=Wasser, red=0, green=255, blue=255, swatch=0)");
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
@@ -337,7 +337,7 @@ public class ScopeQueryParserTest
         queryParams.setSolutionHandler(new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution) {
-                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name = blau, red = 0, green = 0, blue = 255)");
+                assertThat(solution.getAxiom("swatch").toString()).isEqualTo("swatch(name=blau, red=0, green=0, blue=255, swatch=2)");
                 return true;
             }});
         queryProgram.executeQuery(queryParams);
@@ -392,8 +392,8 @@ public class ScopeQueryParserTest
 			public boolean onSolution(Solution solution) {
 				//System.out.println(solution.getAxiom("format_total").toString());
 				//System.out.println(solution.getAxiom("charge_plus_gst").toString());
-				assertThat(solution.getAxiom("charge_plus_gst").toString()).isEqualTo("charge_plus_gst(total = 13580.24)");
-				assertThat(solution.getAxiom("format_total").toString()).isEqualTo("format_total(total_text = Gesamtkosten + gst: 13.580,24 EUR)");
+				assertThat(solution.getAxiom("charge_plus_gst").toString()).isEqualTo("charge_plus_gst(total=13580.24)");
+				assertThat(solution.getAxiom("format_total").toString()).isEqualTo("format_total(total_text=Gesamtkosten + gst: 13.580,24 EUR)");
 				return true;
 			}});
     }
@@ -410,7 +410,7 @@ public class ScopeQueryParserTest
             @Override
             public boolean onSolution(Solution solution) {
                 //System.out.println(solution.getAxiom("german.format_summary").toString());
-                assertThat(solution.getAxiom("german.format_summary").toString()).isEqualTo("format_summary(summary = language = de, region = DE)");
+                assertThat(solution.getAxiom("german.format_summary").toString()).isEqualTo("format_summary(summary=language = de, region = DE)");
                 return true;
             }});
     }
@@ -427,7 +427,7 @@ public class ScopeQueryParserTest
 			public boolean onSolution(Solution solution) {
 				//System.out.println(solution);
 				//System.out.println(solution.getAxiom("factorial").toString());
-				assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i = 5, n = 4, factorial = 24)");
+				assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i=5, n=4, factorial=24)");
 				return true;
 			}};
 		queryProgram.executeQuery("factorial_example.factorial", solutionHandler);
@@ -445,7 +445,7 @@ public class ScopeQueryParserTest
 			@Override
 			public boolean onSolution(Solution solution) {
 				//System.out.println(solution.getAxiom("sort_example.insert_sort").toString());
-				assertThat(solution.getAxiom("sort_example.insert_sort").toString()).isEqualTo("insert_sort(i = 5)");
+				assertThat(solution.getAxiom("sort_example.insert_sort").toString()).isEqualTo("insert_sort(i=5)");
 				return true;
 			}};
 		queryProgram.executeQuery("sort_example.insert_sort", solutionHandler);

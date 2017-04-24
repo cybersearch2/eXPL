@@ -212,9 +212,9 @@ public class CallOperandTest
 
     static final String[] GRADES_RESULTS = 
     {
-        "score(student = Amy, total = 36)",
-        "score(student = George, total = 44)",
-        "score(student = Sarah, total = 44)"
+        "score(student=Amy, total=36)",
+        "score(student=George, total=44)",
+        "score(student=Sarah, total=44)"
     };
 
     static final String[] STUDENTS =
@@ -233,16 +233,16 @@ public class CallOperandTest
  
     static final String[] MARKS_GRADES_RESULTS2 = 
     {
-        "total = 36",
-        "total = 44",
-        "total = 44"
+        "total=36",
+        "total=44",
+        "total=44"
     };
     
     static final String[] MATH_SCORES =
     {
-        "math_score = list<term> subjects.marks_list() = marks_list(Math, mark_var1 = a-)",
-        "math_score = list<term> subjects.marks_list() = marks_list(Math, mark_var1 = b-)",
-        "math_score = list<term> subjects.marks_list() = marks_list(Math, mark_var1 = a)"
+        "math_score=list<term> subjects.marks_list()=marks_list(Math, mark_var1=a-)",
+        "math_score=list<term> subjects.marks_list()=marks_list(Math, mark_var1=b-)",
+        "math_score=list<term> subjects.marks_list()=marks_list(Math, mark_var1=a)"
     };
     
     static final String[] SCHOOL_REPORT = 
@@ -275,7 +275,7 @@ public class CallOperandTest
     "list<term> mark(alpha_marks);\n";
     
     static final String MARKS_CALC = GRADES + ALPHA_MARKS +
-    "template score(student, integer total = edu.add(mark[(english)], mark[(math)], mark[(history)]));\n" +
+    "template score(student, integer total = edu.add(mark[english], mark[math], mark[history]));\n" +
     "query marks(grades : score);";
     
     static final String MARKS_GRADES_CALC = GRADES + ALPHA_MARKS +
@@ -303,9 +303,9 @@ public class CallOperandTest
         "    integer math,\n" +
         "    integer history,\n" +
         "    axiom marks_list =\n" +
-        "              { \"English\", mark[(english)] } \n" +
-        "              { \"Math\",    mark[(math)] }\n" +
-        "              { \"History\", mark[(history)] }\n" +
+        "              { \"English\", mark[english] } \n" +
+        "              { \"Math\",    mark[math] }\n" +
+        "              { \"History\", mark[history] }\n" +
         "  );\n" +
         "  calc total_score(\n" +
         "    integer english,\n" +
@@ -318,7 +318,7 @@ public class CallOperandTest
         "calc score(\n" +
         "    << school.subjects(english, math, history) >> (marks_list),\n" +
         "    << school.total_score(english, math, history) >> (label, value),\n" +
-        "    axiom report = { marks_list, label + \": \" + value }\n" +
+        "    axiom report={ marks_list, label + \": \" + value }\n" +
         ");\n" +
         "query marks(grades : score);";
 
@@ -328,23 +328,23 @@ public class CallOperandTest
             "    integer math,\n" +
             "    integer history,\n" +
             "    axiom marks_list =\n" +
-            "                { \"English\", mark[(english)] } \n" +
-            "                { \"Math\",    mark[(math)] }\n" +
-            "                { \"History\", mark[(history)] }\n" +
+            "                { \"English\", mark[english] } \n" +
+            "                { \"Math\",    mark[math] }\n" +
+            "                { \"History\", mark[history] }\n" +
             "  );\n" +
             "  calc total_score(\n" +
             "    integer english,\n" +
             "    integer math,\n" +
             "    integer history,\n" +
             "    string label = \"Total score\",\n" +
-            "    integer value = english + math + history\n" +
+            "    integer value  =english + math + history\n" +
             "  );\n" +
             "\n" +
             "calc score(\n" +
             "    << subjects(english, math, history) >> (marks_list),\n" +
-            "    math_score = score.subjects[1],\n" +
+            "    math_score=score.subjects[1],\n" +
             "    << total_score(english, math, history) >> (label, value),\n" +
-            "    total = score.total_score[value],\n" +
+            "    total=score.total_score[value],\n" +
             "    axiom report = { marks_list, label + \": \" + value }\n" +
             ");\n" +
             "query<axiom> marks(grades : score);";
@@ -364,17 +364,17 @@ public class CallOperandTest
     
     static final String CITY_AVERAGE_HEIGHT_CALC = CITY_EVELATIONS +
             "list city_list(city);\n" +
-            "calc average (integer average_height = math.avg(" +
-            "  city_list[0][altitude],\n" +
-            "  city_list[1][altitude],\n" +
-            "  city_list[2][altitude],\n" +
-            "  city_list[3][altitude],\n" +
-            "  city_list[4][altitude],\n" +
-            "  city_list[5][altitude],\n" +
-            "  city_list[6][altitude],\n" +
-            "  city_list[7][altitude],\n" +
-            "  city_list[8][altitude],\n" +
-            "  city_list[9][altitude]\n" +
+            "calc average (integer average_height=math.avg(" +
+            "  city_list[0]^altitude,\n" +
+            "  city_list[1]^altitude,\n" +
+            "  city_list[2]^altitude,\n" +
+            "  city_list[3]^altitude,\n" +
+            "  city_list[4]^altitude,\n" +
+            "  city_list[5]^altitude,\n" +
+            "  city_list[6]^altitude,\n" +
+            "  city_list[7]^altitude,\n" +
+            "  city_list[8]^altitude,\n" +
+            "  city_list[9]^altitude\n" +
             "));\n" +
             "query average_height (city : average);";
     
@@ -382,14 +382,14 @@ public class CallOperandTest
             "list city_list(city);\n" +
             "scope city\n" +
             "{\n" +
-            "  integer accum = 0;\n" +
-            "  integer index = 0;\n" +
+            "  integer accum=0;\n" +
+            "  integer index=0;\n" +
            "   calc average_height(\n" +
             "  {\n" +
-            "    accum += city_list[index][altitude],\n" +
+            "    accum += city_list[index]^altitude,\n" +
             "    ? ++index < length(city_list)\n" +
             "  },\n" +
-            "  average = accum / index\n" +
+            "  average=accum / index\n" +
             "  );\n" +
             "}\n"  +
             "calc average_height(\n" +
@@ -401,7 +401,7 @@ public class CallOperandTest
     static final String GERMAN_COLORS =
             "calc german_colors\n" +
             "(\n" +
-            "  axiom colors = {},\n" +
+            "  axiom colors={},\n" +
             "  << german.swatch(shade=\"Wasser\") >> (red, green, blue),\n" + 
             "  colors += axiom aqua { red, green, blue },\n" +
             "  << german.swatch(shade=\"blau\") >> (red, green, blue),\n" + 
@@ -424,9 +424,9 @@ public class CallOperandTest
             "calc german_orange\n" +
             "(\n" +
             "  << german.swatch(shade=\"Orange\") >> (red, green, blue),\n" + 
-            "  boolean hasRed = fact(red),\n" +
-            "  boolean hasGreen = fact(green),\n" +
-            "  boolean hasBlue = fact(blue)\n" +
+            "  boolean hasRed=fact(red),\n" +
+            "  boolean hasGreen=fact(green),\n" +
+            "  boolean hasBlue=fact(blue)\n" +
             ");\n" +
             "query german_orange (german_orange);"
             ;
@@ -438,11 +438,11 @@ public class CallOperandTest
             "  sort_list,\n" +
             "  string column,\n" +
             "  // i is index to last item appended to the list\n" +
-            "  integer i = length(sort_list) - 1,\n" +
+            "  integer i=length(sort_list) - 1,\n" +
             "  // Skip first time when only one item in list\n" +
             "  : i < 1,\n" +
             "  // j is the swap index\n" + 
-            "  integer j = i - 1,\n" +
+            "  integer j=i - 1,\n" +
             "  // Get last altitude for sort comparison\n" + 
             "  integer altitude = sort_list[i][column],\n" +
             "  // Save axiom to swap\n" +
@@ -466,16 +466,16 @@ public class CallOperandTest
 
     static String[] SORTED_CITIES_LIST =
     {
-        "sort_city(name = jacksonville, altitude = 8)",
-        "sort_city(name = richmond, altitude = 19)",
-        "sort_city(name = madrid, altitude = 1305)",
-        "sort_city(name = wichita, altitude = 1305)",
-        "sort_city(name = bilene, altitude = 1718)",
-        "sort_city(name = spokane, altitude = 1909)",
-        "sort_city(name = denver, altitude = 5280)",
-        "sort_city(name = flagstaff, altitude = 6970)",
-        "sort_city(name = addis ababa, altitude = 8000)",
-        "sort_city(name = leadville, altitude = 10200)"
+        "sort_city(name=jacksonville, altitude=8)",
+        "sort_city(name=richmond, altitude=19)",
+        "sort_city(name=madrid, altitude=1305)",
+        "sort_city(name=wichita, altitude=1305)",
+        "sort_city(name=bilene, altitude=1718)",
+        "sort_city(name=spokane, altitude=1909)",
+        "sort_city(name=denver, altitude=5280)",
+        "sort_city(name=flagstaff, altitude=6970)",
+        "sort_city(name=addis ababa, altitude=8000)",
+        "sort_city(name=leadville, altitude=10200)"
     };
     
     static final String PERFECT_MATCH = 
@@ -503,7 +503,7 @@ public class CallOperandTest
             "  integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(person_list),\n" +
-            "    ? person_list[i][starsign] == starsign\n" +
+            "    ? person_list[i]^starsign == starsign\n" +
             "    {\n" +
             "       candidates += person_list[i]\n" +
             "    },\n" +
@@ -511,9 +511,9 @@ public class CallOperandTest
             "  }\n" +
             ");\n" +
             "calc match(\n" +
-            "  << people_by_starsign(\"gemini\") >> (candidates),\n" +
-            "  candidate_list = match.people_by_starsign,\n" +
-             " integer i = 0,\n" +
+            ". << people_by_starsign(\"gemini\") >> (candidates),\n" +
+            " candidate_list = match.people_by_starsign,\n" +
+            ". integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(candidates),\n" +
             "    geminis += candidates[i++]\n" +
@@ -545,17 +545,17 @@ public class CallOperandTest
             "  integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(person_list),\n" +
-            "    ? person_list[i][starsign] == starsign\n" +
+            "    ? person_list[i]^starsign == starsign\n" +
             "    {\n" +
-            "       age = person_list[i][age],\n" +
+            "       age = person_list[i]^age,\n" +
             "       ? age < 18\n" +
             "       { age = unknown },\n" +
             "       axiom person =\n" +
             "       {\n" +
-            "         string name = person_list[i][name],\n" +
-            "         string sex = person_list[i][sex],\n" +
+            "         string name = person_list[i]^name,\n" +
+            "         string sex = person_list[i]^sex,\n" +
             "         age,\n" +
-            "         string starsign =  person_list[i][starsign]\n" +
+            "         string starsign =  person_list[i]^starsign\n" +
             "       },\n" +
             "       candidates += person\n" +
             "    },\n" +
@@ -573,10 +573,10 @@ public class CallOperandTest
             "    {\n" +
             "      axiom person =\n" +
             "      {\n" + 
-            "       string name = gemini[name],\n" +
-            "       string sex = gemini[sex],\n" +
-            "       integer age = gemini[age],\n" +
-            "       string starsign = gemini[starsign]\n" +
+            "       string name = gemini^name,\n" +
+            "       string sex = gemini^sex,\n" +
+            "       integer age = gemini^age,\n" +
+            "       string starsign = gemini^starsign\n" +
             "      },\n" +
             "      eligible += person\n" +
             "    }\n" +
@@ -586,17 +586,17 @@ public class CallOperandTest
 
     static String[] PERFECT_GEMINIS = 
     {
-        "person(name = John, sex = m, age = 23, starsign = gemini)",
-        "person(name = Jenny, sex = f, age = 21, starsign = gemini)",
-        "person(name = Sonia, sex = f, age = 33, starsign = gemini)",
-        "person(name = Fiona, sex = f, age = 29, starsign = gemini)"
+        "person(name=John, sex=m, age=23, starsign=gemini)",
+        "person(name=Jenny, sex=f, age=21, starsign=gemini)",
+        "person(name=Sonia, sex=f, age=33, starsign=gemini)",
+        "person(name=Fiona, sex=f, age=29, starsign=gemini)"
     };
     
     static String[] FACTUAL_GEMINIS = 
     {
-        "person(name = John, sex = m, age = 23, starsign = gemini)",
-        "person(name = Jenny, sex = f, age = 21, starsign = gemini)",
-        "person(name = Fiona, sex = f, age = 29, starsign = gemini)"
+        "person(name=John, sex=m, age=23, starsign=gemini)",
+        "person(name=Jenny, sex=f, age=21, starsign=gemini)",
+        "person(name=Fiona, sex=f, age=29, starsign=gemini)"
     };
 
     QueryProgram queryProgram;
@@ -623,10 +623,11 @@ public class CallOperandTest
         assertThat(index).isEqualTo(4);
         qname = QualifiedName.parseGlobalName("match");
         iterator = result.getIterator(qname);
-        //System.out.println(iterator.next().getTermByName("candidate_list").getValue());
-        AxiomList axiomList = (AxiomList) (iterator.next().getTermByName("candidate_list").getValue());
+        Axiom axiom = iterator.next();
+        //System.out.println(axiom); //iterator.next().toString()); 
+        AxiomList axiomList = (AxiomList) (axiom.getTermByName("candidate_list").getValue());
         for (index = 0; index < axiomList.getLength(); ++index)
-            // System.out.println(axiomList.getItem(index).getAxiom().toString());
+            //System.out.println(axiomList.getItem(index).getAxiom().toString());
             assertThat(axiomList.getItem(index).getAxiom().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
         assertThat(index).isEqualTo(4);
     }
@@ -823,7 +824,7 @@ public class CallOperandTest
             {
                 //System.out.println(solution.getAxiom("average_height").toString());
                 Axiom result = solution.getAxiom("average_height");
-                assertThat(result.toString()).isEqualTo("average_height(average = " + averageHeight + ")");
+                assertThat(result.toString()).isEqualTo("average_height(average=" + averageHeight + ")");
                 return true;
             }});
     }
@@ -841,9 +842,9 @@ public class CallOperandTest
                 AxiomList colorsList = (AxiomList)germanColors.getTermByName("colors").getValue();
                 Iterator<AxiomTermList> iterator = colorsList.iterator();
                 //System.out.println(iterator.next().getAxiom().toString());
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("aqua(red = 0, green = 255, blue = 255)");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("aqua(red=0, green=255, blue=255)");
                 //System.out.println(iterator.next().getAxiom().toString());
-                assertThat(iterator.next().getAxiom().toString()).isEqualTo("blue(red = 0, green = 0, blue = 255)");
+                assertThat(iterator.next().getAxiom().toString()).isEqualTo("blue(red=0, green=0, blue=255)");
                 assertThat(iterator.hasNext()).isFalse();
                 return true;
             }});
@@ -854,7 +855,7 @@ public class CallOperandTest
             {
                 Axiom germanOrange = solution.getAxiom("german_orange");
                 //System.out.println(germanOrange.toString());
-                assertThat(germanOrange.toString()).isEqualTo("german_orange(hasRed = false, hasGreen = false, hasBlue = false)");
+                assertThat(germanOrange.toString()).isEqualTo("german_orange(hasRed=false, hasGreen=false, hasBlue=false)");
                 return true;
             }});
     }

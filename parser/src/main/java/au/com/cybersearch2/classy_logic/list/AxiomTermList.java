@@ -337,7 +337,7 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
             builder.append(key.toString());
         builder.append(')');
         if (!axiom.equals(EMPTY_AXIOM))
-            builder.append(" = ").append(axiom.toString());
+            builder.append("=").append(axiom.toString());
         return builder.toString();
     }
 

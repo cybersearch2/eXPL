@@ -46,9 +46,9 @@ public class ChoiceTest
 
     static final String[] CHOICE_COLORS_LIST =
     {
-        "rgb = list<axiom> shader.rgb: list<term> shader.rgb() = rgb(red = 0, green = 255, blue = 255)",
-        "rgb = list<axiom> shader.rgb: list<term> shader.rgb() = rgb(red = 0, green = 0, blue = 255)",
-        "rgb = list<axiom> shader.rgb: list<term> shader.rgb() = rgb(red = null, green = null, blue = null)"
+        "rgb=list<axiom> shader.rgb: list<term> shader.rgb()=rgb(red=0, green=255, blue=255)",
+        "rgb=list<axiom> shader.rgb: list<term> shader.rgb()=rgb(red=0, green=0, blue=255)",
+        "rgb=list<axiom> shader.rgb: list<term> shader.rgb()=rgb(red=null, green=null, blue=null)"
     };
 
     static final long[] CHOICE_SELECTION_LIST = { 0, 2, -1 };
@@ -79,9 +79,9 @@ public class ChoiceTest
 
     static final String[] STAMP_DUTY_LIST =
     {
-        "stamp_duty_payable(amount = 123458.0, bracket = 4, duty = 3768.32, display = AUD3,768.32)",
-        "stamp_duty_payable(amount = 55876.33, bracket = 3, duty = 1285.67155, display = AUD1,285.67)",
-        "stamp_duty_payable(amount = 1245890.0, bracket = 8, duty = 62353.95, display = AUD62,353.95)"
+        "stamp_duty_payable(amount=123458.0, bracket=4, duty=3768.320, display=AUD3,768.32)",
+        "stamp_duty_payable(amount=55876.33, bracket=3, duty=1285.67155, display=AUD1,285.67)",
+        "stamp_duty_payable(amount=1245890.0, bracket=8, duty=62353.9500, display=AUD62,353.95)"
     };
     
     @Test

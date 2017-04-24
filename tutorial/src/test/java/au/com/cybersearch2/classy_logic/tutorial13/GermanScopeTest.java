@@ -36,7 +36,7 @@ public class GermanScopeTest
     public void testGermanScope()
     {
         GermanScope germanScope = new GermanScope();
-        assertThat(germanScope.getFormatedTotalAmount().toString()).isEqualTo("item_query(total_text = Gesamtkosten + gst: 13.580,24 EUR)");
+        assertThat(germanScope.getFormatedTotalAmount().toString()).isEqualTo("item_query(total_text=Gesamtkosten + gst: 13.580,24 EUR)");
         ParserContext context = germanScope.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
@@ -90,7 +90,7 @@ public class GermanScopeTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency total = amount*1.1 (10,22) (10,57)");
+        assertThat(sourceItem.toString()).isEqualTo("currency total=amount*1.1 (10,22) (10,57)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -98,7 +98,7 @@ public class GermanScopeTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string total_text = translate_var0+ + gst: +total_format (12,19) (12,99)");
+        assertThat(sourceItem.toString()).isEqualTo("string total_text=translate_var0+ + gst: +total_format (12,19) (12,99)");
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("query german.item_query (18,3)");

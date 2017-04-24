@@ -88,11 +88,11 @@ public class CalculateSquareMiles2Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double surface_area = surface_area_Km2 (5,3) (5,40)");
+        assertThat(sourceItem.toString()).isEqualTo("double surface_area=surface_area_Km2 (5,3) (5,40)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string units = km2 (6,3) (6,22)");
+        assertThat(sourceItem.toString()).isEqualTo("string units=km2 (6,3) (6,22)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -112,7 +112,7 @@ public class CalculateSquareMiles2Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("km2=mi2 (11,5) (12,2)");
+        assertThat(sourceItem.toString()).isEqualTo("units=mi2 (11,5) (12,2)");
         assertThat(iterator.hasNext()).isFalse();
   }
     

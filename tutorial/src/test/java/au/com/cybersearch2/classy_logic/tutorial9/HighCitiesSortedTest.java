@@ -90,7 +90,7 @@ public class HighCitiesSortedTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer i = high_cities_length-1 (27,3) (27,37)");
+        assertThat(sourceItem.toString()).isEqualTo("integer i=high_cities_length-1 (27,3) (27,37)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -98,15 +98,15 @@ public class HighCitiesSortedTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer j = i-1 (31,3) (31,19)");
+        assertThat(sourceItem.toString()).isEqualTo("integer j=i-1 (31,3) (31,19)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer altitude=high_cities_var0 (33,3) (33,45)");
+        assertThat(sourceItem.toString()).isEqualTo("integer altitude=high_cities_var0 (33,3) (33,44)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("temp = high_cities_var1 (35,3) (35,23)");
+        assertThat(sourceItem.toString()).isEqualTo("temp=high_cities_var1 (35,3) (35,23)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -121,8 +121,8 @@ public class HighCitiesSortedTest
         assertThat(sourceMarker.toString()).isEqualTo("calc insert_sort1 (37,3)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
-        System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?altitude<high_cities_var2 (38,5) (38,41)");
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("?altitude<high_cities_var2 (38,5) (38,40)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

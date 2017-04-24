@@ -62,7 +62,7 @@ public class FormatterOperand extends StringOperand implements LocaleListener
 			operand.evaluate(id);
 		String formatValue = null;
 		if (operand instanceof TextFormat)
-			formatValue = ((TextFormat)operand).formatValue();
+			formatValue = ((TextFormat)operand).formatValue(operand.getValue());
 		else if (Number.class.isAssignableFrom(operand.getValueClass()))
 		{
 			NumberFormat numberFormat = NumberFormat.getInstance(locale);

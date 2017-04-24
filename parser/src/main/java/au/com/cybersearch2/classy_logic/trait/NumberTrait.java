@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2017  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,14 +13,34 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.interfaces;
+package au.com.cybersearch2.classy_logic.trait;
+
+import java.text.NumberFormat;
+
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 
 /**
- * TextFormat
+ * NumberTrait
  * @author Andrew Bowley
- * 10 Mar 2015
+ * 21Apr.,2017
  */
-public interface TextFormat 
+public class NumberTrait extends DefaultTrait
 {
-	String formatValue(Object value);
+
+    public NumberTrait(OperandType operandType)
+    {
+        super(operandType);
+    }
+
+    /**
+     * @see au.com.cybersearch2.classy_logic.trait.DefaultTrait#formatValue(java.lang.Object)
+     */
+    @Override
+    public String formatValue(Object value)
+    {
+        NumberFormat numberFormat = NumberFormat.getInstance(getLocale());
+        String formatValue = numberFormat.format(value);
+        return formatValue;
+    }
+
 }

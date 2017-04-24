@@ -102,10 +102,10 @@ public class IncreasedAgricultureTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("country?Y2010-Y1990>1.0 (4,20) (4,48)");
+        assertThat(sourceItem.toString()).isEqualTo("double Y1990 (4,20) (4,31)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
+        System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("template surface_area_increase (5,1)");
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
@@ -114,7 +114,7 @@ public class IncreasedAgricultureTest
         assertThat(sourceItem.toString()).isEqualTo("country?country==country (6,3) (6,38)");
         sourceItem = sourceItem.getNext();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double surface_area = Y2010-Y1990/100*surface_area_Km2 (7,3) (8,22)");
+        assertThat(sourceItem.toString()).isEqualTo("double surface_area=Y2010-Y1990/100*surface_area_Km2 (7,3) (8,22)");
     }
     
     protected void checkSolution(BufferedReader reader, String country)

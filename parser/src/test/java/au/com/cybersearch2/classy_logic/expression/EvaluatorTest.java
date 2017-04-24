@@ -298,7 +298,7 @@ public class EvaluatorTest
 		leftName = "";
 		testLeftToString(leftIsEmpty, leftName, leftValue, leftToString, "++", "237++");
 		leftIsEmpty = true;
-		testLeftToString(leftIsEmpty, leftName, leftValue, leftToString, "++", "evaluator = <empty>"); 
+		testLeftToString(leftIsEmpty, leftName, leftValue, leftToString, "++", "evaluator=<empty>"); 
 		leftIsEmpty = true;
 		leftName = "LeftName";
 		testLeftToString(leftIsEmpty, leftName, leftValue, leftToString, "&&", "evaluator?x+y");
@@ -393,18 +393,18 @@ public class EvaluatorTest
 	{
 		UnaryTestData[] testData = new UnaryTestData[]
 		{
-			new UnaryTestData(2, "~", NAME + " = -3"),
-			new UnaryTestData(7, "-", NAME + " = -7"),
-			new UnaryTestData(-99, "+", NAME + " = -99"),
-			new UnaryTestData(Integer.MAX_VALUE, "~", NAME + " = " + (~Integer.MAX_VALUE )),
-			new UnaryTestData(Integer.MAX_VALUE, "-", NAME + " = -" + Integer.MAX_VALUE),
-			new UnaryTestData(Integer.MAX_VALUE, "+", NAME + " = " + Integer.MAX_VALUE),
-			new UnaryTestData("9876.12", "-", NAME + " = -9876.12"),
-			new UnaryTestData("-99999", "+", NAME + " = -99999"),
-			new UnaryTestData(true, "!", NAME + " = false"),
-			new UnaryTestData(false, "!", NAME + " = true"),
-			new UnaryTestData(11, "++", NAME + " = 12", true),
-			new UnaryTestData(11, "--", NAME + " = 10", true),
+			new UnaryTestData(2, "~", NAME + "=-3"),
+			new UnaryTestData(7, "-", NAME + "=-7"),
+			new UnaryTestData(-99, "+", NAME + "=-99"),
+			new UnaryTestData(Integer.MAX_VALUE, "~", NAME + "=" + (~Integer.MAX_VALUE )),
+			new UnaryTestData(Integer.MAX_VALUE, "-", NAME + "=-" + Integer.MAX_VALUE),
+			new UnaryTestData(Integer.MAX_VALUE, "+", NAME + "=" + Integer.MAX_VALUE),
+			new UnaryTestData("9876.12", "-", NAME + "=-9876.12"),
+			new UnaryTestData("-99999", "+", NAME + "=-99999"),
+			new UnaryTestData(true, "!", NAME + "=false"),
+			new UnaryTestData(false, "!", NAME + "=true"),
+			new UnaryTestData(11, "++", NAME + "=12", true),
+			new UnaryTestData(11, "--", NAME + "=10", true),
 		};
 		for (UnaryTestData datum: testData)
 		{
@@ -419,9 +419,9 @@ public class EvaluatorTest
 			Evaluator evaluator = doUnaryPrefixEvaluationTest(datum.operator, operand);
 			assertThat(evaluator.toString()).isEqualTo(datum.result);
 			if (datum.assign)
-				assertThat(operand.toString()).isEqualTo(NAME + " = " + evaluator.getValue());
+				assertThat(operand.toString()).isEqualTo(NAME + "=" + evaluator.getValue());
 			else
-			    assertThat(operand.toString()).isEqualTo(NAME + " = " + datum.operand.toString());
+			    assertThat(operand.toString()).isEqualTo(NAME + "=" + datum.operand.toString());
 		}
 	}
 
@@ -430,8 +430,8 @@ public class EvaluatorTest
 	{
 		UnaryTestData[] testData = new UnaryTestData[]
 		{
-			new UnaryTestData(11, "++", NAME + " = 11"),
-			new UnaryTestData(11, "--", NAME + " = 11"),
+			new UnaryTestData(11, "++", NAME + "=11"),
+			new UnaryTestData(11, "--", NAME + "=11"),
 		};
 		for (UnaryTestData datum: testData)
 		{
@@ -445,7 +445,7 @@ public class EvaluatorTest
 			if (datum.operator.equals("++"))
 				adjust = 1;
 			Object evalValue = evaluator.getValue();
-			assertThat(operand.toString()).isEqualTo(NAME + " = " + (((Long)evalValue).intValue() + adjust));
+			assertThat(operand.toString()).isEqualTo(NAME + "=" + (((Long)evalValue).intValue() + adjust));
 		}
 		Evaluator evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isTrue", Boolean.TRUE), "&&");
 		StringTerm testTerm = new StringTerm("Hello world");
@@ -471,33 +471,33 @@ public class EvaluatorTest
 	{
 		BinaryTestData[] testData = new BinaryTestData[]
 		{
-			new BinaryTestData(new Null(), new TestIntegerOperand("weight", 5), "==", NAME + " = false"),
-			new BinaryTestData(2, null, "=", NAME + " = 2", true),
-			new BinaryTestData(101, new TestIntegerOperand("height", 102), "<", NAME + " = true"),
-			new BinaryTestData(101, new TestIntegerOperand("height", 100), ">", NAME + " = true"),
-			new BinaryTestData(101, new TestIntegerOperand("height", 101), "==", NAME + " = true"),
-			new BinaryTestData(101, new TestIntegerOperand("height", 102), "<=", NAME + " = true"),
-			new BinaryTestData(101, new TestIntegerOperand("height", 101), "<=", NAME + " = true"),
-			new BinaryTestData(101, new TestIntegerOperand("height", 100), ">=", NAME + " = true"),
-			new BinaryTestData(101, new TestIntegerOperand("height", 101), ">=", NAME + " = true"),
-			new BinaryTestData(101, new TestIntegerOperand("height", 101), "!=", NAME + " = false"),
-			new BinaryTestData(101, new TestIntegerOperand("height", 102), "!=", NAME + " = true"),
-			new BinaryTestData(24, new TestIntegerOperand("weight", 7), "+", NAME + " = 31"),
-			new BinaryTestData(76, new TestIntegerOperand("weight", 32), "-", NAME + " = 44"),
-			new BinaryTestData(5, new TestIntegerOperand("weight", 5), "*", NAME + " = 25"),
-			new BinaryTestData(12, new TestIntegerOperand("weight", 4), "/", NAME + " = 3"),
-			new BinaryTestData(7, new TestIntegerOperand("mask", 15), "&", NAME + " = 7"),
-			new BinaryTestData(1, new TestIntegerOperand("mask", 4), "|", NAME + " = 5"),
-			new BinaryTestData(15, new TestIntegerOperand("mask", 7), "^", NAME + " = 8"),
-			new BinaryTestData(82, new TestIntegerOperand("remainder", 9), "%", NAME + " = 1"),
-			new BinaryTestData(24, new TestIntegerOperand("weight", 7), "+=", NAME + " = 31", true),
-			new BinaryTestData(76, new TestIntegerOperand("weight", 32), "-=", NAME + " = 44", true),
-			new BinaryTestData(5, new TestIntegerOperand("weight", 5), "*=", NAME + " = 25", true),
-			new BinaryTestData(12, new TestIntegerOperand("weight", 4), "/=", NAME + " = 3", true),
-			new BinaryTestData(7, new TestIntegerOperand("mask", 15), "&=", NAME + " = 7", true),
-			new BinaryTestData(1, new TestIntegerOperand("mask", 4), "|=", NAME + " = 5", true),
-			new BinaryTestData(15, new TestIntegerOperand("mask", 7), "^=", NAME + " = 8", true),
-			new BinaryTestData(82, new TestIntegerOperand("remainder", 9), "%=", NAME + " = 1", true)
+			new BinaryTestData(new Null(), new TestIntegerOperand("weight", 5), "==", NAME + "=false"),
+			new BinaryTestData(2, null, "=", NAME + "=2", true),
+			new BinaryTestData(101, new TestIntegerOperand("height", 102), "<", NAME + "=true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 100), ">", NAME + "=true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 101), "==", NAME + "=true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 102), "<=", NAME + "=true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 101), "<=", NAME + "=true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 100), ">=", NAME + "=true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 101), ">=", NAME + "=true"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 101), "!=", NAME + "=false"),
+			new BinaryTestData(101, new TestIntegerOperand("height", 102), "!=", NAME + "=true"),
+			new BinaryTestData(24, new TestIntegerOperand("weight", 7), "+", NAME + "=31"),
+			new BinaryTestData(76, new TestIntegerOperand("weight", 32), "-", NAME + "=44"),
+			new BinaryTestData(5, new TestIntegerOperand("weight", 5), "*", NAME + "=25"),
+			new BinaryTestData(12, new TestIntegerOperand("weight", 4), "/", NAME + "=3"),
+			new BinaryTestData(7, new TestIntegerOperand("mask", 15), "&", NAME + "=7"),
+			new BinaryTestData(1, new TestIntegerOperand("mask", 4), "|", NAME + "=5"),
+			new BinaryTestData(15, new TestIntegerOperand("mask", 7), "^", NAME + "=8"),
+			new BinaryTestData(82, new TestIntegerOperand("remainder", 9), "%", NAME + "=1"),
+			new BinaryTestData(24, new TestIntegerOperand("weight", 7), "+=", NAME + "=31", true),
+			new BinaryTestData(76, new TestIntegerOperand("weight", 32), "-=", NAME + "=44", true),
+			new BinaryTestData(5, new TestIntegerOperand("weight", 5), "*=", NAME + "=25", true),
+			new BinaryTestData(12, new TestIntegerOperand("weight", 4), "/=", NAME + "=3", true),
+			new BinaryTestData(7, new TestIntegerOperand("mask", 15), "&=", NAME + "=7", true),
+			new BinaryTestData(1, new TestIntegerOperand("mask", 4), "|=", NAME + "=5", true),
+			new BinaryTestData(15, new TestIntegerOperand("mask", 7), "^=", NAME + "=8", true),
+			new BinaryTestData(82, new TestIntegerOperand("remainder", 9), "%=", NAME + "=1", true)
 		};
 		for (BinaryTestData datum: testData)
 		{
@@ -515,9 +515,9 @@ public class EvaluatorTest
 				Evaluator evaluator = doBinaryEvaluationTest(operand, datum.operator, operand2);
 				assertThat(evaluator.toString()).isEqualTo(datum.result);
 				if (datum.assign)
-					assertThat(operand.toString()).isEqualTo("x = " + evaluator.getValue());
+					assertThat(operand.toString()).isEqualTo("x=" + evaluator.getValue());
 				else
-				    assertThat(operand.toString()).isEqualTo(NAME + " = " + datum.operand.toString());
+				    assertThat(operand.toString()).isEqualTo(NAME + "=" + datum.operand.toString());
 			}
 			else
 			{
@@ -535,37 +535,37 @@ public class EvaluatorTest
 				Evaluator evaluator = doBinaryEvaluationTest(operand, datum.operator, operand2);
 				assertThat(evaluator.toString()).isEqualTo(datum.result);
 				if (datum.operand instanceof Null)
-					assertThat(operand.toString()).isEqualTo("L = null");
+					assertThat(operand.toString()).isEqualTo("L=null");
 				else if (datum.assign )
-					assertThat(operand.toString()).isEqualTo(NAME + " = " + evaluator.getValue());
+					assertThat(operand.toString()).isEqualTo(NAME + "=" + evaluator.getValue());
 				else
-				    assertThat(operand.toString()).isEqualTo(NAME + " = " + datum.operand.toString());
+				    assertThat(operand.toString()).isEqualTo(NAME + "=" + datum.operand.toString());
 			}
 		}
 		System.out.println("x==null");
 		Evaluator evaluator = new TestEvaluator(NAME, new TestIntegerOperand("x", Long.MAX_VALUE), "==", new TestNullOperand("y"));
 		evaluator.evaluate(1);
-		assertThat(evaluator.toString()).isEqualTo(NAME + " = false");
+		assertThat(evaluator.toString()).isEqualTo(NAME + "=false");
 		System.out.println("x!=null");
 		evaluator = new TestEvaluator(NAME, new TestIntegerOperand("x", Long.MAX_VALUE), "!=", new TestNullOperand("y"));
 		evaluator.evaluate(1);
-		assertThat(evaluator.toString()).isEqualTo(NAME + " = true");
+		assertThat(evaluator.toString()).isEqualTo(NAME + "=true");
 		System.out.println("null!=null");
 		evaluator = new TestEvaluator(NAME, new TestNullOperand("x"), "!=", new TestNullOperand("y"));
 		evaluator.evaluate(1);
-		assertThat(evaluator.toString()).isEqualTo(NAME + " = false");
+		assertThat(evaluator.toString()).isEqualTo(NAME + "=false");
 		System.out.println("null==null");
 		evaluator = new TestEvaluator(NAME, new TestNullOperand("x"), "==", new TestNullOperand("y"));
 		evaluator.evaluate(1);
-		assertThat(evaluator.toString()).isEqualTo(NAME + " = true");
+		assertThat(evaluator.toString()).isEqualTo(NAME + "=true");
 		System.out.println("NaN==null");
 		evaluator = new TestEvaluator(NAME, new TestDoubleOperand("x", new Double(Double.NaN)), "==", new TestNullOperand("y"));
 		evaluator.evaluate(1);
-		assertThat(evaluator.toString()).isEqualTo(NAME + " = false");
+		assertThat(evaluator.toString()).isEqualTo(NAME + "=false");
 		System.out.println("NaN!=null");
 		evaluator = new TestEvaluator(NAME, new TestDoubleOperand("x", new Double(Double.NaN)), "!=", new TestNullOperand("y"));
 		evaluator.evaluate(1);
-		assertThat(evaluator.toString()).isEqualTo(NAME + " = true");
+		assertThat(evaluator.toString()).isEqualTo(NAME + "=true");
 		evaluator = new TestEvaluator(NAME, new TestBooleanOperand("isTrue", Boolean.TRUE), "&&", new TestBooleanOperand("isTrue", Boolean.TRUE));
 		assertThat(evaluator.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
 		assertThat(evaluator.getValue()).isEqualTo(Boolean.TRUE);
@@ -789,11 +789,11 @@ public class EvaluatorTest
 	{
 		UnaryTestData[] testData = new UnaryTestData[]
 		{
-			new UnaryTestData(new Double("NaN"), "-", NAME + " = NaN"),
-			new UnaryTestData(new Double("NaN"), "+", NAME + " = NaN"),
-			new UnaryTestData(new Double("NaN"), "~", NAME + " = NaN"),
-			new UnaryTestData(new Double("NaN"), "++", NAME + " = NaN"),
-			new UnaryTestData(new Double("NaN"), "--", NAME + " = NaN")
+			new UnaryTestData(new Double("NaN"), "-", NAME + "=NaN"),
+			new UnaryTestData(new Double("NaN"), "+", NAME + "=NaN"),
+			new UnaryTestData(new Double("NaN"), "~", NAME + "=NaN"),
+			new UnaryTestData(new Double("NaN"), "++", NAME + "=NaN"),
+			new UnaryTestData(new Double("NaN"), "--", NAME + "=NaN")
 		};
 		for (UnaryTestData datum: testData)
 		{
@@ -823,11 +823,11 @@ public class EvaluatorTest
 		}
 		BinaryTestData[] binaryTestData = new BinaryTestData[]
 		{                      
-			new BinaryTestData(new Double("NaN"), new TestIntegerOperand("mask", 7), "^", NAME + " = NaN"),
-			new BinaryTestData(new Double("NaN"), new TestBigDecimalOperand("mask", new BigDecimal("7")), "^", NAME + " = NaN"),
-			new BinaryTestData(new Double("NaN"), new TestBigDecimalOperand("mask", new BigDecimal("7")), "^", NAME + " = NaN"),
-			new BinaryTestData(new Double("NaN"), new TestNullOperand("height"), "+", NAME + " = NaN"),
-			new BinaryTestData(new Null(), new TestDoubleOperand("height", new Double("NaN")), "+", NAME + " = NaN")
+			new BinaryTestData(new Double("NaN"), new TestIntegerOperand("mask", 7), "^", NAME + "=NaN"),
+			new BinaryTestData(new Double("NaN"), new TestBigDecimalOperand("mask", new BigDecimal("7")), "^", NAME + "=NaN"),
+			new BinaryTestData(new Double("NaN"), new TestBigDecimalOperand("mask", new BigDecimal("7")), "^", NAME + "=NaN"),
+			new BinaryTestData(new Double("NaN"), new TestNullOperand("height"), "+", NAME + "=NaN"),
+			new BinaryTestData(new Null(), new TestDoubleOperand("height", new Double("NaN")), "+", NAME + "=NaN")
 		};
 		for (BinaryTestData datum: binaryTestData)
 		{

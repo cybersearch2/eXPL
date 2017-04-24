@@ -97,7 +97,7 @@ public class ParameterOperandTest
                 AxiomList allTypesContainer = (AxiomList)solution.getAxiom("test").getTermByIndex(0).getValue();
                 //System.out.println(solution.getAxiom("test").toString());
                 validateSolution(allTypesContainer, "all_types", "bool, int, real, dec, amount, text", 
-                        "all_types(bool = true, int = 123, real = 1.456, dec = 5.0, amount = 19.76, text = To be, or not to be)");
+                        "all_types(bool=true, int=123, real=1.456, dec=5.0, amount=19.76, text=To be, or not to be)");
                 return false;
             }});
     }
@@ -114,7 +114,7 @@ public class ParameterOperandTest
             {
                 //System.out.println(solution.getAxiom("test").toString());
                 validateSolution((AxiomList)solution.getAxiom("test").getTermByIndex(0).getValue(), "all_types", "a, b, c, d, e, f", 
-                        "all_types(a = true, b = 123, c = 1.456, d = 5.0, e = 19.76, f = To be, or not to be)");
+                        "all_types(a=true, b=123, c=1.456, d=5.0, e=19.76, f=To be, or not to be)");
                 return false;
             }});
     }
@@ -128,7 +128,7 @@ public class ParameterOperandTest
         for (String param: params)
         {
             Object item = iterator.next();
-            assertThat(item.toString()).isEqualTo("list<term> test.all_types() = " + param);
+            assertThat(item.toString()).isEqualTo("list<term> test.all_types()=" + param);
         }
         assertThat(iterator.hasNext()).isFalse();
         //System.out.println(result.getTermByName(Template.TERMNAMES).toString());

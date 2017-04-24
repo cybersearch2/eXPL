@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
@@ -24,8 +25,10 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
+import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * AxiomParameterOperand
@@ -36,6 +39,13 @@ import au.com.cybersearch2.classy_logic.terms.GenericParameter;
  */
 public class AxiomParameterOperand extends GenericParameter<AxiomTermList> implements Operand
 {
+    static Trait AXIOM_PARAMETER_TRAIT;
+    
+    static
+    {
+        AXIOM_PARAMETER_TRAIT = new DefaultTrait(OperandType.TERM);
+    }
+    
     /** Qualified name of operand */
     protected QualifiedName qname;
     /** Collects parameters from an Operand tree and passes them to a supplied function object */
@@ -195,6 +205,18 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
         return isPrivate;
     }
     
+    @Override
+    public void setTrait(Trait trait)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return AXIOM_PARAMETER_TRAIT;
+    }
+
     /**
      * Returns an object which implements CallEvaluator interface returning an AxiomList
      * given a list of terms to marshall into an axiom

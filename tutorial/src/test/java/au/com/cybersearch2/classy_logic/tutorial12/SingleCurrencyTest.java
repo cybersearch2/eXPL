@@ -74,10 +74,10 @@ public class SingleCurrencyTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency AU total = amount*1.1 (7,3) (7,38)");
+        assertThat(sourceItem.toString()).isEqualTo("currency AU total=amount*1.1 (7,3) (7,38)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string total_text = Total + gst: +total_format (8,3) (9,0)");
+        assertThat(sourceItem.toString()).isEqualTo("string total_text=Total + gst: +total_format (8,3) (9,0)");
     }
 }

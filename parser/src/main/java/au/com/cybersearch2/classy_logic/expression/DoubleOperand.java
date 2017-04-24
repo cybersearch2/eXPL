@@ -15,9 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.trait.NumberTrait;
 
 /**
  * DoubleOperand
@@ -26,6 +29,15 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class DoubleOperand extends ExpressionOperand<Double> 
 {
+    static Trait DOUBLE_TRAIT;
+    
+    static
+    {
+        DOUBLE_TRAIT = new NumberTrait(OperandType.DOUBLE);
+    }
+    
+    /** Localization and specialization */
+    protected Trait trait;
 
 	/**
 	 * Construct named DoubleOperand object
@@ -34,6 +46,7 @@ public class DoubleOperand extends ExpressionOperand<Double>
 	public DoubleOperand(QualifiedName qname) 
 	{
 		super(qname);
+		this.trait = DOUBLE_TRAIT;
 	}
 
 	/**
@@ -44,6 +57,7 @@ public class DoubleOperand extends ExpressionOperand<Double>
 	public DoubleOperand(QualifiedName qname, Double value) 
 	{
 		super(qname, value);
+        this.trait = DOUBLE_TRAIT;
 	}
 
 	/**
@@ -54,7 +68,7 @@ public class DoubleOperand extends ExpressionOperand<Double>
 	public DoubleOperand(QualifiedName qname, Operand expression) 
 	{
 		super(qname, expression);
-
+        this.trait = DOUBLE_TRAIT;
 	}
 
 	/**
@@ -187,5 +201,17 @@ public class DoubleOperand extends ExpressionOperand<Double>
 	{
 		setValue((Double)term.getValue());
 	}
+
+    @Override
+    public void setTrait(Trait trait)
+    {
+        this.trait = trait;
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return trait;
+    }
 
 }

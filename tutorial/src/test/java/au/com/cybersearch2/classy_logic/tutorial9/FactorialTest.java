@@ -83,15 +83,15 @@ public class FactorialTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer i = 1 (4,3) (4,15)");
+        assertThat(sourceItem.toString()).isEqualTo("integer i=1 (4,3) (4,15)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("decimal factorial = 1 (5,3) (5,23)");
+        assertThat(sourceItem.toString()).isEqualTo("decimal factorial=1 (5,3) (5,23)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("factorial1(1*=1 ... ?1++<n) (6,3) (10,0)");
+        assertThat(sourceItem.toString()).isEqualTo("factorial1(factorial*=i ... ?i++<n) (6,3) (10,0)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -99,11 +99,11 @@ public class FactorialTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("1*=1 (7,5) (7,18)");
+        assertThat(sourceItem.toString()).isEqualTo("factorial*=i (7,5) (7,18)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?1++<n (8,5) (9,2)");
+        assertThat(sourceItem.toString()).isEqualTo("?i++<n (8,5) (9,2)");
         assertThat(sourceItem.getNext()).isNull();
     }
     

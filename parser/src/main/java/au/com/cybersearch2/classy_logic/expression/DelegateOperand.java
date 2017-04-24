@@ -22,13 +22,16 @@ import java.util.Map;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * DelegateOperand
@@ -37,6 +40,13 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public abstract class DelegateOperand extends Parameter implements Operand, Concaten<Object> 
 {
+    static Trait DEFAULT_TRAIT;
+    
+    static
+    {
+        DEFAULT_TRAIT = new DefaultTrait(OperandType.UNKNOWN);
+    }
+    
     /** Qualified name shared by all delegates and need not be referenced by queries */
 	static final QualifiedName DELEGATE_NAME = new QualifiedName("*delegate*", QualifiedName.ANONYMOUS);
 	/** Default delegate only allows assignment */
@@ -58,6 +68,9 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	protected QualifiedName qname;
 	/** Flag set true if operand not visible in solution */
 	protected boolean isPrivate;
+    /** Localization and specialization override of delegate */
+    protected Trait trait;
+
 
 	static
 	{
@@ -85,6 +98,8 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 		this.qname = qname;
 		// Default to only assignment allowed
         delegate = ASSIGN_ONLY_DELEGATE;
+        // Assign an initial trait, but it can be set at compile time to be applied at run time
+        trait = DEFAULT_TRAIT;
 	}
 
     /**
@@ -169,11 +184,17 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	    if (newDelegate == null)
 		{
 			if (delegate.getClass() != AssignOnlyOperand.class)
+			{
 				//throw new ExpressionException("Unknown value class: " + getValueClass().toString());
 				delegate = new AssignOnlyOperand(new QualifiedName(name, QualifiedName.ANONYMOUS));
+				trait = DEFAULT_TRAIT;
+			}
 		}
 		else
+		{
 			delegate = newDelegate;
+			trait = delegate.getTrait();
+		}
 	}
 
 	public static boolean isDelegateClass(Class<?> clazz)
@@ -318,5 +339,31 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
         if (operand.getRightOperand() != null)
             visit(operand.getRightOperand(), visitor, depth + 1);
         return true;
+    }
+
+    @Override
+    public void setTrait(Trait trait)
+    {
+        if (empty)
+            this.trait = trait;
+        else
+        {   // Only update trait if delegate supports update
+            switch (delegate.getTrait().getOperandType())
+            {
+            case INTEGER:
+            case DOUBLE:
+            case DECIMAL:
+            case CURRENCY:
+            case STRING:
+                this.trait = trait;
+            default:
+            }
+        }
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return trait == null ? delegate.getTrait() : trait;
     }
 }

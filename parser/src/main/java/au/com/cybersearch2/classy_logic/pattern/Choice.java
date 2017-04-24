@@ -21,6 +21,7 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -72,7 +73,9 @@ public class Choice
 	        QualifiedName qualifiedTermName = QualifiedName.parseName(termName, qualifiedContextname);
 	        Operand operand = parserAssembler.getOperandMap().get(qualifiedTermName);
 	        if (operand == null)
+	        {
 	            operand = new Variable(qualifiedTermName);
+	        }
 	    	variableList.add(operand);
 	    }
 	    selection = NO_MATCH;
@@ -157,6 +160,8 @@ public class Choice
 		    }
             ++index;
 		}
+		IntegerOperand selectionOperand = new IntegerOperand(QualifiedName.parseGlobalName(template.getQualifiedName().getTemplate()), (long)selection);
+        solutionTemplate.addTerm(selectionOperand);
 		solution.put(template.getQualifiedName().toString(), solutionTemplate.toAxiom());
 		return true;
 	}

@@ -31,10 +31,10 @@ public class GermanColorsTest
     @Test
     public void GermanColors() throws Exception
     {
-        GermanColors germanColors = new GermanColors();
-        assertThat(germanColors.getColorSwatch("Wasser")).isEqualTo("color_query(name = Wasser, red = 0, green = 255, blue = 255)");
-        assertThat(germanColors.getColorSwatch("schwarz")).isEqualTo("color_query(name = schwarz, red = 0, green = 0, blue = 0)");
-        assertThat(germanColors.getColorSwatch("weiß")).isEqualTo("color_query(name = weiß, red = 255, green = 255, blue = 255)");
-        assertThat(germanColors.getColorSwatch("blau")).isEqualTo("color_query(name = blau, red = 0, green = 0, blue = 255)");
+        GermanColors germanColors=new GermanColors();
+        assertThat(germanColors.getColorSwatch("Wasser")).isEqualTo("color_query(name=Wasser, red=0, green=255, blue=255, swatch=0)");
+        assertThat(germanColors.getColorSwatch("schwarz")).isEqualTo("color_query(name=schwarz, red=0, green=0, blue=0, swatch=1)");
+        assertThat(germanColors.getColorSwatch("weiß")).isEqualTo("color_query(name=weiß, red=255, green=255, blue=255, swatch=3)");
+        assertThat(germanColors.getColorSwatch("blau")).isEqualTo("color_query(name=blau, red=0, green=0, blue=255, swatch=2)");
     }
 }

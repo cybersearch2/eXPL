@@ -76,23 +76,23 @@ public class ColorSwatchTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("{rgb = 65535,aqua,0,255,255} (5,2) (5,33)");
+        assertThat(sourceItem.toString()).isEqualTo("{rgb=65535,aqua,0,255,255} (5,2) (5,33)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("{rgb = 0,black,0,0,0} (6,2) (6,33)");
+        assertThat(sourceItem.toString()).isEqualTo("{rgb=0,black,0,0,0} (6,2) (6,33)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("{rgb = 255,blue,0,0,255} (7,2) (7,33)");
+        assertThat(sourceItem.toString()).isEqualTo("{rgb=255,blue,0,0,255} (7,2) (7,33)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("{rgb = 16777215,white,255,255,255} (8,2) (8,33)");
+        assertThat(sourceItem.toString()).isEqualTo("{rgb=16777215,white,255,255,255} (8,2) (8,33)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("{rgb = unknown,unknown,0,0,0} (9,2) (9,33)");
+        assertThat(sourceItem.toString()).isEqualTo("{rgb=unknown,unknown,0,0,0} (9,2) (9,33)");
         assertThat(iterator.hasNext()).isFalse();
     }
 

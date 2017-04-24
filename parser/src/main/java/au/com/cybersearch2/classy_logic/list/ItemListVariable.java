@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
@@ -22,7 +23,9 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
+import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * ItemListVariable
@@ -36,6 +39,14 @@ import au.com.cybersearch2.classy_logic.terms.GenericParameter;
  */
 public class ItemListVariable<T> extends GenericParameter<T> implements Operand 
 {
+    static Trait LIST_TRAIT;
+    
+    static
+    {
+        // The de-referenced list value may be either an axiom or a term
+        LIST_TRAIT = new DefaultTrait(OperandType.UNKNOWN);
+    }
+    
     /** Qualified name of operand */
     protected QualifiedName qname;
 	/** The backing operand list */
@@ -332,6 +343,18 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
         return isPrivate;
     }
     
+    @Override
+    public void setTrait(Trait trait)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return LIST_TRAIT;
+    }
+
 	/**
 	 * Returns variable name given list name and suffix
 	 * @param listName

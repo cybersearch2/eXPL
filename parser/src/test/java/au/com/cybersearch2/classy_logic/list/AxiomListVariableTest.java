@@ -365,7 +365,7 @@ public class AxiomListVariableTest
 		when(axiomTermList.newVariableInstance(isA(Operand.class), isA(String.class), eq(1))).thenReturn(axiomTermListVariable);
 		variable.setTermExpression(termExpression, 1);
 		assertThat(variable.isEmpty()).isTrue();
-		assertThat(variable.toString()).isEqualTo(NAME + "_5_item = <empty>");
+		assertThat(variable.toString()).isEqualTo(NAME + "_5_item=<empty>");
 		assertThat(variable.getValue()).isInstanceOf(Null.class);
 		assertThat(variable.getLeftOperand()).isEqualTo(axiomTermListVariable);
 		assertThat(variable.getRightOperand()).isNull();
@@ -387,7 +387,7 @@ public class AxiomListVariableTest
 		Operand termExpression = new TestEvaluator("b ", a, "++", null);
 		variable.setTermExpression(termExpression, 0);
 		assertThat(variable.isEmpty()).isTrue();
-		assertThat(variable.toString()).isEqualTo(NAME + "_index_item = <empty>");
+		assertThat(variable.toString()).isEqualTo(NAME + "_index_item=<empty>");
 		assertThat(variable.getValue()).isInstanceOf(Null.class);
 		assertThat(variable.getLeftOperand()).isNull();
 		assertThat(variable.getRightOperand()).isNull();
@@ -442,7 +442,7 @@ public class AxiomListVariableTest
     	while (index < cityList.size())
     	{
     		variable.evaluate(1);
-	    	assertThat(variable.getValue().toString()).isEqualTo("list<term> AxiomListName(AxiomKey) = " + CITY_NAME_HEIGHT[index++]);
+	    	assertThat(variable.getValue().toString()).isEqualTo("list<term> AxiomListName(AxiomKey)=" + CITY_NAME_HEIGHT[index++]);
 	    	variable.backup(1);
     	}
     	x.setValue(Long.valueOf(0));

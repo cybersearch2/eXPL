@@ -71,11 +71,11 @@ public class NestedLoopsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer i = 1 (5,3) (5,15)");
+        assertThat(sourceItem.toString()).isEqualTo("integer i=1 (5,3) (5,15)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("insert_sort1(j = 1-1 ... ?++1<sorted_length) (6,3) (17,0)");
+        assertThat(sourceItem.toString()).isEqualTo("insert_sort1(j=i-1 ... ?++i<sorted_length) (6,3) (17,0)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -83,11 +83,11 @@ public class NestedLoopsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer j = 1-1 (7,5) (7,21)");
+        assertThat(sourceItem.toString()).isEqualTo("integer j=i-1 (7,5) (7,21)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer temp = sorted_var0 (8,5) (8,28)");
+        assertThat(sourceItem.toString()).isEqualTo("integer temp=sorted_var0 (8,5) (8,28)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -99,7 +99,7 @@ public class NestedLoopsTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?++1<sorted_length (15,5) (16,2)");
+        assertThat(sourceItem.toString()).isEqualTo("?++i<sorted_length (15,5) (16,2)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

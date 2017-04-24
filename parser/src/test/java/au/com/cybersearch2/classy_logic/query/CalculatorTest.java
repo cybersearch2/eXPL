@@ -250,7 +250,7 @@ public class CalculatorTest
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
-        assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n = 3, limit = 3)");
+        assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n=3, limit=3)");
 	}
     
     @Test
@@ -277,7 +277,7 @@ public class CalculatorTest
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
-        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n = 4, factorial = 24, i = 5)");
+        assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n=4, factorial=24, i=5)");
 	}
 
     @Test

@@ -1067,10 +1067,8 @@ public class ParserAssembler implements LocaleListener
         if (!qualifiedName.getTemplate().isEmpty())
             throw new ExpressionException("Variable name \"" + name + "\" is invalid");
         String part1 = qualifiedName.getScope();
-        if ((part1.isEmpty() || !operandMap.getQualifiedContextname().getTemplate().equals(part1)))
+        if (part1.isEmpty() || !operandMap.getQualifiedContextname().getTemplate().equals(part1))
             return operandMap.addOperand(name, null);
-        if (!scope.isTemplateName(part1))
-            throw new ExpressionException("Scope \"" + part1 + "\" not allowed in variable name");
         Operand operand = operandMap.getOperand(qualifiedName);
         if (operand == null)
         {

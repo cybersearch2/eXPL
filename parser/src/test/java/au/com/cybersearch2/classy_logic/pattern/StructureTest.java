@@ -25,6 +25,7 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.pattern.Structure;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -38,7 +39,8 @@ import static org.mockito.Mockito.*;
  */
 public class StructureTest 
 {
-	static class TestStructure extends Structure
+	@SuppressWarnings("serial")
+    static class TestStructure extends Structure
 	{
 		public TestStructure(String name)
 		{
@@ -106,7 +108,7 @@ public class StructureTest
 		Structure testStructure = new Structure(NAME, terms);
 		assertThat(testStructure.getName()).isEqualTo(NAME);
 		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "(one = 1, two = 2, three = 3)");
+		assertThat(testStructure.toString()).isEqualTo(NAME + "(one=1, two=2, three=3)");
 		assertThat(testStructure.getTermByName("one")).isEqualTo(terms[0]);
 		assertThat(testStructure.getTermByName("two")).isEqualTo(terms[1]);
 		assertThat(testStructure.getTermByName("three")).isEqualTo(terms[2]);
@@ -131,7 +133,7 @@ public class StructureTest
 		Structure testStructure = new Structure(NAME, objectArray);
 		assertThat(testStructure.getName()).isEqualTo(NAME);
 		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "(23, Test = Value)");
+		assertThat(testStructure.toString()).isEqualTo(NAME + "(23, Test=Value)");
 	}
 
 	@Test
@@ -178,7 +180,7 @@ public class StructureTest
 		Structure testStructure = new Structure(NAME, paramList);
 		assertThat(testStructure.getName()).isEqualTo(NAME);
 		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "(one = 1, two = 2, three = 3)");
+		assertThat(testStructure.toString()).isEqualTo(NAME + "(one=1, two=2, three=3)");
 		assertThat(testStructure.getTermByName("one")).isEqualTo(paramList.get(0));
 		assertThat(testStructure.getTermByName("two")).isEqualTo(paramList.get(1));
 		assertThat(testStructure.getTermByName("three")).isEqualTo(paramList.get(2));
@@ -425,6 +427,17 @@ public class StructureTest
             {
                 return false;
             }
+
+            @Override
+            public void setTrait(Trait trait)
+            {
+            }
+
+            @Override
+            public Trait getTrait()
+            {
+                return null;
+            }
 		};
 		testStructure.addTerm(term4);
 		assertThat(testStructure.getTermCount()).isEqualTo(2);
@@ -555,6 +568,17 @@ public class StructureTest
             public boolean isPrivate()
             {
                 return false;
+            }
+
+            @Override
+            public void setTrait(Trait trait)
+            {
+            }
+
+            @Override
+            public Trait getTrait()
+            {
+                return null;
             }
 			
 		};

@@ -15,9 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.trait.NumberTrait;
 
 /**
  * LongOperand
@@ -26,6 +29,15 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class IntegerOperand extends ExpressionOperand<Long> 
 {
+    static Trait INTEGER_TRAIT;
+    
+    static
+    {
+        INTEGER_TRAIT = new NumberTrait(OperandType.INTEGER);
+    }
+    
+    /** Localization and specialization */
+    protected Trait trait;
 
 	/**
 	 * Construct a variable LongOperand object
@@ -34,6 +46,7 @@ public class IntegerOperand extends ExpressionOperand<Long>
 	public IntegerOperand(QualifiedName qname) 
 	{
 		super(qname);
+		this.trait = INTEGER_TRAIT;
 	}
 
     /**
@@ -44,6 +57,7 @@ public class IntegerOperand extends ExpressionOperand<Long>
     public IntegerOperand(QualifiedName qname, Integer value) 
     {
         super(qname, value.longValue());
+        this.trait = INTEGER_TRAIT;
     }
 
 	/**
@@ -54,6 +68,7 @@ public class IntegerOperand extends ExpressionOperand<Long>
 	public IntegerOperand(QualifiedName qname, Long value) 
 	{
 		super(qname, value);
+        this.trait = INTEGER_TRAIT;
 	}
 
 	/**
@@ -64,7 +79,7 @@ public class IntegerOperand extends ExpressionOperand<Long>
 	public IntegerOperand(QualifiedName qname, Operand expression) 
 	{
 		super(qname, expression);
-
+        this.trait = INTEGER_TRAIT;
 	}
 
 	/**
@@ -232,5 +247,17 @@ public class IntegerOperand extends ExpressionOperand<Long>
 		setValue((Long)term.getValue());
 		id = term.getId();
 	}
+
+    @Override
+    public void setTrait(Trait trait)
+    {
+        this.trait = trait;
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return trait;
+    }
 
 }

@@ -96,7 +96,7 @@ public class AgeDiscrimination3Test
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("rating = unknown (27,3) (27,18)");
+        assertThat(sourceItem.toString()).isEqualTo("rating=unknown (27,3) (27,18)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -104,7 +104,7 @@ public class AgeDiscrimination3Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?is_age_weight_fact = age_weight (29,3) (29,21)");
+        assertThat(sourceItem.toString()).isEqualTo("?is_age_weight_fact=age_weight (29,3) (29,21)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

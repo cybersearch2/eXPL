@@ -198,7 +198,7 @@ public class Parameter implements Term
 	public String toString()
 	{
 		if (!name.isEmpty())
-			return name + " = " + (empty ? "<empty>" : value.toString());
+			return name + "=" + (empty ? "<empty>" : value.toString());
 		return  value.toString();
 	}
 

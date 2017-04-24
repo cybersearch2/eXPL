@@ -177,13 +177,14 @@ public class AxiomListSpec
             termIndex = ((Long)(termExpression.getValue())).intValue();
             suffix = Integer.toString(termIndex);
         }
-        else if (termExpression.isEmpty())/* && (termExpression instanceof Variable))*/
+        else if (termExpression.isEmpty())
         {
-            suffix = termExpression.getName();
-            if (axiomList != null)
-                setTermIndex();
+            if ((axiomList != null) && 
+                (axiomList.getAxiomTermNameList() != null) &&
+                (getIndexForName(termExpression.getName(), axiomList.getAxiomTermNameList()) != -1))
+                suffix = termExpression.getName();
         }
-        else
+        if (suffix == null)
             suffix = termExpression.toString();
     }
 

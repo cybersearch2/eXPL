@@ -132,7 +132,7 @@ public class OperandMap
 	}
 
 	/**
-     * Throws exception for 'Duplicate Operand name' if operand name is a duplicat
+     * Throws exception for 'Duplicate Operand name' if operand name is a duplicate
      * @param qname Qulaified name of operand
      * @throws ExpressionException
 	 */
@@ -228,7 +228,7 @@ public class OperandMap
             if (operandMap.containsKey(qname))
                 return true;
         }
-		return false;
+ 		return false;
 	}
 
     /**

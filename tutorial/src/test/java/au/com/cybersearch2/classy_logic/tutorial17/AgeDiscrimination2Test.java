@@ -97,7 +97,7 @@ public class AgeDiscrimination2Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?is_age_weight_fact = age_weight (27,4) (27,21)");
+        assertThat(sourceItem.toString()).isEqualTo("?is_age_weight_fact=age_weight (27,4) (27,21)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -113,7 +113,7 @@ public class AgeDiscrimination2Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double rating = age_weight+0.2*starsign==gemini (29,4) (30,1)");
+        assertThat(sourceItem.toString()).isEqualTo("double rating=age_weight+0.2*starsign==gemini (29,4) (30,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

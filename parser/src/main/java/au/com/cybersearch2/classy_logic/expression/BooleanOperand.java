@@ -17,9 +17,12 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.math.BigDecimal;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * BooleanVariable
@@ -28,7 +31,13 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class BooleanOperand extends ExpressionOperand<Boolean>
 {
-
+    static Trait BOOLEAN_TRAIT;
+    
+    static
+    {
+        BOOLEAN_TRAIT = new DefaultTrait(OperandType.BOOLEAN);
+    }
+    
 	/**
 	 * Boolean Variable
      * @param qname Qualified name
@@ -164,6 +173,18 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
                 return (BigDecimal)(object);
             else
                 return new BigDecimal(object.toString());
+    }
+
+    @Override
+    public void setTrait(Trait trait)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return BOOLEAN_TRAIT;
     }
 
 }

@@ -48,7 +48,7 @@ public class StampDutyTest
     public void testStampDuty() throws Exception
     {
         StampDuty stampDuty = new StampDuty();
-        assertThat(stampDuty.getStampDuty()).isEqualTo("stamp_duty(duty = 3768.32)");
+        assertThat(stampDuty.getStampDuty()).isEqualTo("stamp_duty(duty=3768.32)");
         Iterator<SourceMarker> iterator = stampDuty.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();

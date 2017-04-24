@@ -15,10 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * NullOperand
@@ -28,6 +31,13 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class NullOperand extends ExpressionOperand<Object> implements Operand
 {
+    static Trait NULL_TRAIT;
+    
+    static
+    {
+        NULL_TRAIT = new DefaultTrait(OperandType.UNKNOWN);
+    }
+    
     /**
      * Construct anonymous NullOperand object
      */
@@ -131,5 +141,17 @@ public class NullOperand extends ExpressionOperand<Object> implements Operand
 	{
 	    id = term.getId();
 	}
+
+    @Override
+    public void setTrait(Trait trait)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return NULL_TRAIT;
+    }
 
 }

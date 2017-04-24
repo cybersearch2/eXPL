@@ -79,7 +79,7 @@ public class SchoolMarksTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer total = math.add(english ... history) (7,25) (7,72)");
+        assertThat(sourceItem.toString()).isEqualTo("integer total=math.add(english ... history) (7,25) (7,72)");
         assertThat(iterator.hasNext()).isFalse();
     } 
 

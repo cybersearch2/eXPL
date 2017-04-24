@@ -140,13 +140,13 @@ public class AxiomTest
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(0);
         
 	    charges.get(0).unifyTemplate(s1, mock(Solution.class));
-        assertThat(s1.toString()).isEqualTo("charge(city = athens, fee = 23)");
+        assertThat(s1.toString()).isEqualTo("charge(city=athens, fee=23)");
         assertThat(((Parameter)s1.termList.get(0)).getId()).isEqualTo(s1.getId());
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(s1.getId());
         
         s1 = createChargeUnificationTarget("charge");
 	    charges.get(1).unifyTemplate(s1, mock(Solution.class));
-        assertThat(s1.toString()).isEqualTo("charge(city = sparta, fee = 13)");
+        assertThat(s1.toString()).isEqualTo("charge(city=sparta, fee=13)");
         assertThat(((Parameter)s1.termList.get(0)).getId()).isEqualTo(s1.getId());
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(s1.getId());
         
@@ -155,13 +155,13 @@ public class AxiomTest
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(0);
         
 	    charges.get(1).unifyTemplate(s1, mock(Solution.class));
-        assertThat(s1.toString()).isEqualTo("charge(city = sparta, fee = 13)");
+        assertThat(s1.toString()).isEqualTo("charge(city=sparta, fee=13)");
         assertThat(((Parameter)s1.termList.get(0)).getId()).isEqualTo(s1.getId());
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(s1.getId());
         
         s1 = createChargeUnificationTarget("fee");
 	    charges.get(0).unifyTemplate(s1, mock(Solution.class));
-        assertThat(s1.toString()).isEqualTo("fee(city = athens, fee = 23)");
+        assertThat(s1.toString()).isEqualTo("fee(city=athens, fee=23)");
         assertThat(((Parameter)s1.termList.get(0)).getId()).isEqualTo(s1.getId());
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(s1.getId());
 
@@ -169,11 +169,11 @@ public class AxiomTest
         Parameter athens = new Parameter("city", "athens");
         s1.termList.get(0).unifyTerm(athens, 1);
 	    charges.get(1).unifyTemplate(s1, mock(Solution.class));
-        assertThat(s1.toString()).isEqualTo("charge(city = athens, fee)");
+        assertThat(s1.toString()).isEqualTo("charge(city=athens, fee)");
 
         Template s2 = createCustomerUnificationTarget();
         customers.get(0).unifyTemplate(s2, mock(Solution.class));
-        assertThat(s2.toString()).isEqualTo("customer(name = Marathon Marble, city = sparta)");
+        assertThat(s2.toString()).isEqualTo("customer(name=Marathon Marble, city=sparta)");
         assertThat(((Parameter)s2.termList.get(0)).getId()).isEqualTo(s2.getId());
         assertThat(((Parameter)s2.termList.get(1)).getId()).isEqualTo(s2.getId());
         // Test unmatched axiom terms are ignored
@@ -184,7 +184,7 @@ public class AxiomTest
         Axiom tooBig = new Axiom("charge", terms);
         s1 = createChargeUnificationTarget("fee");
         tooBig.unifyTemplate(s1, mock(Solution.class));
-        assertThat(s1.toString()).isEqualTo("fee(city = athens, fee = 23)");
+        assertThat(s1.toString()).isEqualTo("fee(city=athens, fee=23)");
 	}
     
     @Test 
@@ -200,13 +200,13 @@ public class AxiomTest
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(0);
         
         namedCharges.get(0).unifyTemplate(s1, solution);
-        assertThat(s1.toString()).isEqualTo("charge(city = athens, fee = 23)");
+        assertThat(s1.toString()).isEqualTo("charge(city=athens, fee=23)");
         assertThat(((Parameter)s1.termList.get(0)).getId()).isEqualTo(s1.getId());
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(s1.getId());
         
         s1 = createChargeUnificationTarget("charge");
         namedCharges.get(1).unifyTemplate(s1, solution);
-        assertThat(s1.toString()).isEqualTo("charge(city = sparta, fee = 13)");
+        assertThat(s1.toString()).isEqualTo("charge(city=sparta, fee=13)");
         assertThat(((Parameter)s1.termList.get(0)).getId()).isEqualTo(s1.getId());
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(s1.getId());
         
@@ -215,13 +215,13 @@ public class AxiomTest
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(0);
         
         namedCharges.get(1).unifyTemplate(s1, solution);
-        assertThat(s1.toString()).isEqualTo("charge(city = sparta, fee = 13)");
+        assertThat(s1.toString()).isEqualTo("charge(city=sparta, fee=13)");
         assertThat(((Parameter)s1.termList.get(0)).getId()).isEqualTo(s1.getId());
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(s1.getId());
         
         s1 = createChargeUnificationTarget("fee");
         namedCharges.get(0).unifyTemplate(s1, solution);
-        assertThat(s1.toString()).isEqualTo("fee(city = athens, fee = 23)");
+        assertThat(s1.toString()).isEqualTo("fee(city=athens, fee=23)");
         assertThat(((Parameter)s1.termList.get(0)).getId()).isEqualTo(s1.getId());
         assertThat(((Parameter)s1.termList.get(1)).getId()).isEqualTo(s1.getId());
     	
@@ -232,7 +232,7 @@ public class AxiomTest
         Axiom tooBig = new Axiom("charge", terms);
         s1 = createChargeUnificationTarget("charge");
         tooBig.unifyTemplate(s1, solution);
-        assertThat(s1.toString()).isEqualTo("charge(city = athens, fee = 23)");
+        assertThat(s1.toString()).isEqualTo("charge(city=athens, fee=23)");
         terms = new Object[]
 		{
         	new Parameter("fee", 23), new Integer(65467), new Parameter("city","athens")
@@ -240,7 +240,7 @@ public class AxiomTest
         tooBig = new Axiom("charge", terms);
         s1 = createChargeUnificationTarget("charge");
         tooBig.unifyTemplate(s1, solution);
-        assertThat(s1.toString()).isEqualTo("charge(city = athens, fee = 23)");
+        assertThat(s1.toString()).isEqualTo("charge(city=athens, fee=23)");
         terms = new Object[]
 		{
         	new Parameter("fee", 23), new Integer(65467), "athens"
@@ -248,7 +248,7 @@ public class AxiomTest
         tooBig = new Axiom("charge", terms);
         s1 = createChargeUnificationTarget("charge");
         tooBig.unifyTemplate(s1, solution);
-        assertThat(s1.toString()).isEqualTo("charge(city, fee = 23)");
+        assertThat(s1.toString()).isEqualTo("charge(city, fee=23)");
     }
 
     @Test 

@@ -17,10 +17,13 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.math.BigDecimal;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.trait.NumberTrait;
 
 /**
  * BigDecimalOperand
@@ -29,6 +32,15 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class BigDecimalOperand extends ExpressionOperand<BigDecimal> 
 {
+    static Trait BIG_DECIMAL_TRAIT;
+    
+    static
+    {
+        BIG_DECIMAL_TRAIT = new NumberTrait(OperandType.DECIMAL);
+    }
+    
+    /** Localization and specialization */
+    protected Trait trait;
     
 	/**
 	 * Construct named, empty BigDecimalOperand object
@@ -37,6 +49,7 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 	public BigDecimalOperand(QualifiedName qname) 
 	{
 		super(qname);
+		trait = BIG_DECIMAL_TRAIT;
 	}
 
 	/**
@@ -47,6 +60,7 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 	public BigDecimalOperand(QualifiedName qname, BigDecimal value) 
 	{
 		super(qname, value);
+        trait = BIG_DECIMAL_TRAIT;
 	}
 
 	/**
@@ -57,6 +71,7 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 	public BigDecimalOperand(QualifiedName qname, Operand expression) 
 	{
 		super(qname, expression);
+        trait = BIG_DECIMAL_TRAIT;
 	}
 
 	/**
@@ -216,7 +231,19 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 		id = term.getId();
 	}
 
-	/**
+    @Override
+    public void setTrait(Trait trait)
+    {
+        this.trait = trait;
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return trait;
+    }
+
+    /**
 	 * Convert value to BigDecimal, if not already of this type
 	 * @param object Value to convert
 	 * @return BigDecimal object
@@ -250,4 +277,5 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 	{
 		return left.divide(right, BigDecimal.ROUND_FLOOR);
 	}
+
 }

@@ -76,15 +76,15 @@ public class StudentScores2Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("english=mark_var0 (16,26) (16,50)");
+        assertThat(sourceItem.toString()).isEqualTo("English=mark_var0 (16,26) (16,48)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("maths=mark_var1 (16,53) (16,73)");
+        assertThat(sourceItem.toString()).isEqualTo("Maths=mark_var1 (16,51) (16,69)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("history=mark_var2 (16,76) (16,100)");
+        assertThat(sourceItem.toString()).isEqualTo("History=mark_var2 (16,72) (16,94)");
    }
 
     protected void checkSolution(BufferedReader reader, String shade)

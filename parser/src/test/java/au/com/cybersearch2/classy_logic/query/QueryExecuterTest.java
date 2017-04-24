@@ -89,16 +89,16 @@ public class QueryExecuterTest
 	
 	String[] CITY_NAME_HEIGHT =
 	{
-		"city(name = bilene, altitude = 1718)",
-		"city(name = addis ababa, altitude = 8000)",
-		"city(name = denver, altitude = 5280)",
-		"city(name = flagstaff, altitude = 6970)",
-		"city(name = jacksonville, altitude = 8)",
-		"city(name = leadville, altitude = 10200)",
-		"city(name = madrid, altitude = 1305)",
-		"city(name = richmond, altitude = 19)",
-		"city(name = spokane, altitude = 1909)",
-		"city(name = wichita, altitude = 1305)"
+		"city(name=bilene, altitude=1718)",
+		"city(name=addis ababa, altitude=8000)",
+		"city(name=denver, altitude=5280)",
+		"city(name=flagstaff, altitude=6970)",
+		"city(name=jacksonville, altitude=8)",
+		"city(name=leadville, altitude=10200)",
+		"city(name=madrid, altitude=1305)",
+		"city(name=richmond, altitude=19)",
+		"city(name=spokane, altitude=1909)",
+		"city(name=wichita, altitude=1305)"
 	};
 
 	String[] CITY_AXIOMS =
@@ -117,10 +117,10 @@ public class QueryExecuterTest
 	
 	String[] GREEK_BUSINESS =
 	{
-		"charge(city = Athens, charge = 23), customer(name = Acropolis Construction, city = Athens)",
-		"charge(city = Sparta, charge = 13), customer(name = Marathon Marble, city = Sparta)",
-		"charge(city = Sparta, charge = 13), customer(name = Agora Imports, city = Sparta)",
-		"charge(city = Milos, charge = 17), customer(name = Spiros Theodolites, city = Milos)"	
+		"charge(city=Athens, charge=23), customer(name=Acropolis Construction, city=Athens)",
+		"charge(city=Sparta, charge=13), customer(name=Marathon Marble, city=Sparta)",
+		"charge(city=Sparta, charge=13), customer(name=Agora Imports, city=Sparta)",
+		"charge(city=Milos, charge=17), customer(name=Spiros Theodolites, city=Milos)"	
 	};
 
 	public static final String GREEK_CONSTRUCTION =
@@ -145,22 +145,22 @@ public class QueryExecuterTest
 
 	static final String[] FEE_AND_FREIGHT =
 	{
-		"account(name = Acropolis Construction, fee = 47)",
-		"delivery(city = Athens, freight = 5)",
-		"account(name = Marathon Marble, fee = 61)",
-		"delivery(city = Sparta, freight = 16)",
-		"account(name = Agora Imports, fee = 49)",
-		"delivery(city = Sparta, freight = 16)",
-		"account(name = Spiros Theodolites, fee = 57)",
-		"delivery(city = Milos, freight = 22)"
+		"account(name=Acropolis Construction, fee=47)",
+		"delivery(city=Athens, freight=5)",
+		"account(name=Marathon Marble, fee=61)",
+		"delivery(city=Sparta, freight=16)",
+		"account(name=Agora Imports, fee=49)",
+		"delivery(city=Sparta, freight=16)",
+		"account(name=Spiros Theodolites, fee=57)",
+		"delivery(city=Milos, freight=22)"
 	};
 	
 	static final String[] SPARTA_FEE_AND_FREIGHT =
 	{
-		"account(name = Marathon Marble, fee = 61)",
-		"delivery(city = Sparta, freight = 16)",
-		"account(name = Agora Imports, fee = 49)",
-		"delivery(city = Sparta, freight = 16)",
+		"account(name=Marathon Marble, fee=61)",
+		"delivery(city=Sparta, freight=16)",
+		"account(name=Agora Imports, fee=49)",
+		"delivery(city=Sparta, freight=16)",
 	};
 	
     static final String[] MULTI_QUERY_TRACE =
@@ -169,38 +169,38 @@ public class QueryExecuterTest
     	"charge(Athens, 23)",
     	"customer(Marathon Marble, Sparta)",
     	"customer(Acropolis Construction, Athens)",
-    	"fee(name = Marathon Marble, fee = 61)",
-    	"fee(name = Acropolis Construction, fee = 47)",
-    	"freight(city = Athens, freight = 5)",
+    	"fee(name=Marathon Marble, fee=61)",
+    	"fee(name=Acropolis Construction, fee=47)",
+    	"freight(city=Athens, freight=5)",
     	"customer(Agora Imports, Sparta)",
     	"customer(Spiros Theodolites, Milos)",
     	"charge(Sparta, 13)",
     	"customer(Marathon Marble, Sparta)",
-    	"fee(name = Marathon Marble, fee = 61)",
-    	"freight(city = Athens, freight = 5)",
-    	"freight(city = Sparta, freight = 16)",
-    	"sparta_only(charge.city = Sparta)",
+    	"fee(name=Marathon Marble, fee=61)",
+    	"freight(city=Athens, freight=5)",
+    	"freight(city=Sparta, freight=16)",
+    	"sparta_only(charge.city=Sparta)",
     	"customer(Acropolis Construction, Athens)",
     	"customer(Agora Imports, Sparta)",
-    	"fee(name = Marathon Marble, fee = 61)",
-    	"fee(name = Acropolis Construction, fee = 47)",
-    	"fee(name = Agora Imports, fee = 49)",
-    	"freight(city = Athens, freight = 5)",
-    	"freight(city = Sparta, freight = 16)",
-    	"sparta_only(charge.city = Sparta)",
+    	"fee(name=Marathon Marble, fee=61)",
+    	"fee(name=Acropolis Construction, fee=47)",
+    	"fee(name=Agora Imports, fee=49)",
+    	"freight(city=Athens, freight=5)",
+    	"freight(city=Sparta, freight=16)",
+    	"sparta_only(charge.city=Sparta)",
     	"customer(Spiros Theodolites, Milos)",
     	"charge(Milos, 17)",
     	"customer(Marathon Marble, Sparta)",
     	"customer(Acropolis Construction, Athens)",
     	"customer(Agora Imports, Sparta)",
     	"customer(Spiros Theodolites, Milos)",
-    	"fee(name = Marathon Marble, fee = 61)",
-    	"fee(name = Acropolis Construction, fee = 47)",
-    	"fee(name = Agora Imports, fee = 49)",
-    	"fee(name = Spiros Theodolites, fee = 57)",
-    	"freight(city = Athens, freight = 5)",
-    	"freight(city = Sparta, freight = 16)",
-    	"freight(city = Milos, freight = 22)"
+    	"fee(name=Marathon Marble, fee=61)",
+    	"fee(name=Acropolis Construction, fee=47)",
+    	"fee(name=Agora Imports, fee=49)",
+    	"fee(name=Spiros Theodolites, fee=57)",
+    	"freight(city=Athens, freight=5)",
+    	"freight(city=Sparta, freight=16)",
+    	"freight(city=Milos, freight=22)"
 	};
 	
 	@Before

@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
@@ -24,7 +25,9 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * AxiomListVariable
@@ -35,10 +38,12 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 public class AxiomListVariable  extends Parameter implements Operand, Concaten<String>
 {
     static AxiomList EMPTY_AXIOM_LIST;
+    static Trait AXIOM_LIST_TRAIT;
     
     static
     {
         EMPTY_AXIOM_LIST = new AxiomList(QualifiedName.ANONYMOUS, new QualifiedName(Term.ANONYMOUS));
+        AXIOM_LIST_TRAIT = new DefaultTrait(OperandType.TERM);
     }
     
 	/** The backing axiom list */
@@ -496,6 +501,18 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
         return getItemValue().toString() + rightOperand.getValue().toString();
     }
 
+    @Override
+    public void setTrait(Trait trait)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return AXIOM_LIST_TRAIT;
+    }
+    
     /**
      * Returns default qualified name for axiom term list
      * @param axiomList2 The containing axiom list
@@ -505,6 +522,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     {
         return new QualifiedName(axiomList2.getName() + "_item", axiomList2.getQualifiedName());
     }
+
 
 
 }

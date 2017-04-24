@@ -20,7 +20,6 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -58,6 +57,7 @@ public class AxiomOperand extends ListVariableOperand implements ParserRunner
     {
         if (!listName.getScope().isEmpty() && (parserAssembler.getScope().findScope(listName.getScope()) == null))
         {
+            // TODO - return null from getAxiomTermList() if list not found
             final AxiomTermList itemList = parserAssembler.getAxiomTermList(listName);
             if (itemList.getAxiomTermNameList().size() == 1)
             {
@@ -117,6 +117,4 @@ public class AxiomOperand extends ListVariableOperand implements ParserRunner
         else
             expression = newListVariableInstance(parserAssembler);
     }
-
-
 }

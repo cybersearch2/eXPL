@@ -102,4 +102,16 @@ public interface Operand extends Term
 	 * @return
 	 */
 	boolean isPrivate();
+
+	/**
+	 * Set trait for localization and specialization
+	 * @param trait Trait object
+	 */
+	void setTrait(Trait trait);
+
+	/**
+	 * Returns trait for localization and specialization
+	 * @return Trait object
+	 */
+	Trait getTrait();
 }

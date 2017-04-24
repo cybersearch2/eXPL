@@ -46,7 +46,7 @@ public class RegexGroupsTest
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         Iterator<Axiom> axiomIterator = regexGroups.getRegexGroups();
         while (axiomIterator.hasNext()) 
-              checkSolution(reader, axiomIterator.next().getTermByName("in_word").toString().substring(10));
+              checkSolution(reader, axiomIterator.next().getTermByName("in_word").toString().substring(8));
         Iterator<SourceMarker> iterator = regexGroups.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
@@ -55,7 +55,7 @@ public class RegexGroupsTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string defRegex = ^(.)\\. (.*+) (5,1) (5,32)");
+        assertThat(sourceItem.toString()).isEqualTo("string defRegex=^(.)\\. (.*+) (5,1) (5,32)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -87,7 +87,7 @@ public class RegexGroupsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string wordRegex = ^in[^ ]+ (4,1) (4,29)");
+        assertThat(sourceItem.toString()).isEqualTo("string wordRegex=^in[^ ]+ (4,1) (4,29)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -103,7 +103,7 @@ public class RegexGroupsTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string in_word = word+, +expand_var0+- +def (20,3) (21,0)");
+        assertThat(sourceItem.toString()).isEqualTo("string in_word=word+, +expand_var0+- +def (20,3) (21,0)");
    }
 
     protected void checkSolution(BufferedReader reader, String word)

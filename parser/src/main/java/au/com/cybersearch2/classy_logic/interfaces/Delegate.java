@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2017  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 /**
- * TextFormat
+ * Delegate
  * @author Andrew Bowley
- * 10 Mar 2015
+ * 21Apr.,2017
  */
-public interface TextFormat 
+public interface Delegate
 {
-	String formatValue(Object value);
+
 }

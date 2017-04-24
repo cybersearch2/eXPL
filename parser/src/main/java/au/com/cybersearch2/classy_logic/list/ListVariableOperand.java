@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.list;
 
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.ExpressionOperand;
@@ -26,6 +27,8 @@ import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * ListVariableOperand
@@ -37,6 +40,14 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public abstract class ListVariableOperand extends ExpressionOperand<Object> implements Concaten<String>
 {
+    static Trait LIST_TRAIT;
+    
+    static
+    {
+        // The de-referenced list value may be either an axiom or a term
+        LIST_TRAIT = new DefaultTrait(OperandType.UNKNOWN);
+    }
+    
     /** Name of list */
     protected String listName;
     /** Operand which evaluates the list index */
@@ -144,6 +155,19 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
     public String concatenate(Operand rightOperand)
     {
         return ((Concaten<String>)expression).concatenate(rightOperand);
+    }
+
+
+    @Override
+    public void setTrait(Trait trait)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Trait getTrait()
+    {
+        return LIST_TRAIT;
     }
 
     /**
