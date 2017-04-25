@@ -16,12 +16,15 @@
 package au.com.cybersearch2.classy_logic.tutorial18;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -35,27 +38,37 @@ public class CalculateSquareMiles3
 {
     // The surface-land.xpl file has country and surface_area terms eg.  ("United States",{9,831,510.00})
     // Note the braces indicate the surface area is formatted, so must be parsed to get numeric value
-	static final String COUNTRY_SURFACE_AREA = 
-			"include \"surface-land.xpl\";\n" +
-		    "scope global (location = \"United States\"){}\n" +
-            "scope australia (location = \"Australia\"){}\n" +
-			"calc country_area (\n" +
-            "  country { \"United States\" , \"Australia\" },\n" +
-			"  double surface_area = surface_area_Km2,\n" +
-			"  string units = \"km2\",\n" +
-            "  // Use imperial measurements if country is USA\n" +
-			"  ? scope[location] == \"United States\"\n" +
-			"  {\n" +
-			"    surface_area *= 0.3861,\n" +
-			"    units = \"mi2\"\n" +
-			"  }\n" +
-			");\n" +
-            "list surface_area_by_country(country_area);\n" +
-            "query au_surface_area_query(surface_area : australia.country_area);" +
-		    "query surface_area_query(surface_area : country_area);";
+/* calc-squre-miles.xpl
+include "surface-land.xpl";
+
+scope global (location = "United States"){}
+
+scope australia (location = "Australia"){}
+
+calc country_area 
+(
+  country { "United States" , "Australia" },
+  double surface_area = surface_area_Km2,
+  string units = "km2",
+  ? scope^location == "United States"
+  {
+    surface_area *= 0.3861,
+    units = "mi2"
+  }
+);
+
+query<axiom> au_surface_area_query(surface_area : australia.country_area);
+query<axiom> surface_area_query(surface_area : country_area);
+
+*/
+    
+    protected QueryProgramParser queryProgramParser;
+    ParserContext parserContext;
 
 	public CalculateSquareMiles3()
 	{
+        File resourcePath = new File("src/main/resources");
+        queryProgramParser = new QueryProgramParser(resourcePath);
 	}
 	
 	/**
@@ -66,28 +79,35 @@ public class CalculateSquareMiles3
        country_area(country = Australia, surface_area = 7741220, units = km2, false)</br>
        country_area(country = United States, surface_area = 9831510, units = km2, false)</br>     
      */
-	public void displaySurfaceArea()
+	public List<Axiom> displaySurfaceArea()
 	{
-		QueryProgram queryProgram = new QueryProgram();
-		queryProgram.setResourceBase(new File("src/main/resources"));
-
-		queryProgram.parseScript(COUNTRY_SURFACE_AREA);
+	    List<Axiom> resultList = new ArrayList<Axiom>(4);
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial18/calc-square-miles3.xpl");
+        parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("surface_area_query");
-		Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("surface_area_by_country"));
+		Iterator<Axiom> iterator = result.getIterator("surface_area_query");
         while(iterator.hasNext())
-		    System.out.println(iterator.next().toString());
+            resultList.add(iterator.next());
         result = queryProgram.executeQuery("au_surface_area_query");
-        iterator = result.getIterator(QualifiedName.parseGlobalName("surface_area_by_country"));
+        iterator = result.getIterator("au_surface_area_query");
         while(iterator.hasNext())
-            System.out.println(iterator.next().toString());
+            resultList.add(iterator.next());
+        return resultList;
 	}
 
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+    
 	public static void main(String[] args)
 	{
 		CalculateSquareMiles3 calculateSquareMiles = new CalculateSquareMiles3();
 		try 
 		{
-				calculateSquareMiles.displaySurfaceArea();
+		    Iterator<Axiom> iterator = calculateSquareMiles.displaySurfaceArea().iterator();
+	        while(iterator.hasNext())
+	            System.out.println(iterator.next().toString());
 		} 
 		catch (ExpressionException e) 
 		{

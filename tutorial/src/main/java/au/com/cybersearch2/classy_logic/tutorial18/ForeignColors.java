@@ -16,13 +16,17 @@
 package au.com.cybersearch2.classy_logic.tutorial18;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
-import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.FileAxiomProvider;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -38,67 +42,33 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class ForeignColors 
 {
-    static final String FOREIGN_LEXICON =
-            "list<term> german_list(german.colors : resource);\n" +
-            "list<term> french_list(french.colors : resource);\n" +
-            "scope french (language=\"fr\", region=\"FR\"){}\n" +
-            "scope german (language=\"de\", region=\"DE\"){}\n" +
-            "axiom french.colors (aqua, black, blue, white)\n" +
-            "  {\"bleu vert\", \"noir\", \"bleu\", \"blanc\"};\n" +
-            "axiom german.colors (aqua, black, blue, white)\n" +
-            "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
-            "query color_query (german.colors:german.colors) >> (french.colors:french.colors);\n";
-
-    static final String FOREIGN_COLORS =
-            "axiom colors (aqua, black, blue, white);\n" +
-            "axiom german.colors (aqua, black, blue, white) : resource;\n" +
-            "axiom french.colors (aqua, black, blue, white) : resource;\n" +
-            "local select(colors);\n" +
-            "choice swatch (name, red, green, blue)\n" +
-            "{select[aqua], 0, 255, 255}\n" +
-            "{select[black], 0, 0, 0}\n" +
-            "{select[blue], 0, 0, 255}\n" +
-            "{select[white], 255, 255, 255};\n" +
-            "axiom shade (name) : parameter;\n" +
-            "scope french (language=\"fr\", region=\"FR\")\n" +
-            "{\n" +
-            "  query color_query (shade : swatch);\n" +
-            "}" +
-            "scope german (language=\"de\", region=\"DE\")\n" +
-            "{\n" +
-            "  query color_query (shade : swatch);\n" +
-            "}";
-
-    /** ProviderManager is Axiom source for eXPL compiler */
-    private ProviderManager providerManager;
-    private static FileAxiomProvider[] fileAxiomProviders;
+    protected QueryProgramParser queryProgramParser;
+    protected static FileAxiomProvider[] fileAxiomProviders;
+    ParserContext parserContext;
 
     public ForeignColors()
     {
-        providerManager = new ProviderManager();
         File testPath = new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION);
         if (!testPath.exists())
             testPath.mkdir();
+        File resourcePath = new File("src/main/resources/tutorial18");
         fileAxiomProviders = new FileAxiomProvider[2];
         fileAxiomProviders[0] = new FileAxiomProvider("german.colors", testPath);
         fileAxiomProviders[1] = new FileAxiomProvider("french.colors", testPath);
-        for (FileAxiomProvider provider: fileAxiomProviders)
-            providerManager.putAxiomProvider(provider);
+        queryProgramParser = new QueryProgramParser(resourcePath, fileAxiomProviders[0], fileAxiomProviders[1]);
     }
 
-    public void createForeignLexicon()
+    public List<Axiom> createForeignLexicon()
     {
-        QueryProgram queryProgram = new QueryProgram(providerManager);
-        queryProgram.parseScript(FOREIGN_LEXICON);
+        QueryProgram queryProgram = queryProgramParser.loadScript("foreign-lexicon.xpl");
+        parserContext = queryProgramParser.getContext();
         try
         {
-            queryProgram.executeQuery("color_query", new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                System.out.println(solution.getAxiom("german.colors").toString());
-                System.out.println(solution.getAxiom("french.colors").toString());
-                return true;
-            }});
+            Result result = queryProgram.executeQuery("color_query"); 
+            List<Axiom> axiomList = new ArrayList<Axiom>();
+            axiomList.add(result.getAxiom("german_list"));
+            axiomList.add(result.getAxiom("french_list"));
+            return axiomList;
         }
         finally
         {
@@ -113,42 +83,41 @@ public class ForeignColors
 	 */
     public String getColorSwatch(String language, String name)
 	{
-        QueryProgram queryProgram = new QueryProgram(providerManager);
-        queryProgram.parseScript(FOREIGN_COLORS);
+        QueryProgram queryProgram = queryProgramParser.loadScript("foreign-colors.xpl");
+        parserContext = queryProgramParser.getContext();
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams(language, "color_query");
         // Add a shade Axiom with a specified color term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         Solution initialSolution = queryParams.getInitialSolution();
         initialSolution.put("shade", new Axiom("shade", new Parameter("name", name)));
-        final StringBuilder builder = new StringBuilder();
-        queryParams.setSolutionHandler(new SolutionHandler(){
-            @Override
-            public boolean onSolution(Solution solution) {
-                builder.append(solution.getAxiom("swatch").toString());
-                return true;
-            }});
-        queryProgram.executeQuery(queryParams);
-        return builder.toString();
+        Result result = queryProgram.executeQuery(queryParams);
+        return result.getAxiom(language, "color_query").toString();
 	}
 	
     /**
      * Run tutorial
      * The expected result:<br/>
-        colors(aqua = Wasser, black = schwarz, blue = blau, white = weiß)<br/>
-        colors(aqua = bleu vert, black = noir, blue = bleu, white = blanc)<br/>
-        swatch(name = Wasser, red = 0, green = 255, blue = 255)<br/>
-        swatch(name = schwarz, red = 0, green = 0, blue = 0)<br/>
-        swatch(name = weiß, red = 255, green = 255, blue = 255)<br/>
-        swatch(name = blau, red = 0, green = 0, blue = 255)<br/>
-     * @param args
+        german_list(aqua=Wasser, black=schwarz, blue=blau, white=weiß)<br/>
+        french_list(aqua=bleu vert, black=noir, blue=bleu, white=blanc)<br/>
+        color_query(name=bleu vert, red=0, green=255, blue=255, swatch=0)<br/>
+        color_query(name=noir, red=0, green=0, blue=0, swatch=1)<br/>
+        color_query(name=blanc, red=255, green=255, blue=255, swatch=3)<br/>
+        color_query(name=bleu, red=0, green=0, blue=255, swatch=2)<br/>
+        color_query(name=Wasser, red=0, green=255, blue=255, swatch=0)<br/>
+        color_query(name=schwarz, red=0, green=0, blue=0, swatch=1)<br/>
+        color_query(name=weiß, red=255, green=255, blue=255, swatch=3)<br/>
+        color_query(name=blau, red=0, green=0, blue=255, swatch=2) <br/>    
+        * @param args
      */
 	public static void main(String[] args)
 	{
 		try 
 		{
 	        ForeignColors foreignColors = new ForeignColors();
-	        foreignColors.createForeignLexicon();
+	        Iterator<Axiom> colors = foreignColors.createForeignLexicon().iterator();
+	        while (colors.hasNext())
+	            System.out.println(colors.next());
             System.out.println(foreignColors.getColorSwatch("french", "bleu vert"));
             System.out.println(foreignColors.getColorSwatch("french", "noir"));
             System.out.println(foreignColors.getColorSwatch("french", "blanc"));
@@ -157,7 +126,7 @@ public class ForeignColors
             System.out.println(foreignColors.getColorSwatch("german", "schwarz"));
             System.out.println(foreignColors.getColorSwatch("german", "weiß"));
             System.out.println(foreignColors.getColorSwatch("german", "blau"));
-		} 
+ 		} 
 		catch (ExpressionException e) 
 		{ 
 			e.printStackTrace();

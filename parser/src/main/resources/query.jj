@@ -318,6 +318,7 @@ TOKEN :
 | < LT: "<" >
 | < BANG: "!" >
 | < COLON: ":" >
+| < QMARK: "?" >
 | < EQ: "==" >
 | < LE: "<=" >
 | < GE: ">=" >
@@ -912,15 +913,17 @@ Operand TemplateExpression(Template template, ParserContext context) :
     )
     |
     (  
-       ( scToken=":" | scToken="?" 
-       | assignToken=<MINUSASSIGN>
-       | assignToken=<STARASSIGN>
-       | assignToken=<SLASHASSIGN>
-       | assignToken=<ANDASSIGN>
-       | assignToken=<ORASSIGN>
-       | assignToken=<XORASSIGN>
-       | assignToken=<REMASSIGN> )
-       expression=Expression(context) 
+      ( 
+        scToken=<COLON> | scToken=<QMARK>  
+        | assignToken=<MINUSASSIGN>
+        | assignToken=<STARASSIGN>
+        | assignToken=<SLASHASSIGN>
+        | assignToken=<ANDASSIGN>
+        | assignToken=<ORASSIGN>
+        | assignToken=<XORASSIGN>
+        | assignToken=<REMASSIGN> 
+      )
+      expression=Expression(context) 
     )
     |
         interceptToken=<REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(template, name, parserAssembler) )? ")"

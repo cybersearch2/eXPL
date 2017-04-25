@@ -50,11 +50,12 @@ public class QueryProgramParser
         this.resourcePath = resourcePath;
     }
     
-    public QueryProgramParser(File resourcePath, AxiomProvider axiomProvider)
+    public QueryProgramParser(File resourcePath, AxiomProvider... axiomProvider)
     {
         this.resourcePath = resourcePath;
         providerManager = new ProviderManager(resourcePath);
-        providerManager.putAxiomProvider(axiomProvider);
+        for (AxiomProvider provider: axiomProvider)
+            providerManager.putAxiomProvider(provider);
     }
     
     public QueryProgramParser(File resourcePath, FunctionManager functionManager)

@@ -118,15 +118,19 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
         Axiom axiom = axiomTermList.getAxiom();
         if (axiomTermList.getAxiomTermNameList() != null)
         {
+            int i = 0;
             for (String termName: axiomTermList.getAxiomTermNameList())
+            {
                 if (termName.equals(itemName))
-                    return index;
+                    return i;
+                ++i;
+            }
         }
         else if (axiom != null)
         {
-            for (int index = 0; index < axiom.getTermCount(); ++index)
-                if (axiom.getTermByIndex(index).getName().equals(itemName))
-                    return index;
+            for (int i = 0; i < axiom.getTermCount(); ++i)
+                if (axiom.getTermByIndex(i).getName().equals(itemName))
+                    return i;
         }
         return -1;
     }

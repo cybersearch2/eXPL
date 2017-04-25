@@ -83,9 +83,9 @@ query<axiom> star_people(person : perfect_match);
      * Compiles the STAR_PERSON script and runs the "star_people" query which gives each person 
      * over the age of 20 an age rating and excludes those aged 20 and under.<br/>
      * The first 3 expected results:<br/>
-     perfect_match(name = John, sex = m, starsign = gemini, rating = 1.2)<br/>
-     perfect_match(name = Sam, sex = m, starsign = scorpio, rating = 0.3)<br/>
-     perfect_match(name = Jenny, sex = f, starsign = gemini, rating = 0.8)<br/>
+     perfect_match(name = John, sex = m, starsign = gemini, age_rating = 1.2)<br/>
+     perfect_match(name = Sam, sex = m, starsign = scorpio, age_rating = 0.3)<br/>
+     perfect_match(name = Jenny, sex = f, starsign = gemini, age_rating = 0.8)<br/>
      * @return Axiom iterator
      */
     public Iterator<Axiom> getAgeRating()

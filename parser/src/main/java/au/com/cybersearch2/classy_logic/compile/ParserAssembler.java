@@ -729,7 +729,7 @@ public class ParserAssembler implements LocaleListener
         if (template != null)
             return scope;
         if (!qname.getScope().isEmpty())
-            qname.clearScope();
+            qname = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, qname.getTemplate());
         template = scope.getGlobalParserAssembler().getTemplate(qname);
         if (template != null)
             return scope.getGlobalScope();

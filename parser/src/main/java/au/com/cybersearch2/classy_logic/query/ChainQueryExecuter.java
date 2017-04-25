@@ -27,6 +27,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -174,7 +175,9 @@ public class ChainQueryExecuter
 	        	axiomListenerList = axiomListenerMap.get(qname);
 	        else if (template.isReplicate()) 
 	        {
-	            qname.clearScope();
+	            // TODO - check if scope meant to be cleared on template object
+	            //qname.clearScope();
+	            qname = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, qname.getTemplate());
 	            if (axiomListenerMap.containsKey(qname))
 	                axiomListenerList = axiomListenerMap.get(qname);
 	        }
