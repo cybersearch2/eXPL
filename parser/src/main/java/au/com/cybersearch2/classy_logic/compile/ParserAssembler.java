@@ -618,6 +618,8 @@ public class ParserAssembler implements LocaleListener
 	{
 		for (LocaleListener localeListener: localeListenerList)
 			localeListener.onScopeChange(scope);
+		if (this.scope != scope)
+		    scope.getParserAssembler().onScopeChange(scope);
 	}
 
 	/**

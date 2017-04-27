@@ -15,49 +15,49 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.trait;
 
+import java.math.BigDecimal;
 import java.util.Locale;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.LocaleCurrency;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * CurrencyTrait
  * @author Andrew Bowley
  * 21Apr.,2017
  */
-public class CurrencyTrait extends DefaultTrait
+public class CurrencyTrait extends DefaultTrait implements StringCloneable
 {
     /** Currency implementation for specific locale */
     protected LocaleCurrency localeCurrency;
-    /** Operand to evaluate currency country */
-    protected Operand countryOperand;
+    /** Country code */
+    protected String country;
 
-    public CurrencyTrait(OperandType operandType, Locale locale)
+    public CurrencyTrait(OperandType operandType)
     {
         super(operandType);
         localeCurrency = new LocaleCurrency();
-        setLocale(locale);
+        country = "";
     }
 
-    /**
-     * Set Operand to evaluate currency country
-     * @param countryOperand the countryOperand to set
-     */
-    public void setCountryOperand(Operand countryOperand) 
+    public BigDecimal parseValue(String value)
     {
-        this.countryOperand = countryOperand;
+        return localeCurrency.parse(value);
     }
-
+    
     /**
      * @see au.com.cybersearch2.classy_logic.trait.DefaultTrait#formatValue(java.lang.Object)
      */
     @Override
     public String formatValue(Object value)
     {
-        if (isCountryCodeSet())
-            getLocaleByCode(countryOperand.getValue().toString());
         return localeCurrency.format(value);
     }
 
@@ -67,12 +67,8 @@ public class CurrencyTrait extends DefaultTrait
     @Override
     public void setLocale(Locale locale)
     {
-        if (!isCountryCodeSet())
-        {
-            super.setLocale(locale);
-            localeCurrency.setLocale(locale);
-        }
-        
+        super.setLocale(locale);
+        localeCurrency.setLocale(locale);
     }
 
     /**
@@ -84,6 +80,7 @@ public class CurrencyTrait extends DefaultTrait
      */
     public Locale getLocaleByCode(String country) 
     {
+        this.country = country;
         String[] parts = country.split("_|-");
         if (parts.length == 2)
             return new Locale(parts[0], parts[1]);
@@ -104,9 +101,35 @@ public class CurrencyTrait extends DefaultTrait
         return matchedByCountry;
     }
 
-    protected boolean isCountryCodeSet()
+    /**
+     * @return the country code or empty string if not specified
+     */
+    public String getCountry()
     {
-        return (countryOperand != null)  && !countryOperand.isEmpty();
+        return country;
+    }
+
+    /**
+     * Returns fraction digits for locale currency
+     * @return int
+     */
+    public int getFractionDigits()
+    {
+        return localeCurrency.getFractionDigits();
+    }
+
+    @Override
+    public CurrencyOperand cloneFromOperand(StringOperand stringOperand, Operand expression)
+    {
+        CurrencyOperand clone = 
+            expression == null ? 
+            new CurrencyOperand(stringOperand.getQualifiedName(), null) :
+            new CurrencyOperand(stringOperand.getQualifiedName(), expression, null);
+        Parameter param = new Parameter(Term.ANONYMOUS, stringOperand.getValue().toString());
+        param.setId(stringOperand.getId());
+        clone.getTrait().setLocale(stringOperand.getTrait().getLocale());
+        clone.assign(param);
+        return clone;
     }
 
 }

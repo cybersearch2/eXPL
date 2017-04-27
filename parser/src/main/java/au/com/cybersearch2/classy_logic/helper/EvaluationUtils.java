@@ -92,6 +92,14 @@ public class EvaluationUtils
         return operatorEnum == OperatorEnum.COMMA;
     }
 
+    public static boolean isValidOperand(Operand term, OperatorEnum operatorEnum, OperatorEnum[] operatorEnums) 
+    {
+        for (OperatorEnum operatorEnum2: operatorEnums)
+            if (operatorEnum2 == operatorEnum)
+                return true;
+        return false;
+    }
+    
     /**
      * Returns true if left operand permited for operator used in expression
      * @param rightTerm Right Operand. If not null then operation is binary

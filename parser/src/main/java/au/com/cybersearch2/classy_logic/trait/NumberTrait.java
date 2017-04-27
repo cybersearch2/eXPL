@@ -18,13 +18,14 @@ package au.com.cybersearch2.classy_logic.trait;
 import java.text.NumberFormat;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 
 /**
  * NumberTrait
  * @author Andrew Bowley
  * 21Apr.,2017
  */
-public class NumberTrait extends DefaultTrait
+public abstract class NumberTrait<T> extends DefaultTrait implements StringCloneable
 {
 
     public NumberTrait(OperandType operandType)
@@ -42,5 +43,7 @@ public class NumberTrait extends DefaultTrait
         String formatValue = numberFormat.format(value);
         return formatValue;
     }
+
+    public abstract T parseValue(String string);
 
 }

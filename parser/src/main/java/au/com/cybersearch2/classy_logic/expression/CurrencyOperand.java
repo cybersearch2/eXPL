@@ -16,15 +16,15 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import java.math.BigDecimal;
-import java.util.Locale;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-import au.com.cybersearch2.classy_logic.helper.LocaleCurrency;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.TextFormat;
+import au.com.cybersearch2.classy_logic.trait.CurrencyTrait;
 
 /**
  * CurrencyOperand
@@ -33,58 +33,51 @@ import au.com.cybersearch2.classy_logic.interfaces.TextFormat;
  */
 public class CurrencyOperand extends BigDecimalOperand implements TextFormat, LocaleListener
 {
-    /** Currency implementation for specific locale */
-	protected LocaleCurrency localeCurrency;
 	/** Operand to evaluate currency country */
 	protected Operand countryOperand;
-	/** Country code */
-	protected String country;
 	
 	/**
 	 * Construct CurrencyOperand object for specified locale
      * @param qname Qualified name
-     * @param locale The locale
+     * @param countryOperand Optional operand for setting fixed locale
 	 */
-	public CurrencyOperand(QualifiedName qname, Locale locale) 
+	public CurrencyOperand(QualifiedName qname, Operand countryOperand) 
 	{
 		super(qname);
-		this.localeCurrency = new LocaleCurrency();
-		localeCurrency.setLocale(locale);
+		if (countryOperand != null)
+		    setCountyOperand(countryOperand);
+		else
+		    trait = new CurrencyTrait(trait.getOperandType());
 	}
 
-	/**
+    /**
      * Construct CurrencyOperand object for specified value and locale
      * @param qname Qualified name
 	 * @param value The value
-	 * @param locale The locale
+     * @param countryOperand Optional operand for setting fixed locale
 	 */
-	public CurrencyOperand(QualifiedName qname, BigDecimal value, Locale locale) 
+	public CurrencyOperand(QualifiedName qname, BigDecimal value, Operand countryOperand) 
 	{
 		super(qname, value);
-		this.localeCurrency = new LocaleCurrency();
-		localeCurrency.setLocale(locale);
+        if (countryOperand != null)
+            setCountyOperand(countryOperand);
+        else
+            trait = new CurrencyTrait(trait.getOperandType());
 	}
 
 	/**
      * Construct CurrencyOperand object with given expression Operand and specified locale
      * @param qname Qualified name
 	 * @param expression Operand to evaluate value
-     * @param locale The locale
+     * @param countryOperand Optional operand for setting fixed locale
 	 */
-	public CurrencyOperand(QualifiedName qname, Operand expression, Locale locale) 
+	public CurrencyOperand(QualifiedName qname, Operand expression, Operand countryOperand) 
 	{
 		super(qname, expression);
-		this.localeCurrency = new LocaleCurrency();
-		localeCurrency.setLocale(locale);
-	}
-
-	/**
-	 * Set Operand to evaluate currency country
-	 * @param countryOperand the countryOperand to set
-	 */
-	public void setCountryOperand(Operand countryOperand) 
-	{
-		this.countryOperand = countryOperand;
+        if (countryOperand != null)
+            setCountyOperand(countryOperand);
+        else
+            trait = new CurrencyTrait(trait.getOperandType());
 	}
 
 	/**
@@ -94,45 +87,10 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 	@Override
 	public String formatValue(Object value)
 	{   // Refresh locale-dependent currency component in case it has changed
-	    if ((countryOperand != null)  && !countryOperand.isEmpty())
-	        setCountry(countryOperand.getValue().toString());
-		return localeCurrency.format(value);
+	    updateLocale();
+		return trait.formatValue(value);
 	}
 	
-	/**
-	 * Set Locale using 2-digit country code
-	 * If currency format varies with language, then use 
-	 * language and country code separated by '_' or '-'. eg. 'de_LU'
-	 * Locale variants and scripts not supported.
-     * @param country An ISO 3166 alpha-2 country code 
-	 */
-	public void setCountry(String country) 
-	{
-		String[] parts = country.split("_|-");
-		if (parts.length == 2)
-		{
-		    this.country = parts[1];
-			localeCurrency.setLocale(new Locale(parts[0], parts[1]));
-			return;
-		}
-		this.country = country;
-		// Match to first Locale found by country. 
-		// Language is usually irrelevant for currency.
-		Locale matchedByCountry = null;
-		for (Locale locale: Locale.getAvailableLocales())
-			if (locale.getCountry().equals(country) && 
-				/*locale.getScript().isEmpty() && */
-				locale.getVariant().isEmpty())
-			{
-				matchedByCountry = locale;
-				break;
-			}
-		if (matchedByCountry == null)
-			throw new ExpressionException(country + " is not a valid ISO 3166 alpha-2 country code");
-		//System.out.println("Locale " + matchedByCountry.getLanguage() + "-" + matchedByCountry.getCountry());
-		localeCurrency.setLocale(matchedByCountry);
-	}
-
 	/**
 	 * Evaluate value using data gathered during unification.
 	 * @param id Identity of caller, which must be provided for backup()
@@ -141,15 +99,15 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 	@Override
 	public EvaluationStatus evaluate(int id) 
 	{
-		EvaluationStatus status = super.evaluate(id);
+		EvaluationStatus status = evaluateExpression(id);
 		if (countryOperand != null) 
 		{
 			if (countryOperand.isEmpty())
 				countryOperand.evaluate(id);
-			setCountry(countryOperand.getValue().toString());
+			updateLocale();
 		}
 		if (getValueClass().equals(String.class))
-			value = localeCurrency.parse(value.toString());
+			value = getCurrencyTrait().parseValue(value.toString());
 		return status;
 	}
 
@@ -194,7 +152,7 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 	    // while for the Japanese Yen it's 0.
 	    // In the case of pseudo-currencies, such as IMF Special Drawing Rights,
 	    // -1 is returned.
-		int scale = localeCurrency.getFractionDigits();
+		int scale = getCurrencyTrait().getFractionDigits();
 		if (scale >= 0)
 			newAmount = newAmount.setScale(scale, BigDecimal.ROUND_HALF_EVEN);
 		return newAmount;
@@ -214,12 +172,14 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
 
 	/**
 	 * onScopeChange
+	 * TODO - 
 	 * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(au.com.cybersearch2.classy_logic.Scope)
 	 */
 	@Override
 	public void onScopeChange(Scope scope) 
 	{
-		localeCurrency.setLocale(scope.getLocale());
+	    if (getCountry().isEmpty() && (countryOperand == null))
+	        trait.setLocale(scope.getLocale());
 	}
 
     /**
@@ -228,8 +188,53 @@ public class CurrencyOperand extends BigDecimalOperand implements TextFormat, Lo
     @Override
     public String toString()
     {
-        return country != null ? country + " " + super.toString() : super.toString();
+        return !getCountry().isEmpty() ? getCountry() + " " + super.toString() : super.toString();
     }
 
+   /**
+     * Execute operation for expression
+     * @param id Identity of caller, which must be provided for backup()
+     * @return Flag set true if evaluation is to continue
+     */
+    protected EvaluationStatus evaluateExpression(int id)
+    {
+        EvaluationStatus status = EvaluationStatus.COMPLETE;
+        if (expression != null)
+        {
+            status = expression.evaluate(id);
+            if (!expression.isEmpty())
+            {
+                this.value = expression.getValue();
+                this.empty = false;
+                this.id = id;
+            }
+        }
+        return status;
+    }
+    
 
+    private void setCountyOperand(Operand countryOperand)
+    {
+        this.countryOperand = countryOperand;
+        CurrencyTrait currencyTrait = new CurrencyTrait(trait.getOperandType());
+        if (!countryOperand.isEmpty())
+            currencyTrait.setLocale(currencyTrait.getLocaleByCode(countryOperand.getValue().toString()));
+        trait = currencyTrait;
+    }
+
+    private void updateLocale()
+    {
+        if ((countryOperand != null)  && !countryOperand.isEmpty())
+            trait.setLocale(getCurrencyTrait().getLocaleByCode(countryOperand.getValue().toString()));
+    }
+
+    private CurrencyTrait getCurrencyTrait()
+    {
+        return (CurrencyTrait)trait;
+    }
+    
+    private String getCountry()
+    {
+        return getCurrencyTrait().getCountry();
+    }
 }

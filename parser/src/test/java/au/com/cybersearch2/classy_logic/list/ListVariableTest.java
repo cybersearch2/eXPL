@@ -28,6 +28,7 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+
 import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.TestDoubleOperand;
@@ -81,7 +82,7 @@ public class ListVariableTest
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(5)).thenReturn(Long.valueOf(13));
 		IntegerOperand x = new TestIntegerOperand("x", Long.valueOf(5));
-		Operand indexExpression = new TestEvaluator("y ", x, "++", null);
+		Operand indexExpression = new TestEvaluator("y", x, "++");
 		ItemListVariable<Long> variable = new ItemListVariable<Long>(itemList, new TestIntegerOperand(NAME), indexExpression, "y");
 		Parameter otherTerm = new Parameter(NAME, Long.valueOf(13));
 		// No unification possible

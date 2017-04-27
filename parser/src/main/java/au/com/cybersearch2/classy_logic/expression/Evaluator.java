@@ -10,6 +10,7 @@ import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.*;
@@ -35,51 +36,36 @@ public class Evaluator extends DelegateOperand
 	protected Operand left;
     /** Operator as an enumerated value */
 	protected OperatorEnum operatorEnum;
+	/** Orientation - binary or unary (prefix or postfix) */
+	protected Orientation orientation;
 	/** Short circuit on boolean false result */
 	protected boolean shortCircuitOnFalse;
 	/** Short circuit on boolean true result */
 	protected boolean shortCircuitOnTrue;
 
 	/**
-	 * Create Evaluator object for postfix unary expression 
-	 * @param leftTerm Left operand
+	 * Create Evaluator object for prefix/postfix unary expression 
+	 * @param term Operand left or right determined by orientation
 	 * @param operator Text representation of operator
+	 * @param orientation Unary - prefix/postfix
 	 */
-	public Evaluator(Operand leftTerm, String operator)
+	public Evaluator(Operand term, String operator, Orientation orientation)
 	{
-		this(leftTerm, operator, (Operand)null);
+		this(QualifiedName.ANONYMOUS, operator, orientation);
+		setUnaryTerm(term);
 	}
 
-	/**
+    /**
 	 * Create named Evaluator object for postfix unary expression 
      * @param qname Qualified name of variable
-	 * @param leftTerm Left operand
+	 * @param term Operand
 	 * @param operator Text representation of operator
+     * @param orientation Unary - prefix/postfix
 	 */
-	public Evaluator(QualifiedName qname, Operand leftTerm, String operator)
+	public Evaluator(QualifiedName qname, Operand term, String operator, Orientation orientation)
 	{
-		this(qname, leftTerm, operator, (Operand)null);
-	}
-
-	/**
-	 * Create Evaluator object for prefix unary expression 
-	 * @param operator Text representation of operator
-	 * @param rightTerm  Right operand
-	 */
-	public Evaluator(String operator, Operand rightTerm)
-	{
-		this((Operand)null, operator, rightTerm);
-	}
-
-	/**
-	 * Create named Evaluator object for prefix unary expression 
-     * @param qname Qualified name of variable
-	 * @param rightTerm Operand
-	 * @param operator 
-	 */
-	public Evaluator(QualifiedName qname, String operator, Operand rightTerm)
-	{
-		this(qname, (Operand)null, operator, rightTerm);
+		this(qname, operator, orientation);
+        setUnaryTerm(term);
 	}
 
 	/**
@@ -90,21 +76,37 @@ public class Evaluator extends DelegateOperand
 	 */
 	public Evaluator(Operand leftTerm, String operator, Operand rightTerm)
 	{
-		this(QualifiedName.ANONYMOUS, leftTerm, operator, rightTerm);
-	}
+		this(QualifiedName.ANONYMOUS, operator, Orientation.binary);
+        this.right = rightTerm;
+        this.left = leftTerm;
+        checkBinaryTerms(operator);
+    }
+
+    /**
+     * Create named Evaluator object for binary expression 
+     * @param qname Qualified name of variable
+     * @param leftTerm Left perand
+     * @param operator Text representation of operator
+     * @param rightTerm Right operand
+     */
+    public Evaluator(QualifiedName qname, Operand leftTerm, String operator, Operand rightTerm)
+    {
+        this(qname, operator, Orientation.binary);
+        this.right = rightTerm;
+        this.left = leftTerm;
+        checkBinaryTerms(operator);
+    }
 
 	/**
-	 * Create named Evaluator object for binary expression 
+	 * Construct named Evaluator object  
      * @param qname Qualified name of variable
-	 * @param leftTerm Operand
-	 * @param operator 
-	 * @param rightTerm Operand
+	 * @param operator Text representation of operator
+     * @param orientation Binary or unary - prefix/postfix
 	 */
-	public Evaluator(QualifiedName qname, Operand leftTerm, String operator, Operand rightTerm)
+	protected Evaluator(QualifiedName qname, String operator, Orientation orientation)
 	{
 		super(qname);
-	    this.right = rightTerm;
-	    this.left = leftTerm;
+	    this.orientation = orientation;
 	    operatorEnum = OperatorEnum.convertOperator(operator);
 	    // Short circuit adds logic to return false to evaluate().
 	    // It applies to operators "&&" and "||".
@@ -148,6 +150,8 @@ public class Evaluator extends DelegateOperand
     		// If right hand term is empty, then cannot proceed. Maybe unification failed for this term.
     		if (right.isEmpty())
 	   			throw new ExpressionException("Right term is empty");
+            if (orientation == Orientation.binary)
+                performOnFlyConversion();
     		// Remember if right is not a number
    			rightIsNaN = isNaN(right, operatorEnum);
     		if ((!isValidRightOperand(right, operatorEnum) || isInvalidRightUnaryOp(left, operatorEnum)) &&
@@ -164,7 +168,7 @@ public class Evaluator extends DelegateOperand
     	presetDelegate();
     	// Now perform evaluation, depending on status of left and right terms
 		Object result = null;
-	   	if (right == null)
+	   	if (orientation == Orientation.unary_postfix)
 	   	{   // Postfix unary operation.
 	   	    // Result will automatically be NaN if left Term value is NaN
 	   		result = left.getValue();
@@ -174,7 +178,7 @@ public class Evaluator extends DelegateOperand
 	   			left.setValue(post);
 	   		}
 	   	}
-	   	else if (left == null)
+	   	else if (orientation == Orientation.unary_prefix)
 	   	{   // Prefix unary operation.
 	   		if (rightIsNaN)
 	   			result = right.getValue();
@@ -285,9 +289,9 @@ public class Evaluator extends DelegateOperand
 	{
 		if (empty)
 		{   // Return evaluation to perform
-			if (left == null)
+			if (orientation == Orientation.unary_prefix)
 				return  unaryRightToString();
-			else if (right == null)
+			else if (orientation == Orientation.unary_postfix)
 				return unaryLeftToString();
 			return binaryToString();
 		}
@@ -512,6 +516,64 @@ public class Evaluator extends DelegateOperand
         default:
         }
         return null;
+    }
+
+    protected void setUnaryTerm(Operand term)
+    {
+        switch (orientation)
+        {
+        case unary_prefix:
+            right = term;
+            break;
+        case unary_postfix:
+            left = term;
+            break;
+        case binary:
+            throw new ExpressionException("Invalid Evaluator binary orientation where unary required");
+        }
+    }
+
+    protected void checkBinaryTerms(String operator)
+    {
+        if (orientation == Orientation.binary) 
+        {
+            String invalidTerm = null;
+            if (left == null)
+                invalidTerm = "left";
+            if (right == null)
+                invalidTerm = "right";
+            if (invalidTerm != null)
+                throw new ExpressionException("Binary operator \"" + operator + "\" cannot have null " + invalidTerm + " term");
+        }
+    }
+
+    /**
+     * When number operation is to be performed with string on one side, convert the string to a number of same type as opposite
+     */
+    protected void performOnFlyConversion()
+    {
+        boolean isLeftString = left instanceof StringOperand;
+        boolean isRightString = right instanceof StringOperand;
+        if ((!isLeftString && !isRightString) || (isLeftString && isRightString))
+            return;
+        if (isRightString)
+        {
+            if (isValidOperand(left, operatorEnum, left.getLeftOperandOps()) &&
+                (left.getTrait() instanceof StringCloneable))
+            {
+                StringCloneable stringCloneable = (StringCloneable)left.getTrait();
+                StringOperand stringOperand = (StringOperand)right;
+                right = stringCloneable.cloneFromOperand(stringOperand, stringOperand.expression);
+            }
+            return;
+        }
+        if (isValidOperand(right, operatorEnum, right.getRightOperandOps()) &&
+             (right.getTrait() instanceof StringCloneable))
+        {
+            StringCloneable stringCloneable = (StringCloneable)right.getTrait();
+            StringOperand stringOperand = (StringOperand)left;
+            left = stringCloneable.cloneFromOperand(stringOperand, stringOperand.expression);
+        }
     }
 
 	/**

@@ -35,6 +35,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
@@ -175,26 +176,25 @@ public class VariableType
             operand = new AxiomOperand(qname, axiomKey, parameterList, axiomListListener);
             break;
         case CURRENCY:
+        {
+            Operand countryOperand = (Operand)getProperty(QUALIFIER_OPERAND);
+            if (countryOperand == null)
+            {
+                String country = getPropertyString(QUALIFIER_STRING);
+                if (country != null)
+                    countryOperand = new StringOperand(QualifiedName.ANONYMOUS, country);
+            }
         	operand = !hasExpression ? 
-        			  new CurrencyOperand(qname, parserAssembler.getScopeLocale()) : 
-        		      new CurrencyOperand(qname, expression, parserAssembler.getScopeLocale());
+        			  new CurrencyOperand(qname, countryOperand) : 
+        		      new CurrencyOperand(qname, expression, countryOperand);
 	    	break;
+        }
         case UNKNOWN: 	
         default:
         	operand = !hasExpression ? new Variable(qname) : new Variable(qname, expression);
 	    }
-	    if (operandType == OperandType.CURRENCY)
-	    {
-	    	CurrencyOperand currencyOperand = (CurrencyOperand)operand;
-	    	String country = getPropertyString(QUALIFIER_STRING);
-    		Operand countryOperand = (Operand) getProperty(QUALIFIER_OPERAND);
-	    	if (country != null)
-	    		currencyOperand.setCountry(country);
-	    	else if (countryOperand != null)
-	    		currencyOperand.setCountryOperand(countryOperand);
-	    	else
-	    		parserAssembler.registerLocaleListener(currencyOperand);
-	    }
+	    if (operand instanceof LocaleListener)
+	    	parserAssembler.registerLocaleListener((LocaleListener) operand);
 	    Operand literalOperand = (Operand)getProperty(LITERAL);
 	    if (literalOperand != null)
 	        operand.assign(new Parameter(Term.ANONYMOUS, literalOperand.getValue()));

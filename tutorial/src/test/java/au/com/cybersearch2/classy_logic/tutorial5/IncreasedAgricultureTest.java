@@ -73,17 +73,17 @@ public class IncreasedAgricultureTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query more_agriculture (9,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query more_agriculture (10,1)");
         assertThat(sourceMarker.getSourceDocumentId()).isEqualTo(0);
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("Data:agri_10y (9,31) (9,45)");
+        assertThat(sourceItem.toString()).isEqualTo("Data:agri_10y (10,31) (10,45)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area:surface_area_increase (9,48) (9,83)");
+        assertThat(sourceItem.toString()).isEqualTo("surface_area:surface_area_increase (10,48) (10,83)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -106,7 +106,7 @@ public class IncreasedAgricultureTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template surface_area_increase (5,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("calc surface_area_increase (5,1)");
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
@@ -114,7 +114,7 @@ public class IncreasedAgricultureTest
         assertThat(sourceItem.toString()).isEqualTo("country?country==country (6,3) (6,38)");
         sourceItem = sourceItem.getNext();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double surface_area=Y2010-Y1990/100*surface_area_Km2 (7,3) (8,22)");
+        assertThat(sourceItem.toString()).isEqualTo("double surface_area_Km2 (7,3) (7,25)");
     }
     
     protected void checkSolution(BufferedReader reader, String country)

@@ -2,12 +2,12 @@ include "surface-land.xpl";
 calc filter_area 
 (
   country { "United States" , "Australia" },
-  double surface_area = surface_area_Km2,
+  double surface_area_Km2,
   string units = "km2",
   // Use imperial measurements if country is USA
   ? country == "United States"
   {
-    surface_area *= 0.3861,
+    surface_area_Km2 *= 0.3861,
     units = "mi2"
   }
 );

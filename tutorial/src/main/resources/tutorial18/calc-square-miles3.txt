@@ -1,4 +1,4 @@
-country_area(country=Australia, surface_area=2988885.042, units=mi2)
-country_area(country=United States, surface_area=3795946.011, units=mi2)
-country_area(country=Australia, surface_area=7741220, units=km2)
-country_area(country=United States, surface_area=9831510, units=km2)
+country_area(country=Australia, surface_area_Km2=2988885.042, units=mi2)
+country_area(country=United States, surface_area_Km2=3795946.011, units=mi2)
+country_area(country=Australia, surface_area_Km2=7741220.0, units=km2)
+country_area(country=United States, surface_area_Km2=9831510.0, units=km2)

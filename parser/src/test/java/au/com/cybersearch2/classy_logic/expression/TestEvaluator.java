@@ -32,7 +32,7 @@ public class TestEvaluator extends Evaluator
      */
     public TestEvaluator(Operand leftTerm, String operator)
     {
-        super(leftTerm, operator);
+        super(leftTerm, operator, Orientation.unary_postfix);
 
     }
 
@@ -43,7 +43,7 @@ public class TestEvaluator extends Evaluator
      */
     public TestEvaluator(String name, Operand leftTerm, String operator)
     {
-        super(QualifiedName.parseName(name), leftTerm, operator);
+        super(QualifiedName.parseName(name), leftTerm, operator, Orientation.unary_postfix);
 
     }
 
@@ -53,7 +53,7 @@ public class TestEvaluator extends Evaluator
      */
     public TestEvaluator(String operator, Operand rightTerm)
     {
-        super(operator, rightTerm);
+        super(rightTerm, operator, Orientation.unary_prefix);
 
     }
 
@@ -64,7 +64,7 @@ public class TestEvaluator extends Evaluator
      */
     public TestEvaluator(String name, String operator, Operand rightTerm)
     {
-        super(QualifiedName.parseName(name), operator, rightTerm);
+        super(QualifiedName.parseName(name), rightTerm, operator, Orientation.unary_prefix);
 
     }
 

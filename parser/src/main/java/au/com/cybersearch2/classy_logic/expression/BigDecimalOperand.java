@@ -17,26 +17,27 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.math.BigDecimal;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
-import au.com.cybersearch2.classy_logic.trait.NumberTrait;
+import au.com.cybersearch2.classy_logic.trait.BigDecimalTrait;
 
 /**
  * BigDecimalOperand
  * @author Andrew Bowley
  * 3 Dec 2014
  */
-public class BigDecimalOperand extends ExpressionOperand<BigDecimal> 
+public class BigDecimalOperand extends ExpressionOperand<BigDecimal> implements LocaleListener 
 {
     static Trait BIG_DECIMAL_TRAIT;
     
     static
     {
-        BIG_DECIMAL_TRAIT = new NumberTrait(OperandType.DECIMAL);
+        BIG_DECIMAL_TRAIT = new BigDecimalTrait();
     }
     
     /** Localization and specialization */
@@ -139,7 +140,7 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 	@Override
 	public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
 	{
-		BigDecimal right = convertObject(rightTerm.getValue());
+		BigDecimal right = convertObject(rightTerm.getValue(), rightTerm.getValueClass());
 		BigDecimal calc = BigDecimal.ZERO;
 		switch (operatorEnum2)
 		{
@@ -157,8 +158,8 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 	@Override
 	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
 	{
-		BigDecimal right = convertObject(rightTerm.getValue());
-		BigDecimal left = convertObject(leftTerm.getValue());
+		BigDecimal right = convertObject(rightTerm.getValue(), rightTerm.getValueClass());
+		BigDecimal left = convertObject(leftTerm.getValue(), leftTerm.getValueClass());
 		BigDecimal calc = BigDecimal.ZERO;
 		switch (operatorEnum2)
 		{
@@ -185,8 +186,8 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 	public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
 	{
 		boolean calc = false;
-		BigDecimal leftBigDec = convertObject(leftTerm.getValue());
-		BigDecimal righttBigDec = convertObject(rightTerm.getValue());
+		BigDecimal leftBigDec = convertObject(leftTerm.getValue(), leftTerm.getValueClass());
+		BigDecimal righttBigDec = convertObject(rightTerm.getValue(), rightTerm.getValueClass());
 		switch (operatorEnum2)
 		{
 		case EQ:  calc = leftBigDec.compareTo(righttBigDec) == 0; break; // "=="
@@ -200,25 +201,20 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 		return calc;
 	}
 
-	/**
-	 * Evaluate value if expression exists
-	 * @param id Identity of caller, which must be provided for backup()
-	 * @return Flag set true if evaluation is to continue
-	 */
-	@Override
-	public EvaluationStatus evaluate(int id)
-	{
-		if (expression != null)
-		{
-			expression.evaluate(id);
-			if (!expression.isEmpty())
-			{   // Perform conversion to BigDecimal, if required
-				setValue(convertObject(expression.getValue()));
-				this.id = id;
-			}
-		}
-		return EvaluationStatus.COMPLETE;
-	}
+    /**
+     * Evaluate value if expression exists
+     * @param id Identity of caller, which must be provided for backup()
+     * @return Flag set true if evaluation is to continue
+     */
+    @Override
+    public EvaluationStatus evaluate(int id)
+    {
+        EvaluationStatus status = super.evaluate(id);
+        if ((status == EvaluationStatus.COMPLETE) && !isEmpty())
+            // Perform conversion to BigDecimal, if required
+            setValue(convertObject(value, getValueClass()));
+        return status;
+    }
 
 	/**
      * Assign a value and id to this Term from another term 
@@ -227,20 +223,32 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 	@Override
 	public void assign(Term term) 
 	{
-		setValue(convertObject(term.getValue()));
+		setValue(convertObject(term.getValue(), term.getValueClass()));
 		id = term.getId();
 	}
 
     @Override
     public void setTrait(Trait trait)
     {
+        if (this.trait != null)
+            trait.setLocale(this.trait.getLocale());
         this.trait = trait;
     }
 
     @Override
     public Trait getTrait()
     {
+        if (trait == BIG_DECIMAL_TRAIT)
+            trait = new BigDecimalTrait();
         return trait;
+    }
+
+    @Override
+    public void onScopeChange(Scope scope)
+    {
+        if (trait == BIG_DECIMAL_TRAIT)
+            trait = new BigDecimalTrait();
+        trait.setLocale(scope.getLocale());
     }
 
     /**
@@ -248,12 +256,21 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal>
 	 * @param object Value to convert
 	 * @return BigDecimal object
 	 */
-	protected BigDecimal convertObject(Object object)
+	protected BigDecimal convertObject(Object object, Class<?> clazz)
 	{
-			if (object instanceof BigDecimal)
-				return (BigDecimal)(object);
-			else
-				return new BigDecimal(object.toString());
+		if (clazz == BigDecimal.class)
+			return (BigDecimal)(object);
+		else if (clazz == String.class)
+		    return ((BigDecimalTrait)trait).parseValue(object.toString());
+		else
+		    try
+		    {
+			    return new BigDecimal(object.toString());
+		    }
+		    catch (NumberFormatException e)
+			{
+			    throw new ExpressionException(object.toString() + " is not convertible to a Decimal type");    
+			}
 	}
 
 	/**

@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
 
 /**
@@ -204,4 +205,11 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
              return expression.getStringOperandOps();
 	     return Operand.EMPTY_OPERAND_OPS;
      }
+
+	 @Override
+	 public void setTrait(Trait trait)
+	 {
+	     throw new UnsupportedOperationException();
+	 }
+
 }

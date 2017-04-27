@@ -15,8 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
-import java.text.NumberFormat;
-import java.util.Formatter;
 import java.util.Locale;
 
 import au.com.cybersearch2.classy_logic.Scope;
@@ -24,7 +22,6 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.TextFormat;
 
 /**
  * Formatter
@@ -60,21 +57,7 @@ public class FormatterOperand extends StringOperand implements LocaleListener
 	{
 		if (operand.isEmpty())
 			operand.evaluate(id);
-		String formatValue = null;
-		if (operand instanceof TextFormat)
-			formatValue = ((TextFormat)operand).formatValue(operand.getValue());
-		else if (Number.class.isAssignableFrom(operand.getValueClass()))
-		{
-			NumberFormat numberFormat = NumberFormat.getInstance(locale);
-			formatValue = numberFormat.format(operand.getValue());
-		}
-		else 
-		{
-			Formatter localeFormatter = new Formatter(locale);
-			localeFormatter.format("%s", operand.getValue());
-			formatValue = localeFormatter.toString();
-			localeFormatter.close();
-		}
+		String formatValue = operand.getTrait().formatValue(operand.getValue());
 		setValue(formatValue);
 		this.id = id;
 		return EvaluationStatus.COMPLETE;

@@ -7,11 +7,11 @@ scope australia (location = "Australia"){}
 calc country_area 
 (
   country { "United States" , "Australia" },
-  double surface_area = surface_area_Km2,
+  double surface_area_Km2,
   string units = "km2",
   ? scope^location == "United States"
   {
-    surface_area *= 0.3861,
+    surface_area_Km2 *= 0.3861,
     units = "mi2"
   }
 );

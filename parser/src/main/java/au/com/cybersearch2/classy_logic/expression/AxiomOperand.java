@@ -276,6 +276,12 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         return paramsTreeRoot;
     }
  
+    @Override
+    public Trait getTrait()
+    {
+        return AXIOM_TRAIT;
+    }
+    
     /**
      * Override toString() to incorporate intialization list
      * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
@@ -295,15 +301,4 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
             return super.toString();
     }
 
-    @Override
-    public void setTrait(Trait trait)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Trait getTrait()
-    {
-        return AXIOM_TRAIT;
-    }
 }

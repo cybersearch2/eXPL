@@ -57,6 +57,7 @@ import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
+import au.com.cybersearch2.classy_logic.expression.Orientation;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.list.AxiomOperand;
 import au.com.cybersearch2.classy_logic.list.ItemListOperand;
@@ -66,11 +67,11 @@ import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
 import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classy_logic.terms.NumberTerm;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
+import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -257,12 +258,6 @@ TOKEN :
         (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["d","D"])?
       | "." (["0"-"9"])+ (<EXPONENT>)? (["d","D"])?
       | (["0"-"9"])+ (<EXPONENT> | (["d","D"]))
-  >
-|
-  < NUMBER_LITERAL:
-       "'" 
-       ((["0"-"9"])+ ([",","."]))+ (["0"-"9"])+
-       "'"
   >
 |
   < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
@@ -605,7 +600,10 @@ String AxiomSpecification(QualifiedName qualifiedAxiomName, ParserContext contex
     |
     ( 
       <LBRACE> 
-      AxiomItem(qualifiedAxiomName, context)
+      ( AxiomItem(qualifiedAxiomName, context)
+        |
+        AltAxiomItem(qualifiedAxiomName, context)
+      )
       {
         ++index;
       }
@@ -660,6 +658,16 @@ void AxiomItem(QualifiedName qualifiedAxiomName, ParserContext context) :
   }
 }
 
+void AltAxiomItem(QualifiedName qualifiedAxiomName, ParserContext context) :
+{
+}
+{
+  <BIT_OR> Fact(qualifiedAxiomName, context) ( <BIT_OR> Fact(qualifiedAxiomName, context) )*
+  {
+    context.getParserAssembler().saveAxiom(qualifiedAxiomName);
+  }
+}
+
 String Fact(QualifiedName qualifiedAxiomName, ParserContext context) :
 {
   Parameter param = null;
@@ -671,12 +679,6 @@ String Fact(QualifiedName qualifiedAxiomName, ParserContext context) :
   {
     parserAssembler.addAxiom(qualifiedAxiomName, param);
     return param.getValue().toString();
-  }
-  |
-  lit=<NUMBER_LITERAL>
-  {
-    parserAssembler.addAxiom(qualifiedAxiomName, new NumberTerm(getText(lit), parserAssembler.getScopeLocale()));
-    return getText(lit);
   }
   |
   <NAN>
@@ -955,7 +957,7 @@ Operand TemplateExpression(Template template, ParserContext context) :
     else if (regexOp != null)
       var = new RegExOperand(qname, regexOp, 0, group);
     else if (scToken != null) 
-      var = new Evaluator(qname, expression, (scToken.image == "?" ? "&&" : "||"));
+      var = new Evaluator(qname, expression, (scToken.image == "?" ? "&&" : "||"), Orientation.unary_postfix);
     else if (literalList != null)
       var = new LiteralListOperand(qname, literalList);
     else 
@@ -1017,7 +1019,8 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
       }
      )?  
   {
-    expression = new Evaluator(expression, (scToken.image == "?" ? "&&" : "||"), innerLoop);
+    String operator = scToken.image == "?" ? "&&" : "||";
+    expression = innerLoop == null ? new Evaluator(expression, operator, Orientation.unary_postfix) : new Evaluator(expression, operator, innerLoop);
     expression.setPrivate(true);
     template.addTerm(expression);
     return expression;
@@ -1298,7 +1301,7 @@ Operand ChoiceExpression(String name, ParserContext context) :
     operand=Expression(context)
     {
       if (operand instanceof Evaluator)
-          return new Evaluator(qname, operand, "&&" ); 
+          return new Evaluator(qname, operand, "&&", Orientation.unary_postfix ); 
       if (operand instanceof StringOperand)
           return new RegExOperand(qname, operand, 0, null);
       return new MatchOperand(qname, operand);
@@ -1541,15 +1544,6 @@ Operand PrimaryExpression(ParserContext context) :
     return param1;
   }
   |
-  literal=<NUMBER_LITERAL>
-  {
-    NumberTerm numberTerm = new NumberTerm(getText(literal), parserAssembler.getScopeLocale());
-    Variable var = new Variable(QualifiedName.ANONYMOUS);
-    var.assign(numberTerm);
-    context.onTokenIntercept(literal);
-    return var;
-  }
-  |
   name=Name(context) (LOOKAHEAD(2) param1=NamedExpression(name, context) )?
   {
     if (param1 == null)
@@ -1680,12 +1674,14 @@ Operand Literal(ParserContext context) :
   Token lit;
   Operand operand;
   boolean flag;
+  ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
   lit=<INTEGER_LITERAL>
   {
     Long litValue = Long.decode(lit.image);
     operand = new IntegerOperand(QualifiedName.ANONYMOUS, litValue);
+	parserAssembler.registerLocaleListener((LocaleListener) operand);
     context.onTokenIntercept(lit);
     return operand;
   }
@@ -1693,6 +1689,7 @@ Operand Literal(ParserContext context) :
   lit=<FLOATING_POINT_LITERAL>
   {
     operand = new DoubleOperand(QualifiedName.ANONYMOUS, Double.valueOf(lit.image));
+	parserAssembler.registerLocaleListener((LocaleListener) operand);
     context.onTokenIntercept(lit);
     return operand;
   }
@@ -1700,6 +1697,7 @@ Operand Literal(ParserContext context) :
   lit=<STRING_LITERAL>
   {
     operand = new StringOperand(QualifiedName.ANONYMOUS, getText(lit));
+	parserAssembler.registerLocaleListener((LocaleListener) operand);
     context.onTokenIntercept(lit);
     return operand;
   }
@@ -2129,11 +2127,11 @@ Operand UnaryExpression(ParserContext context) :
   param=UnaryExpression(context)
   {
     if (plus)
-      return new Evaluator("+", param);
+      return new Evaluator(param, "+", Orientation.unary_prefix);
     else if (minus)
-      return new Evaluator("-", param);
+      return new Evaluator(param, "-", Orientation.unary_prefix);
     else if (tilde)
-      return new Evaluator("~", param);
+      return new Evaluator(param, "~", Orientation.unary_prefix);
     return param;
   }
   |
@@ -2160,7 +2158,7 @@ Operand PreIncrementExpression(ParserContext context) :
 {
   "++" param=PrimaryExpression(context)
   {
-    return new Evaluator("++", param);
+    return new Evaluator(param, "++", Orientation.unary_prefix);
   }
 }
 
@@ -2171,7 +2169,7 @@ Operand PreDecrementExpression(ParserContext context) :
 {
   "--" param=PrimaryExpression(context)
   {
-    return new Evaluator("--", param);
+    return new Evaluator(param, "--", Orientation.unary_prefix);
   }
 }
 
@@ -2182,7 +2180,7 @@ Operand UnaryExpressionNotPlusMinus(ParserContext context) :
 {
   "!" param=UnaryExpression(context)
   {
-    return new Evaluator("!", param);
+    return new Evaluator(param, "!", Orientation.unary_prefix);
   }
   |
   param=PostfixExpression(context)  
@@ -2212,9 +2210,9 @@ Operand PostfixExpression(ParserContext context) :
   ]
   {
     if (incr)
-       return new Evaluator(param, "++");
+       return new Evaluator(param, "++", Orientation.unary_postfix);
     else if (decr)
-       return new Evaluator(param, "--");
+       return new Evaluator(param, "--", Orientation.unary_postfix);
     return param;
   } 
 }

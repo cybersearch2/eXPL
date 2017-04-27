@@ -143,12 +143,6 @@ public class NullOperand extends ExpressionOperand<Object> implements Operand
 	}
 
     @Override
-    public void setTrait(Trait trait)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Trait getTrait()
     {
         return NULL_TRAIT;

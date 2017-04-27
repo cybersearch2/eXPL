@@ -101,7 +101,7 @@ public class CalculateSquareMiles3Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double surface_area=surface_area_Km2 (10,3) (10,40)");
+        assertThat(sourceItem.toString()).isEqualTo("double surface_area_Km2 (10,3) (10,25)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -121,7 +121,7 @@ public class CalculateSquareMiles3Test
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area*=0.3861 (14,5) (14,26)");
+        assertThat(sourceItem.toString()).isEqualTo("surface_area_Km2*=0.3861 (14,5) (14,30)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

@@ -367,7 +367,7 @@ public class EvaluatorTest
 		when(leftTerm.getName()).thenReturn(leftName);
 		when(leftTerm.getValue()).thenReturn(leftValue);
 		when(leftTerm.toString()).thenReturn(leftToString);
-		Evaluator evaluator = new TestEvaluator("evaluator", leftTerm, operator, null);
+		Evaluator evaluator = new TestEvaluator("evaluator", leftTerm, operator);
 		assertThat(evaluator.toString()).isEqualTo(expectedText);
 	}
 	
@@ -384,7 +384,7 @@ public class EvaluatorTest
 		when(rightTerm.getName()).thenReturn(rightName);
 		when(rightTerm.getValue()).thenReturn(rightValue);
 		when(rightTerm.toString()).thenReturn(rightToString);
-		Evaluator evaluator = new TestEvaluator("evaluator", null, operator, rightTerm);
+		Evaluator evaluator = new TestEvaluator("evaluator", operator, rightTerm);
 		assertThat(evaluator.toString()).isEqualTo(expectedText);
 	}
 	

@@ -15,9 +15,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
+import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -28,7 +30,7 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  * @author Andrew Bowley
  * 8 Dec 2014
  */
-public class StringOperand  extends ExpressionOperand<String> implements Concaten<String>
+public class StringOperand  extends ExpressionOperand<String> implements Concaten<String>, LocaleListener
 {
     static Trait STRING_TRAIT;
     
@@ -184,7 +186,17 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
     @Override
     public Trait getTrait()
     {
+        if (trait == STRING_TRAIT)
+            trait = new DefaultTrait(OperandType.STRING);
         return trait;
+    }
+
+    @Override
+    public void onScopeChange(Scope scope)
+    {
+        if (trait == STRING_TRAIT)
+            trait = new DefaultTrait(OperandType.STRING);
+        trait.setLocale(scope.getLocale());
     }
 
 }

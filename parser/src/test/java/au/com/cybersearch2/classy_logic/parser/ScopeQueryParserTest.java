@@ -95,7 +95,12 @@ public class ScopeQueryParserTest
 		"include \"agriculture-land.xpl\";\n" +
 		"include \"surface-land.xpl\";\n" +
 		"template agri_10y(double Y1990, double Y2010, country ? Y2010 - Y1990 > 1.0);\n" +
-		"template surface_area_increase(country ? country == agri_10y.country, double surface_area=(agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2);\n" +
+		"calc surface_area_increase\n" +
+		"(\n" +
+		"  country ? country == agri_10y.country,\n" +
+		". double surface_area_Km2,\n" +
+		"  double surface_area=(agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2\n" +
+		");\n" +
 		"calc km2_to_mi2 (decimal mi2, mi2=surface_area_increase.surface_area * 0.3861);" +
         "scope countries\n" +
 	    "{\n" +
@@ -299,9 +304,9 @@ public class ScopeQueryParserTest
             "{\n" +
             "  choice population_group\n" +
             "  (Population,                   Group)\n" +
-            "  {Population >= '30.000.000', \"Mega\"}\n" +
-            "  {Population >= '20.000.000', \"Huge\"}\n" +
-            "  {Population <  '20.000.000', \"Large\"};\n" +
+            "  {Population >= \"30.000.000\", \"Mega\"}\n" +
+            "  {Population >= \"20.000.000\", \"Huge\"}\n" +
+            "  {Population <  \"20.000.000\", \"Large\"};\n" +
             "  list city_group_list(german.population_group);\n" +
             "  query group_query (mega_city:city) >> (city:population_group);\n" +
             "}\n";
@@ -498,7 +503,7 @@ public class ScopeQueryParserTest
 	  	    LineNumberReader reader = new LineNumberReader(new FileReader(surfaceAreaList));
 			@Override
 			public boolean onSolution(Solution solution) {
-				//System.out.println(solution.getAxiom("surface_area").toString());
+				//System.out.println(solution.getAxiom("surface_area_increase").toString());
  	 	    	String line = "";
 				try {
 					line = reader.readLine();
@@ -515,7 +520,7 @@ public class ScopeQueryParserTest
 			@Override
 			public boolean onSolution(Solution solution) 
 			{
-				//System.out.println(solution.getString("surface_area", "Data.country") + " " + solution.getString("km2_to_mi2", "mi2") + " mi2");
+				//System.out.println(solution.getString("surface_area_increase", "country") + " " + solution.getString("km2_to_mi2", "mi2") + " mi2");
  	 	    	String line = "";
 				try {
 					line = reader.readLine();
