@@ -19,6 +19,7 @@ import java.util.Formatter;
 import java.util.Locale;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 
 /**
@@ -30,10 +31,13 @@ public class DefaultTrait implements Trait
 {
     protected OperandType operandType;
     protected Locale locale;
+    /** Country code */
+    protected String country;
 
     public DefaultTrait(OperandType operandType)
     {
         this.operandType = operandType;
+        country = "";
     }
     
     @Override
@@ -66,6 +70,46 @@ public class DefaultTrait implements Trait
     public OperandType getOperandType()
     {
         return operandType;
+    }
+
+    /**
+     * Get Locale using 2-digit country code
+     * If currency format varies with language, then use 
+     * language and country code separated by '_' or '-'. eg. 'de_LU'
+     * Locale variants and scripts not supported.
+     * @param country An ISO 3166 alpha-2 country code 
+     */
+    @Override
+    public Locale getLocaleByCode(String country) 
+    {
+        this.country = country;
+        String[] parts = country.split("_|-");
+        if (parts.length == 2)
+            return new Locale(parts[0], parts[1]);
+        // Match to first Locale found by country. 
+        // Language is usually irrelevant for currency.
+        Locale matchedByCountry = null;
+        for (Locale locale: Locale.getAvailableLocales())
+            if (locale.getCountry().equals(country) && 
+                /*locale.getScript().isEmpty() && */
+                locale.getVariant().isEmpty())
+            {
+                matchedByCountry = locale;
+                break;
+            }
+        if (matchedByCountry == null)
+            throw new ExpressionException(country + " is not a valid ISO 3166 alpha-2 country code");
+        //System.out.println("Locale " + matchedByCountry.getLanguage() + "-" + matchedByCountry.getCountry());
+        return matchedByCountry;
+    }
+
+    /**
+     * @return the country code or empty string if not specified
+     */
+    @Override
+    public String getCountry()
+    {
+        return country;
     }
 
     /**

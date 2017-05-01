@@ -15,8 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
-import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 
 /**
@@ -28,55 +28,26 @@ import au.com.cybersearch2.classy_logic.interfaces.ItemList;
  */
 public class AxiomArrayVariable extends ItemListVariable<AxiomTermList> 
 {
-	/** OperatorEnum const array for assignment only */
-	protected static OperatorEnum[] ASSIGN_OPERAND_OP = { OperatorEnum.ASSIGN };
-
 	/**
 	 * Construct AxiomArrayVariable object for fixed index
 	 * @param itemList Owning list - must contain AxiomTermList objects
-	 * @param proxy Delegate for operand interactions (AssignOnlyOperand)
 	 * @param index Fixed position in list
 	 * @param suffix To append to name
 	 */
-	public AxiomArrayVariable(ItemList<?> itemList, Operand proxy,
-			int index, String suffix) 
+	public AxiomArrayVariable(ItemList<?> itemList, int index, String suffix) 
 	{
-		super(itemList, proxy, index, suffix);
-
+		super(itemList, DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate(), index, suffix);
 	}
 
 	/**
 	 * Construct AxiomArrayVariable object for expression index
 	 * @param itemList Owning list - must contain AxiomTermList objects
-	 * @param proxy Delegate for operand interactions (AssignOnlyOperand)
 	 * @param indexExpression Operand which evalualates index integer value 
 	 * @param suffix To append to name
 	 */
-	public AxiomArrayVariable(ItemList<?> itemList, Operand proxy,
-			Operand indexExpression, String suffix) 
+	public AxiomArrayVariable(ItemList<?> itemList, Operand indexExpression, String suffix) 
 	{
-		super(itemList, proxy, indexExpression, suffix);
-
-	}
-
-	/**
-	 * Returns permited operations for this Variable as a right hand term
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getRightOperandOps() 
-	{
-		return ASSIGN_OPERAND_OP;
-	}
-
-	/**
-	 * Returns permited operations for this Variable as a left hand term
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getLeftOperandOps() 
-	{
-		return ASSIGN_OPERAND_OP;
+		super(itemList, DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate(), indexExpression, suffix);
 	}
 
 }

@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.trait;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Scanner;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
@@ -36,6 +37,11 @@ public class BigDecimalTrait extends NumberTrait<BigDecimal>
     public BigDecimalTrait()
     {
         super(OperandType.DECIMAL);
+    }
+
+    protected BigDecimalTrait(OperandType operandType)
+    {
+        super(operandType);
     }
 
     @Override
@@ -62,7 +68,8 @@ public class BigDecimalTrait extends NumberTrait<BigDecimal>
             new BigDecimalOperand(stringOperand.getQualifiedName(), expression);
         Parameter param = new Parameter(Term.ANONYMOUS, stringOperand.getValue().toString());
         param.setId(stringOperand.getId());
-        clone.getTrait().setLocale(stringOperand.getTrait().getLocale());
+        Locale locale = stringOperand.getOperator().getTrait().getLocale();
+        clone.getOperator().getTrait().setLocale(locale);
         clone.assign(param);
         return clone;
     }

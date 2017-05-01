@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.trait;
 
+import java.util.Locale;
 import java.util.Scanner;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
@@ -60,7 +61,8 @@ public class IntegerTrait extends NumberTrait<Long>
             new IntegerOperand(stringOperand.getQualifiedName(), expression);
         Parameter param = new Parameter(Term.ANONYMOUS, stringOperand.getValue().toString());
         param.setId(stringOperand.getId());
-        clone.getTrait().setLocale(stringOperand.getTrait().getLocale());
+        Locale locale = stringOperand.getOperator().getTrait().getLocale();
+        clone.getOperator().getTrait().setLocale(locale);
         clone.assign(param);
         return clone;
     }

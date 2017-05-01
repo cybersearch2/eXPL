@@ -15,9 +15,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.helper;
 
-import au.com.cybersearch2.classy_logic.expression.DelegateOperand;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
 
 /**
  * EvaluationUtils
@@ -36,7 +36,7 @@ public class EvaluationUtils
      */
     public static boolean isValidLeftOperand(Operand leftTerm, Operand rightTerm, OperatorEnum operatorEnum) 
     {
-        for (OperatorEnum operatorEnum2: leftTerm.getLeftOperandOps())
+        for (OperatorEnum operatorEnum2: leftTerm.getOperator().getLeftOperandOps())
             if (operatorEnum2 == operatorEnum)
                 return true;
         if (isValidStringOperation(leftTerm, operatorEnum) || 
@@ -53,7 +53,7 @@ public class EvaluationUtils
      */
     public static boolean isValidStringOperation(Operand term, OperatorEnum operatorEnum)
     {
-        for (OperatorEnum operatorEnum2: term.getStringOperandOps())
+        for (OperatorEnum operatorEnum2: term.getOperator().getStringOperandOps())
             if (operatorEnum2 == operatorEnum)
                 return true;
         return false;
@@ -85,7 +85,7 @@ public class EvaluationUtils
      */
     public static boolean isValidRightOperand(Operand rightTerm, OperatorEnum operatorEnum) 
     {
-        for (OperatorEnum operatorEnum2: rightTerm.getRightOperandOps())
+        for (OperatorEnum operatorEnum2: rightTerm.getOperator().getRightOperandOps())
             if (operatorEnum2 == operatorEnum)
                 return true;
         // Only Comma operator is valid at this point
@@ -182,7 +182,7 @@ public class EvaluationUtils
         leftTerm.assign(rightTerm);
         // When the value class is not supported as a delegate, substitute a Null object.
         // This is defensive only as Operands are expected to only support Delegate classes
-        return DelegateOperand.isDelegateClass(rightTerm.getValueClass()) ? value : new Null();
+        return DelegateOperator.isDelegateClass(rightTerm.getValueClass()) ? value : new Null();
     }
 
     /**
@@ -195,7 +195,7 @@ public class EvaluationUtils
     public static Number calculateBoolean(Operand leftTerm, Operand rightTerm)
     {
         if (leftTerm.getValueClass() == Boolean.class)
-            return leftTerm.numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
-        return rightTerm.numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
+            return leftTerm.getOperator().numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
+        return rightTerm.getOperator().numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
     }
 }

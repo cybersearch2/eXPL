@@ -57,7 +57,7 @@ public class FormatterOperand extends StringOperand implements LocaleListener
 	{
 		if (operand.isEmpty())
 			operand.evaluate(id);
-		String formatValue = operand.getTrait().formatValue(operand.getValue());
+		String formatValue = operand.getOperator().getTrait().formatValue(operand.getValue());
 		setValue(formatValue);
 		this.id = id;
 		return EvaluationStatus.COMPLETE;

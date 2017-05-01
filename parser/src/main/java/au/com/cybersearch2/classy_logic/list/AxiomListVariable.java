@@ -15,19 +15,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * AxiomListVariable
@@ -38,12 +36,10 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 public class AxiomListVariable  extends Parameter implements Operand, Concaten<String>
 {
     static AxiomList EMPTY_AXIOM_LIST;
-    static Trait AXIOM_LIST_TRAIT;
     
     static
     {
         EMPTY_AXIOM_LIST = new AxiomList(QualifiedName.ANONYMOUS, new QualifiedName(Term.ANONYMOUS));
-        AXIOM_LIST_TRAIT = new DefaultTrait(OperandType.TERM);
     }
     
 	/** The backing axiom list */
@@ -62,12 +58,9 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	protected AxiomListSpec axiomListSpec;
     /** Flag set true if operand not visible in solution */
     protected boolean isPrivate;
+    /** Defines operations that an Operand performs with other operands. To be set by super. */
+    protected Operator operator;
 	
-	/** OperatorEnum const array for no operations permitted */
-	protected static OperatorEnum[] EMPTY_OPERAND_OPS = new OperatorEnum[0];
-	/** OperatorEnum const array for assignment only */
-	protected static OperatorEnum[] ASSIGN_OPERAND_OP = { OperatorEnum.ASSIGN };
-   
 	/**
 	 * Construct a fixed index AxiomListVariable object.
 	 * Note axiom term fixed index or expression operand must be set to complete set up
@@ -82,6 +75,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 		super(axiomList.getName() + "_" + axiomIndex + "_" + suffix);
 		this.axiomList = axiomList;
 		this.axiomIndex = axiomIndex;
+		init();
 	}
 
 	/**
@@ -96,6 +90,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 		this.axiomList = axiomList;
         this.axiomExpression = axiomExpression;
         axiomIndex = -1; // Set index to invalid value to avoid accidental uninitialised list access
+        init();
 	}
 
 	/**
@@ -114,9 +109,10 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
             axiomExpression = axiomListSpec.getAxiomExpression();
         else 
             axiomIndex = axiomListSpec.getAxiomIndex();
+        init();
 	}
 
-	/**
+    /**
 	 * getQualifiedName
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getQualifiedName()
 	 */
@@ -153,7 +149,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     	        variable = termExpression != null ? 
     	                AxiomUtils.newVariableInstance(axiomTermList, termExpression, suffix, id) :
     	                AxiomUtils.newVariableInstance(axiomTermList, termIndex, suffix, id);
-    	        axiomTermListVariable = variable;  
+    	        axiomTermListVariable = variable; 
 	        }
 	    }
 	    else if (axiomTermListVariable != null)
@@ -387,88 +383,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 		variable = termExpression != null ? 
 				                   axiomTermList.newVariableInstance(termExpression, suffix, modifierId) :
 				            	   axiomTermList.newVariableInstance(termIndex, suffix, modifierId);
-		axiomTermListVariable = variable;				                   
-	}
-
-    /**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getRightOperandOps() 
-	{
-		return axiomTermListVariable == null ? 
-				    ASSIGN_OPERAND_OP : 
-					axiomTermListVariable.getRightOperandOps();
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getLeftOperandOps() 
-	{
-		return axiomTermListVariable == null ? 
-				    ASSIGN_OPERAND_OP : 
-				    axiomTermListVariable.getLeftOperandOps();
-	}
-
- 	/**
- 	 * Returns OperatorEnum values for which this Term is a valid String operand
- 	 * @return OperatorEnum[]
- 	 */
-	 @Override
-     public OperatorEnum[] getStringOperandOps()
-     {
-	     if (!empty)
-	     {
-	         return  new OperatorEnum[]
-	                 { 
-	                     OperatorEnum.PLUS,
-	                     OperatorEnum.PLUSASSIGN
-	                 };
-
-	     }
-	     return Operand.EMPTY_OPERAND_OPS;
-     }
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-		return axiomTermListVariable == null ? 
-				    new Integer(0) : 
-				    axiomTermListVariable.numberEvaluation(operatorEnum2, rightTerm);
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2,
-			Term rightTerm) 
-	{
-		return axiomTermListVariable == null ? 
-				    new Integer(0) : 
-		            axiomTermListVariable.numberEvaluation(leftTerm, operatorEnum2, rightTerm);
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2,
-			Term rightTerm) 
-	{
-		return axiomTermListVariable == null ?
-				    Boolean.FALSE :
-				    axiomTermListVariable.booleanEvaluation(leftTerm, operatorEnum2, rightTerm) ;
+		axiomTermListVariable = variable;
 	}
 
 	/**
@@ -502,17 +417,11 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     }
 
     @Override
-    public void setTrait(Trait trait)
+    public Operator getOperator()
     {
-        throw new UnsupportedOperationException();
+        return axiomTermListVariable == null ? operator : axiomTermListVariable.getOperator();
     }
 
-    @Override
-    public Trait getTrait()
-    {
-        return AXIOM_LIST_TRAIT;
-    }
-    
     /**
      * Returns default qualified name for axiom term list
      * @param axiomList2 The containing axiom list
@@ -523,6 +432,9 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
         return new QualifiedName(axiomList2.getName() + "_item", axiomList2.getQualifiedName());
     }
 
-
-
+    protected void init()
+    {
+        operator = DelegateType.NULL.getOperatorFactory().delegate();
+    }
+    
 }

@@ -12,6 +12,9 @@ import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.operator.AssignTypeEvaluatorOperator;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
+import au.com.cybersearch2.classy_logic.operator.EvaluatorOperator;
 
 import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.*;
 
@@ -46,12 +49,12 @@ public class Evaluator extends DelegateOperand
 	/**
 	 * Create Evaluator object for prefix/postfix unary expression 
 	 * @param term Operand left or right determined by orientation
-	 * @param operator Text representation of operator
+	 * @param operatorNotation Text representation of operator
 	 * @param orientation Unary - prefix/postfix
 	 */
-	public Evaluator(Operand term, String operator, Orientation orientation)
+	public Evaluator(Operand term, String operatorNotation, Orientation orientation)
 	{
-		this(QualifiedName.ANONYMOUS, operator, orientation);
+		this(QualifiedName.ANONYMOUS, operatorNotation, orientation);
 		setUnaryTerm(term);
 	}
 
@@ -59,62 +62,66 @@ public class Evaluator extends DelegateOperand
 	 * Create named Evaluator object for postfix unary expression 
      * @param qname Qualified name of variable
 	 * @param term Operand
-	 * @param operator Text representation of operator
+	 * @param operatorNotation Text representation of operator
      * @param orientation Unary - prefix/postfix
 	 */
-	public Evaluator(QualifiedName qname, Operand term, String operator, Orientation orientation)
+	public Evaluator(QualifiedName qname, Operand term, String operatorNotation, Orientation orientation)
 	{
-		this(qname, operator, orientation);
+		this(qname, operatorNotation, orientation);
         setUnaryTerm(term);
 	}
 
 	/**
 	 * Create Evaluator object for binary expression 
 	 * @param leftTerm Left perand
-	 * @param operator Text representation of operator
+	 * @param operatorNotation Text representation of operator
 	 * @param rightTerm Right operand
 	 */
-	public Evaluator(Operand leftTerm, String operator, Operand rightTerm)
+	public Evaluator(Operand leftTerm, String operatorNotation, Operand rightTerm)
 	{
-		this(QualifiedName.ANONYMOUS, operator, Orientation.binary);
+		this(QualifiedName.ANONYMOUS, operatorNotation, Orientation.binary);
         this.right = rightTerm;
         this.left = leftTerm;
-        checkBinaryTerms(operator);
+        checkBinaryTerms(operatorNotation);
     }
 
     /**
      * Create named Evaluator object for binary expression 
      * @param qname Qualified name of variable
      * @param leftTerm Left perand
-     * @param operator Text representation of operator
+     * @param operatorNotation Text representation of operator
      * @param rightTerm Right operand
      */
-    public Evaluator(QualifiedName qname, Operand leftTerm, String operator, Operand rightTerm)
+    public Evaluator(QualifiedName qname, Operand leftTerm, String operatorNotation, Operand rightTerm)
     {
-        this(qname, operator, Orientation.binary);
+        this(qname, operatorNotation, Orientation.binary);
         this.right = rightTerm;
         this.left = leftTerm;
-        checkBinaryTerms(operator);
+        checkBinaryTerms(operatorNotation);
     }
 
 	/**
 	 * Construct named Evaluator object  
      * @param qname Qualified name of variable
-	 * @param operator Text representation of operator
+	 * @param operatorNotation Text representation of operator
      * @param orientation Binary or unary - prefix/postfix
 	 */
-	protected Evaluator(QualifiedName qname, String operator, Orientation orientation)
+	protected Evaluator(QualifiedName qname, String operatorNotation, Orientation orientation)
 	{
 		super(qname);
 	    this.orientation = orientation;
-	    operatorEnum = OperatorEnum.convertOperator(operator);
+	    operatorEnum = OperatorEnum.convertOperator(operatorNotation);
 	    // Short circuit adds logic to return false to evaluate().
 	    // It applies to operators "&&" and "||".
 	    // Note there is a unary form used for short circuit expressions ie. starting with '?'
 	    shortCircuitOnFalse = operatorEnum == OperatorEnum.SC_AND; 
 	    shortCircuitOnTrue = operatorEnum == OperatorEnum.SC_OR; 
+	    if (operatorEnum == OperatorEnum.ASSIGN)
+	        operator = new AssignTypeEvaluatorOperator();
+	    else
+	        operator = new EvaluatorOperator();
 	}
-
+	
 	/**
 	 * Execute expression and set Evaluator value with result
 	 * There is a precedence for errors, in highest to lowest:
@@ -174,7 +181,7 @@ public class Evaluator extends DelegateOperand
 	   		result = left.getValue();
 	   		if (!leftIsNaN)
 	   		{
-	   			Number post = left.numberEvaluation(operatorEnum, left);
+	   			Number post = left.getOperator().numberEvaluation(operatorEnum, left);
 	   			left.setValue(post);
 	   		}
 	   	}
@@ -213,11 +220,6 @@ public class Evaluator extends DelegateOperand
 	   	return setResult(result, id);
 	}
 
-    public OperatorEnum getOperator()
-    {
-        return operatorEnum;
-    }
-    
 	/**
 	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 
 	 * @param modifierId Identity of caller. 
@@ -240,25 +242,25 @@ public class Evaluator extends DelegateOperand
  	 * Evaluate a unary expression 
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
 	 */
-	@Override
-	public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-		if (isNaN(rightTerm.getValue()))
-			return new Double("NaN");
-		return super.numberEvaluation(operatorEnum2, rightTerm);
-	}
+	//@Override
+	//public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
+	//{
+	//	if (isNaN(rightTerm.getValue()))
+	//		return new Double("NaN");
+	//	return super.numberEvaluation(operatorEnum2, rightTerm);
+	//}
 
 	/**
 	 * Evaluate a binary expression
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
 	 */
-	@Override
-	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-		if (isNaN(rightTerm.getValue()) || isNaN(leftTerm.getValue()))
-			return new Double("NaN");
-		return super.numberEvaluation(leftTerm, operatorEnum2, rightTerm);
-	}
+	//@Override
+	//public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
+	//{
+	//	if (isNaN(rightTerm.getValue()) || isNaN(leftTerm.getValue()))
+	//		return new Double("NaN");
+	//	return super.numberEvaluation(leftTerm, operatorEnum2, rightTerm);
+	//}
 
 	/**
 	 * Returns left child of Operand
@@ -307,7 +309,7 @@ public class Evaluator extends DelegateOperand
     {
         if ((operatorEnum == OperatorEnum.INCR) || (operatorEnum == OperatorEnum.DECR))
         {   // ++ or --
-            Number pre = right.numberEvaluation(operatorEnum, right);
+            Number pre = right.getOperator().numberEvaluation(operatorEnum, right);
             right.setValue(pre);
             return pre;
         }
@@ -320,7 +322,7 @@ public class Evaluator extends DelegateOperand
         }
         else if ((operatorEnum == OperatorEnum.TILDE) || (operatorEnum == OperatorEnum.PLUS) || (operatorEnum == OperatorEnum.MINUS))
             // ~ is unary so left is ignored
-            return right.numberEvaluation(operatorEnum, right);
+            return right.getOperator().numberEvaluation(operatorEnum, right);
         return null;
     }
 
@@ -447,7 +449,10 @@ public class Evaluator extends DelegateOperand
         case NE: // "!="
         case SC_OR: // "||"
         case SC_AND: // "&&"
-            setDelegate(Boolean.class);
+        {
+            if (delegateType != DelegateType.BOOLEAN)
+                operator.setDelegateType(DelegateType.BOOLEAN);
+        }
         default:
         }
     }
@@ -473,8 +478,8 @@ public class Evaluator extends DelegateOperand
         case SC_OR: // "||"
         case SC_AND: // "&&"
             return rightTerm.getValue().equals(null) ? // == or != null
-                    rightTerm.booleanEvaluation(leftTerm, operatorEnum, leftTerm) :
-                    leftTerm.booleanEvaluation(leftTerm, operatorEnum, rightTerm);
+                    rightTerm.getOperator().booleanEvaluation(leftTerm, operatorEnum, leftTerm) :
+                    leftTerm.getOperator().booleanEvaluation(leftTerm, operatorEnum, rightTerm);
         case PLUS: // "+"
         case PLUSASSIGN: // "+"
             if (isValidStringOperation(leftTerm, operatorEnum))
@@ -500,17 +505,17 @@ public class Evaluator extends DelegateOperand
             boolean leftIsBigDec = leftTerm.getValueClass() == BigDecimal.class;
             boolean rightIsBigDec = rightTerm.getValueClass() == BigDecimal.class;
             if (leftIsBigDec)
-                return leftTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
+                return leftTerm.getOperator().numberEvaluation(leftTerm, operatorEnum, rightTerm);
             else if (rightIsBigDec)
-                return rightTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
+                return rightTerm.getOperator().numberEvaluation(leftTerm, operatorEnum, rightTerm);
             // Prevent conversion of Double to Integer by 
             // always selecting the Double term to perform the operation
             boolean leftIsDouble = leftTerm.getValueClass() == Double.class;
             boolean rightIsDouble = rightTerm.getValueClass() == Double.class;
             if (leftIsDouble || !rightIsDouble)
-                return leftTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
+                return leftTerm.getOperator().numberEvaluation(leftTerm, operatorEnum, rightTerm);
             else
-                return rightTerm.numberEvaluation(leftTerm, operatorEnum, rightTerm);
+                return rightTerm.getOperator().numberEvaluation(leftTerm, operatorEnum, rightTerm);
         case COMMA: // Comma operator builds a tree of operands instead of performing a calculation
             return new Null(); // Set dummy value so this variable is no longer empty
         default:
@@ -558,19 +563,19 @@ public class Evaluator extends DelegateOperand
             return;
         if (isRightString)
         {
-            if (isValidOperand(left, operatorEnum, left.getLeftOperandOps()) &&
-                (left.getTrait() instanceof StringCloneable))
+            if (isValidOperand(left, operatorEnum, left.getOperator().getLeftOperandOps()) &&
+                (left.getOperator().getTrait() instanceof StringCloneable))
             {
-                StringCloneable stringCloneable = (StringCloneable)left.getTrait();
+                StringCloneable stringCloneable = (StringCloneable)left.getOperator().getTrait();
                 StringOperand stringOperand = (StringOperand)right;
                 right = stringCloneable.cloneFromOperand(stringOperand, stringOperand.expression);
             }
             return;
         }
-        if (isValidOperand(right, operatorEnum, right.getRightOperandOps()) &&
-             (right.getTrait() instanceof StringCloneable))
+        if (isValidOperand(right, operatorEnum, right.getOperator().getRightOperandOps()) &&
+             (right.getOperator().getTrait() instanceof StringCloneable))
         {
-            StringCloneable stringCloneable = (StringCloneable)right.getTrait();
+            StringCloneable stringCloneable = (StringCloneable)right.getOperator().getTrait();
             StringOperand stringOperand = (StringOperand)left;
             left = stringCloneable.cloneFromOperand(stringOperand, stringOperand.expression);
         }

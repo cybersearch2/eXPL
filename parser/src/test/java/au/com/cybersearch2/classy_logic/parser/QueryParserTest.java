@@ -58,8 +58,10 @@ import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -125,10 +127,10 @@ public class QueryParserTest
 		"include \"agriculture-land.xpl\";" +
 		"include \"surface-land.xpl\";" +
 	    "template agri_10y (double Y1990, double Y2010, country ? Y2010 - Y1990 > 1.0);" +
-		"template surface_area_increase " +
+		"calc surface_area_increase " +
 		"(" +
 		"  country? country == agri_10y.country," +
-		"  double surface_area_Km2," +
+		". double surface_area_Km2," +
 		"  double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100 * surface_area_Km2" +
 		");";
 
@@ -657,7 +659,8 @@ public class QueryParserTest
 			}});
     }
     
-	@Test
+	@SuppressWarnings("unchecked")
+    @Test
 	public void test_high_cities_sorted() throws Exception
 	{
 		QueryProgram queryProgram = new QueryProgram();
@@ -675,19 +678,17 @@ public class QueryParserTest
     	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude?altitude>5000)");
  	    while (highCitiesQuery.execute())
  	    {
- 	        Axiom axiom = calcTemplate.toAxiom();
-            System.out.println(axiom.toString());
- 	    	System.out.println(highCitiesQuery.toString());
- 	    	System.out.println(parserAssembler.getOperandMap().getItemList(QualifiedName.parseGlobalName("city_list")).toString());
- 	    	System.out.println();
+ 	        //Axiom axiom = calcTemplate.toAxiom();
+            //System.out.println(axiom.toString());
+ 	    	//System.out.println(highCitiesQuery.toString());
+ 	    	//System.out.println(parserAssembler.getOperandMap().getItemList(QualifiedName.parseGlobalName("city_list")).toString());
+ 	    	//System.out.println();
  	    }
- 	    /*
- 	    ItemList<?> cityList = parserAssembler.getOperandMap().getItemList(QualifiedName.parseGlobalName("city_list"));
- 	    assertThat(cityList.getItem(0).toString()).isEqualTo("high_city(name = denver, altitude = 5280)");
- 	    assertThat(cityList.getItem(1).toString()).isEqualTo("high_city(name = flagstaff, altitude = 6970)");
- 	    assertThat(cityList.getItem(2).toString()).isEqualTo("high_city(name = addis ababa, altitude = 8000)");
- 	    assertThat(cityList.getItem(3).toString()).isEqualTo("high_city(name = leadville, altitude = 10200)");
- 	    */
+ 	    ItemList<AxiomTermList> cityList = (ItemList<AxiomTermList>) parserAssembler.getOperandMap().getItemList(QualifiedName.parseGlobalName("city_list"));
+ 	    assertThat(cityList.getItem(0).getAxiom().toString()).isEqualTo("high_city(name=denver, altitude=5280)");
+ 	    assertThat(cityList.getItem(1).getAxiom().toString()).isEqualTo("high_city(name=flagstaff, altitude=6970)");
+ 	    assertThat(cityList.getItem(2).getAxiom().toString()).isEqualTo("high_city(name=addis ababa, altitude=8000)");
+ 	    assertThat(cityList.getItem(3).getAxiom().toString()).isEqualTo("high_city(name=leadville, altitude=10200)");
  	  	}
 
     @Test
@@ -1040,7 +1041,7 @@ public class QueryParserTest
  	    {
  	    	String line = reader.readLine();
             //System.out.println(agriculturalQuery.toString());
-  	    	//assertThat(agriculturalQuery.toString()).isEqualTo(line);
+  	    	assertThat(agriculturalQuery.toString()).isEqualTo(line);
  	    }
  	    reader.close();
  	    
@@ -1059,8 +1060,8 @@ public class QueryParserTest
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-	 	    	System.out.println(solution.getAxiom("surface_area_increase").toString());
-	  	    	//assertThat(solution.getAxiom("surface_area_increase").toString()).isEqualTo(line);
+	 	    	//System.out.println(solution.getAxiom("surface_area_increase").toString());
+	  	    	assertThat(solution.getAxiom("surface_area_increase").toString()).isEqualTo(line);
 				return true;
 			}};
 

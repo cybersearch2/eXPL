@@ -78,7 +78,7 @@ public class FormatterOperandTest
 		    	targetOperand.assign(new Parameter(Term.ANONYMOUS, date));
 	 	        FormatterOperand formatOperand = new FormatterOperand(QualifiedName.parseName(locale.getCountry()), targetOperand, locale);
 	 	        assertThat(formatOperand.evaluate(1)).isEqualTo(EvaluationStatus.COMPLETE);
-	 	        System.out.println(formatOperand.getValue().toString() + " " + locale.toString());
+	 	        //System.out.println(formatOperand.getValue().toString() + " " + locale.toString());
 	 	        //assertThat(formatOperand.getValue().toString() + " " + locale.toString()).isEqualTo(reader.readLine());
 			}
 	    }

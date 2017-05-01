@@ -16,19 +16,16 @@
 package au.com.cybersearch2.classy_logic.list;
 
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
-import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.ExpressionOperand;
-import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.Trait;
-import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
 
 /**
  * ListVariableOperand
@@ -40,20 +37,14 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  */
 public abstract class ListVariableOperand extends ExpressionOperand<Object> implements Concaten<String>
 {
-    static Trait LIST_TRAIT;
-    
-    static
-    {
-        // The de-referenced list value may be either an axiom or a term
-        LIST_TRAIT = new DefaultTrait(OperandType.UNKNOWN);
-    }
-    
     /** Name of list */
     protected String listName;
     /** Operand which evaluates the list index */
     protected Operand indexExpression = null;
     /** Optional Operand to select term in axiom - only applicable to Axiom lists */
     protected Operand expression2 = null;
+    /** Defines operations that an Operand performs with other operands. */
+    protected Operator assignOnlyOperator;
     
     /**
      * Construct ListVariableOperand object
@@ -70,6 +61,7 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
         this.listName = listName.getName();
         this.indexExpression = indexExpression;
         this.expression2 = expression2;
+        assignOnlyOperator = DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate();
     }
 
     /**
@@ -95,58 +87,6 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
     }
     
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
-     */
-    @Override
-    public OperatorEnum[] getRightOperandOps() 
-    {
-        return expression.getRightOperandOps();
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
-     */
-    @Override
-    public OperatorEnum[] getLeftOperandOps() 
-    {
-        return expression.getLeftOperandOps();
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-     */
-    @Override
-    public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
-    {
-        return expression.numberEvaluation(operatorEnum2, rightTerm);
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-     */
-    @Override
-    public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2,
-            Term rightTerm) 
-    {
-        return expression.numberEvaluation(leftTerm, operatorEnum2, rightTerm);
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-     */
-    @Override
-    public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2,
-            Term rightTerm) 
-    {
-        return expression.booleanEvaluation(leftTerm, operatorEnum2, rightTerm);
-    }
-
-    /**
      * concatenate
      * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
      */
@@ -157,20 +97,13 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
         return ((Concaten<String>)expression).concatenate(rightOperand);
     }
 
-
     @Override
-    public void setTrait(Trait trait)
+    public Operator getOperator()
     {
-        throw new UnsupportedOperationException();
+        return expression == null ? assignOnlyOperator : expression.getOperator();
     }
 
-    @Override
-    public Trait getTrait()
-    {
-        return LIST_TRAIT;
-    }
-
-    /**
+   /**
      * Returns Operand which accesses a list identified by name
      * @param listName Name of list
      * @param param1 Operand of first index

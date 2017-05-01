@@ -19,6 +19,8 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -31,6 +33,8 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 public class AxiomTermListVariable extends ItemListVariable<Object> implements Concaten<String>
 {
     protected AxiomTermList axiomTermList;
+    /** Defines operations that an Operand performs with other operands. Set when item selected. */
+    protected DelegateOperator delegateOperator;
     
 	/**
 	 * Construct an AxiomTermListVariable instance
@@ -42,7 +46,7 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 	 */
 	public AxiomTermListVariable(AxiomTermList axiomTermList, Operand proxy, int index, String suffix, int id) 
 	{
-		super(axiomTermList, proxy, index, suffix);
+		super(axiomTermList, DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate(), index, suffix);
 		this.axiomTermList = axiomTermList;
 		this.id = id;
 	}
@@ -58,7 +62,7 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 	public AxiomTermListVariable(AxiomTermList axiomTermList, Operand proxy,
 			Operand indexExpression, String suffix, int id) 
 	{
-		super(axiomTermList, proxy, indexExpression, suffix);
+		super(axiomTermList, DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate(), indexExpression, suffix);
         this.axiomTermList = axiomTermList;
 		this.id = id;
 	}
@@ -73,9 +77,12 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 	{
 		setValue(index);
 		Term term = (Term) itemList.getItem(index);
-     	if (proxy.isEmpty() || (term.getValueClass() != proxy.getValueClass()))
-     		// Assign a value to set the proxy delegate
-    		proxy.setValue(term.getValue());
+     	if (delegateOperator == null)
+     	{
+     	   delegateOperator = new DelegateOperator();
+     	   proxy = delegateOperator;
+     	}
+     	delegateOperator.setDelegate(term.getValueClass());
 	}
 
 	/**

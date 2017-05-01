@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.expression;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
 
 /**
@@ -34,8 +33,8 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
     protected QualifiedName qname;
     /** Flag set true if operand not visible in solution */
     protected boolean isPrivate;
-	
-	/**
+ 
+    /**
 	 * Construct a ExpressionOperand object using given name 
      * @param qname Qualified name
 	 * @throws IllegalArgumentException if name is empty
@@ -193,23 +192,5 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 	{
 		return null;
 	}
-
- 	/**
- 	 * Returns OperatorEnum values for which this Term is a valid String operand
- 	 * @return OperatorEnum[]
- 	 */
-	 @Override
-     public OperatorEnum[] getStringOperandOps()
-     {
-         if (expression != null)
-             return expression.getStringOperandOps();
-	     return Operand.EMPTY_OPERAND_OPS;
-     }
-
-	 @Override
-	 public void setTrait(Trait trait)
-	 {
-	     throw new UnsupportedOperationException();
-	 }
 
 }

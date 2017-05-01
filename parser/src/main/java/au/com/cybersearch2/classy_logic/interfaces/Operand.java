@@ -15,7 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
-import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 
 /**
@@ -24,11 +23,8 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
  * @author Andrew Bowley
  * 1 Dec 2014
  */
-public interface Operand extends Term
+public interface Operand extends Term 
 {
-
-	public static OperatorEnum[] EMPTY_OPERAND_OPS = new OperatorEnum[0];
-
 	/**
 	 * Returns qualified name
 	 * @return QualifiedName object
@@ -36,60 +32,16 @@ public interface Operand extends Term
 	QualifiedName getQualifiedName();
 	
     /**
-	 * Returns OperatorEnum values for which this Term is a valid right operand
-	 * @return OperatorEnum[]
-	 */
-    OperatorEnum[] getRightOperandOps();
-	
-	/**
-	 * Returns OperatorEnum values for which this Term is a valid left operand
-	 * @return OperatorEnum[]
-	 */
-     OperatorEnum[] getLeftOperandOps();
-
- 	/**
- 	 * Returns OperatorEnum values for which this Term is a valid String operand
- 	 * @return OperatorEnum[]
- 	 */
-     OperatorEnum[] getStringOperandOps();
-
- 	/**
- 	 * Evaluate a unary expression 
- 	 * @param operatorEnum2 OperatorEnum for one of +, -, ~. ++ or -- 
-	 * @param rightTerm The term, always on right except for post inc/dec
-	 * @return Class derived from Number.
- 	 */
- 	Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm);
- 	
-	/**
-	 * Evaluate a binary expression
-	 * @param leftTerm Term on left
-	 * @param operatorEnum2 OperatorEnum for one of +, -, *, /, &amp;, |, ^ or % 
-	 * @param rightTerm Term on right
-	 * @return Class derived from Number.
-	 */
-	Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm);
-	
-	/**
-	 * Evaluate comparison 
-	 * @param leftTerm Term on left
-	 * @param operatorEnum2 OperaorEnum.LT or OperaorEnum.GT
-	 * @param rightTerm Term on right
-	 * @return BooleanOperand result
-	 */
-	Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm);
-
-	/**
-	 * Returns left child of Operand
-	 * @return Operand object or null if there is no child
-	 */
-	Operand getLeftOperand();
-	
-	/**
-	 * Returns right child of Operand
-	 * @return Operand object or null if there is no child
-	 */
-	Operand getRightOperand();
+     * Returns left child of Operand
+     * @return Operand object or null if there is no child
+     */
+    Operand getLeftOperand();
+    
+    /**
+     * Returns right child of Operand
+     * @return Operand object or null if there is no child
+     */
+    Operand getRightOperand();
 
 	/**
 	 * Set this operand private - not visible in solution
@@ -104,14 +56,8 @@ public interface Operand extends Term
 	boolean isPrivate();
 
 	/**
-	 * Set trait for localization and specialization
-	 * @param trait Trait object
+	 * Returns object which defines operations that an Operand performs with other operands
+	 * @return Operator object
 	 */
-	void setTrait(Trait trait);
-
-	/**
-	 * Returns trait for localization and specialization
-	 * @return Trait object
-	 */
-	Trait getTrait();
+	Operator getOperator();
 }

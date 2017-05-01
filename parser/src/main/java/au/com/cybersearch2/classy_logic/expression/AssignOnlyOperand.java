@@ -16,6 +16,8 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
+import au.com.cybersearch2.classy_logic.operator.AssignOnlyOperator;
 
 /**
  * AssignOnlyOperand
@@ -25,6 +27,14 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
  */
 public class AssignOnlyOperand extends NullOperand 
 {
+    /** Defines operations that an Operand performs with other operands. */
+    protected AssignOnlyOperator assignOnlyOperator;
+ 
+    public AssignOnlyOperand()
+    {
+        super();
+    }
+    
 	/**
 	 * Construct AssignOnlyOperand object
      * @param qname Qualified name
@@ -32,37 +42,13 @@ public class AssignOnlyOperand extends NullOperand
 	public AssignOnlyOperand(QualifiedName qname) 
 	{
 		super(qname);
-
+		assignOnlyOperator = new AssignOnlyOperator();
 	}
 
-	/**
-	 * getRightOperandOps
-	 * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getRightOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getRightOperandOps() 
-	{
-		return 	new OperatorEnum[]
-		{ 
-			OperatorEnum.ASSIGN,
-			OperatorEnum.EQ,
-			OperatorEnum.NE
-		};
-	}
-
-	/**
-	 * getLeftOperandOps
-	 * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getLeftOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getLeftOperandOps() 
-	{
-		return 	new OperatorEnum[]
-		{ 
-				OperatorEnum.ASSIGN,
-				OperatorEnum.EQ,
-				OperatorEnum.NE
-		};
-	}
+    @Override
+    public Operator getOperator()
+    {
+        return assignOnlyOperator;
+    }
 
 }

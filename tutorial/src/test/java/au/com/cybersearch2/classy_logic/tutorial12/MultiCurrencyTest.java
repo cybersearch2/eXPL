@@ -77,11 +77,11 @@ public class MultiCurrencyTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency charge=amount (6,3) (6,36)");
+        assertThat(sourceItem.toString()).isEqualTo("currency country charge=amount (6,3) (6,36)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency total=charge*1.1 (7,3) (7,41)");
+        assertThat(sourceItem.toString()).isEqualTo("currency country total=charge*1.1 (7,3) (7,41)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

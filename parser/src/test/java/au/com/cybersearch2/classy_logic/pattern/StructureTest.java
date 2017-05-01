@@ -24,6 +24,7 @@ import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.pattern.Structure;
@@ -348,40 +349,6 @@ public class StructureTest
 			}
 
 			@Override
-			public OperatorEnum[] getRightOperandOps() {
-				return null;
-			}
-
-			@Override
-			public OperatorEnum[] getLeftOperandOps() {
-				return null;
-			}
-
-			 @Override
-		     public OperatorEnum[] getStringOperandOps()
-		     {
-			     return Operand.EMPTY_OPERAND_OPS;
-		     }
-
-			@Override
-			public Number numberEvaluation(OperatorEnum operatorEnum2,
-					Term rightTerm) {
-				return null;
-			}
-
-			@Override
-			public Number numberEvaluation(Term leftTerm,
-					OperatorEnum operatorEnum2, Term rightTerm) {
-				return null;
-			}
-
-			@Override
-			public Boolean booleanEvaluation(Term leftTerm,
-					OperatorEnum operatorEnum2, Term rightTerm) {
-				return null;
-			}
-
-			@Override
 			public void assign(Term term) {
 			}
 
@@ -429,12 +396,7 @@ public class StructureTest
             }
 
             @Override
-            public void setTrait(Trait trait)
-            {
-            }
-
-            @Override
-            public Trait getTrait()
+            public Operator getOperator()
             {
                 return null;
             }
@@ -489,39 +451,6 @@ public class StructureTest
 				return EvaluationStatus.COMPLETE;
 			}
 
-			@Override
-			public OperatorEnum[] getRightOperandOps() {
-				return null;
-			}
-
-			@Override
-			public OperatorEnum[] getLeftOperandOps() {
-				return null;
-			}
-
-			@Override
-		    public OperatorEnum[] getStringOperandOps()
-		    {
-			    return Operand.EMPTY_OPERAND_OPS;
-		    }
-	
-			@Override
-			public Number numberEvaluation(OperatorEnum operatorEnum2,
-					Term rightTerm) {
-				return null;
-			}
-
-			@Override
-			public Number numberEvaluation(Term leftTerm,
-					OperatorEnum operatorEnum2, Term rightTerm) {
-				return null;
-			}
-
-			@Override
-			public Boolean booleanEvaluation(Term leftTerm,
-					OperatorEnum operatorEnum2, Term rightTerm) {
-				return null;
-			}
 
 			@Override
 			public void assign(Term term) {
@@ -571,16 +500,11 @@ public class StructureTest
             }
 
             @Override
-            public void setTrait(Trait trait)
-            {
-            }
-
-            @Override
-            public Trait getTrait()
+            public Operator getOperator()
             {
                 return null;
             }
-			
+
 		};
 		testStructure.addTerm(term6);
 		assertThat(testStructure.getTermCount()).isEqualTo(3);

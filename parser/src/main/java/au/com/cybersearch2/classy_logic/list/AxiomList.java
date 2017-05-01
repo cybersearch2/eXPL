@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.list;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
-import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -46,7 +45,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	 */
 	public AxiomList(QualifiedName qname, QualifiedName key) 
 	{
-		super(AxiomTermList.class, new Variable(qname));
+		super(AxiomTermList.class, qname);
 		this.key = key;
 	}
 

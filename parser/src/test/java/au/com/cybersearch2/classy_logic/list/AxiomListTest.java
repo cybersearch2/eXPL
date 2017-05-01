@@ -17,15 +17,16 @@ package au.com.cybersearch2.classy_logic.list;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
 
 /**
  * AxiomListTest
@@ -48,17 +49,10 @@ public class AxiomListTest
 		assertThat(axiomList.getLength()).isEqualTo(0);
 		assertThat(axiomList.hasItem(0)).isFalse();
 		assertThat(axiomList.isEmpty()).isTrue();
-		try
-		{
-			axiomList.proxy.setName(NAME + 1);
-		    failBecauseExceptionWasNotThrown(IllegalStateException.class);
-		}
-		catch (IllegalStateException e)
-		{
-			assertThat(e.getMessage()).isEqualTo("Assigning name \"ListOperandName1\" to Term already named \"ListOperandName\" not allowed");
-		}
+        assertThat(axiomList.delegateType).isEqualTo(DelegateType.ASSIGN_ONLY);
+        assertThat(axiomList.operator.getTrait().getOperandType()).isEqualTo(OperandType.UNKNOWN);
 	}
-
+	
 	@Test
 	public void test_assign()
 	{
@@ -73,7 +67,7 @@ public class AxiomListTest
 		assertThat(axiomList.hasItem(0)).isTrue();
 		assertThat(axiomList.isEmpty()).isFalse();
 	}
-	
+		
 	@Test
 	public void test_new_variable_instance()
 	{
@@ -90,7 +84,7 @@ public class AxiomListTest
 		axiomListVariable.evaluate(1);
 		assertThat(axiomListVariable.getValue()).isEqualTo(axiomOperandList2);
 	}
-	
+		
 	@Test
 	public void test_axiom_listener()
 	{

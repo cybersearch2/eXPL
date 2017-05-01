@@ -59,7 +59,7 @@ import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
 import au.com.cybersearch2.classy_logic.expression.Orientation;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
-import au.com.cybersearch2.classy_logic.list.AxiomOperand;
+import au.com.cybersearch2.classy_logic.list.AxiomContainerOperand;
 import au.com.cybersearch2.classy_logic.list.ItemListOperand;
 import au.com.cybersearch2.classy_logic.list.ListLength;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
@@ -71,6 +71,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
+import au.com.cybersearch2.classy_logic.interfaces.AssignType;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -148,27 +149,29 @@ public class QueryParser
       return stringLiteral.image.substring(1, stringLiteral.image.length() - 1);
   } 
 
-  protected Operand axiomOperand(QualifiedName qname, 
-                                 ParserAssembler parserAssembler, 
-                                 Operand indexExpression1, 
-                                 Operand indexExpression2)
+  protected Operand axiomContainerOperand(
+      QualifiedName qname, 
+      ParserAssembler parserAssembler, 
+      Operand indexExpression1, 
+      Operand indexExpression2)
   {
-    AxiomOperand operand = new AxiomOperand(qname, indexExpression1, indexExpression2);
+    AxiomContainerOperand operand = new AxiomContainerOperand(qname, indexExpression1, indexExpression2);
     ParserTask parserTask = parserAssembler.addPending(operand);
     //parserTask.setPriority(1);
     return operand;
   }
   
-  protected Operand listItemOperand(QualifiedName qname, 
-                                    ParserContext context, 
-                                    Operand indexExpression, 
-                                    Operand assignExpression) throws ParseException
+  protected Operand listItemOperand(
+      QualifiedName qname, 
+      ParserContext context, 
+      Operand indexExpression, 
+      Operand assignExpression) throws ParseException
   {
     if (context.isQueryName(qname))
     {
       if (assignExpression != null)
          throw new ParseException("Query variablee \"" + qname.toString() + "\" is read-only");
-      return axiomOperand(qname, context.getParserAssembler(), indexExpression, null);
+      return axiomContainerOperand(qname, context.getParserAssembler(), indexExpression, null);
     }
     ItemListOperand operand = new ItemListOperand(qname, indexExpression, assignExpression);
     ParserTask parserTask = context.getParserAssembler().addPending(operand);
@@ -1633,8 +1636,8 @@ OperandParam Argument(ParserContext context, boolean nameRequired) :
   {
      boolean isAssign = false;
      Operand leftOperand = expression.getLeftOperand();
-     if ((leftOperand != null) && (expression instanceof Evaluator))
-       isAssign =  ((Evaluator)expression).getOperator() == OperatorEnum.ASSIGN; 
+     if (leftOperand != null)
+       isAssign = expression.getOperator() instanceof AssignType; 
      String name = Term.ANONYMOUS;
      if (nameRequired)
        name = expression.getName();
@@ -1829,7 +1832,7 @@ Operand NamedExpression(String name, ParserContext context) :
 {
   param1=IndexExpression(context) ( LOOKAHEAD(2) param2=IndexExpression(context) )?
   {
-    return axiomOperand(context.getQualifiedName(name), parserAssembler, param1, param2);
+    return axiomContainerOperand(context.getQualifiedName(name), parserAssembler, param1, param2);
   }
   |
   "(" ( operandParamList = ArgumentList(context, true) )? ")"

@@ -17,12 +17,11 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.math.BigDecimal;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.Trait;
-import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
+import au.com.cybersearch2.classy_logic.operator.BooleanOperator;
 
 /**
  * BooleanVariable
@@ -31,20 +30,17 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  */
 public class BooleanOperand extends ExpressionOperand<Boolean>
 {
-    static Trait BOOLEAN_TRAIT;
-    
-    static
-    {
-        BOOLEAN_TRAIT = new DefaultTrait(OperandType.BOOLEAN);
-    }
-    
-	/**
+    /** Defines operations that an Operand performs with other operands. */
+    protected BooleanOperator operator;
+
+    /**
 	 * Boolean Variable
      * @param qname Qualified name
 	 */
 	public BooleanOperand(QualifiedName qname) 
 	{
 		super(qname);
+		init();
 	}
 
 	/**
@@ -55,7 +51,7 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
 	public BooleanOperand(QualifiedName qname, Boolean value) 
 	{
 		super(qname, value);
-
+        init();
 	}
 
 	/**
@@ -66,92 +62,15 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
 	public BooleanOperand(QualifiedName qname, Operand expression) 
 	{
 		super(qname, expression);
-
+        init();
 	}
 
-	@Override
-	public OperatorEnum[] getRightOperandOps() 
-	{
-		return 	new OperatorEnum[]
-		{ 
-			OperatorEnum.EQ, // "=="
-			OperatorEnum.NE, // "!="
-			OperatorEnum.ASSIGN,
-			OperatorEnum.NOT,    // !
-			OperatorEnum.SC_OR, // "||"
-			OperatorEnum.SC_AND, // "&&"
-            OperatorEnum.STAR // * true == 1.0, false = 0.0
-		};
+	private void init()
+    {
+	    operator = new BooleanOperator();
 	}
 
-	@Override
-	public OperatorEnum[] getLeftOperandOps() 
-	{
-		return 	new OperatorEnum[]
-		{ 
-			OperatorEnum.EQ, // "=="
-			OperatorEnum.NE, // "!="
-			OperatorEnum.ASSIGN, // "="
-			OperatorEnum.SC_OR,  // "||"
-			OperatorEnum.SC_AND,  // "&&"
-            OperatorEnum.STAR // * true == 1.0, false = 0.0
-		};
-	}
-
-	@Override
-	public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
-	{   // There is no valid evaluation involving a boolean resulting in a number
-	    return new Integer(0);
-	}
-
-	/**
-	 * Evaluate a binary expression using this Term as the left term
-     * @param leftTerm Term on left
-	 * @param operatorEnum2 OperatorEnum for one of +, -, *, /, &amp;, |, ^ or % 
-	 * @param rightTerm Term on right
-	 * @return sub class of Number with result
-	 */
-	@Override
-	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
-	{   // There is no valid evaluation involving a boolean and another term resulting in a number except *
-	    boolean leftIsBool = leftTerm.getValueClass() == Boolean.class; 
-        boolean rightIsBool = rightTerm.getValueClass() == Boolean.class; 
-        BigDecimal right;
-        BigDecimal left;
-        if (leftIsBool)
-            left =  ((Boolean)(leftTerm.getValue())).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
-        else
-            left = convertObject(leftTerm.getValue());
-        if (rightIsBool)
-            right =  ((Boolean)(rightTerm.getValue())).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
-        else
-            right = convertObject(rightTerm.getValue());
-	    return left.multiply(right);
-	}
-
-	/**
-	 * Evaluate less than (LT) and greater than (GT) using this Boolean as the left term
-	 * @param operatorEnum2 OperaorEnum.LT or OperaorEnum.GT
-	 * @param rightTerm Term on right
-	 * @return Boolean object
-	 */
-	@Override
-	public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
-	{   
-		boolean right = ((Boolean)(rightTerm.getValue())).booleanValue();
-		boolean left = ((Boolean)(leftTerm.getValue())).booleanValue();
-		switch (operatorEnum2)
-		{
-		case SC_OR:  return right || left; // "||"
-		case SC_AND: return right && left; // "&&"
-		case EQ:  return left == right; // "=="
-		case NE:  return left != right; // "!="
-		default:
-		}
-		return Boolean.FALSE;
-	}
-
-	/**
+    /**
      * Assign a value and id to this Term from another term 
      * @param term Term containing non-null value and id to set
 	 */
@@ -176,15 +95,9 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
     }
 
     @Override
-    public void setTrait(Trait trait)
+    public Operator getOperator()
     {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Trait getTrait()
-    {
-        return BOOLEAN_TRAIT;
+        return operator;
     }
 
 }

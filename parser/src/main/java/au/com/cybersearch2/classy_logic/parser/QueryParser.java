@@ -40,7 +40,7 @@ import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
 import au.com.cybersearch2.classy_logic.expression.Orientation;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
-import au.com.cybersearch2.classy_logic.list.AxiomOperand;
+import au.com.cybersearch2.classy_logic.list.AxiomContainerOperand;
 import au.com.cybersearch2.classy_logic.list.ItemListOperand;
 import au.com.cybersearch2.classy_logic.list.ListLength;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
@@ -52,6 +52,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
+import au.com.cybersearch2.classy_logic.interfaces.AssignType;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -129,27 +130,29 @@ public class QueryParser implements QueryParserConstants
       return stringLiteral.image.substring(1, stringLiteral.image.length() - 1);
   }
 
-  protected Operand axiomOperand(QualifiedName qname,
-                                 ParserAssembler parserAssembler,
-                                 Operand indexExpression1,
-                                 Operand indexExpression2)
+  protected Operand axiomContainerOperand(
+      QualifiedName qname,
+      ParserAssembler parserAssembler,
+      Operand indexExpression1,
+      Operand indexExpression2)
   {
-    AxiomOperand operand = new AxiomOperand(qname, indexExpression1, indexExpression2);
+    AxiomContainerOperand operand = new AxiomContainerOperand(qname, indexExpression1, indexExpression2);
     ParserTask parserTask = parserAssembler.addPending(operand);
     //parserTask.setPriority(1);
     return operand;
   }
 
-  protected Operand listItemOperand(QualifiedName qname,
-                                    ParserContext context,
-                                    Operand indexExpression,
-                                    Operand assignExpression) throws ParseException
+  protected Operand listItemOperand(
+      QualifiedName qname,
+      ParserContext context,
+      Operand indexExpression,
+      Operand assignExpression) throws ParseException
   {
     if (context.isQueryName(qname))
     {
       if (assignExpression != null)
          throw new ParseException("Query variablee \u005c"" + qname.toString() + "\u005c" is read-only");
-      return axiomOperand(qname, context.getParserAssembler(), indexExpression, null);
+      return axiomContainerOperand(qname, context.getParserAssembler(), indexExpression, null);
     }
     ItemListOperand operand = new ItemListOperand(qname, indexExpression, assignExpression);
     ParserTask parserTask = context.getParserAssembler().addPending(operand);
@@ -2347,8 +2350,8 @@ public class QueryParser implements QueryParserConstants
     expression = Expression(context);
      boolean isAssign = false;
      Operand leftOperand = expression.getLeftOperand();
-     if ((leftOperand != null) && (expression instanceof Evaluator))
-       isAssign =  ((Evaluator)expression).getOperator() == OperatorEnum.ASSIGN;
+     if (leftOperand != null)
+       isAssign = expression.getOperator() instanceof AssignType;
      String name = Term.ANONYMOUS;
      if (nameRequired)
        name = expression.getName();
@@ -2619,7 +2622,7 @@ public class QueryParser implements QueryParserConstants
       {
         ;
       }
-    {if (true) return axiomOperand(context.getQualifiedName(name), parserAssembler, param1, param2);}
+    {if (true) return axiomContainerOperand(context.getQualifiedName(name), parserAssembler, param1, param2);}
       break;
     case LPAREN:
       jj_consume_token(LPAREN);
@@ -3203,31 +3206,6 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_71() {
-    if (jj_scan_token(BANG)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_70() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_71()) {
-    jj_scanpos = xsp;
-    if (jj_3R_72()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_87() {
-    if (jj_3R_89()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_59() {
-    if (jj_3R_60()) return true;
-    return false;
-  }
-
   private boolean jj_3R_40() {
     if (jj_3R_42()) return true;
     return false;
@@ -3617,6 +3595,31 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_55() {
     if (jj_3R_56()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_71() {
+    if (jj_scan_token(BANG)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_70() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_71()) {
+    jj_scanpos = xsp;
+    if (jj_3R_72()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_87() {
+    if (jj_3R_89()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_59() {
+    if (jj_3R_60()) return true;
     return false;
   }
 

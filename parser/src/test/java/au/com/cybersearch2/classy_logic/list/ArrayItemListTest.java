@@ -15,22 +15,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
+
 import java.math.BigDecimal;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
-import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;
-import au.com.cybersearch2.classy_logic.expression.TestDoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.list.ArrayItemList;
-import au.com.cybersearch2.classy_logic.list.ItemListVariable;
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
 
 /**
  * ListOperandTest
@@ -41,30 +38,22 @@ public class ArrayItemListTest
 {
 
 	private static final String NAME = "ListOperandName";
-
+	private static final QualifiedName QNAME = QualifiedName.parseGlobalName(NAME);
+	   
 	@Test
 	public void test_constructor()
 	{
-		IntegerOperand proxy = new TestIntegerOperand(NAME);
-		ArrayItemList<Integer> listOperand = new ArrayItemList<Integer>(Integer.class, proxy);
+		ArrayItemList<Integer> listOperand = new ArrayItemList<Integer>(Integer.class, QNAME);
 		assertThat(listOperand.getName()).isEqualTo(NAME);
 		assertThat(listOperand.isEmpty()).isTrue();
-		try
-		{
-			proxy.setName(NAME + 1);
-		    failBecauseExceptionWasNotThrown(IllegalStateException.class);
-		}
-		catch (IllegalStateException e)
-		{
-			assertThat(e.getMessage()).isEqualTo("Assigning name \"ListOperandName1\" to Term already named \"ListOperandName\" not allowed");
-		}
+		assertThat(listOperand.delegateType).isEqualTo(DelegateType.INTEGER);
+		assertThat(listOperand.operator.getTrait().getOperandType()).isEqualTo(OperandType.INTEGER);
 	}
-
+	
 	@Test
 	public void test_assign()
 	{
-		IntegerOperand proxy = new TestIntegerOperand(NAME);
-		ArrayItemList<Long> listOperand = new ArrayItemList<Long>(Long.class, proxy);
+		ArrayItemList<Long> listOperand = new ArrayItemList<Long>(Long.class, QNAME);
 		listOperand.assignItem(0, Long.valueOf(17));
 		assertThat(listOperand.getItem(0)).isEqualTo(17);
 		listOperand.assignItem(0, Long.valueOf(21));
@@ -97,11 +86,11 @@ public class ArrayItemListTest
 			assertThat(e.getMessage()).isEqualTo("Cannot assign type java.lang.Double to List " + NAME);
 		}
 	}
-
+	
 	@Test
 	public void test_new_variable_instance()
 	{
-		ArrayItemList<Long> intOperandList = new ArrayItemList<Long>(Long.class, new TestIntegerOperand(NAME));
+		ArrayItemList<Long> intOperandList = new ArrayItemList<Long>(Long.class, QNAME);
 		intOperandList.assignItem(0, Long.valueOf(21));
 		ItemListVariable<Long> intListVariable = intOperandList.newVariableInstance(0, "0", 1);
 		intListVariable.evaluate(1);
@@ -111,7 +100,7 @@ public class ArrayItemListTest
 		intListVariable = intOperandList.newVariableInstance(expression, "test", 1);
 		intListVariable.evaluate(1);
 		assertThat(intListVariable.getValue()).isEqualTo(72);
-		ArrayItemList<Double> doubOperandList = new ArrayItemList<Double>(Double.class, new TestDoubleOperand(NAME));
+		ArrayItemList<Double> doubOperandList = new ArrayItemList<Double>(Double.class, QNAME);
 		doubOperandList.assignItem(0, Double.valueOf(5.23));
 		ItemListVariable<Double> doubListVariable = doubOperandList.newVariableInstance(0, "0", 1);
 		doubListVariable.evaluate(1);
@@ -120,7 +109,7 @@ public class ArrayItemListTest
 		doubListVariable = doubOperandList.newVariableInstance(expression, "test", 1);
 		doubListVariable.evaluate(1);
 		assertThat(doubListVariable.getValue()).isEqualTo(97.34);
-		ArrayItemList<String> sOperandList = new ArrayItemList<String>(String.class, new TestStringOperand(NAME));
+		ArrayItemList<String> sOperandList = new ArrayItemList<String>(String.class, QNAME);
 		sOperandList.assignItem(0, "testing123");
 		ItemListVariable<String> sListVariable = sOperandList.newVariableInstance(0, "0", 1);
 		sListVariable.evaluate(1);
@@ -129,7 +118,7 @@ public class ArrayItemListTest
 		sListVariable = sOperandList.newVariableInstance(expression, "test", 1);
 		sListVariable.evaluate(1);
 		assertThat(sListVariable.getValue()).isEqualTo("xmas2014");
-		ArrayItemList<Boolean> boolOperandList = new ArrayItemList<Boolean>(Boolean.class, new TestBooleanOperand(NAME));
+		ArrayItemList<Boolean> boolOperandList = new ArrayItemList<Boolean>(Boolean.class, QNAME);
 		boolOperandList.assignItem(0, Boolean.TRUE);
 		ItemListVariable<Boolean> boolListVariable = boolOperandList.newVariableInstance(0, "0", 1);
 		boolListVariable.evaluate(1);
@@ -138,7 +127,7 @@ public class ArrayItemListTest
 		boolListVariable = boolOperandList.newVariableInstance(expression, "test", 1);
 		boolListVariable.evaluate(1);
 		assertThat(boolListVariable.getValue()).isFalse();
-		ArrayItemList<BigDecimal> decOperandList = new ArrayItemList<BigDecimal>(BigDecimal.class, new TestBigDecimalOperand(NAME));
+		ArrayItemList<BigDecimal> decOperandList = new ArrayItemList<BigDecimal>(BigDecimal.class, QNAME);
 		decOperandList.assignItem(0, BigDecimal.TEN);
 		ItemListVariable<BigDecimal> decListVariable = decOperandList.newVariableInstance(0, "0", 1);
 		decListVariable.evaluate(1);

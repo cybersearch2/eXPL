@@ -66,6 +66,25 @@ public class AxiomListVariableTest
 	};
 
 
+    @Test
+    public void test_integer_operand_ops()
+    {
+        AxiomList axiomList = mock(AxiomList.class);
+        AxiomTermList axiomTermList = new AxiomTermList(QNAME, Q_KEY);
+        axiomTermList.setAxiom(new Axiom("AxiomKey", new IntegerTerm(13)));
+        when(axiomList.getName()).thenReturn(NAME);
+        when(axiomList.getQualifiedName()).thenReturn(QNAME);
+        when(axiomList.hasItem(5)).thenReturn(true);
+        when(axiomList.getItem(5)).thenReturn(axiomTermList);
+        AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "0");
+        variable.setTermIndex(0, 1);
+        assertThat(variable.getOperator().getLeftOperandOps()).isEqualTo(new TestIntegerOperand("*").getOperator().getLeftOperandOps());
+        assertThat(variable.getOperator().getRightOperandOps()).isEqualTo(new TestIntegerOperand("*").getOperator().getRightOperandOps());
+        assertThat(variable.getOperator().booleanEvaluation(new TestIntegerOperand("L", Long.valueOf(2)), OperatorEnum.GE, new TestIntegerOperand("R", Long.valueOf(2)))).isTrue();
+        assertThat(variable.getOperator().numberEvaluation(new TestIntegerOperand("L", Long.valueOf(7)), OperatorEnum.XOR, new TestIntegerOperand("R", Long.valueOf(5)))).isEqualTo(new Long(2));
+        assertThat(variable.getOperator().numberEvaluation(OperatorEnum.INCR, new TestIntegerOperand("R", Long.valueOf(8)))).isEqualTo(new Long(9));
+    }
+  
 	@Test
 	public void test_term_fixed_index_unify_evaluate_backup()
 	{
@@ -393,25 +412,6 @@ public class AxiomListVariableTest
 		assertThat(variable.getRightOperand()).isNull();
  	}
 
-	@Test
-	public void test_integer_operand_ops()
-	{
-		AxiomList axiomList = mock(AxiomList.class);
-		AxiomTermList axiomTermList = new AxiomTermList(QNAME, Q_KEY);
-		axiomTermList.setAxiom(new Axiom("AxiomKey", new IntegerTerm(13)));
-		when(axiomList.getName()).thenReturn(NAME);
-        when(axiomList.getQualifiedName()).thenReturn(QNAME);
-		when(axiomList.hasItem(5)).thenReturn(true);
-		when(axiomList.getItem(5)).thenReturn(axiomTermList);
-		AxiomListVariable variable = new AxiomListVariable(axiomList, 5, "0");
-		variable.setTermIndex(0, 1);
-		assertThat(variable.getLeftOperandOps()).isEqualTo(new TestIntegerOperand("*").getLeftOperandOps());
-		assertThat(variable.getRightOperandOps()).isEqualTo(new TestIntegerOperand("*").getRightOperandOps());
-		assertThat(variable.booleanEvaluation(new TestIntegerOperand("L", Long.valueOf(2)), OperatorEnum.GE, new TestIntegerOperand("R", Long.valueOf(2)))).isTrue();
-		assertThat(variable.numberEvaluation(new TestIntegerOperand("L", Long.valueOf(7)), OperatorEnum.XOR, new TestIntegerOperand("R", Long.valueOf(5)))).isEqualTo(new Long(2));
-		assertThat(variable.numberEvaluation(OperatorEnum.INCR, new TestIntegerOperand("R", Long.valueOf(8)))).isEqualTo(new Long(9));
-	}
-	
     @Test 
     public void test_cities() throws Exception
     {

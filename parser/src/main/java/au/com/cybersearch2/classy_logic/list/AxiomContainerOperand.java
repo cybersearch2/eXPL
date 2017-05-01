@@ -27,22 +27,22 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
- * AxiomOperand
+ * AxiomContainerOperand
  * Variable Operand to access an item of either an axiom or a term of an axiom
  * @author Andrew Bowley
  * 22Jan.,2017
  */
-public class AxiomOperand extends ListVariableOperand implements ParserRunner
+public class AxiomContainerOperand extends ListVariableOperand implements ParserRunner
 {
     protected QualifiedName listName;
     
     /**
-     * Construct an AxiomOperand object
+     * Construct an AxiomContainerOperand object
      * @param listName
      * @param indexExpression
      * @param expression2
      */
-    public AxiomOperand(QualifiedName listName, Operand indexExpression,
+    public AxiomContainerOperand(QualifiedName listName, Operand indexExpression,
             Operand expression2)
     {
         super(listName, indexExpression, expression2);

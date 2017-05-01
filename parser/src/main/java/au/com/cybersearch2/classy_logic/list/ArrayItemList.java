@@ -17,146 +17,72 @@ package au.com.cybersearch2.classy_logic.list;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
+import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
+import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 
 /**
  * ArrayItemList
  * List implementation. Generic types are String, Integer, Double, BigDecimal and Boolean
- * A proxy Operand is supplied to participate in item expressions. 
- * The proxy is shared by dependent ItemListVariable objects which take their values from the list.
+ * A single Operator object is shared by dependent ItemListVariable objects which take their values from the list.
  * This object resides in an OperandMap never directly interacts with other operands.
  * @author Andrew Bowley
  * 15 Jan 2015
  */
-public class ArrayItemList<T> implements ItemList<T> 
+public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOperand 
 {
-	/**
-	 * VariableFactory
-	 * Constructs list variable to match list type
-	 */
-	interface VariableFactory
-	{
-		/** Construct a list variable for a fixed list item */
-		ItemListVariable<?> newVariableInstance(ItemList<?> operandList, Operand proxy, int index, String suffix, int id);
-		/** Construct a list variable for a dynamically selected item */
-		ItemListVariable<?> newVariableInstance(ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id);
-	}
-	
-	/** Map value class to ItemListVariable class factory */
-    protected static Map<Class<?>, VariableFactory> factorylassMap;
- 
-    /** List class type */
-    protected Class<T> clazz;
-    /** Operand delegate to provide evaluation functionality */
-    protected Operand proxy;
     /** The list items */
     protected ArrayList<Object> valueList;
     /** Source item to be updated in parser task */
     protected SourceItem sourceItem;
- 
-    static
-    {
-    	factorylassMap = new HashMap<Class<?>,  VariableFactory>();
-    	factorylassMap.put(String.class, new VariableFactory(){
+    /** Qualified name */
+    protected QualifiedName qname;
+    /** Defines operations that an Operand performs with other operands. */
+    Operator operator;
+    /** Default object defines operations based on item class. */
+    DelegateOperator delegateOperator;
+    /** Operator DelegateType for type of item */
+    protected DelegateType delegateType;
+    /** List class type */
+    protected Class<T> clazz;
+    /** Optional operand for Currency type */
+    protected Operand rightOperand;
 
-			@Override
-			public ItemListVariable<String> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix, int id) {
-				return new ItemListVariable<String>(operandList, proxy, index, suffix);
-			}
-
-			@Override
-			public ItemListVariable<String> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
-				return new ItemListVariable<String>(operandList, proxy, expression, suffix);
-			}});
-    	factorylassMap.put(Long.class, new VariableFactory(){
-
-			@Override
-			public ItemListVariable<Integer> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix, int id) {
-				return new ItemListVariable<Integer>(operandList, proxy, index, suffix);
-			}
-
-			@Override
-			public ItemListVariable<Integer> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
-				return new ItemListVariable<Integer>(operandList, proxy, expression, suffix);
-			}});
-    	factorylassMap.put(Boolean.class, new VariableFactory(){
-
-			@Override
-			public ItemListVariable<Boolean> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix, int id) {
-				return new ItemListVariable<Boolean>(operandList, proxy, index, suffix);
-			}
-
-			@Override
-			public ItemListVariable<Boolean> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
-				return new ItemListVariable<Boolean>(operandList, proxy, expression, suffix);
-			}});
-    	factorylassMap.put(Double.class, new VariableFactory(){
-
-			@Override
-			public ItemListVariable<Double> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix, int id) {
-				return new ItemListVariable<Double>(operandList, proxy, index, suffix);
-			}
-
-			@Override
-			public ItemListVariable<Double> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
-				return new ItemListVariable<Double>(operandList, proxy, expression, suffix);
-			}});
-    	factorylassMap.put(BigDecimal.class, new VariableFactory(){
-
-			@Override
-			public ItemListVariable<BigDecimal> newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix, int id) {
-				return new ItemListVariable<BigDecimal>(operandList, proxy, index, suffix);
-			}
-
-			@Override
-			public ItemListVariable<BigDecimal> newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
-				return new ItemListVariable<BigDecimal>(operandList, proxy, expression, suffix);
-		    }});
-    	factorylassMap.put(AxiomTermList.class, new VariableFactory(){
-
-			@Override
-			public AxiomArrayVariable newVariableInstance(ItemList<?> operandList, Operand proxy, 
-					int index, String suffix, int id) {
-				return new AxiomArrayVariable(operandList, proxy, index, suffix);
-			}
-
-			@Override
-			public AxiomArrayVariable newVariableInstance(
-					ItemList<?> operandList, Operand proxy, Operand expression, String suffix, int id) {
-				return new AxiomArrayVariable(operandList, proxy, expression, suffix);
-		    }});
-    }
-    
     /**
      * Construct a ListOperand object
      * @param clazz Class of list items 
-     * @param proxy Operand delegate to provide evaluation functionality 
+     * @param qname Qualified name 
      */
-	public ArrayItemList(Class<T> clazz, Operand proxy) 
+	public ArrayItemList(Class<T> clazz, QualifiedName qname) 
 	{
-		this.clazz = clazz;
-		this.proxy = proxy;
+	    this.clazz = clazz;
+		this.qname = qname;
 		valueList = new ArrayList<Object>();
+		delegateOperator = new DelegateOperator();
+		delegateOperator.setDelegate(clazz);
+		operator = delegateOperator;
+		delegateType = delegateOperator.getDelegateType();
+		if (((delegateType == DelegateType.ASSIGN_ONLY) &&
+		    (delegateOperator.getDelegateTypeForClass(clazz) == null)) ||
+		    (delegateType == DelegateType.NULL))
+		    throw new ExpressionException("Class \"" + clazz.getSimpleName() + "\" not a valid list type");
 	}
 
+	public void setOperator(Operator operator)
+	{
+	    this.operator = operator;
+	}
+	
 	/**
 	 * Returns number of items in array
 	 * @return int
@@ -174,7 +100,7 @@ public class ArrayItemList<T> implements ItemList<T>
     @Override
     public QualifiedName getQualifiedName()
     {
-        return proxy.getQualifiedName();
+        return qname;
     }
 
 	/**
@@ -184,7 +110,7 @@ public class ArrayItemList<T> implements ItemList<T>
 	@Override
 	public String getName() 
 	{
-		return proxy.getName();
+		return qname.getName();
 	}
 
 	/**
@@ -204,7 +130,8 @@ public class ArrayItemList<T> implements ItemList<T>
 	@Override
 	public void assignItem(int index, Object value) 
 	{
-		if (!clazz.isInstance(value))
+	    DelegateType valueDelegationType = delegateOperator.getDelegateTypeForClass(value.getClass());
+		if (valueDelegationType != delegateType)
 			throw new ExpressionException("Cannot assign type " + value.getClass().getName() + " to List " + getName());
 		if (index < valueList.size())
 			valueList.set(index, value);
@@ -219,6 +146,12 @@ public class ArrayItemList<T> implements ItemList<T>
 		}
 	}
 
+    @Override
+    public void onScopeChange(Scope scope)
+    {
+        operator.getTrait().setLocale(scope.getLocale());
+    }
+
 	/**
 	 * newVariableInstance
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String, int)
@@ -227,7 +160,37 @@ public class ArrayItemList<T> implements ItemList<T>
 	@Override
 	public ItemListVariable<T> newVariableInstance(int index, String suffix, int id)
 	{
-		return (ItemListVariable<T>) factorylassMap.get(clazz).newVariableInstance(this, proxy, index, suffix, id);
+	    ItemListVariable<?> itemListVariable = null;
+	    switch(delegateType)
+	    {
+	    case STRING:
+	        itemListVariable = new ItemListVariable<String>(this, operator, index, suffix);
+            break;
+	    case INTEGER:
+            itemListVariable = new ItemListVariable<Long>(this, operator, index, suffix);
+            break;
+	    case DOUBLE:
+            itemListVariable = new ItemListVariable<Double>(this, operator, index, suffix);
+            break;
+	    case DECIMAL:
+            itemListVariable = new ItemListVariable<BigDecimal>(this, operator, index, suffix);
+            break;
+	    case BOOLEAN:
+            itemListVariable = new ItemListVariable<Boolean>(this, operator, index, suffix);
+            break;
+	    case ASSIGN_ONLY:
+	        itemListVariable = new AxiomArrayVariable(this, index, suffix);
+	        break;
+	    default:
+            // This is not expected to happen
+            throw new IllegalArgumentException(delegateType.toString() + " not allowed for item type");
+        }
+        if (rightOperand != null)
+        {   // The right operand is shared by all variables. First variable to evaluate will set the value
+            // which will be retained until it is cleared by the template which did the evaluation.
+            itemListVariable.setRightOperand(rightOperand);
+        }
+	    return (ItemListVariable<T>) itemListVariable;
 	}
 
 	/**
@@ -238,7 +201,37 @@ public class ArrayItemList<T> implements ItemList<T>
 	@Override
 	public ItemListVariable<T> newVariableInstance(Operand expression, String suffix, int id)
 	{
-		return (ItemListVariable<T>) factorylassMap.get(clazz).newVariableInstance(this, proxy, expression, suffix, id);
+        ItemListVariable<?> itemListVariable = null;
+        switch(delegateType)
+        {
+        case STRING:
+            itemListVariable = new ItemListVariable<String>(this, operator, expression, suffix);
+            break;
+        case INTEGER:
+            itemListVariable = new ItemListVariable<Long>(this, operator, expression, suffix);
+            break;
+        case DOUBLE:
+            itemListVariable = new ItemListVariable<Double>(this, operator, expression, suffix);
+            break;
+        case DECIMAL:
+            itemListVariable = new ItemListVariable<BigDecimal>(this, operator, expression, suffix);
+            break;
+        case BOOLEAN:
+            itemListVariable = new ItemListVariable<Boolean>(this, operator, expression, suffix);
+            break;
+        case ASSIGN_ONLY:
+            itemListVariable = new AxiomArrayVariable(this, expression, suffix);
+            break;
+        default:
+            // This is not expected to happen
+            throw new IllegalArgumentException(delegateType.toString() + " not allowed for item type");
+        }
+        if (rightOperand != null)
+        {   // The right operand is shared by all variables. First variable to evaluate will set the value
+            // which will be retained until it is cleared by the template which did the evaluation.
+            itemListVariable.setRightOperand(rightOperand);
+        }
+        return (ItemListVariable<T>) itemListVariable;
 	}
 
 	/**
@@ -336,6 +329,12 @@ public class ArrayItemList<T> implements ItemList<T>
         this.sourceItem = sourceItem;
     }
 
+    @Override
+    public void setRightOperand(Operand rightOperand)
+    {
+        this.rightOperand = rightOperand;
+    }
+    
     /**
      * toString
      * @see java.lang.Object#toString()

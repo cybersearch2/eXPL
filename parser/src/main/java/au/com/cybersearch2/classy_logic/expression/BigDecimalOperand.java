@@ -18,30 +18,27 @@ package au.com.cybersearch2.classy_logic.expression;
 import java.math.BigDecimal;
 
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
+import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.Trait;
-import au.com.cybersearch2.classy_logic.trait.BigDecimalTrait;
+import au.com.cybersearch2.classy_logic.operator.BigDecimalOperator;
 
 /**
  * BigDecimalOperand
  * @author Andrew Bowley
  * 3 Dec 2014
  */
-public class BigDecimalOperand extends ExpressionOperand<BigDecimal> implements LocaleListener 
+public class BigDecimalOperand extends ExpressionOperand<BigDecimal> implements LocaleListener, RightOperand 
 {
-    static Trait BIG_DECIMAL_TRAIT;
-    
-    static
-    {
-        BIG_DECIMAL_TRAIT = new BigDecimalTrait();
-    }
-    
-    /** Localization and specialization */
-    protected Trait trait;
+    /** Defines operations that an Operand performs with other operands. */
+    protected BigDecimalOperator operator;
+    /** Optional operand for Currency type */
+    protected Operand rightOperand;
     
 	/**
 	 * Construct named, empty BigDecimalOperand object
@@ -50,7 +47,7 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal> implements 
 	public BigDecimalOperand(QualifiedName qname) 
 	{
 		super(qname);
-		trait = BIG_DECIMAL_TRAIT;
+		init();
 	}
 
 	/**
@@ -61,7 +58,7 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal> implements 
 	public BigDecimalOperand(QualifiedName qname, BigDecimal value) 
 	{
 		super(qname, value);
-        trait = BIG_DECIMAL_TRAIT;
+        init();
 	}
 
 	/**
@@ -72,135 +69,18 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal> implements 
 	public BigDecimalOperand(QualifiedName qname, Operand expression) 
 	{
 		super(qname, expression);
-        trait = BIG_DECIMAL_TRAIT;
+        init();
 	}
 
 	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
+	 * Override operator to customize behaviour
+	 * @param operator Compatible operator
 	 */
-	@Override
-	public OperatorEnum[] getRightOperandOps() 
-	{
-		return 	new OperatorEnum[]
-		{ 
-			OperatorEnum.ASSIGN,
-			OperatorEnum.LT, // "<"
-			OperatorEnum.GT ,// ">"
-			OperatorEnum.EQ, // "=="
-			OperatorEnum.LE, // "<="
-			OperatorEnum.GE, // ">="
-			OperatorEnum.NE, // "!="
-			OperatorEnum.PLUS,
-			OperatorEnum.MINUS,
-			OperatorEnum.STAR,
-			OperatorEnum.SLASH,
-			OperatorEnum.REM,		
-			OperatorEnum.PLUSASSIGN,
-			OperatorEnum.MINUSASSIGN,
-			OperatorEnum.STARASSIGN,
-			OperatorEnum.SLASHASSIGN,
-			OperatorEnum.REMASSIGN			
-		};
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getLeftOperandOps() 
-	{
-		return 	new OperatorEnum[]
-		{ 
-				OperatorEnum.ASSIGN,
-				OperatorEnum.LT, // "<"
-				OperatorEnum.GT ,// ">"
-				OperatorEnum.EQ, // "=="
-				OperatorEnum.LE, // "<="
-				OperatorEnum.GE, // ">="
-				OperatorEnum.NE, // "!="
-				OperatorEnum.PLUS,
-				OperatorEnum.MINUS,
-				OperatorEnum.STAR,
-				OperatorEnum.SLASH,
-				OperatorEnum.REM,		
-				OperatorEnum.PLUSASSIGN,
-				OperatorEnum.MINUSASSIGN,
-				OperatorEnum.STARASSIGN,
-				OperatorEnum.SLASHASSIGN,
-				OperatorEnum.REMASSIGN			
-		};
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-		BigDecimal right = convertObject(rightTerm.getValue(), rightTerm.getValueClass());
-		BigDecimal calc = BigDecimal.ZERO;
-		switch (operatorEnum2)
-		{
-		case PLUS:  calc = right.plus(); break;
-		case MINUS: calc = right.negate(); break;  
-	    default:
-		}
-	    return calc;
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-		BigDecimal right = convertObject(rightTerm.getValue(), rightTerm.getValueClass());
-		BigDecimal left = convertObject(leftTerm.getValue(), leftTerm.getValueClass());
-		BigDecimal calc = BigDecimal.ZERO;
-		switch (operatorEnum2)
-		{
-		case PLUSASSIGN: // "+="
-		case PLUS: 	calc = left.add(right); break;
-		case MINUSASSIGN: // "-="
-		case MINUS:     calc = left.subtract(right); break;
-		case STARASSIGN: // "*="
-		case STAR:      calc = calculateTimes(left, right); break;
-		case SLASHASSIGN: // "/="
-		case SLASH:     calc = calculateDiv(left, right); break;
-		case REMASSIGN: // "%="
-		case REM:       calc = left.remainder(right); break;
-	    default:
-		}
-	    return calc;
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-		boolean calc = false;
-		BigDecimal leftBigDec = convertObject(leftTerm.getValue(), leftTerm.getValueClass());
-		BigDecimal righttBigDec = convertObject(rightTerm.getValue(), rightTerm.getValueClass());
-		switch (operatorEnum2)
-		{
-		case EQ:  calc = leftBigDec.compareTo(righttBigDec) == 0; break; // "=="
-		case NE:  calc = leftBigDec.compareTo(righttBigDec) != 0; break; // "!="
-		case LT:  calc = leftBigDec.compareTo(righttBigDec) < 0; break; // "<"
-		case GT:  calc = leftBigDec.compareTo(righttBigDec) > 0; break; // ">"
-		case LE:  calc = leftBigDec.compareTo(righttBigDec) <= 0; break; // "<="
-		case GE:  calc = leftBigDec.compareTo(righttBigDec) >= 0; break; // ">="
-	    default:
-		}
-		return calc;
-	}
-
+    public void setOperator(BigDecimalOperator operator)
+    {
+        this.operator = operator;
+    }
+    
     /**
      * Evaluate value if expression exists
      * @param id Identity of caller, which must be provided for backup()
@@ -209,13 +89,30 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal> implements 
     @Override
     public EvaluationStatus evaluate(int id)
     {
+        if (rightOperand != null)
+            rightOperand.evaluate(id);
         EvaluationStatus status = super.evaluate(id);
         if ((status == EvaluationStatus.COMPLETE) && !isEmpty())
             // Perform conversion to BigDecimal, if required
-            setValue(convertObject(value, getValueClass()));
+            setValue(operator.convertObject(value, getValueClass()));
         return status;
     }
 
+    /**
+     * Backup to intial state if given id matches id assigned on unification or given id = 0. 
+     * @param id Identity of caller. 
+     * @return boolean true if backup occurred
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#unify(Term otherParam, int id)
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#evaluate(int id)
+     */
+    @Override
+    public boolean backup(int id)
+    {
+        if (rightOperand != null)
+            rightOperand.backup(id);
+        return super.backup(id);
+    }
+    
 	/**
      * Assign a value and id to this Term from another term 
      * @param term Term containing non-null value and id to set
@@ -223,76 +120,59 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal> implements 
 	@Override
 	public void assign(Term term) 
 	{
-		setValue(convertObject(term.getValue(), term.getValueClass()));
+		setValue(operator.convertObject(term.getValue(), term.getValueClass()));
 		id = term.getId();
 	}
 
+    /**
+     * Returns null     
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperand()
+     */
     @Override
-    public void setTrait(Trait trait)
+    public Operand getRightOperand() 
     {
-        if (this.trait != null)
-            trait.setLocale(this.trait.getLocale());
-        this.trait = trait;
+        return rightOperand;
     }
-
-    @Override
-    public Trait getTrait()
-    {
-        if (trait == BIG_DECIMAL_TRAIT)
-            trait = new BigDecimalTrait();
-        return trait;
-    }
-
+    
     @Override
     public void onScopeChange(Scope scope)
     {
-        if (trait == BIG_DECIMAL_TRAIT)
-            trait = new BigDecimalTrait();
-        trait.setLocale(scope.getLocale());
+        operator.onScopeChange(scope);
     }
 
+    @Override
+    public Operator getOperator()
+    {
+        return operator;
+    }
+
+    @Override
+    public void setRightOperand(Operand rightOperand)
+    {
+        this.rightOperand = rightOperand;
+    }
+    
     /**
-	 * Convert value to BigDecimal, if not already of this type
-	 * @param object Value to convert
-	 * @return BigDecimal object
-	 */
-	protected BigDecimal convertObject(Object object, Class<?> clazz)
-	{
-		if (clazz == BigDecimal.class)
-			return (BigDecimal)(object);
-		else if (clazz == String.class)
-		    return ((BigDecimalTrait)trait).parseValue(object.toString());
-		else
-		    try
-		    {
-			    return new BigDecimal(object.toString());
-		    }
-		    catch (NumberFormatException e)
-			{
-			    throw new ExpressionException(object.toString() + " is not convertible to a Decimal type");    
-			}
-	}
+     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#toString()
+     */
+    @Override
+    public String toString()
+    {
+        if (operator.getTrait().getOperandType() == OperandType.CURRENCY)
+        {
+            String country = operator.getTrait().getCountry();
+            if (!country.isEmpty())
+                return country + " " + super.toString();
+            else if (rightOperand != null)
+                return rightOperand.toString() + " " + super.toString();
+        }
+        return super.toString();
+    }
 
-	/**
-	 * Binary multiply. Override to adjust rounding. 
-	 * @param right BigDecimal object left term
-	 * @param left BigDecimal object reight term
-	 * @return BigDecimal object
-	 */
-	protected BigDecimal calculateTimes(BigDecimal right, BigDecimal left)
-	{
-		return left.multiply(right);
-	}
+    private void init()
+    {
+        operator = new BigDecimalOperator();
+    }
 
-	/**
-	 * Binary divide. Override to adjust rounding. 
-	 * @param right BigDecimal object left term
-	 * @param left BigDecimal object reight term
-	 * @return BigDecimal object
-	 */
-	protected BigDecimal calculateDiv(BigDecimal right, BigDecimal left)
-	{
-		return left.divide(right, BigDecimal.ROUND_FLOOR);
-	}
 
 }

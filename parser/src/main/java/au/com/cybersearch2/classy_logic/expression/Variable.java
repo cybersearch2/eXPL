@@ -41,7 +41,7 @@ public class Variable extends DelegateOperand
 	public Variable(QualifiedName qname) 
 	{
 		super(qname);
-	}
+    }
 
 	/**
 	 * Construct a Variable object which uses an Expression operand to evaluate it's value
@@ -50,7 +50,7 @@ public class Variable extends DelegateOperand
 	 */
 	public Variable(QualifiedName qname, Operand expression) 
 	{
-		super(qname);
+		this(qname);
 		this.expression = expression;
 	}
 

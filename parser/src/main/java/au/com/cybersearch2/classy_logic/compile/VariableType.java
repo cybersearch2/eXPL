@@ -24,7 +24,7 @@ import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
-import au.com.cybersearch2.classy_logic.expression.CurrencyOperand;
+import au.com.cybersearch2.classy_logic.expression.CountryOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.ParameterList;
@@ -37,10 +37,12 @@ import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -177,16 +179,9 @@ public class VariableType
             break;
         case CURRENCY:
         {
-            Operand countryOperand = (Operand)getProperty(QUALIFIER_OPERAND);
-            if (countryOperand == null)
-            {
-                String country = getPropertyString(QUALIFIER_STRING);
-                if (country != null)
-                    countryOperand = new StringOperand(QualifiedName.ANONYMOUS, country);
-            }
-        	operand = !hasExpression ? 
-        			  new CurrencyOperand(qname, countryOperand) : 
-        		      new CurrencyOperand(qname, expression, countryOperand);
+            BigDecimalOperand currencyOperand = !hasExpression ? new BigDecimalOperand(qname) : new BigDecimalOperand(qname, expression);
+            currencyOperand.setOperator(getCurrencyOperator(qname, currencyOperand));
+            operand = currencyOperand;
 	    	break;
         }
         case UNKNOWN: 	
@@ -201,7 +196,7 @@ public class VariableType
 	    return operand;
     }
 
-	/**
+    /**
 	 * Returns ItemList object for this type in current scope. 
 	 * NOTE: AxiomKey proptery must be set for Term, Axiom or Local type
      * @param parserAssembler ParserAssembler object
@@ -223,7 +218,7 @@ public class VariableType
      * @return ItemList object
      * @throws ParseException
      */
-    public ItemList<?> getItemListInstance(final ParserAssembler parserAssembler, QualifiedName qname) throws ParseException
+    protected ItemList<?> getItemListInstance(final ParserAssembler parserAssembler, QualifiedName qname) throws ParseException
     {
 		QualifiedName axiomKey = (QualifiedName)getProperty(AXIOM_KEY);
 		if ((operandType == OperandType.TERM) || 
@@ -238,20 +233,28 @@ public class VariableType
 	        if (axiomKey != null)
 	           throw new ParseException("List " + qname.toString() + " axiom key (" + axiomKey + ") is not valid for this type of list");
 		}
+		ArrayItemList<?> arrayItemList = null;
 	    switch (operandType)
 	    {
         case INTEGER:
-            return new ArrayItemList<Long>(Long.class, new IntegerOperand(qname));
+            arrayItemList = new ArrayItemList<Long>(Long.class, qname);
+            break; 
         case DOUBLE:
-            return new ArrayItemList<Double>(Double.class, new DoubleOperand(qname));
+            arrayItemList = new ArrayItemList<Double>(Double.class, qname);
+            break;
         case BOOLEAN:
-            return new ArrayItemList<Boolean>(Boolean.class, new BooleanOperand(qname));
+            arrayItemList = new ArrayItemList<Boolean>(Boolean.class, qname);
+            break; 
         case STRING:
-            return new ArrayItemList<String>(String.class, new StringOperand(qname));
+            arrayItemList = new ArrayItemList<String>(String.class, qname);
+            break; 
         case DECIMAL:
-            return new ArrayItemList<BigDecimal>(BigDecimal.class, new BigDecimalOperand(qname));
+            arrayItemList = new ArrayItemList<BigDecimal>(BigDecimal.class, qname);
+            break;
         case CURRENCY:
-            return new ArrayItemList<BigDecimal>(BigDecimal.class, getInstance(parserAssembler, qname));
+            arrayItemList = new ArrayItemList<BigDecimal>(BigDecimal.class, qname);
+            arrayItemList.setOperator(getCurrencyOperator(qname, arrayItemList));
+            break;
         case TERM:
             final AxiomTermList itemList = new AxiomTermList(qname, axiomKey);
             parserAssembler.registerAxiomTermList(itemList);
@@ -268,8 +271,32 @@ public class VariableType
         default:
             throw new ParseException("List " + qname.toString() + " type unknown");
        }
+       parserAssembler.registerLocaleListener(arrayItemList);
+       return arrayItemList;
     }
   	
+    protected CurrencyOperator getCurrencyOperator(QualifiedName qname, RightOperand currencyOperand)
+    {
+        CurrencyOperator currencyOperator = new CurrencyOperator();
+        String country = getPropertyString(QUALIFIER_STRING);
+        if (country != null)
+            currencyOperator.setLocaleByCode(country);
+        else
+        {
+            Operand countryOperand = (Operand)getProperty(QUALIFIER_OPERAND);
+            if (countryOperand != null)
+            {
+                QualifiedName countryQname = new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname);
+                currencyOperand.setRightOperand(
+                    new CountryOperand(
+                        countryQname, 
+                        currencyOperator.getTrait(), 
+                        countryOperand));
+            }
+        }
+        return currencyOperator;
+    }
+
     /**
      * Returns property value as String
      * @param key

@@ -15,7 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
@@ -23,11 +22,11 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
+import au.com.cybersearch2.classy_logic.operator.AxiomOperator;
 
 /**
  * AxiomOperand
@@ -39,13 +38,6 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  */
 public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concaten<AxiomList>
 {
-    static Trait AXIOM_TRAIT;
-    
-    static
-    {
-        AXIOM_TRAIT = new DefaultTrait(OperandType.AXIOM);
-    }
-    
     /** Axiom key to use when an empty list is created */
     protected QualifiedName axiomKey;
     /** Parameter container which creates an AxiomList object on evaluation */
@@ -54,6 +46,8 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
     protected AxiomListListener axiomListListener;
     /** Root of Operand tree for unification */
     protected Operand paramsTreeRoot;
+    /** Defines operations that an Operand performs with other operands. To be set by super. */
+    protected AxiomOperator operator;
     
     /**
      * Axiom Variable
@@ -66,6 +60,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         super(qname);
         this.axiomKey = axiomKey;
         this.axiomListListener = axiomListListener;
+        init();
     }
 
     /**
@@ -77,6 +72,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
     {
         super(qname, value);
         axiomKey = value.getKey();
+        init();
     }
 
     /**
@@ -91,6 +87,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         super(qname, expression);
         this.axiomKey = axiomKey;
         this.axiomListListener = axiomListListener;
+        init();
     }
 
     /**
@@ -109,6 +106,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         if ((parameterList.getOperandParamList() != null) && 
                 !parameterList.getOperandParamList().isEmpty())
             paramsTreeRoot = OperandParam.buildOperandTree(parameterList.getOperandParamList());
+        init();
     }
 
     /**
@@ -169,78 +167,6 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getRightOperandOps()
-     */
-    @Override
-    public OperatorEnum[] getRightOperandOps() 
-    {
-        return  new OperatorEnum[]
-        { 
-            OperatorEnum.ASSIGN,
-        };
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getLeftOperandOps()
-     */
-    @Override
-    public OperatorEnum[] getLeftOperandOps() 
-    {
-        return  new OperatorEnum[]
-        { 
-                OperatorEnum.ASSIGN,
-        };
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#getStringOperandOps()
-     */
-    @Override
-    public OperatorEnum[] getStringOperandOps()
-    {  // Allow concatenation like String
-       // Two operands must be congruent, the left hand operand is
-       // appended to the right hand one
-       return  new OperatorEnum[]
-       { 
-           OperatorEnum.PLUS,  
-           OperatorEnum.PLUSASSIGN
-       };
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-     */
-    @Override
-    public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm)
-    {   // There is no valid evaluation involving an axiom resulting in a number
-        return new Integer(0);
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-     */
-    @Override
-    public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
-    {   // There is no valid evaluation involving an axiom resulting in a number
-        return new Integer(0);
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-     */
-    @Override
-    public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
-    {   // There is no valid evaluation involving an axiom resulting in a boolean
-        return Boolean.FALSE;
-    }
-
-    /**
      * concatenate
      * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
      */
@@ -276,12 +202,6 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         return paramsTreeRoot;
     }
  
-    @Override
-    public Trait getTrait()
-    {
-        return AXIOM_TRAIT;
-    }
-    
     /**
      * Override toString() to incorporate intialization list
      * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
@@ -299,6 +219,17 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         }
         else
             return super.toString();
+    }
+
+    @Override
+    public Operator getOperator()
+    {
+        return operator;
+    }
+
+    private void init()
+    {
+        operator = new AxiomOperator();
     }
 
 }

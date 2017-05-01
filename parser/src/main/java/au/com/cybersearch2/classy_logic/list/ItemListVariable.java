@@ -17,10 +17,11 @@ package au.com.cybersearch2.classy_logic.list;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
+import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -37,7 +38,7 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  * @see au.com.cybersearch2.classy_logic.list.ArrayItemList
  * @see au.com.cybersearch2.classy_logic.list.AxiomTermList
  */
-public class ItemListVariable<T> extends GenericParameter<T> implements Operand 
+public class ItemListVariable<T> extends GenericParameter<T> implements Operand, RightOperand 
 {
     static Trait LIST_TRAIT;
     
@@ -52,26 +53,28 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 	/** The backing operand list */
     protected ItemList<?> itemList;
     /** Proxy to provide Operand evaluation */
-	protected Operand proxy;
+	protected Operator proxy;
 	/** Operand to evaluate index. Will be null if index is fixed. */
 	protected Operand indexExpression;
 	/** Curent index value. Will be constant if indexExpression is null.  */
 	protected int index;
     /** Flag set true if operand not visible in solution */
     protected boolean isPrivate;
+    /** Optional operand for Currency type */
+    protected Operand rightOperand;
 
 	/**
 	 * Construct a fixed index ItemListVariable object
 	 * @param itemList The backing operand list
-	 * @param proxy Proxy to provide Operand evaluation
+	 * @param delegateType Operator delegate type
 	 * @param index The index value to select the list item
 	 * @param suffix To append to name
 	 */
-	public ItemListVariable(ItemList<?> itemList, Operand proxy, int index, String suffix) 
+	public ItemListVariable(ItemList<?> itemList, Operator operator, int index, String suffix) 
 	{   // Use convention list name appended with '_' + suffix, where suffix depends on type of index
 		super(getVariableName(itemList.getName(), suffix));
 		this.itemList = itemList;
-        this.proxy = proxy;
+        this.proxy = operator;
         this.index = index;
         this.qname = getVariableName(itemList, suffix);
         if (itemList.hasItem(index))
@@ -81,15 +84,15 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
     /**
 	 * Construct an evaluated index ItemListVariable object
 	 * @param itemList The backing operand list
-	 * @param proxy Proxy to provide Operand evaluation
+     * @param delegateType Operator delegate type
 	 * @param indexExpression Operand to evaluate index
 	 * @param suffix To append to name
 	 */
-	public ItemListVariable(ItemList<?> itemList, Operand proxy, Operand indexExpression, String suffix) 
+	public ItemListVariable(ItemList<?> itemList, Operator operator, Operand indexExpression, String suffix) 
 	{
 		super(getVariableName(itemList.getName(), suffix));
 		this.itemList = itemList;
-        this.proxy = proxy;
+        this.proxy = operator;
         this.indexExpression = indexExpression;
         this.qname = getVariableName(itemList, suffix);
         index = -1; // Set index to invalid value to avoid accidental uninitialised list access
@@ -183,68 +186,6 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 	}
 
 	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getRightOperandOps() 
-	{
-		return proxy.getRightOperandOps();
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getLeftOperandOps() 
-	{
-		return proxy.getLeftOperandOps();
-	}
-
- 	/**
- 	 * Returns OperatorEnum values for which this Term is a valid String operand
- 	 * @return OperatorEnum[]
- 	 */
-	 @Override
-     public OperatorEnum[] getStringOperandOps()
-     {
-	     return proxy.getStringOperandOps();
-     }
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-		return proxy.numberEvaluation(operatorEnum2, rightTerm);
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2,
-			Term rightTerm) 
-	{
-		return proxy.numberEvaluation(leftTerm, operatorEnum2, rightTerm);
-	}
-
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2,
-			Term rightTerm) 
-	{
-		return proxy.booleanEvaluation(leftTerm, operatorEnum2, rightTerm);
-	}
-
-	/**
 	 * Returns value
 	 * @return Object of generic type T
 	 */
@@ -320,9 +261,15 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
 	@Override
 	public Operand getRightOperand() 
 	{
-		return null;
+		return rightOperand;
 	}
 
+    @Override
+    public void setRightOperand(Operand rightOperand)
+    {
+        this.rightOperand = rightOperand;
+    }
+    
     /**
      * Set this operand private - not visible in solution
      * @param isPrivate Flag set true if operand not visible in solution
@@ -344,15 +291,9 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand
     }
     
     @Override
-    public void setTrait(Trait trait)
+    public Operator getOperator()
     {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Trait getTrait()
-    {
-        return LIST_TRAIT;
+        return proxy;
     }
 
 	/**

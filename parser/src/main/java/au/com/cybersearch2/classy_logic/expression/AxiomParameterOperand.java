@@ -17,18 +17,17 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.util.List;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.operator.AxiomParameterOperator;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
-import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * AxiomParameterOperand
@@ -39,13 +38,6 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  */
 public class AxiomParameterOperand extends GenericParameter<AxiomTermList> implements Operand
 {
-    static Trait AXIOM_PARAMETER_TRAIT;
-    
-    static
-    {
-        AXIOM_PARAMETER_TRAIT = new DefaultTrait(OperandType.TERM);
-    }
-    
     /** Qualified name of operand */
     protected QualifiedName qname;
     /** Collects parameters from an Operand tree and passes them to a supplied function object */
@@ -56,6 +48,8 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     protected Operand paramsTreeRoot;
     /** Flag set true if operand not visible in solution */
     protected boolean isPrivate;
+    /** Defines operations that an Operand performs with other operands. To be set by super. */
+    protected AxiomParameterOperator operator;
 
     /**
      * Construct an AxiomParameterOperand object
@@ -73,6 +67,7 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
             parameterList = new ParameterList<AxiomTermList>(initializeList, axiomGenerator());
             paramsTreeRoot = OperandParam.buildOperandTree(initializeList);
         }
+        operator = new AxiomParameterOperator();
     }
 
     @Override
@@ -116,60 +111,6 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     }
     
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getRightOperandOps()
-     */
-    @Override
-    public OperatorEnum[] getRightOperandOps() 
-    {
-        return  new OperatorEnum[]
-        { 
-            OperatorEnum.ASSIGN,
-         };
-    }
-
-    /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getLeftOperandOps()
-     */
-    @Override
-    public OperatorEnum[] getLeftOperandOps() 
-    {
-        return  new OperatorEnum[]
-        { 
-                OperatorEnum.ASSIGN,
-        };
-    }
-
-    /**
-     * Returns Value for no concatenation operations
-     * @return OperatorEnum[]
-     */
-    @Override
-    public OperatorEnum[] getStringOperandOps()
-    {
-        return Operand.EMPTY_OPERAND_OPS;
-    }
- 
-    @Override
-    public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm)
-    {   // There is no valid evaluation involving an axiom resulting in a number
-        return new Integer(0);
-    }
-
-    @Override
-    public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
-    {   // There is no valid evaluation involving an axiom resulting in a number
-        return new Integer(0);
-    }
-
-    @Override
-    public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
-    {   // There is no valid evaluation involving an axiom resulting in a boolean
-        return Boolean.FALSE;
-    }
-
-    /**
      * Returns operand tree fur parameter unification     
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperand()
      */
@@ -206,15 +147,9 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     }
     
     @Override
-    public void setTrait(Trait trait)
+    public Operator getOperator()
     {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Trait getTrait()
-    {
-        return AXIOM_PARAMETER_TRAIT;
+        return operator;
     }
 
     /**

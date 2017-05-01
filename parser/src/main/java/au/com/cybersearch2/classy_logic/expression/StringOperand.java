@@ -16,14 +16,13 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.Scope;
-import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.Trait;
-import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
+import au.com.cybersearch2.classy_logic.operator.StringOperator;
 
 /**
  * StringOperand
@@ -32,15 +31,8 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  */
 public class StringOperand  extends ExpressionOperand<String> implements Concaten<String>, LocaleListener
 {
-    static Trait STRING_TRAIT;
-    
-    static
-    {
-        STRING_TRAIT = new DefaultTrait(OperandType.STRING);
-    }
-    
-    /** Localization and specialization */
-    protected Trait trait;
+    /** Defines operations that an Operand performs with other operands. To be set by super. */
+    protected StringOperator operator;
 
 	/**
 	 * Construct StringOperand with given expression Operand
@@ -50,10 +42,10 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
 	public StringOperand(QualifiedName qname, Operand expression) 
 	{
 		super(qname, expression);
-		this.trait = STRING_TRAIT;
+		init();
 	}
 
-	/**
+    /**
      * Construct StringOperand with given value
      * @param qname Qualified name
 	 * @param value The value
@@ -61,7 +53,7 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
 	public StringOperand(QualifiedName qname, String value) 
 	{
 		super(qname, value);
-        this.trait = STRING_TRAIT;
+        init();
 	}
 
 	/**
@@ -71,89 +63,7 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
 	public StringOperand(QualifiedName qname) 
 	{
 		super(qname);
-        this.trait = STRING_TRAIT;
-	}
-
-	/**
-	 * getRightOperandOps
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getRightOperandOps() 
-	{
-		return 	new OperatorEnum[]
-		{ 
-			OperatorEnum.ASSIGN,
-			OperatorEnum.EQ, // "=="
-			OperatorEnum.NE
-		};
-	}
-
-	/**
-	 * getLeftOperandOps
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
-	 */
-	@Override
-	public OperatorEnum[] getLeftOperandOps() 
-	{
-		return 	new OperatorEnum[]
-		{ 
-				OperatorEnum.ASSIGN,
-				OperatorEnum.EQ, // "=="
-				OperatorEnum.NE // "!="
-		};
-	}
-
-	/**
-	 * getStringOperandOps
-	 * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#getStringOperandOps()
-	 */
-	 @Override
-     public OperatorEnum[] getStringOperandOps()
-     {
-		return 	new OperatorEnum[]
-		{ 
-			OperatorEnum.PLUS,
-		    OperatorEnum.PLUSASSIGN
-		};
-     }
-
-	/**
-	 * Evaluate a unary expression using this Term
-	 * @param operatorEnum2 OperatorEnum for one of +, - or ~ 
-	 * @return generic Parameter which implements Operand. The genericy type will be a sub class of Number.
-	 */
-	@Override
-	public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-	    return new Integer(0);
-	}
-
-	/**
-	 * Binary numberEvaluation
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-	    return new Integer(0);
-	}
-
-	/**
-	 * booleanEvaluation
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	@Override
-	public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
-	{
-		boolean calc = false;
-		switch (operatorEnum2)
-		{
-		case EQ:  calc = leftTerm.getValue().equals(rightTerm.getValue()); break; // "=="
-		case NE:  calc = !leftTerm.getValue().equals(rightTerm.getValue()); break; // "!="
-	    default:
-		}
-		return calc;
+        init();
 	}
 
 	/**
@@ -178,25 +88,20 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
     }
 
     @Override
-    public void setTrait(Trait trait)
-    {
-        this.trait = trait;
-    }
-
-    @Override
-    public Trait getTrait()
-    {
-        if (trait == STRING_TRAIT)
-            trait = new DefaultTrait(OperandType.STRING);
-        return trait;
-    }
-
-    @Override
     public void onScopeChange(Scope scope)
     {
-        if (trait == STRING_TRAIT)
-            trait = new DefaultTrait(OperandType.STRING);
-        trait.setLocale(scope.getLocale());
+        operator.onScopeChange(scope);
+    }
+
+    @Override
+    public Operator getOperator()
+    {
+        return operator;
+    }
+
+    private void init()
+    {
+        operator = new StringOperator();
     }
 
 }
