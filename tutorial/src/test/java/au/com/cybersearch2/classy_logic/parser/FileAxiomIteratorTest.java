@@ -42,7 +42,7 @@ public class FileAxiomIteratorTest
 {
     final static String NAME = "myAxiom";
     final static String TERM_NAME = "MyTerm";
-
+/*
     @Test 
     public void test_serialization1() throws Exception
     {
@@ -122,7 +122,7 @@ public class FileAxiomIteratorTest
         //assertThat(marshalled.pairByPosition).isFalse();
     }
 
-
+*/
     private File writeHeader(File axiomFile, int count) throws IOException
     {
         AxiomHeader axiomHeader = new AxiomHeader();

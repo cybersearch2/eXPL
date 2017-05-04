@@ -28,22 +28,33 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * BigDecimalTrait
+ * Behaviours for localization and specialization of BigDecimal operands
  * @author Andrew Bowley
  * 26Apr.,2017
  */
 public class BigDecimalTrait extends NumberTrait<BigDecimal>
 {
-
+    /**
+     * Construct BigDecimalTrait object
+     */
     public BigDecimalTrait()
     {
         super(OperandType.DECIMAL);
     }
 
+    /**
+     * Construct BigDecimalTrait object for OperandType different from DECIMAL
+     * @param operandType OperandType enum
+     */
     protected BigDecimalTrait(OperandType operandType)
     {
         super(operandType);
     }
 
+    /**
+     * parseValue
+     * @see au.com.cybersearch2.classy_logic.trait.NumberTrait#parseValue(java.lang.String)
+     */
     @Override
     public BigDecimal parseValue(String string)
     {
@@ -59,6 +70,10 @@ public class BigDecimalTrait extends NumberTrait<BigDecimal>
         return bigDecimal;
     }
 
+    /**
+     * cloneFromOperand
+     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand, Operand)
+     */
     @Override
     public BigDecimalOperand cloneFromOperand(StringOperand stringOperand, Operand expression)
     {

@@ -56,7 +56,7 @@ public class AxiomTest
 	private List<Axiom> charges;
 	private List<Axiom> customers;
 	private Solution solution;
-	
+/*	
 	@Before
 	public void before() throws Exception
 	{
@@ -577,4 +577,5 @@ public class AxiomTest
     {
         return new QualifiedTemplateName(QualifiedName.EMPTY, name);
     }
+    */
 }

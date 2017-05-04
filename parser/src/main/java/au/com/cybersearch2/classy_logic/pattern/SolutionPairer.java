@@ -37,7 +37,7 @@ public class SolutionPairer extends AxiomPairer
 	 * @param owner Structure which is performing unification
      * @param solution Container to aggregate results
 	 */
-	public SolutionPairer(Structure owner, Solution solution, QualifiedName localContext) 
+	public SolutionPairer(Axiom owner, Solution solution, QualifiedName localContext) 
 	{
 		super(owner, localContext);
 		this.solution = solution;

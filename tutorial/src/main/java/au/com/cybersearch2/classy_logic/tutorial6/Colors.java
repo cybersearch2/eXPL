@@ -39,7 +39,7 @@ public class Colors
     {"aqua", 0, 255, 255}
     {"black", 0, 0, 0}
     {"blue", 0, 0, 255};
-    template shade(name, color[red], color[green], color[blue]);
+    template shade(name, color^red, color^green, color^blue);
     query<axiom> colors(swatch : shade);
 
     */

@@ -27,17 +27,25 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * DoubleTrait
+ * Behaviours for localization and specialization of Double operands
  * @author Andrew Bowley
  * 26Apr.,2017
  */
 public class DoubleTrait extends NumberTrait<Double>
 {
 
+    /**
+     * Construct DoubleTrait object
+     */
     public DoubleTrait()
     {
         super(OperandType.DOUBLE);
     }
 
+    /**
+     * parseValue
+     * @see au.com.cybersearch2.classy_logic.trait.NumberTrait#parseValue(java.lang.String)
+     */
     @Override
     public Double parseValue(String string)
     {
@@ -52,6 +60,10 @@ public class DoubleTrait extends NumberTrait<Double>
         return value;
     }
 
+    /**
+     * cloneFromOperand
+     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand, Operand)
+     */
     @Override
     public DoubleOperand cloneFromOperand(StringOperand stringOperand, Operand expression)
     {

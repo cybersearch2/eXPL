@@ -15,7 +15,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.query;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -55,6 +57,9 @@ public class ChainQueryExecuter
     protected Solution solution;
 	/** Set of axiom listeners referenced by name */
 	protected Map<QualifiedName, List<AxiomListener>> axiomListenerMap;
+	/** Template chain passed down chain to manage case of more than one query in chain
+	 *  eg. repeating same query in different scopes */
+	protected Deque<Template> templateChain;
 
 	/**
 	 * Construct ChainQueryExecuter object
@@ -62,6 +67,7 @@ public class ChainQueryExecuter
 	 */
 	public ChainQueryExecuter(QueryParams queryParams) 
 	{   
+	    templateChain = new ArrayDeque<Template>();
 		this.scope = queryParams.getScope();
 		calcScope = scope;
         if ((scope != null) && (scope.getAxiomListenerMap() != null))
@@ -81,7 +87,7 @@ public class ChainQueryExecuter
 			bindAxiomListeners(scope);
 		if ((headChainQuery == null) ||
 			    // Query chain will add to solution or trigger short circuit
-			    (headChainQuery.executeQuery(solution) == EvaluationStatus.COMPLETE))
+			    (headChainQuery.executeQuery(solution, templateChain) == EvaluationStatus.COMPLETE))
 				return true;
 		return false;
     }

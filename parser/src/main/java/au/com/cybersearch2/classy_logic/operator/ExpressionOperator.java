@@ -16,11 +16,14 @@
 package au.com.cybersearch2.classy_logic.operator;
 
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.ExpressionOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 
 /**
  * ExpressionOperator
+ * Base class for Operator classes which evaluate using an expression of an ExpressionOperand object
+ * @see ExpressionOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
@@ -48,6 +51,7 @@ public abstract class ExpressionOperator implements Operator
     /**
      * Returns OperatorEnum values for which this Term is a valid String operand
      * @return OperatorEnum[]
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getStringOperandOps()
      */
      @Override
      public OperatorEnum[] getStringOperandOps()

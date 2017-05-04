@@ -348,8 +348,6 @@ public class VariableType
                     // Do not add empty axioms to list
                     if (!axiomTermList.isEmpty())
                         axiomList.assignItem(index++, axiomTermList);
-                    if (!axiomTermList.isEmpty())
-                        axiomList.setAxiomTermNameList(axiomTermList.getAxiomTermNameList());
                 }
                 return axiomList;
             }

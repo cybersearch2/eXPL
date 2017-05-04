@@ -42,8 +42,6 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	protected boolean isPrivate;
     /** Defines operations that an Operand performs with other operands. */
     protected DelegateOperator operator;
-    /** Current operator DelegateType */
-    protected DelegateType delegateType;
 
 
 	/**
@@ -55,7 +53,6 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 		super(qname.getName());
 		this.qname = qname;
         operator = new DelegateOperator();
-        delegateType = operator.getDelegateType();
 	}
 
     /**
@@ -90,21 +87,6 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
     }
 	
 	/**
-	 * Creates delegate instance according to type of value
-	 */
-	protected void setDelegate(Class<?> clazz)
-	{
-	    DelegateType newDelegateType = operator.getDelegateTypeForClass(clazz);
-	    if (newDelegateType == null)
-			newDelegateType = DelegateType.ASSIGN_ONLY;
-		if (newDelegateType != delegateType)
-		{
-		    delegateType = newDelegateType;
-		    operator.setDelegate(clazz);
-		}
-	}
-
-	/**
 	 * Set Parameter value
 	 * GenericParameter has a protected type-specific setValue()
 	 * @param value
@@ -118,7 +100,7 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 		{
 			this.value = value;
 			this.empty = false;
-		    setDelegate(getValueClass());
+		    operator.setDelegate(getValueClass());
 		}
 	}
 
@@ -146,7 +128,7 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	public int unify(Term otherTerm, int id)
 	{
 		int result = super.unify(otherTerm, id);
-		setDelegate(getValueClass());
+		operator.setDelegate(getValueClass());
 		return result;
 	}
 
@@ -157,7 +139,7 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
     @Override
     public Object concatenate(Operand rightOperand)
     {   // Axioms are special case
-        if (delegateType ==DelegateType.AXIOM)
+        if (operator.getDelegateType() ==DelegateType.AXIOM)
             return AxiomUtils.concatenate(this, rightOperand);
         return value.toString() + rightOperand.getValue().toString();
     }

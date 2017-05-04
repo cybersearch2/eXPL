@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.query;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,10 +68,10 @@ public class CalculateChainQueryTest
         Solution solution = new Solution();
         
         CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate, null);
-        calculateChainQuery.executeQuery(solution);
+        calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>());
         assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n=3, limit=3)");
-	}
-
+	}   
+    
     @Test
 	public void test_factorial() 
 	{
@@ -97,7 +98,7 @@ public class CalculateChainQueryTest
 
         Solution solution = new Solution();
         CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate, null);
-        calculateChainQuery.executeQuery(solution);
+        calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>());
         assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n=4, factorial=24, i=5)");
         calculateChainQuery.backupToStart();
         assertThat(n.isEmpty()).isFalse();
@@ -106,7 +107,7 @@ public class CalculateChainQueryTest
         assertThat(factorialExpression.isEmpty()).isTrue();
         assertThat(iExpression.isEmpty()).isTrue();
         assertThat(testExpression.isEmpty()).isTrue();
-        calculateChainQuery.executeQuery(solution);
+        calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>());
         assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n=4, factorial=24, i=5)");
 	}
 

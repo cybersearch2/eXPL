@@ -24,6 +24,7 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -63,6 +64,7 @@ query<axiom> in_words(lexicon : in_words);
 	 */
 	public RegexGroups()
 	{
+        Archetype.CASE_INSENSITIVE_NAME_MATCH = true;
         File resourcePath = new File("src/main/resources/tutorial11");
         // Use an external axiom source which is bound in TestAxiomProvider dependency class
         // to AxiomSource class LexiconSource

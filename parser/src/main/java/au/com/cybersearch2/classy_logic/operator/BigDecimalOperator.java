@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -27,24 +28,36 @@ import au.com.cybersearch2.classy_logic.trait.BigDecimalTrait;
 
 /**
  * BigDecimalOperator
+ * @see DelegateType#DECIMAL
+ * @see BigDecimalOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
 public class BigDecimalOperator extends ExpressionOperator implements LocaleListener
 {
+    /** Behaviours for localization and specialization of Decimal operands */
     protected BigDecimalTrait bigDecimalTrait;
 
+    /** Construct BigDecimalOperator object */
     public BigDecimalOperator()
     {
         bigDecimalTrait = new BigDecimalTrait();
     }
 
+    /**
+     * getTrait
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getTrait()
+     */
     @Override
     public Trait getTrait()
     {
         return bigDecimalTrait;
     }
-    
+ 
+    /**
+     * onScopeChange
+     * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(Scope)
+     */
     @Override
     public void onScopeChange(Scope scope)
     {
@@ -52,8 +65,8 @@ public class BigDecimalOperator extends ExpressionOperator implements LocaleList
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
+     * getRightOperandOps
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getRightOperandOps()
      */
     @Override
     public OperatorEnum[] getRightOperandOps() 
@@ -81,8 +94,8 @@ public class BigDecimalOperator extends ExpressionOperator implements LocaleList
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
+     * getLeftOperandOps
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getLeftOperandOps()
      */
     @Override
     public OperatorEnum[] getLeftOperandOps() 
@@ -110,8 +123,8 @@ public class BigDecimalOperator extends ExpressionOperator implements LocaleList
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * numberEvaluation - unary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#numberEvaluation(OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
@@ -128,8 +141,8 @@ public class BigDecimalOperator extends ExpressionOperator implements LocaleList
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * numberEvaluation - binary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#numberEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
@@ -155,8 +168,8 @@ public class BigDecimalOperator extends ExpressionOperator implements LocaleList
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * booleanEvaluation
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#booleanEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
@@ -180,6 +193,7 @@ public class BigDecimalOperator extends ExpressionOperator implements LocaleList
     /**
      * Convert value to BigDecimal, if not already of this type
      * @param object Value to convert
+     * @param clazz Value class
      * @return BigDecimal object
      */
     public BigDecimal convertObject(Object object, Class<?> clazz)

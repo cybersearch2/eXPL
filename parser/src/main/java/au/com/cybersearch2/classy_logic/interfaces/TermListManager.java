@@ -15,18 +15,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
+import java.util.List;
+
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.terms.TermMetaData;
 
 /**
- * AxiomContainer
- * Holds one or more axioms
+ * TermListManager
+ * Interface for TermList instance factory
  * @author Andrew Bowley
- * 14Apr.,2017
+ * 3May,2017
  */
-public interface AxiomContainer
+public interface TermListManager
 {
-    QualifiedName getKey();
-    AxiomListener getAxiomListener();
-    OperandType getOperandType();
+    QualifiedName getQualifiedName();
+    String getName();
+    int getTermCount();
+    int addTerm(TermMetaData termMetaData);
+    void checkTerm(TermMetaData termMetaData);
+    int getIndexForName(String termName);
+    boolean changeName(int index, String name);
+    boolean isMutable();
+    int getNamedTermCount();
+    List<String> getAxiomTermNameList();
+    void clearMutable();
+    TermMetaData analyseTerm(Term term, int index);
 }

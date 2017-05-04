@@ -19,6 +19,7 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
 
 /**
  * Variable
@@ -53,6 +54,14 @@ public class Variable extends DelegateOperand
 		this(qname);
 		this.expression = expression;
 	}
+
+    /**
+     * @return the delegateType
+     */
+    public DelegateType getDelegateType()
+    {
+        return operator.getDelegateType();
+    }
 
 	/**
      * Assign a value and id to this Term from another term 

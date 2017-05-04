@@ -25,7 +25,6 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -34,6 +33,7 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
@@ -382,7 +382,7 @@ public class Scope
             {
                 axiomProvider = parserAssembler.getAxiomProvider(resourceName);
                 if (axiomProvider != null)
-                    return createResourceTemplate(templateName, parserAssembler);
+                    return parserAssembler.createResourceTemplate(templateName);
             }
             else if (!templateName.getScope().isEmpty())
             {
@@ -390,7 +390,7 @@ public class Scope
                 if (globalResourceName != null) 
                     axiomProvider =  getGlobalParserAssembler().getAxiomProvider(globalResourceName);
                 if (axiomProvider != null)
-                    return createResourceTemplate(templateName, getGlobalParserAssembler());
+                    return getGlobalParserAssembler().createResourceTemplate(templateName);
             }
         }
         return template;
@@ -621,59 +621,36 @@ public class Scope
     private void addScopeList(Map<String, Object> properties)
     {   // Add axiom to ParserAssembler
         QualifiedName qname = new QualifiedName(name, SCOPE);
-        boolean isUpdate = !parserAssembler.createAxiom(qname);
-        for (String termName: properties.keySet())
-        {
-            parserAssembler.addAxiom(qname, new Parameter(termName, properties.get(termName)));
-            parserAssembler.addAxiomTermName(qname, termName);
-        }
-        Axiom localAxiom = parserAssembler.saveAxiom(qname);
+        List<Axiom> axiomList = parserAssembler.getAxiomList(qname);
         AxiomTermList localList = null;
-        if (isUpdate)
+        Axiom localAxiom = null;
+        if (axiomList == null)
         {
+            parserAssembler.createAxiom(qname);
+            for (String termName: properties.keySet())
+                parserAssembler.addAxiom(qname, new Parameter(termName, properties.get(termName)));
+            localAxiom = parserAssembler.saveAxiom(qname);
+            localList = new AxiomTermList(qname, qname);
+        }
+        else
+        {
+            localAxiom = axiomList.get(0);
+            for (String termName: properties.keySet())
+            {
+                Term term = localAxiom.getTermByName(termName);
+                if (term != null)
+                    term.setValue(properties.get(termName));
+                else
+                    localAxiom.addTerm(new Parameter(termName, properties.get(termName)));
+            }
             localList = (AxiomTermList) parserAssembler.getOperandMap().getItemList(qname);
             localList.getAxiomListener().onNextAxiom(qname, localAxiom);
             return;
         }
-        else
-            localList = new AxiomTermList(qname, qname);
         parserAssembler.registerLocalList(localList);
         parserAssembler.getOperandMap().addItemList(qname, localList);
     }
  
-    /**
-     * Create template for for term list bound to resource.
-     * The termplate terms are simply named variables.
-     * An axiom declaration must exist with same name as template.
-     * Preconditions: A template with specified name does not already exist
-     * and a term name list is defined for axiom declaration.
-     * @param templateName Qualified template name
-     * @param parserAssembler ParserAssembler object for scope identified in temmplate name
-     * @return Template object
-     */
-    private Template createResourceTemplate(QualifiedName templateName, ParserAssembler parserAssembler)
-    {   // Create qualified axiom  name 
-        QualifiedName qualifiedAxiomName = new QualifiedName(templateName.getScope(),  templateName.getTemplate());
-        // Get term names
-        List<String> termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
-        if ((termNameList == null) && !templateName.getScope().isEmpty())
-        {
-            qualifiedAxiomName.clearScope();
-            termNameList = parserAssembler.getAxiomTermNameList(qualifiedAxiomName);
-        }
-        if ((termNameList != null) && !termNameList.isEmpty())
-        {
-            Template template = parserAssembler.createTemplate(templateName, false);
-            for (String termName: termNameList)
-            {
-                QualifiedName qname = parserAssembler.getContextName(termName);
-                template.addTerm(new Variable(qname));
-            }
-            return template;
-        }
-        return null;
-    }
-
     /**
      * Set scope locale from properties
      * @param properties

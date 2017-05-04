@@ -19,10 +19,18 @@ import au.com.cybersearch2.classy_logic.expression.StringOperand;
 
 /**
  * StringCloneable
+ * Support for conversion of text in format to suit locate to a number
  * @author Andrew Bowley
  * 27Apr.,2017
  */
 public interface StringCloneable
 {
+    /**
+     * Create an instance of same type as self and 
+     * set it to the parsed value contained in given StringOperand
+     * @param stringOperand The operand containing the text value
+     * @param expression Optional expression to dynamically evaluate a string value
+     * @return Operand of same type as self
+     */
     Operand cloneFromOperand(StringOperand stringOperand, Operand expression);
 }

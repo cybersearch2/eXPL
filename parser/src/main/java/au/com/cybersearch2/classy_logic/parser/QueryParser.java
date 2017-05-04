@@ -48,6 +48,8 @@ import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
 import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.terms.LiteralParameter;
+import au.com.cybersearch2.classy_logic.terms.LiteralType;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -763,7 +765,7 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(COMMA);
       Fact(qualifiedAxiomName, context);
     }
-    context.getParserAssembler().saveAxiom(qualifiedAxiomName);
+    context.getParserAssembler().saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
   }
 
   final public void AltAxiomItem(QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
@@ -785,7 +787,7 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(BIT_OR);
       Fact(qualifiedAxiomName, context);
     }
-    context.getParserAssembler().saveAxiom(qualifiedAxiomName);
+    context.getParserAssembler().saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
   }
 
   final public String Fact(QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
@@ -1800,7 +1802,7 @@ public class QueryParser implements QueryParserConstants
     label_16:
     while (true) 
     {
-      ChoiceItem(selection, qualifiedAxiomName, context);
+      ChoiceItem(selection++, qualifiedAxiomName, context);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
       case LBRACE:
@@ -1839,7 +1841,7 @@ public class QueryParser implements QueryParserConstants
     Token delimToken;
     ParserAssembler parserAssembler = context.getParserAssembler();
     String name = parserAssembler.getAxiomTermName(qualifiedAxiomName, 0);
-    parserAssembler.addAxiom(qualifiedAxiomName, new Parameter(Term.ANONYMOUS, new Null()));
+    parserAssembler.addAxiom(qualifiedAxiomName, new StringTerm(name + selection));
     StringBuilder builder = new StringBuilder();
     jj_consume_token(LBRACE);
     operand = ChoiceExpression(name, context);
@@ -1861,7 +1863,7 @@ public class QueryParser implements QueryParserConstants
         builder.append(',').append(fact);
     }
     delimToken = jj_consume_token(RBRACE);
-       parserAssembler.saveAxiom(qualifiedAxiomName);
+       parserAssembler.saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
        QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName());
        parserAssembler.addTemplate(qualifiedTemplateName, operand);
        builder.append('}');
@@ -2703,7 +2705,7 @@ public class QueryParser implements QueryParserConstants
       break;
     case UNKNOWN:
       UnknownLiteral(context);
-    {if (true) return new Parameter(Term.ANONYMOUS, new Unknown());}
+    {if (true) return new LiteralParameter(Term.ANONYMOUS, new Unknown(), LiteralType.unknown);}
       break;
     default:
       jj_la1[82] = jj_gen;
@@ -3206,21 +3208,6 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_40() {
-    if (jj_3R_42()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_92() {
-    if (jj_scan_token(FALSE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_39() {
-    if (jj_3R_41()) return true;
-    return false;
-  }
-
   private boolean jj_3R_86() {
     if (jj_scan_token(STRING_LITERAL)) return true;
     return false;
@@ -3620,6 +3607,21 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_59() {
     if (jj_3R_60()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_40() {
+    if (jj_3R_42()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_92() {
+    if (jj_scan_token(FALSE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_39() {
+    if (jj_3R_41()) return true;
     return false;
   }
 

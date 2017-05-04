@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.operator;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.NullOperand;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -24,6 +25,8 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * NullOperator
+ * @see DelegateType.NULL
+ * @see NullOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
@@ -33,14 +36,18 @@ public class NullOperator extends ExpressionOperator
     protected DefaultTrait trait;
 
     /**
-     * 
+     * Construct NullOperator object
      */
     public NullOperator()
     {
         super();
         trait = new DefaultTrait(OperandType.UNKNOWN);
     }
-
+    
+    /**
+     * getTrait
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getTrait()
+     */
     @Override
     public Trait getTrait()
     {
@@ -79,7 +86,7 @@ public class NullOperator extends ExpressionOperator
 
     /**
      * Unary numberEvaluation - invalid
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
@@ -89,7 +96,7 @@ public class NullOperator extends ExpressionOperator
 
     /**
      * Binary numberEvaluation - invalid
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
@@ -99,7 +106,7 @@ public class NullOperator extends ExpressionOperator
 
     /**
      * booleanEvaluation - compare to another NullOperand
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
@@ -114,6 +121,10 @@ public class NullOperator extends ExpressionOperator
         return calc;
     }
 
+    /**
+     * Returns Null class
+     * @return class object
+     */
     private Class<?> getValueClass()
     {
         return Null.class;

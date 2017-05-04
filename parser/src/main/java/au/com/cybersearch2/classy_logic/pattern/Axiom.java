@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.pattern;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +27,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.terms.TermMetaData;
 import au.com.cybersearch2.classy_logic.terms.TermStore;
 
 
@@ -38,15 +38,14 @@ import au.com.cybersearch2.classy_logic.terms.TermStore;
  *
  * @since 06/10/2010
  */
-public class Axiom extends Structure
+public class Axiom extends TermList
 {
-	private static final long serialVersionUID = 2741521667825735668L;
-    private static final ObjectStreamField[] serialPersistentFields =
-    {
-        new ObjectStreamField("name", String.class),
-        new ObjectStreamField("pairByPosition", Boolean.class)
-    };
-
+	//private static final long serialVersionUID = 2741521667825735668L;
+    //private static final ObjectStreamField[] serialPersistentFields =
+    //{
+    //    new ObjectStreamField("name", String.class),
+    //    new ObjectStreamField("pairByPosition", Boolean.class)
+    //};
 
     /**
 	 * TermPair holds paired Terms for unification
@@ -69,14 +68,36 @@ public class Axiom extends Structure
     protected SolutionPairer solutionPairer;
     /** Pairs axiom terms in this axiom with terms in a template */
     protected AxiomPairer axiomPairer;
+    protected String name;
 	
+    /**
+     * Construct an empty or parameter-supplied self-mangaged Axiom. Use addTerm() to add terms. 
+     * @param name
+     */
+    public Axiom(String name, Parameter... params)
+    {
+        super(new AxiomArchetype(QualifiedName.parseGlobalName(name)));
+        this.name = name;
+        // Assume terms are anonymous. Change when non=anonymous term is added
+        pairByPosition = true;
+        if ((params != null)&& (params.length > 0))
+        {
+            if (archetype.isMutable())
+                setTerms(params);
+            for (Term term: params)
+                addTerm(term);
+            pairByPosition = archetype.getNamedTermCount() == 0;
+        }
+    }
+
 	/**
 	 * Construct an empty Axiom. Use addTerm() to add terms. 
 	 * @param name
 	 */
-	public Axiom(String name)
+	public Axiom(AxiomArchetype axiomArchetype)
 	{
-		super(name);
+        super(axiomArchetype);
+		name = axiomArchetype.getName();
 		// Assume terms are anonymous. Change when non=anonymous term is added
 		pairByPosition = true;
 	}
@@ -86,14 +107,23 @@ public class Axiom extends Structure
 	 * @param name
 	 * @param data Objects to add. 
 	 */
-	public Axiom(String name, Object... data)
+	public Axiom(AxiomArchetype axiomArchetype, Object... data)
 	{
-		super(name, data);
-		// Set pairByPosition flag if all terms are anonymous
-		for (Object datum: data)
-			if ((datum instanceof Term) && !((Term)datum).getName().isEmpty())
-				return;
-		pairByPosition = true;
+        this(axiomArchetype);
+        if ((data != null)&& (data.length > 0))
+        {
+            List<Term> terms = new ArrayList<Term>(data.length);
+            for (Object datum: data)
+            {
+                if (datum instanceof Term)
+                    terms.add((Term) datum);
+                else
+                    terms.add(new Parameter(Term.ANONYMOUS, datum));
+            }
+    		if (archetype.isMutable())
+    		    setTerms(terms.toArray(new Term[terms.size()]));
+            pairByPosition = archetype.getNamedTermCount() == 0;
+        }
 	}
 
 	/**
@@ -101,14 +131,17 @@ public class Axiom extends Structure
 	 * @param name
 	 * @param terms Terms to add
 	 */
-	public Axiom(String name, Term... terms)
+	public Axiom(AxiomArchetype axiomArchetype, Term... terms)
 	{
-		super(name, terms);
-		// Set pairByPosition flag if all terms are anonymous
-		for (Term term: terms)
-			if (!term.getName().isEmpty())
-				return;
-		pairByPosition = true;
+        this(axiomArchetype);
+        if ((terms != null)&& (terms.length > 0))
+        {
+            if (archetype.isMutable())
+                setTerms(terms);
+            for (Term term: terms)
+                addTerm(term);
+        }
+        pairByPosition = archetype.getNamedTermCount() == 0;
 	}
 
 	/**
@@ -116,31 +149,20 @@ public class Axiom extends Structure
 	 * @param name
 	 * @param terms List of Term objects
 	 */
-	public Axiom(String name, List<Term> terms)
+	public Axiom(AxiomArchetype axiomArchetype, List<Term> terms)
 	{
-		super(name, terms);
-		// Set pairByPosition flage if all terms are anonymous
-		for (Term term: terms)
-			if (!term.getName().isEmpty())
-				return;
-		pairByPosition = true;
-	}
+        this(axiomArchetype);
+        if ((terms != null)&& (terms.size() > 0))
+        {
+            if (archetype.isMutable())
+                setTerms(terms.toArray(new Term[terms.size()]));
+            for (Term term: terms)
+                addTerm(term);
+            pairByPosition = archetype.getNamedTermCount() == 0;
+        }
+ 	}
 
-	public Axiom()
-	{
-	    super(null);
-	}
-	
-	/**
-	 * Set flag to indicate unification term pairing to be performed sequentially
-	 * @param value PairByPosition flag 
-	 */
-	public void setPairByPosition(boolean value)
-	{
-		pairByPosition = value;
-	}
-	
-	/**
+    /**
 	 * Unify this Axiom with given Template, pairing Terms of this Axiom with those
 	 * of the Template. Terms are matched by name except when "pairByPosition" flag is set, 
 	 * in which case, terms are paired in list order. 
@@ -181,7 +203,7 @@ public class Axiom extends Structure
 					if (isLocalTerm && !qname.getName().isEmpty())
 					{   // Name axiom term for Operand navigation
 						axiomTerm.setName(qname.getName());
-						termMap.put(qname.getName().toUpperCase(), axiomTerm);
+						archetype.changeName(index, qname.getName());
 					}
 				}
 				// Only needs to be done once
@@ -208,27 +230,16 @@ public class Axiom extends Structure
     }
 
 	/**
-	 * Exposes super addTerm()
-	 * @param term Term object
-	 */
-	public void addTerm(Term term)
-	{
-		super.addTerm(term);
-		if (!term.getName().isEmpty())
-			pairByPosition = false;
-	}
-	
-	/**
 	 * Add a Term() with name assigned from a list according to position 
 	 * @param term Term object
-	 * @param nameList List of termeter names assembled by parser
+	 * @param nameList List of term names assembled by parser
 	 */
 	public void addTerm(Term term, List<String> nameList)
 	{
 		int index = termList == null ? 0 : termList.size();
 		if (index < nameList.size())
 			term.setName(nameList.get(index));
-		super.addTerm(term);
+		addTerm(term);
 		pairByPosition = false;
 	}
 
@@ -256,5 +267,22 @@ public class Axiom extends Structure
             termArray[i] = param;
         }
         setTerms(termArray);
+    }
+
+    /**
+     * Set Anonymous Terms using values from supplied Object array.
+     * Any Object in the array not of type Term id converted to
+     * an anonymous Term with value set to the object. 
+     * @param terms Term array
+     */
+    protected void setTerms(Term[] terms) 
+    {
+        if (terms.length > 0)
+        {
+            int index = 0;
+            for (Term term: terms)
+                archetype.addTerm(new TermMetaData(term, index++));
+            archetype.clearMutable();
+        }
     }
 }

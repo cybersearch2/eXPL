@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.terms;
 
+import au.com.cybersearch2.classy_logic.interfaces.Literal;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
@@ -22,7 +23,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 8 Dec 2014
  */
-public class BooleanTerm extends GenericParameter<Boolean> 
+public class BooleanTerm extends GenericParameter<Boolean> implements Literal 
 {
 
 	/**
@@ -33,4 +34,10 @@ public class BooleanTerm extends GenericParameter<Boolean>
 	{
 		super(Term.ANONYMOUS, value);
 	}
+
+    @Override
+    public LiteralType getLiteralType()
+    {
+        return LiteralType.xpl_boolean;
+    }
 }

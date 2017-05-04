@@ -20,6 +20,8 @@ import au.com.cybersearch2.classy_logic.interfaces.OperatorFactory;
 
 /**
  * DelegateType
+ * Classifies all cases where a value is assigned to a variable. 
+ * If value is not one of 7 specific types, is it classified as ASSIGN_ONLY.
  * @author Andrew Bowley
  * 29Apr.,2017
  */
@@ -31,11 +33,16 @@ public enum DelegateType
     DECIMAL,
     BOOLEAN,
     AXIOM, 
-    ASSIGN_ONLY,
-    NULL;
-    
+    NULL,
+    ASSIGN_ONLY;
+ 
+    /** Creates an Operator instance specific to one DelegateType */
     private OperatorFactory operatorFactory;
-    
+ 
+    /**
+     * Returns operator factory for delegate type
+     * @return OperatorFactory object
+     */
     public OperatorFactory getOperatorFactory()
     {
         return operatorFactory;

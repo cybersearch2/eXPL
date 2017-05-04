@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.operator;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -24,11 +25,14 @@ import au.com.cybersearch2.classy_logic.trait.DoubleTrait;
 
 /**
  * DoubleOperator
+ * @see DelegateType#DOUBLE
+ * @see DoubleOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
 public class DoubleOperator extends ExpressionOperator implements LocaleListener
 {
+    /** Behaviours for localization and specialization of Double operands */
     private DoubleTrait doubleTrait;
     
     /**
@@ -52,6 +56,7 @@ public class DoubleOperator extends ExpressionOperator implements LocaleListener
     }
 
     /**
+     * getRightOperandOps
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
      */
     @Override
@@ -78,6 +83,7 @@ public class DoubleOperator extends ExpressionOperator implements LocaleListener
     }
 
     /**
+     * getLeftOperandOps
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
      */
     @Override
@@ -104,7 +110,7 @@ public class DoubleOperator extends ExpressionOperator implements LocaleListener
     }
 
     /**
-     * 
+     * numberEvaluation - unary
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
      */
     @Override
@@ -122,8 +128,8 @@ public class DoubleOperator extends ExpressionOperator implements LocaleListener
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * numberEvaluation - binary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
@@ -152,6 +158,7 @@ public class DoubleOperator extends ExpressionOperator implements LocaleListener
      * @param operatorEnum2 Operator
      * @param rightTerm Term on right
      * @return Boolean result
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#booleanEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
@@ -172,6 +179,12 @@ public class DoubleOperator extends ExpressionOperator implements LocaleListener
         return calc;
     }
 
+    /**
+     * Convert value to double, if not already of this type
+     * @param object Value to convert
+     * @param clazz Value class
+     * @return double
+     */
     public double convertObject(Object object, Class<?> clazz)
     {
         if (clazz == Double.class)

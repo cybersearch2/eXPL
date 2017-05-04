@@ -13,20 +13,17 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.interfaces;
-
-import au.com.cybersearch2.classy_logic.compile.OperandType;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+package au.com.cybersearch2.classy_logic.pattern;
 
 /**
- * AxiomContainer
- * Holds one or more axioms
+ * StructureType
  * @author Andrew Bowley
- * 14Apr.,2017
+ * 2May,2017
  */
-public interface AxiomContainer
+public enum StructureType
 {
-    QualifiedName getKey();
-    AxiomListener getAxiomListener();
-    OperandType getOperandType();
+    axiom,
+    template,
+    choice,
+    archetype
 }

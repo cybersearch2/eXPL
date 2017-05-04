@@ -32,7 +32,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
 public class AxiomPairer implements UnificationPairer
 {
 	/** Axiom which is performing unification */
-	protected Structure owner;
+	protected Axiom owner;
 	/** List of paired terms collected by this object */
 	protected List<TermPair> pairList;
 	/** Qualified name for local context */
@@ -42,7 +42,7 @@ public class AxiomPairer implements UnificationPairer
 	 * Construct an AxiomPairer object
 	 * @param owner Structure which is performing unification
 	 */
-	public AxiomPairer(Structure owner, QualifiedName localContext) 
+	public AxiomPairer(Axiom owner, QualifiedName localContext) 
 	{
 		this.owner = owner;
 		this.localContext = localContext;

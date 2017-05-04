@@ -15,18 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.terms.LiteralType;
 
 /**
- * AxiomContainer
- * Holds one or more axioms
+ * Literal
  * @author Andrew Bowley
- * 14Apr.,2017
+ * 3May,2017
  */
-public interface AxiomContainer
+public interface Literal
 {
-    QualifiedName getKey();
-    AxiomListener getAxiomListener();
-    OperandType getOperandType();
+    LiteralType getLiteralType();
 }

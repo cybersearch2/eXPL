@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,10 +58,11 @@ public class LogicChainQuery extends ChainQuery
  	 * Execute query and if not tail, chain to next.
  	 * Sub classes override this method and call it upon completion to handle the chaining
  	 * @param solution The object which stores the query results
+     * @param templateChain Template chain to manage same query repeated in different scopes
 	 * @return EvaluationStatus enum: SHORT_CIRCUIT, SKIP or COMPLETE
 	 */
 	@Override
-	public EvaluationStatus executeQuery(Solution solution)
+	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain)
 	{
 		for (Template template: templateList)
 		{
@@ -75,7 +77,7 @@ public class LogicChainQuery extends ChainQuery
 			if (!query.iterate(solution, template))
 				return EvaluationStatus.SHORT_CIRCUIT;
 		}
-		return super.executeQuery(solution);
+		return super.executeQuery(solution, templateChain);
  	}
 
 	/**

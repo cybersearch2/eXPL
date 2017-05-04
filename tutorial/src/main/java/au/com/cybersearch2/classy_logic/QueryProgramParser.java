@@ -79,7 +79,6 @@ public class QueryProgramParser
             else
                 queryProgram = new QueryProgram(providerManager);
             queryProgram.setResourceBase(resourcePath);
-            queryProgram.setResourceBase(resourcePath);
             context = new ParserContext(queryProgram, filePath.toString());
             queryParser.input(context);
             return queryProgram;

@@ -4,7 +4,9 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -13,6 +15,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.AssignTypeEvaluatorOperator;
+import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.operator.EvaluatorOperator;
 
@@ -239,30 +242,6 @@ public class Evaluator extends DelegateOperand
 	}
 
 	/**
- 	 * Evaluate a unary expression 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	//@Override
-	//public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
-	//{
-	//	if (isNaN(rightTerm.getValue()))
-	//		return new Double("NaN");
-	//	return super.numberEvaluation(operatorEnum2, rightTerm);
-	//}
-
-	/**
-	 * Evaluate a binary expression
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
-	 */
-	//@Override
-	//public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
-	//{
-	//	if (isNaN(rightTerm.getValue()) || isNaN(leftTerm.getValue()))
-	//		return new Double("NaN");
-	//	return super.numberEvaluation(leftTerm, operatorEnum2, rightTerm);
-	//}
-
-	/**
 	 * Returns left child of Operand
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperand()
 	 */
@@ -450,7 +429,7 @@ public class Evaluator extends DelegateOperand
         case SC_OR: // "||"
         case SC_AND: // "&&"
         {
-            if (delegateType != DelegateType.BOOLEAN)
+            if (operator.getDelegateType() != DelegateType.BOOLEAN)
                 operator.setDelegateType(DelegateType.BOOLEAN);
         }
         default:
@@ -557,10 +536,16 @@ public class Evaluator extends DelegateOperand
      */
     protected void performOnFlyConversion()
     {
+        if (!performStringConversion())
+            performDecimalConversion();
+    }
+    
+    protected boolean performStringConversion()
+    {
         boolean isLeftString = left instanceof StringOperand;
         boolean isRightString = right instanceof StringOperand;
         if ((!isLeftString && !isRightString) || (isLeftString && isRightString))
-            return;
+            return (isLeftString && isRightString);
         if (isRightString)
         {
             if (isValidOperand(left, operatorEnum, left.getOperator().getLeftOperandOps()) &&
@@ -570,7 +555,7 @@ public class Evaluator extends DelegateOperand
                 StringOperand stringOperand = (StringOperand)right;
                 right = stringCloneable.cloneFromOperand(stringOperand, stringOperand.expression);
             }
-            return;
+            return true;
         }
         if (isValidOperand(right, operatorEnum, right.getOperator().getRightOperandOps()) &&
              (right.getOperator().getTrait() instanceof StringCloneable))
@@ -579,6 +564,34 @@ public class Evaluator extends DelegateOperand
             StringOperand stringOperand = (StringOperand)left;
             left = stringCloneable.cloneFromOperand(stringOperand, stringOperand.expression);
         }
+        return true;
+    }
+
+    protected boolean performDecimalConversion()
+    {
+        boolean isLeftDecimal = left instanceof BigDecimalOperand;
+        boolean isRightDecimal = right instanceof BigDecimalOperand;
+        if ((!isLeftDecimal && !isRightDecimal) || (isLeftDecimal && isRightDecimal))
+            return (isLeftDecimal && isRightDecimal);
+        if (isRightDecimal)
+        {
+            if (left.getOperator().getTrait().getOperandType() == OperandType.CURRENCY)
+                convertToCurrency((BigDecimalOperand)left);
+        }
+        else
+        {
+            if (right.getOperator().getTrait().getOperandType() == OperandType.CURRENCY)
+                convertToCurrency((BigDecimalOperand)right);
+        }
+       return true;
+    }
+
+    protected void convertToCurrency(BigDecimalOperand bigDecimalOperand)
+    {
+        Locale locale = bigDecimalOperand.getOperator().getTrait().getLocale();
+        CurrencyOperator currencyOperator = new CurrencyOperator();
+        bigDecimalOperand.setOperator(currencyOperator);
+        currencyOperator.getTrait().setLocale(locale);
     }
 
 	/**

@@ -98,7 +98,7 @@ public class GermanScopeTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string total_text=translate_var0+ + gst: +total_format (12,19) (12,99)");
+        assertThat(sourceItem.toString()).isEqualTo("string total_text=translate_var0+ + gst: +total_format (12,19) (12,98)");
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("query german.item_query (18,3)");

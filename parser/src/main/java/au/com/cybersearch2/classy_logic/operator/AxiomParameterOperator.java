@@ -21,9 +21,12 @@ import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
+import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 
 /**
  * AxiomParameterOperator
+ * Operator for Operand which populates an axiom from a parameter list after the list operands have been evaluated
+ * @see AxiomParameterOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
@@ -35,7 +38,11 @@ public class AxiomParameterOperator implements Operator
     {
         AXIOM_PARAMETER_TRAIT = new DefaultTrait(OperandType.TERM);
     }
-    
+
+    /**
+     * getTrait
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getTrait()
+     */
     @Override
     public Trait getTrait()
     {
@@ -43,8 +50,8 @@ public class AxiomParameterOperator implements Operator
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getRightOperandOps()
+     * getRightOperandOps
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getRightOperandOps()
      */
     @Override
     public OperatorEnum[] getRightOperandOps() 
@@ -56,8 +63,8 @@ public class AxiomParameterOperator implements Operator
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getLeftOperandOps()
+     * getLeftOperandOps
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getLeftOperandOps()
      */
     @Override
     public OperatorEnum[] getLeftOperandOps() 
@@ -77,19 +84,31 @@ public class AxiomParameterOperator implements Operator
     {
         return EMPTY_OPERAND_OPS;
     }
- 
+
+    /**
+     * numberEvaluation - unary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#numberEvaluation(OperatorEnum, Term)
+     */
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm)
     {   // There is no valid evaluation involving an axiom resulting in a number
         return new Integer(0);
     }
 
+    /**
+     * numberEvaluation - binary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#numberEvaluation(Term, OperatorEnum, Term)
+     */
     @Override
     public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
     {   // There is no valid evaluation involving an axiom resulting in a number
         return new Integer(0);
     }
 
+    /**
+     * booleanEvaluation
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#booleanEvaluation(Term, OperatorEnum, Term)
+     */
     @Override
     public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm)
     {   // There is no valid evaluation involving an axiom resulting in a boolean

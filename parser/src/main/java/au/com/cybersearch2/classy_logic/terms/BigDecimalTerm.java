@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.terms;
 
 import java.math.BigDecimal;
 
+import au.com.cybersearch2.classy_logic.interfaces.Literal;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
@@ -24,7 +25,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 19 Jan 2015
  */
-public class BigDecimalTerm extends GenericParameter<BigDecimal>
+public class BigDecimalTerm extends GenericParameter<BigDecimal> implements Literal
 {
     /**
      * Construct a BigDecimalTerm object
@@ -35,4 +36,9 @@ public class BigDecimalTerm extends GenericParameter<BigDecimal>
 		super(Term.ANONYMOUS, new BigDecimal(value));
 	}
 
+    @Override
+    public LiteralType getLiteralType()
+    {
+        return LiteralType.decimal;
+    }
 }

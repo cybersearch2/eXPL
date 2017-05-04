@@ -13,20 +13,21 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.interfaces;
-
-import au.com.cybersearch2.classy_logic.compile.OperandType;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+package au.com.cybersearch2.classy_logic.terms;
 
 /**
- * AxiomContainer
- * Holds one or more axioms
+ * LiteralType
+ * Identifies term types available where only literals are allowed
  * @author Andrew Bowley
- * 14Apr.,2017
+ * 3May,2017
  */
-public interface AxiomContainer
+public enum LiteralType
 {
-    QualifiedName getKey();
-    AxiomListener getAxiomListener();
-    OperandType getOperandType();
+    string,
+    integer,
+    xpl_double,
+    decimal,
+    xpl_boolean,
+    unknown,
+    unspecified
 }

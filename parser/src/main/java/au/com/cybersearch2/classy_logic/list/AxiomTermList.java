@@ -27,6 +27,7 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.TermListManager;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -51,6 +52,8 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 	protected List<String> axiomTermNameList;
     /** Source item to be updated in parser task */
     protected SourceItem sourceItem;
+    /** Archetype identity used to detect axiom specification changes */
+    protected String archetypeName;
 
 	/** Empty Axiom constant */
 	static Axiom EMPTY_AXIOM;
@@ -76,6 +79,15 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 			public void onNextAxiom(QualifiedName qname, Axiom nextAxiom) 
 			{
 				axiom = nextAxiom;
+                TermListManager axiomArchetype = axiom.getArchetype();
+                if ((archetypeName == null) | 
+                    !axiomArchetype.toString().equals(archetypeName) |
+                    ((axiomTermNameList != null) && 
+                     (axiom.getTermCount() > axiomTermNameList.size())))
+                {
+                    axiomTermNameList = axiom.getArchetype().getAxiomTermNameList();
+                    archetypeName = axiomArchetype.toString();
+                }
 		        if (sourceItem != null)
 		            sourceItem.setInformation(toString());
 			}};
@@ -103,19 +115,9 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 	/**
 	 * @return the axiomTermNameList
 	 */
-    @Override
 	public List<String> getAxiomTermNameList() 
 	{
 		return axiomTermNameList;
-	}
-
-	/**
-	 * @param axiomTermNameList the axiomTermNameList to set
-	 */
-    @Override
-	public void setAxiomTermNameList(List<String> axiomTermNameList) 
-	{
-		this.axiomTermNameList = axiomTermNameList;
 	}
 
 	/**
@@ -135,6 +137,7 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 	public void setAxiom(Axiom axiom)
 	{
 		this.axiom = axiom;
+        axiomTermNameList = axiom.getArchetype().getAxiomTermNameList();
 		if (sourceItem != null)
 		    sourceItem.setInformation(toString());
 	}

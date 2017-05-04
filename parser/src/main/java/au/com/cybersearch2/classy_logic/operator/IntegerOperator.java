@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.operator;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -24,15 +25,18 @@ import au.com.cybersearch2.classy_logic.trait.IntegerTrait;
 
 /**
  * IntegerOperator
+ * @see DelegateType.INTEGER
+ * @see IntegerOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
 public class IntegerOperator extends ExpressionOperator implements LocaleListener
 {
+    /** Behaviours for localization and specialization of Integer operands */
     private IntegerTrait integerTrait;
     
     /**
-     * 
+     * Construct IntegerOperator object
      */
     public IntegerOperator()
     {
@@ -40,12 +44,20 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
         integerTrait = new IntegerTrait();
     }
 
+    /**
+     * getTrait
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getTrait()
+     */
     @Override
     public Trait getTrait()
     {
         return integerTrait;
     }
-    
+
+    /**
+     * onScopeChange
+     * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(au.com.cybersearch2.classy_logic.Scope)
+     */
     @Override
     public void onScopeChange(Scope scope)
     {
@@ -128,8 +140,8 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
     }
 
     /**
-     * Unary numberEvaluation
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * Unary numberEvaluation - unary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
@@ -149,8 +161,8 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
     }
 
     /**
-     * Binary numberEvaluation
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * Binary numberEvaluation - binary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
@@ -187,6 +199,7 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
      * @param operatorEnum2 Operator
      * @param rightTerm Term on right
      * @return Boolean result
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#booleanEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
@@ -207,6 +220,12 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
         return calc;
     }
 
+    /**
+     * Convert value to long, if not already of this type
+     * @param object Value to convert
+     * @param clazz Value class
+     * @return long
+     */
     public long convertObject(Object object, Class<?> clazz)
     {
         if (clazz == Long.class)
@@ -218,6 +237,12 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
         else return 0L;
     }
 
+    /**
+     * Convert value of integer type to long, if not already of this type
+     * @param object Value to convert
+     * @param clazz Value class
+     * @return long
+     */
     protected int convertIntObject(Object object, Class<?> clazz)
     {
         if (clazz == Long.class)

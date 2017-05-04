@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.operator;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -24,6 +25,8 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * AxiomOperator
+ * @see DelegateType#AXIOM
+ * @see AxiomOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
@@ -35,7 +38,11 @@ public class AxiomOperator implements Operator
     {
         AXIOM_TRAIT = new DefaultTrait(OperandType.AXIOM);
     }
-    
+
+    /**
+     * getTrait
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getTrait()
+     */
     @Override
     public Trait getTrait()
     {
@@ -43,8 +50,8 @@ public class AxiomOperator implements Operator
     }
     
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getRightOperandOps()
+     * getRightOperandOps
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getRightOperandOps()
      */
     @Override
     public OperatorEnum[] getRightOperandOps() 
@@ -56,8 +63,8 @@ public class AxiomOperator implements Operator
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getLeftOperandOps()
+     * getLeftOperandOps
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getLeftOperandOps()
      */
     @Override
     public OperatorEnum[] getLeftOperandOps() 
@@ -69,7 +76,7 @@ public class AxiomOperator implements Operator
     }
 
     /**
-     * 
+     * getStringOperandOps
      * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#getStringOperandOps()
      */
     @Override
@@ -85,7 +92,7 @@ public class AxiomOperator implements Operator
     }
 
     /**
-     * 
+     * numberEvaluation - unary
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
      */
     @Override
@@ -95,7 +102,7 @@ public class AxiomOperator implements Operator
     }
 
     /**
-     * 
+     * numberEvaluation - binary
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
      */
     @Override
@@ -105,7 +112,7 @@ public class AxiomOperator implements Operator
     }
 
     /**
-     * 
+     * booleanEvaluation
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
      */
     @Override

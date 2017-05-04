@@ -95,7 +95,7 @@ public class BlackIsWhiteTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("color_var0^=255 (11,3) (11,19)");
+        assertThat(sourceItem.toString()).isEqualTo("color_var0^=255 (11,3) (11,18)");
     }
 
     protected void checkSolution(BufferedReader reader, String shade)

@@ -31,7 +31,6 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermListVariable;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.query.AxiomListSource;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -72,8 +71,6 @@ public class AxiomUtils
             {
                 AxiomTermList rightAxiomTermList = (AxiomTermList)rightOperand.getValue();
                 rightAxiomList = new AxiomList(rightAxiomTermList.getQualifiedName(), rightAxiomTermList.getKey());
-                rightAxiomList.setAxiomTermNameList(getTermNames(rightAxiomTermList.getAxiom()));
-                rightAxiomList.assignItem(0, rightAxiomTermList);
             }
             leftAxiomList = (AxiomList)leftOperand.getValue();
             argumentsValid = AxiomUtils.isCongruent(leftAxiomList, rightAxiomList);
@@ -85,14 +82,6 @@ public class AxiomUtils
         int index = leftAxiomList.getLength();
         while (iterator.hasNext())
             leftAxiomList.assignItem(index++, iterator.next());
-        List<String> leftTermNames = leftAxiomList.getAxiomTermNameList();
-        if (leftTermNames == null) 
-        {   // Concatenation to an empty list
-            if (leftAxiomList.isEmpty())
-                leftAxiomList.setAxiomTermNameList(EMPTY_NAMES_LIST);
-            else
-                leftAxiomList.setAxiomTermNameList(getTermNames(leftAxiomList.getItem(0).getAxiom()));
-        }
         return (AxiomList) leftOperand.getValue();
     }
 
@@ -112,16 +101,10 @@ public class AxiomUtils
             Parameter param = new Parameter(arg.getName(), arg.getValue());
             axiom.addTerm(param);
         }
-        List<String> axiomTermNameList = getTermNames(axiom);
         // Wrap axiom in AxiomList object to allow interaction with other AxiomLists
         AxiomTermList axiomTermList = new AxiomTermList(qualifiedListName, axiomKey);
         axiomTermList.setAxiom(axiom);
-        axiomTermList.setAxiomTermNameList(axiomTermNameList);
         return axiomTermList;
-        //AxiomList axiomList = new AxiomList(qualifiedListName, axiomKey);
-        //axiomList.assignItem(0, axiomTermList);
-        //axiomList.setAxiomTermNameList(axiomTermNameList);
-        //return axiomList;
     }
 
     /**
@@ -159,15 +142,12 @@ public class AxiomUtils
      */
     public static void marshallAxioms(AxiomList axiomList, List<Axiom> axioms)
     {
-        List<String> axiomTermNameList = axiomList.getAxiomTermNameList();
         QualifiedName axiomName = axiomList.getQualifiedName();
         QualifiedName axiomKey = axiomList.getKey();
         for (int i = 0; i < axioms.size(); i++)
         {   // Each axiom is wrapped in an AxiomTermList to allow access from script
             AxiomTermList axiomTermList = new AxiomTermList(axiomName, axiomKey);
             axiomTermList.setAxiom(axioms.get(i));
-            if (axiomTermNameList != null)
-                axiomTermList.setAxiomTermNameList(axiomTermNameList);
             axiomList.assignItem(i, axiomTermList);
         }
     }
@@ -181,37 +161,14 @@ public class AxiomUtils
     {
         List<Axiom> dupAxioms = AxiomUtils.copyItemList(axiomList.getName(), axiomList);
         AxiomList dupAxiomList = new AxiomList(axiomList.getQualifiedName(), axiomList.getKey());
-        dupAxiomList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
         int index = 0;
         for (Axiom dupAxiom: dupAxioms)
         {
             AxiomTermList axiomTermList = new AxiomTermList(axiomList.getQualifiedName(), axiomList.getKey());
-            axiomTermList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
             axiomTermList.setAxiom(dupAxiom);
             dupAxiomList.assignItem(index++, axiomTermList);
         }
         return dupAxiomList;
-    }
-
-    /**
-     * Returns list of term names for specified axiom
-     * @param axiom The axiom
-     * @return List of term names which will be empty if the axiom contains anonymous terms
-     */
-    public static List<String> getTermNames(Axiom axiom)
-    {
-        if (axiom.getTermCount() == 0) 
-            return EMPTY_NAMES_LIST;
-        List<String> axiomTermNameList = new ArrayList<String>(axiom.getTermCount());
-        for (int i = 0; i < axiom.getTermCount(); i++)
-        {
-            Term term = axiom.getTermByIndex(i);
-            String termName = term.getName();
-            if (Term.ANONYMOUS.equals(termName))
-                return AxiomListSource.EMPTY_LIST;
-            axiomTermNameList.add(termName);
-        }
-        return axiomTermNameList;
     }
 
     /**
@@ -282,7 +239,6 @@ public class AxiomUtils
             {
                 AxiomList axiomList = (AxiomList)itemList;
                 AxiomList copyAxiomList = new AxiomList(axiomList.getQualifiedName(), axiomList.getKey());
-                copyAxiomList.setAxiomTermNameList(axiomList.getAxiomTermNameList());
                 int index = 0;
                 for (int i = 0; i < axiomList.getLength(); )
                 {

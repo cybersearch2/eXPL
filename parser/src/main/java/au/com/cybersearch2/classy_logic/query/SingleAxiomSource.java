@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.query;
 import java.util.Iterator;
 import java.util.List;
 
-import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
@@ -44,7 +43,7 @@ public class SingleAxiomSource implements AxiomSource, Iterator<Axiom>, Iterable
     public SingleAxiomSource(Axiom axiom)
     {
     	this.axiom = axiom;
-    	axiomTermNameList = AxiomUtils.getTermNames(axiom);
+    	axiomTermNameList = axiom.getArchetype().getAxiomTermNameList();
     }
 
     /**

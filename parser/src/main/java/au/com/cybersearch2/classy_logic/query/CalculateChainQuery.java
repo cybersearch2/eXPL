@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
@@ -67,10 +68,11 @@ public class CalculateChainQuery extends ChainQuery
  	 * Execute query and if not tail, chain to next.
  	 * Sub classes override this method and call it upon completion to handle the chaining
  	 * @param solution The object which stores the query results
+ 	 * @param templateChain Template chain to manage same query repeated in different scopes
 	 * @return EvaluationStatus enum: SHORT_CIRCUIT, SKIP or COMPLETE
 	 */
 	@Override
-	public EvaluationStatus executeQuery(Solution solution)
+	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain)
 	{
 	    if (scopeNotifier != null)
 	        scopeNotifier.run();
@@ -80,6 +82,21 @@ public class CalculateChainQuery extends ChainQuery
 			    calculator.setAxiomListener(axiomListener);
 	    if (template.isChoice())
 	    	calculator.setChoice(choice);
+	    // A chain is used to detect if a template with same name as head template encountered.
+	    // This may happen for same query repeated in different scopes.
+	    if (templateChain.isEmpty())
+	        templateChain.push(template);
+	    else
+	    {
+	        String key = template.getName();
+	        Template head = templateChain.peekLast();
+	        if (head.getName().equals(key))
+	        {   // New query, so reset template chain
+	            while ((head = templateChain.pollLast()) != null)
+	                head.reset();
+	        }
+            templateChain.push(template);
+	    }
 		if (axiom == null)
 			calculator.iterate(solution, template);
 		else 
@@ -94,7 +111,7 @@ public class CalculateChainQuery extends ChainQuery
     		}
     		calculator.iterate(seedAxiom, solution, template);
 		}
-		return super.executeQuery(solution);
+		return super.executeQuery(solution, templateChain);
  	}
 
  	/**

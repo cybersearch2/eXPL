@@ -79,6 +79,29 @@ public class LocaleCurrency
 	    		currencyAsText = currencyAsText.substring(symLength).trim();
 	    	else if (mark > 0)
 	    		currencyAsText = currencyAsText.substring(0, mark).trim();
+	    	// Fix grouping character, if different from expected
+	    	// Move a cursor from first digit until non-digit encountered
+	    	int cursor = Character.isDigit(currencyAsText.charAt(0)) ? 0 : 1;
+	    	int decPoint = currencyAsText.indexOf(symbols.getDecimalSeparator());
+	    	// Stop if decimal point or end of amount reached
+	    	int endOfGroups = decPoint == -1 ? currencyAsText.length() : decPoint;
+	    	while (cursor != endOfGroups)
+	    	{
+	    	    char groupChar = currencyAsText.charAt(cursor++);
+	    	    if (!Character.isDigit(groupChar))
+	    	    {
+	    	        if (groupChar != symbols.getGroupingSeparator())
+	    	        {
+	    	            char[] charArray = currencyAsText.toCharArray();
+	    	            for (int i = 0; i < charArray.length; i++)
+	    	                if (charArray[i] == groupChar)
+	    	                    charArray[i] = symbols.getGroupingSeparator();
+	    	            currencyAsText = String.copyValueOf(charArray);
+	    	        }
+	    	        break;
+	    	    }
+	    	}
+	    	// Now add currency smybol according to expected format
 			String sample = decformat.format(12345.67);
 			mark = sample.indexOf(currencySymbol);
 			String sep = mark == 0 ? sample.substring(symLength,symLength+1) : sample.substring(sample.length() - symLength - 1, sample.length() - symLength);

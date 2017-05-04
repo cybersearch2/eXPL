@@ -22,6 +22,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.TermListManager;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -37,6 +38,8 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	protected List<String> axiomTermNameList;
     /** Axiom key */
     protected QualifiedName key;
+    /** Archetype identity used to detect axiom specification changes */
+    protected String archetypeName;
 
 	/**
 	 * Construct an AxiomList object
@@ -120,6 +123,15 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 				AxiomTermList axiomListOperand = new AxiomTermList(getQualifiedName(), qname);
 				axiomListOperand.setAxiom(axiom);
 				assignItem(getLength(), axiomListOperand);
+				TermListManager axiomArchetype = axiom.getArchetype();
+				if ((archetypeName == null) | 
+				     !axiomArchetype.toString().equals(archetypeName) |
+	                 ((axiomTermNameList != null) && 
+	                  (axiom.getTermCount() > axiomTermNameList.size())))
+				{
+				    axiomTermNameList = axiom.getArchetype().getAxiomTermNameList();
+				    archetypeName = axiomArchetype.toString();
+				}
 			}};
 	}
 
@@ -152,20 +164,9 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	 * Returns axiom term name list
 	 * @return List of axiom term names
 	 */
-    @Override
 	public List<String> getAxiomTermNameList() 
 	{
 		return axiomTermNameList;
-	}
-
-	/**
-	 * Set  axiom term name list
-	 * @param axiomTermNameList The axiomTermNameList to set
-	 */
-    @Override
-	public void setAxiomTermNameList(List<String> axiomTermNameList) 
-	{
-		this.axiomTermNameList = axiomTermNameList;
 	}
 
 	/**

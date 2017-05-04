@@ -24,7 +24,6 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.TermVisitor;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -253,19 +252,9 @@ public class Structure implements Serializable
 		// If the parameter is named, add it to the term map as well
 		if (termMap == null)
 			termMap = new HashMap<String, Term>();
-		TermWalker termWalker = new TermWalker(param);
-		TermVisitor visitor = new TermVisitor()
-		{
-
-			@Override
-			public boolean next(Term term, int depth) 
-			{
-				if (!term.getName().isEmpty())
-					termMap.put(term.getName().toUpperCase(), term);
-				return true;
-			}
-		};
-		termWalker.visitAllNodes(visitor);
+		
+        if (!param.getName().isEmpty())
+            termMap.put(param.getName().toUpperCase(), param);
 	}
 
 }

@@ -27,9 +27,34 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
  */
 public interface Trait extends TextFormat
 {
+    /**
+     * Set locale
+     * @param locale Locale object
+     */
     void setLocale(Locale locale);
+    
+    /**
+     * Returns country code of locale 
+     * @return String
+     */
     String getCountry();
+    
+    /**
+     * Returns locale
+     * @return Locale object
+     */
     Locale getLocale();
+    
+    /**
+     * Returns locale for given country code
+     * @param country Country code (2-character)
+     * @return Locale object
+     */
     Locale getLocaleByCode(String country);
+    
+    /**
+     * Returns operand type to identify type of operands supported
+     * @return OperandType enum
+     */
     OperandType getOperandType();
 }

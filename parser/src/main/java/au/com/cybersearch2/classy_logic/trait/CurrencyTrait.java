@@ -30,6 +30,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * CurrencyTrait
+ * Behaviours for localization and specialization of Currency operands
  * @author Andrew Bowley
  * 21Apr.,2017
  */
@@ -38,12 +39,31 @@ public class CurrencyTrait extends BigDecimalTrait implements StringCloneable
     /** Currency implementation for specific locale */
     protected LocaleCurrency localeCurrency;
 
+    /**
+     * Construct CurrencyTrait object
+     */
     public CurrencyTrait()
     {
         super(OperandType.CURRENCY);
         localeCurrency = new LocaleCurrency();
     }
 
+    /**
+     * Returns fraction digits for locale currency
+     * @return int
+     */
+    public int getFractionDigits()
+    {
+        return localeCurrency.getFractionDigits();
+    }
+
+    /**
+     * Returns BigDecimal representation of an amount specified as text.
+     * Relaxes Java's strict format requirements to allow reasonable variations.
+     * @param value Text to parse
+     * @return BigDecimal object
+     * @see au.com.cybersearch2.classy_logic.trait.DefaultTrait#parseValue(java.lang.String)
+     */
     @Override
     public BigDecimal parseValue(String value)
     {
@@ -51,6 +71,9 @@ public class CurrencyTrait extends BigDecimalTrait implements StringCloneable
     }
     
     /**
+     * Returns text representation of amount specified in text
+     * @param amount Currency value in type compatible with NumberFormat eg. BigDecimal
+     * @return String
      * @see au.com.cybersearch2.classy_logic.trait.DefaultTrait#formatValue(java.lang.Object)
      */
     @Override
@@ -70,20 +93,19 @@ public class CurrencyTrait extends BigDecimalTrait implements StringCloneable
     }
 
     /**
-     * Returns fraction digits for locale currency
-     * @return int
+     * getOperandType
+     * @see au.com.cybersearch2.classy_logic.trait.DefaultTrait#getOperandType()
      */
-    public int getFractionDigits()
-    {
-        return localeCurrency.getFractionDigits();
-    }
-
     @Override
     public OperandType getOperandType()
     {
         return operandType;
     }
 
+    /**
+     * cloneFromOperand
+     * @see au.com.cybersearch2.classy_logic.trait.BigDecimalTrait#cloneFromOperand(au.com.cybersearch2.classy_logic.expression.StringOperand, au.com.cybersearch2.classy_logic.interfaces.Operand)
+     */
     @Override
     public BigDecimalOperand cloneFromOperand(StringOperand stringOperand, Operand expression)
     {

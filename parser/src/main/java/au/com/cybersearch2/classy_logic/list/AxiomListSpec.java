@@ -19,7 +19,6 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -232,26 +231,24 @@ public class AxiomListSpec
                      !axiomList.getKey().equals(axiomTermList.getKey()))
                 {
                     axiomList = new AxiomList(axiomName, axiomKey);
-                    axiomList.setAxiomTermNameList(AxiomUtils.getTermNames(axiomTermList.getAxiom()));
                 }
                 axiomList.assignItem(0, axiomTermList);
             }
             if (isTermList)
                 return true; // Ready to reference term in list
-            {   // Adjust index values for AxiomTermList
-                isTermList = true;
-                if (axiomIndex >= 0)
-                    termIndex = axiomIndex;
-                else
-                {
-                    termIndex = -1;
-                    termExpression = axiomExpression;
-                    suffix = termExpression.getName();
-                    setTermIndex();
-                }
-                axiomIndex = 0;
-                axiomExpression = null;
+            // Adjust index values for AxiomTermList
+            isTermList = true;
+            if (axiomIndex >= 0)
+                termIndex = axiomIndex;
+            else
+            {
+                termIndex = -1;
+                termExpression = axiomExpression;
+                suffix = termExpression.getName();
+                setTermIndex();
             }
+            axiomIndex = 0;
+            axiomExpression = null;
         }
         else if (axiomList == null)
             throw new ExpressionException("Value has incompatible type. Expecting " + (isTermList ? "AxiomTermList" : "AxiomList"));

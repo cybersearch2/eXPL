@@ -24,22 +24,32 @@ import au.com.cybersearch2.classy_logic.interfaces.Trait;
 
 /**
  * DefaultTrait
+ * Provides text formatting sufficient for most operands, including StringOperand.
+ * Also supports setting locale by 2-character country code - useful for currency formatting.
  * @author Andrew Bowley
  * 21Apr.,2017
  */
 public class DefaultTrait implements Trait
 {
+    /** Operand type identifies type of operands supported */
     protected OperandType operandType;
+    /** Locale - defaults to default locale */
     protected Locale locale;
     /** Country code */
     protected String country;
 
+    /** Construct DefaultTrait object */
     public DefaultTrait(OperandType operandType)
     {
         this.operandType = operandType;
+        // Locale is lazy-loaded
         country = "";
     }
-    
+
+    /**
+     * formatValue
+     * @see au.com.cybersearch2.classy_logic.interfaces.TextFormat#formatValue(java.lang.Object)
+     */
     @Override
     public String formatValue(Object value)
     {
@@ -52,20 +62,33 @@ public class DefaultTrait implements Trait
         return formatValue;
     }
 
+    /**
+     * getLocale
+     * @see au.com.cybersearch2.classy_logic.interfaces.Trait#getLocale()
+     */
     @Override
     public Locale getLocale()
     {
         if (locale == null)
-            locale = Locale.getDefault();
+            setLocale(Locale.getDefault());
         return locale;
     }
 
+    /**
+     * setLocale
+     * @see au.com.cybersearch2.classy_logic.interfaces.Trait#setLocale(java.util.Locale)
+     */
     @Override
     public void setLocale(Locale locale)
     {
         this.locale = locale;
+        country = getLocale().getCountry();
     }
 
+    /**
+     * getOperandType
+     * @see au.com.cybersearch2.classy_logic.interfaces.Trait#getOperandType()
+     */
     @Override
     public OperandType getOperandType()
     {
@@ -82,7 +105,6 @@ public class DefaultTrait implements Trait
     @Override
     public Locale getLocaleByCode(String country) 
     {
-        this.country = country;
         String[] parts = country.split("_|-");
         if (parts.length == 2)
             return new Locale(parts[0], parts[1]);
@@ -104,7 +126,7 @@ public class DefaultTrait implements Trait
     }
 
     /**
-     * @return the country code or empty string if not specified
+     * @return the country code or empty string if locale not set
      */
     @Override
     public String getCountry()
@@ -113,6 +135,7 @@ public class DefaultTrait implements Trait
     }
 
     /**
+     * Returns locale languge and country codes
      * @see java.lang.Object#toString()
      */
     @Override

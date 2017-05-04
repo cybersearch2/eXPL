@@ -66,6 +66,9 @@ public class DoubleOperand extends ExpressionOperand<Double> implements LocaleLi
 	    init();
 	}
 
+	/**
+	 * Complete object construction
+	 */
     private void init()
     {
         operator = new DoubleOperator();
@@ -75,6 +78,7 @@ public class DoubleOperand extends ExpressionOperand<Double> implements LocaleLi
      * Evaluate value if expression exists
      * @param id Identity of caller, which must be provided for backup()
      * @return Flag set true if evaluation is to continue
+     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#evaluate(int)
      */
     @Override
     public EvaluationStatus evaluate(int id)
@@ -89,19 +93,28 @@ public class DoubleOperand extends ExpressionOperand<Double> implements LocaleLi
 	/**
      * Assign a value and id to this Term from another term 
      * @param term Term containing non-null value and id to set
-	 */
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#assign(au.com.cybersearch2.classy_logic.interfaces.Term)
+     */
 	@Override
 	public void assign(Term term) 
 	{
 		setValue(operator.convertObject(term.getValue(), term.getValueClass()));
 	}
 
+	/**
+	 * onScopeChange
+	 * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(au.com.cybersearch2.classy_logic.Scope)
+	 */
     @Override
     public void onScopeChange(Scope scope)
     {
         operator.onScopeChange(scope);
     }
 
+    /**
+     * getOperator
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getOperator()
+     */
     @Override
     public Operator getOperator()
     {

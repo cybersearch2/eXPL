@@ -29,6 +29,8 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 
 /**
  * DelegateOperator
+ * Proxies operator according to delegate type
+ * @see DelegateType
  * @author Andrew Bowley
  * 29Apr.,2017
  */
@@ -51,19 +53,22 @@ public class DelegateOperator implements Operator
         delegateTypeMap.put(Null.class, DelegateType.NULL);
     }
 
-    /** Defines operations that an Operand performs with other operands. To be set by super. */
+    /** Defines operations that an Operand performs with other operands. */
     protected Operator proxy;
     /** Current operator DelegateType */
     protected DelegateType delegateType;
 
+    /**
+     * Construct DelegateOperator object
+     */
     public DelegateOperator()
-    {
+    {   // Default to type ASSIGN_ONLY
         delegateType = DelegateType.ASSIGN_ONLY;
         proxy = operatorInstance(DelegateType.ASSIGN_ONLY);
     }
     
     /**
-     * Creates delegate instance according to type of value
+     * Delegates operator depending on given value class
      */
     public void setDelegate(Class<?> clazz)
     {
@@ -112,7 +117,17 @@ public class DelegateOperator implements Operator
     }
 
     /**
-     * 
+     * getTrait
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getTrait()
+     */
+    @Override
+    public Trait getTrait()
+    {
+        return proxy.getTrait();
+    }
+
+    /**
+     * getRightOperandOps
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
      */
     @Override
@@ -122,7 +137,7 @@ public class DelegateOperator implements Operator
     }
 
     /**
-     * 
+     * getLeftOperandOps
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getLeftOperandOps()
      */
     @Override
@@ -132,8 +147,8 @@ public class DelegateOperator implements Operator
     }
 
     /**
-     * Returns OperatorEnum values for which this Term is a valid String operand
-     * @return OperatorEnum[]
+     * getStringOperandOps
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getStringOperandOps()
      */
      @Override
      public OperatorEnum[] getStringOperandOps()
@@ -142,8 +157,8 @@ public class DelegateOperator implements Operator
      }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * numberEvaluation - unary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
@@ -152,8 +167,8 @@ public class DelegateOperator implements Operator
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * numberEvaluation - binary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2,
@@ -163,8 +178,8 @@ public class DelegateOperator implements Operator
     }
 
     /**
-     * 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * booleanEvaluation
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2,
@@ -173,17 +188,21 @@ public class DelegateOperator implements Operator
         return proxy.booleanEvaluation(leftTerm, operatorEnum2, rightTerm);
     }
 
-    @Override
-    public Trait getTrait()
-    {
-        return proxy.getTrait();
-    }
-
+    /**
+     * Returns new instance of operator for given delegate type
+     * @param delegateType
+     * @return Operator object
+     */
     protected Operator operatorInstance(DelegateType delegateType)
     {
         return delegateType.getOperatorFactory().delegate();
     }
-    
+
+    /**
+     * Returns flag set true if give class is a delegate class
+     * @param clazz Class to check
+     * @return boolean
+     */
     public static boolean isDelegateClass(Class<?> clazz)
     {
         return delegateTypeMap.containsKey(clazz);

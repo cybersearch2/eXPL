@@ -128,6 +128,8 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
 	@Override
 	public EvaluationStatus evaluate(int id)
 	{
+        if (rightOperand != null)
+            rightOperand.evaluate(id);
 		if (indexExpression != null)
 		{   // Evaluate index. The resulting value must be a sub class of Number to be usable as an index.
 			indexExpression.evaluate(id);
@@ -239,6 +241,8 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
 	{   // Do not backup list item as unification still works regardless of whether it is empty or not.
 		// Setting the list item to null, which is the only backup option, also risks NPE.
 		// Backup index expression too as it always evaluates index
+        if (rightOperand != null)
+            rightOperand.backup(id);
 		if (indexExpression != null)
 			indexExpression.backup(id);
 		return super.backup(id);

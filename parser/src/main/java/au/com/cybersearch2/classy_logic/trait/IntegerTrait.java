@@ -27,18 +27,24 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * IntegerTrait
+ * Behaviours for localization and specialization of Integer operands
  * @author Andrew Bowley
  * 26Apr.,2017
  */
 public class IntegerTrait extends NumberTrait<Long>
 {
-
+    /**
+     * Construct IntegerTrait object
+     */
     public IntegerTrait()
     {
         super(OperandType.INTEGER);
-        
-    }
+     }
 
+    /**
+     * parseValue
+     * @see au.com.cybersearch2.classy_logic.trait.NumberTrait#parseValue(java.lang.String)
+     */
     @Override
     public Long parseValue(String string)
     {
@@ -52,6 +58,10 @@ public class IntegerTrait extends NumberTrait<Long>
         return value;
     }
 
+    /**
+     * cloneFromOperand
+     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand, Operand)
+     */
     @Override
     public IntegerOperand cloneFromOperand(StringOperand stringOperand, Operand expression)
     {

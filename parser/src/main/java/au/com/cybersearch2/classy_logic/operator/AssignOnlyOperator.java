@@ -19,6 +19,7 @@ import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 
 /**
  * AssignOnlyOperator
+ * @see DelegateType#ASSIGN_ONLY
  * @author Andrew Bowley
  * 28Apr.,2017
  */
@@ -26,7 +27,7 @@ public class AssignOnlyOperator extends NullOperator
 {
 
     /**
-     * 
+     * Construct AssignOnlyOperator object
      */
     public AssignOnlyOperator()
     {
@@ -35,7 +36,7 @@ public class AssignOnlyOperator extends NullOperator
 
     /**
      * getRightOperandOps
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getRightOperandOps()
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getRightOperandOps()
      */
     @Override
     public OperatorEnum[] getRightOperandOps() 
@@ -50,7 +51,7 @@ public class AssignOnlyOperator extends NullOperator
 
     /**
      * getLeftOperandOps
-     * @see au.com.cybersearch2.classy_logic.expression.NullOperand#getLeftOperandOps()
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getLeftOperandOps()
      */
     @Override
     public OperatorEnum[] getLeftOperandOps() 

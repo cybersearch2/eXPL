@@ -24,8 +24,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 
 /**
@@ -60,6 +64,7 @@ public class LexiconSource implements AxiomSource
 	public Iterator<Axiom> iterator() 
 	{
 		File dictionaryFile = new File("src/main/resources", "definitions.txt");
+		
         try 
         {
 			reader = new BufferedReader(new FileReader(dictionaryFile));
@@ -71,6 +76,7 @@ public class LexiconSource implements AxiomSource
 		return new Iterator<Axiom>()
 		{
 			String[] strings;
+	        AxiomArchetype axiomArchetype = new AxiomArchetype(QualifiedName.parseGlobalName(axiomName));
 			
 			@Override
 			public boolean hasNext() 
@@ -103,13 +109,14 @@ public class LexiconSource implements AxiomSource
 			@Override
 			public Axiom next() 
 			{
-				Axiom axiom = new Axiom(axiomName);
 				StringTerm word = new StringTerm(strings[0].trim());
 				word.setName(axiomTermNameList.get(0));
-				axiom.addTerm(word);
 				StringTerm definition = new StringTerm(strings[1].trim());
 				definition.setName(axiomTermNameList.get(1));
-				axiom.addTerm(definition);
+				List<Term> terms = new ArrayList<Term>(2);
+				terms.add(word);
+				terms.add(definition);
+				Axiom axiom = axiomArchetype.itemInstance(terms);
 				return axiom;
 			}
 

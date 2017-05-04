@@ -135,7 +135,6 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	        if (axiomList == null)
 	        {
 	            axiomList = new AxiomList(axiomTermList.getQualifiedName(), axiomTermList.getKey());
-	            axiomList.setAxiomTermNameList(AxiomUtils.getTermNames(axiomTermList.getAxiom()));
 	        }
 	        if (axiomIndex == -1)
 	            axiomIndex = 0;

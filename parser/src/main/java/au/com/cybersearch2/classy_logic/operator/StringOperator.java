@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.operator;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -25,6 +26,8 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * StringOperator
+ * @see DelegateType.STRING
+ * @see StringOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
@@ -34,7 +37,7 @@ public class StringOperator extends ExpressionOperator implements LocaleListener
     protected DefaultTrait trait;
 
     /**
-     * 
+     * Construct StringOperator object
      */
     public StringOperator()
     {
@@ -42,12 +45,20 @@ public class StringOperator extends ExpressionOperator implements LocaleListener
         trait = new DefaultTrait(OperandType.STRING);
     }
 
+    /**
+     * getTrait
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getTrait()
+     */
     @Override
     public Trait getTrait()
     {
         return trait;
     }
 
+    /**
+     * onScopeChange
+     * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(au.com.cybersearch2.classy_logic.Scope)
+     */
     @Override
     public void onScopeChange(Scope scope)
     {
@@ -100,34 +111,35 @@ public class StringOperator extends ExpressionOperator implements LocaleListener
 
     /**
      * Evaluate a unary expression using this Term
-     * @param operatorEnum2 OperatorEnum for one of +, - or ~ 
+     * @param operatorEnum OperatorEnum for one of +, - or ~ 
      * @return generic Parameter which implements Operand. The genericy type will be a sub class of Number.
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#numberEvaluation(OperatorEnum, Term)
      */
     @Override
-    public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
+    public Number numberEvaluation(OperatorEnum operatorEnum, Term rightTerm) 
     {
         return new Integer(0);
     }
 
     /**
-     * Binary numberEvaluation
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * numberEvaluation - binary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluationTerm, OperatorEnum, Term)
      */
     @Override
-    public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
+    public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum, Term rightTerm) 
     {
         return new Integer(0);
     }
 
     /**
      * booleanEvaluation
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#booleanEvaluation(Term, OperatorEnum, Term)
      */
     @Override
-    public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
+    public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum, Term rightTerm) 
     {
         boolean calc = false;
-        switch (operatorEnum2)
+        switch (operatorEnum)
         {
         case EQ:  calc = leftTerm.getValue().equals(rightTerm.getValue()); break; // "=="
         case NE:  calc = !leftTerm.getValue().equals(rightTerm.getValue()); break; // "!="

@@ -15,12 +15,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
+
 /**
  * OperatorFactory
+ * Creates an Operator instance specific to one DelegateType
+ * @see DelegateType
  * @author Andrew Bowley
  * 29Apr.,2017
  */
 public interface OperatorFactory
 {
+    /**
+     * Returns Operator instance for one delegate type
+     * @return Operator object
+     */
     Operator delegate();
 }

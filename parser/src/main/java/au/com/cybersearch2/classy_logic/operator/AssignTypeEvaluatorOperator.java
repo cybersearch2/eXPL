@@ -20,6 +20,7 @@ import au.com.cybersearch2.classy_logic.interfaces.AssignType;
 /**
  * AssignTypeEvaluatorOperator
  * Marker interface signals operator performs assignment. Used by parser.
+ * @see EvaluatorOperator
  * @author Andrew Bowley
  * 28Apr.,2017
  */

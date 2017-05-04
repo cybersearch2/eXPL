@@ -22,18 +22,24 @@ import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 
 /**
  * NumberTrait
+ * Base class for Number operands - Integer, Double and Decimal
  * @author Andrew Bowley
  * 21Apr.,2017
  */
-public abstract class NumberTrait<T> extends DefaultTrait implements StringCloneable
+public abstract class NumberTrait<T extends Number> extends DefaultTrait implements StringCloneable
 {
 
+    /**
+     * Construct NumberTrait object
+     * @param operandType OperandType enum
+     */
     public NumberTrait(OperandType operandType)
     {
         super(operandType);
     }
 
     /**
+     * formatValue
      * @see au.com.cybersearch2.classy_logic.trait.DefaultTrait#formatValue(java.lang.Object)
      */
     @Override
@@ -44,6 +50,11 @@ public abstract class NumberTrait<T> extends DefaultTrait implements StringClone
         return formatValue;
     }
 
+    /**
+     * Sub classes to implement parsing of text values to return a Number object
+     * @param string
+     * @return
+     */
     public abstract T parseValue(String string);
 
 }

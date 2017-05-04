@@ -15,9 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.query;
 
+import java.util.Deque;
+
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
+import au.com.cybersearch2.classy_logic.pattern.Template;
 
 /**
  * ChainQuery
@@ -35,11 +38,12 @@ public abstract class ChainQuery
  	 * Execute query and if not tail, chain to next.
  	 * Sub classes override this method and call it upon completion to handle the chaining
  	 * @param solution The object which stores the query results
+     * @param templateChain Template chain to manage same query repeated in different scopes
 	 * @return EvaluationStatus enum: SHORT_CIRCUIT, SKIP or COMPLETE
  	 */
-	public EvaluationStatus executeQuery(Solution solution)
+	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain)
 	{
-		return next == null ? EvaluationStatus.COMPLETE : next.executeQuery(solution);
+		return next == null ? EvaluationStatus.COMPLETE : next.executeQuery(solution, templateChain);
  	}
 
 	/**

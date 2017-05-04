@@ -417,6 +417,7 @@ public class AxiomListVariableTest
     {
     	AxiomList axiomList = new AxiomList(QualifiedName.parseName("city_height_list"), new QualifiedName("city"));
     	final List<Axiom> cityList = new ArrayList<Axiom>();
+    	/*
 		cityList.add(new Axiom("city", "bilene", 1718));
 		cityList.add(new Axiom("city", "addis ababa", 8000));
 		cityList.add(new Axiom("city", "denver", 5280));
@@ -427,6 +428,7 @@ public class AxiomListVariableTest
 		cityList.add(new Axiom("city", "richmond", 19));
 		cityList.add(new Axiom("city", "spokane", 1909));
 		cityList.add(new Axiom("city", "wichita", 1305)); 
+		*/
 		int index = 0;
 		for (Axiom axiom: cityList)
 		{

@@ -67,6 +67,8 @@ import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
 import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.terms.LiteralParameter;
+import au.com.cybersearch2.classy_logic.terms.LiteralType;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -657,7 +659,7 @@ void AxiomItem(QualifiedName qualifiedAxiomName, ParserContext context) :
 {
   Fact(qualifiedAxiomName, context) ("," Fact(qualifiedAxiomName, context) )*  
   {
-    context.getParserAssembler().saveAxiom(qualifiedAxiomName);
+    context.getParserAssembler().saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
   }
 }
 
@@ -667,7 +669,7 @@ void AltAxiomItem(QualifiedName qualifiedAxiomName, ParserContext context) :
 {
   <BIT_OR> Fact(qualifiedAxiomName, context) ( <BIT_OR> Fact(qualifiedAxiomName, context) )*
   {
-    context.getParserAssembler().saveAxiom(qualifiedAxiomName);
+    context.getParserAssembler().saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
   }
 }
 
@@ -1239,7 +1241,7 @@ QualifiedName ChoiceDeclaration(ParserContext context) :
   {
     context.addChoiceItem(qualifiedAxiomName).setEnd(delimitToken); 
   }
-  ( ChoiceItem(selection, qualifiedAxiomName, context) )+ 
+  ( ChoiceItem(selection++, qualifiedAxiomName, context) )+ 
   {
     context.setContextName(contextName);
     return qualifiedAxiomName;
@@ -1272,7 +1274,7 @@ void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserContext c
     Token delimToken;
     ParserAssembler parserAssembler = context.getParserAssembler();
     String name = parserAssembler.getAxiomTermName(qualifiedAxiomName, 0);
-    parserAssembler.addAxiom(qualifiedAxiomName, new Parameter(Term.ANONYMOUS, new Null()));
+    parserAssembler.addAxiom(qualifiedAxiomName, new StringTerm(name + selection));
     StringBuilder builder = new StringBuilder();
 }
 {
@@ -1287,7 +1289,7 @@ void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserContext c
       }
     )* delimToken=<RBRACE> 
     {
-       parserAssembler.saveAxiom(qualifiedAxiomName);
+       parserAssembler.saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
        QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName());
        parserAssembler.addTemplate(qualifiedTemplateName, operand);
        builder.append('}');
@@ -1877,7 +1879,7 @@ Parameter LiteralTerm(ParserContext context) :
   |
   UnknownLiteral(context)
   {
-    return new Parameter(Term.ANONYMOUS, new Unknown());
+    return new LiteralParameter(Term.ANONYMOUS, new Unknown(), LiteralType.unknown);
   }
 }
 

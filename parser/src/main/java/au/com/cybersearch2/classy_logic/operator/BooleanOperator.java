@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.operator;
 import java.math.BigDecimal;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -25,6 +26,8 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
  * BooleanOperator
+ * @see DelegateType#BOOLEAN
+ * @see BooleanOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
@@ -32,18 +35,29 @@ public class BooleanOperator extends ExpressionOperator
 {
     /** Localization and specialization */
     protected DefaultTrait trait;
- 
+
+    /** 
+     * Construct BooleanOperator object
+     */
     public BooleanOperator()
     {
         trait = new DefaultTrait(OperandType.BOOLEAN);
     }
-    
+
+    /**
+     * getTrait
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getTrait()
+     */
     @Override
     public Trait getTrait()
     {
         return trait;
     }
 
+    /**
+     * getRightOperandOps
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getRightOperandOps()
+     */
     @Override
     public OperatorEnum[] getRightOperandOps() 
     {
@@ -59,6 +73,10 @@ public class BooleanOperator extends ExpressionOperator
         };
     }
 
+    /**
+     * getLeftOperandOps
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getLeftOperandOps()
+     */
     @Override
     public OperatorEnum[] getLeftOperandOps() 
     {
@@ -73,6 +91,10 @@ public class BooleanOperator extends ExpressionOperator
         };
     }
 
+    /**
+     * numberEvaluation - unary
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#numberEvaluation(OperatorEnum, Term)
+     */
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
     {   // There is no valid evaluation involving a boolean resulting in a number
@@ -85,9 +107,10 @@ public class BooleanOperator extends ExpressionOperator
      * @param operatorEnum2 OperatorEnum for one of +, -, *, /, &amp;, |, ^ or % 
      * @param rightTerm Term on right
      * @return sub class of Number with result
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#numberEvaluation(Term, OperatorEnum, Term)
      */
     @Override
-    public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
+    public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum, Term rightTerm) 
     {   // There is no valid evaluation involving a boolean and another term resulting in a number except *
         boolean leftIsBool = leftTerm.getValueClass() == Boolean.class; 
         boolean rightIsBool = rightTerm.getValueClass() == Boolean.class; 
@@ -109,13 +132,14 @@ public class BooleanOperator extends ExpressionOperator
      * @param operatorEnum2 OperaorEnum.LT or OperaorEnum.GT
      * @param rightTerm Term on right
      * @return Boolean object
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#booleanEvaluation(Term, OperatorEnum, Term)
      */
     @Override
-    public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
+    public Boolean booleanEvaluation(Term leftTerm, OperatorEnum operatorEnum, Term rightTerm) 
     {   
         boolean right = ((Boolean)(rightTerm.getValue())).booleanValue();
         boolean left = ((Boolean)(leftTerm.getValue())).booleanValue();
-        switch (operatorEnum2)
+        switch (operatorEnum)
         {
         case SC_OR:  return right || left; // "||"
         case SC_AND: return right && left; // "&&"

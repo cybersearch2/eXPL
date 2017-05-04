@@ -47,6 +47,8 @@ import au.com.cybersearch2.classy_logic.terms.IntegerTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
 import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.terms.LiteralParameter;
+import au.com.cybersearch2.classy_logic.terms.LiteralType;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;

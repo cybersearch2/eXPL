@@ -22,13 +22,14 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
  * EvaluatorOperator
+ * Sub classes DelegateOperator to escape number evaluation with NaN
  * @author Andrew Bowley
  * 28Apr.,2017
  */
 public class EvaluatorOperator extends DelegateOperator
 {
     /**
-     * 
+     * Construct EvaluatorOperator object
      */
     public EvaluatorOperator()
     {
@@ -37,7 +38,7 @@ public class EvaluatorOperator extends DelegateOperator
 
     /**
      * Evaluate a unary expression 
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term rightTerm) 
@@ -49,7 +50,7 @@ public class EvaluatorOperator extends DelegateOperator
 
     /**
      * Evaluate a binary expression
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(au.com.cybersearch2.classy_logic.interfaces.Term, au.com.cybersearch2.classy_logic.expression.OperatorEnum, au.com.cybersearch2.classy_logic.interfaces.Term)
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#numberEvaluation(Term, OperatorEnum, Term)
      */
     @Override
     public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 

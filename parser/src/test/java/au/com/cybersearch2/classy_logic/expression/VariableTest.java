@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
+import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -40,27 +41,27 @@ public class VariableTest
 		Parameter otherTerm = new Parameter("x", Float.valueOf("1.0f"));
 		assertThat(variable.unifyTerm(otherTerm, 1)).isEqualTo(1);
 		assertThat(variable.getValue()).isEqualTo(otherTerm.getValue());
-		assertThat(variable.delegateType).isEqualTo(DelegateType.ASSIGN_ONLY);
+		assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.ASSIGN_ONLY);
 	    variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", BigDecimal.ONE);
 		variable.unifyTerm(otherTerm, 1);
-        assertThat(variable.delegateType).isEqualTo(DelegateType.DECIMAL);
+        assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.DECIMAL);
 	    variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", Boolean.TRUE);
 		variable.unifyTerm(otherTerm, 1);
-	    assertThat(variable.delegateType).isEqualTo(DelegateType.BOOLEAN);
+	    assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.BOOLEAN);
 	    variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", Double.valueOf("1.0"));
 		variable.unifyTerm(otherTerm, 1);
-	    assertThat(variable.delegateType).isEqualTo(DelegateType.DOUBLE);
+	    assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.DOUBLE);
 	    variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", Integer.valueOf("1"));
 		variable.unifyTerm(otherTerm, 1);
-	    assertThat(variable.delegateType).isEqualTo(DelegateType.INTEGER);
+	    assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.INTEGER);
 	    variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", "1.0f");
 		variable.unifyTerm(otherTerm, 1);
-	    assertThat(variable.delegateType).isEqualTo(DelegateType.STRING);
+	    assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.STRING);
 	}
 	@Test
 	public void test_assign()
@@ -69,27 +70,27 @@ public class VariableTest
 	    variable = new TestVariable(NAME);
 	    variable.assign(new Parameter(Term.ANONYMOUS, BigDecimal.ONE));
 	    assertThat(variable.isEmpty()).isFalse();
-	    assertThat(variable.delegateType).isEqualTo(DelegateType.DECIMAL);
+	    assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.DECIMAL);
 		assertThat(variable.getValue()).isEqualTo(BigDecimal.ONE);
 	    variable = new TestVariable(NAME);
 	    variable.assign(new Parameter(Term.ANONYMOUS, Boolean.TRUE));
 	    assertThat(variable.isEmpty()).isFalse();
-        assertThat(variable.delegateType).isEqualTo(DelegateType.BOOLEAN);
+        assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.BOOLEAN);
 		assertThat(variable.getValue()).isEqualTo(Boolean.TRUE);
 	    variable = new TestVariable(NAME);
 	    variable.assign(new Parameter(Term.ANONYMOUS, Double.valueOf("1.0")));
 	    assertThat(variable.isEmpty()).isFalse();
-        assertThat(variable.delegateType).isEqualTo(DelegateType.DOUBLE);
+        assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.DOUBLE);
 		assertThat(variable.getValue()).isEqualTo(Double.valueOf("1.0"));
 	    variable = new TestVariable(NAME);
 	    variable.assign(new Parameter(Term.ANONYMOUS, Integer.valueOf("1")));
 	    assertThat(variable.isEmpty()).isFalse();
-        assertThat(variable.delegateType).isEqualTo(DelegateType.INTEGER);
+        assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.INTEGER);
 		assertThat(variable.getValue()).isEqualTo(Integer.valueOf("1"));
 	    variable = new TestVariable(NAME);
 	    variable.assign(new Parameter(Term.ANONYMOUS, "1.0f"));
 	    assertThat(variable.isEmpty()).isFalse();
-        assertThat(variable.delegateType).isEqualTo(DelegateType.STRING);
+        assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.STRING);
 		assertThat(variable.getValue()).isEqualTo("1.0f");
 	}
 
@@ -106,7 +107,7 @@ public class VariableTest
 		variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", "1.0f");
 		assertThat(variable.unifyTerm(otherTerm, 2)).isEqualTo(2);
-		assertThat(variable.delegateType).isEqualTo(DelegateType.STRING);
+		assertThat(((DelegateOperator)variable.operator).getDelegateType()).isEqualTo(DelegateType.STRING);
 		
 	}
     
@@ -122,14 +123,12 @@ public class VariableTest
 	    variable = new TestVariable(NAME);
 	    Parameter otherTerm = new Parameter("x", Boolean.TRUE);
 		variable.unifyTerm(otherTerm, 1);
-		variable.setDelegate(variable.getValueClass());
 		// Boolean allows multiplication with number. Operator is ignored along with fact no boolean terms involved!
 		assertThat(variable.operator.numberEvaluation(new TestIntegerOperand("L", Integer.valueOf(7)), OperatorEnum.XOR, new TestIntegerOperand("R", Integer.valueOf(5)))).isEqualTo(new BigDecimal("35"));
 		assertThat(variable.operator.numberEvaluation(OperatorEnum.INCR, new TestIntegerOperand("R", Integer.valueOf(8)))).isEqualTo(new Integer(0));
 	    variable = new TestVariable(NAME);
 	    otherTerm = new Parameter("x", "String");
 		variable.unifyTerm(otherTerm, 1);
-		variable.setDelegate(variable.getValueClass());
 		assertThat(variable.operator.numberEvaluation(new TestIntegerOperand("L", Integer.valueOf(7)), OperatorEnum.XOR, new TestIntegerOperand("R", Integer.valueOf(5)))).isEqualTo(new Integer(0));
 		assertThat(variable.operator.numberEvaluation(OperatorEnum.INCR, new TestIntegerOperand("R", Integer.valueOf(8)))).isEqualTo(new Integer(0));
 	}
@@ -140,7 +139,6 @@ public class VariableTest
 		Variable variable = new TestVariable(NAME);
 		Parameter otherTerm = new Parameter("x", BigDecimal.ONE);
 		variable.unifyTerm(otherTerm, 1);
-		variable.setDelegate(variable.getValueClass());
 		assertThat(variable.operator.getLeftOperandOps()).isEqualTo(new TestBigDecimalOperand("*").operator.getLeftOperandOps());
 		assertThat(variable.operator.getRightOperandOps()).isEqualTo(new TestBigDecimalOperand("*").operator.getRightOperandOps());
 		assertThat(variable.operator.booleanEvaluation(new TestBigDecimalOperand("L", BigDecimal.ZERO), OperatorEnum.LT, new TestBigDecimalOperand("R", BigDecimal.TEN))).isTrue();
@@ -149,14 +147,12 @@ public class VariableTest
 	    variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", Boolean.TRUE);
 		variable.unifyTerm(otherTerm, 1);
-		variable.setDelegate(variable.getValueClass());
 		assertThat(variable.operator.getLeftOperandOps()).isEqualTo(new TestBooleanOperand("*").operator.getLeftOperandOps());
 		assertThat(variable.operator.getRightOperandOps()).isEqualTo(new TestBooleanOperand("*").operator.getRightOperandOps());
 		assertThat(variable.operator.booleanEvaluation(new TestBooleanOperand("L", Boolean.FALSE), OperatorEnum.NE, new TestBooleanOperand("R", Boolean.TRUE))).isTrue();
 	    variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", Double.valueOf("1.0"));
 		variable.unifyTerm(otherTerm, 1);
-		variable.setDelegate(variable.getValueClass());
 		assertThat(variable.operator.getLeftOperandOps()).isEqualTo(new TestDoubleOperand("*").operator.getLeftOperandOps());
 		assertThat(variable.operator.getRightOperandOps()).isEqualTo(new TestDoubleOperand("*").operator.getRightOperandOps());
 		assertThat(variable.operator.booleanEvaluation(new TestDoubleOperand("L", Double.valueOf(1.0)), OperatorEnum.LT, new TestDoubleOperand("R", Double.valueOf(0.5)))).isFalse();
@@ -165,7 +161,6 @@ public class VariableTest
 	    variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", Integer.valueOf("1"));
 		variable.unifyTerm(otherTerm, 1);
-		variable.setDelegate(variable.getValueClass());
 		assertThat(variable.operator.getLeftOperandOps()).isEqualTo(new TestIntegerOperand("*").operator.getLeftOperandOps());
 		assertThat(variable.operator.getRightOperandOps()).isEqualTo(new TestIntegerOperand("*").operator.getRightOperandOps());
 		assertThat(variable.operator.booleanEvaluation(new TestIntegerOperand("L", Long.valueOf(2)), OperatorEnum.GE, new TestIntegerOperand("R", Long.valueOf(2)))).isTrue();
@@ -174,7 +169,6 @@ public class VariableTest
 	    variable = new TestVariable(NAME);
 		otherTerm = new Parameter("x", "1.0f");
 		variable.unifyTerm(otherTerm, 1);
-		variable.setDelegate(variable.getValueClass());
 		assertThat(variable.operator.getLeftOperandOps()).isEqualTo(new TestStringOperand("*").operator.getLeftOperandOps());
 		assertThat(variable.operator.getRightOperandOps()).isEqualTo(new TestStringOperand("*").operator.getRightOperandOps());
 		assertThat(variable.operator.booleanEvaluation(new TestStringOperand("L", "hello"), OperatorEnum.NE, new TestStringOperand("R", "world"))).isTrue();
