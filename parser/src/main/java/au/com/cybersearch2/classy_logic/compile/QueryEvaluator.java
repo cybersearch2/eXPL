@@ -119,6 +119,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             QualifiedName axiomKey = QualifiedName.parseName(innerTemplate.getKey());
             axiomListenerList = parserAssembler.getAxiomListenerList(axiomKey);
             AxiomTermList itemList = parserAssembler.getAxiomTermList(axiomKey);
+            parserAssembler.setAxiomTermNameList(innerTemplate, itemList);
             axiomListenerList.add(itemList.getAxiomListener());
         }
         else

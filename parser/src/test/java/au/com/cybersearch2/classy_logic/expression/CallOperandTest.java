@@ -66,9 +66,9 @@ public class CallOperandTest
                     @Override
                     public Void evaluate(List<Term> argumentList)
                     {
-                        for (Term term: argumentList)
-                            System.out.print(term.getValue().toString());
-                        System.out.println();
+                        //for (Term term: argumentList)
+                        //    System.out.print(term.getValue().toString());
+                        //System.out.println();
                         return null;
                     }
                     
@@ -413,10 +413,10 @@ public class CallOperandTest
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);" +
             "choice swatch (shade, red, green, blue)\n" +
-            "{colors[aqua], 0, 255, 255}\n" +
-            "{colors[black], 0, 0, 0}\n" +
-            "{colors[blue], 0, 0, 255}\n" +
-            "{colors[white], 255, 255, 255};\n" +
+            "{colors^aqua, 0, 255, 255}\n" +
+            "{colors^black, 0, 0, 0}\n" +
+            "{colors^blue, 0, 0, 255}\n" +
+            "{colors^white, 255, 255, 255};\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
             "}\n" +

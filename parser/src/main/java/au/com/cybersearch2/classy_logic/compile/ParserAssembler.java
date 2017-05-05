@@ -784,6 +784,28 @@ public class ParserAssembler implements LocaleListener
 	    return axiomListMap.get(qname);
 	}
 	
+    /**
+	 * Set axiom term name list from template
+	 * @param qualifiedTemplateName Qualified name of template
+	 * @param axiomList Axiom list to be updated
+	 * @return List of term names
+	 */
+	public List<String> setAxiomTermNameList(Template template, AxiomContainer axiomContainer)
+    {
+	    List<String> axiomTermNameList = null;
+        axiomTermNameList = new ArrayList<String>();
+        for (int i = 0; i < template.getTermCount(); i++)
+        {
+            Term term = template.getTermByIndex(i);
+            if (term.getName().isEmpty())
+                break;
+            axiomTermNameList.add(term.getName());
+        }
+        if (axiomTermNameList.size() > 0)
+            axiomContainer.setAxiomTermNameList(axiomTermNameList);
+        return axiomTermNameList;
+    }
+
 	/**
 	 * Register axiom list by adding it's axiom listener to this ParserAssembler object
 	 * @param qname The qualified name of the axioms inserted into the list

@@ -170,6 +170,16 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	}
 
 	/**
+	 * Set  axiom term name list
+	 * @param axiomTermNameList The axiomTermNameList to set
+	 */
+    @Override
+	public void setAxiomTermNameList(List<String> axiomTermNameList) 
+	{
+		this.axiomTermNameList = axiomTermNameList;
+	}
+
+	/**
 	 * getItemClass
 	 * @see au.com.cybersearch2.classy_logic.list.ArrayItemList#getItemClass()
 	 */

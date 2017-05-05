@@ -147,6 +147,7 @@ public class TermMetaData implements Comparable<TermMetaData>
         if (isAnonymous)
         {
             this.name = name;
+            isAnonymous = false;
             return true;
         }
         return false;

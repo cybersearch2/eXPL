@@ -78,7 +78,7 @@ public class QueryExecuterTest
         
         void trace(Axiom axiom)
         {
-            System.out.println(axiom.toString());
+            //System.out.println(axiom.toString());
             assertThat(axiom.toString()).isEqualTo(MULTI_QUERY_TRACE[i++]);
         }
     }
@@ -713,7 +713,7 @@ public class QueryExecuterTest
         Template spartaOnly = new Template(spartaOnlyName, spartaLiteral);
         spartaOnly.setKey("spartaOnly");
         query.chain(ensemble, Collections.singletonList(spartaOnly));
-        System.out.println(query.toString());
+        //System.out.println(query.toString());
         assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
         Iterator<ChainQuery> it = query.chainQueryIterator();
         assertThat(it.next().toString()).isEqualTo("account(name?name==name, fee), delivery(city?city==city, freight)");

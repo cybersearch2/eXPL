@@ -126,16 +126,17 @@ public class QueryExecuterAdapter
             while (iterator.hasNext())
             {
                 Axiom axiom = iterator.next();
-                String axiomName = axiom.getName();
-                QualifiedName qname = QualifiedName.parseName(axiomName);
+                QualifiedName qname = QualifiedName.parseGlobalName(key);
                 if (firstTime)
                 {
                     firstTime = false;
                     parserAssembler.createAxiom(qname);
+                    for (int i = 0; i < axiom.getTermCount(); i++)
+                        parserAssembler.addAxiom(qname, axiom.getTermByIndex(i));
+                    parserAssembler.saveAxiom(qname);
                 }
-                for (int i = 0; i < axiom.getTermCount(); i++)
-                    parserAssembler.addAxiom(qname, axiom.getTermByIndex(i));
-                parserAssembler.saveAxiom(qname);
+                else
+                    parserAssembler.getAxiomList(qname).add(axiom);
             }
         }
     }

@@ -71,6 +71,7 @@ public class AxiomUtils
             {
                 AxiomTermList rightAxiomTermList = (AxiomTermList)rightOperand.getValue();
                 rightAxiomList = new AxiomList(rightAxiomTermList.getQualifiedName(), rightAxiomTermList.getKey());
+                rightAxiomList.assignItem(0, rightAxiomTermList);
             }
             leftAxiomList = (AxiomList)leftOperand.getValue();
             argumentsValid = AxiomUtils.isCongruent(leftAxiomList, rightAxiomList);

@@ -121,6 +121,15 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 	}
 
 	/**
+	 * @param axiomTermNameList the axiomTermNameList to set
+	 */
+    @Override
+	public void setAxiomTermNameList(List<String> axiomTermNameList) 
+	{
+		this.axiomTermNameList = axiomTermNameList;
+	}
+
+	/**
 	 * Returns axiom listener
 	 * @return AxiomListener object
 	 */

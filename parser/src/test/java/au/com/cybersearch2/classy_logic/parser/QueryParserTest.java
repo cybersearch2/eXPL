@@ -53,7 +53,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.LexiconSource;
+import au.com.cybersearch2.classy_logic.LexiconSource;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
@@ -910,9 +910,9 @@ public class QueryParserTest
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
         TestQueryExecuter colorsQuery = new TestQueryExecuter(queryParams);
-    	//assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude, is_high = altitude>5000)");
- 	    if (colorsQuery.execute())
-  	    	System.out.println(colorsQuery.getSolution().getAxiom("color_convert").toString());
+ 	    assertThat(colorsQuery.execute()).isTrue();
+  	    //System.out.println(colorsQuery.getSolution().getAxiom("color_convert").toString());
+ 	    assertThat(colorsQuery.getSolution().getAxiom("color_convert").toString()).isEqualTo("color_convert(red=0.75, green=0.5, blue=0.25, r=0.75, g=0.75, b=0.75)");
 	}
 
 	@Test
@@ -1090,7 +1090,7 @@ public class QueryParserTest
  	    try
  	    {
  	    	agriculturalQuery.execute();
- 	    	System.out.println(agriculturalQuery);
+ 	    	//System.out.println(agriculturalQuery);
  	    	failBecauseExceptionWasNotThrown(QueryExecutionException.class);
  	    }
  	    catch(QueryExecutionException e)

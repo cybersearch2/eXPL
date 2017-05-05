@@ -19,6 +19,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.Iterator;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -89,7 +90,8 @@ public class DebugClientTest
         assertThat(sourceMarker).isNotNull();
         return result.getIterator(QualifiedName.parseGlobalName("rated"));
     }
-    
+
+    @Ignore
     @Test
     public void testAgeRating()
     {
@@ -100,6 +102,7 @@ public class DebugClientTest
         }
     }
 
+    @Ignore
     @Test
     public void textDisplayFruit()
     {

@@ -131,10 +131,8 @@ public class ParameterOperandTest
             assertThat(item.toString()).isEqualTo("list<term> test.all_types()=" + param);
         }
         assertThat(iterator.hasNext()).isFalse();
-        //System.out.println(result.getTermByName(Template.TERMNAMES).toString());
+        //System.out.println(result.getItem(0).getAxiom().getArchetype().getAxiomTermNameList());
         if (termNames != null)
-            assertThat(result.getAxiomTermNameList().toString()).isEqualTo("[" + termNames + "]");
-        else
-            assertThat(result.getAxiomTermNameList()).isNull();
+            assertThat(result.getItem(0).getAxiom().getArchetype().getAxiomTermNameList().toString()).isEqualTo("[" + termNames + "]");
     }
 }

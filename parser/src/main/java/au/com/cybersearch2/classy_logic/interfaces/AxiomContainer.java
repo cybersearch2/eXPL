@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
+import java.util.List;
+
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 
@@ -28,5 +30,6 @@ public interface AxiomContainer
 {
     QualifiedName getKey();
     AxiomListener getAxiomListener();
+    void setAxiomTermNameList(List<String> axiomTermNameList);
     OperandType getOperandType();
 }

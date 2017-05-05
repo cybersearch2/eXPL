@@ -265,7 +265,7 @@ public class ScopeQueryParserTest
 	        "local translate(lexicon);" +
 			"template charge(currency amount);\n" +
 			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +
-			"calc format_total(string total_text = translate[Total] + \" + gst: \" + format(charge_plus_gst.total));\n" +
+			"calc format_total(string total_text = translate^Total + \" + gst: \" + format(charge_plus_gst.total));\n" +
 			"scope german (language=\"de\", region=\"DE\")\n" +
 			"{\n" +
 			"  axiom item() {\"12.345,67 €\"};\n" +
@@ -278,10 +278,10 @@ public class ScopeQueryParserTest
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);" +
             "choice swatch (name, red, green, blue)\n" +
-            "{colors[aqua], 0, 255, 255}\n" +
-            "{colors[black], 0, 0, 0}\n" +
-            "{colors[blue], 0, 0, 255}\n" +
-            "{colors[white], 255, 255, 255};\n" +
+            "{colors^aqua, 0, 255, 255}\n" +
+            "{colors^black, 0, 0, 0}\n" +
+            "{colors^blue, 0, 0, 255}\n" +
+            "{colors^white, 255, 255, 255};\n" +
             "axiom shade (name) : parameter;\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
@@ -701,21 +701,21 @@ public class ScopeQueryParserTest
 		if (querySpec == null)
 			throw new IllegalArgumentException("Query \"" + queryName + "\" does not exist");
 		QueryParams queryParams = new QueryParams(scope, querySpec);
-		Parameter term1 = (Parameter) queryParams.getTemplateList().get(1).getTermByName("name");
-		Parameter term2 = null;
+		//Parameter term1 = (Parameter) queryParams.getTemplateList().get(1).getTermByName("name");
+		//Parameter term2 = null;
 		QueryExecuterAdapter adapter = new QueryExecuterAdapter(queryParams.getAxiomCollection(), queryParams.getTemplateList());
 		TestQueryExecuter headQuery = new TestQueryExecuter(new QueryParams(adapter.getScope(), adapter.getQuerySpec()));
 		if (querySpec.getQueryChainList() != null)
 			for (QuerySpec chainQuerySpec: querySpec.getQueryChainList())
 			{
 				 queryParams = new QueryParams(scope, chainQuerySpec);
-				 if (term2 == null)
-					 term2 = (Parameter) queryParams.getTemplateList().get(0).getTermByName("name");
+				 //if (term2 == null)
+				 //	 term2 = (Parameter) queryParams.getTemplateList().get(0).getTermByName("name");
 				 headQuery.chain(queryParams.getAxiomCollection(), queryParams.getTemplateList());
 			}
 		while (headQuery.execute())
 		{
-			System.out.println("Name1 id = " + term1.getId() + ", Name2 id = " + term2.getId());
+			//System.out.println("Name1 id = " + term1.getId() + ", Name2 id = " + term2.getId());
 			//assertThat(term1).isEqualTo(term2);
 			if (!solutionHandler.onSolution(headQuery.getSolution()))
 				break;

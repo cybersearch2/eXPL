@@ -28,11 +28,13 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.LexiconSource;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
@@ -47,6 +49,7 @@ public class RegExTest
 	@Before
 	public void setUp()
 	{
+        Archetype.CASE_INSENSITIVE_NAME_MATCH = true;
 	}
 	
 

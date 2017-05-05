@@ -191,11 +191,14 @@ public class Axiom extends TermList
 				int index = 0;
 				for (Term templateTerm: other.termList)
 				{   // Match by position
-					Term axiomTerm = getTermByIndex(index++);
-					if (index > getTermCount())
+					Term axiomTerm = getTermByIndex(index);
+					if (index >= getTermCount())
 					    break;
                     if (!axiomTerm.getName().isEmpty())
+                    {
+                        index++;
                         continue;
+                    }
 					if (!axiomPairer.pairTerms((Operand)templateTerm, axiomTerm))
 						return false;
 					QualifiedName qname = ((Operand)templateTerm).getQualifiedName();
@@ -205,6 +208,7 @@ public class Axiom extends TermList
 						axiomTerm.setName(qname.getName());
 						archetype.changeName(index, qname.getName());
 					}
+					index++;
 				}
 				// Only needs to be done once
 				pairByPosition = false;
