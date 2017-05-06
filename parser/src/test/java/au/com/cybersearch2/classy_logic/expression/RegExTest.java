@@ -36,6 +36,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
 
@@ -57,7 +58,8 @@ public class RegExTest
 	public void test_RegEx_query() throws IOException 
 	{
 		LexiconSource lexiconSource = new LexiconSource();
-		Template inWordsTemplate = new Template(new QualifiedTemplateName(QualifiedName.EMPTY, "in_words"));
+        TemplateArchetype wordArchetype = new TemplateArchetype(new QualifiedTemplateName(QualifiedName.EMPTY, "in_words"));
+		Template inWordsTemplate = new Template(wordArchetype);
 		inWordsTemplate.setKey("Lexicon");
 		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Word"), "^in[^ ]+", 0, null);
 		inWordsTemplate.addTerm(regExOperand);
@@ -81,7 +83,8 @@ public class RegExTest
 	public void test_groups()
 	{
 		LexiconSource lexiconSource = new LexiconSource();
-		Template dictionaryTemplate = new Template(new QualifiedTemplateName(QualifiedName.EMPTY, "dictionary"));
+        TemplateArchetype wordArchetype = new TemplateArchetype(new QualifiedTemplateName(QualifiedName.EMPTY, "dictionary"));
+		Template dictionaryTemplate = new Template(wordArchetype);
 		dictionaryTemplate.setKey("Lexicon");
 		Group group = new Group("dictionary");
 		Operand g1 = mock(Operand.class);

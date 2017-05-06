@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.pattern;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -27,6 +28,10 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
+import au.com.cybersearch2.classy_logic.operator.IntegerOperator;
+import au.com.cybersearch2.classy_logic.operator.StringOperator;
+import au.com.cybersearch2.classy_logic.terms.TermMetaData;
 
 /**
  * TemplateTest
@@ -37,20 +42,38 @@ public class TemplateTest
 {
 	final static String NAME = "myStruct";
 	final static String KEY = "myKey";
-	
+
+	TemplateArchetype templateArchitype;
 	Operand parameter1;
 	Operand parameter2;
+	Operator operator1;
+	Operator operator2;
 
+	@Before
+	public void setUp()
+	{
+	    operator1 = new StringOperator();
+	    operator2 = new IntegerOperator();
+	    templateArchitype = mock(TemplateArchetype.class);
+	    when(templateArchitype.getQualifiedName()).thenReturn(parseTemplateName(NAME));
+	    when(templateArchitype.getName()).thenReturn(NAME);
+	    when(templateArchitype.isMutable()).thenReturn(true);
+	}
+	
 	@Test
 	public void test_Constructor_terms_list()
 	{
-		Template testTemplate = new Template(parseTemplateName(NAME), getTermList());
+	    TermMetaData termMetaData1 = mock(TermMetaData.class);
+        TermMetaData termMetaData2 = mock(TermMetaData.class);
+	    when(templateArchitype.analyseTerm(parameter1, 0)).thenReturn(termMetaData1);
+        when(templateArchitype.analyseTerm(parameter2, 1)).thenReturn(termMetaData2);
+		Template testTemplate = new Template(templateArchitype, getTermList());
 		int id = testTemplate.getId();
 		assertThat(testTemplate.getName()).isEqualTo(NAME);
 		assertThat(testTemplate.getKey()).isEqualTo(NAME);
 		assertThat(id).isEqualTo(Template.referenceCount.get());
-		assertThat(testTemplate.termMap.get("PARAMETER1")).isEqualTo(parameter1);
-		assertThat(testTemplate.termMap.get("PARAMETER2")).isEqualTo(parameter2);
+		verify(templateArchitype, times(2)).addTerm(isA(TermMetaData.class));
+		verify(templateArchitype).clearMutable();
 		testTemplate.evaluate();
 		verify(parameter1).evaluate(id);
 		verify(parameter2).evaluate(id);
@@ -59,46 +82,58 @@ public class TemplateTest
 	@Test
 	public void test_Constructor_terms_list_key()
 	{
-		Template testTemplate = new Template(KEY, parseTemplateName(NAME), getTermList());
-		int id = testTemplate.getId();
-		assertThat(testTemplate.getName()).isEqualTo(NAME);
-		assertThat(testTemplate.getKey()).isEqualTo(KEY);
-		assertThat(id).isEqualTo(Template.referenceCount.get());
-		assertThat(testTemplate.termMap.get("PARAMETER1")).isEqualTo(parameter1);
-		assertThat(testTemplate.termMap.get("PARAMETER2")).isEqualTo(parameter2);
-		testTemplate.evaluate();
-		verify(parameter1).evaluate(id);
-		verify(parameter2).evaluate(id);
+        TermMetaData termMetaData1 = mock(TermMetaData.class);
+        TermMetaData termMetaData2 = mock(TermMetaData.class);
+        when(templateArchitype.analyseTerm(parameter1, 0)).thenReturn(termMetaData1);
+        when(templateArchitype.analyseTerm(parameter2, 1)).thenReturn(termMetaData2);
+        Template testTemplate = new Template(KEY, templateArchitype, getTermList());
+        int id = testTemplate.getId();
+        assertThat(testTemplate.getName()).isEqualTo(NAME);
+        assertThat(testTemplate.getKey()).isEqualTo(KEY);
+        assertThat(id).isEqualTo(Template.referenceCount.get());
+        verify(templateArchitype, times(2)).addTerm(isA(TermMetaData.class));
+        verify(templateArchitype).clearMutable();
+        testTemplate.evaluate();
+        verify(parameter1).evaluate(id);
+        verify(parameter2).evaluate(id);
 	}
-	
+		
 	@Test
 	public void test_Constructor_terms_array()
 	{
-		Template testTemplate = new Template(parseTemplateName(NAME), getParameterArray());
-		int id = testTemplate.getId();
-		assertThat(testTemplate.getName()).isEqualTo(NAME);
-		assertThat(testTemplate.getKey()).isEqualTo(NAME);
-		assertThat(id).isEqualTo(Template.referenceCount.get());
-		assertThat(testTemplate.termMap.get("PARAMETER1")).isEqualTo(parameter1);
-		assertThat(testTemplate.termMap.get("PARAMETER2")).isEqualTo(parameter2);
-		testTemplate.evaluate();
-		verify(parameter1).evaluate(id);
-		verify(parameter2).evaluate(id);
+        TermMetaData termMetaData1 = mock(TermMetaData.class);
+        TermMetaData termMetaData2 = mock(TermMetaData.class);
+        when(templateArchitype.analyseTerm(parameter1, 0)).thenReturn(termMetaData1);
+        when(templateArchitype.analyseTerm(parameter2, 1)).thenReturn(termMetaData2);
+        Template testTemplate = new Template(templateArchitype, getParameterArray());
+        int id = testTemplate.getId();
+        assertThat(testTemplate.getName()).isEqualTo(NAME);
+        assertThat(testTemplate.getKey()).isEqualTo(NAME);
+        assertThat(id).isEqualTo(Template.referenceCount.get());
+        verify(templateArchitype, times(2)).addTerm(isA(TermMetaData.class));
+        verify(templateArchitype).clearMutable();
+        testTemplate.evaluate();
+        verify(parameter1).evaluate(id);
+        verify(parameter2).evaluate(id);
 	}
-	
+		
 	@Test
 	public void test_Constructor_terms_array_key()
 	{
-		Template testTemplate = new Template(KEY, parseTemplateName(NAME), getParameterArray());
-		int id = testTemplate.getId();
-		assertThat(testTemplate.getName()).isEqualTo(NAME);
-		assertThat(testTemplate.getKey()).isEqualTo(KEY);
-		assertThat(id).isEqualTo(Template.referenceCount.get());
-		assertThat(testTemplate.termMap.get("PARAMETER1")).isEqualTo(parameter1);
-		assertThat(testTemplate.termMap.get("PARAMETER2")).isEqualTo(parameter2);
-		testTemplate.evaluate();
-		verify(parameter1).evaluate(id);
-		verify(parameter2).evaluate(id);
+        TermMetaData termMetaData1 = mock(TermMetaData.class);
+        TermMetaData termMetaData2 = mock(TermMetaData.class);
+        when(templateArchitype.analyseTerm(parameter1, 0)).thenReturn(termMetaData1);
+        when(templateArchitype.analyseTerm(parameter2, 1)).thenReturn(termMetaData2);
+        Template testTemplate = new Template(KEY, templateArchitype, getParameterArray());
+        int id = testTemplate.getId();
+        assertThat(testTemplate.getName()).isEqualTo(NAME);
+        assertThat(testTemplate.getKey()).isEqualTo(KEY);
+        assertThat(id).isEqualTo(Template.referenceCount.get());
+        verify(templateArchitype, times(2)).addTerm(isA(TermMetaData.class));
+        verify(templateArchitype).clearMutable();
+        testTemplate.evaluate();
+        verify(parameter1).evaluate(id);
+        verify(parameter2).evaluate(id);
 	}
 	
 	@Test
@@ -107,16 +142,16 @@ public class TemplateTest
 		List<Operand> paramList = new ArrayList<Operand>();
 		try
 		{
-			new Template(parseTemplateName(NAME), paramList);
+			new Template(templateArchitype, paramList);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch (IllegalArgumentException e)
 		{
-			assertThat(e.getMessage()).isEqualTo("Parameter \"termList\" is empty");
+			assertThat(e.getMessage()).isEqualTo("Parameter \"terms\" is empty");
 	    }
 		try
 		{
-			new Template(parseTemplateName(NAME), new Operand[0]);
+			new Template(templateArchitype, new Operand[0]);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch (IllegalArgumentException e)
@@ -124,15 +159,18 @@ public class TemplateTest
 			assertThat(e.getMessage()).isEqualTo("Parameter \"terms\" is empty");
 	    }
 	}
-
+	  
 	@Test
 	public void test_backup()
 	{
 		List<Operand> paramList = new ArrayList<Operand>();
 		Operand parameter = mock(Operand.class);
 		when(parameter.getName()).thenReturn("test-parameter1");
+        when(parameter.getOperator()).thenReturn(operator1);
 		paramList.add(parameter);
-		Template testTemplate = new Template(parseTemplateName(NAME), paramList);	
+        TermMetaData termMetaData1 = mock(TermMetaData.class);
+        when(templateArchitype.analyseTerm(parameter, 0)).thenReturn(termMetaData1);
+		Template testTemplate = new Template(templateArchitype, paramList);	
 		when(parameter.backup(Template.referenceCount.get())).thenReturn(true);
 		assertThat(testTemplate.backup(true)).isTrue();
 		when(parameter.backup(Template.referenceCount.get())).thenReturn(false);
@@ -143,8 +181,11 @@ public class TemplateTest
 		assertThat(testTemplate.backup(false)).isFalse();
 		Operand parameter2 = mock(Operand.class);
 		when(parameter2.getName()).thenReturn("test-parameter2");
+        when(parameter2.getOperator()).thenReturn(operator1);
 		paramList.add(parameter2);
-		testTemplate = new Template(parseTemplateName(NAME) ,paramList);	
+        TermMetaData termMetaData2 = mock(TermMetaData.class);
+        when(templateArchitype.analyseTerm(parameter2, 0)).thenReturn(termMetaData2);
+		testTemplate = new Template(templateArchitype ,paramList);	
 		when(parameter2.backup(Template.referenceCount.get())).thenReturn(false);
 		when(parameter.backup(Template.referenceCount.get())).thenReturn(true);
 		assertThat(testTemplate.backup(true)).isTrue();
@@ -156,11 +197,15 @@ public class TemplateTest
 		when(parameter.backup(0)).thenReturn(false);
 		assertThat(testTemplate.backup(false)).isFalse();
 	}
-
+	
 	@Test
 	public void test_setKey()
 	{
-		Template testTemplate = new Template(KEY, parseTemplateName(NAME), getTermList());
+        TermMetaData termMetaData1 = mock(TermMetaData.class);
+        TermMetaData termMetaData2 = mock(TermMetaData.class);
+        when(templateArchitype.analyseTerm(parameter1, 0)).thenReturn(termMetaData1);
+        when(templateArchitype.analyseTerm(parameter2, 1)).thenReturn(termMetaData2);
+		Template testTemplate = new Template(KEY, templateArchitype, getTermList());
 		testTemplate.setKey(KEY +"!");
 		assertThat(testTemplate.getKey()).isEqualTo(KEY+"!");
 	}
@@ -171,9 +216,11 @@ public class TemplateTest
 		parameter1 = mock(Operand.class);
 		when(parameter1.getName()).thenReturn("parameter1");
 		when(parameter1.evaluate(anyInt())).thenReturn(EvaluationStatus.COMPLETE);
+		when(parameter1.getOperator()).thenReturn(operator1);
 		parameter2 = mock(Operand.class);
 		when(parameter2.getName()).thenReturn("parameter2");
 		when(parameter2.evaluate(anyInt())).thenReturn(EvaluationStatus.COMPLETE);
+        when(parameter2.getOperator()).thenReturn(operator2);
 		paramList.add(parameter1);
 		paramList.add(parameter2);
 		return paramList;
@@ -185,9 +232,11 @@ public class TemplateTest
 		parameter1 = mock(Operand.class);
 		when(parameter1.getName()).thenReturn("parameter1");
 		when(parameter1.evaluate(anyInt())).thenReturn(EvaluationStatus.COMPLETE);
+        when(parameter1.getOperator()).thenReturn(operator1);
 		parameter2 = mock(Operand.class);
 		when(parameter2.getName()).thenReturn("parameter2");
 		when(parameter2.evaluate(anyInt())).thenReturn(EvaluationStatus.COMPLETE);
+        when(parameter2.getOperator()).thenReturn(operator2);
 		paramArray[0] = parameter1;
 		paramArray[1] = parameter2;
 		return paramArray;

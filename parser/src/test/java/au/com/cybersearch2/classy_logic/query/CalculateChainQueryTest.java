@@ -36,6 +36,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 
 /**
  * CalculateChainQueryTest
@@ -59,11 +60,13 @@ public class CalculateChainQueryTest
 	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(calcExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template(parseTemplateName("loop"));
+	    TemplateArchetype loopArchetype = new TemplateArchetype(parseTemplateName("loop"));
+	    Template template = new Template(loopArchetype);
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template(parseTemplateName("calc"), n, loopy, limit);
+        TemplateArchetype calcArchetype = new TemplateArchetype(parseTemplateName("calc"));
+        Template calcTemplate = new Template(calcArchetype, n, loopy, limit);
         calcTemplate.addProperties(props);
         Solution solution = new Solution();
         
@@ -89,11 +92,13 @@ public class CalculateChainQueryTest
 	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(factorialExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template(parseTemplateName("loop"));
+        TemplateArchetype loopArchetype = new TemplateArchetype(parseTemplateName("loop"));
+	    Template template = new Template(loopArchetype);
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template(parseTemplateName("factorial"), n, factorial, i, loopy);
+        TemplateArchetype factorialArchetype = new TemplateArchetype(parseTemplateName("factorial"));
+        Template calcTemplate = new Template(factorialArchetype, n, factorial, i, loopy);
         calcTemplate.addProperties(props);
 
         Solution solution = new Solution();

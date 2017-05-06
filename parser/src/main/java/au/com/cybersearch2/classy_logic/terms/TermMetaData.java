@@ -68,7 +68,7 @@ public class TermMetaData implements Comparable<TermMetaData>
                 if (!term.isEmpty() && (term.getValueClass() == Unknown.class))
                     literalType = LiteralType.unknown; break;
             default:
-                literalType = LiteralType.unspecified; break;
+                literalType = LiteralType.object; break;
             }
         }
         else if (!term.isEmpty())

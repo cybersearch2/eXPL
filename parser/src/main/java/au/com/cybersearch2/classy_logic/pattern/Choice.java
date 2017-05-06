@@ -131,7 +131,7 @@ public class Choice
                 term = selectionTerm;
         }
         // Create solution axiom using Template toAxiom() method
-		Template solutionTemplate = new Template(template.getQualifiedName());
+		Template solutionTemplate = new Template(new TemplateArchetype(template.getQualifiedName()));
 		// Selection term
 		int index = 0;
 		Operand operand = variableList.get(index++);

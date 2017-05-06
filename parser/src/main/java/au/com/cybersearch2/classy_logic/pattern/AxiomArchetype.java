@@ -29,31 +29,52 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
 
 /**
  * AxiomArchetype
+ * Axiom factory which type checks data passed to construct axioms
  * @author Andrew Bowley
  * 3May,2017
  */
 public class AxiomArchetype extends Archetype<Axiom, Term>
 {
     private static final Unknown UNKNOWN =  new Unknown();
-    
+
+    /**
+     * Construct AxiomArchetype
+     * @param structureName Qualified name which uniquely identifies the axioms being produced - must have a name part
+     */
     public AxiomArchetype(QualifiedName structureName)
     {
         super(structureName, StructureType.axiom);
+        if (structureName.getName().isEmpty())
+            throw new IllegalArgumentException("Template qualified name must have a name part");
     }
 
+    /**
+     * Create default Axiom instance
+     * @return Axiom object
+     */
     protected Axiom newInstance()
     {
         Axiom axiom = new Axiom(this, Collections.emptyList());
         return axiom;
     }
 
-   @Override
+    /**
+     * Create Axiom instance
+     * @return Axiom object
+     * @see au.com.cybersearch2.classy_logic.pattern.Archetype#newInstance(java.util.List)
+     */
+    @Override
     protected Axiom newInstance(List<Term> terms)
     {
         Axiom axiom = new Axiom(this, terms);
         return axiom;
     }
 
+    /**
+     * Create Axiom instance
+     * @param values Objects to populate axiom - may be Terms
+     * @return
+     */
     public Axiom itemInstance(Object... values)
     {
         List<Term> terms = new ArrayList<Term>();
@@ -70,11 +91,21 @@ public class AxiomArchetype extends Archetype<Axiom, Term>
         return newInstance(terms);
     }
 
+    /**
+     * Add term to archetype, specifying only name. Archetype must be in mutable state to succeed.
+     * @param termName Name of term
+     * @return Term index
+     */
     public int addTermName(String termName)
     {
         return addTerm(new TermMetaData(new LiteralParameter(termName, UNKNOWN, LiteralType.unspecified)));
     }
 
+    /**
+     * Returns meta-data for term specified by index
+     * @param index Term index
+     * @return TermMetaData object
+     */
     public TermMetaData getMetaDataByIndex(int index)
     {
         if ((index >= 0) && (index < getTermCount()))

@@ -28,6 +28,7 @@ public enum LiteralType
     xpl_double,
     decimal,
     xpl_boolean,
+    object,
     unknown,
     unspecified
 }

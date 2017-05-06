@@ -39,6 +39,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 import au.com.cybersearch2.classy_logic.query.AxiomListSource;
 import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -248,7 +249,7 @@ public class ParserAssembler implements LocaleListener
 	 */
 	public Template createTemplate(QualifiedName qualifiedTemplateName, boolean isCalculator)
 	{
-		Template template = new Template(qualifiedTemplateName);
+		Template template = new Template(new TemplateArchetype(qualifiedTemplateName));
 		template.setCalculator(isCalculator);
 		templateMap.put(qualifiedTemplateName, template);
 		return template;
@@ -838,7 +839,7 @@ public class ParserAssembler implements LocaleListener
 	public Template chainTemplate(QualifiedName outerTemplateName, QualifiedName innerTemplateName) 
 	{
 		Template template = getTemplate(outerTemplateName);
-		Template chainTemplate = new Template(innerTemplateName);
+		Template chainTemplate = new Template(new TemplateArchetype(innerTemplateName));
 		template.setNext(chainTemplate);
 		templateMap.put(innerTemplateName, chainTemplate);
 		return chainTemplate;

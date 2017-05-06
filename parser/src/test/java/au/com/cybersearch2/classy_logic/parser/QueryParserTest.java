@@ -56,6 +56,7 @@ import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.LexiconSource;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -65,6 +66,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 import au.com.cybersearch2.classy_logic.query.Calculator;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
@@ -1329,7 +1331,8 @@ public class QueryParserTest
 				birdsResultsChecker.checkNextResult(axiom.getTermByName("bird").getValue().toString() + " " + keyword + " " + attribute);
 			else if (("family_" + keyword).equals(axiom.getName()))
 			{
-				Template template = new Template(QualifiedName.parseTemplateName("bird"));
+		        TemplateArchetype birdArchetype = new TemplateArchetype(new QualifiedTemplateName(QualifiedName.EMPTY, "bird"));
+				Template template = new Template(birdArchetype);
 				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("bird")));
 				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("family"), axiom.getTermByName("family").getValue().toString()));
 			    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("bird")), Collections.singletonList(template));
@@ -1339,7 +1342,8 @@ public class QueryParserTest
 			}
 			else
 			{
-				Template template = new Template(QualifiedName.parseTemplateName("family"));
+                TemplateArchetype familyArchetype = new TemplateArchetype(new QualifiedTemplateName(QualifiedName.EMPTY, "family"));
+				Template template = new Template(familyArchetype);
 				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("family")));
 				template.addTerm(new StringOperand(QualifiedName.parseGlobalName("order"), axiom.getTermByName("order").getValue().toString()));
 			    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("family")), Collections.singletonList(template));

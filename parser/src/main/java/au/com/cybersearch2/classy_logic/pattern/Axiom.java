@@ -27,7 +27,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classy_logic.terms.TermMetaData;
 import au.com.cybersearch2.classy_logic.terms.TermStore;
 
 
@@ -273,20 +272,4 @@ public class Axiom extends TermList
         setTerms(termArray);
     }
 
-    /**
-     * Set Anonymous Terms using values from supplied Object array.
-     * Any Object in the array not of type Term id converted to
-     * an anonymous Term with value set to the object. 
-     * @param terms Term array
-     */
-    protected void setTerms(Term[] terms) 
-    {
-        if (terms.length > 0)
-        {
-            int index = 0;
-            for (Term term: terms)
-                archetype.addTerm(new TermMetaData(term, index++));
-            archetype.clearMutable();
-        }
-    }
 }

@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.pattern;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -30,7 +31,13 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
  */
 public abstract class TermList
 {
+    public static List<Term> EMPTY_TERM_LIST;
 
+    static
+    {
+        EMPTY_TERM_LIST = Collections.emptyList();
+    }
+    
     /** Defines structure features shared by instances with same identity */
     protected TermListManager archetype;
     /** Terms to be paired on unification by position. */
@@ -128,12 +135,29 @@ public abstract class TermList
     }
     
     /**
+     * Set Anonymous Terms using values from supplied Object array.
+     * Any Object in the array not of type Term id converted to
+     * an anonymous Term with value set to the object. 
+     * @param terms Term array
+     */
+    protected void setTerms(Term[] terms) 
+    {
+        if (terms.length > 0)
+        {
+            int index = 0;
+            for (Term term: terms)
+                archetype.addTerm(new TermMetaData(term, index++));
+            archetype.clearMutable();
+        }
+    }
+
+    /**
      * Returns display text of name and terms
      */
     @Override
     public String toString()
     {
-        StringBuilder builder = new StringBuilder(archetype.getName());
+        StringBuilder builder = new StringBuilder(getName());
         if (!termList.isEmpty())
         {
             builder.append('(');

@@ -23,8 +23,8 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.pattern.Structure;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.pattern.TermList;
 
 /**
  * QueryExecuter
@@ -234,17 +234,17 @@ public class QueryExecuter extends ChainQueryExecuter
 	 * @param structureList List of templates contained in query
 	 * @return String
 	 */
-	static protected String toString(List<? extends Structure> structureList)
+	static protected String toString(List<? extends TermList> termLists)
 	{
 		StringBuilder builder = new StringBuilder();
 		boolean firstTime = true;
-	    for (Structure structure: structureList)
+	    for (TermList termList: termLists)
 	    {
 	    	if (firstTime)
 	    		firstTime = false;
 	    	else
 	    		builder.append(", ");
-	    	builder.append(structure.toString().replaceAll("\\<empty\\>", "?"));
+	    	builder.append(termList.toString().replaceAll("\\<empty\\>", "?"));
 	    }
 	    return builder.toString();	
 	}

@@ -48,6 +48,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 import au.com.cybersearch2.classy_logic.terms.BigDecimalTerm;
 import au.com.cybersearch2.classy_logic.terms.BooleanTerm;
 import au.com.cybersearch2.classy_logic.terms.DoubleTerm;
@@ -533,7 +534,8 @@ public class LogicQueryTest
 	@Test 
 	public void test_axiom_listener()
 	{
-		Template template = new Template(new QualifiedTemplateName(QualifiedName.EMPTY, "template_name"));
+        TemplateArchetype testArchetype = new TemplateArchetype(new QualifiedTemplateName(QualifiedName.EMPTY, "template_name"));
+		Template template = new Template(testArchetype);
 		template.setKey(KEY);
 		template.addTerm(new TestStringOperand("string"));
 		template.addTerm(new TestIntegerOperand("integer"));

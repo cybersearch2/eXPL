@@ -47,6 +47,7 @@ import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -241,11 +242,13 @@ public class CalculatorTest
 	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(calcExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template(parseTemplateName("loop"));
+        TemplateArchetype loopArchetype = new TemplateArchetype(parseTemplateName("loop"));
+	    Template template = new Template(loopArchetype);
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template(parseTemplateName("calc"), n, loopy, limit);
+        TemplateArchetype calcArchetype = new TemplateArchetype(parseTemplateName("calc"));
+        Template calcTemplate = new Template(calcArchetype, n, loopy, limit);
         calcTemplate.putInitData("n", Long.valueOf(1));
         calcTemplate.putInitData("limit", Long.valueOf(3));
         Solution solution = new Solution();
@@ -254,7 +257,6 @@ public class CalculatorTest
         assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n=3, limit=3)");
 	}
     
-    @Ignore // Test fails if template add term does not do operand map
     @Test
 	public void test_factorial() 
 	{
@@ -268,11 +270,13 @@ public class CalculatorTest
 	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(factorialExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template(parseTemplateName("loop"));
+	    TemplateArchetype loopArchetype = new TemplateArchetype(parseTemplateName("loop"));
+	    Template template = new Template(loopArchetype);
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template(parseTemplateName("factorial"), n, factorialExpression, i, loopy);
+        TemplateArchetype factorialArchetype = new TemplateArchetype(parseTemplateName("factorial"));
+        Template calcTemplate = new Template(factorialArchetype, n, factorialExpression, i, loopy);
         calcTemplate.putInitData("factorial", Integer.valueOf(1));
         calcTemplate.putInitData("n", Long.valueOf(4));
         calcTemplate.putInitData("i", Long.valueOf(1));
@@ -296,11 +300,13 @@ public class CalculatorTest
 	    Evaluator shortCircuit = new TestEvaluator(testExpression, "&&");
 	    operandList.add(factorialExpression);
 	    operandList.add(shortCircuit);
-	    Template template = new Template(parseTemplateName("loop"));
+        TemplateArchetype loopArchetype = new TemplateArchetype(parseTemplateName("loop"));
+	    Template template = new Template(loopArchetype);
 		for (Operand operand: operandList)
 			template.addTerm(operand);
     	LoopEvaluator loopy = new LoopEvaluator(template);
-        Template calcTemplate = new Template(parseTemplateName("factorial"), n, factorialExpression, i, loopy);
+        TemplateArchetype factorialArchetype = new TemplateArchetype(parseTemplateName("factorial"));
+        Template calcTemplate = new Template(factorialArchetype, n, factorialExpression, i, loopy);
         calcTemplate.putInitData("factorial", Long.valueOf(1));
         calcTemplate.putInitData("i", Long.valueOf(1));
         Solution solution = new Solution();
@@ -326,7 +332,7 @@ public class CalculatorTest
 			calcTemplate.backup(false);
 		}
     }
-    
+   
     @Test
     public void test_choice()
     {
@@ -342,7 +348,8 @@ public class CalculatorTest
     	ArrayList<Axiom> choiceAxiomList = new ArrayList<Axiom>();
     	choiceAxiomList.add(axiom0);
     	choiceAxiomList.add(axiom1);
-    	Template template = new Template(parseTemplateName(CHOICE_NAME));
+        TemplateArchetype choiceArchetype = new TemplateArchetype(parseTemplateName(CHOICE_NAME));
+    	Template template = new Template(choiceArchetype);
     	template.setChoice(true);
     	Operand expression = new TestEvaluator(new TestVariable("amount"), "<", new TestIntegerOperand(Term.ANONYMOUS, Integer.valueOf(12000)));
     	Evaluator evaluator0 = new TestEvaluator("amount", expression, "&&"); 

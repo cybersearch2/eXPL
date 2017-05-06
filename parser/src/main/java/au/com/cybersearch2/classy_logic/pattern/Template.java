@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
-import java.io.ObjectStreamField;
+//import java.io.ObjectStreamField;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -40,15 +41,15 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 30 Nov 2014
  */
-public class Template extends Structure 
+public class Template extends TermList 
 {
-	private static final long serialVersionUID = -3549624322416667887L;
-    private static final ObjectStreamField[] serialPersistentFields =
-    {   // Template inherits Serializable from Structure but
+	//private static final long serialVersionUID = -3549624322416667887L;
+    //private static final ObjectStreamField[] serialPersistentFields =
+    //{   // Template inherits Serializable from Structure but
         //    should not be serialized. Two fields defined for tracing purposes.
-        new ObjectStreamField("name", String.class),
-        new ObjectStreamField("id", Integer.class)
-    };
+   //     new ObjectStreamField("name", String.class),
+   //     new ObjectStreamField("id", Integer.class)
+   // };
     
     //public static final String ITERABLE = "iterable";
     //public static final String TERMNAMES = "termnames";
@@ -116,9 +117,10 @@ public class Template extends Structure
      */
     public Template(Template master, QualifiedName qname) 
     {
-        this(qname);
+        this((TemplateArchetype) master.getArchetype());
+        this.qname = qname;
         key = master.key;
-        setTerms(master.termList);
+        setTerms(master.termList.toArray(new Term[master.termList.size()]));
         this.isCalculator = master.isCalculator;
         this.isChoice = master.isChoice;
         this.isInnerTemplate = master.isInnerTemplate;
@@ -129,11 +131,11 @@ public class Template extends Structure
 	 * Construct Template object
 	 * @param qname Template qualified name. The axiom key is set to the name part as a default.
 	 */
-	public Template(QualifiedName qname) 
+	public Template(TemplateArchetype templateArchetype) 
 	{
-		super(qname.getName().isEmpty() ? qname.getTemplate() : qname.getName());
-		this.qname = qname;
-		this.key = name;
+		super(templateArchetype);
+		qname = templateArchetype.getQualifiedName();
+		key = qname.getTemplate();
 		id = referenceCount.incrementAndGet();
 	}
 
@@ -142,12 +144,10 @@ public class Template extends Structure
 	 * @param key Axiom name to unify with 
 	 * @param qname Template qualified name
 	 */
-	public Template(String key, QualifiedName qname) 
+	public Template(String key, TemplateArchetype templateArchetype) 
 	{
-		super(qname.getName().isEmpty() ? qname.getTemplate() : qname.getName());
+	    this(templateArchetype);
 		this.key = key;
-        this.qname = qname;
-		id = referenceCount.incrementAndGet();
 	}
 
 	/**
@@ -155,12 +155,18 @@ public class Template extends Structure
 	 * @param qname Template qualifed name
 	 * @param termList One or more Variables
 	 */
-	public Template(QualifiedName qname, List<Operand> termList) 
+	public Template(TemplateArchetype templateArchetype, List<Operand> terms) 
 	{
-		this(qname);
-		if (termList.size() == 0)
-			throw new IllegalArgumentException("Parameter \"termList\" is empty");
-		setTerms(termList);
+		this(templateArchetype);
+		if (terms.size() == 0)
+			throw new IllegalArgumentException("Parameter \"terms\" is empty");
+        if ((terms != null)&& (terms.size() > 0))
+        {
+            if (archetype.isMutable())
+                setTerms(terms.toArray(new Term[terms.size()]));
+            for (Term term: terms)
+                addTerm(term);
+        }
 	}
 
 	/**
@@ -169,9 +175,9 @@ public class Template extends Structure
      * @param qname Template qualified name
 	 * @param termList One or more Variables
 	 */
-	public Template(String key, QualifiedName qname, List<Operand> termList) 
+	public Template(String key, TemplateArchetype templateArchetype, List<Operand> termList) 
 	{
-		this(qname, termList);
+		this(templateArchetype, termList);
 		this.key = key;
 	}
 
@@ -180,12 +186,18 @@ public class Template extends Structure
      * @param qname Template qualified name
 	 * @param terms One or more Variables
 	 */
-	public Template(QualifiedName qname, Operand... terms) 
+	public Template(TemplateArchetype templateArchetype, Operand... terms) 
 	{
-		this(qname);
-		if (terms.length== 0)
-			throw new IllegalArgumentException("Parameter \"terms\" is empty");
-		setTerms(terms);
+		this(templateArchetype);
+        if ((terms != null)&& (terms.length > 0))
+        {
+            if (archetype.isMutable())
+                setTerms(terms);
+            for (Term term: terms)
+                addTerm(term);
+        }
+        else
+            throw new IllegalArgumentException("Parameter \"terms\" is empty");
 	}
 
 	/**
@@ -194,11 +206,20 @@ public class Template extends Structure
      * @param qname Template qualified name
 	 * @param terms One or more Variables
 	 */
-	public Template(String key, QualifiedName qname, Operand... terms) 
+	public Template(String key, TemplateArchetype templateArchetype, Operand... terms) 
 	{
-		this(qname, terms);
+		this(templateArchetype, terms);
 		this.key = key;
 	}
+
+    /**
+     * Returns the name of the Structure    
+     * @return String
+     */
+    public String getName() 
+    {
+        return qname.getTemplate();
+    }
 
 	/**
 	 * Returns key to match with Axiom name for unification
@@ -369,7 +390,7 @@ public class Template extends Structure
 	 */
 	public Axiom toAxiom()
 	{
-        Axiom axiom = new Axiom(name);
+        Axiom axiom = new Axiom(qname.getTemplate());
 		for (Term term: termList)
 		{
 		    Operand operand = (Operand)term;
@@ -437,6 +458,8 @@ public class Template extends Structure
 		{
 			for (String name: initData.keySet())
 			{
+			    /*
+			    // TODO - Analyse qualified name code for validity
 			    QualifiedName qualifiedTermName = QualifiedName.parseName(name, qname);
                 Term term = getTermByName(qualifiedTermName.toString());
                 if ((term == null) && (!qualifiedTermName.getTemplate().isEmpty()))
@@ -449,8 +472,21 @@ public class Template extends Structure
                     qualifiedTermName.clearScope();
                     term = getTermByName(qualifiedTermName.toString());
                 }
+                */
+                Term term = getTermByName(name);
+				if (term != null)
+				{
+				    if (term instanceof Evaluator)
+				    {
+				        Operand left = ((Evaluator)term).getLeftOperand();
+				        if ((left != null) && name.equals(left.getName()))
+				            term = left;
+				        else
+				            term = null;
+				    }
+				}
 				if (term == null)
-					throw new QueryExecutionException("Template \"" + getName() + "\" does not have term \"" + name + "\"");
+				    throw new QueryExecutionException("Template \"" + getName() + "\" does not have term \"" + name + "\"");
 				term.assign(new Parameter(Term.ANONYMOUS, initData.get(name)));
 			}
 		}
