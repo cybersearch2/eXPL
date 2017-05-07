@@ -20,10 +20,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -37,7 +35,7 @@ import au.com.cybersearch2.classy_logic.terms.TermStore;
  *
  * @since 06/10/2010
  */
-public class Axiom extends TermList
+public class Axiom extends TermList<Term>
 {
 	//private static final long serialVersionUID = 2741521667825735668L;
     //private static final ObjectStreamField[] serialPersistentFields =
@@ -46,27 +44,6 @@ public class Axiom extends TermList
     //    new ObjectStreamField("pairByPosition", Boolean.class)
     //};
 
-    /**
-	 * TermPair holds paired Terms for unification
-	 */
-	public static class TermPair
-	{
-		public Term term1;
-		public Term term2;
-
-		public TermPair(Term term1, Term term2)
-		{
-			this.term1 = term1;
-			this.term2 = term2;
-		}
-	}
-
-	/** Special case of all Axiom terms are anonymous. Unify termList by position */
-	protected boolean pairByPosition;
-    /** Pairs axiom terms in a Solution object with terms in a template */
-    protected SolutionPairer solutionPairer;
-    /** Pairs axiom terms in this axiom with terms in a template */
-    protected AxiomPairer axiomPairer;
     protected String name;
 	
     /**
@@ -77,15 +54,12 @@ public class Axiom extends TermList
     {
         super(new AxiomArchetype(QualifiedName.parseGlobalName(name)));
         this.name = name;
-        // Assume terms are anonymous. Change when non=anonymous term is added
-        pairByPosition = true;
         if ((params != null)&& (params.length > 0))
         {
             if (archetype.isMutable())
                 setTerms(params);
             for (Term term: params)
                 addTerm(term);
-            pairByPosition = archetype.getNamedTermCount() == 0;
         }
     }
 
@@ -97,8 +71,6 @@ public class Axiom extends TermList
 	{
         super(axiomArchetype);
 		name = axiomArchetype.getName();
-		// Assume terms are anonymous. Change when non=anonymous term is added
-		pairByPosition = true;
 	}
 
 	/**
@@ -121,7 +93,6 @@ public class Axiom extends TermList
             }
     		if (archetype.isMutable())
     		    setTerms(terms.toArray(new Term[terms.size()]));
-            pairByPosition = archetype.getNamedTermCount() == 0;
         }
 	}
 
@@ -140,7 +111,6 @@ public class Axiom extends TermList
             for (Term term: terms)
                 addTerm(term);
         }
-        pairByPosition = archetype.getNamedTermCount() == 0;
 	}
 
 	/**
@@ -157,8 +127,7 @@ public class Axiom extends TermList
                 setTerms(terms.toArray(new Term[terms.size()]));
             for (Term term: terms)
                 addTerm(term);
-            pairByPosition = archetype.getNamedTermCount() == 0;
-        }
+         }
  	}
 
     /**
@@ -166,70 +135,14 @@ public class Axiom extends TermList
 	 * of the Template. Terms are matched by name except when "pairByPosition" flag is set, 
 	 * in which case, terms are paired in list order. 
 	 * When both terms of a pairing have a value and values do not match, unification is skipped. 
-	 * Unification of all terms is skipped if this Axiom and the other Template have different names.
-     * @param solution Map of Axioms selectable by Axiom name
-	 * @param other Template
-	 * @return Flag unification completed = true
+	 * Unification of all terms is also skipped if this Axiom and the other Template have different names.
+	 * @param template Template with which to unify 
+     * @param solution Contains result of previous unify-evaluation steps
+	 * @return Flag set true if unification completed successfully
 	 */
-	public boolean unifyTemplate(Template other, Solution solution)
+	public boolean unifyTemplate(Template template, Solution solution)
     {
-		//if (!this.name.equals(other.getKey()))
-		//	return false; // Names don't match
-		Set<String> keySet = solution.keySet();
-		List<TermPair> pairList = new ArrayList<TermPair>(termList != null ? termList.size() : other.termList.size());
-		OperandWalker walker = new OperandWalker(other.termList);
-		// If term list is not empty, unification will be restricted to solution only.
-		if (!termList.isEmpty())
-		{
-			if (axiomPairer == null)
-				axiomPairer = new AxiomPairer(this, other.getQualifiedName());
-			else
-				axiomPairer.reset();
-			if (pairByPosition)
-			{
-				int index = 0;
-				for (Term templateTerm: other.termList)
-				{   // Match by position
-					Term axiomTerm = getTermByIndex(index);
-					if (index >= getTermCount())
-					    break;
-                    if (!axiomTerm.getName().isEmpty())
-                    {
-                        index++;
-                        continue;
-                    }
-					if (!axiomPairer.pairTerms((Operand)templateTerm, axiomTerm))
-						return false;
-					QualifiedName qname = ((Operand)templateTerm).getQualifiedName();
-					boolean isLocalTerm = other.getQualifiedName().inSameSpace(qname);
-					if (isLocalTerm && !qname.getName().isEmpty())
-					{   // Name axiom term for Operand navigation
-						axiomTerm.setName(qname.getName());
-						archetype.changeName(index, qname.getName());
-					}
-					index++;
-				}
-				// Only needs to be done once
-				pairByPosition = false;
-			}
-			if (!walker.visitAllNodes(axiomPairer))
-				return false;
-			pairList.addAll(axiomPairer.getPairList());
-		}
-		if (keySet.size() > 0)
-		{
-			if (solutionPairer == null)
-				solutionPairer = new SolutionPairer(this, solution, other.getQualifiedName());
-			else
-				solutionPairer.setSolution(solution);
-			if (!walker.visitAllNodes(solutionPairer))
-				return false;
-			pairList.addAll(solutionPairer.getPairList());
-		}
-		// Proceed with unification term by term
-		for (TermPair termPair: pairList)
-			termPair.term1.unifyTerm(termPair.term2, other.getId());
-		return true;
+	    return template.unify(this, solution);
     }
 
 	/**
@@ -243,7 +156,6 @@ public class Axiom extends TermList
 		if (index < nameList.size())
 			term.setName(nameList.get(index));
 		addTerm(term);
-		pairByPosition = false;
 	}
 
     private void writeObject(ObjectOutputStream oos)
@@ -271,5 +183,4 @@ public class Axiom extends TermList
         }
         setTerms(termArray);
     }
-
 }

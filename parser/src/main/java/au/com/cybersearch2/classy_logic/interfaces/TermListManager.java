@@ -36,6 +36,7 @@ public interface TermListManager
     int getIndexForName(String termName);
     boolean changeName(int index, String name);
     boolean isMutable();
+    boolean isAnonymousTerms();
     int getNamedTermCount();
     List<String> getAxiomTermNameList();
     void clearMutable();

@@ -16,7 +16,6 @@
 package au.com.cybersearch2.classy_logic.pattern;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -29,25 +28,18 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
  * @author Andrew Bowley
  * 2May,2017
  */
-public abstract class TermList
+public abstract class TermList <T extends Term>
 {
-    public static List<Term> EMPTY_TERM_LIST;
-
-    static
-    {
-        EMPTY_TERM_LIST = Collections.emptyList();
-    }
-    
     /** Defines structure features shared by instances with same identity */
     protected TermListManager archetype;
-    /** Terms to be paired on unification by position. */
-    transient protected List<Term> termList;
+    /** Term list */
+    transient protected List<T> termList;
     protected int termCount;
     
     public TermList(TermListManager archetype)
     {
         this.archetype = archetype;
-        termList = new ArrayList<Term>(archetype.isMutable() ? 10 : archetype.getTermCount());
+        termList = new ArrayList<T>(archetype.isMutable() ? 10 : archetype.getTermCount());
     }
 
     /**
@@ -71,7 +63,7 @@ public abstract class TermList
      * Add Term
      * @param term Term object
      */
-    public void addTerm(Term term)
+    public void addTerm(T term)
     {
         TermMetaData termMetaData = archetype.analyseTerm(term, termCount);
         if (archetype.isMutable())
@@ -127,7 +119,7 @@ public abstract class TermList
      * @param index Valid index value
      * @return Term object or null if index out of range
      */
-    public Term getTermByIndex(int index)
+    public T getTermByIndex(int index)
     {
         if (termList.isEmpty() || (index >= termList.size()) ||( index < 0))
             return null;
@@ -140,12 +132,12 @@ public abstract class TermList
      * an anonymous Term with value set to the object. 
      * @param terms Term array
      */
-    protected void setTerms(Term[] terms) 
+    protected void setTerms(T[] terms) 
     {
         if (terms.length > 0)
         {
             int index = 0;
-            for (Term term: terms)
+            for (T term: terms)
                 archetype.addTerm(new TermMetaData(term, index++));
             archetype.clearMutable();
         }

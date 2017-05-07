@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.pattern;
 //import java.io.ObjectStreamField;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +27,8 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.interfaces.TermPairList;
+import au.com.cybersearch2.classy_logic.pattern.TermPair;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -41,7 +41,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 30 Nov 2014
  */
-public class Template extends TermList 
+public class Template extends TermList<Operand> implements TermPairList
 {
 	//private static final long serialVersionUID = -3549624322416667887L;
     //private static final ObjectStreamField[] serialPersistentFields =
@@ -51,40 +51,15 @@ public class Template extends TermList
    //     new ObjectStreamField("id", Integer.class)
    // };
     
-    //public static final String ITERABLE = "iterable";
-    //public static final String TERMNAMES = "termnames";
     public static List<String>  EMPTY_NAMES_LIST;
-    public static Iterable<AxiomTermList> EMPTY_ITERABLE;
     /** Unique identity generator */
     static protected AtomicInteger referenceCount;
-  
+    public static List<Operand> EMPTY_OPERAND_LIST;
+
     static
     {
         referenceCount = new AtomicInteger();
-        EMPTY_ITERABLE = new Iterable<AxiomTermList>(){
-
-            @Override
-            public Iterator<AxiomTermList> iterator()
-            {
-                return new Iterator<AxiomTermList>(){
-
-                    @Override
-                    public boolean hasNext()
-                    {
-                        return false;
-                    }
-
-                    @Override
-                    public AxiomTermList next()
-                    {
-                        return null;
-                    }
-
-                    @Override
-                    public void remove()
-                    {
-                    }};
-            }};
+        EMPTY_OPERAND_LIST = Collections.emptyList();
         EMPTY_NAMES_LIST = Collections.emptyList();
     }
     /** Qualified name of operand */
@@ -109,7 +84,17 @@ public class Template extends TermList
     protected CallContext headCallContext;
     /** Tail of call stack */
     protected CallContext tailCallContext;
-    
+    /** Pairs axiom terms in a Solution object with terms in a template */
+    protected SolutionPairer solutionPairer;
+    /** Pairs axiom terms in this axiom with terms in a template */
+    protected AxiomPairer axiomPairer;
+    /** Head of TermPair list */
+    private TermPair termPairHead;
+    /** List TermPair tail */
+    private TermPair termPairTail;
+    /** Head of free TermPair list */
+    private TermPair freeTermPairHead;
+   
     /**
      * Construct a replicate Template object. The new template has a unique id and specified qualified name 
      * @param master Template object to replicate
@@ -120,11 +105,12 @@ public class Template extends TermList
         this((TemplateArchetype) master.getArchetype());
         this.qname = qname;
         key = master.key;
-        setTerms(master.termList.toArray(new Term[master.termList.size()]));
         this.isCalculator = master.isCalculator;
         this.isChoice = master.isChoice;
         this.isInnerTemplate = master.isInnerTemplate;
         isReplicate = true;
+        for (Operand operand: master.termList)
+            termList.add(operand);
     }
 
 	/**
@@ -137,6 +123,7 @@ public class Template extends TermList
 		qname = templateArchetype.getQualifiedName();
 		key = qname.getTemplate();
 		id = referenceCount.incrementAndGet();
+		axiomPairer = new AxiomPairer(this);
 	}
 
 	/**
@@ -158,13 +145,12 @@ public class Template extends TermList
 	public Template(TemplateArchetype templateArchetype, List<Operand> terms) 
 	{
 		this(templateArchetype);
+		templateArchetype.clearMutable();
 		if (terms.size() == 0)
 			throw new IllegalArgumentException("Parameter \"terms\" is empty");
         if ((terms != null)&& (terms.size() > 0))
         {
-            if (archetype.isMutable())
-                setTerms(terms.toArray(new Term[terms.size()]));
-            for (Term term: terms)
+            for (Operand term: terms)
                 addTerm(term);
         }
 	}
@@ -193,7 +179,7 @@ public class Template extends TermList
         {
             if (archetype.isMutable())
                 setTerms(terms);
-            for (Term term: terms)
+            for (Operand term: terms)
                 addTerm(term);
         }
         else
@@ -383,7 +369,103 @@ public class Template extends TermList
         super.addTerm(operand);
     }
 
-	/**
+    /**
+     * Unify given Axiom with this Template, pairing Terms of the Axiom with those
+     * of this Template. Terms are matched by name except when all terms are anonymous, 
+     * in which case, terms are paired in list order. 
+     * When both terms of a pairing have a value and values do not match, unification is skipped. 
+     * Unification of all terms is also skipped if this Axiom and the other Template have different names.
+     * @param axiom Axiom with which to unify as TermList object 
+     * @param solution Contains result of previous unify-evaluation steps
+     * @return Flag set true if unification completed successfully
+     */
+    public boolean unify(TermList<Term> axiom, Solution solution)
+    {
+        OperandWalker walker = new OperandWalker(termList);
+        clearTermPairList();
+        // If term list is empty, unification will be restricted to solution only.
+        if (!termList.isEmpty())
+        {
+            axiomPairer.setAxiom(axiom);
+            if (axiom.getArchetype().isAnonymousTerms() && !matchTermsByPosition(axiom))
+                return false;
+            // Match by position results in axiom term names being set in the archetype.
+            // Therefore a second pair matching takes place to apply named term logic.
+            // Note that this is likey to create duplicate pairing which the TermPairList implementation
+            // filters out.
+            if (!walker.visitAllNodes(axiomPairer))
+                return false;
+        }
+        // Solution has contents indicated by key set size non-zero
+        if (solution.keySet().size() > 0)
+        {
+            setSolutionPairer(axiom, solution);
+            if (!walker.visitAllNodes(solutionPairer))
+                return false;
+        }
+        // Proceed with unification term by term
+        TermPair termPair = termPairHead;
+        while (termPair != null)
+        {
+            termPair.getTerm1().unifyTerm(termPair.getTerm2(), id);
+            termPair = termPair.getNext();
+        }
+        return true;
+    }
+
+    /**
+     * Prepare class solution handler for next term pairing operation
+     * @param axiom Axiom with which to unify as TermList object 
+     * @param solution Contains result of previous unify-evaluation steps
+     */
+    protected void setSolutionPairer(TermList<Term> axiom, Solution solution)
+    {
+        if (solutionPairer == null)
+            solutionPairer = new SolutionPairer(this, solution);
+        else
+            solutionPairer.setSolution(solution);
+        solutionPairer.setSolution(solution, qname, axiom);
+    }
+
+    /**
+     * Match terms by position
+     * @param axiom Axiom with which to unify as TermList object 
+     * @return Flag set true if unification completed successfully
+     */
+    protected boolean matchTermsByPosition(TermList<Term> axiom)
+    {
+        int index = 0;
+        for (Operand templateTerm: termList)
+        {   // Match by position
+            Term axiomTerm = axiom.getTermByIndex(index);
+            // Do not go beyond last term in axiom
+            if (index >= axiom.getTermCount())
+                break;
+            // Skip alreay-name terms
+            if (!axiomTerm.getName().isEmpty())
+            {
+                index++;
+                continue;
+            }
+            // Perform pairing
+            if (!axiomPairer.pairTerms(templateTerm, axiomTerm))
+                return false;
+            // Name anonymous term as long as it is in the same name space as this template
+            if (!templateTerm.getName().isEmpty())
+            {
+                boolean isLocalTerm = qname.inSameSpace(templateTerm.getQualifiedName());
+                if (isLocalTerm)
+                {   // Name axiom term for Operand navigation
+                    axiomTerm.setName(templateTerm.getName());
+                    axiom.getArchetype().changeName(index, templateTerm.getName());
+                }
+            }
+            index++;
+        }
+        return true;
+    }
+
+    /**
 	 * Returns an axiom containing the values of this template and 
 	 * having same key and name as this template's name.
 	 * @return Axiom
@@ -404,12 +486,6 @@ public class Template extends TermList
 		return axiom;
 	}
 
-	protected boolean isAnonymous(String name)
-	{
-	    int index = name.indexOf('.');
-	    return name.isEmpty() || (index == 0); 
-	}
-	
 	/**
 	 * Returns an OperandWalker object for navigating this template
 	 * @return OperandWalker 
@@ -418,7 +494,7 @@ public class Template extends TermList
 	{
 	    if (!termList.isEmpty())
 		    return new OperandWalker(termList);
-	    return new OperandWalker(EMPTY_TERM_LIST);
+	    return new OperandWalker(EMPTY_OPERAND_LIST);
 	}
 
 	/**
@@ -587,5 +663,57 @@ public class Template extends TermList
             template.pop();
             template = template.getNext();
         }
+    }
+
+    /**
+     * add term pair
+     * @see au.com.cybersearch2.classy_logic.interfaces.TermPairList#add(au.com.cybersearch2.classy_logic.interfaces.Operand, au.com.cybersearch2.classy_logic.interfaces.Term)
+     */
+    @Override
+    public void add(Operand term1, Term term2)
+    {
+        if (termPairHead != null)
+        {   // Skip duplicates
+            TermPair termPair = termPairHead;
+            while(termPair != null)
+            {
+                if (term1 == termPair.getTerm1())
+                    return;
+                termPair = termPair.getNext(); 
+            }
+        }
+        // Get next free TermPair or create instance if no free items available
+        TermPair nextTermPair = null;
+        if (freeTermPairHead == null)
+            nextTermPair = new TermPair(term1, term2);
+        else
+        {
+            nextTermPair = freeTermPairHead;
+            nextTermPair.setTerm1(term1);
+            nextTermPair.setTerm2(term2);
+            nextTermPair.setNext(null);
+            freeTermPairHead = freeTermPairHead.getNext();
+        }
+        // Append TermPair item to list
+        if (termPairHead == null)
+        {
+            termPairHead = nextTermPair;
+            termPairTail = nextTermPair;
+        }
+        else
+        {
+            termPairTail.setNext(nextTermPair);
+            termPairTail = nextTermPair;
+        }
+    }
+
+    /**
+     * Return TermPair list to initial state
+     */
+    public void clearTermPairList()
+    {   // Recycle items
+        freeTermPairHead = termPairHead;
+        // Clear list accessors
+        termPairHead = termPairTail = null;
     }
 }

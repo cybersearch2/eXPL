@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2017  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,18 +16,18 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 /**
- * UnificationPairer
+ * TermPairList
+ * Interface for container for TermPair objects designed to recycle objects for efficiency
+ * The container must allow the the list to also be accessed and cleared 
  * @author Andrew Bowley
- * 23 Dec 2014
+ * 7May,2017
  */
-public interface UnificationPairer extends OperandVisitor 
+public interface TermPairList
 {
-	/**
-	 * Process two terms, matched by name or list order, according to their status.
-	 * Both terms will be added the internal pair list if the first term is empty. 
-	 * @param operand Operand term belonging to a Template 
-	 * @param otherTerm Term belonging to an Axiom - must be non-empty
-	 * @return Flag set true unless exit condition detected, which depends on implementation
-	 */
-	boolean pairTerms(Operand operand, Term otherTerm);
+    /**
+     * Add operand/term pair to be unified
+     * @param term1 Template operand
+     * @param term2 Axiom term
+     */
+    void add(Operand term1, Term term2);
 }

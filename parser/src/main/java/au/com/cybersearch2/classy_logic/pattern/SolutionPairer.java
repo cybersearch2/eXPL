@@ -19,7 +19,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
+import au.com.cybersearch2.classy_logic.interfaces.TermPairList;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -27,20 +27,18 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 20 Dec 2014
  */
-public class SolutionPairer extends AxiomPairer
+public class SolutionPairer extends AxiomPairer 
 {
     /** Map of Axioms selectable by Axiom name */
 	protected Solution solution;
 	
 	/**
 	 * Construct SolutionPairer object
-	 * @param owner Structure which is performing unification
-     * @param solution Container to aggregate results
 	 */
-	public SolutionPairer(Axiom owner, Solution solution, QualifiedName localContext) 
+	public SolutionPairer(TermPairList termPairList, Solution solution) 
 	{
-		super(owner, localContext);
-		this.solution = solution;
+        super(termPairList);
+        this.solution = solution;
 	}
 
 	/**
@@ -48,9 +46,10 @@ public class SolutionPairer extends AxiomPairer
      * @param solution Container to aggregate results
      * @param localContext Qualified name of enclosing context
 	 */
-	public SolutionPairer(Solution solution, QualifiedName localContext) 
+	public SolutionPairer(Solution solution, QualifiedName localContext, TermPairList termPairList) 
 	{
-		this(null, solution, localContext);
+	    this(termPairList, solution);
+        this.localContext = localContext;
 	}
 
 	/**
@@ -60,9 +59,20 @@ public class SolutionPairer extends AxiomPairer
 	public void setSolution(Solution solution)
 	{
 		this.solution = solution;
-		reset();
 	}
 
+    /**
+     * Set SolutionPairer for unification with axiom and solution
+     * @param solution Container to aggregate results
+     * @param localContext Qualified name of enclosing context
+     */
+    public void setSolution(Solution solution, QualifiedName localContext, TermList<Term> axiom) 
+    {
+        setAxiom(axiom);
+        this.solution = solution;
+        this.localContext = localContext;
+    }
+    
 	/**
 	 * Visit next term
 	 * @see au.com.cybersearch2.classy_logic.pattern.AxiomPairer#next(au.com.cybersearch2.classy_logic.interfaces.Operand, int)
@@ -97,19 +107,18 @@ public class SolutionPairer extends AxiomPairer
         { 
             // Check for exit case: Axiom term contains different value to matching Solution term
             Term axiomTerm = null;
-            if (owner == null) 
+            if (axiom == AxiomArchetype.EMPTY_AXIOM) 
                 axiomTerm = operand;
             else
-                axiomTerm = owner.getTermByName(termName);
+                axiomTerm = axiom.getTermByName(termName);
             if ((axiomTerm != null) && 
                 !axiomTerm.isEmpty() && localContext.inSameSpace(operand.getQualifiedName()) &&
                 !axiomTerm.getValue().equals(otherTerm.getValue()))
                 return false;
             else if (operand.isEmpty())
                 // Unify with Solution term
-                pairList.add(new TermPair(operand, otherTerm));
+                termPairList.add(operand, otherTerm);
         }
         return true;
     }
-
 }

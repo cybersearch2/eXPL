@@ -37,7 +37,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 public class ForeignColorsTest
 {
     @Test
-    public void testForeignScope() throws Exception
+    public void testForeignColors() throws Exception
     {
         File testFile = new File("src/main/resources/tutorial18", "foreign-colors.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));

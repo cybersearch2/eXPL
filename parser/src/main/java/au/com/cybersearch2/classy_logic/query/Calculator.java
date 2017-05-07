@@ -22,9 +22,10 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionFinder;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
+import au.com.cybersearch2.classy_logic.pattern.SolutionList;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
 import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.pattern.Axiom.TermPair;
+import au.com.cybersearch2.classy_logic.pattern.TermPair;
 
 /**
  * Calculator
@@ -45,7 +46,13 @@ public class Calculator implements SolutionFinder
     protected SolutionPairer pairer;
     /** Choice set if template.isChoice() returns true */
     protected Choice choice;
- 
+    protected SolutionList solutionList;
+
+    public Calculator()
+    {
+        solutionList = new SolutionList();
+    }
+    
 	/**
 	 * Set choice when template is part of a choice
 	 * @param choice Choice object
@@ -196,8 +203,9 @@ public class Calculator implements SolutionFinder
     {
 		if (solution.size() > 0)
 		{
+		    solutionList.clearTermPairList();
 			if (pairer == null)
-				pairer = new SolutionPairer(solution, template.getQualifiedName());
+				pairer = new SolutionPairer(solution, template.getQualifiedName(), solutionList);
 			else
 				pairer.setSolution(solution);
 			Template chainTemplate = template;
@@ -207,8 +215,12 @@ public class Calculator implements SolutionFinder
 				if (walker.visitAllNodes(pairer))
 				{
 					// Proceed with unification term by term
-					for (TermPair termPair: pairer.getPairList())
-						termPair.term1.unifyTerm(termPair.term2, chainTemplate.getId());
+			        TermPair termPair = solutionList.getHead();
+			        while (termPair != null)
+			        {
+						termPair.getTerm1().unifyTerm(termPair.getTerm2(), chainTemplate.getId());
+						termPair = termPair.getNext();
+			        }
 					return true;
 				}
 				chainTemplate = chainTemplate.getNext();

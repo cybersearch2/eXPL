@@ -39,14 +39,14 @@ public class OperandWalker
 	/** Single operand */
     protected Operand operand;
     /** Term list */
-    protected List<Term> operandList;
+    protected List<Operand> operandList;
 
     /**
      * Construct OperandWalker object to navigate a list of terms.
      * Note Term interface applied to items for compatibility with Template super class Structure, which contains Template terms.
      * @param operandList List of terms to navigate
      */
-	public OperandWalker(List<Term> operandList) 
+	public OperandWalker(List<Operand> operandList) 
 	{
 		this.operandList = operandList;
 	}
@@ -71,9 +71,9 @@ public class OperandWalker
 	{
 		if (operand != null)
 			return visit(operand, visitor, 1);
-		for (Term operandItem: operandList)
+		for (Operand operandItem: operandList)
 		{
-			if (!visit((Operand)operandItem, visitor, 1))
+			if (!visit(operandItem, visitor, 1))
 				return false;
 		}
 		return true;

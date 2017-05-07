@@ -33,7 +33,7 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
  * @author Andrew Bowley
  * 2May,2017
  */
-public abstract class Archetype <T extends TermList, P extends Term> implements TermListManager, Comparable<Archetype<T,P>>
+public abstract class Archetype <T extends TermList<P>, P extends Term> implements TermListManager, Comparable<Archetype<T,P>>
 {
     public static List<TermMetaData> EMPTY_LIST;
     public static boolean CASE_INSENSITIVE_NAME_MATCH;
@@ -51,6 +51,8 @@ public abstract class Archetype <T extends TermList, P extends Term> implements 
     protected List<TermMetaData> termMetaList;
     /** Flag set true if this Structure allows updates. Set true on creation and cleared when all term data complete */
     protected boolean isMutable;
+    /** Flag set true if all terms anonymous */
+    protected boolean isAnonymousTerms;
 
     public Archetype(QualifiedName structureName, StructureType structureType)
     {
@@ -58,6 +60,7 @@ public abstract class Archetype <T extends TermList, P extends Term> implements 
         this.structureType = structureType;
         termMetaList = EMPTY_LIST;
         isMutable = true;
+        isAnonymousTerms = true;
     }
 
     /**
@@ -124,6 +127,8 @@ public abstract class Archetype <T extends TermList, P extends Term> implements 
         }
         else
             termMetaList.add(termMetaData);
+        if (!termMetaData.isAnonymous())
+            isAnonymousTerms = false;
         return termMetaData.getIndex();
     }
 
@@ -168,7 +173,10 @@ public abstract class Archetype <T extends TermList, P extends Term> implements 
         {
             TermMetaData termMetaData = termMetaList.get(index);
             if (term.getName().isEmpty() && !termMetaData.isAnonymous())
+            {
                 term.setName(termMetaData.getName());
+                isAnonymousTerms = false;
+            }
         }
         return new TermMetaData(term, index);
     }
@@ -261,6 +269,14 @@ public abstract class Archetype <T extends TermList, P extends Term> implements 
     public void clearMutable()
     {
         isMutable = false;
+    }
+
+    /**
+     * @return the isAnonymousTerms
+     */
+    public boolean isAnonymousTerms()
+    {
+        return isAnonymousTerms;
     }
 
     /**

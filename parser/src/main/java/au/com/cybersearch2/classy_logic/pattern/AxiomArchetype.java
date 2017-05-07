@@ -35,7 +35,15 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
  */
 public class AxiomArchetype extends Archetype<Axiom, Term>
 {
-    private static final Unknown UNKNOWN =  new Unknown();
+    private static final Unknown UNKNOWN ;
+    public static TermList<Term> EMPTY_AXIOM;
+    
+    static
+    {
+        UNKNOWN =  new Unknown();
+        EMPTY_AXIOM = new TermList<Term>(new AxiomArchetype(QualifiedName.parseGlobalName("*"))){};
+    }
+    
 
     /**
      * Construct AxiomArchetype
@@ -45,7 +53,7 @@ public class AxiomArchetype extends Archetype<Axiom, Term>
     {
         super(structureName, StructureType.axiom);
         if (structureName.getName().isEmpty())
-            throw new IllegalArgumentException("Template qualified name must have a name part");
+            throw new IllegalArgumentException("Axiom qualified name must have a name part");
     }
 
     /**
