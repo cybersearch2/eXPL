@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.pattern;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.TermPairList;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -27,20 +28,15 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * @author Andrew Bowley
  * 20 Dec 2014
  */
-public class SolutionPairer extends AxiomPairer 
+public class SolutionPairer implements OperandVisitor 
 {
     /** Map of Axioms selectable by Axiom name */
 	protected Solution solution;
+    /** List of paired terms collected by this object */
+    protected TermPairList termPairList;
+    /** Qualified name for local context */
+    protected QualifiedName localContext;
 	
-	/**
-	 * Construct SolutionPairer object
-	 */
-	public SolutionPairer(TermPairList termPairList, Solution solution) 
-	{
-        super(termPairList);
-        this.solution = solution;
-	}
-
 	/**
 	 * Construct SolutionPairer object
      * @param solution Container to aggregate results
@@ -48,7 +44,8 @@ public class SolutionPairer extends AxiomPairer
 	 */
 	public SolutionPairer(Solution solution, QualifiedName localContext, TermPairList termPairList) 
 	{
-	    this(termPairList, solution);
+        this.solution = solution;
+        this.termPairList = termPairList;
         this.localContext = localContext;
 	}
 
@@ -61,18 +58,6 @@ public class SolutionPairer extends AxiomPairer
 		this.solution = solution;
 	}
 
-    /**
-     * Set SolutionPairer for unification with axiom and solution
-     * @param solution Container to aggregate results
-     * @param localContext Qualified name of enclosing context
-     */
-    public void setSolution(Solution solution, QualifiedName localContext, TermList<Term> axiom) 
-    {
-        setAxiom(axiom);
-        this.solution = solution;
-        this.localContext = localContext;
-    }
-    
 	/**
 	 * Visit next term
 	 * @see au.com.cybersearch2.classy_logic.pattern.AxiomPairer#next(au.com.cybersearch2.classy_logic.interfaces.Operand, int)
@@ -106,14 +91,8 @@ public class SolutionPairer extends AxiomPairer
         if ((otherTerm != null) && !otherTerm.isEmpty())
         { 
             // Check for exit case: Axiom term contains different value to matching Solution term
-            Term axiomTerm = null;
-            if (axiom == AxiomArchetype.EMPTY_AXIOM) 
-                axiomTerm = operand;
-            else
-                axiomTerm = axiom.getTermByName(termName);
-            if ((axiomTerm != null) && 
-                !axiomTerm.isEmpty() && localContext.inSameSpace(operand.getQualifiedName()) &&
-                !axiomTerm.getValue().equals(otherTerm.getValue()))
+            if (!operand.isEmpty() && localContext.inSameSpace(operand.getQualifiedName()) &&
+                !operand.getValue().equals(otherTerm.getValue()))
                 return false;
             else if (operand.isEmpty())
                 // Unify with Solution term

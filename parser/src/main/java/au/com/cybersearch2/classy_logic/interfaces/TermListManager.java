@@ -34,6 +34,7 @@ public interface TermListManager
     int addTerm(TermMetaData termMetaData);
     void checkTerm(TermMetaData termMetaData);
     int getIndexForName(String termName);
+    TermMetaData getMetaData(int index);
     boolean changeName(int index, String name);
     boolean isMutable();
     boolean isAnonymousTerms();

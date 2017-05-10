@@ -402,6 +402,17 @@ public class StructureTest
             {
                 return null;
             }
+
+            @Override
+            public void setArchetypeIndex(int index)
+            {
+            }
+
+            @Override
+            public int getArchetypeIndex()
+            {
+                return 0;
+            }
 		};
 		testStructure.addTerm(term4);
 		assertThat(testStructure.getTermCount()).isEqualTo(2);
@@ -505,6 +516,17 @@ public class StructureTest
             public Operator getOperator()
             {
                 return null;
+            }
+
+            @Override
+            public void setArchetypeIndex(int index)
+            {
+            }
+
+            @Override
+            public int getArchetypeIndex()
+            {
+                return 0;
             }
 
 		};

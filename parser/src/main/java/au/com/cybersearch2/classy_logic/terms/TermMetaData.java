@@ -66,7 +66,10 @@ public class TermMetaData implements Comparable<TermMetaData>
             case DECIMAL: literalType = LiteralType.decimal; break;
             case UNKNOWN:
                 if (!term.isEmpty() && (term.getValueClass() == Unknown.class))
-                    literalType = LiteralType.unknown; break;
+                    literalType = LiteralType.unknown; 
+                else
+                    literalType = LiteralType.object;
+                break;
             default:
                 literalType = LiteralType.object; break;
             }

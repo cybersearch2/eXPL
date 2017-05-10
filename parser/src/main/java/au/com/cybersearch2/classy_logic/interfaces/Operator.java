@@ -79,5 +79,4 @@ public interface Operator
      * @return Trait object
      */
     Trait getTrait();
-
 }

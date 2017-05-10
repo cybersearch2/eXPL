@@ -15,6 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,15 +37,21 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
  * @author Andrew Bowley
  * 3May,2017
  */
-public class AxiomArchetype extends Archetype<Axiom, Term>
+public class AxiomArchetype extends Archetype<Axiom, Term> implements Serializable
 {
+    private static final long serialVersionUID = -8403891863022754448L;
+    
     private static final Unknown UNKNOWN ;
     public static TermList<Term> EMPTY_AXIOM;
     
     static
     {
         UNKNOWN =  new Unknown();
-        EMPTY_AXIOM = new TermList<Term>(new AxiomArchetype(QualifiedName.parseGlobalName("*"))){};
+        EMPTY_AXIOM = new TermList<Term>(new AxiomArchetype(QualifiedName.parseGlobalName("*"))){
+
+            private static final long serialVersionUID = 2071000367077189439L;
+            
+        };
     }
     
 
@@ -130,4 +140,19 @@ public class AxiomArchetype extends Archetype<Axiom, Term>
         return "Archetype " + structureName.toString();
     }
 
+    private void writeObject(ObjectOutputStream oos)
+            throws IOException 
+    {
+        oos.writeObject(structureName);
+    }
+    
+    private void readObject(ObjectInputStream ois)
+            throws IOException, ClassNotFoundException  
+    {
+        structureName = (QualifiedName)ois.readObject();
+        structureType = StructureType.axiom;
+        termMetaList = EMPTY_LIST;
+        isMutable = true;
+        isAnonymousTerms = true;
+    }
 }

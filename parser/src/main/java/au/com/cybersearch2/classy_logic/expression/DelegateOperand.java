@@ -42,7 +42,8 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	protected boolean isPrivate;
     /** Defines operations that an Operand performs with other operands. */
     protected DelegateOperator operator;
-
+    /** Index of this Operand in the archetype of it's containing template */
+    private int index;
 
 	/**
      * Construct empty DelegateOperand object
@@ -53,6 +54,7 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 		super(qname.getName());
 		this.qname = qname;
         operator = new DelegateOperator();
+        index = -1;
 	}
 
     /**
@@ -185,7 +187,27 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
         return isPrivate;
     }
     
-	/**
+    /**
+     * setIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#setIndex(int)
+     */
+    @Override
+    public void setArchetypeIndex(int index)
+    {
+        this.index = index;
+    }
+
+    /**
+     * getIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getIndex()
+     */
+    @Override
+    public int getArchetypeIndex()
+    {
+        return index;
+    }
+
+    /**
      * Set value to null, mark Parameter as empty and set id to 0. 
      * Do full backup for left and right operands to allow re-evaluation.
      */

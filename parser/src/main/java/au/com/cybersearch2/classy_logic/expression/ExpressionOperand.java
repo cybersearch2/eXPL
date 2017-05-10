@@ -33,6 +33,8 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
     protected QualifiedName qname;
     /** Flag set true if operand not visible in solution */
     protected boolean isPrivate;
+    /** Index of this Operand in the archetype of it's containing template */
+    private int index;
  
     /**
 	 * Construct a ExpressionOperand object using given name 
@@ -45,6 +47,7 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 		if (name.isEmpty())
 			throw new IllegalArgumentException("Param \"name\" is empty");
 		this.qname = qname;
+        index = -1;
 	}
 
 	/**
@@ -56,6 +59,7 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 	{
 		super(qname.toString(), value);
         this.qname = qname;
+        index = -1;
 	}
 
 	/**
@@ -68,6 +72,7 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 		super(qname.getName());
 		this.qname = qname;
 		this.expression = expression;
+        index = -1;
 	}
 
     /**
@@ -192,5 +197,25 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 	{
 		return null;
 	}
+
+	/**
+	 * setIndex
+	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#setIndex(int)
+	 */
+    @Override
+    public void setArchetypeIndex(int index)
+    {
+        this.index = index;
+    }
+
+    /**
+     * getIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getIndex()
+     */
+    @Override
+    public int getArchetypeIndex()
+    {
+        return index;
+    }
 
 }

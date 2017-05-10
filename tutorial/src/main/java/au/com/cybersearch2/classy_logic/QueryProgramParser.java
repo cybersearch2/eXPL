@@ -65,7 +65,7 @@ public class QueryProgramParser
         this.functionManager = functionManager;
     }
     
-    public QueryProgram loadScript(String programFile)
+    public synchronized QueryProgram loadScript(String programFile)
     {
         File filePath = new File(resourcePath, programFile);
         QueryProgram queryProgram = null;

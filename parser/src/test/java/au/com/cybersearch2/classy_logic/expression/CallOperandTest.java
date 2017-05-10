@@ -376,7 +376,7 @@ public class CallOperandTest
             "  city_list[8]^altitude,\n" +
             "  city_list[9]^altitude\n" +
             "));\n" +
-            "query average_height (city : average);";
+            "query average_height (average);";
     
     static final String CITY_AVERAGE_HEIGHT_CALC2 = CITY_EVELATIONS +
             "list city_list(city);\n" +

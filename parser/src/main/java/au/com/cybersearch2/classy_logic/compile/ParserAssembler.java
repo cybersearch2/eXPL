@@ -244,13 +244,21 @@ public class ParserAssembler implements LocaleListener
 
 	/**
 	 * Add a new template to this ParserAssembler
-     * @param qualifiedTemplateName Qualified template name
+     * @param qualifiedName Qualified template name or axiom name if for Choice
 	 * @param isCalculator Flag true if template declared a calculator
 	 */
-	public Template createTemplate(QualifiedName qualifiedTemplateName, boolean isCalculator)
+	public Template createTemplate(QualifiedName qualifiedName, boolean isCalculator)
 	{
+	    boolean isChoice = qualifiedName.getTemplate().isEmpty() && isCalculator;
+	    QualifiedName qualifiedTemplateName = qualifiedName;
+	    if (isChoice)
+	        qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), qualifiedName.getName());
 		Template template = new Template(new TemplateArchetype(qualifiedTemplateName));
 		template.setCalculator(isCalculator);
+		if (isChoice)
+		{
+		    template.setChoice(true);
+		}
 		templateMap.put(qualifiedTemplateName, template);
 		return template;
 	}
@@ -836,12 +844,11 @@ public class ParserAssembler implements LocaleListener
 	 * @param innerTemplateName Qualified name of inner template
 	 * @return Template object
 	 */
-	public Template chainTemplate(QualifiedName outerTemplateName, QualifiedName innerTemplateName) 
+	public Template chainTemplate(QualifiedName outerTemplateName, String name) 
 	{
 		Template template = getTemplate(outerTemplateName);
-		Template chainTemplate = new Template(new TemplateArchetype(innerTemplateName));
-		template.setNext(chainTemplate);
-		templateMap.put(innerTemplateName, chainTemplate);
+		Template chainTemplate = template.innerTemplateInstance(name);
+		templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
 		return chainTemplate;
 	}
 

@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.helper;
 
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -28,8 +29,10 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 22 Aug 2015
  */
-public class QualifiedName implements Comparable<QualifiedName>
+public class QualifiedName implements Comparable<QualifiedName>, Serializable
 {
+    private static final long serialVersionUID = 3872140142266578675L;
+    
     public static String EMPTY;
     public static QualifiedName ANONYMOUS;
     
@@ -42,7 +45,7 @@ public class QualifiedName implements Comparable<QualifiedName>
     protected String scope;
     protected String template;
     protected String name;
-    protected AtomicInteger referenceCount;
+    transient protected AtomicInteger referenceCount;
 
     /**
      * Construct name-only QualifiedName in global namespace

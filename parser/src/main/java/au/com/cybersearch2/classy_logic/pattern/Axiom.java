@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.pattern;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamField;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,12 +38,11 @@ import au.com.cybersearch2.classy_logic.terms.TermStore;
  */
 public class Axiom extends TermList<Term>
 {
-	//private static final long serialVersionUID = 2741521667825735668L;
-    //private static final ObjectStreamField[] serialPersistentFields =
-    //{
-    //    new ObjectStreamField("name", String.class),
-    //    new ObjectStreamField("pairByPosition", Boolean.class)
-    //};
+	private static final long serialVersionUID = 2741521667825735668L;
+    private static final ObjectStreamField[] serialPersistentFields =
+    {
+        new ObjectStreamField("name", String.class),
+    };
 
     protected String name;
 	
@@ -57,7 +57,10 @@ public class Axiom extends TermList<Term>
         if ((params != null)&& (params.length > 0))
         {
             if (archetype.isMutable())
+            {
                 setTerms(params);
+                archetype.clearMutable();
+            }
             for (Term term: params)
                 addTerm(term);
         }
@@ -92,7 +95,10 @@ public class Axiom extends TermList<Term>
                     terms.add(new Parameter(Term.ANONYMOUS, datum));
             }
     		if (archetype.isMutable())
+    		{
     		    setTerms(terms.toArray(new Term[terms.size()]));
+                archetype.clearMutable();
+   	     	}
         }
 	}
 
@@ -107,7 +113,10 @@ public class Axiom extends TermList<Term>
         if ((terms != null)&& (terms.length > 0))
         {
             if (archetype.isMutable())
+            {
                 setTerms(terms);
+                archetype.clearMutable();
+            }
             for (Term term: terms)
                 addTerm(term);
         }
@@ -124,7 +133,10 @@ public class Axiom extends TermList<Term>
         if ((terms != null)&& (terms.size() > 0))
         {
             if (archetype.isMutable())
+            {
                 setTerms(terms.toArray(new Term[terms.size()]));
+                archetype.clearMutable();
+            }
             for (Term term: terms)
                 addTerm(term);
          }
@@ -161,6 +173,8 @@ public class Axiom extends TermList<Term>
     private void writeObject(ObjectOutputStream oos)
             throws IOException 
     {
+        oos.writeObject(archetype);
+        oos.writeObject(name);
         // termList size
         oos.writeInt(termList.size());
         // terms
@@ -171,6 +185,8 @@ public class Axiom extends TermList<Term>
     private void readObject(ObjectInputStream ois)
             throws IOException, ClassNotFoundException  
     {
+        archetype = (AxiomArchetype)ois.readObject();
+        name = (String)ois.readObject();
         // termList size
         Term[] termArray = new Term[ois.readInt()];
         // terms
@@ -181,6 +197,10 @@ public class Axiom extends TermList<Term>
             param.setId(termStore.getId());
             termArray[i] = param;
         }
+        termList = new ArrayList<Term>();
         setTerms(termArray);
+        archetype.clearMutable();
+        for (Term term: termArray)
+            addTerm(term);
     }
 }

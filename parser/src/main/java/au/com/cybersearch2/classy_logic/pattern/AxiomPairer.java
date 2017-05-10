@@ -26,7 +26,7 @@ import au.com.cybersearch2.classy_logic.interfaces.UnificationPairer;
  * @author Andrew Bowley
  * 20 Dec 2014
  */
-public class AxiomPairer implements UnificationPairer
+public abstract class AxiomPairer implements UnificationPairer
 {
 	/** Axiom which is performing unification */
 	protected TermList<Term> axiom;

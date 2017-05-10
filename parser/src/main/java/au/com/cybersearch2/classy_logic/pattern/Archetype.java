@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,8 +34,10 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
  * @author Andrew Bowley
  * 2May,2017
  */
-public abstract class Archetype <T extends TermList<P>, P extends Term> implements TermListManager, Comparable<Archetype<T,P>>
+public abstract class Archetype <T extends TermList<P>, P extends Term> implements TermListManager, Comparable<Archetype<T,P>>, Serializable
 {
+    private static final long serialVersionUID = 7567670630018077130L;
+    
     public static List<TermMetaData> EMPTY_LIST;
     public static boolean CASE_INSENSITIVE_NAME_MATCH;
     
@@ -46,13 +49,13 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
     /** Unique name of structure */
     protected QualifiedName structureName;
     /** Structure type defines usage */
-    protected StructureType structureType;
+    transient protected StructureType structureType;
     /** List of term meta data in same order as terms in structure */
-    protected List<TermMetaData> termMetaList;
+    transient protected List<TermMetaData> termMetaList;
     /** Flag set true if this Structure allows updates. Set true on creation and cleared when all term data complete */
-    protected boolean isMutable;
+    transient protected boolean isMutable;
     /** Flag set true if all terms anonymous */
-    protected boolean isAnonymousTerms;
+    transient protected boolean isAnonymousTerms;
 
     public Archetype(QualifiedName structureName, StructureType structureType)
     {
@@ -107,7 +110,7 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
     public int addTerm(TermMetaData termMetaData)
     {
         if (!isMutable)
-            throw new ExpressionException("Term " + termMetaData.toString() + " cannot be added to locked Structure " + structureName);
+            throw new ExpressionException("Term " + termMetaData.toString() + " cannot be added to locked " + toString());
         if (termMetaData.getIndex() == -1)
             termMetaData.setIndex(getTermCount());
         if (termMetaList.isEmpty())
@@ -193,7 +196,8 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
         for (TermMetaData termMetaData: termMetaList)
         {
             String name = CASE_INSENSITIVE_NAME_MATCH ? termMetaData.getName().toUpperCase() : termMetaData.getName();
-            if (!termMetaData.isAnonymous() && termName.equals(name))
+            String toMatch = CASE_INSENSITIVE_NAME_MATCH ? termName.toUpperCase() : termName;
+            if (/*!termMetaData.isAnonymous() &&*/ toMatch.equals(name))
                 return i;
             ++i;
         }
@@ -218,6 +222,15 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
         return termMetaData.setName(name);
     }
 
+    @Override
+    public TermMetaData getMetaData(int index)
+    {
+        if ((index < 0) || (index >= getTermCount()))
+            return null;
+        return termMetaList.get(index);
+        
+    }
+    
     public T itemInstance(List<P> terms)
     {
         if (terms != null)

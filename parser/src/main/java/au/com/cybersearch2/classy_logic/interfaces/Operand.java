@@ -60,4 +60,16 @@ public interface Operand extends Term
 	 * @return Operator object
 	 */
 	Operator getOperator();
+
+    /**
+     * Sets index of this Operand in the archetype of it's containing template
+     * @param index int value
+     */
+    void setArchetypeIndex(int index);
+ 
+    /**
+     * Returns index of this Operand in the archetype of it's containing template.
+     * @return non-negative number, if set, otherwise -1
+     */
+    int getArchetypeIndex();
 }

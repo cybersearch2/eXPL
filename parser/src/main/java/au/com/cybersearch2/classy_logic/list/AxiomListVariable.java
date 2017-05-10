@@ -60,6 +60,8 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     protected boolean isPrivate;
     /** Defines operations that an Operand performs with other operands. To be set by super. */
     protected Operator operator;
+    /** Index of this Operand in the archetype of it's containing template */
+    private int archetypeIndex;
 	
 	/**
 	 * Construct a fixed index AxiomListVariable object.
@@ -422,6 +424,26 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     }
 
     /**
+     * setIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#setIndex(int)
+     */
+    @Override
+    public void setArchetypeIndex(int archetypeIndex)
+    {
+        this.archetypeIndex = archetypeIndex;
+    }
+
+    /**
+     * getIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getIndex()
+     */
+    @Override
+    public int getArchetypeIndex()
+    {
+        return archetypeIndex;
+    }
+
+    /**
      * Returns default qualified name for axiom term list
      * @param axiomList2 The containing axiom list
      * @return QualifiedName object
@@ -434,6 +456,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     protected void init()
     {
         operator = DelegateType.NULL.getOperatorFactory().delegate();
+        archetypeIndex = -1;
     }
     
 }

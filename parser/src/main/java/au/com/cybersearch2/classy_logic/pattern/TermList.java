@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,13 +29,16 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
  * @author Andrew Bowley
  * 2May,2017
  */
-public abstract class TermList <T extends Term>
+public abstract class TermList <T extends Term> implements Serializable
 {
+    private static final long serialVersionUID = -8039301398667216325L;
+    
     /** Defines structure features shared by instances with same identity */
     protected TermListManager archetype;
     /** Term list */
     transient protected List<T> termList;
-    protected int termCount;
+    /** Number of terms in term list */
+    transient protected int termCount;
     
     public TermList(TermListManager archetype)
     {
@@ -67,11 +71,7 @@ public abstract class TermList <T extends Term>
     {
         TermMetaData termMetaData = archetype.analyseTerm(term, termCount);
         if (archetype.isMutable())
-        {
             archetype.addTerm(termMetaData);
-            //if (!term.getName().isEmpty())
-            //    pairByPosition = false;
-        }
         else
             archetype.checkTerm(termMetaData);
         termList.add(term);
@@ -127,9 +127,7 @@ public abstract class TermList <T extends Term>
     }
     
     /**
-     * Set Anonymous Terms using values from supplied Object array.
-     * Any Object in the array not of type Term id converted to
-     * an anonymous Term with value set to the object. 
+     * Set Terms in this archetype. 
      * @param terms Term array
      */
     protected void setTerms(T[] terms) 
@@ -139,7 +137,6 @@ public abstract class TermList <T extends Term>
             int index = 0;
             for (T term: terms)
                 archetype.addTerm(new TermMetaData(term, index++));
-            archetype.clearMutable();
         }
     }
 

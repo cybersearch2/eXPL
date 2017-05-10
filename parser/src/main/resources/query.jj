@@ -201,13 +201,6 @@ public class QueryParser
      }
   }
   
-  protected QualifiedName createInnerTemplateName(QualifiedName outerTemplateName)
-  {
-  	return new QualifiedTemplateName(
-  	    outerTemplateName.getScope(), 
-  	    outerTemplateName.getTemplate() + 
-  	    Integer.toString(outerTemplateName.incrementReferenceCount() + 1));
-  }
 }
 PARSER_END(QueryParser)
 
@@ -1008,14 +1001,13 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
     ( 
       delimitToken="{"
       {
-        QualifiedName innerTemplateName = createInnerTemplateName(outerTemplateName);
-        Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, innerTemplateName);
+        Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, "");
         context.addSourceItem(scToken.image+expression.toString()).setEnd(delimitToken);
         context.pushSourceMarker();
         Token token = Token.newToken(QueryParserConstants.CALC);
         token.beginLine = delimitToken.beginLine;
         token.beginColumn = delimitToken.beginColumn;
-        context.setSourceMarker(token, innerTemplateName);
+        context.setSourceMarker(token, innerTemplate.getQualifiedName());
       }
       innerLoop=InnerCalculator(innerTemplate, outerTemplateName, context, true) 
       {
@@ -1043,12 +1035,11 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
     {
       context.onTokenIntercept(delimitToken);
       context.pushSourceMarker();
-      QualifiedName innerTemplateName = createInnerTemplateName(outerTemplateName);
-      Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, innerTemplateName);
+      Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, "");
       Token token = Token.newToken(QueryParserConstants.CALC);
       token.beginLine = delimitToken.beginLine;
       token.beginColumn = delimitToken.beginColumn;
-      context.setSourceMarker(token, innerTemplateName);
+      context.setSourceMarker(token, innerTemplate.getQualifiedName());
     }
     innerLoop=InnerCalculator(innerTemplate, outerTemplateName, context, false)
     {
@@ -1090,6 +1081,7 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
  	Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     template.addTerm(choiceOperand);
+    template.setNext(choiceTemplate);
     return choiceOperand;
   }
 }
@@ -1128,37 +1120,35 @@ Operand CalculatorQuery(Template template, ParserContext context) :
        qname = new QualifiedName(qname.getName() + reference, qname);
      context.addCalcQuery(qname, operandParamList).setEnd(delimitToken);
    }
-   ( innerTemplate=InnerTemplateDeclaration(outerTemplateName.getTemplate() + "." + callName, new QualifiedName(callName, createInnerTemplateName(outerTemplateName)), context) )?
+   ( innerTemplate=InnerTemplateDeclaration(outerTemplateName, callName, context) )?
   {
     Operand queryOperand = context.getParserAssembler().getQueryOperand(queryName, qname, operandParamList, innerTemplate);
     template.addTerm(queryOperand);
-    if (innerTemplate != null)
-        template.setNext(innerTemplate);
     context.popSourceMarker();
     return queryOperand;
   }
 }
 
-Template InnerTemplateDeclaration(String queryKey, QualifiedName qualifiedTemplateName, ParserContext context) :
+Template InnerTemplateDeclaration(QualifiedName outerTemplateName, String callName, ParserContext context) :
 {
   Template template;
   Operand expression;
   Token templateToken;
   Token delimitToken;
   SourceItem sourceItem;
+  String queryKey = outerTemplateName.getTemplate() + "." + callName;
 }
 {
     templateToken=">>"
     {
       ParserAssembler parserAssembler = context.getParserAssembler();
-      template = parserAssembler.createTemplate(qualifiedTemplateName, false);
-      template.setInnerTemplate(true);
-      template.setKey( queryKey);
+      template = parserAssembler.chainTemplate(outerTemplateName, callName);
+      template.setKey(queryKey);
       context.onTokenIntercept(templateToken);
     }
     delimitToken="(" 
     {
-      context.addSourceItem(">> " + qualifiedTemplateName.toString()).setEnd(delimitToken);
+      context.addSourceItem(">> " + template.getQualifiedName().toString()).setEnd(delimitToken);
     }
       ( 
         expression=TemplateExpression(template, context)
@@ -1259,9 +1249,7 @@ QualifiedName Choice(ParserContext context) :
   { 
     QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
     parserAssembler.createAxiom(qualifiedChoiceName);
-    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), qualifiedChoiceName.getName());
-    Template template = parserAssembler.createTemplate(qualifiedTemplateName, true);
-    template.setChoice(true);
+    Template template = parserAssembler.createTemplate(qualifiedChoiceName, true);
     context.setContextName(new QualifiedTemplateName(scope.getAlias(), choiceToken.image));
     return qualifiedChoiceName;
   }

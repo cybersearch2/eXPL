@@ -50,6 +50,8 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     protected boolean isPrivate;
     /** Defines operations that an Operand performs with other operands. To be set by super. */
     protected AxiomParameterOperator operator;
+    /** Index of this Operand in the archetype of it's containing template */
+    private int index;
 
     /**
      * Construct an AxiomParameterOperand object
@@ -68,6 +70,7 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
             paramsTreeRoot = OperandParam.buildOperandTree(initializeList);
         }
         operator = new AxiomParameterOperator();
+        index = -1;
     }
 
     @Override
@@ -150,6 +153,26 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     public Operator getOperator()
     {
         return operator;
+    }
+
+    /**
+     * setIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#setIndex(int)
+     */
+    @Override
+    public void setArchetypeIndex(int index)
+    {
+        this.index = index;
+    }
+
+    /**
+     * getIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getIndex()
+     */
+    @Override
+    public int getArchetypeIndex()
+    {
+        return index;
     }
 
     /**

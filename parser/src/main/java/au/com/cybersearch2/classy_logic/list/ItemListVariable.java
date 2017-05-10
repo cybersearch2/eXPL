@@ -62,6 +62,8 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
     protected boolean isPrivate;
     /** Optional operand for Currency type */
     protected Operand rightOperand;
+    /** Index of this Operand in the archetype of it's containing template */
+    private int archetypeIndex;
 
 	/**
 	 * Construct a fixed index ItemListVariable object
@@ -79,6 +81,7 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
         this.qname = getVariableName(itemList, suffix);
         if (itemList.hasItem(index))
 			onIndexSet(index);
+        archetypeIndex = -1;
 	}
 
     /**
@@ -96,6 +99,7 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
         this.indexExpression = indexExpression;
         this.qname = getVariableName(itemList, suffix);
         index = -1; // Set index to invalid value to avoid accidental uninitialised list access
+        archetypeIndex = -1;
 	}
 
     /**
@@ -300,6 +304,25 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
         return proxy;
     }
 
+    /**
+     * setIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#setIndex(int)
+     */
+    @Override
+    public void setArchetypeIndex(int archetypeIndex)
+    {
+        this.archetypeIndex = archetypeIndex;
+    }
+
+    /**
+     * getIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getIndex()
+     */
+    @Override
+    public int getArchetypeIndex()
+    {
+        return archetypeIndex;
+    }
 	/**
 	 * Returns variable name given list name and suffix
 	 * @param listName

@@ -17,7 +17,6 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -32,15 +31,12 @@ public class ChoiceOperand extends IntegerOperand
 {
     protected Template template;
     protected Choice choice;
-    /** Root of Operand tree for unification */
-    protected Operand termsTreeRoot;
     
     public ChoiceOperand(QualifiedName qname, Template template, Choice choice)
     {
         super(qname);
         this.template = template;
         this.choice = choice;
-        termsTreeRoot = buildOperandTree();
     }
     /**
      * Evaluate loop
@@ -84,17 +80,6 @@ public class ChoiceOperand extends IntegerOperand
     }
 
     /**
-     * Returns root operand of template terms tree     
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperand()
-     */
-    @Override
-    public Operand getRightOperand() 
-    {
-        return termsTreeRoot;
-    }
-
-
-    /**
      * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#toString()
      */
     @Override
@@ -103,21 +88,4 @@ public class ChoiceOperand extends IntegerOperand
         return "choice " + name;
     }
 
-    /**
-     * Build parameter tree for unification
-     */
-    public Operand buildOperandTree()
-    {
-        int index = 0;
-        Operand[] params = new Operand[2];
-        params[0] = (Operand)template.getTermByIndex(index++);
-        while (true)
-        {
-            if (index == template.getTermCount())
-                break;
-            params[1] = (Operand)template.getTermByIndex(index++);
-            params[0] = new Evaluator(params[0], ",", params[1]);
-        }
-        return params[0];
-    }
 }

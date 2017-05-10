@@ -23,6 +23,7 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
@@ -61,6 +62,7 @@ axiom grades (student, english, maths, history)
     {
         File resourcePath = new File("src/main/resources/tutorial6");
         queryProgramParser = new QueryProgramParser(resourcePath);
+        Archetype.CASE_INSENSITIVE_NAME_MATCH = false;
     }
     
 	/**

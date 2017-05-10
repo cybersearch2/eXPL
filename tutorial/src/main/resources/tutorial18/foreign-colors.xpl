@@ -5,10 +5,10 @@ axiom french.colors (aqua, black, blue, white) : resource;
 local select(colors);
 
 choice swatch (name, red, green, blue)
-  {select[aqua], 0, 255, 255}
-  {select[black], 0, 0, 0}
-  {select[blue], 0, 0, 255}
-  {select[white], 255, 255, 255};
+  {select^aqua, 0, 255, 255}
+  {select^black, 0, 0, 0}
+  {select^blue, 0, 0, 255}
+  {select^white, 255, 255, 255};
   
 axiom shade (name) : parameter;
 

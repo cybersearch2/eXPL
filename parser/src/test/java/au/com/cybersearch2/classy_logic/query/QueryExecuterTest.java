@@ -360,7 +360,7 @@ public class QueryExecuterTest
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
         QueryExecuter query = new QueryExecuter(queryParams);
-        Evaluator expression = new TestEvaluator(new TestStringOperand("customer.name"), "==", new TestStringOperand("name"));
+        Evaluator expression = new TestEvaluator(new StringOperand(QualifiedName.parseName("name", new QualifiedTemplateName(QualifiedName.EMPTY, "account"))), "==", new TestStringOperand("name"));
         Evaluator invoice = new TestEvaluator("name", expression, "&&");
         Variable fee = new TestVariable("fee");
         TemplateArchetype accountArchetype = new TemplateArchetype(parseTemplateName("account"));
@@ -760,6 +760,11 @@ public class QueryExecuterTest
         return new QualifiedTemplateName(QualifiedName.EMPTY, name);
     }
 
+    protected static QualifiedName parseVariableName(String template, String name)
+    {
+        return QualifiedName.parseName(name, new QualifiedTemplateName(QualifiedName.EMPTY, template));
+    }
+    
     public static ParserAssembler openScript(String script) throws ParseException
     {
         InputStream stream = new ByteArrayInputStream(script.getBytes());

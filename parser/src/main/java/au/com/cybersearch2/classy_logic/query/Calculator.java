@@ -129,7 +129,7 @@ public class Calculator implements SolutionFinder
 		else
 		    axiom = solution.getAxiom(template.getKey());
 		boolean unificationSuccess = true;
-		if (axiom != null)
+		if ((axiom != null) && (axiom.getTermCount() > 0))
 		{
 			if (!axiom.unifyTemplate(template, solution))
 				unificationSuccess = false;

@@ -65,8 +65,8 @@ public class TemplateTest
 	{
 	    TermMetaData termMetaData1 = mock(TermMetaData.class);
         TermMetaData termMetaData2 = mock(TermMetaData.class);
-	    when(templateArchitype.analyseTerm(parameter1, 0)).thenReturn(termMetaData1);
-        when(templateArchitype.analyseTerm(parameter2, 1)).thenReturn(termMetaData2);
+	    when(templateArchitype.analyseTerm(isA(Operand.class), eq(0))).thenReturn(termMetaData1);
+        when(templateArchitype.analyseTerm(isA(Operand.class), eq(1))).thenReturn(termMetaData2);
 		Template testTemplate = new Template(templateArchitype, getTermList());
 		int id = testTemplate.getId();
 		assertThat(testTemplate.getName()).isEqualTo(NAME);
@@ -84,8 +84,8 @@ public class TemplateTest
 	{
         TermMetaData termMetaData1 = mock(TermMetaData.class);
         TermMetaData termMetaData2 = mock(TermMetaData.class);
-        when(templateArchitype.analyseTerm(parameter1, 0)).thenReturn(termMetaData1);
-        when(templateArchitype.analyseTerm(parameter2, 1)).thenReturn(termMetaData2);
+        when(templateArchitype.analyseTerm(isA(Operand.class), eq(0))).thenReturn(termMetaData1);
+        when(templateArchitype.analyseTerm(isA(Operand.class), eq(1))).thenReturn(termMetaData2);
         Template testTemplate = new Template(KEY, templateArchitype, getTermList());
         int id = testTemplate.getId();
         assertThat(testTemplate.getName()).isEqualTo(NAME);

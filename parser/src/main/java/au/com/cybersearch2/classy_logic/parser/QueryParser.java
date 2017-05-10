@@ -182,14 +182,6 @@ public class QueryParser implements QueryParserConstants
      }
   }
 
-  protected QualifiedName createInnerTemplateName(QualifiedName outerTemplateName)
-  {
-        return new QualifiedTemplateName(
-            outerTemplateName.getScope(),
-            outerTemplateName.getTemplate() +
-            Integer.toString(outerTemplateName.incrementReferenceCount() + 1));
-  }
-
 /** Root production. */
   final public void input(ParserContext context) throws ParseException
   {
@@ -1477,14 +1469,13 @@ public class QueryParser implements QueryParserConstants
       {
       case LBRACE:
         delimitToken = jj_consume_token(LBRACE);
-        QualifiedName innerTemplateName = createInnerTemplateName(outerTemplateName);
-        Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, innerTemplateName);
+        Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, "");
         context.addSourceItem(scToken.image+expression.toString()).setEnd(delimitToken);
         context.pushSourceMarker();
         Token token = Token.newToken(QueryParserConstants.CALC);
         token.beginLine = delimitToken.beginLine;
         token.beginColumn = delimitToken.beginColumn;
-        context.setSourceMarker(token, innerTemplateName);
+        context.setSourceMarker(token, innerTemplate.getQualifiedName());
         innerLoop = InnerCalculator(innerTemplate, outerTemplateName, context, true);
       context.popSourceMarker();
       context.onTokenIntercept(delimitToken);
@@ -1567,12 +1558,11 @@ public class QueryParser implements QueryParserConstants
       delimitToken = jj_consume_token(LBRACE);
       context.onTokenIntercept(delimitToken);
       context.pushSourceMarker();
-      QualifiedName innerTemplateName = createInnerTemplateName(outerTemplateName);
-      Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, innerTemplateName);
+      Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, "");
       Token token = Token.newToken(QueryParserConstants.CALC);
       token.beginLine = delimitToken.beginLine;
       token.beginColumn = delimitToken.beginColumn;
-      context.setSourceMarker(token, innerTemplateName);
+      context.setSourceMarker(token, innerTemplate.getQualifiedName());
       innerLoop = InnerCalculator(innerTemplate, outerTemplateName, context, false);
       context.checkForShortCircuit();
       context.popSourceMarker();
@@ -1596,6 +1586,7 @@ public class QueryParser implements QueryParserConstants
     qualifiedAxiomName = QualifiedName.parseName(choiceToken.image);
     qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
     Template choiceTemplate = parserAssembler.getTemplate(qualifiedTemplateName);
+    //choiceTemplate.setContextName(template.getQualifiedName());
     OperandMap operandMap = parserAssembler.getOperandMap();
     for (String termName: parserAssembler.getAxiomTermNameList(qualifiedAxiomName))
       operandMap.addOperand(termName, null);
@@ -1604,6 +1595,7 @@ public class QueryParser implements QueryParserConstants
         Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     template.addTerm(choiceOperand);
+    template.setNext(choiceTemplate);
     {if (true) return choiceOperand;}
       break;
     default:
@@ -1677,7 +1669,7 @@ public class QueryParser implements QueryParserConstants
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case 78:
-      innerTemplate = InnerTemplateDeclaration(outerTemplateName.getTemplate() + "." + callName, new QualifiedName(callName, createInnerTemplateName(outerTemplateName)), context);
+      innerTemplate = InnerTemplateDeclaration(outerTemplateName, callName, context);
       break;
     default:
       jj_la1[52] = jj_gen;
@@ -1685,28 +1677,26 @@ public class QueryParser implements QueryParserConstants
     }
     Operand queryOperand = context.getParserAssembler().getQueryOperand(queryName, qname, operandParamList, innerTemplate);
     template.addTerm(queryOperand);
-    if (innerTemplate != null)
-        template.setNext(innerTemplate);
     context.popSourceMarker();
     {if (true) return queryOperand;}
     throw new Error("Missing return statement in function");
   }
 
-  final public Template InnerTemplateDeclaration(String queryKey, QualifiedName qualifiedTemplateName, ParserContext context) throws ParseException
+  final public Template InnerTemplateDeclaration(QualifiedName outerTemplateName, String callName, ParserContext context) throws ParseException
   {
   Template template;
   Operand expression;
   Token templateToken;
   Token delimitToken;
   SourceItem sourceItem;
+  String queryKey = outerTemplateName.getTemplate() + "." + callName;
     templateToken = jj_consume_token(78);
       ParserAssembler parserAssembler = context.getParserAssembler();
-      template = parserAssembler.createTemplate(qualifiedTemplateName, false);
-      template.setInnerTemplate(true);
-      template.setKey( queryKey);
+      template = parserAssembler.chainTemplate(outerTemplateName, callName);
+      template.setKey(queryKey);
       context.onTokenIntercept(templateToken);
     delimitToken = jj_consume_token(LPAREN);
-      context.addSourceItem(">> " + qualifiedTemplateName.toString()).setEnd(delimitToken);
+      context.addSourceItem(">> " + template.getQualifiedName().toString()).setEnd(delimitToken);
     expression = TemplateExpression(template, context);
           template.addTerm(expression);
           sourceItem=context.addSourceItem(expression);
@@ -1826,9 +1816,9 @@ public class QueryParser implements QueryParserConstants
     choiceToken = jj_consume_token(IDENTIFIER);
     QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
     parserAssembler.createAxiom(qualifiedChoiceName);
-    QualifiedName qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), qualifiedChoiceName.getName());
-    Template template = parserAssembler.createTemplate(qualifiedTemplateName, true);
-    template.setChoice(true);
+    //QualifiedName qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), qualifiedChoiceName.getName());
+    Template template = parserAssembler.createTemplate(qualifiedChoiceName, true);
+    //template.setChoice(true);
     context.setContextName(new QualifiedTemplateName(scope.getAlias(), choiceToken.image));
     {if (true) return qualifiedChoiceName;}
     throw new Error("Missing return statement in function");
@@ -3208,6 +3198,61 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(1, xla); }
   }
 
+  private boolean jj_3R_88() {
+    if (jj_3R_90()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_83() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_55() {
+    if (jj_3R_56()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_71() {
+    if (jj_scan_token(BANG)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_70() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_71()) {
+    jj_scanpos = xsp;
+    if (jj_3R_72()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_87() {
+    if (jj_3R_89()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_59() {
+    if (jj_3R_60()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_40() {
+    if (jj_3R_42()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_92() {
+    if (jj_scan_token(FALSE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_39() {
+    if (jj_3R_41()) return true;
+    return false;
+  }
+
   private boolean jj_3R_86() {
     if (jj_scan_token(STRING_LITERAL)) return true;
     return false;
@@ -3567,61 +3612,6 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_72() {
     if (jj_3R_73()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_88() {
-    if (jj_3R_90()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_83() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_55() {
-    if (jj_3R_56()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_71() {
-    if (jj_scan_token(BANG)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_70() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_71()) {
-    jj_scanpos = xsp;
-    if (jj_3R_72()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_87() {
-    if (jj_3R_89()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_59() {
-    if (jj_3R_60()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_40() {
-    if (jj_3R_42()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_92() {
-    if (jj_scan_token(FALSE)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_39() {
-    if (jj_3R_41()) return true;
     return false;
   }
 

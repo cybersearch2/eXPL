@@ -15,7 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
-//import java.io.ObjectStreamField;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamField;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,13 +28,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.TermPairList;
-import au.com.cybersearch2.classy_logic.pattern.TermPair;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.terms.TermMetaData;
 
 
 /**
@@ -43,13 +48,22 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class Template extends TermList<Operand> implements TermPairList
 {
-	//private static final long serialVersionUID = -3549624322416667887L;
-    //private static final ObjectStreamField[] serialPersistentFields =
-    //{   // Template inherits Serializable from Structure but
-        //    should not be serialized. Two fields defined for tracing purposes.
-   //     new ObjectStreamField("name", String.class),
-   //     new ObjectStreamField("id", Integer.class)
-   // };
+	private static final long serialVersionUID = -3549624322416667887L;
+	
+    private static final ObjectStreamField[] serialPersistentFields =
+    {   // Template inherits Serializable from TermList but
+        //    should not be serialized. Three fields defined for tracing purposes.
+        new ObjectStreamField("qname", QualifiedName.class),
+        new ObjectStreamField("key", String.class),
+        new ObjectStreamField("id", Integer.class)
+    };
+
+    static class FixUp
+    {
+        public Operand operand;
+        public int preFixIndex;
+        public int postFixIndex;
+    }
     
     public static List<String>  EMPTY_NAMES_LIST;
     /** Unique identity generator */
@@ -62,8 +76,10 @@ public class Template extends TermList<Operand> implements TermPairList
         EMPTY_OPERAND_LIST = Collections.emptyList();
         EMPTY_NAMES_LIST = Collections.emptyList();
     }
-    /** Qualified name of operand */
+    /** Qualified name of template */
     protected QualifiedName qname;
+    /** Qualified name of context - different from qname for inner templates and replicates */
+    protected QualifiedName contextName;
     /** Key to match with Axiom name for unification */
 	protected String key;
     /** Identity used in backup to allow partial backup to last unifying agent */
@@ -86,14 +102,13 @@ public class Template extends TermList<Operand> implements TermPairList
     protected CallContext tailCallContext;
     /** Pairs axiom terms in a Solution object with terms in a template */
     protected SolutionPairer solutionPairer;
-    /** Pairs axiom terms in this axiom with terms in a template */
-    protected AxiomPairer axiomPairer;
     /** Head of TermPair list */
     private TermPair termPairHead;
     /** List TermPair tail */
     private TermPair termPairTail;
     /** Head of free TermPair list */
     private TermPair freeTermPairHead;
+    private List<FixUp> fixUpList;
    
     /**
      * Construct a replicate Template object. The new template has a unique id and specified qualified name 
@@ -102,7 +117,7 @@ public class Template extends TermList<Operand> implements TermPairList
      */
     public Template(Template master, QualifiedName qname) 
     {
-        this((TemplateArchetype) master.getArchetype());
+        this((TemplateArchetype) master.getArchetype(), master.getQualifiedName());
         this.qname = qname;
         key = master.key;
         this.isCalculator = master.isCalculator;
@@ -113,17 +128,26 @@ public class Template extends TermList<Operand> implements TermPairList
             termList.add(operand);
     }
 
+    /**
+     * Construct Template object
+     * @param qname Template qualified name. The axiom key is set to the name part as a default.
+     */
+    private Template(TemplateArchetype templateArchetype, QualifiedName contextName) 
+    {
+        super(templateArchetype);
+        this.contextName = contextName;
+        qname = templateArchetype.getQualifiedName();
+        key = qname.getTemplate();
+        id = referenceCount.incrementAndGet();
+    }
+
 	/**
 	 * Construct Template object
 	 * @param qname Template qualified name. The axiom key is set to the name part as a default.
 	 */
 	public Template(TemplateArchetype templateArchetype) 
 	{
-		super(templateArchetype);
-		qname = templateArchetype.getQualifiedName();
-		key = qname.getTemplate();
-		id = referenceCount.incrementAndGet();
-		axiomPairer = new AxiomPairer(this);
+		this(templateArchetype, templateArchetype.getQualifiedName());
 	}
 
 	/**
@@ -145,7 +169,6 @@ public class Template extends TermList<Operand> implements TermPairList
 	public Template(TemplateArchetype templateArchetype, List<Operand> terms) 
 	{
 		this(templateArchetype);
-		templateArchetype.clearMutable();
 		if (terms.size() == 0)
 			throw new IllegalArgumentException("Parameter \"terms\" is empty");
         if ((terms != null)&& (terms.size() > 0))
@@ -177,8 +200,6 @@ public class Template extends TermList<Operand> implements TermPairList
 		this(templateArchetype);
         if ((terms != null)&& (terms.length > 0))
         {
-            if (archetype.isMutable())
-                setTerms(terms);
             for (Operand term: terms)
                 addTerm(term);
         }
@@ -270,16 +291,6 @@ public class Template extends TermList<Operand> implements TermPairList
         return isInnerTemplate;
     }
 
-	/**
-	 * Set flag to indicate this is an inner template
-	 * @param isInnerTemplate
-	 */
-    public void setInnerTemplate(boolean isInnerTemplate)
-    {
-        this.isInnerTemplate = isInnerTemplate;
-    }
-
-    
     public boolean isReplicate()
     {
         return isReplicate;
@@ -369,6 +380,85 @@ public class Template extends TermList<Operand> implements TermPairList
         super.addTerm(operand);
     }
 
+    
+    /**
+     * Set Term meta data for Operands in evaluation tree. 
+     */
+    protected void setOperandTree() 
+    {
+        // Now analyse operands in operand trees
+        // Use set to avoid duplicates
+        final Map<String, Integer> indexMap = new HashMap<String, Integer>();
+        final int[] index = new int[1];
+        index[0] = archetype.getTermCount();
+        for (int i = 0; i < index[0]; i++)
+        {
+            Operand operand = termList.get(i);
+            if (inSameSpace(operand))
+            {
+                indexMap.put(archetype.getMetaData(i).getName(), i);
+                setArchiveIndex(operand, i);
+            }
+        }
+        OperandVisitor visitor = new OperandVisitor(){
+
+            @Override
+            public boolean next(Operand operand, int depth)
+            {
+                String name = operand.getName();
+                if (!name.isEmpty() && inSameSpace(operand))
+                {
+                    if (indexMap.containsKey(name))
+                    {
+                        int archiveIndex = indexMap.get(name);
+                        setArchiveIndex(operand, archiveIndex);
+                    }
+                    else
+                    {
+                        int archiveIndex = index[0]++;
+                        indexMap.put(name, archiveIndex);
+                        setArchiveIndex(operand, archiveIndex);
+                        archetype.addTerm(new TermMetaData(operand, archiveIndex));
+                    }
+                }
+                return true;
+            }
+
+         };
+         for (Operand operand: termList)
+         {
+             OperandWalker operandWalker = new OperandWalker(operand);
+             operandWalker.visitAllNodes(visitor);
+         }
+         indexMap.clear();
+         archetype.clearMutable();
+    }
+
+    private boolean inSameSpace(Operand operand)
+    {
+        return contextName.inSameSpace(operand.getQualifiedName()) || 
+            ((contextName != qname) && qname.inSameSpace(operand.getQualifiedName()));
+    }
+
+    private void setArchiveIndex(Operand operand, int archiveIndex)
+    {
+        if (operand.getArchetypeIndex() == -1)
+            operand.setArchetypeIndex(archiveIndex);
+        else if (operand.getArchetypeIndex() != archiveIndex)
+            addFixUp(operand, archiveIndex);
+    }
+
+    protected void addFixUp(Operand operand, int archiveIndex)
+    {
+        FixUp fixUp = new FixUp();
+        fixUp.operand = operand;
+        fixUp.preFixIndex = fixUp.operand.getArchetypeIndex();
+        fixUp.postFixIndex = archiveIndex;
+        if (fixUpList == null)
+            fixUpList = new ArrayList<FixUp>();
+        fixUpList.add(fixUp);
+    }
+
     /**
      * Unify given Axiom with this Template, pairing Terms of the Axiom with those
      * of this Template. Terms are matched by name except when all terms are anonymous, 
@@ -379,90 +469,38 @@ public class Template extends TermList<Operand> implements TermPairList
      * @param solution Contains result of previous unify-evaluation steps
      * @return Flag set true if unification completed successfully
      */
-    public boolean unify(TermList<Term> axiom, Solution solution)
+    public boolean unify(final TermList<Term> axiom, Solution solution)
     {
+        // The archetype meta data needs to include all operands found by walking the operand trees 
+        // The archetype is mutable until this is completed
+        if (archetype.isMutable())
+            // Complete archetype initialization
+            setOperandTree();
+        if (fixUpList != null)
+            for (FixUp fixUp: fixUpList)
+                fixUp.operand.setArchetypeIndex(fixUp.postFixIndex);
+        final int[] termMapping = ((TemplateArchetype)archetype).createTermMapping(axiom.getArchetype());
+        //for (int map = 0; map < termMapping.length; map++)
+        //    System.out.print(Integer.toString(termMapping[map]) + ",");
         OperandWalker walker = new OperandWalker(termList);
         clearTermPairList();
-        // If term list is empty, unification will be restricted to solution only.
-        if (!termList.isEmpty())
+        boolean unificationComplete = false;
+        // Create list of term pairs to unify
+        if (walker.visitAllNodes(new TemplateUnificationPairer(this, axiom, termMapping, solution)))
         {
-            axiomPairer.setAxiom(axiom);
-            if (axiom.getArchetype().isAnonymousTerms() && !matchTermsByPosition(axiom))
-                return false;
-            // Match by position results in axiom term names being set in the archetype.
-            // Therefore a second pair matching takes place to apply named term logic.
-            // Note that this is likey to create duplicate pairing which the TermPairList implementation
-            // filters out.
-            if (!walker.visitAllNodes(axiomPairer))
-                return false;
-        }
-        // Solution has contents indicated by key set size non-zero
-        if (solution.keySet().size() > 0)
-        {
-            setSolutionPairer(axiom, solution);
-            if (!walker.visitAllNodes(solutionPairer))
-                return false;
-        }
-        // Proceed with unification term by term
-        TermPair termPair = termPairHead;
-        while (termPair != null)
-        {
-            termPair.getTerm1().unifyTerm(termPair.getTerm2(), id);
-            termPair = termPair.getNext();
-        }
-        return true;
-    }
-
-    /**
-     * Prepare class solution handler for next term pairing operation
-     * @param axiom Axiom with which to unify as TermList object 
-     * @param solution Contains result of previous unify-evaluation steps
-     */
-    protected void setSolutionPairer(TermList<Term> axiom, Solution solution)
-    {
-        if (solutionPairer == null)
-            solutionPairer = new SolutionPairer(this, solution);
-        else
-            solutionPairer.setSolution(solution);
-        solutionPairer.setSolution(solution, qname, axiom);
-    }
-
-    /**
-     * Match terms by position
-     * @param axiom Axiom with which to unify as TermList object 
-     * @return Flag set true if unification completed successfully
-     */
-    protected boolean matchTermsByPosition(TermList<Term> axiom)
-    {
-        int index = 0;
-        for (Operand templateTerm: termList)
-        {   // Match by position
-            Term axiomTerm = axiom.getTermByIndex(index);
-            // Do not go beyond last term in axiom
-            if (index >= axiom.getTermCount())
-                break;
-            // Skip alreay-name terms
-            if (!axiomTerm.getName().isEmpty())
+            // Proceed with unification term by term
+            TermPair termPair = termPairHead;
+            while (termPair != null)
             {
-                index++;
-                continue;
+                termPair.getTerm1().unifyTerm(termPair.getTerm2(), id);
+                termPair = termPair.getNext();
             }
-            // Perform pairing
-            if (!axiomPairer.pairTerms(templateTerm, axiomTerm))
-                return false;
-            // Name anonymous term as long as it is in the same name space as this template
-            if (!templateTerm.getName().isEmpty())
-            {
-                boolean isLocalTerm = qname.inSameSpace(templateTerm.getQualifiedName());
-                if (isLocalTerm)
-                {   // Name axiom term for Operand navigation
-                    axiomTerm.setName(templateTerm.getName());
-                    axiom.getArchetype().changeName(index, templateTerm.getName());
-                }
-            }
-            index++;
+            unificationComplete = true;
         }
-        return true;
+        if (fixUpList != null)
+            for (FixUp fixUp: fixUpList)
+                fixUp.operand.setArchetypeIndex(fixUp.preFixIndex);
+        return unificationComplete;
     }
 
     /**
@@ -602,6 +640,21 @@ public class Template extends TermList<Operand> implements TermPairList
         template.next = nextTemplate;
 	}
 
+    public Template innerTemplateInstance(String name)
+    {
+        QualifiedName innerTemplateName = new QualifiedTemplateName(
+                qname.getScope(), 
+                qname.getTemplate() + 
+                Integer.toString(qname.incrementReferenceCount() + 1));
+        if (!name.isEmpty())
+            innerTemplateName = new QualifiedName(name, innerTemplateName);
+        TemplateArchetype newTemplateArchetype = new TemplateArchetype(innerTemplateName);
+        Template newTemplate = new Template(newTemplateArchetype, qname);
+        newTemplate.isInnerTemplate = true;
+        setNext(newTemplate);
+        return newTemplate;
+    }
+    
 	/**
 	 * Returns properties
 	 * @return Map container or null if no properties
@@ -672,16 +725,6 @@ public class Template extends TermList<Operand> implements TermPairList
     @Override
     public void add(Operand term1, Term term2)
     {
-        if (termPairHead != null)
-        {   // Skip duplicates
-            TermPair termPair = termPairHead;
-            while(termPair != null)
-            {
-                if (term1 == termPair.getTerm1())
-                    return;
-                termPair = termPair.getNext(); 
-            }
-        }
         // Get next free TermPair or create instance if no free items available
         TermPair nextTermPair = null;
         if (freeTermPairHead == null)
@@ -715,5 +758,11 @@ public class Template extends TermList<Operand> implements TermPairList
         freeTermPairHead = termPairHead;
         // Clear list accessors
         termPairHead = termPairTail = null;
+    }
+    
+    private void readObject(ObjectInputStream ois)
+            throws IOException, ClassNotFoundException  
+    {
+        archetype = new TemplateArchetype(qname);
     }
 }
