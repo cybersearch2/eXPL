@@ -25,9 +25,23 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 public class QualifiedTemplateName extends QualifiedName
 {
 
+    private static final long serialVersionUID = 3634005314122046014L;
+
     public QualifiedTemplateName(String scope, String name)
     {
         super(QueryProgram.GLOBAL_SCOPE.equals(scope) ? EMPTY : scope, name, EMPTY);
     }
 
+    public static String toString(String scope, String template)
+    {
+        StringBuilder builder = new StringBuilder();
+        if (!scope.isEmpty())
+            builder.append(scope).append('.');
+        if (!template.isEmpty())
+        {
+            builder.append(template);
+        }
+        return builder.toString();
+    }
+    
 }

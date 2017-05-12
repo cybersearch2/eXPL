@@ -20,7 +20,6 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.TermPairList;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -32,21 +31,18 @@ public class SolutionPairer implements OperandVisitor
 {
     /** Map of Axioms selectable by Axiom name */
 	protected Solution solution;
-    /** List of paired terms collected by this object */
-    protected TermPairList termPairList;
     /** Qualified name for local context */
-    protected QualifiedName localContext;
+    protected Template template;
 	
 	/**
 	 * Construct SolutionPairer object
      * @param solution Container to aggregate results
      * @param localContext Qualified name of enclosing context
 	 */
-	public SolutionPairer(Solution solution, QualifiedName localContext, TermPairList termPairList) 
+	public SolutionPairer(Solution solution, Template template) 
 	{
         this.solution = solution;
-        this.termPairList = termPairList;
-        this.localContext = localContext;
+        this.template = template;
 	}
 
 	/**
@@ -69,34 +65,45 @@ public class SolutionPairer implements OperandVisitor
 	    if (qname.getTemplate().isEmpty() || qname.getName().isEmpty())
 	        return true;
 	    String templateKey = solution.getCurrentKey();
-	    if (!localContext.inSameSpace(qname)) 
+	    QualifiedName localContext = template.getQualifiedName();
+	    boolean inSameSpace = localContext.inSameSpace(qname);
+	    if (!inSameSpace) 
 	    {
  	        if (!localContext.getScope().isEmpty())
 	        {
-	            String localTemplateKey = new QualifiedTemplateName(localContext.getScope(), qname.getTemplate()).toString();
-	            if (solution.keySet().contains(localTemplateKey))
-	                return processKey(localTemplateKey, qname.getName(), operand);
+	            String localTemplateKey = QualifiedTemplateName.toString(localContext.getScope(), qname.getTemplate());
+	            Axiom axiom = solution.getAxiom(localTemplateKey);
+	            if (axiom != null)
+	            {
+	                Term otherTerm = axiom.getTermByName(qname.getName());
+	                if (otherTerm != null)
+	                    return processKey(operand, otherTerm, inSameSpace);
+	                else
+	                    return true;
+	            }
 	        }
-            templateKey = new QualifiedTemplateName(qname.getScope(), qname.getTemplate()).toString();
+            templateKey = QualifiedTemplateName.toString(qname.getScope(), qname.getTemplate());
 	    }
-		if (solution.keySet().contains(templateKey))
-		    return processKey(templateKey, qname.getName(), operand);
+	    Axiom axiom = solution.getAxiom(templateKey);
+		if (axiom != null)
+		{
+            Term otherTerm = axiom.getTermByName(qname.getName());
+            if (otherTerm != null)
+                return processKey(operand, otherTerm, inSameSpace);
+		}
 		return true;
 	}
 
-	private boolean processKey(String templateKey, String termName, Operand operand)
+	private boolean processKey(Operand operand, Term term, boolean inSameSpace)
     {   
         // Solution has Axiom with key name
-        Term otherTerm = solution.getAxiom(templateKey).getTermByName(termName);
-        if ((otherTerm != null) && !otherTerm.isEmpty())
+        if (term != null)
         { 
-            // Check for exit case: Axiom term contains different value to matching Solution term
-            if (!operand.isEmpty() && localContext.inSameSpace(operand.getQualifiedName()) &&
-                !operand.getValue().equals(otherTerm.getValue()))
-                return false;
-            else if (operand.isEmpty())
+            if (operand.isEmpty())
                 // Unify with Solution term
-                termPairList.add(operand, otherTerm);
+                operand.unifyTerm(term, template.getId());
+            else if (inSameSpace)
+                return operand.getValue().equals(term.getValue());
         }
         return true;
     }

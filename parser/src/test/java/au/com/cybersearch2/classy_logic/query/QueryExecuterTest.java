@@ -205,6 +205,7 @@ public class QueryExecuterTest
         "freight(city=Sparta, freight=16)",
         "freight(city=Milos, freight=22)"
     };
+ 
     
     @Before
     public void before() throws Exception
@@ -525,7 +526,7 @@ public class QueryExecuterTest
         assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[3]);
         assertThat(query.execute()).isFalse();
     }
-    
+
     @Test
     public void test_chainQuery_short_circuit() throws Exception
     {

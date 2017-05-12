@@ -16,19 +16,19 @@
 package au.com.cybersearch2.classy_logic.pattern;
 
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.UnificationPairer;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * TemplateUnificationPairer
+ * Unifier
  * Attempts to pair one operand with a term and add the combination to a supplied list.
  * The term will be an item from a given axiom or optionally from an axiom selected
  * from a given solution.
  * @author Andrew Bowley
  * 9May,2017
  */
-public class TemplateUnificationPairer implements UnificationPairer
+public class Unifier implements OperandVisitor
 {
     /** The template containing operands to be unified */
     private Template template;
@@ -39,7 +39,7 @@ public class TemplateUnificationPairer implements UnificationPairer
     /** Optional solution pairer, used if solution keyset is non-empty */
     private SolutionPairer solutionPairer;
 
-    public TemplateUnificationPairer(
+    public Unifier(
         Template template, 
         TermList<Term> axiom, 
         int[] termMapping, 
@@ -49,7 +49,7 @@ public class TemplateUnificationPairer implements UnificationPairer
         this.axiom = axiom;
         this.termMapping = termMapping;
         if (solution.keySet().size() > 0)
-            solutionPairer = new SolutionPairer(solution, template.getQualifiedName(), template);
+            solutionPairer = new SolutionPairer(solution, template);
     }
     
     @Override
@@ -74,13 +74,13 @@ public class TemplateUnificationPairer implements UnificationPairer
         return true;
     }
 
-    @Override
-    public boolean pairTerms(Operand operand, Term otherTerm)
+    private boolean pairTerms(Operand operand, Term otherTerm)
     {
         // Pair first term to other term if first term is empty
         if (operand.isEmpty())
         {
-            template.add(operand, otherTerm);
+           // template.add(operand, otherTerm);
+            operand.unifyTerm(otherTerm, template.getId());
             return true;
         }
         // Check for exit case: terms in the same name space have different values

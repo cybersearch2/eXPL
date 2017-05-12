@@ -42,7 +42,6 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.pattern.TermPair;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
@@ -66,21 +65,23 @@ public class CalculatorTest
 	public void test_unifySolution()
 	{
         Calculator calculator = new Calculator();
+        SolutionList solutionList = mock(SolutionList.class);
+        calculator.solutionList = solutionList;
 		Solution solution = mock(Solution.class);
         SolutionPairer pairer = mock(SolutionPairer.class);
         calculator.pairer = pairer;
-		List<TermPair> pairList = new ArrayList<TermPair>();
 		Operand term1 = mock(Operand.class);
 		Term term2 = mock(Term.class);
+        TermPair termPair1 = new TermPair(term1, term2);
+        when(solutionList.getHead()).thenReturn(termPair1);
 		when(term1.unifyTerm(term2, 1)).thenReturn(1);
-		TermPair termPair1 = new TermPair(term1, term2);
-		pairList.add(termPair1);
+		calculator.solutionList.add(term1, term2);
 		Operand term3 = mock(Operand.class);
 		Term term4 = mock(Term.class);
+        TermPair termPair2 = new TermPair(term3, term4);
+        termPair1.setNext(termPair2);
 		when(term3.unifyTerm(term4, 1)).thenReturn(1);
-		TermPair termPair2 = new TermPair(term3, term4);
-		pairList.add(termPair2);
-		when(pairer.getPairList()).thenReturn(pairList);
+		calculator.solutionList.add(term3, term4);
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(1);
 		OperandWalker walker = mock(OperandWalker.class);
@@ -88,7 +89,10 @@ public class CalculatorTest
 		when(template.getOperandWalker()).thenReturn(walker);
 		when(solution.size()).thenReturn(2);
 		assertThat(calculator.unifySolution(solution, template)).isTrue();
+		verify(solutionList).clearTermPairList();
 		verify(pairer).setSolution(solution);
+		verify(term1).unifyTerm(term2, 1);
+		verify(term3).unifyTerm(term4, 1);
         Template template2 = mock(Template.class);
         when(template2.getId()).thenReturn(1);
 		OperandWalker walker2 = mock(OperandWalker.class);
@@ -202,19 +206,20 @@ public class CalculatorTest
 		Solution solution = mock(Solution.class);
 		when(solution.size()).thenReturn(2);
 		QualifiedName qualifiedTemplateName = QualifiedName.parseTemplateName(TEMPLATE_NAME);
-        SolutionPairer pairer = new SolutionPairer(solution, qualifiedTemplateName);
+        SolutionList solutionList = mock(SolutionList.class);
+        calculator.solutionList = solutionList;
+        SolutionPairer pairer = new SolutionPairer(solution, QualifiedTemplateName.ANONYMOUS, solutionList);
         calculator.pairer = pairer;
-		List<TermPair> pairList = pairer.getPairList();
 		Operand term1 = mock(Operand.class);
 		Term term2 = mock(Term.class);
 		when(term1.unifyTerm(term2, 1)).thenReturn(1);
-		TermPair termPair1 = new TermPair(term1, term2);
-		pairList.add(termPair1);
+        TermPair termPair1 = new TermPair(term1, term2);
+        when(solutionList.getHead()).thenReturn(termPair1);
 		Operand term3 = mock(Operand.class);
 		Term term4 = mock(Term.class);
 		when(term3.unifyTerm(term4, 1)).thenReturn(1);
 		TermPair termPair2 = new TermPair(term3, term4);
-		pairList.add(termPair2);
+		termPair1.setNext(termPair2);
         Template template = mock(Template.class);
         when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
         when(template.getKey()).thenReturn(KEY);
@@ -228,6 +233,8 @@ public class CalculatorTest
         when(template.toAxiom()).thenReturn(solutionAxiom);
         when(template.getId()).thenReturn(1);
         calculator.execute(template, solution);
+        verify(term1).unifyTerm(term2, 1);
+        verify(term3).unifyTerm(term4, 1);
         verify(solution).put(TEMPLATE_NAME, solutionAxiom);
 	}
 */	

@@ -30,10 +30,8 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
-import au.com.cybersearch2.classy_logic.pattern.SolutionList;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
 import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.pattern.TermPair;
 
 /**
  * LogicQuery
@@ -57,7 +55,6 @@ public class LogicQuery implements SolutionFinder
     protected List<AxiomListener> axiomListenerList;
     /** Pairs axiom terms in a Solution object with terms in a template */
     protected SolutionPairer pairer;
-    protected SolutionList solutionList;
   
     /**
      * Construct QueryLogic object
@@ -69,7 +66,6 @@ public class LogicQuery implements SolutionFinder
 		this.axiomSource = axiomSource;
 		this.solutionHandler = solutionHandler;
 		queryStatus = QueryStatus.start;
-        solutionList = new SolutionList();
 	}
 
     /**
@@ -146,23 +142,12 @@ public class LogicQuery implements SolutionFinder
     {
 		if (solution.size() > 0)
 		{
-            solutionList.clearTermPairList();
 			OperandWalker walker = template.getOperandWalker();
 			if (pairer == null)
-				pairer = new SolutionPairer(solution, template.getQualifiedName(), solutionList);
+				pairer = new SolutionPairer(solution, template);
 			else
 				pairer.setSolution(solution);
-			if (walker.visitAllNodes(pairer))
-			{
-				// Proceed with unification term by term
-                TermPair termPair = solutionList.getHead();
-                while (termPair != null)
-                {
-					termPair.getTerm1().unifyTerm(termPair.getTerm2(), template.getId());
-                    termPair = termPair.getNext();
-                }
-				return true;
-			}
+			return walker.visitAllNodes(pairer);
 		}
 		return false;
     }

@@ -43,9 +43,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.UnificationPairer;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.pattern.TermPair;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -318,7 +316,7 @@ public class LogicQueryTest
 	public void test_iterate_end()
 	{
 		OperandWalker operandWalker = mock(OperandWalker.class);
-		when(operandWalker.visitAllNodes(isA(UnificationPairer.class))).thenReturn(true);
+		when(operandWalker.visitAllNodes(isA(OperandVisitor.class))).thenReturn(true);
 		AxiomSource axiomSource = mock(AxiomSource.class);
 		final Axiom axiom = mock(Axiom.class);
 		Axiom solutionAxiom = mock(Axiom.class);

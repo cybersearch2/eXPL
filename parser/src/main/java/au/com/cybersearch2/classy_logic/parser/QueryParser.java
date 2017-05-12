@@ -1585,17 +1585,15 @@ public class QueryParser implements QueryParserConstants
       choiceToken = jj_consume_token(IDENTIFIER);
     qualifiedAxiomName = QualifiedName.parseName(choiceToken.image);
     qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
-    Template choiceTemplate = parserAssembler.getTemplate(qualifiedTemplateName);
-    //choiceTemplate.setContextName(template.getQualifiedName());
+    Template choiceTemplate = template.choiceInstance(parserAssembler.getTemplate(qualifiedTemplateName));
     OperandMap operandMap = parserAssembler.getOperandMap();
     for (String termName: parserAssembler.getAxiomTermNameList(qualifiedAxiomName))
       operandMap.addOperand(termName, null);
     QualifiedName contextName = context.getContextName();
-    QualifiedName qname = QualifiedName.parseName(choiceTemplate.getName(), contextName);
+    QualifiedName qname = QualifiedName.parseName(qualifiedAxiomName.getName(), contextName);
         Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     template.addTerm(choiceOperand);
-    template.setNext(choiceTemplate);
     {if (true) return choiceOperand;}
       break;
     default:
@@ -1816,9 +1814,7 @@ public class QueryParser implements QueryParserConstants
     choiceToken = jj_consume_token(IDENTIFIER);
     QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
     parserAssembler.createAxiom(qualifiedChoiceName);
-    //QualifiedName qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), qualifiedChoiceName.getName());
     Template template = parserAssembler.createTemplate(qualifiedChoiceName, true);
-    //template.setChoice(true);
     context.setContextName(new QualifiedTemplateName(scope.getAlias(), choiceToken.image));
     {if (true) return qualifiedChoiceName;}
     throw new Error("Missing return statement in function");
@@ -3198,6 +3194,16 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(1, xla); }
   }
 
+  private boolean jj_3R_90() {
+    if (jj_scan_token(UNKNOWN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_72() {
+    if (jj_3R_73()) return true;
+    return false;
+  }
+
   private boolean jj_3R_88() {
     if (jj_3R_90()) return true;
     return false;
@@ -3602,16 +3608,6 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_73() {
     if (jj_3R_74()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_90() {
-    if (jj_scan_token(UNKNOWN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_72() {
-    if (jj_3R_73()) return true;
     return false;
   }
 

@@ -234,11 +234,11 @@ public class QueryExecuter extends ChainQueryExecuter
 	 * @param structureList List of templates contained in query
 	 * @return String
 	 */
-	static protected String toString(List<? extends TermList> termLists)
+	static protected String toString(List<? extends TermList<?>> termLists)
 	{
 		StringBuilder builder = new StringBuilder();
 		boolean firstTime = true;
-	    for (TermList termList: termLists)
+	    for (TermList<?> termList: termLists)
 	    {
 	    	if (firstTime)
 	    		firstTime = false;

@@ -1072,16 +1072,15 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
   {
     qualifiedAxiomName = QualifiedName.parseName(choiceToken.image);
     qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
-    Template choiceTemplate = parserAssembler.getTemplate(qualifiedTemplateName);
+    Template choiceTemplate = template.choiceInstance(parserAssembler.getTemplate(qualifiedTemplateName));
     OperandMap operandMap = parserAssembler.getOperandMap();
     for (String termName: parserAssembler.getAxiomTermNameList(qualifiedAxiomName))
       operandMap.addOperand(termName, null);
     QualifiedName contextName = context.getContextName();
-    QualifiedName qname = QualifiedName.parseName(choiceTemplate.getName(), contextName); 
+    QualifiedName qname = QualifiedName.parseName(qualifiedAxiomName.getName(), contextName); 
  	Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     template.addTerm(choiceOperand);
-    template.setNext(choiceTemplate);
     return choiceOperand;
   }
 }

@@ -21,16 +21,15 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.TermPairList;
-import au.com.cybersearch2.classy_logic.pattern.TermPair;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 /**
- * AxiomPairerTest
+ * UnifierTest
  * @author Andrew Bowley
  * 22 Dec 2014
  */
-public class AxiomPairerTest 
+public class UnifierTest 
 {
     static final String TEMPLATE_NAME = "TemplateName";
     static final String OPERAND_NAME = "x";

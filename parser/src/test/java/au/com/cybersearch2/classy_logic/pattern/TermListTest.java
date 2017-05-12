@@ -28,28 +28,29 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
-import au.com.cybersearch2.classy_logic.pattern.Structure;
+import au.com.cybersearch2.classy_logic.pattern.TermList;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Mockito.*;
 
 /**
- * StructureTest
+ * TermListTest
  * @author Andrew Bowley
  * 17 Nov 2014
  */
-public class StructureTest 
+public class TermListTest 
 {
+    /*
 	@SuppressWarnings("serial")
-    static class TestStructure extends Structure
+    static class TestTermList extends TermList
 	{
-		public TestStructure(String name)
+		public TestTermList(String name)
 		{
 			super(name);
 		}
 
-		public TestStructure(String name, List<Term> terms) 
+		public TestTermList(String name, List<Term> terms) 
 		{
 			super(name, terms);
 			
@@ -73,19 +74,19 @@ public class StructureTest
 	public void testNamedConstructorWithTermsContainingValues()
 	{
 		Object[] values = new Object[] { "One", Integer.valueOf(2), Boolean.TRUE };
-		Structure testStructure = new Structure(NAME, values);
-		assertThat(testStructure.getName()).isEqualTo(NAME);
-		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "(One, 2, true)");
+		TermList testTermList = new TermList(NAME, values);
+		assertThat(testTermList.getName()).isEqualTo(NAME);
+		assertThat(testTermList.isFact()).isTrue();
+		assertThat(testTermList.toString()).isEqualTo(NAME + "(One, 2, true)");
 	}
 
 	@Test
 	public void testNamedConstructorWithEmptyValues()
 	{
-		Structure testStructure = new Structure(NAME, new Object[0]);
-		assertThat(testStructure.getName()).isEqualTo(NAME);
-		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "()");
+		TermList testTermList = new TermList(NAME, new Object[0]);
+		assertThat(testTermList.getName()).isEqualTo(NAME);
+		assertThat(testTermList.isFact()).isTrue();
+		assertThat(testTermList.toString()).isEqualTo(NAME + "()");
 	}
 
 	@Test
@@ -93,7 +94,7 @@ public class StructureTest
 	{
 		try
 		{
-		    new Structure(NAME, (Object[])null);
+		    new TermList(NAME, (Object[])null);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch(IllegalArgumentException e)
@@ -107,22 +108,22 @@ public class StructureTest
 	public void testNamedConstructorWithTermsArray()
 	{
 		Parameter[] terms = getTermsList().toArray(new Parameter[3]); 
-		Structure testStructure = new Structure(NAME, terms);
-		assertThat(testStructure.getName()).isEqualTo(NAME);
-		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "(one=1, two=2, three=3)");
-		assertThat(testStructure.getTermByName("one")).isEqualTo(terms[0]);
-		assertThat(testStructure.getTermByName("two")).isEqualTo(terms[1]);
-		assertThat(testStructure.getTermByName("three")).isEqualTo(terms[2]);
+		TermList testTermList = new TermList(NAME, terms);
+		assertThat(testTermList.getName()).isEqualTo(NAME);
+		assertThat(testTermList.isFact()).isTrue();
+		assertThat(testTermList.toString()).isEqualTo(NAME + "(one=1, two=2, three=3)");
+		assertThat(testTermList.getTermByName("one")).isEqualTo(terms[0]);
+		assertThat(testTermList.getTermByName("two")).isEqualTo(terms[1]);
+		assertThat(testTermList.getTermByName("three")).isEqualTo(terms[2]);
 	}
 
 	@Test
 	public void testNamedConstructorWithEmptyTermsArray()
 	{
-		Structure testStructure = new Structure(NAME, new Parameter[0]);
-		assertThat(testStructure.getName()).isEqualTo(NAME);
-		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "()");
+		TermList testTermList = new TermList(NAME, new Parameter[0]);
+		assertThat(testTermList.getName()).isEqualTo(NAME);
+		assertThat(testTermList.isFact()).isTrue();
+		assertThat(testTermList.toString()).isEqualTo(NAME + "()");
 	}
 
 	@Test
@@ -132,10 +133,10 @@ public class StructureTest
 		{
 			new Integer(23), new Parameter("Test", "Value")
 		};
-		Structure testStructure = new Structure(NAME, objectArray);
-		assertThat(testStructure.getName()).isEqualTo(NAME);
-		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "(23, Test=Value)");
+		TermList testTermList = new TermList(NAME, objectArray);
+		assertThat(testTermList.getName()).isEqualTo(NAME);
+		assertThat(testTermList.isFact()).isTrue();
+		assertThat(testTermList.toString()).isEqualTo(NAME + "(23, Test=Value)");
 	}
 
 	@Test
@@ -143,7 +144,7 @@ public class StructureTest
 	{
 		try
 		{
-		    new TestStructure(null);
+		    new TestTermList(null);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch(IllegalArgumentException e)
@@ -152,7 +153,7 @@ public class StructureTest
 		}
 		try
 		{
-		    new TestStructure("");
+		    new TestTermList("");
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch(IllegalArgumentException e)
@@ -166,7 +167,7 @@ public class StructureTest
 	{
 		try
 		{
-		    new Structure(NAME, (Parameter[])null);
+		    new TermList(NAME, (Parameter[])null);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch(IllegalArgumentException e)
@@ -179,22 +180,22 @@ public class StructureTest
 	public void testNamedConstructorWithTermsList()
 	{
 		List<Term> paramList = getTermsList();
-		Structure testStructure = new Structure(NAME, paramList);
-		assertThat(testStructure.getName()).isEqualTo(NAME);
-		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "(one=1, two=2, three=3)");
-		assertThat(testStructure.getTermByName("one")).isEqualTo(paramList.get(0));
-		assertThat(testStructure.getTermByName("two")).isEqualTo(paramList.get(1));
-		assertThat(testStructure.getTermByName("three")).isEqualTo(paramList.get(2));
+		TermList testTermList = new TermList(NAME, paramList);
+		assertThat(testTermList.getName()).isEqualTo(NAME);
+		assertThat(testTermList.isFact()).isTrue();
+		assertThat(testTermList.toString()).isEqualTo(NAME + "(one=1, two=2, three=3)");
+		assertThat(testTermList.getTermByName("one")).isEqualTo(paramList.get(0));
+		assertThat(testTermList.getTermByName("two")).isEqualTo(paramList.get(1));
+		assertThat(testTermList.getTermByName("three")).isEqualTo(paramList.get(2));
 	}
 
 	@Test
 	public void testNamedConstructorWithEmptyTermsList()
 	{
-		Structure testStructure = new Structure(NAME, new ArrayList<Term>());
-		assertThat(testStructure.getName()).isEqualTo(NAME);
-		assertThat(testStructure.isFact()).isTrue();
-		assertThat(testStructure.toString()).isEqualTo(NAME + "()");
+		TermList testTermList = new TermList(NAME, new ArrayList<Term>());
+		assertThat(testTermList.getName()).isEqualTo(NAME);
+		assertThat(testTermList.isFact()).isTrue();
+		assertThat(testTermList.toString()).isEqualTo(NAME + "()");
 	}
 
 	@Test
@@ -202,7 +203,7 @@ public class StructureTest
 	{
 		try
 		{
-		    new Structure(NAME, (List<Term>)null);
+		    new TermList(NAME, (List<Term>)null);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch(IllegalArgumentException e)
@@ -214,50 +215,50 @@ public class StructureTest
 	@Test
 	public void test_getTermByName()
 	{
-		Structure testStructure = new Structure(NAME, new ArrayList<Term>());
-		assertThat(testStructure.getTermByName("")).isNull();
-		assertThat(testStructure.getTermByName(null)).isNull();
+		TermList testTermList = new TermList(NAME, new ArrayList<Term>());
+		assertThat(testTermList.getTermByName("")).isNull();
+		assertThat(testTermList.getTermByName(null)).isNull();
 		List<Term> paramList = getTermsList();
-		testStructure = new Structure(NAME, paramList);
-		assertThat(testStructure.getTermByName("one")).isEqualTo(paramList.get(0));
-		assertThat(testStructure.getTermByName("two")).isEqualTo(paramList.get(1));
-		assertThat(testStructure.getTermByName("three")).isEqualTo(paramList.get(2));
-		assertThat(testStructure.getTermByName("ONE")).isEqualTo(paramList.get(0));
-		assertThat(testStructure.getTermByName("Two")).isEqualTo(paramList.get(1));
-		assertThat(testStructure.getTermByName("THRee")).isEqualTo(paramList.get(2));
-		assertThat(testStructure.getTermByName("four")).isNull();
+		testTermList = new TermList(NAME, paramList);
+		assertThat(testTermList.getTermByName("one")).isEqualTo(paramList.get(0));
+		assertThat(testTermList.getTermByName("two")).isEqualTo(paramList.get(1));
+		assertThat(testTermList.getTermByName("three")).isEqualTo(paramList.get(2));
+		assertThat(testTermList.getTermByName("ONE")).isEqualTo(paramList.get(0));
+		assertThat(testTermList.getTermByName("Two")).isEqualTo(paramList.get(1));
+		assertThat(testTermList.getTermByName("THRee")).isEqualTo(paramList.get(2));
+		assertThat(testTermList.getTermByName("four")).isNull();
 		try
 		{
-			testStructure.getTermByName(null);
+			testTermList.getTermByName(null);
 			failBecauseExceptionWasNotThrown(IllegalArgumentException.class);
 		}
 		catch(IllegalArgumentException e)
 		{
 			assertThat(e.getMessage()).isEqualTo("Parameter \"name\" is null");
 		}
-		TestStructure testStructure2 = new TestStructure(NAME);
-		assertThat(testStructure2.getTermByName("")).isNull();
-		assertThat(testStructure2.getTermByName(null)).isNull();
+		TestTermList testTermList2 = new TestTermList(NAME);
+		assertThat(testTermList2.getTermByName("")).isNull();
+		assertThat(testTermList2.getTermByName(null)).isNull();
 	}
 
 	@Test
 	public void test_getTermByIndex()
 	{
-		Structure testStructure = new Structure(NAME, new ArrayList<Term>());
-		assertThat(testStructure.getTermByIndex(-1)).isNull();
-		assertThat(testStructure.getTermByIndex(0)).isNull();
+		TermList testTermList = new TermList(NAME, new ArrayList<Term>());
+		assertThat(testTermList.getTermByIndex(-1)).isNull();
+		assertThat(testTermList.getTermByIndex(0)).isNull();
 		List<Term> paramList = getTermsList();
-		testStructure = new Structure(NAME, paramList);
-		assertThat(testStructure.getTermCount()).isEqualTo(3);
-		assertThat(testStructure.getTermByIndex(0)).isEqualTo(paramList.get(0));
-		assertThat(testStructure.getTermByIndex(1)).isEqualTo(paramList.get(1));
-		assertThat(testStructure.getTermByIndex(2)).isEqualTo(paramList.get(2));
-		assertThat(testStructure.getTermByIndex(-1)).isNull();
-		assertThat(testStructure.getTermByIndex(3)).isNull();
-		TestStructure testStructure2 = new TestStructure(NAME);
-		assertThat(testStructure2.getTermByIndex(0)).isNull();
-		assertThat(testStructure2.getTermByIndex(-1)).isNull();
-		assertThat(testStructure2.getTermCount()).isEqualTo(0);
+		testTermList = new TermList(NAME, paramList);
+		assertThat(testTermList.getTermCount()).isEqualTo(3);
+		assertThat(testTermList.getTermByIndex(0)).isEqualTo(paramList.get(0));
+		assertThat(testTermList.getTermByIndex(1)).isEqualTo(paramList.get(1));
+		assertThat(testTermList.getTermByIndex(2)).isEqualTo(paramList.get(2));
+		assertThat(testTermList.getTermByIndex(-1)).isNull();
+		assertThat(testTermList.getTermByIndex(3)).isNull();
+		TestTermList testTermList2 = new TestTermList(NAME);
+		assertThat(testTermList2.getTermByIndex(0)).isNull();
+		assertThat(testTermList2.getTermByIndex(-1)).isNull();
+		assertThat(testTermList2.getTermCount()).isEqualTo(0);
 	}
 	
 	@Test
@@ -271,39 +272,39 @@ public class StructureTest
 		paramList.add(parameter1);
 		paramList.add(parameter2);
 		when(parameter1.isEmpty()).thenReturn(true);
-		Structure testStructure = new Structure(NAME, paramList);
-		assertThat(testStructure.isFact()).isFalse();
+		TermList testTermList = new TermList(NAME, paramList);
+		assertThat(testTermList.isFact()).isFalse();
 		when(parameter1.isEmpty()).thenReturn(false);
 		when(parameter2.isEmpty()).thenReturn(true);
-		assertThat(testStructure.isFact()).isFalse();
+		assertThat(testTermList.isFact()).isFalse();
 		when(parameter1.isEmpty()).thenReturn(false);
 		when(parameter2.isEmpty()).thenReturn(false);
-		assertThat(testStructure.isFact()).isTrue();
-		Structure testStructure2 = new Structure(NAME, new ArrayList<Term>());
-		assertThat(testStructure2.isFact()).isTrue();
+		assertThat(testTermList.isFact()).isTrue();
+		TermList testTermList2 = new TermList(NAME, new ArrayList<Term>());
+		assertThat(testTermList2.isFact()).isTrue();
 	}
-/*	
+	
 	@Test
 	public void test_getName_Pattern()
 	{
-		Structure testStructure = new Structure(NAME, new ArrayList<Term>());
-		Pattern namePattern = testStructure.getNamePattern();
+		TermList testTermList = new TermList(NAME, new ArrayList<Term>());
+		Pattern namePattern = testTermList.getNamePattern();
 		Matcher matcher = namePattern.matcher("one.two");
 		assertThat(matcher.find()).isTrue();
 		assertThat(matcher.group(1)).isEqualTo("one");
 		assertThat(matcher.group(2)).isEqualTo("two");
 	}
-*/	
+	
     @Ignore // Test fails if template add term does not do operand map
 	@Test
 	public void test_addTerm()
 	{
-		TestStructure testStructure = new TestStructure(NAME);
+		TestTermList testTermList = new TestTermList(NAME);
 		Term term1 = mock(Term.class);
 		when(term1.getName()).thenReturn(Term.ANONYMOUS);
-		testStructure.addTerm(term1);
-		assertThat(testStructure.getTermCount()).isEqualTo(1);
-		assertThat(testStructure.termMap.size()).isEqualTo(0);
+		testTermList.addTerm(term1);
+		assertThat(testTermList.getTermCount()).isEqualTo(1);
+		assertThat(testTermList.termMap.size()).isEqualTo(0);
 		final Operand term2 = mock(Operand.class);
 		when(term2.getName()).thenReturn("l");
 		final Operand term3 = mock(Operand.class);
@@ -414,12 +415,11 @@ public class StructureTest
                 return 0;
             }
 		};
-		testStructure.addTerm(term4);
-		assertThat(testStructure.getTermCount()).isEqualTo(2);
-		assertThat(testStructure.termMap.size()).isEqualTo(3);
-		assertThat(testStructure.getTermByName("l")).isEqualTo(term2);
-		assertThat(testStructure.getTermByName("r")).isEqualTo(term3);
-		assertThat(testStructure.getTermByName(NAME.toLowerCase() + 1)).isEqualTo(term4);
+		testTermList.addTerm(term4);
+		assertThat(testTermList.getTermCount()).isEqualTo(2);
+		assertThat(testTermList.getTermByName("l")).isEqualTo(term2);
+		assertThat(testTermList.getTermByName("r")).isEqualTo(term3);
+		assertThat(testTermList.getTermByName(NAME.toLowerCase() + 1)).isEqualTo(term4);
 		final Operand term5 = mock(Operand.class);
 		when(term5.getName()).thenReturn(Term.ANONYMOUS);
 		Operand term6 = new Operand()
@@ -530,10 +530,10 @@ public class StructureTest
             }
 
 		};
-		testStructure.addTerm(term6);
-		assertThat(testStructure.getTermCount()).isEqualTo(3);
-		assertThat(testStructure.termMap.size()).isEqualTo(4);
-		assertThat(testStructure.getTermByName(NAME + 2)).isEqualTo(term6);
+		testTermList.addTerm(term6);
+		assertThat(testTermList.getTermCount()).isEqualTo(3);
+		assertThat(testTermList.getTermByName(NAME + 2)).isEqualTo(term6);
 	}
+	*/
 }
 
