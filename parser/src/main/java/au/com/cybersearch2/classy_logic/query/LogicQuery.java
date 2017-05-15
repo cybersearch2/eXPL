@@ -120,10 +120,7 @@ public class LogicQuery implements SolutionFinder
 	            }
 	            emptyTemplate = false;
 	        }
-			// Unify use to not happen if keys don't match, but scope names broke this rule
-			//if (!axiom.getName().equals(template.getKey()))
-			//	throw new QueryExecutionException("Axiom key \"" + axiom.getName() + "\" does not match Template key \"" + template.getKey() + "\"");
-			if (axiom.unifyTemplate(template, solution) &&
+			if (template.unify(axiom, solution) &&
 				completeSolution(solution, template))
 				return true;
 			template.backup(true);
@@ -144,7 +141,7 @@ public class LogicQuery implements SolutionFinder
 		{
 			OperandWalker walker = template.getOperandWalker();
 			if (pairer == null)
-				pairer = new SolutionPairer(solution, template);
+                pairer = template.getSolutionPairer(solution);
 			else
 				pairer.setSolution(solution);
 			return walker.visitAllNodes(pairer);

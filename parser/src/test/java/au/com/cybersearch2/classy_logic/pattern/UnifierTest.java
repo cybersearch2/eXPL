@@ -17,12 +17,15 @@ package au.com.cybersearch2.classy_logic.pattern;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.interfaces.TermPairList;
+import au.com.cybersearch2.classy_logic.query.Solution;
+
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * UnifierTest
@@ -34,89 +37,147 @@ public class UnifierTest
     static final String TEMPLATE_NAME = "TemplateName";
     static final String OPERAND_NAME = "x";
     
-    class TestTermPairList implements TermPairList
-    {
-        public Operand term1;
-        public Term term2;
-        
-        @Override
-        public void add(Operand term1, Term term2)
-        {
-            this.term1 = term1;
-            this.term2 = term2;
-        }
-  
-        public void clear()
-        {
-            term1 = null;
-            term2 = null;
-        }
-    }
- /*  
 	@Test
-	public void test_next()
+	public void test_next_pair()
 	{
 		// Pairing case
-	    QualifiedName contextName = QualifiedName.parseTemplateName(TEMPLATE_NAME);
-	    QualifiedName operandName = QualifiedName.parseName(OPERAND_NAME, contextName);
 		Axiom axiom = mock(Axiom.class);
-	    AxiomArchetype axiomArchetype = mock(AxiomArchetype.class);
-	    when(axiom.getArchetype()).thenReturn(axiomArchetype);
 		Operand operand = mock(Operand.class);
 		Term term2 = mock(Term.class);
 		when(operand.getName()).thenReturn(OPERAND_NAME);
-		when(operand.getQualifiedName()).thenReturn(operandName);
-		when(axiom.getTermByName(OPERAND_NAME)).thenReturn(term2);
+        when(axiom.getTermByIndex(1)).thenReturn(term2);
 		when(operand.isEmpty()).thenReturn(true);
-		TestTermPairList termPairList = new TestTermPairList();
-		AxiomPairer axiomPairer= new AxiomPairer(termPairList);
-        axiomPairer.setAxiom(axiom);
-		assertThat(axiomPairer.next(operand, 1)).isTrue();
-		assertThat(termPairList.term1).isEqualTo(operand);
-        assertThat(termPairList.term2).isEqualTo(term2);
-		
-		// Template term not empty: Axiom value == Template value
-		when(operand.isEmpty()).thenReturn(false);
-		when(operand.getValue()).thenReturn(new Integer(2));
-		when(term2.isEmpty()).thenReturn(false);
-		when(term2.getValue()).thenReturn(new Integer(2));
-		termPairList.clear();
-		axiomPairer= new AxiomPairer(termPairList);
-		assertThat(axiomPairer.next(operand, 1)).isTrue();
-        assertThat(termPairList.term1).isNull();
-        assertThat(termPairList.term2).isNull();
-		
+		when(operand.getArchetypeIndex()).thenReturn(0);
+		Template template = mock(Template.class);
+		when(template.getId()).thenReturn(3);
+		int[] termMapping = new int[] { 1, 0};
+		Unifier underTest = new Unifier(template, axiom, termMapping, new Solution());
+ 		assertThat(underTest.next(operand, 1)).isTrue();
+ 		verify(operand).unifyTerm(term2, 3);
+	}
+	
+    @Test
+    public void test_non_empty_match()
+    {
+		// Operand not empty: axiom value == operand value
+        Axiom axiom = mock(Axiom.class);
+        Operand operand = mock(Operand.class);
+        Term term2 = mock(Term.class);
+        when(term2.isEmpty()).thenReturn(false);
+        when(term2.getValue()).thenReturn(new Integer(2));
+        when(operand.getName()).thenReturn(OPERAND_NAME);
+        when(axiom.getTermByIndex(1)).thenReturn(term2);
+        when(operand.isEmpty()).thenReturn(false);
+        when(operand.getValue()).thenReturn(new Integer(2));
+        when(operand.getArchetypeIndex()).thenReturn(0);
+        Template template = mock(Template.class);
+        when(template.getId()).thenReturn(3);
+        int[] termMapping = new int[] { 1, 0};
+        Unifier underTest = new Unifier(template, axiom, termMapping, new Solution());
+        assertThat(underTest.next(operand, 1)).isTrue();
+        verify(operand, times(0)).unifyTerm(term2, 3);
+    }
+    
+    @Test
+    public void test_term_empty()
+    {
 		// Axiom parameter is empty - should never happen
-		when(term2.isEmpty()).thenReturn(true);
-        termPairList.clear();
-        axiomPairer= new AxiomPairer(termPairList);
-		assertThat(axiomPairer.next(operand, 1)).isTrue();
-        assertThat(termPairList.term1).isNull();
-        assertThat(termPairList.term2).isNull();
-
+        Axiom axiom = mock(Axiom.class);
+        Operand operand = mock(Operand.class);
+        Term term2 = mock(Term.class);
+        when(term2.isEmpty()).thenReturn(true);
+        when(term2.getValue()).thenReturn(new Integer(2));
+        when(operand.getName()).thenReturn(OPERAND_NAME);
+        when(axiom.getTermByIndex(1)).thenReturn(term2);
+        when(operand.isEmpty()).thenReturn(false);
+        when(operand.getValue()).thenReturn(new Integer(2));
+        when(operand.getArchetypeIndex()).thenReturn(0);
+        Template template = mock(Template.class);
+        when(template.getId()).thenReturn(3);
+        int[] termMapping = new int[] { 1, 0};
+        Unifier underTest = new Unifier(template, axiom, termMapping, new Solution());
+        assertThat(underTest.next(operand, 1)).isTrue();
+        verify(operand, times(0)).unifyTerm(term2, 3);
+    }
+    
+    @Test
+    public void test_non_empty_non_match()
+    {
  		// Axiom value != Template value
-		when(term2.isEmpty()).thenReturn(false);
-		when(term2.getValue()).thenReturn(new Integer(3));
-        termPairList.clear();
-        axiomPairer= new AxiomPairer(termPairList);
-		assertThat(axiomPairer.next(operand, 1)).isFalse();
-	    assertThat(termPairList.term1).isNull();
-	    assertThat(termPairList.term2).isNull();
-         
-		// Template term is anonymous
-		when(operand.getName()).thenReturn("");
-        when(operand.getQualifiedName()).thenReturn(contextName);
-		axiomPairer= new AxiomPairer(owner, contextName);
-		assertThat(axiomPairer.next(operand, 1)).isTrue();
-		assertThat(axiomPairer.getPairList().size()).isEqualTo(0);
+        // Operand not empty: axiom value == operand value
+        Axiom axiom = mock(Axiom.class);
+        Operand operand = mock(Operand.class);
+        Term term2 = mock(Term.class);
+        when(term2.isEmpty()).thenReturn(false);
+        when(term2.getValue()).thenReturn(new Integer(3));
+        when(operand.getName()).thenReturn(OPERAND_NAME);
+        when(axiom.getTermByIndex(1)).thenReturn(term2);
+        when(operand.isEmpty()).thenReturn(false);
+        when(operand.getValue()).thenReturn(new Integer(2));
+        when(operand.getArchetypeIndex()).thenReturn(0);
+        Template template = mock(Template.class);
+        when(template.getId()).thenReturn(3);
+        int[] termMapping = new int[] { 1, 0};
+        Unifier underTest = new Unifier(template, axiom, termMapping, new Solution());
+        assertThat(underTest.next(operand, 1)).isFalse();
+        verify(operand, times(0)).unifyTerm(term2, 3);
+    }
+    
+    @Test
+    public void test_empty_name_operand()
+    {
+        // Operand is anonymous
+        Axiom axiom = mock(Axiom.class);
+        Operand operand = mock(Operand.class);
+        Term term2 = mock(Term.class);
+        when(operand.getName()).thenReturn("");
+        Template template = mock(Template.class);
+        when(template.getId()).thenReturn(3);
+        int[] termMapping = new int[] { 1, 0};
+        Unifier underTest = new Unifier(template, axiom, termMapping, new Solution());
+        assertThat(underTest.next(operand, 1)).isTrue();
+        verify(operand, times(0)).unifyTerm(term2, 3);
+    }
 
-	    // Matching term not found by name 
-		when(operand.getName()).thenReturn(OPERAND_NAME);
-        when(operand.getQualifiedName()).thenReturn(operandName);
-		when(owner.getTermByName(OPERAND_NAME)).thenReturn(null);
-		assertThat(axiomPairer.next(operand, 1)).isTrue();
-		assertThat(axiomPairer.getPairList().size()).isEqualTo(0);
-    } 
-        */
+    @Test
+    public void test_no_pair()
+    {
+        // Term not paired
+        Axiom axiom = mock(Axiom.class);
+        Operand operand = mock(Operand.class);
+        Term term2 = mock(Term.class);
+        when(operand.getName()).thenReturn(OPERAND_NAME);
+        when(operand.getArchetypeIndex()).thenReturn(-1);
+        Template template = mock(Template.class);
+        when(template.getId()).thenReturn(3);
+        int[] termMapping = new int[] { 1, 0};
+        Unifier underTest = new Unifier(template, axiom, termMapping, new Solution());
+        assertThat(underTest.next(operand, 1)).isTrue();
+        verify(operand, times(0)).unifyTerm(term2, 3);
+    }
+    
+    @Test
+    public void test_solution_pair()
+    {
+        // Term not paired
+        Axiom axiom = mock(Axiom.class);
+        Operand operand = mock(Operand.class);
+        Term term2 = mock(Term.class);
+        when(operand.getName()).thenReturn(OPERAND_NAME);
+        when(operand.getArchetypeIndex()).thenReturn(-1);
+        Template template = mock(Template.class);
+        when(template.getId()).thenReturn(3);
+        int[] termMapping = new int[] { 1, 0};
+        Solution solution = mock(Solution.class);
+        Set<String> keyset = new HashSet<String>();
+        keyset.add("key");
+        when(solution.keySet()).thenReturn(keyset);
+        SolutionPairer solutionPairer = mock(SolutionPairer.class);
+        when(template.getSolutionPairer(solution)).thenReturn(solutionPairer);
+        when(solutionPairer.next(operand, 0)).thenReturn(true);
+        Unifier underTest = new Unifier(template, axiom, termMapping, solution);
+        assertThat(underTest.next(operand, 1)).isTrue();
+        verify(operand, times(0)).unifyTerm(term2, 3);
+    }
 
 }

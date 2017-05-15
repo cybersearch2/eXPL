@@ -15,6 +15,7 @@ import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.compile.AxiomAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.compile.Group;
@@ -418,7 +419,7 @@ public class QueryParser implements QueryParserConstants
     VariableType varType = typeToken.kind == QueryParserConstants.AXIOM ? new VariableType(OperandType.AXIOM) : new VariableType(OperandType.TERM);
     varType.setProperty(VariableType.AXIOM_KEY, querySpec.getKey());
     ItemList<?> itemList = varType.getItemListInstance(parserAssembler, querySpec.getName());
-    parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
+    parserAssembler.getListAssembler().addItemList(itemList.getQualifiedName(), itemList);
   }
 
   final public QuerySpec Query(ParserContext context) throws ParseException
@@ -593,7 +594,7 @@ public class QueryParser implements QueryParserConstants
   int index = 0;
   StringBuilder builder = new StringBuilder(qualifiedAxiomName.getName());
   ParserAssembler parserAssembler = context.getParserAssembler();
-  parserAssembler.createAxiom(qualifiedAxiomName);
+  parserAssembler.getListAssembler().createAxiomItemList(qualifiedAxiomName);
     jj_consume_token(LPAREN);
     builder.append('(');
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -707,7 +708,7 @@ public class QueryParser implements QueryParserConstants
   {
   Token nameToken;
     nameToken = jj_consume_token(IDENTIFIER);
-    parserAssembler.addAxiomTermName(qualifiedAxiomName, nameToken.image);
+    parserAssembler.getAxiomAssembler().addAxiomTermName(qualifiedAxiomName, nameToken.image);
     {if (true) return nameToken.image;}
     throw new Error("Missing return statement in function");
   }
@@ -757,7 +758,7 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(COMMA);
       Fact(qualifiedAxiomName, context);
     }
-    context.getParserAssembler().saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
+    context.getParserAssembler().getAxiomAssembler().saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
   }
 
   final public void AltAxiomItem(QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
@@ -779,7 +780,7 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(BIT_OR);
       Fact(qualifiedAxiomName, context);
     }
-    context.getParserAssembler().saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
+    context.getParserAssembler().getAxiomAssembler().saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
   }
 
   final public String Fact(QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
@@ -796,12 +797,12 @@ public class QueryParser implements QueryParserConstants
     case FALSE:
     case UNKNOWN:
       param = LiteralTerm(context);
-    parserAssembler.addAxiom(qualifiedAxiomName, param);
+    parserAssembler.getAxiomAssembler().addAxiom(qualifiedAxiomName, param);
     {if (true) return param.getValue().toString();}
       break;
     case NAN:
       jj_consume_token(NAN);
-    parserAssembler.addAxiom(qualifiedAxiomName, new DoubleTerm("NaN"));
+    parserAssembler.getAxiomAssembler().addAxiom(qualifiedAxiomName, new DoubleTerm("NaN"));
     {if (true) return "NaN";}
       break;
     default:
@@ -976,7 +977,7 @@ public class QueryParser implements QueryParserConstants
     templateToken = jj_consume_token(IDENTIFIER);
     QualifiedName qualifiedTemplateName = new QualifiedTemplateName(context.getScope().getAlias(), templateToken.image);
     context.setContextName(qualifiedTemplateName);
-    {if (true) return context.getParserAssembler().createTemplate(qualifiedTemplateName, isCalculator);}
+    {if (true) return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, isCalculator);}
     throw new Error("Missing return statement in function");
   }
 
@@ -1392,7 +1393,7 @@ public class QueryParser implements QueryParserConstants
       ;
     }
     boolean isDeclaration = varType != null;
-    boolean hasOperand = operandMap.hasOperand(name);
+    boolean hasOperand = operandMap.hasOperand(name, parserAssembler.getQualifiedContextname());
     if (!isDeclaration)
       varType = new VariableType(OperandType.UNKNOWN);
     Operand assignExpression = (assignToken != null) ? expression : null;
@@ -1400,7 +1401,7 @@ public class QueryParser implements QueryParserConstants
     if (regexLit != null)
       regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
     else if (regexId != null)
-      regexOp = operandMap.addOperand(regexId.image, null);
+      regexOp = operandMap.addOperand(regexId.image, null, parserAssembler.getQualifiedContextname());
     if (assignToken != null)
       expression = null;
     if (expression != null)
@@ -1420,7 +1421,7 @@ public class QueryParser implements QueryParserConstants
     if ((var == null) && !hasOperand)
       var = varType.getInstance(parserAssembler, name);
     if (var == null)
-      var = operandMap.addOperand(name, expression);
+      var = operandMap.addOperand(name, expression, parserAssembler.getQualifiedContextname());
     if ((index == null) && (!hasOperand))
       operandMap.addOperand(var);
     if (assignToken != null)
@@ -1469,7 +1470,7 @@ public class QueryParser implements QueryParserConstants
       {
       case LBRACE:
         delimitToken = jj_consume_token(LBRACE);
-        Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, "");
+        Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName, "");
         context.addSourceItem(scToken.image+expression.toString()).setEnd(delimitToken);
         context.pushSourceMarker();
         Token token = Token.newToken(QueryParserConstants.CALC);
@@ -1558,7 +1559,7 @@ public class QueryParser implements QueryParserConstants
       delimitToken = jj_consume_token(LBRACE);
       context.onTokenIntercept(delimitToken);
       context.pushSourceMarker();
-      Template innerTemplate = context.getParserAssembler().chainTemplate(outerTemplateName, "");
+      Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName, "");
       Token token = Token.newToken(QueryParserConstants.CALC);
       token.beginLine = delimitToken.beginLine;
       token.beginColumn = delimitToken.beginColumn;
@@ -1585,10 +1586,11 @@ public class QueryParser implements QueryParserConstants
       choiceToken = jj_consume_token(IDENTIFIER);
     qualifiedAxiomName = QualifiedName.parseName(choiceToken.image);
     qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
-    Template choiceTemplate = template.choiceInstance(parserAssembler.getTemplate(qualifiedTemplateName));
+    Template choiceTemplate = template.choiceInstance(parserAssembler.getTemplateAssembler().getTemplate(qualifiedTemplateName));
     OperandMap operandMap = parserAssembler.getOperandMap();
-    for (String termName: parserAssembler.getAxiomTermNameList(qualifiedAxiomName))
-      operandMap.addOperand(termName, null);
+    AxiomAssembler axiomAssembler = parserAssembler.getAxiomAssembler();
+    for (String termName: axiomAssembler.getAxiomTermNameList(qualifiedAxiomName))
+      operandMap.addOperand(termName, null, parserAssembler.getQualifiedContextname());
     QualifiedName contextName = context.getContextName();
     QualifiedName qname = QualifiedName.parseName(qualifiedAxiomName.getName(), contextName);
         Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
@@ -1690,7 +1692,7 @@ public class QueryParser implements QueryParserConstants
   String queryKey = outerTemplateName.getTemplate() + "." + callName;
     templateToken = jj_consume_token(78);
       ParserAssembler parserAssembler = context.getParserAssembler();
-      template = parserAssembler.chainTemplate(outerTemplateName, callName);
+      template = parserAssembler.getTemplateAssembler().chainTemplate(outerTemplateName, callName);
       template.setKey(queryKey);
       context.onTokenIntercept(templateToken);
     delimitToken = jj_consume_token(LPAREN);
@@ -1813,8 +1815,8 @@ public class QueryParser implements QueryParserConstants
     Scope scope = context.getScope();
     choiceToken = jj_consume_token(IDENTIFIER);
     QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
-    parserAssembler.createAxiom(qualifiedChoiceName);
-    Template template = parserAssembler.createTemplate(qualifiedChoiceName, true);
+    parserAssembler.getListAssembler().createAxiomItemList(qualifiedChoiceName);
+    parserAssembler.getTemplateAssembler().createTemplate(qualifiedChoiceName, true);
     context.setContextName(new QualifiedTemplateName(scope.getAlias(), choiceToken.image));
     {if (true) return qualifiedChoiceName;}
     throw new Error("Missing return statement in function");
@@ -1826,8 +1828,9 @@ public class QueryParser implements QueryParserConstants
     String fact;
     Token delimToken;
     ParserAssembler parserAssembler = context.getParserAssembler();
-    String name = parserAssembler.getAxiomTermName(qualifiedAxiomName, 0);
-    parserAssembler.addAxiom(qualifiedAxiomName, new StringTerm(name + selection));
+    AxiomAssembler axiomAssembler = parserAssembler.getAxiomAssembler();
+    String name = axiomAssembler.getAxiomTermName(qualifiedAxiomName, 0);
+    parserAssembler.getAxiomAssembler().addAxiom(qualifiedAxiomName, new StringTerm(name + selection));
     StringBuilder builder = new StringBuilder();
     jj_consume_token(LBRACE);
     operand = ChoiceExpression(name, context);
@@ -1849,9 +1852,9 @@ public class QueryParser implements QueryParserConstants
         builder.append(',').append(fact);
     }
     delimToken = jj_consume_token(RBRACE);
-       parserAssembler.saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
+       parserAssembler.getAxiomAssembler().saveAxiom(qualifiedAxiomName).getArchetype().clearMutable();
        QualifiedName qualifiedTemplateName = new QualifiedTemplateName(parserAssembler.getScope().getAlias(), qualifiedAxiomName.getName());
-       parserAssembler.addTemplate(qualifiedTemplateName, operand);
+       parserAssembler.getTemplateAssembler().addTemplate(qualifiedTemplateName, operand);
        builder.append('}');
        context.addSourceItem(builder.toString()).setEnd(delimToken);
   }
@@ -1939,7 +1942,7 @@ public class QueryParser implements QueryParserConstants
   {
   Token groupToken;
     groupToken = jj_consume_token(IDENTIFIER);
-    Operand var = parserAssembler.getOperandMap().addOperand(groupToken.image, null);
+    Operand var = parserAssembler.getOperandMap().addOperand(groupToken.image, null, parserAssembler.getQualifiedContextname());
     template.addTerm(var);
     group.addGroup(var);
     var.setPrivate(true);
@@ -2118,7 +2121,7 @@ public class QueryParser implements QueryParserConstants
     if (qualifiedAxiomName != null)
         varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
     ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
-    parserAssembler.getOperandMap().addItemList(itemList.getQualifiedName(), itemList);
+    parserAssembler.getListAssembler().addItemList(itemList.getQualifiedName(), itemList);
     context.addSourceItem(itemList).setEnd(delimitToken);
   }
 
@@ -2250,7 +2253,7 @@ public class QueryParser implements QueryParserConstants
     if (operand != null)
         {if (true) return new ListLength(qname, operand);}
     else
-        {if (true) return new ListLength(qname, parserAssembler.getItemList(name));}
+        {if (true) return new ListLength(qname, parserAssembler.getListAssembler().getItemList(name));}
       break;
     case FORMAT:
       literal = jj_consume_token(FORMAT);
@@ -2502,7 +2505,7 @@ public class QueryParser implements QueryParserConstants
       if (qualifierLit != null)
          varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
       else if (qualifierId != null)
-         varType.setProperty(VariableType.QUALIFIER_OPERAND, context.getOperandMap().addOperand(qualifierId, null));
+         varType.setProperty(VariableType.QUALIFIER_OPERAND, context.getOperandMap().addOperand(qualifierId, null, context.getParserAssembler().getQualifiedContextname()));
        {if (true) return varType;}
       break;
     default:
@@ -3194,11 +3197,6 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_90() {
-    if (jj_scan_token(UNKNOWN)) return true;
-    return false;
-  }
-
   private boolean jj_3R_72() {
     if (jj_3R_73()) return true;
     return false;
@@ -3608,6 +3606,11 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_73() {
     if (jj_3R_74()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_90() {
+    if (jj_scan_token(UNKNOWN)) return true;
     return false;
   }
 

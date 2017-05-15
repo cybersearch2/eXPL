@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.ParserTask;
@@ -341,11 +340,10 @@ public class QueryProgram extends QueryLauncher
         {
             Scope scope = scopes.get(parserTask.getScopeName());
             ParserAssembler parserAssembler = scope.getParserAssembler();
-            OperandMap operandMap = parserAssembler.getOperandMap();
-            QualifiedName savedQName = operandMap.getQualifiedContextname();
-            operandMap.setQualifiedContextname(parserTask.getQualifiedContextname());
+            QualifiedName savedQName = parserAssembler.getQualifiedContextname();
+            parserAssembler.setQualifiedContextname(parserTask.getQualifiedContextname());
             parserTask.run(parserAssembler);
-            operandMap.setQualifiedContextname(savedQName);
+            parserAssembler.setQualifiedContextname(savedQName);
             parserTask = priorityQueue.poll();
         }
     }

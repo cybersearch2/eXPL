@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import au.com.cybersearch2.classy_logic.compile.ListAssembler;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
@@ -113,7 +114,7 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
     protected Operand newListVariableInstance(ParserAssembler parserAssembler)
     {
         QualifiedName qualifiedListName = null;
-        ItemList<?> itemList = parserAssembler.findItemList(listName);
+        ItemList<?> itemList = parserAssembler.getListAssembler().findItemList(listName);
         if (itemList != null)
             qualifiedListName = itemList.getQualifiedName(); 
         else 
@@ -141,6 +142,7 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
         ItemList<?> itemList = null;
         AxiomListSpec axiomListSpec = null;
         OperandMap operandMap = parserAssembler.getOperandMap();
+        ListAssembler listAssembler = parserAssembler.getListAssembler();
         // When an axiom parameter is specified, then initialization of the list variable must be delayed 
         // until evaluation occurs when running the first query.
         boolean isAxiomListVariable = parserAssembler.isParameter(qualifiedListName) || (operandMap.get(qualifiedListName) != null);
@@ -150,12 +152,12 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
             return new AxiomListVariable(axiomListSpec);
         }
         // A normal list should be ready to go
-        itemList = parserAssembler.getItemList(qualifiedListName);
+        itemList = parserAssembler.getListAssembler().getItemList(qualifiedListName);
         //operandMap.addItemList(listName, itemList);
         if (expression2 == null) // Single index case is easy
-            return operandMap.newListVariableInstance(itemList, indexExpression);
+            return listAssembler.newListVariableInstance(itemList, indexExpression);
         axiomListSpec = new AxiomListSpec((AxiomList)itemList, indexExpression, expression2);
-        return operandMap.newListVariableInstance(axiomListSpec);
+        return listAssembler.newListVariableInstance(axiomListSpec);
     }
     
    /**

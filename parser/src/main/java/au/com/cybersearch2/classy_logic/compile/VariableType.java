@@ -141,7 +141,7 @@ public class VariableType
             axiomKey = (QualifiedName)getProperty(AXIOM_KEY);
             if (axiomKey == null)
                 axiomKey = qname;
-            axiomListListener = axiomListListener(parserAssembler.getOperandMap());
+            axiomListListener = parserAssembler.getListAssembler().axiomListListenerInstance();
         }
         if (operandType == OperandType.LIST || operandType == OperandType.TERM)
             initializeList = (List<OperandParam>)getProperty(PARAMS);
@@ -206,7 +206,7 @@ public class VariableType
 	 */
   	public ItemList<?> getItemListInstance(ParserAssembler parserAssembler, String listName) throws ParseException
 	{
-        QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getOperandMap().getQualifiedContextname());
+        QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getQualifiedContextname());
   	    return getItemListInstance(parserAssembler, qualifiedListName);
 	}
   	
@@ -354,21 +354,4 @@ public class VariableType
         };
     }
 
-    /**
-     * Returns axiom list listener which adds the list to a given operand container
-     * @param operandMap OperandMap object
-     * @return AxiomListListener object
-     */
-    protected AxiomListListener axiomListListener(final OperandMap operandMap)
-    {
-        return new AxiomListListener(){
-
-            @Override
-            public void addAxiomList(QualifiedName qname, AxiomList axiomList)
-            {
-                if (operandMap.getItemList(qname) == null)
-                    operandMap.addItemList(qname, axiomList);
-            }
-        };
-    }
 }

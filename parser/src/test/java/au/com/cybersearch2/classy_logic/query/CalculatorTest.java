@@ -60,28 +60,14 @@ public class CalculatorTest
 	private static final String KEY = "AxiomKey";
 	private static final String TEMPLATE_NAME = "TemplateName";
 	private static final String CHOICE_NAME = "ChoiceName";
-/*
+
 	@Test
 	public void test_unifySolution()
 	{
         Calculator calculator = new Calculator();
-        SolutionList solutionList = mock(SolutionList.class);
-        calculator.solutionList = solutionList;
 		Solution solution = mock(Solution.class);
         SolutionPairer pairer = mock(SolutionPairer.class);
         calculator.pairer = pairer;
-		Operand term1 = mock(Operand.class);
-		Term term2 = mock(Term.class);
-        TermPair termPair1 = new TermPair(term1, term2);
-        when(solutionList.getHead()).thenReturn(termPair1);
-		when(term1.unifyTerm(term2, 1)).thenReturn(1);
-		calculator.solutionList.add(term1, term2);
-		Operand term3 = mock(Operand.class);
-		Term term4 = mock(Term.class);
-        TermPair termPair2 = new TermPair(term3, term4);
-        termPair1.setNext(termPair2);
-		when(term3.unifyTerm(term4, 1)).thenReturn(1);
-		calculator.solutionList.add(term3, term4);
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(1);
 		OperandWalker walker = mock(OperandWalker.class);
@@ -89,10 +75,7 @@ public class CalculatorTest
 		when(template.getOperandWalker()).thenReturn(walker);
 		when(solution.size()).thenReturn(2);
 		assertThat(calculator.unifySolution(solution, template)).isTrue();
-		verify(solutionList).clearTermPairList();
 		verify(pairer).setSolution(solution);
-		verify(term1).unifyTerm(term2, 1);
-		verify(term3).unifyTerm(term4, 1);
         Template template2 = mock(Template.class);
         when(template2.getId()).thenReturn(1);
 		OperandWalker walker2 = mock(OperandWalker.class);
@@ -100,7 +83,7 @@ public class CalculatorTest
 		when(template2.getOperandWalker()).thenReturn(walker2);
 		assertThat(calculator.unifySolution(solution, template2)).isFalse();
 	}
-*/
+
 	@Test
 	public void test_completeSolution()
 	{
@@ -190,7 +173,7 @@ public class CalculatorTest
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(TEMPLATE_NAME));
         Axiom axiom = mock(Axiom.class);
         when(axiom.getName()).thenReturn(KEY);
-        when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+        when(template.unify(axiom, solution)).thenReturn(true);
         Axiom solutionAxiom = mock(Axiom.class);
         when(solutionAxiom.getName()).thenReturn(TEMPLATE_NAME);
         when(template.toAxiom()).thenReturn(solutionAxiom);
@@ -198,7 +181,7 @@ public class CalculatorTest
         calculator.execute(axiom, template, solution);
         verify(solution).put(TEMPLATE_NAME, solutionAxiom);
 	}
-/*	
+	
 	@Test
 	public void test_execute_no_seed_axiom()
 	{
@@ -206,21 +189,15 @@ public class CalculatorTest
 		Solution solution = mock(Solution.class);
 		when(solution.size()).thenReturn(2);
 		QualifiedName qualifiedTemplateName = QualifiedName.parseTemplateName(TEMPLATE_NAME);
-        SolutionList solutionList = mock(SolutionList.class);
-        calculator.solutionList = solutionList;
-        SolutionPairer pairer = new SolutionPairer(solution, QualifiedTemplateName.ANONYMOUS, solutionList);
+		Template template = mock(Template.class);
+        SolutionPairer pairer = new SolutionPairer(solution, 1, qualifiedTemplateName);
         calculator.pairer = pairer;
 		Operand term1 = mock(Operand.class);
 		Term term2 = mock(Term.class);
 		when(term1.unifyTerm(term2, 1)).thenReturn(1);
-        TermPair termPair1 = new TermPair(term1, term2);
-        when(solutionList.getHead()).thenReturn(termPair1);
 		Operand term3 = mock(Operand.class);
 		Term term4 = mock(Term.class);
 		when(term3.unifyTerm(term4, 1)).thenReturn(1);
-		TermPair termPair2 = new TermPair(term3, term4);
-		termPair1.setNext(termPair2);
-        Template template = mock(Template.class);
         when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
         when(template.getKey()).thenReturn(KEY);
         when(template.getName()).thenReturn(TEMPLATE_NAME);
@@ -233,11 +210,9 @@ public class CalculatorTest
         when(template.toAxiom()).thenReturn(solutionAxiom);
         when(template.getId()).thenReturn(1);
         calculator.execute(template, solution);
-        verify(term1).unifyTerm(term2, 1);
-        verify(term3).unifyTerm(term4, 1);
         verify(solution).put(TEMPLATE_NAME, solutionAxiom);
 	}
-*/	
+	
     @Test
 	public void test_simple() 
 	{

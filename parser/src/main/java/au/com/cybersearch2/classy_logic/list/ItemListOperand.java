@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import au.com.cybersearch2.classy_logic.compile.ListAssembler;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
@@ -50,16 +51,16 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
     @Override
     public void run(ParserAssembler parserAssembler)
     {
-        OperandMap operandMap = parserAssembler.getOperandMap();
-        ItemList<?> itemList = parserAssembler.findItemList(listName);
+        ListAssembler listAssembler = parserAssembler.getListAssembler();
+        ItemList<?> itemList = parserAssembler.getListAssembler().findItemList(listName);
         if (itemList == null)
         {
-            QualifiedName qualifiedListName = QualifiedName.parseName(listName, operandMap.getQualifiedContextname());
+            QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getQualifiedContextname());
             qualifiedListName.clearTemplate();
-            itemList = parserAssembler.findItemList(qualifiedListName);
+            itemList = parserAssembler.getListAssembler().findItemList(qualifiedListName);
         }
         if (itemList != null)
-            expression = setListVariable(operandMap, itemList);
+            expression = setListVariable(listAssembler, itemList);
         else
             expression = newListVariableInstance(parserAssembler);
         if (sourceItem != null)
@@ -71,9 +72,9 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
      * This is wrapped in an assignment evaluator if optional expression parameter needs to be evaluated.
      * @return Operand object
      */
-    protected Operand setListVariable(OperandMap operandMap, ItemList<?> itemList) 
+    protected Operand setListVariable(ListAssembler listAssembler, ItemList<?> itemList) 
     {
-        ItemListVariable<?> variable = operandMap.newListVariableInstance(itemList, indexExpression);
+        ItemListVariable<?> variable = listAssembler.newListVariableInstance(itemList, indexExpression);
         if (expression2 != null)
         {
             if (expression2.isEmpty() || (expression2 instanceof Evaluator))

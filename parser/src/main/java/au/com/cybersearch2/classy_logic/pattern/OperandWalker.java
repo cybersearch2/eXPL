@@ -19,8 +19,6 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * OperandWalker
@@ -29,10 +27,6 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  * Applicable for unification or collection of terms into a map.
  * @author Andrew Bowley
  * 16 Dec 2014
- * @see au.com.cybersearch2.classy_logic.pattern.Structure#addTerm(Term param)
- * @see au.com.cybersearch2.classy_logic.pattern.Axiom#unifyTemplate(Template other, Solution solution)
- * @see au.com.cybersearch2.classy_logic.query.Calculator#unifySolution(Solution solution, Template template)
- * @see au.com.cybersearch2.classy_logic.query.LogicQuery#unifySolution(Solution solution, Template template)
  */
 public class OperandWalker 
 {

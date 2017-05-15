@@ -14,6 +14,7 @@ import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.compile.AxiomAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.compile.Group;

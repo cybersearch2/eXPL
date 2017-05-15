@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.compile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
@@ -26,6 +27,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
@@ -103,7 +105,8 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         if (querySpec == null)
         {
             QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library.name, queryName);
-            if ((library.functionScope == callerScope) && (parserAssembler.getTemplate(qualifiedTemplateName) == null))
+            if ((library.functionScope == callerScope) && 
+                (parserAssembler.getTemplateAssembler().getTemplate(qualifiedTemplateName) == null))
                 throw new ExpressionException("Query \"" + qualifiedCallName.getName() + "\" not found in scope \"" + library + "\"");
             querySpec = new QuerySpec(callName);
             querySpec.addKeyName(new KeyName("", qualifiedCallName.getName()));
@@ -117,15 +120,16 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             QualifiedName innerTemplateName = innerTemplate.getQualifiedName();
             innerTerm = callerOperandMap.get(innerTemplateName);
             QualifiedName axiomKey = QualifiedName.parseName(innerTemplate.getKey());
-            axiomListenerList = parserAssembler.getAxiomListenerList(axiomKey);
-            AxiomTermList itemList = parserAssembler.getAxiomTermList(axiomKey);
-            parserAssembler.setAxiomTermNameList(innerTemplate, itemList);
-            axiomListenerList.add(itemList.getAxiomListener());
+            ListAssembler listAssembler = parserAssembler.getListAssembler();
+            axiomListenerList = listAssembler.getAxiomListenerList(axiomKey);
+            AxiomTermList itemList = listAssembler.getAxiomTerms(axiomKey);
+            listAssembler.add(axiomKey, itemList.getAxiomListener());
+            setAxiomTermNameList(innerTemplate, itemList);
         }
         else
         {   // Create empty AxiomTermList to avoid null issues
             KeyName firstKeyname = queryParams.getQuerySpec().getKeyNameList().get(0);
-            QualifiedName qname = QualifiedName.parseName(firstKeyname.getTemplateName().getName(), callerOperandMap.getQualifiedContextname());
+            QualifiedName qname = QualifiedName.parseName(firstKeyname.getTemplateName().getName(), callerScope.getParserAssembler().getQualifiedContextname());
             // Create empty AxiomTermList to return as query result. 
             innerTerm = new Parameter(qname.getName(), new AxiomTermList(qname, firstKeyname.getTemplateName()));
         }
@@ -259,7 +263,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
             {
                 // No backup, so reset before unification
                 innerTemplate.reset();
-                if (axiom.unifyTemplate(innerTemplate, solution))
+                if (innerTemplate.unify(axiom, solution))
                 {
                     if (innerTemplate.evaluate() == EvaluationStatus.COMPLETE);
                     {
@@ -295,6 +299,28 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         innerTermValue.setId(id);
         innerTerm.assign(innerTermValue);
         return axiomTermList;
+    }
+
+    /**
+     * Set axiom term name list from template
+     * @param qualifiedTemplateName Qualified name of template
+     * @param axiomList Axiom list to be updated
+     * @return List of term names
+     */
+    protected List<String> setAxiomTermNameList(Template template, AxiomContainer axiomContainer)
+    {
+        List<String> axiomTermNameList = null;
+        axiomTermNameList = new ArrayList<String>();
+        for (int i = 0; i < template.getTermCount(); i++)
+        {
+            Term term = template.getTermByIndex(i);
+            if (term.getName().isEmpty())
+                break;
+            axiomTermNameList.add(term.getName());
+        }
+        if (axiomTermNameList.size() > 0)
+            axiomContainer.setAxiomTermNameList(axiomTermNameList);
+        return axiomTermNameList;
     }
 
 }

@@ -72,7 +72,7 @@ public class LogicQueryTest
 		logicQuery.setQueryStatusComplete();
 		assertThat(logicQuery.getQueryStatus()).isEqualTo(QueryStatus.complete);
     }
-/*
+
 	@Test
 	public void test_unifySolution()
 	{
@@ -81,18 +81,12 @@ public class LogicQueryTest
 		Solution solution = mock(Solution.class);
 	    SolutionPairer pairer = mock(SolutionPairer.class);
         logicQuery.pairer = pairer;
-		List<TermPair> pairList = new ArrayList<TermPair>();
 		Operand term1 = mock(Operand.class);
 		Term term2 = mock(Term.class);
 		when(term1.unifyTerm(term2, 1)).thenReturn(1);
-		TermPair termPair1 = new TermPair(term1, term2);
-		pairList.add(termPair1);
 		Operand term3 = mock(Operand.class);
 		Term term4 = mock(Term.class);
 		when(term3.unifyTerm(term4, 1)).thenReturn(1);
-		TermPair termPair2 = new TermPair(term3, term4);
-		pairList.add(termPair2);
-		when(pairer.getPairList()).thenReturn(pairList);
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(1);
 		OperandWalker walker = mock(OperandWalker.class);
@@ -108,7 +102,6 @@ public class LogicQueryTest
 		when(template2.getOperandWalker()).thenReturn(walker2);
 		assertThat(logicQuery.unifySolution(solution, template2)).isFalse();
 	}
-*/
 
 	@Test
 	public void test_iterate_empty_source()
@@ -154,7 +147,7 @@ public class LogicQueryTest
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
-		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+		when(template.unify(axiom, solution)).thenReturn(true);
 		final Iterator<Axiom> iterator = 	new Iterator<Axiom>(){
 
 			@Override
@@ -198,7 +191,7 @@ public class LogicQueryTest
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
-		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+		when(template.unify(axiom, solution)).thenReturn(true);
 		final Iterator<Axiom> iterator = 	new Iterator<Axiom>(){
 
 			@Override
@@ -242,7 +235,7 @@ public class LogicQueryTest
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
-		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+		when(template.unify(axiom, solution)).thenReturn(true);
 		final Iterator<Axiom> iterator = new Iterator<Axiom>(){
             int count = 0;
 			@Override
@@ -284,7 +277,7 @@ public class LogicQueryTest
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(false);
-		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+		when(template.unify(axiom, solution)).thenReturn(true);
 		final Iterator<Axiom> iterator = 	new Iterator<Axiom>(){
             int count = 0;
 			@Override
@@ -330,7 +323,7 @@ public class LogicQueryTest
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		when(template.getOperandWalker()).thenReturn(operandWalker);
 		Solution solution = new Solution();
-		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+		when(template.unify(axiom, solution)).thenReturn(true);
 		final Iterator<Axiom> iterator = 	new Iterator<Axiom>(){
             int count = 0;
 			@Override
@@ -371,7 +364,7 @@ public class LogicQueryTest
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
-		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+		when(template.unify(axiom, solution)).thenReturn(true);
 		final Iterator<Axiom> iterator = 	new Iterator<Axiom>(){
             int count = 0;
 			@Override
@@ -411,7 +404,7 @@ public class LogicQueryTest
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
-		when(axiom.unifyTemplate(template, solution)).thenReturn(false);
+		when(template.unify(axiom, solution)).thenReturn(false);
 		final Iterator<Axiom> iterator = 	new Iterator<Axiom>(){
             int count = 0;
 			@Override
@@ -452,7 +445,7 @@ public class LogicQueryTest
 		when(template.toString()).thenReturn("surface_area(km2)");
 		final Axiom axiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
-		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+		when(template.unify(axiom, solution)).thenReturn(true);
 		final Iterator<Axiom> iterator = 	new Iterator<Axiom>(){
 
 			@Override
@@ -496,7 +489,7 @@ public class LogicQueryTest
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
-		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+		when(template.unify(axiom, solution)).thenReturn(true);
 		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 		assertThat(logicQuery.iterate(solution, template)).isFalse();
@@ -522,7 +515,7 @@ public class LogicQueryTest
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
 		solution.put(NAME, solutionAxiom);
-		when(axiom.unifyTemplate(template, solution)).thenReturn(true);
+		when(template.unify(axiom, solution)).thenReturn(true);
 		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 		assertThat(logicQuery.iterate(solution, template)).isTrue();

@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
@@ -325,4 +326,35 @@ public class AxiomUtils
                 }};
             listMap.put(qualifiedListName, axiomIterable);
     }
+
+    /**
+     * Copy result axioms to supplied container
+     * @param axiomMap Container to receive axioms
+     */
+    public static Axiom copyAxiom(Entry<QualifiedName, ItemList<?>> entry, Map<QualifiedName, Axiom> axiomMap)
+    {
+        ItemList<?> itemList = entry.getValue();
+        // Create deep copy in case item list is cleared
+        Axiom axiom = null;
+        if (itemList.getItemClass().equals(Term.class))
+        {   // AxiomTermList contains backing axiom
+            AxiomTermList axiomTermList = (AxiomTermList)itemList;
+            axiom = new Axiom(entry.getKey().getName());
+            Axiom source = axiomTermList.getAxiom();
+            for (int i = 0; i < source.getTermCount(); i++)
+                axiom.addTerm(source.getTermByIndex(i));
+        }
+        else if (!itemList.getItemClass().equals(Axiom.class))
+        {   // Regular ItemList contains objects which are packed into axiom to return
+            axiom = new Axiom(entry.getKey().getName());
+            Iterator<?> iterator = itemList.getIterable().iterator();
+            while (iterator.hasNext())
+                axiom.addTerm(new Parameter(Term.ANONYMOUS, iterator.next()));
+        }
+        if (axiom != null)
+            // Use fully qualified key to avoid name collisions
+            axiomMap.put(itemList.getQualifiedName(), axiom);
+        return axiom;
+    }
+
 }

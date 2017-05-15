@@ -671,7 +671,7 @@ public class QueryParserTest
 		QuerySpec querySpec = new QuerySpec("Test");
 		KeyName keyName1 = new KeyName("city", "high_city");
 		querySpec.addKeyName(keyName1);
-        Template calcTemplate = parserAssembler.getTemplate("insert_sort");
+        Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("insert_sort");
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
         QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
@@ -686,7 +686,7 @@ public class QueryParserTest
  	    	//System.out.println(parserAssembler.getOperandMap().getItemList(QualifiedName.parseGlobalName("city_list")).toString());
  	    	//System.out.println();
  	    }
- 	    ItemList<AxiomTermList> cityList = (ItemList<AxiomTermList>) parserAssembler.getOperandMap().getItemList(QualifiedName.parseGlobalName("city_list"));
+ 	    ItemList<AxiomTermList> cityList = (ItemList<AxiomTermList>) parserAssembler.getListAssembler().getItemList(QualifiedName.parseGlobalName("city_list"));
  	    assertThat(cityList.getItem(0).getAxiom().toString()).isEqualTo("high_city(name=denver, altitude=5280)");
  	    assertThat(cityList.getItem(1).getAxiom().toString()).isEqualTo("high_city(name=flagstaff, altitude=6970)");
  	    assertThat(cityList.getItem(2).getAxiom().toString()).isEqualTo("high_city(name=addis ababa, altitude=8000)");
@@ -700,7 +700,7 @@ public class QueryParserTest
 		queryProgram.parseScript(INSERT_SORT_XPL);
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 		TestChainQueryExecuter queryExecuter = new TestChainQueryExecuter(new QueryParams(queryProgram.getGlobalScope(), new QuerySpec("test")));
-        Template calcTemplate = parserAssembler.getTemplate("insert_sort");
+        Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("insert_sort");
 		queryExecuter.chainCalculator(queryProgram.getGlobalScope(), null, calcTemplate);
 		queryExecuter.setSolution(new Solution());
 		queryExecuter.execute();
@@ -713,9 +713,9 @@ public class QueryParserTest
     public void test_simple_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(SIMPLE_CALCULATE);
-		assertThat(parserAssembler.getTemplate("increment_n").toString()).isEqualTo("increment_n(n, limit, increment_n1(?++n<limit))");
-		//System.out.println(parserAssembler.getTemplate("increment_n"));
-        Template calcTemplate = parserAssembler.getTemplate("increment_n");
+		assertThat(parserAssembler.getTemplateAssembler().getTemplate("increment_n").toString()).isEqualTo("increment_n(n, limit, increment_n1(?++n<limit))");
+		//System.out.println(parserAssembler.getTemplateAssembler().getTemplate("increment_n"));
+        Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
@@ -726,11 +726,11 @@ public class QueryParserTest
     public void test_simple_list_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(SIMPLE_LIST_CALCULATE);
-		assertThat(parserAssembler.getTemplate("increment_n")
+		assertThat(parserAssembler.getTemplateAssembler().getTemplate("increment_n")
 			.toString()).isEqualTo(
 				"increment_n(n, limit, increment_n1(number_list_0=n++ ... ?number_list_2<limit))");
-		//System.out.println(parserAssembler.getTemplate("increment_n"));
-        Template calcTemplate = parserAssembler.getTemplate("increment_n");
+		//System.out.println(parserAssembler.getTemplateAssembler().getTemplate("increment_n"));
+        Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
@@ -742,9 +742,9 @@ public class QueryParserTest
     public void test_simple_variable_index_list_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(SIMPLE_VARIABLE_INDEX_LIST_CALCULATE);
-		assertThat(parserAssembler.getTemplate("increment_n").toString()).isEqualTo("increment_n(n, i, limit, increment_n1(number_list_i++=n++ ... ?i<limit))");
-		//System.out.println(parserAssembler.getTemplate("increment_n"));
-        Template calcTemplate = parserAssembler.getTemplate("increment_n");
+		assertThat(parserAssembler.getTemplateAssembler().getTemplate("increment_n").toString()).isEqualTo("increment_n(n, i, limit, increment_n1(number_list_i++=n++ ... ?i<limit))");
+		//System.out.println(parserAssembler.getTemplateAssembler().getTemplate("increment_n"));
+        Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
@@ -756,11 +756,11 @@ public class QueryParserTest
     public void test_simple_list_length_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(SIMPLE_LIST_LENGTH_CALCULATE);
-		assertThat(parserAssembler.getTemplate("increment_n")
+		assertThat(parserAssembler.getTemplateAssembler().getTemplate("increment_n")
 				.toString()).isEqualTo(
 						"increment_n(n, i, limit, increment_n1(number_list_i++=n++ ... ?number_list_length<limit))");
-		//System.out.println(parserAssembler.getTemplate("increment_n"));
-        Template calcTemplate = parserAssembler.getTemplate("increment_n");
+		//System.out.println(parserAssembler.getTemplateAssembler().getTemplate("increment_n"));
+        Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
@@ -772,9 +772,9 @@ public class QueryParserTest
     public void test_factorial_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(FACTORIAL_CALCULATE);
-		assertThat(parserAssembler.getTemplate("factorial").toString()).isEqualTo("factorial(i, n, factorial, factorial1(factorial*=i ... ?i++<n))");
-		//System.out.println(parserAssembler.getTemplate("factorial").toString());
-        Template calcTemplate = parserAssembler.getTemplate("factorial");
+		assertThat(parserAssembler.getTemplateAssembler().getTemplate("factorial").toString()).isEqualTo("factorial(i, n, factorial, factorial1(factorial*=i ... ?i++<n))");
+		//System.out.println(parserAssembler.getTemplateAssembler().getTemplate("factorial").toString());
+        Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("factorial");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
@@ -786,9 +786,9 @@ public class QueryParserTest
     public void test_one_shot_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(ONE_SHOT_CALCULATE);
-		assertThat(parserAssembler.getTemplate("km2_to_mi2").toString()).isEqualTo("km2_to_mi2(km2, mi2, mi2=km2*0.3861)");
-		//System.out.println(parserAssembler.getTemplate("km2_to_mi2"));
-        Template calcTemplate = parserAssembler.getTemplate("km2_to_mi2");
+		assertThat(parserAssembler.getTemplateAssembler().getTemplate("km2_to_mi2").toString()).isEqualTo("km2_to_mi2(km2, mi2, mi2=km2*0.3861)");
+		//System.out.println(parserAssembler.getTemplateAssembler().getTemplate("km2_to_mi2"));
+        Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("km2_to_mi2");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate);
@@ -887,7 +887,7 @@ public class QueryParserTest
 		QueryProgram queryProgram = new QueryProgram(provideProviderManager());
 		queryProgram.parseScript(CITY_EVELATIONS);
 	    ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
-	    Template highCities = parserAssembler.getTemplate("high_city");
+	    Template highCities = parserAssembler.getTemplateAssembler().getTemplate("high_city");
 	    highCities.setKey("city");
         QuerySpec querySpec = new QuerySpec("TEST");
 		KeyName keyName = new KeyName("city", "high_city");
@@ -921,8 +921,8 @@ public class QueryParserTest
 	public void test_GreekBusiness() throws Exception
 	{
 	    final ParserAssembler parserAssembler = openScript(GREEK_BUSINESS);
-	    Template charge = parserAssembler.getTemplate("charge");
-	    Template customer = parserAssembler.getTemplate("customer");
+	    Template charge = parserAssembler.getTemplateAssembler().getTemplate("charge");
+	    Template customer = parserAssembler.getTemplateAssembler().getTemplate("customer");
 	    List<Template> templateList = new ArrayList<Template>();
 	    templateList.add(customer);
 	    templateList.add(charge);
@@ -957,8 +957,8 @@ public class QueryParserTest
     public void test_GreekBusiness2() throws Exception
     {
         final ParserAssembler parserAssembler = openScript(GREEK_BUSINESS2);
-        Template charge = parserAssembler.getTemplate("charge");
-        Template customer = parserAssembler.getTemplate("customer");
+        Template charge = parserAssembler.getTemplateAssembler().getTemplate("charge");
+        Template customer = parserAssembler.getTemplateAssembler().getTemplate("customer");
         List<Template> templateList = new ArrayList<Template>();
         templateList.add(charge);
         templateList.add(customer);
@@ -993,8 +993,8 @@ public class QueryParserTest
 	public void test_NamedGreekBusiness() throws Exception
 	{
 	    final ParserAssembler parserAssembler = openScript(NAMED_GREEK_BUSINESS);
-	    Template charge = parserAssembler.getTemplate("charge");
-	    Template customer = parserAssembler.getTemplate("customer");
+	    Template charge = parserAssembler.getTemplateAssembler().getTemplate("charge");
+	    Template customer = parserAssembler.getTemplateAssembler().getTemplate("customer");
 	    List<Template> templateList = new ArrayList<Template>();
 	    templateList.add(customer);
 	    templateList.add(charge);
@@ -1029,7 +1029,7 @@ public class QueryParserTest
 	public void testAgriculturalLand() throws Exception
 	{
 		ParserAssembler parserAssembler = openScript(AGRICULTURAL_LAND);
-	    Template more_agriculture_y1990_y2010 = parserAssembler.getTemplate("agri_10y");
+	    Template more_agriculture_y1990_y2010 = parserAssembler.getTemplateAssembler().getTemplate("agri_10y");
 	    more_agriculture_y1990_y2010.setKey("Data");
 	    AxiomSource agriSource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("Data"));
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(agriSource, Collections.singletonList(more_agriculture_y1990_y2010));
@@ -1069,7 +1069,7 @@ public class QueryParserTest
 
  	    agriculturalQuery = new TestQueryExecuter(queryParams2);
 	    more_agriculture_y1990_y2010.backup(false);
-	    Template surface_area = parserAssembler.getTemplate("surface_area_increase");
+	    Template surface_area = parserAssembler.getTemplateAssembler().getTemplate("surface_area_increase");
 	    surface_area.setKey("surface_area");
 	    agriculturalQuery.chain(QueryExecuterAdapter.ensembleFromSource(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("surface_area"))), Collections.singletonList(surface_area));
 		while (agriculturalQuery.execute())
@@ -1106,7 +1106,7 @@ public class QueryParserTest
 	public void test_regex() throws ParseException, IOException
 	{
 		ParserAssembler parserAssembler = openScript(LEXICAL_SEARCH);
-		Template inWordsTemplate = parserAssembler.getTemplate("in_words");
+		Template inWordsTemplate = parserAssembler.getTemplateAssembler().getTemplate("in_words");
 		inWordsTemplate.setKey("Lexicon");
 		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\, Definition)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
@@ -1128,7 +1128,7 @@ public class QueryParserTest
 	{
 		ParserAssembler parserAssembler = openScript(REGEX_GROUPS);
 		//
-		Template dictionaryTemplate = parserAssembler.getTemplate("dictionary");
+		Template dictionaryTemplate = parserAssembler.getTemplateAssembler().getTemplate("dictionary");
 		dictionaryTemplate.setKey("Lexicon");
 		LexiconSource lexiconSource = new LexiconSource();
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(dictionaryTemplate));
@@ -1159,7 +1159,7 @@ public class QueryParserTest
 	public void test_mega_city() throws ParseException, IOException
 	{
 		ParserAssembler parserAssembler = openScript(MEGA_CITY1);
-		Template asia_top_ten = parserAssembler.getTemplate("asia_top_ten");
+		Template asia_top_ten = parserAssembler.getTemplateAssembler().getTemplate("asia_top_ten");
 		asia_top_ten.setKey("mega_city");
 	    AxiomSource megacitySource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("mega_city"));
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(megacitySource, Collections.singletonList(asia_top_ten));
@@ -1176,7 +1176,7 @@ public class QueryParserTest
 		reader.close();
 		
 		parserAssembler = openScript(MEGA_CITY2);
-		Template american_megacities = parserAssembler.getTemplate("america_megacities");
+		Template american_megacities = parserAssembler.getTemplateAssembler().getTemplate("america_megacities");
 		american_megacities.setKey("mega_city");
 		megacitySource = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("mega_city"));
         QueryExecuterAdapter adapter2 = new QueryExecuterAdapter(megacitySource, Collections.singletonList(american_megacities));
@@ -1198,7 +1198,7 @@ public class QueryParserTest
 	public void test_regex2() throws ParseException, IOException
 	{
 		ParserAssembler parserAssembler = openScript(NOUN_LEXICAL_SEARCH);
-		Template inWordsTemplate = parserAssembler.getTemplate("in_words");
+		Template inWordsTemplate = parserAssembler.getTemplateAssembler().getTemplate("in_words");
 		inWordsTemplate.setKey("Lexicon");
 		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\, Definition \\^n\\)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
@@ -1256,7 +1256,7 @@ public class QueryParserTest
 				if (orderSet.contains(keyword))
 				{
 					String templateName = "order_" + keyword;
-					Template template = parserAssembler.getTemplate(templateName);
+					Template template = parserAssembler.getTemplateAssembler().getTemplate(templateName);
 					template.setKey("order");
 				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("order")), Collections.singletonList(template));
 				    TestQueryExecuter orderQuery = new TestQueryExecuter(adapter.getQueryParams());
@@ -1266,7 +1266,7 @@ public class QueryParserTest
 				if (familySet.contains(keyword))
 				{
 					String templateName = "family_" + keyword;
-					Template template = parserAssembler.getTemplate(templateName);
+					Template template = parserAssembler.getTemplateAssembler().getTemplate(templateName);
 					template.setKey("family");
 				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("family")), Collections.singletonList(template));
 				    TestQueryExecuter orderQuery = new TestQueryExecuter(adapter.getQueryParams());
@@ -1276,7 +1276,7 @@ public class QueryParserTest
 				if (birdSet.contains(keyword))
 				{
 					String templateName = "bird_" + keyword;
-					Template template = parserAssembler.getTemplate(templateName);
+					Template template = parserAssembler.getTemplateAssembler().getTemplate(templateName);
 					template.setKey("bird");
 				    QueryExecuterAdapter adapter = new QueryExecuterAdapter(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("bird")), Collections.singletonList(template));
 				    TestQueryExecuter orderQuery = new TestQueryExecuter(adapter.getQueryParams());

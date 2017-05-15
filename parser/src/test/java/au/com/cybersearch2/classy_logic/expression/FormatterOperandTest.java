@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -41,7 +40,6 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class FormatterOperandTest
 {
-    @Ignore // TODO - Fix now compiled with JDK6
 	@Test
 	public void testFormatWorldNumber() throws IOException
 	{

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -52,14 +53,15 @@ public class ScopeContext
 	{
 		this.scope = scope;
 		this.isFunctionScope = isFunctionScope;
-		OperandMap operandMap = scope.getParserAssembler().getOperandMap();
+        ParserAssembler parserAssembler = scope.getParserAssembler();
+        OperandMap operandMap = parserAssembler.getOperandMap();
 		operandValueMap = operandMap.getOperandValues();
-		emptyListNames = operandMap.getEmptyListNames();
+		emptyListNames = parserAssembler.getListAssembler().getEmptyListNames();
 		if (!isFunctionScope && !QueryProgram.GLOBAL_SCOPE.equals(scope.getName()))
 		{
 			OperandMap globalOperandMap = scope.getGlobalScope().getParserAssembler().getOperandMap();
 			globalOperandValueMap = globalOperandMap.getOperandValues();
-	        emptyGlobalListNames = globalOperandMap.getEmptyListNames();
+	        emptyGlobalListNames = scope.getGlobalListAssembler().getEmptyListNames();
 		}
 	}
 
@@ -68,15 +70,16 @@ public class ScopeContext
 	 */
 	public void resetScope()
 	{
-		OperandMap operandMap = scope.getParserAssembler().getOperandMap();
+	    ParserAssembler parserAssembler = scope.getParserAssembler();
+		OperandMap operandMap = parserAssembler.getOperandMap();
 		operandMap.setOperandValues(operandValueMap);
-		operandMap.clearLists(emptyListNames);
-		scope.getParserAssembler().clearScopeAxioms();
+		parserAssembler.getListAssembler().clearLists(emptyListNames);
+		parserAssembler.clearScopeAxioms();
 		if (globalOperandValueMap != null)
 		{
 			OperandMap globalOperandMap = scope.getGlobalScope().getParserAssembler().getOperandMap();
 			globalOperandMap.setOperandValues(operandValueMap);
-			globalOperandMap.clearLists(emptyGlobalListNames);
+			scope.getGlobalListAssembler().clearLists(emptyGlobalListNames);
 			scope.getGlobalParserAssembler().clearScopeAxioms();
 		}
 		// Restore Global scope locale which may be changed when used within another scope 

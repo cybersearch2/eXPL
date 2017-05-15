@@ -57,8 +57,7 @@ public class AxiomContainerOperand extends ListVariableOperand implements Parser
     {
         if (!listName.getScope().isEmpty() && (parserAssembler.getScope().findScope(listName.getScope()) == null))
         {
-            // TODO - return null from getAxiomTermList() if list not found
-            final AxiomTermList itemList = parserAssembler.getAxiomTermList(listName);
+            final AxiomTermList itemList = parserAssembler.getListAssembler().getAxiomTerms(listName);
             if (itemList.getAxiomTermNameList().size() == 1)
             {
                 // Dereference single term of returned axiom
@@ -112,7 +111,7 @@ public class AxiomContainerOperand extends ListVariableOperand implements Parser
                 expression = var;
                 return;
             }
-            expression = parserAssembler.getOperandMap().newListVariableInstance(itemList, indexExpression);
+            expression = parserAssembler.getListAssembler().newListVariableInstance(itemList, indexExpression);
         }
         else
             expression = newListVariableInstance(parserAssembler);

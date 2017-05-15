@@ -22,9 +22,9 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * Unifier
- * Attempts to pair one operand with a term and add the combination to a supplied list.
- * The term will be an item from a given axiom or optionally from an axiom selected
- * from a given solution.
+ * Attempts to unify one operand with a term.
+ * For an operand in the template context, the term is selected from a supplied axiom,
+ * otherwise the operand is unified with a term selected from a solution axiom, if available.
  * @author Andrew Bowley
  * 9May,2017
  */
@@ -32,13 +32,20 @@ public class Unifier implements OperandVisitor
 {
     /** The template containing operands to be unified */
     private Template template;
-    /** Int array mapping operand indexes to nmae=matched axiom indexes */
+    /** Int array mapping operand indexes to name=matched axiom indexes */
     private int[] termMapping;
     /** Axiom reduced to a TermList object */
     private TermList<Term> axiom;
     /** Optional solution pairer, used if solution keyset is non-empty */
     private SolutionPairer solutionPairer;
 
+    /**
+     * Construct Unifier object
+     * @param template Template performing unification
+     * @param axiom Axiom performing unification
+     * @param termMapping Int array mapping operand indexes to name=matched axiom indexes
+     * @param solution Contains result of query up to this stage
+     */
     public Unifier(
         Template template, 
         TermList<Term> axiom, 
@@ -49,9 +56,13 @@ public class Unifier implements OperandVisitor
         this.axiom = axiom;
         this.termMapping = termMapping;
         if (solution.keySet().size() > 0)
-            solutionPairer = new SolutionPairer(solution, template);
+            solutionPairer = template.getSolutionPairer(solution);
     }
-    
+ 
+    /**
+     * next
+     * @see au.com.cybersearch2.classy_logic.interfaces.OperandVisitor#next(au.com.cybersearch2.classy_logic.interfaces.Operand, int)
+     */
     @Override
     public boolean next(Operand operand, int depth)
     {
@@ -59,32 +70,39 @@ public class Unifier implements OperandVisitor
         {
             int index = operand.getArchetypeIndex();
             if (index != -1)
-            {
+            {   // Operand in template context
                 // Pair by mapped index 
                 if (index >= termMapping.length)
-                    // This is not expected to happen
+                    // Paranoid check - This is not expected to happen
                     return true;
                 int pairIndex = termMapping[index];
                 if (pairIndex != -1)
                     return pairTerms(operand, axiom.getTermByIndex(pairIndex));
             }
-            if (solutionPairer != null)
+            else if (solutionPairer != null)
+                // Operand in another template context and solution available for unification
                 return solutionPairer.next(operand, 0);
         }
         return true;
     }
 
-    private boolean pairTerms(Operand operand, Term otherTerm)
+    /**
+     * Unify operand with term
+     * @param operand Operand to unify, if empty, else compare values
+     * @param term Term to unify
+     * @return flag set true if unification suceeded
+     */
+    private boolean pairTerms(Operand operand, Term term)
     {
         // Pair first term to other term if first term is empty
         if (operand.isEmpty())
         {
            // template.add(operand, otherTerm);
-            operand.unifyTerm(otherTerm, template.getId());
+            operand.unifyTerm(term, template.getId());
             return true;
         }
         // Check for exit case: terms in the same name space have different values
         else 
-            return operand.getValue().equals(otherTerm.getValue());
+            return operand.getValue().equals(term.getValue());
     }
 }

@@ -39,7 +39,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
@@ -49,7 +48,6 @@ import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.compile.ParserResources;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -70,12 +68,6 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class ScopeQueryParserTest 
 {
-    public interface ApplicationComponent
-    {
-        void inject(ParserAssembler.ExternalAxiomSource externalAxiomSource);
-        void inject(ParserResources parserResources);
-    }
-
     static final String CITY_EVELATIONS =
 	    "include \"named_cities.xpl\";\n" + 
 	    "template high_city(string name, altitude ? altitude > 5000);\n" +
@@ -479,7 +471,7 @@ public class ScopeQueryParserTest
 		KeyName keyName = keynameList.get(0);
 		assertThat(keyName.getAxiomKey()).isEqualTo(new QualifiedName("city"));
 		assertThat(keyName.getTemplateName().getTemplate()).isEqualTo("high_city");
-		assertThat(globalScope.getParserAssembler().getTemplate("high_city")).isNotNull();
+		assertThat(globalScope.getParserAssembler().getTemplateAssembler().getTemplate("high_city")).isNotNull();
 		// TODO - fix with QualifiedNames
 		//assertThat(parserAssembler.getAxiomSource("city")).isNull();
 		//assertThat(queryProgram.getGlobalScope().getParserAssembler().getAxiomSource("city")).isNotNull();
@@ -553,7 +545,6 @@ public class ScopeQueryParserTest
 		queryProgram.executeQuery("greek_construction.greek_business", solutionHandler);
 	}
 
-	@Ignore // Broken with new unification code in Template
 	@Test 
 	public void test_birds() throws ParseException, IOException
 	{

@@ -37,7 +37,9 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * Template
- * Unifies with Axioms with same name. Each term is matched on name at each unification iteration.
+ * A collection of operands which evaulate and produce a solution axiom. 
+ * A template performs unification which it supports by analysing the archetypes of axioms with which it is paired.
+ * Template variants are inner template, choice and replicate which support particular language features 
  * Every Template has a unique ID to facilitate partial backup. 
  * @author Andrew Bowley
  * 30 Nov 2014
@@ -55,16 +57,18 @@ public class Template extends TermList<Operand>
     };
 
     public static List<String>  EMPTY_NAMES_LIST;
+    public static List<Operand> EMPTY_OPERAND_LIST;
+    
     /** Unique identity generator */
     static protected AtomicInteger referenceCount;
-    public static List<Operand> EMPTY_OPERAND_LIST;
-
+ 
     static
     {
         referenceCount = new AtomicInteger();
         EMPTY_OPERAND_LIST = Collections.emptyList();
         EMPTY_NAMES_LIST = Collections.emptyList();
     }
+    
     /** Qualified name of template */
     protected QualifiedName qname;
     /** Qualified name of context - different from qname for inner templates and replicates */
@@ -83,7 +87,7 @@ public class Template extends TermList<Operand>
     protected boolean isChoice;
     /** Flag true if inner template */
     protected boolean isInnerTemplate;
-    /** Flag true if replicate. Required because terms are re-cycled instead of preserved after evaluation. */
+    /** Flag true if replicate. Required because terms are reused instead of preserved after evaluation. */
     protected boolean isReplicate;
     /** Head of call stack */
     protected CallContext headCallContext;
@@ -101,13 +105,19 @@ public class Template extends TermList<Operand>
      */
     public Template(Template master, QualifiedName qname) 
     {
-        this((TemplateArchetype) master.getArchetype(), master.getQualifiedName());
+        // Replicates share the master template archetype
+        this((TemplateArchetype) master.getArchetype());
+        // Context name is now set as qualified name of master template.
+        // This template qualified name must be set to given value.
+        // Note this is the only case where template qualified name and 
+        // context name happen to be in different scopes.
         this.qname = qname;
         key = master.key;
         this.isCalculator = master.isCalculator;
         this.isChoice = master.isChoice;
         this.isInnerTemplate = master.isInnerTemplate;
         isReplicate = true;
+        // Replicates share the terms of the master template
         for (Operand operand: master.termList)
             termList.add(operand);
     }
@@ -339,7 +349,6 @@ public class Template extends TermList<Operand>
 	 * Backup from last unification.
 	 * @param partial Flag to indicate backup to before previous unification or backup to start
 	 * @return Flag to indicate if this Structure is ready to continue unification
-	 * @see Axiom#unifyTemplate(Template other, Solution solution)
 	 */
 	public boolean backup(boolean partial)
 	{
@@ -348,7 +357,6 @@ public class Template extends TermList<Operand>
 			for (Term term: termList)
 			{
 				boolean backupPerformed = (partial ? term.backup(id) : term.backup(0));
-				//System.out.println("Backup " + id + " " + backupPerformed);
 				if (backupPerformed)
 					isMutable = true;
 			}
@@ -403,6 +411,13 @@ public class Template extends TermList<Operand>
         return unificationComplete;
     }
 
+    public SolutionPairer getSolutionPairer(Solution solution)
+    {
+        return (contextName == qname) ? 
+            new SolutionPairer(solution, id, contextName) :
+            new SolutionPairer(solution, id, qname, contextName);
+
+    }
     /**
 	 * Returns an axiom containing the values of this template and 
 	 * having same key and name as this template's name.

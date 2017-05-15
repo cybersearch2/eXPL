@@ -311,12 +311,12 @@ public class ParserContext
      */
     public QualifiedName getContextName()
     {
-        return operandMap.getQualifiedContextname();
+        return parserAssembler.getQualifiedContextname();
     }
     
     public void setContextName(QualifiedName qualifiedName)
     {
-        operandMap.setQualifiedContextname(qualifiedName);
+        parserAssembler.setQualifiedContextname(qualifiedName);
     }
     
     /**
@@ -406,7 +406,7 @@ public class ParserContext
     {
         StringBuilder builder = new StringBuilder("choice ");
         builder.append(qualifiedAxionName).append('(');
-        List<String> termNames = parserAssembler.getAxiomTermNameList(qualifiedAxionName);
+        List<String> termNames = parserAssembler.getAxiomAssembler().getAxiomTermNameList(qualifiedAxionName);
         boolean firstTime = true;
         for (String termname: termNames)
         {

@@ -23,7 +23,8 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * SolutionVisitor
+ * SolutionPairer
+ * Attempts to pair an operand to a solution term, and if successful, unifies them
  * @author Andrew Bowley
  * 20 Dec 2014
  */
@@ -31,23 +32,27 @@ public class SolutionPairer implements OperandVisitor
 {
     /** Map of Axioms selectable by Axiom name */
 	protected Solution solution;
-    /** Qualified name for local context */
-    protected Template template;
+    /** Template id for unification */
+    protected int id;
+    /** Template context name or names. The first name must be the template qualified name */
+    protected QualifiedName[] contextNames;
 	
 	/**
 	 * Construct SolutionPairer object
-     * @param solution Container to aggregate results
-     * @param localContext Qualified name of enclosing context
+     * @param solution Contains query solution up to current stage
+     * @param id Template id for unification
+     * @param contextNames Template context name or names. The first name must be the template qualified name.
 	 */
-	public SolutionPairer(Solution solution, Template template) 
+	public SolutionPairer(Solution solution, int id, QualifiedName... contextNames) 
 	{
         this.solution = solution;
-        this.template = template;
+        this.id = id;
+        this.contextNames = contextNames;
 	}
 
 	/**
-	 * Update solution and reset pair list
-	 * @param solution Container to aggregate results
+	 * Set solution
+	 * @param solution Contains query solution up to current stage
 	 */
 	public void setSolution(Solution solution)
 	{
@@ -55,56 +60,80 @@ public class SolutionPairer implements OperandVisitor
 	}
 
 	/**
-	 * Visit next term
+	 * Visit next operand to pair and unify with a corresponding solution term
 	 * @see au.com.cybersearch2.classy_logic.pattern.AxiomPairer#next(au.com.cybersearch2.classy_logic.interfaces.Operand, int)
 	 */
 	@Override
 	public boolean next(Operand operand, int depth) 
 	{
+	    // Solution pairing only applies to operands with two or three part names
 	    QualifiedName qname = operand.getQualifiedName();
 	    if (qname.getTemplate().isEmpty() || qname.getName().isEmpty())
 	        return true;
-	    String templateKey = solution.getCurrentKey();
-	    QualifiedName localContext = template.getQualifiedName();
-	    boolean inSameSpace = localContext.inSameSpace(qname);
-	    if (!inSameSpace) 
-	    {
- 	        if (!localContext.getScope().isEmpty())
+	    // Determine if operand in same name space as template context. Inner templates and replcates have 2 context names.
+	    boolean inSameSpace = inSameSpace(operand);
+	    // Prepare to hold up to 2 keys for solution axiom search
+	    String[] keys = new String[2];
+	    if (inSameSpace) 
+	        // An operand in the template context can be paired with a solution from the previous query step, obtained using the "current key" of the soution
+	        keys[0] = solution.getCurrentKey();
+	    else
+	    {   // An operand belonging to another template can pair by template name and scope, which can be the operand's scope or the context scope, if not global.
+	        String contextScope = contextNames[0].getScope();
+            String operandKey = QualifiedTemplateName.toString(qname.getScope(), qname.getTemplate());
+ 	        if (contextScope.isEmpty())
+ 	            keys[0] = operandKey;
+ 	        else
 	        {
-	            String localTemplateKey = QualifiedTemplateName.toString(localContext.getScope(), qname.getTemplate());
-	            Axiom axiom = solution.getAxiom(localTemplateKey);
-	            if (axiom != null)
-	            {
-	                Term otherTerm = axiom.getTermByName(qname.getName());
-	                if (otherTerm != null)
-	                    return processKey(operand, otherTerm, inSameSpace);
-	                else
-	                    return true;
-	            }
+	            keys[0] = QualifiedTemplateName.toString(contextScope, qname.getTemplate());
+	            keys[1] = operandKey;
 	        }
-            templateKey = QualifiedTemplateName.toString(qname.getScope(), qname.getTemplate());
 	    }
-	    Axiom axiom = solution.getAxiom(templateKey);
-		if (axiom != null)
-		{
-            Term otherTerm = axiom.getTermByName(qname.getName());
-            if (otherTerm != null)
-                return processKey(operand, otherTerm, inSameSpace);
-		}
+	    for (String key: keys)
+	    {
+	        if (key == null)
+	            break;
+    	    Axiom axiom = solution.getAxiom(key);
+    		if (axiom != null)
+    		{
+                Term otherTerm = axiom.getTermByName(qname.getName());
+                if (otherTerm != null)
+                    return processKey(operand, otherTerm, inSameSpace);
+                return true;
+    		}
+	    }
 		return true;
 	}
 
+	/**
+	 * Process operand paired to solution term
+	 * @param operand The operand to unify
+	 * @param term The term to unify
+	 * @param inSameSpace Flag set true if operand belongs to same name space as template context
+	 * @return boolean
+	 */
 	private boolean processKey(Operand operand, Term term, boolean inSameSpace)
     {   
-        // Solution has Axiom with key name
-        if (term != null)
-        { 
-            if (operand.isEmpty())
-                // Unify with Solution term
-                operand.unifyTerm(term, template.getId());
-            else if (inSameSpace)
-                return operand.getValue().equals(term.getValue());
-        }
+        if (operand.isEmpty())
+            // Unify with Solution term
+            operand.unifyTerm(term, id);
+        else if (inSameSpace)
+            // Terminate this iteration if operand and term have mis-matched values
+            return operand.getValue().equals(term.getValue());
         return true;
     }
+
+	/**
+	 * Returns flag set true if operand is in the same name space as template which contains it
+	 * @param operand The operand to check
+	 * @return boolean
+	 */
+    private boolean inSameSpace(Operand operand)
+    {
+        for (QualifiedName contextName: contextNames)
+            if (contextName.inSameSpace(operand.getQualifiedName())) 
+                return true;
+        return false;
+    }
+
 }

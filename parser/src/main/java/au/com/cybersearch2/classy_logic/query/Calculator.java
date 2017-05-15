@@ -123,14 +123,14 @@ public class Calculator implements SolutionFinder
 		boolean unificationSuccess = true;
 		if ((axiom != null) && (axiom.getTermCount() > 0))
 		{
-			if (!axiom.unifyTemplate(template, solution))
+			if (!template.unify(axiom, solution))
 				unificationSuccess = false;
 			else
 			{   // Unify enclosed templates which will participate in ensuing evaluation
 				Template chainTemplate = template.getNext();
 				while (chainTemplate != null)
 				{
-					axiom.unifyTemplate(chainTemplate, solution);
+				    chainTemplate.unify(axiom , solution);
 					chainTemplate = chainTemplate.getNext();
 				}
 			}
@@ -196,7 +196,7 @@ public class Calculator implements SolutionFinder
 		if (solution.size() > 0)
 		{
 			if (pairer == null)
-				pairer = new SolutionPairer(solution, template);
+				pairer = template.getSolutionPairer(solution);
 			else
 				pairer.setSolution(solution);
 			Template chainTemplate = template;

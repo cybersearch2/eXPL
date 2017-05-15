@@ -23,7 +23,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.compile.AxiomAssembler;
+import au.com.cybersearch2.classy_logic.compile.ListAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.TemplateAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
@@ -181,11 +184,13 @@ public class Scope
            Template logicTemplate = findTemplate(qualifiedTemplateName);
            if ((logicTemplate == null) && !getAlias().isEmpty())
                // Use global scope template if scope specified
-               logicTemplate = getGlobalParserAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, axiomName));
+               logicTemplate = getGlobalTemplateAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, axiomName));
            if (logicTemplate != null)
                return headQuerySpec;
            // Create new logic query template which will populated with terms to match axiom terms at start of query
-           logicTemplate = parserAssembler.createTemplate(qualifiedTemplateName, false);
+           logicTemplate = 
+               parserAssembler.getTemplateAssembler()
+                   .createTemplate(qualifiedTemplateName, false);
            logicTemplate.setKey(axiomName);
            return headQuerySpec;
         }
@@ -299,7 +304,7 @@ public class Scope
         AxiomSource axiomSource = parserAssembler.getAxiomSource(axiomKey);
         if (axiomSource != null)
             return axiomSource;
-        QualifiedName qname = QualifiedName.parseName(axiomKey.getName(), parserAssembler.getOperandMap().getQualifiedContextname());
+        QualifiedName qname = QualifiedName.parseName(axiomKey.getName(), parserAssembler.getQualifiedContextname());
         axiomSource = parserAssembler.getAxiomSource(qname);
         if ((axiomSource == null) && !qname.getTemplate().isEmpty())
         {
@@ -321,7 +326,7 @@ public class Scope
     public boolean isTemplateName(String templateName)
     {
         boolean isTemplateKey = false;
-        for (QualifiedName qame: parserAssembler.getTemplateNames())
+        for (QualifiedName qame: parserAssembler.getTemplateAssembler().getTemplateNames())
             if (qame.getTemplate().equals(templateName))
             {
                 isTemplateKey = true;
@@ -329,7 +334,7 @@ public class Scope
             }
         if (!isTemplateKey && !name.equals(QueryProgram.GLOBAL_SCOPE))
         {
-            for (QualifiedName qame: getGlobalParserAssembler().getTemplateNames())
+            for (QualifiedName qame: getGlobalTemplateAssembler().getTemplateNames())
                 if (qame.getTemplate().equals(templateName))
                 {
                     isTemplateKey = true;
@@ -349,7 +354,7 @@ public class Scope
         Template template = findTemplate(templateName);
         if ((template == null) && !templateName.getScope().isEmpty())
             // Use global scope template if scope specified
-            template = getGlobalParserAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, templateName.getTemplate()));
+            template = getGlobalTemplateAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, templateName.getTemplate()));
         if (template == null)
             throw new IllegalArgumentException("Template \"" + templateName.toString() + "\" does not exist");
         return template;
@@ -365,14 +370,14 @@ public class Scope
         String scopeName = templateName.getScope();
         if (!scopeName.isEmpty() && (scopeMap.get(scopeName) == null))
             throw new ExpressionException("Scope \"" + scopeName + "\"  in template key \"" + templateName.toString() + "\" is not found");
-        Template template = parserAssembler.getTemplate(templateName);
+        Template template = parserAssembler.getTemplateAssembler().getTemplate(templateName);
         if ((template == null) && templateName.getScope().isEmpty())
         {
             QualifiedName localname = new QualifiedTemplateName(name, templateName.getTemplate());
-            template = parserAssembler.getTemplate(localname);
+            template = parserAssembler.getTemplateAssembler().getTemplate(localname);
         }
         if (template == null)
-            template = getGlobalParserAssembler().getTemplate(templateName);
+            template = getGlobalTemplateAssembler().getTemplate(templateName);
         if (template == null)
         {   // Create template for resource binding, if one exists
             AxiomProvider axiomProvider = null;
@@ -403,19 +408,25 @@ public class Scope
     public Map<QualifiedName, List<AxiomListener>> getAxiomListenerMap()
     {
         Map<QualifiedName, List<AxiomListener>> axiomListenerMap = null;
-        if ((!name.equals(QueryProgram.GLOBAL_SCOPE)) && (getGlobalParserAssembler().getAxiomListenerMap().size() > 0))
-            axiomListenerMap = getGlobalParserAssembler().getAxiomListenerMap();
-        if (parserAssembler.getAxiomListenerMap().size() > 0)
+        if (!name.equals(QueryProgram.GLOBAL_SCOPE))
+        {
+            ListAssembler globalListAssembler = getGlobalListAssembler(); 
+            if (globalListAssembler.getAxiomListenerMap().size() > 0)
+                axiomListenerMap = globalListAssembler.getAxiomListenerMap();
+        }
+        Map<QualifiedName, List<AxiomListener>> localListenerMap = 
+            parserAssembler.getListAssembler().getAxiomListenerMap();
+        if (localListenerMap.size() > 0)
         {
             if (axiomListenerMap != null)
             {
                 Map<QualifiedName, List<AxiomListener>> newAxiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
                 newAxiomListenerMap.putAll(axiomListenerMap);
                 axiomListenerMap = newAxiomListenerMap;
-                axiomListenerMap.putAll(parserAssembler.getAxiomListenerMap());
+                axiomListenerMap.putAll(localListenerMap);
             }
             else
-                axiomListenerMap = parserAssembler.getAxiomListenerMap();
+                axiomListenerMap = localListenerMap;
         }
         return axiomListenerMap == null ? null : Collections.unmodifiableMap(axiomListenerMap);
     }
@@ -429,14 +440,7 @@ public class Scope
     {
         // Look first in local scope, then if not found, try global scope
         String scopeName = name.equals(QueryProgram.GLOBAL_SCOPE) ? QualifiedName.EMPTY : name;
-        QualifiedName qualifiedListName = new QualifiedName(scopeName, listName);
-        ItemList<?> itemList = parserAssembler.getOperandMap().getItemList(qualifiedListName);
-        if ((itemList == null) && !scopeName.isEmpty())
-        {
-            qualifiedListName = new QualifiedName(listName);
-            itemList = getGlobalParserAssembler().getOperandMap().getItemList(qualifiedListName);
-        }
-        return itemList;
+        return parserAssembler.getListAssembler().getItemList(scopeName, listName);
     }
 
     /**
@@ -465,7 +469,7 @@ public class Scope
     public Map<QualifiedName, Iterable<Axiom>> getListMap() 
     {
         Map<QualifiedName, Iterable<Axiom>> listMap = new HashMap<QualifiedName, Iterable<Axiom>>();
-        parserAssembler.copyLists(listMap);
+        parserAssembler.getListAssembler().copyLists(listMap);
         return listMap;
     }
 
@@ -478,11 +482,11 @@ public class Scope
         Map<QualifiedName, Axiom> axiomMap = new HashMap<QualifiedName, Axiom>();
         if (!name.equals(QueryProgram.GLOBAL_SCOPE))
         {
-            getGlobalParserAssembler().getOperandMap().copyAxioms(axiomMap);
-            parserAssembler.getOperandMap().copyAxioms(axiomMap);
+            getGlobalListAssembler().copyAxioms(axiomMap);
+            parserAssembler.getListAssembler().copyAxioms(axiomMap);
         }
         else
-            parserAssembler.getOperandMap().copyAxioms(axiomMap);
+            parserAssembler.getListAssembler().copyAxioms(axiomMap);
         return axiomMap;
     }
 
@@ -600,6 +604,33 @@ public class Scope
     }
 
     /**
+     * Returns ParserAssembler belonging to the global scope
+     * @return ParserAssembler object
+     */
+    public ListAssembler getGlobalListAssembler()
+    {
+        return getGlobalParserAssembler().getListAssembler();
+    }
+
+    /**
+     * Returns TemplateAssembler belonging to the global scope
+     * @return TemplateAssembler object
+     */
+    public TemplateAssembler getGlobalTemplateAssembler()
+    {
+        return getGlobalParserAssembler().getTemplateAssembler();
+    }
+
+    /**
+     * Returns ParserAssembler belonging to the global scope
+     * @return ParserAssembler object
+     */
+    public AxiomAssembler getGlobalAxiomAssembler()
+    {
+        return getGlobalParserAssembler().getAxiomAssembler();
+    }
+
+   /**
      * Create placeholder axiom with "unknown" items
      * @param axiomName
      * @param termNameList List of term names
@@ -621,15 +652,16 @@ public class Scope
     private void addScopeList(Map<String, Object> properties)
     {   // Add axiom to ParserAssembler
         QualifiedName qname = new QualifiedName(name, SCOPE);
-        List<Axiom> axiomList = parserAssembler.getAxiomList(qname);
+        List<Axiom> axiomList = parserAssembler.getListAssembler().getAxiomItems(qname);
         AxiomTermList localList = null;
         Axiom localAxiom = null;
         if (axiomList == null)
         {
-            parserAssembler.createAxiom(qname);
+            parserAssembler.getListAssembler().createAxiomItemList(qname);
+            AxiomAssembler axiomAssembler = parserAssembler.getAxiomAssembler();
             for (String termName: properties.keySet())
-                parserAssembler.addAxiom(qname, new Parameter(termName, properties.get(termName)));
-            localAxiom = parserAssembler.saveAxiom(qname);
+                axiomAssembler.addAxiom(qname, new Parameter(termName, properties.get(termName)));
+            localAxiom = axiomAssembler.saveAxiom(qname);
             localList = new AxiomTermList(qname, qname);
         }
         else
@@ -643,12 +675,12 @@ public class Scope
                 else
                     localAxiom.addTerm(new Parameter(termName, properties.get(termName)));
             }
-            localList = (AxiomTermList) parserAssembler.getOperandMap().getItemList(qname);
+            localList = parserAssembler.getListAssembler().getAxiomTermList(qname);
             localList.getAxiomListener().onNextAxiom(qname, localAxiom);
             return;
         }
         parserAssembler.registerLocalList(localList);
-        parserAssembler.getOperandMap().addItemList(qname, localList);
+        parserAssembler.getListAssembler().addItemList(qname, localList);
     }
  
     /**

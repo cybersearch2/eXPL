@@ -130,13 +130,13 @@ public class QueryExecuterAdapter
                 if (firstTime)
                 {
                     firstTime = false;
-                    parserAssembler.createAxiom(qname);
+                    parserAssembler.getListAssembler().createAxiomItemList(qname);
                     for (int i = 0; i < axiom.getTermCount(); i++)
-                        parserAssembler.addAxiom(qname, axiom.getTermByIndex(i));
-                    parserAssembler.saveAxiom(qname);
+                        parserAssembler.getAxiomAssembler().addAxiom(qname, axiom.getTermByIndex(i));
+                    parserAssembler.getAxiomAssembler().saveAxiom(qname);
                 }
                 else
-                    parserAssembler.getAxiomList(qname).add(axiom);
+                    parserAssembler.getListAssembler().add(qname, axiom);
             }
         }
     }
@@ -154,11 +154,11 @@ public class QueryExecuterAdapter
             QualifiedName qname = new QualifiedTemplateName(QualifiedName.EMPTY, templateName);
             String templateKey = template.getKey();
             Map<String, Object> props = template.getProperties();
-            parserAssembler.createTemplate(qname, false);
-            parserAssembler.getTemplate(qname).setKey(templateKey);
+            parserAssembler.getTemplateAssembler().createTemplate(qname, false);
+            parserAssembler.getTemplateAssembler().getTemplate(qname).setKey(templateKey);
             if (props != null)
-                parserAssembler.addTemplate(qname, props);
-            Template newTemplate = parserAssembler.getTemplate(qname);
+                parserAssembler.getTemplateAssembler().addTemplate(qname, props);
+            Template newTemplate = parserAssembler.getTemplateAssembler().getTemplate(qname);
             for (int i = 0; i < template.getTermCount(); i++)
                 newTemplate.addTerm((Operand)template.getTermByIndex(i));
         }

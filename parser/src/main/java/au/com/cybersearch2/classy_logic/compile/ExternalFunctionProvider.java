@@ -13,21 +13,29 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.interfaces;
+package au.com.cybersearch2.classy_logic.compile;
+
+import au.com.cybersearch2.classy_logic.FunctionManager;
+import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 
 /**
- * TermPairList
- * Interface for container for TermPair objects designed to recycle objects for efficiency
- * The container must allow the the list to also be accessed and cleared 
+ * ExternalFunctionProvider
+ * Binds client-supplied FunctionManager object. 
+ * Allows dependency injection to be avoided if external functions are not used. 
  * @author Andrew Bowley
- * 7May,2017
+ * 4 Aug 2015
  */
-public interface TermPairList
+public class ExternalFunctionProvider
 {
-    /**
-     * Add operand/term pair to be unified
-     * @param term1 Template operand
-     * @param term2 Axiom term
-     */
-    void add(Operand term1, Term term2);
+    protected FunctionManager functionManager;
+    
+    public ExternalFunctionProvider(FunctionManager functionManager)
+    {
+        this.functionManager = functionManager;
+    }
+
+    public FunctionProvider<?> getFunctionProvider(String name)
+    {
+        return functionManager.getFunctionProvider(name);
+    }
 }

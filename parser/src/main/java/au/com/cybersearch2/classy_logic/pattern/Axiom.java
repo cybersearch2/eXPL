@@ -24,7 +24,6 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.terms.TermStore;
 
@@ -141,21 +140,6 @@ public class Axiom extends TermList<Term>
                 addTerm(term);
          }
  	}
-
-    /**
-	 * Unify this Axiom with given Template, pairing Terms of this Axiom with those
-	 * of the Template. Terms are matched by name except when "pairByPosition" flag is set, 
-	 * in which case, terms are paired in list order. 
-	 * When both terms of a pairing have a value and values do not match, unification is skipped. 
-	 * Unification of all terms is also skipped if this Axiom and the other Template have different names.
-	 * @param template Template with which to unify 
-     * @param solution Contains result of previous unify-evaluation steps
-	 * @return Flag set true if unification completed successfully
-	 */
-	public boolean unifyTemplate(Template template, Solution solution)
-    {
-	    return template.unify(this, solution);
-    }
 
 	/**
 	 * Add a Term() with name assigned from a list according to position 

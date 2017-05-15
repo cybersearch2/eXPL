@@ -67,7 +67,7 @@ public class Choice
 		// Populate variableList from operand map using axiom term name keys
 		variableList = new ArrayList<Operand>();
 		termNameList = choiceAxiomSource.getAxiomTermNameList();
-        QualifiedName qualifiedContextname = parserAssembler.getOperandMap().getQualifiedContextname();
+        QualifiedName qualifiedContextname = parserAssembler.getQualifiedContextname();
 	    for (String termName: termNameList)
 	    {
 	        QualifiedName qualifiedTermName = QualifiedName.parseName(termName, qualifiedContextname);

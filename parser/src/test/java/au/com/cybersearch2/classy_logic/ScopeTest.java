@@ -28,7 +28,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.compile.ListAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.TemplateAssembler;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -69,15 +71,17 @@ public class ScopeTest
         Scope scope = new Scope(scopeMap, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
         scopeMap.put(SCOPE_NAME, scope);
 		ParserAssembler globalParserAssembler = mock(ParserAssembler.class);
+        TemplateAssembler templateAssembler = mock(TemplateAssembler.class);
+        when(globalParserAssembler.getTemplateAssembler()).thenReturn(templateAssembler);
 		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
 		AxiomSource axiomSource = mock(AxiomSource.class);
 		when(globalParserAssembler.getAxiomSource(GLOBAL_Q_AXIOM_NAME)).thenReturn(axiomSource);
 		Template template = mock(Template.class);
-		when(globalParserAssembler.getTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME))).thenReturn(template);
+		when(templateAssembler.getTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME))).thenReturn(template);
 		assertThat(scope.getAxiomSource(GLOBAL_Q_AXIOM_NAME)).isEqualTo(axiomSource);
 		assertThat(scope.getTemplate(Q_TEMPLATE_NAME)).isEqualTo(template);
-		scope.getParserAssembler().createAxiom(Q_AXIOM_NAME);
-		scope.getParserAssembler().createTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME), false);
+		scope.getParserAssembler().getListAssembler().createAxiomItemList(Q_AXIOM_NAME);
+		scope.getParserAssembler().getTemplateAssembler().createTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME), false);
 	}
 	
 	@Test
@@ -89,15 +93,17 @@ public class ScopeTest
 		Scope scope = new Scope(scopeMap, SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		scopeMap.put(SCOPE_NAME, scope);
 		ParserAssembler globalParserAssembler = mock(ParserAssembler.class);
+        TemplateAssembler templateAssembler = mock(TemplateAssembler.class);
+        when(globalParserAssembler.getTemplateAssembler()).thenReturn(templateAssembler);
 		when(globalScope.getParserAssembler()).thenReturn(globalParserAssembler);
-		scope.getParserAssembler().createAxiom(Q_AXIOM_NAME);
-		scope.getParserAssembler().addAxiom(Q_AXIOM_NAME, new Parameter("x"));
-		scope.getParserAssembler().saveAxiom(Q_AXIOM_NAME);
-		scope.getParserAssembler().createTemplate(new QualifiedTemplateName(SCOPE_NAME, TEMPLATE_NAME), false);
+		scope.getParserAssembler().getListAssembler().createAxiomItemList(Q_AXIOM_NAME);
+		scope.getParserAssembler().getAxiomAssembler().addAxiom(Q_AXIOM_NAME, new Parameter("x"));
+		scope.getParserAssembler().getAxiomAssembler().saveAxiom(Q_AXIOM_NAME);
+		scope.getParserAssembler().getTemplateAssembler().createTemplate(new QualifiedTemplateName(SCOPE_NAME, TEMPLATE_NAME), false);
 		assertThat(scope.getAxiomSource(Q_AXIOM_NAME).iterator().next()).isNotNull();
 		assertThat(scope.getTemplate(Q_TEMPLATE_NAME)).isNotNull();
 		verify(globalParserAssembler, times(0)).getAxiomSource(Q_AXIOM_NAME);
-		verify(globalParserAssembler, times(0)).getTemplate(new QualifiedTemplateName(QualifiedName.EMPTY, TEMPLATE_NAME));
+		verify(templateAssembler, times(0)).getTemplate(new QualifiedTemplateName(QualifiedName.EMPTY, TEMPLATE_NAME));
 	}
 
 	@Test
@@ -124,7 +130,9 @@ public class ScopeTest
 	{
         Scope globalScope = mock(Scope.class);
         ParserAssembler parserAssembler = mock(ParserAssembler.class);
-        when(parserAssembler.getTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME))).thenReturn(null);
+        TemplateAssembler templateAssembler = mock(TemplateAssembler.class);
+        when(parserAssembler.getTemplateAssembler()).thenReturn(templateAssembler);
+        when(templateAssembler.getTemplate(QualifiedName.parseTemplateName(TEMPLATE_NAME))).thenReturn(null);
         when(globalScope.getParserAssembler()).thenReturn(parserAssembler);
         Map<String, Scope> scopeMap = new HashMap<String, Scope>();
         scopeMap.put(QueryProgram.GLOBAL_SCOPE, globalScope);
@@ -146,7 +154,9 @@ public class ScopeTest
 	{
         Scope globalScope = mock(Scope.class);
         ParserAssembler parserAssembler = mock(ParserAssembler.class);
-        when(parserAssembler.getAxiomListenerMap()).thenReturn(EMPTY_AXIOM_LISTENER_MAP);
+        ListAssembler listAssembler = mock(ListAssembler.class);
+        when(parserAssembler.getListAssembler()).thenReturn(listAssembler);
+        when(listAssembler.getAxiomListenerMap()).thenReturn(EMPTY_AXIOM_LISTENER_MAP);
         when(globalScope.getParserAssembler()).thenReturn(parserAssembler);
         Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		assertThat(scope.getAxiomListenerMap()).isNull();
@@ -161,7 +171,10 @@ public class ScopeTest
 		Map<QualifiedName, List<AxiomListener>> axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
 		AxiomListener axiomListener = mock(AxiomListener.class);
 		axiomListenerMap.put(Q_AXIOM_NAME, Collections.singletonList(axiomListener));
-		when(globalParserAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
+        ListAssembler listAssembler = mock(ListAssembler.class);
+        when(globalParserAssembler.getListAssembler()).thenReturn(listAssembler);
+        when(listAssembler.getAxiomListenerMap()).thenReturn(EMPTY_AXIOM_LISTENER_MAP);
+		when(listAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
 		Scope scope = new Scope(Collections.singletonMap(QueryProgram.GLOBAL_SCOPE, globalScope), SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		assertThat(scope.getAxiomListenerMap().get(Q_AXIOM_NAME).get(0)).isEqualTo(axiomListener);
 	}
