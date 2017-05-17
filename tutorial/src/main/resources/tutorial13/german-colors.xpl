@@ -1,6 +1,3 @@
-// Define lexicon term names
-axiom lexicon (aqua, black, blue, white);
-
 axiom german.lexicon 
   (    aqua,    black,    blue,  white)
   {"Wasser", "schwarz", "blau", "weiß"};

@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.pattern;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamField;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.ArchiveIndexHelper.FixUp;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -97,6 +99,8 @@ public class Template extends TermList<Operand>
     protected SolutionPairer solutionPairer;
     /** Operand archive index fix ups */
     private List<ArchiveIndexHelper.FixUp> fixUpList;
+    /** Template archetype - attribute avoids casting to get super archetype */
+    private TemplateArchetype templateArchetype;
    
     /**
      * Construct a replicate Template object. The new template has a unique id and specified qualified name 
@@ -106,7 +110,7 @@ public class Template extends TermList<Operand>
     public Template(Template master, QualifiedName qname) 
     {
         // Replicates share the master template archetype
-        this((TemplateArchetype) master.getArchetype());
+        this(master.getTemplateArchetype());
         // Context name is now set as qualified name of master template.
         // This template qualified name must be set to given value.
         // Note this is the only case where template qualified name and 
@@ -120,6 +124,8 @@ public class Template extends TermList<Operand>
         // Replicates share the terms of the master template
         for (Operand operand: master.termList)
             termList.add(operand);
+        termCount = termList.size();
+        fixUpList = master.fixUpList;
     }
 
     /**
@@ -129,10 +135,12 @@ public class Template extends TermList<Operand>
     private Template(TemplateArchetype templateArchetype, QualifiedName contextName) 
     {
         super(templateArchetype);
+        this.templateArchetype = templateArchetype;
         this.contextName = contextName;
         qname = templateArchetype.getQualifiedName();
         key = qname.getTemplate();
         id = referenceCount.incrementAndGet();
+        fixUpList = new ArrayList<FixUp>();
     }
 
 	/**
@@ -285,6 +293,10 @@ public class Template extends TermList<Operand>
         return isInnerTemplate;
     }
 
+	/**
+	 * Returns flage set true if this si a replicate template
+	 * @return boolean
+	 */
     public boolean isReplicate()
     {
         return isReplicate;
@@ -382,42 +394,27 @@ public class Template extends TermList<Operand>
      * @param solution Contains result of previous unify-evaluation steps
      * @return Flag set true if unification completed successfully
      */
-    public boolean unify(final TermList<Term> axiom, Solution solution)
+    public boolean unify(TermList<Term> axiom, Solution solution)
     {
-        // The archetype meta data needs to include all operands found by walking the operand trees 
-        // The archetype is mutable until this is completed
-        if (archetype.isMutable())
-        {
-            // Complete archetype initialization
-            ArchiveIndexHelper archiveIndexHelper = 
-                (contextName == qname) ? 
-                new ArchiveIndexHelper(archetype, this, contextName) :
-                new ArchiveIndexHelper(archetype, this, contextName, qname);
-            fixUpList = archiveIndexHelper.setOperandTree();
-        }
-        if (fixUpList != null)
-            for (ArchiveIndexHelper.FixUp fixUp: fixUpList)
-                fixUp.operand.setArchetypeIndex(fixUp.postFixIndex);
-        final int[] termMapping = ((TemplateArchetype)archetype).createTermMapping(axiom.getArchetype());
-        //for (int map = 0; map < termMapping.length; map++)
-        //    System.out.print(Integer.toString(termMapping[map]) + ",");
-        OperandWalker walker = new OperandWalker(termList);
-        boolean unificationComplete = false;
-        // Create list of term pairs to unify
-        unificationComplete = walker.visitAllNodes(new Unifier(this, axiom, termMapping, solution));
-        if (fixUpList != null)
-            for (ArchiveIndexHelper.FixUp fixUp: fixUpList)
-                fixUp.operand.setArchetypeIndex(fixUp.preFixIndex);
+        for (ArchiveIndexHelper.FixUp fixUp: fixUpList)
+            fixUp.operand.setArchetypeIndex(fixUp.postFixIndex);
+        int[] termMapping = templateArchetype.getTermMapping(axiom.getArchetype());
+        boolean unificationComplete = unify(axiom, solution, termMapping);
+        for (ArchiveIndexHelper.FixUp fixUp: fixUpList)
+            fixUp.operand.setArchetypeIndex(fixUp.preFixIndex);
         return unificationComplete;
     }
 
+    /**
+     * Returns solution pairer to perform unification with this template
+     * @param solution The query solution up to this stage
+     * @return SolutionPairer object
+     */
     public SolutionPairer getSolutionPairer(Solution solution)
     {
-        return (contextName == qname) ? 
-            new SolutionPairer(solution, id, contextName) :
-            new SolutionPairer(solution, id, qname, contextName);
-
+        return new SolutionPairer(solution, id, getContextNames());
     }
+    
     /**
 	 * Returns an axiom containing the values of this template and 
 	 * having same key and name as this template's name.
@@ -487,21 +484,6 @@ public class Template extends TermList<Operand>
 		{
 			for (String name: initData.keySet())
 			{
-			    /*
-			    // TODO - Analyse qualified name code for validity
-			    QualifiedName qualifiedTermName = QualifiedName.parseName(name, qname);
-                Term term = getTermByName(qualifiedTermName.toString());
-                if ((term == null) && (!qualifiedTermName.getTemplate().isEmpty()))
-                {
-                    qualifiedTermName.clearTemplate();
-                    term = getTermByName(qualifiedTermName.toString());
-                }
-                if ((term == null) && (!qualifiedTermName.getScope().isEmpty()))
-                {
-                    qualifiedTermName.clearScope();
-                    term = getTermByName(qualifiedTermName.toString());
-                }
-                */
                 Term term = getTermByName(name);
 				if (term != null)
 				{
@@ -555,6 +537,11 @@ public class Template extends TermList<Operand>
         template.next = nextTemplate;
 	}
 
+	/**
+	 * Returns inner template instance for which this is the outer template
+	 * @param name Additional name part to afix to the qualified name - optional, can be empty
+	 * @return
+	 */
     public Template innerTemplateInstance(String name)
     {
         QualifiedName innerTemplateName = new QualifiedTemplateName(
@@ -570,6 +557,12 @@ public class Template extends TermList<Operand>
         return newTemplate;
     }
 
+    /**
+     * Create a choice template instance as an inner template of this template,
+     * @param master Global scope template containing the choice operands 
+     *                which are copied to the inner template.
+     * @return Template object
+     */
     public Template choiceInstance(Template master)
     {
         Template choiceTemplate = innerTemplateInstance("");
@@ -643,6 +636,75 @@ public class Template extends TermList<Operand>
         }
     }
 
+    public Runnable getParserTask()
+    {
+        return new Runnable(){
+
+            @Override
+            public void run()
+            {
+                // The archetype meta data needs to include all operands found by walking the operand trees 
+                // The archetype is mutable until this is completed
+                if ((archetype.isMutable()))
+                {
+                    // Complete archetype initialization. This cannot be performed earlier due to fact parser tasks, 
+                    // which can modify operand terms, run after template construction.
+                    // Note replicate templates share the master fixUpList as this operation can only be performed once.
+                    fixUpList.addAll(getFixUpList());
+                    archetype.clearMutable();
+                }
+            }};
+    }
+    /**
+     * Returns template context name(s)
+     * @return QualifiedName array 
+     */
+    protected QualifiedName[] getContextNames()
+    {
+        return (contextName == qname) ? 
+            new QualifiedName[] { qname } :
+            new QualifiedName[] { qname, contextName };
+    }
+
+    /**
+     * Return the archetype with it's actual type
+     * @return TemplateArchetype object
+     */
+    protected TemplateArchetype getTemplateArchetype()
+    {
+        return templateArchetype;
+    }
+ 
+    /**
+     * Returns fix up list which is used to adjust operand archive indexes for unification
+     * @return FixUp list
+     */
+    protected List<ArchiveIndexHelper.FixUp> getFixUpList()
+    {
+        ArchiveIndexHelper archiveIndexHelper = new ArchiveIndexHelper(this);
+        return archiveIndexHelper.setOperandTree();
+    }
+
+    /**
+     * Unify template using given axiom and solution
+     * @param axiom Axiom with which to unify as TermList object 
+     * @param solution Contains result of previous unify-evaluation steps
+     * @param termMapping Maps operands to axiom terms
+     * @return Flag set true if unification completed successfully
+     */
+    protected boolean unify(TermList<Term> axiom, Solution solution, int[] termMapping)
+    {
+        OperandWalker walker = new OperandWalker(termList);
+        // Create list of term pairs to unify
+        return walker.visitAllNodes(new Unifier(this, axiom, termMapping, solution));
+    }
+
+    /**
+     * Serial I/O
+     * @param ois ObjectInputStream
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     private void readObject(ObjectInputStream ois)
             throws IOException, ClassNotFoundException  
     {

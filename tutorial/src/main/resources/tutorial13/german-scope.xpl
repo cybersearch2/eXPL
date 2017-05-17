@@ -1,6 +1,5 @@
 axiom item (amount) : parameter;
 
-axiom lexicon (Total);
 axiom german.lexicon 
   ( Total)
   {"Gesamtkosten"};

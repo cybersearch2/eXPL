@@ -98,10 +98,10 @@ scope german (language="de", region="DE")
     /**
      * Run tutorial
      * The expected result:<br/>
-        swatch(name = Wasser, red = 0, green = 255, blue = 255)<br/>
-        swatch(name = schwarz, red = 0, green = 0, blue = 0)<br/>
-        swatch(name = weiß, red = 255, green = 255, blue = 255)<br/>
-        swatch(name = blau, red = 0, green = 0, blue = 255)<br/>
+        color_query(name=Wasser, red=0, green=255, blue=255, swatch=0)<br/>
+        color_query(name=schwarz, red=0, green=0, blue=0, swatch=1)<br/>
+        color_query(name=weiß, red=255, green=255, blue=255, swatch=3)<br/>
+        color_query(name=blau, red=0, green=0, blue=255, swatch=2)<br/>
      * @param args
      */
 	public static void main(String[] args)

@@ -1,4 +1,3 @@
-axiom colors        (aqua, black, blue, white);
 axiom german.colors (aqua, black, blue, white) : resource;
 axiom french.colors (aqua, black, blue, white) : resource;
 

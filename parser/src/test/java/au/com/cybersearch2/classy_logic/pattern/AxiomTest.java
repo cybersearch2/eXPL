@@ -116,20 +116,6 @@ public class AxiomTest
 		}
 	}
     
-    @Test
-	public void test_constructor_template()
-	{
-    	String TEMPLATE_NAME = "myTemplate";
-    	String TEMPLATE_KEY = "templateKey";
-    	Template template = new Template(TEMPLATE_KEY, parseTemplateName(TEMPLATE_NAME));
-    	IntegerOperand term = new IntegerOperand(QualifiedName.parseGlobalName("x"), new Integer(2));
-    	template.addTerm(term);
-    	Axiom axiom = template.toAxiom();
-    	assertThat(axiom.getName()).isEqualTo(TEMPLATE_NAME);
-    	assertThat(axiom.getTermCount()).isEqualTo(1);
-    	assertThat(axiom.getTermByName("x")).isEqualTo(term);
-	}
-    
    @Test
 	public void test_unification_by_position()
 	{
@@ -512,25 +498,6 @@ public class AxiomTest
         assertThat(testAxiom.unifyTemplate(template, solution)).isFalse();
     }
     
-    @Test 
-    public void test_addTerm_namelist()
-    {
-    	Parameter term1 = new Parameter(Term.ANONYMOUS, new Integer(2));
-    	Parameter term2 = new Parameter(Term.ANONYMOUS, new Integer(99));
-    	List<String> nameList = new ArrayList<String>();
-    	nameList.add("x");
-    	nameList.add("y");
-    	Axiom axiom = new Axiom(NAME);
-    	axiom.addTerm(term1, nameList);
-       	axiom.addTerm(term2, nameList);
-       	assertThat(axiom.getTermCount()).isEqualTo(2);
-       	assertThat(axiom.getTermByName("x")).isEqualTo(term1);
-       	assertThat(axiom.getTermByName("y")).isEqualTo(term2);
-    	Parameter term3 = new Parameter(Term.ANONYMOUS, new Integer(41));
-       	axiom.addTerm(term3, nameList);
-       	assertThat(axiom.getTermCount()).isEqualTo(3);
-   }
- 
     @Test 
     public void test_serialization() throws Exception
     {

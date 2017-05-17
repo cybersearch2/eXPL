@@ -346,6 +346,11 @@ public class QueryProgram extends QueryLauncher
             parserAssembler.setQualifiedContextname(savedQName);
             parserTask = priorityQueue.poll();
         }
+        // Run parser task for every non=empty template. For each operand in the template, 
+        // the task walks the operand tree and adds all terms to the archetype which belong
+        // to the template name space.
+        for (Scope scope: scopes.values())
+            scope.getParserAssembler().getTemplateAssembler().doParserTask();
     }
 
     /**

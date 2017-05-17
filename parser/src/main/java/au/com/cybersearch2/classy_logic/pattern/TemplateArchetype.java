@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.pattern;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,11 +47,20 @@ public class TemplateArchetype extends Archetype<Template, Operand> implements S
         super(structureName, StructureType.template);
         if (structureName.getTemplate().isEmpty())
             throw new IllegalArgumentException("Template qualified name must have a template part");
+        termMappingMap = new HashMap<QualifiedName,int[]>();
         
     }
 
+    /**
+     * Returns array of indexes mapping operands registered in this archetype to terms of an axiom archetype
+     * @param pairArchetype Axiom archetype narrowed to TermListManager
+     * @return int[]
+     */
     public int[] getTermMapping(TermListManager pairArchetype)
     {
+        if (pairArchetype.getTermCount() == 0)
+            // Return empty mapping if pair archetype is empty - not expected to happen
+            return new int[]{};
         QualifiedName pairQName = pairArchetype.getQualifiedName();
         int[] termMapping = termMappingMap.get(pairQName);
         if (termMapping == null)
@@ -60,7 +70,12 @@ public class TemplateArchetype extends Archetype<Template, Operand> implements S
         }
         return termMapping;
     }
-    
+ 
+    /**
+     * Creates and returns array of indexes mapping operands registered in this archetype to terms of an axiom archetype
+     * @param pairArchetype Axiom archetype narrowed to TermListManager
+     * @return int[]
+     */
     protected int[] createTermMapping(TermListManager pairArchetype)
     {
         int[] termMapping = new int[getTermCount()];
@@ -80,7 +95,7 @@ public class TemplateArchetype extends Archetype<Template, Operand> implements S
                 pairMetaData = pairArchetype.getMetaData(pairIndex);
                 if ((termMetaData.getLiteralType() == pairMetaData.getLiteralType()) ||
                         (termMetaData.getLiteralType() == LiteralType.object) ||    
-                        areConvertibleTypes(termMetaData.getLiteralType(),pairMetaData.getLiteralType() )) 
+                        areConvertibleTypes(termMetaData.getLiteralType(), pairMetaData.getLiteralType() )) 
                 {
                     pairArchetype.changeName(index, termMetaData.getName());
                     termMapping[index] = index; 
@@ -100,6 +115,12 @@ public class TemplateArchetype extends Archetype<Template, Operand> implements S
         return termMapping;
     }
 
+    /**
+     * Returns flag set true if one literal type is convertable to the second literal type
+     * @param literalType First literal type is for an operand
+     * @param literalType2 Secound literal type is for an axiom term
+     * @return boolean
+     */
     protected boolean areConvertibleTypes(LiteralType literalType,  LiteralType literalType2)
     {
         switch (literalType)

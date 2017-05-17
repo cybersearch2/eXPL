@@ -86,6 +86,9 @@ public class LogicQuery implements SolutionFinder
 	@Override
 	public boolean iterate(Solution solution, Template template)
 	{
+	    // An empty template is provided for unification with the incoming axiom, by first
+	    // populating it with empty operands to match the axiom terms.
+	    // The empty template is located as the first in the chain.
 	    boolean emptyTemplate = false;
 		if (queryStatus == QueryStatus.start)
 		{   // Start from beginning of axiom sequence
@@ -111,13 +114,15 @@ public class LogicQuery implements SolutionFinder
 				for (AxiomListener axiomListener: axiomListenerList)
 					axiomListener.onNextAxiom(new QualifiedName(axiom.getName()), axiom);
 			if (emptyTemplate && template.getName().equals(axiom.getName()) && template.getKey().equals(axiom.getName()))
-	        {
+	        {   // Populate empty template with operands to match the named terms of the axiom
 	            for (int i = 0; i < axiom.getTermCount(); i++)
 	            {
 	                Term term = axiom.getTermByIndex(i);
 	                if (!term.getName().equals(Term.ANONYMOUS))
 	                    template.addTerm(new Variable(new QualifiedName(term.getName(), QualifiedName.ANONYMOUS)));
 	            }
+	            // Run parser task delayed until template is populated
+	            template.getParserTask().run();
 	            emptyTemplate = false;
 	        }
 			if (template.unify(axiom, solution) &&

@@ -21,7 +21,6 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
-import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -29,6 +28,7 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * Choice
@@ -130,21 +130,22 @@ public class Choice
             if (selectionTerm != null)
                 term = selectionTerm;
         }
-        // Create solution axiom using Template toAxiom() method
-		Template solutionTemplate = new Template(new TemplateArchetype(template.getQualifiedName()));
+        // Set variables and create solution axiom
+        Axiom solutionAxiom = new Axiom(template.getName());
 		// Selection term
 		int index = 0;
 		Operand operand = variableList.get(index++);
         operand.backup(0);
         term.unifyTerm(operand, template.getId());
-		solutionTemplate.addTerm(operand);
+        solutionAxiom.addTerm(new Parameter(operand.getName(), operand.getValue()));
 		// Constants
 		while (index < choiceAxiom.getTermCount())
 		{
 			operand = variableList.get(index);
             operand.backup(0);
-			choiceAxiom.getTermByIndex(index).unifyTerm(operand, template.getId());
-			solutionTemplate.addTerm(operand);
+            Term choiceTerm = choiceAxiom.getTermByIndex(index);
+            choiceTerm.unifyTerm(operand, template.getId());
+			solutionAxiom.addTerm(choiceTerm);
 			++index;
 		}
 		// Add pass-thru variables, if any, to solution
@@ -156,13 +157,13 @@ public class Choice
 	            operand = variableList.get(index);
 	            operand.backup(0);
 		        term.unifyTerm(operand, template.getId());
-	            solutionTemplate.addTerm(operand);
+		        solutionAxiom.addTerm(term);
 		    }
             ++index;
 		}
-		IntegerOperand selectionOperand = new IntegerOperand(QualifiedName.parseGlobalName(template.getQualifiedName().getTemplate()), (long)selection);
-        solutionTemplate.addTerm(selectionOperand);
-		solution.put(template.getQualifiedName().toString(), solutionTemplate.toAxiom());
+		Parameter selectionTerm = new Parameter(template.getName(), (long)selection);
+        solutionAxiom.addTerm(selectionTerm);
+		solution.put(template.getQualifiedName().toString(), solutionAxiom);
 		return true;
 	}
 	
@@ -179,7 +180,7 @@ public class Choice
         // Unifiy template terms if this has not already happened
         for (int i = 0; i < template.getTermCount(); i++)
         {   // Every term in the choice template has the same name
-            // abd all terms are set to the same value
+            // and all terms are set to the same value
             Term term = template.getTermByIndex(i);
             if (!term.isEmpty())
                 break; // Term is already populated so proceed to selection

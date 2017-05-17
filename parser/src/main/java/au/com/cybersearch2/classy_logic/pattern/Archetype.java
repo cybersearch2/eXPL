@@ -192,6 +192,8 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
     @Override
     public int getIndexForName(String termName)
     {
+        if (termName == null)
+            return -1;
         int i = 0;
         for (TermMetaData termMetaData: termMetaList)
         {
@@ -219,7 +221,12 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
         if ((index < 0) || (index >= getTermCount()))
             return false;
         TermMetaData termMetaData = termMetaList.get(index);
-        return termMetaData.setName(name);
+        if (termMetaData.setName(name))
+        {
+            isAnonymousTerms = false;
+            return true;
+        }
+        return false;
     }
 
     @Override

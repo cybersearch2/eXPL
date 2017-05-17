@@ -18,9 +18,9 @@ package au.com.cybersearch2.classy_logic.list;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
-import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;

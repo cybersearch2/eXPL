@@ -90,6 +90,8 @@ public class Axiom extends TermList<Term>
             {
                 if (datum instanceof Term)
                     terms.add((Term) datum);
+                else if (datum instanceof Integer)
+                    terms.add(new Parameter(Term.ANONYMOUS, ((Integer)datum).longValue()));
                 else
                     terms.add(new Parameter(Term.ANONYMOUS, datum));
             }
@@ -140,19 +142,6 @@ public class Axiom extends TermList<Term>
                 addTerm(term);
          }
  	}
-
-	/**
-	 * Add a Term() with name assigned from a list according to position 
-	 * @param term Term object
-	 * @param nameList List of term names assembled by parser
-	 */
-	public void addTerm(Term term, List<String> nameList)
-	{
-		int index = termList == null ? 0 : termList.size();
-		if (index < nameList.size())
-			term.setName(nameList.get(index));
-		addTerm(term);
-	}
 
     private void writeObject(ObjectOutputStream oos)
             throws IOException 

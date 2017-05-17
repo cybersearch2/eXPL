@@ -28,6 +28,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.axiom.AxiomListSource;
+import au.com.cybersearch2.classy_logic.axiom.EmptyAxiomSource;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;

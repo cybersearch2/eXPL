@@ -17,7 +17,7 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.util.List;
 
-import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
+import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;

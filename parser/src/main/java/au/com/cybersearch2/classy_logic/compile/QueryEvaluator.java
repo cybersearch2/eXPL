@@ -259,7 +259,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
         public boolean onSolution(Solution solution)
         {
             Axiom axiom = solution.getAxiom(solutionName);
-            if (axiom != null)
+            if (axiom.getTermCount() > 0)
             {
                 // No backup, so reset before unification
                 innerTemplate.reset();

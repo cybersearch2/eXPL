@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.axiom.AxiomMapCollection;
+import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
@@ -12,9 +14,7 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.query.AxiomMapCollection;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
-import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 

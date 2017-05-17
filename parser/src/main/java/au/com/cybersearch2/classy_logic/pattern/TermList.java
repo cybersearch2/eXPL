@@ -42,6 +42,8 @@ public abstract class TermList <T extends Term> implements Serializable
     
     public TermList(TermListManager archetype)
     {
+        if (archetype == null)
+            throw new IllegalArgumentException("Parameter \"archetype\" is null");
         this.archetype = archetype;
         termList = new ArrayList<T>(archetype.isMutable() ? 10 : archetype.getTermCount());
     }
@@ -106,11 +108,11 @@ public abstract class TermList <T extends Term> implements Serializable
      */
     public Term getTermByName(String name)
     {
-        int index = archetype.getIndexForName(Archetype.CASE_INSENSITIVE_NAME_MATCH ? name.toUpperCase() : name);
-        if (index == -1)
-            return null;
-        if (name == null)
+       if (name == null)
             throw new IllegalArgumentException("Parameter \"name\" is null");
+       int index = archetype.getIndexForName(name);
+       if (index == -1)
+            return null;
         return termList.get(index);
     }
 

@@ -22,12 +22,12 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.axiom.AxiomListSource;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
-import au.com.cybersearch2.classy_logic.query.AxiomListSource;
 
 /**
  * AxiomAssembler

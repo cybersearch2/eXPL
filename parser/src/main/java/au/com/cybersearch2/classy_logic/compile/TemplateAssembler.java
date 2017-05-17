@@ -124,39 +124,51 @@ public class TemplateAssembler
         return templateMap.get(QualifiedName.parseTemplateName(textName));
     }
 
-     /**
-      * Returns scope of axiom source specified by qname
-      * @param qname Qualified name
-      * @return Scope object or null if axiom source not found
-      */
-     public Scope findTemplateScope(QualifiedName qname)
-     {
-         if (qname.getTemplate().isEmpty())
-             // qname must be in axiom form
-             return null;
-         Template template = templateMap.get(qname);
-         if (template != null)
-             return scope;
-         if (!qname.getScope().isEmpty())
-             qname = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, qname.getTemplate());
-         template = scope.getGlobalTemplateAssembler().getTemplate(qname);
-         if (template != null)
-             return scope.getGlobalScope();
-         return null; 
-     }
+    /**
+     * Returns scope of axiom source specified by qname
+     * @param qname Qualified name
+     * @return Scope object or null if axiom source not found
+     */
+    public Scope findTemplateScope(QualifiedName qname)
+    {
+        if (qname.getTemplate().isEmpty())
+            // qname must be in axiom form
+            return null;
+        Template template = templateMap.get(qname);
+        if (template != null)
+            return scope;
+        if (!qname.getScope().isEmpty())
+            qname = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, qname.getTemplate());
+        template = scope.getGlobalTemplateAssembler().getTemplate(qname);
+        if (template != null)
+            return scope.getGlobalScope();
+        return null; 
+    }
  
-     /**
-      * Create new template and add to head template chain
-      * @param outerTemplateName Qualified name of head template
-      * @param innerTemplateName Qualified name of inner template
-      * @return Template object
-      */
-     public Template chainTemplate(QualifiedName outerTemplateName, String name) 
-     {
-         Template template = getTemplate(outerTemplateName);
-         Template chainTemplate = template.innerTemplateInstance(name);
-         templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
-         return chainTemplate;
-     }
+    /**
+     * Create new template and add to head template chain
+     * @param outerTemplateName Qualified name of head template
+     * @param innerTemplateName Qualified name of inner template
+     * @return Template object
+     */
+    public Template chainTemplate(QualifiedName outerTemplateName, String name) 
+    {
+        Template template = getTemplate(outerTemplateName);
+        Template chainTemplate = template.innerTemplateInstance(name);
+        templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
+        return chainTemplate;
+    }
+ 
+    /**
+     * Run parser task for every non=empty template. For each operand in the template, 
+     * the task walks the operand tree and adds all terms to the archetype which belong
+     * to the template name space.
+     */
+    public void doParserTask()
+    {
+        for (Template template: templateMap.values())
+            if (template.getTermCount() > 0)
+                template.getParserTask().run();
+    }
 
 }

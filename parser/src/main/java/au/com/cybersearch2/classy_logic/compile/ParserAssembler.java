@@ -14,6 +14,7 @@ import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
@@ -37,7 +38,6 @@ import au.com.cybersearch2.classy_logic.list.ListType;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.query.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 

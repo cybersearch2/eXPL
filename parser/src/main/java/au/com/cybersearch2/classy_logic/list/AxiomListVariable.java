@@ -15,8 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
