@@ -79,5 +79,9 @@ public abstract class ChainQuery
 	 * @param qname Reference to axiom by qualified name
 	 * @param axiomListener The axiom listener object
 	 */
-	abstract void setAxiomListener(QualifiedName qname, AxiomListener axiomListener); 
+	abstract void setAxiomListener(QualifiedName qname, AxiomListener axiomListener);
+
+    protected void backup()
+    {
+    } 
 }

@@ -91,6 +91,16 @@ public class LogicChainQuery extends ChainQuery
 		return QueryExecuter.toString(templateList);
 	}
 
+    /**
+     * Backup to state before previous unification
+     */
+    @Override
+    protected void backup() 
+    {
+        for (Template template: templateList)
+            template.backup(true);
+    }
+
  	/**
 	 * Backup to state before previous unification
 	 */

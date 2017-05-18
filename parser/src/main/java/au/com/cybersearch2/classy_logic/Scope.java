@@ -563,6 +563,8 @@ public class Scope
                     axiomSource = getGlobalParserAssembler().getAxiomSource(qualifiedAxiomName);
                     if (axiomSource != null)
                         localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
+                    else if (scope.name.equals(QueryProgram.GLOBAL_SCOPE))
+                        return; // This is not an error when global scope context is being reset
                     else
                         throw new ExpressionException("Axiom source \"" + qualifiedAxiomName.toString() + "\" not found");
                 }

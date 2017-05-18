@@ -408,7 +408,6 @@ public class CallOperandTest
             "  colors += axiom blue { red, green, blue }\n" +
             "  \n" + 
             ");\n" +
-            "axiom lexicon (aqua, black, blue, white);\n" +
             "axiom german.lexicon (aqua, black, blue, white)\n" +
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);" +
@@ -420,7 +419,7 @@ public class CallOperandTest
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
             "}\n" +
-            "query german_colors (german_colors);\n" +
+            "query colors (german_colors);\n" +
             "calc german_orange\n" +
             "(\n" +
             "  << german.swatch(shade=\"Orange\") >> (red, green, blue),\n" + 
@@ -428,7 +427,7 @@ public class CallOperandTest
             "  boolean hasGreen=fact(green),\n" +
             "  boolean hasBlue=fact(blue)\n" +
             ");\n" +
-            "query german_orange (german_orange);"
+            "query orange (german_orange);"
             ;
     static final String SORTED_CITIES = CITY_EVELATIONS +
             "// Calculator to perform insert sort on any list\n" +
@@ -833,7 +832,7 @@ public class CallOperandTest
     public void test_choice_german_colors()
     {
         queryProgram.parseScript(GERMAN_COLORS);
-        queryProgram.executeQuery("german_colors", new SolutionHandler(){
+        queryProgram.executeQuery("colors", new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution)
             {
@@ -848,8 +847,13 @@ public class CallOperandTest
                 assertThat(iterator.hasNext()).isFalse();
                 return true;
             }});
-           
-        queryProgram.executeQuery("german_orange", new SolutionHandler(){
+    }
+    
+    @Test
+    public void test_choice_german_missing_color()
+    {
+        queryProgram.parseScript(GERMAN_COLORS);
+        queryProgram.executeQuery("orange", new SolutionHandler(){
             @Override
             public boolean onSolution(Solution solution)
             {
@@ -859,6 +863,7 @@ public class CallOperandTest
                 return true;
             }});
     }
+    
     FunctionManager provideFunctionManager()
     {
         FunctionManager functionManager = new FunctionManager();

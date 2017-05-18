@@ -47,10 +47,6 @@ import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
 import au.com.cybersearch2.classy_logic.expression.Orientation;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;
-import au.com.cybersearch2.classy_logic.expression.TestEvaluator;
-import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
-import au.com.cybersearch2.classy_logic.expression.TestVariable;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
@@ -149,6 +145,14 @@ public class QueryExecuterTest
         "  {\"Sparta\", 16 }\n" +
         "  {\"Milos\", 22};\n";
 
+    static final String[] GREEK_FEE =
+    {
+        "account(name=Acropolis Construction, fee=47)",
+        "account(name=Marathon Marble, fee=61)",
+        "account(name=Agora Imports, fee=49)",
+        "account(name=Spiros Theodolites, fee=57)"
+    };
+    
     static final String[] FEE_AND_FREIGHT =
     {
         "account(name=Acropolis Construction, fee=47)",
@@ -248,24 +252,17 @@ public class QueryExecuterTest
         freights.add(axiomArchetype.itemInstance(new Parameter("city", "Sparta"), new Parameter("freight", new Integer(16))));
         freights.add(axiomArchetype.itemInstance(new Parameter("city", "Milos"), new Parameter("freight", new Integer(22))));
     }
-/*
 
-    @Test
-    public void test_xpl() throws ParseException
-    {
-        openScript(GREEK_CONSTRUCTION);
-    }
- */   
     @Test 
     public void test_cities() throws Exception
     {
-        StringOperand name = new TestStringOperand("name");
-        IntegerOperand altitude = new TestIntegerOperand("altitude");
-        TemplateArchetype templateArchetype = new TemplateArchetype(parseTemplateName("city"));
+        TemplateArchetype cityArchetype = new TemplateArchetype(parseTemplateName("city"));
+        StringOperand name = new StringOperand(new QualifiedName("name", cityArchetype.getQualifiedName()));
+        IntegerOperand altitude = new IntegerOperand(new QualifiedName("altitude", cityArchetype.getQualifiedName()));
         List<Operand> params = new ArrayList<Operand>();
         params.add(name);
         params.add(altitude);
-        Template cities = templateArchetype.itemInstance(params);
+        Template cities = cityArchetype.itemInstance(params);
         AxiomCollection ensemble = new AxiomCollection(){
 
             @Override
@@ -306,25 +303,30 @@ public class QueryExecuterTest
             public boolean isEmpty() {
                 return false;
             }};
-        Variable city = new TestVariable("city");
-        Variable charge = new TestVariable("charge");
-        Variable name = new TestVariable("name");
         TemplateArchetype chargeArchetype = new TemplateArchetype(parseTemplateName("charge"));
-        Template s1 = new Template(chargeArchetype, city, charge);
-        s1.setKey(charges.get(0).getName());
+        Variable city = new Variable(new QualifiedName("city", chargeArchetype.getQualifiedName()));
+        Variable charge = new Variable(new QualifiedName("charge", chargeArchetype.getQualifiedName()));
+        Template chargeTemplate = new Template(chargeArchetype, city, charge);
+        chargeTemplate.setKey("charge");
         TemplateArchetype customerArchetype = new TemplateArchetype(parseTemplateName("customer"));
-        Template s2 = new Template(customerArchetype, name, city);
-        s2.setKey(customers.get(0).getName());
+        Variable name = new Variable(new QualifiedName("name", customerArchetype.getQualifiedName()));
+        Variable customerCity = new Variable(new QualifiedName("city", customerArchetype.getQualifiedName()));
+        Evaluator expression = new Evaluator(customerCity, "==", city);
+        Evaluator cityMatch = new Evaluator(new QualifiedName("city", customerArchetype.getQualifiedName()), expression, "&&", Orientation.unary_postfix);
+        Template customerTemplate = new Template(customerArchetype, name, cityMatch);
+        customerTemplate.setKey("customer");
         List<Template> templateList = new ArrayList<Template>();
-        templateList.add(s1);
-        templateList.add(s2);
+        templateList.add(chargeTemplate);
+        templateList.add(customerTemplate);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
         QueryExecuter query = new QueryExecuter(queryParams);
-        assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
+        //System.out.println(query.toString());
+        assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city?city==city)");
         int index = 0;
         while (query.execute())
+            //System.out.println(query.toString());
             assertThat(query.toString()).isEqualTo(GREEK_BUSINESS[index++]);
     }
 
@@ -348,35 +350,46 @@ public class QueryExecuterTest
             public boolean isEmpty() {
                 return false;
             }};
-        Variable city = new TestVariable("city");
-        Variable charge = new TestVariable("charge");
-        Variable name = new TestVariable("name");
         TemplateArchetype chargeArchetype = new TemplateArchetype(parseTemplateName("charge"));
-        Template s1 = new Template(chargeArchetype, city, charge);
-        s1.setKey(charges.get(0).getName());
+        Variable city = new Variable(new QualifiedName("city", chargeArchetype.getQualifiedName()));
+        Variable charge = new Variable(new QualifiedName("charge", chargeArchetype.getQualifiedName()));
+        Template chargeTemplate = new Template(chargeArchetype, city, charge);
+        chargeTemplate.getParserTask().run();
+        chargeTemplate.setKey("charge");
         TemplateArchetype customerArchetype = new TemplateArchetype(parseTemplateName("customer"));
-        Template s2 = new Template(customerArchetype, name, city);
-        s2.setKey(customers.get(0).getName());
+        Variable name = new Variable(new QualifiedName("name", customerArchetype.getQualifiedName()));
+        Variable customerCity = new Variable(new QualifiedName("city", customerArchetype.getQualifiedName()));
+        Evaluator expression = new Evaluator(customerCity, "==", city);
+        Evaluator cityMatch = new Evaluator(new QualifiedName("city", customerArchetype.getQualifiedName()), expression, "&&", Orientation.unary_postfix);
+        Template customerTemplate = new Template(customerArchetype, name, cityMatch);
+        customerTemplate.getParserTask().run();
+        customerTemplate.setKey("customer");
         List<Template> templateList = new ArrayList<Template>();
-        templateList.add(s1);
-        templateList.add(s2);
+        templateList.add(chargeTemplate);
+        templateList.add(customerTemplate);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
         QueryExecuter query = new QueryExecuter(queryParams);
-        Evaluator expression = new TestEvaluator(new StringOperand(QualifiedName.parseName("name", new QualifiedTemplateName(QualifiedName.EMPTY, "account"))), "==", new TestStringOperand("name"));
-        Evaluator invoice = new TestEvaluator("name", expression, "&&");
-        Variable fee = new TestVariable("fee");
+        //while (query.execute())
+        //   System.out.println(query.toString());
         TemplateArchetype accountArchetype = new TemplateArchetype(parseTemplateName("account"));
-        Template account = new Template(accountArchetype, invoice, fee);
+        StringOperand accountNameOperand = new StringOperand(new QualifiedName("name", accountArchetype.getQualifiedName()));
+        Evaluator expression2 = new Evaluator(accountNameOperand, "==", name);
+        Evaluator nameMatch = new Evaluator(accountNameOperand.getQualifiedName(), expression2, "&&", Orientation.unary_postfix);
+        Variable fee = new Variable(new QualifiedName("fee", accountArchetype.getQualifiedName()));
+        Template account = new Template(accountArchetype, nameMatch, fee);
+        account.getParserTask().run();
         account.setKey("fee");
         query.chain(ensemble, Collections.singletonList(account));
         //System.out.println(query.toString());
-        assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
+        //assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city?city==city)");
         int index = 0;
         while (query.execute())
-            assertThat(query.toString()).isEqualTo(GREEK_BUSINESS[index++]);
-            //System.out.println(query.toString());
+        {
+            //System.out.println(query.getSolution().getAxiom("account").toString());
+            assertThat(query.getSolution().getAxiom("account").toString()).isEqualTo(GREEK_FEE[index++]);
+       }
     }
     
     @Test
@@ -388,32 +401,41 @@ public class QueryExecuterTest
         ParserContext context = new ParserContext(queryProgram);
         queryParser.input(context);
         final ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
-        QuerySpec querySpec = new QuerySpec("TEST");
-        Variable city = new TestVariable("city");
-        Variable charge = new TestVariable("charge");
-        Variable name = new TestVariable("name");
         parserAssembler.getTemplateAssembler().createTemplate(parseTemplateName("charge"), false);
-        Template s1 = parserAssembler.getTemplateAssembler().getTemplate(parseTemplateName("charge"));
-        s1.addTerm(city);
-        s1.addTerm(charge);
-        s1.setKey(charges.get(0).getName());
-        KeyName keyName1 = new KeyName(s1.getKey(), "charge");
-        querySpec.addKeyName(keyName1);
+        Template chargeTemplate = parserAssembler.getTemplateAssembler().getTemplate(parseTemplateName("charge"));
+        Variable city = new Variable(new QualifiedName("city", chargeTemplate.getQualifiedName()));
+        Variable charge = new Variable(new QualifiedName("charge", chargeTemplate.getQualifiedName()));
+        chargeTemplate.addTerm(city);
+        chargeTemplate.addTerm(charge);
+        chargeTemplate.getParserTask().run();
+        chargeTemplate.setKey(charges.get(0).getName());
         parserAssembler.getTemplateAssembler().createTemplate(parseTemplateName("customer"), false);
-        Template s2 = parserAssembler.getTemplateAssembler().getTemplate(parseTemplateName("customer"));
-        s2.addTerm(name);
-        s2.addTerm(city);
-        s2.setKey(customers.get(0).getName());
-        KeyName keyName2 = new KeyName(s2.getKey(), "customer");
+        Template customerTemplate = parserAssembler.getTemplateAssembler().getTemplate(parseTemplateName("customer"));
+        Variable name = new Variable(new QualifiedName("name", customerTemplate.getQualifiedName()));
+        Variable customerCity = new Variable(new QualifiedName("city", customerTemplate.getQualifiedName()));
+        Evaluator expression = new Evaluator(customerCity, "==", city);
+        Evaluator cityMatch = new Evaluator(new QualifiedName("city", customerTemplate.getQualifiedName()), expression, "&&", Orientation.unary_postfix);
+        customerTemplate.addTerm(name);
+        customerTemplate.addTerm(cityMatch);
+        customerTemplate.setKey("customer");
+        customerTemplate.getParserTask().run();
+        KeyName keyName1 = new KeyName("charge", "charge");
+        QuerySpec querySpec = new QuerySpec("TEST");
+        querySpec.addKeyName(keyName1);
+        KeyName keyName2 = new KeyName("customer", "customer");
         querySpec.addKeyName(keyName2);
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
         QueryExecuter query = new QueryExecuter(queryParams);
-        Evaluator expression = new TestEvaluator(new TestStringOperand("name"), "==", name);
-        Evaluator nameMatch = new TestEvaluator("name", expression, "&&");
-        Variable fee = new TestVariable("fee");
+        //while (query.execute())
+        //    System.out.println(query.toString());
         TemplateArchetype accountArchetype = new TemplateArchetype(parseTemplateName("account"));
+        StringOperand accountNameOperand = new StringOperand(new QualifiedName("name", accountArchetype.getQualifiedName()));
+        Evaluator expression2 = new Evaluator(accountNameOperand, "==", name);
+        Evaluator nameMatch = new Evaluator(new QualifiedName("name", accountArchetype.getQualifiedName()), expression2, "&&", Orientation.unary_postfix);
+        Variable fee = new Variable(new QualifiedName("fee", accountArchetype.getQualifiedName()));
         Template account = new Template(accountArchetype, nameMatch, fee);
+        account.getParserTask().run();
         account.setKey("fee");
         AxiomCollection axiomEnsemble = new AxiomCollection(){
 
@@ -428,11 +450,15 @@ public class QueryExecuterTest
             }};
 
         query.chain(axiomEnsemble, Collections.singletonList(account));
-        Evaluator expression2 = new TestEvaluator(new TestStringOperand("city"), "==", city);
-        Evaluator cityMatch = new TestEvaluator("city", expression2, "&&");
-        Variable freight = new TestVariable("freight");
+        //while (query.execute())
+        //    System.out.println(query.getSolution().getAxiom("account").toString());
         TemplateArchetype deliveryArchetype = new TemplateArchetype(parseTemplateName("delivery"));
-        Template delivery = new Template(deliveryArchetype, cityMatch, freight);
+        StringOperand deliveryCityOperand = new StringOperand(new QualifiedName("city", deliveryArchetype.getQualifiedName()));
+        Evaluator expression3 = new Evaluator(deliveryCityOperand, "==", city);
+        Evaluator cityMatch2 = new Evaluator(new QualifiedName("city", deliveryArchetype.getQualifiedName()), expression3, "&&", Orientation.unary_postfix);
+        Variable freight = new Variable(new QualifiedName("freight", deliveryArchetype.getQualifiedName()));
+        Template delivery = new Template(deliveryArchetype, cityMatch2, freight);
+        delivery.getParserTask().run();
         delivery.setKey("freight");
         query.chain(axiomEnsemble, Collections.singletonList(delivery));
         int index = 0;
@@ -471,18 +497,20 @@ public class QueryExecuterTest
         QualifiedName chargeTemplateName = parseTemplateName("charge");
         Variable city = new Variable(QualifiedName.parseName("city", chargeTemplateName));
         Variable charge = new Variable(QualifiedName.parseName("charge", chargeTemplateName));
-        TemplateArchetype s1Archetype = new TemplateArchetype(chargeTemplateName);
-        Template s1 = new Template(s1Archetype, city, charge);
-        s1.setKey(charges.get(0).getName());
+        TemplateArchetype chargeArchetype = new TemplateArchetype(chargeTemplateName);
+        Template chargeTemplate = new Template(chargeArchetype, city, charge);
+        chargeTemplate.getParserTask().run();
+        chargeTemplate.setKey("charge");
         QualifiedName customerTemplateName = parseTemplateName("customer");
         Variable name = new Variable(QualifiedName.parseName("name", customerTemplateName));
         Variable city2 = new Variable(QualifiedName.parseName("city", customerTemplateName));
-        TemplateArchetype s2Archetype = new TemplateArchetype(customerTemplateName);
-        Template s2 = new Template(s2Archetype, name, city2);
-        s2.setKey(customers.get(0).getName());
+        TemplateArchetype customerArchetype = new TemplateArchetype(customerTemplateName);
+        Template customerTemplate = new Template(customerArchetype, name, city2);
+        customerTemplate.getParserTask().run();
+        customerTemplate.setKey(customers.get(0).getName());
         List<Template> templateList = new ArrayList<Template>();
-        templateList.add(s1);
-        templateList.add(s2);
+        templateList.add(chargeTemplate);
+        templateList.add(customerTemplate);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
@@ -493,6 +521,7 @@ public class QueryExecuterTest
         Variable fee = new Variable(QualifiedName.parseName("fee", accountTemplateName));
         TemplateArchetype accountArchetype = new TemplateArchetype(accountTemplateName);
         Template account = new Template(accountArchetype, nameMatch, fee);
+        account.getParserTask().run();
         account.setKey("fee");
         QualifiedName deliveryTemplateName = parseTemplateName("delivery");
         Evaluator expression2 = new Evaluator(new StringOperand(QualifiedName.parseName("city", deliveryTemplateName)), "==", city2);
@@ -500,6 +529,7 @@ public class QueryExecuterTest
         Variable freight = new Variable(QualifiedName.parseName("freight", deliveryTemplateName));
         TemplateArchetype deliveryArchetype = new TemplateArchetype(deliveryTemplateName);
         Template delivery = new Template(deliveryArchetype, cityMatch, freight);
+        delivery.getParserTask().run();
         delivery.setKey("freight");
         List<Template> chainTemplateList = new ArrayList<Template>(2);
         chainTemplateList.add(account);
@@ -510,6 +540,7 @@ public class QueryExecuterTest
         Operand spartaLiteral = new LiteralListOperand(spartaLitListName, Collections.singletonList(new Parameter(Term.ANONYMOUS, "Sparta")));
         TemplateArchetype spartaOnlyArchetype = new TemplateArchetype(spartaOnlyName);
         Template spartaOnly = new Template(spartaOnlyArchetype, spartaLiteral);
+        spartaOnly.getParserTask().run();
         spartaOnly.setKey("spartaOnly");
         query.chain(ensemble, Collections.singletonList(spartaOnly));
         //System.out.println(query.toString());
@@ -550,32 +581,35 @@ public class QueryExecuterTest
             public boolean isEmpty() {
                 return false;
             }};
-        Variable city = new TestVariable("city");
-        Variable charge = new TestVariable("charge");
-        Variable name = new TestVariable("name");
-        QualifiedName chargeTemplateName = parseTemplateName("charge");
-        TemplateArchetype chargeArchetype = new TemplateArchetype(chargeTemplateName);
-        Template s1 = new Template(chargeArchetype, city, charge);
-        s1.setKey(charges.get(0).getName());
+        TemplateArchetype chargeArchetype = new TemplateArchetype(parseTemplateName("charge"));
+        Variable city = new Variable(new QualifiedName("city", chargeArchetype.getQualifiedName()));
+        Variable charge = new Variable(new QualifiedName("charge", chargeArchetype.getQualifiedName()));
+        Template chargeTemplate = new Template(chargeArchetype, city, charge);
+        chargeTemplate.getParserTask().run();
+        chargeTemplate.setKey("charge");
         TemplateArchetype customerArchetype = new TemplateArchetype(parseTemplateName("customer"));
-        Template s2 = new Template(customerArchetype, name, city);
-        s2.setKey(customers.get(0).getName());
+        Variable name = new Variable(new QualifiedName("name", customerArchetype.getQualifiedName()));
+        Variable customerCity = new Variable(new QualifiedName("city", customerArchetype.getQualifiedName()));
+        Evaluator expression = new Evaluator(customerCity, "==", city);
+        Evaluator cityMatch = new Evaluator(new QualifiedName("city", customerArchetype.getQualifiedName()), expression, "&&", Orientation.unary_postfix);
+        Template customerTemplate = new Template(customerArchetype, name, cityMatch);
+        customerTemplate.getParserTask().run();
+        customerTemplate.setKey("customer");
         List<Template> templateList = new ArrayList<Template>();
-        templateList.add(s1);
-        templateList.add(s2);
+        templateList.add(chargeTemplate);
+        templateList.add(customerTemplate);
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
         QueryExecuter query = new QueryExecuter(queryParams);
-        Evaluator expression = new TestEvaluator(new TestBooleanOperand("True", Boolean.TRUE), "==", new TestBooleanOperand("True2", Boolean.TRUE));
-        Evaluator invoice = new TestEvaluator("name", expression, "||");
-        Variable fee = new TestVariable("fee");
         TemplateArchetype accountArchetype = new TemplateArchetype(parseTemplateName("account"));
+        Evaluator expression2 = new Evaluator(new TestBooleanOperand("True", Boolean.TRUE), "==", new TestBooleanOperand("True2", Boolean.TRUE));
+        Evaluator invoice = new Evaluator(new QualifiedName("name", accountArchetype.getQualifiedName()), expression2, "||", Orientation.unary_postfix);
+        Variable fee = new Variable(new QualifiedName("fee", accountArchetype.getQualifiedName()));
         Template account = new Template(accountArchetype, invoice, fee);
+        account.getParserTask().run();
         account.setKey("fee");
         query.chain(ensemble, Collections.singletonList(account));
-        //System.out.println(query.toString());
-        assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
         assertThat(query.execute()).isFalse();
         List<LogicQuery> logicQueryList = query.logicQueryList;
         assertThat(logicQueryList.get(0).getQueryStatus()).isEqualTo(QueryStatus.complete);
@@ -585,10 +619,11 @@ public class QueryExecuterTest
     @Test 
     public void test_query_logic_axiom_listener() throws Exception
     {
-        StringOperand name = new TestStringOperand("name");
-        IntegerOperand altitude = new TestIntegerOperand("altitude");
         TemplateArchetype cityArchetype = new TemplateArchetype(parseTemplateName("city"));
+        StringOperand name = new StringOperand(new QualifiedName("name", cityArchetype.getQualifiedName()));
+        IntegerOperand altitude = new IntegerOperand(new QualifiedName("altitude", cityArchetype.getQualifiedName()));
         Template cities = new Template(cityArchetype, name, altitude);
+        cities.getParserTask().run();
         AxiomListener axiomListener = new AxiomListener(){
             int i;
             @Override
@@ -647,19 +682,21 @@ public class QueryExecuterTest
         Variable city = new Variable(QualifiedName.parseName("city", chargeTemplateName));
         Variable charge = new Variable(QualifiedName.parseName("charge", chargeTemplateName));
         TemplateArchetype s1Archetype = new TemplateArchetype(chargeTemplateName);
-        Template s1 = new Template(s1Archetype, city, charge);
-        s1.setKey("charge");
+        Template chargeTemplate = new Template(s1Archetype, city, charge);
+        chargeTemplate.getParserTask().run();
+        chargeTemplate.setKey("charge");
         QualifiedName chargeAxiomName = new QualifiedName("charge");
         QualifiedName customerTemplateName = parseTemplateName("customer");
         Variable name = new Variable(QualifiedName.parseName("name", customerTemplateName));
         Variable city2 = new Variable(QualifiedName.parseName("city", customerTemplateName));
         TemplateArchetype s2Archetype = new TemplateArchetype(customerTemplateName);
-        Template s2 = new Template(s2Archetype, name, city2);
-        s2.setKey("customer");
+        Template customerTemplate = new Template(s2Archetype, name, city2);
+        customerTemplate.getParserTask().run();
+        customerTemplate.setKey("customer");
         QualifiedName customerAxiomName = new QualifiedName("customer");
         List<Template> templateList = new ArrayList<Template>();
-        templateList.add(s1);
-        templateList.add(s2);
+        templateList.add(chargeTemplate);
+        templateList.add(customerTemplate);
         final MultQueryTracer multiQueryTracer = new MultQueryTracer();
         AxiomListener axiomListener1 = new AxiomListener(){
             @Override
@@ -706,9 +743,9 @@ public class QueryExecuterTest
         when(scope.findAxiomSource(chargeAxiomName)).thenReturn(new AxiomListSource(charges));
         when(scope.findAxiomSource(customerAxiomName)).thenReturn(new AxiomListSource(customers));
         KeyName keyName1 = new KeyName("charge", "charge");
-        when(scope.getTemplate(keyName1.getTemplateName())).thenReturn(s1);
+        when(scope.getTemplate(keyName1.getTemplateName())).thenReturn(chargeTemplate);
         KeyName keyName2 = new KeyName("customer", "customer");
-        when(scope.getTemplate(keyName2.getTemplateName())).thenReturn(s2);
+        when(scope.getTemplate(keyName2.getTemplateName())).thenReturn(customerTemplate);
         ListAssembler listAssembler = mock(ListAssembler.class);
         when(parserAssembler.getListAssembler()).thenReturn(listAssembler);
         when(listAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
@@ -724,6 +761,7 @@ public class QueryExecuterTest
         Variable fee = new Variable(QualifiedName.parseName("fee", accountTemplateName));
         TemplateArchetype accountArchetype = new TemplateArchetype(accountTemplateName);
         Template account = new Template(accountArchetype, nameMatch, fee);
+        account.getParserTask().run();
         account.setKey("fee");
         QualifiedName feeAxiomName = new QualifiedName("fee");
         when(scope.findAxiomSource(feeAxiomName)).thenReturn(new AxiomListSource(fees));
@@ -733,6 +771,7 @@ public class QueryExecuterTest
         Variable freight = new Variable(QualifiedName.parseName("freight", deliveryTemplateName));
         TemplateArchetype deliveryArchetype = new TemplateArchetype(deliveryTemplateName);
         Template delivery = new Template(deliveryArchetype, cityMatch, freight);
+        delivery.getParserTask().run();
         delivery.setKey("freight");
         QualifiedName freightAxiomName = new QualifiedName("freight");
         when(scope.findAxiomSource(freightAxiomName)).thenReturn(new AxiomListSource(freights));
@@ -745,6 +784,7 @@ public class QueryExecuterTest
         Operand spartaLiteral = new LiteralListOperand(spartaLitListName, Collections.singletonList(new Parameter(Term.ANONYMOUS, "Sparta")));
         TemplateArchetype spartaOnlyArchetype = new TemplateArchetype(spartaOnlyName);
         Template spartaOnly = new Template(spartaOnlyArchetype, spartaLiteral);
+        spartaOnly.getParserTask().run();
         spartaOnly.setKey("spartaOnly");
         query.chain(ensemble, Collections.singletonList(spartaOnly));
         //System.out.println(query.toString());

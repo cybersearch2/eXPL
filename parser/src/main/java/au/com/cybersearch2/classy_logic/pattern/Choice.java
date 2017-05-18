@@ -163,6 +163,7 @@ public class Choice
 		}
 		Parameter selectionTerm = new Parameter(template.getName(), (long)selection);
         solutionAxiom.addTerm(selectionTerm);
+        solutionAxiom.getArchetype().clearMutable();
 		solution.put(template.getQualifiedName().toString(), solutionAxiom);
 		return true;
 	}

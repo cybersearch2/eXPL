@@ -25,6 +25,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
+import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
@@ -39,6 +40,8 @@ import au.com.cybersearch2.classy_logic.query.QueryLauncher;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.query.QueryType;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.LiteralParameter;
+import au.com.cybersearch2.classy_logic.terms.LiteralType;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -276,9 +279,22 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
                                 term = new Parameter(termName);
                             innerAxiom.addTerm(term);
                         }
+                        innerAxiom.getArchetype().clearMutable();
                         axiomTermListInstance(id).setAxiom(innerAxiom);
                     }
                 }
+            }
+            else
+            {
+                Axiom innerAxiom = new Axiom(innerTemplate.getKey());
+                for (int i = 0; i < (innerTemplate.getTermCount()); i++)
+                {
+                    String termName = innerTemplate.getTermByIndex(i).getName();
+                    Term term = new LiteralParameter(termName, new Unknown(), LiteralType.unknown);
+                    innerAxiom.addTerm(term);
+                }
+                innerAxiom.getArchetype().clearMutable();
+                axiomTermListInstance(id).setAxiom(innerAxiom);
             }
             return true;
         }};

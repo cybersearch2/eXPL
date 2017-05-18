@@ -16,13 +16,7 @@
 package au.com.cybersearch2.classy_logic.pattern;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-//import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
-//import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Before;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
@@ -30,7 +24,6 @@ import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
-import au.com.cybersearch2.classy_logic.terms.StringTerm;
 
 /**
  * TemplateArchetypeTest

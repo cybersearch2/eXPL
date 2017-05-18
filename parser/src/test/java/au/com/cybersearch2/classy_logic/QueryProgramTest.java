@@ -263,7 +263,6 @@ public class QueryProgramTest
 		parserAssembler.getListAssembler().createAxiomItemList(Q_AXIOM_NAME);
 		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME, false);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
-		variable.assign(new Parameter(Term.ANONYMOUS, Integer.valueOf(0)));
 		parserAssembler.getTemplateAssembler().addTemplate(Q_TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
 		parserAssembler.getAxiomAssembler().addAxiom(Q_AXIOM_NAME, param);

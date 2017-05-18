@@ -94,6 +94,7 @@ public class RegExTest
 		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Definition"), "^(.)\\. (.*+)", 0, group);
 		dictionaryTemplate.addTerm(new TestStringOperand("Word"));
 		dictionaryTemplate.addTerm(regExOperand);
+		dictionaryTemplate.getParserTask().run();
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(dictionaryTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();

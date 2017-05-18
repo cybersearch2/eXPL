@@ -161,6 +161,7 @@ public class QueryExecuterAdapter
             Template newTemplate = parserAssembler.getTemplateAssembler().getTemplate(qname);
             for (int i = 0; i < template.getTermCount(); i++)
                 newTemplate.addTerm((Operand)template.getTermByIndex(i));
+            newTemplate.getParserTask().run();
         }
     }
     

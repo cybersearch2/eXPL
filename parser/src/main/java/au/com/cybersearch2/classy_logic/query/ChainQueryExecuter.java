@@ -85,11 +85,13 @@ public class ChainQueryExecuter
     {
 		if (axiomListenerMap != null)
 			bindAxiomListeners(scope);
-		if ((headChainQuery == null) ||
-			    // Query chain will add to solution or trigger short circuit
-			    (headChainQuery.executeQuery(solution, templateChain) == EvaluationStatus.COMPLETE))
-				return true;
-		return false;
+		if (headChainQuery != null)
+		{
+		    // Query chain will add to solution or trigger short circuit
+		    headChainQuery.backup();
+		    return (headChainQuery.executeQuery(solution, templateChain) == EvaluationStatus.COMPLETE);
+		}
+		return true;
     }
 
 	/**

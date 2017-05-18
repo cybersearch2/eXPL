@@ -177,51 +177,70 @@ public class Evaluator extends DelegateOperand
     	// Otherwise, delegate will be set on value assigment
     	presetDelegate();
     	// Now perform evaluation, depending on status of left and right terms
-		Object result = null;
-	   	if (orientation == Orientation.unary_postfix)
-	   	{   // Postfix unary operation.
-	   	    // Result will automatically be NaN if left Term value is NaN
-	   		result = left.getValue();
-	   		if (!leftIsNaN)
-	   		{
-	   			Number post = left.getOperator().numberEvaluation(operatorEnum, left);
-	   			left.setValue(post);
-	   		}
-	   	}
-	   	else if (orientation == Orientation.unary_prefix)
-	   	{   // Prefix unary operation.
-	   		if (rightIsNaN)
-	   			result = right.getValue();
-	   		else
-	   			result = doPrefixUnary();
-	   	}
-	   	else
-	   	{
-	   		if (leftIsNaN)
-	   			result = left.getValue();
-	   		else if (rightIsNaN)
-	   			result = right.getValue();
-	   		else
-	   		{
-		   		result = calculate(left, right, id);
-		   		// Assign operation updates left term with result
-				switch (operatorEnum)
-				{
-		   			case PLUSASSIGN: // "+"
-		   			case MINUSASSIGN: // "-"
-		   			case STARASSIGN: // "*"
-		   			case SLASHASSIGN: // "/"
-		   			case ANDASSIGN: // "&"
-		   			case ORASSIGN: // "|"
-		   			case XORASSIGN: // "^"
-		   			case REMASSIGN: // "%"
-	                left.setValue(result);
-	                default:
-		   		}
-	   		}
-	   	}
+        Object result = null;
+    	switch (orientation)
+    	{
+    	case binary:
+    	    result = evaluateBinary(id, leftIsNaN, rightIsNaN); break;
+    	case unary_prefix:
+    	    result = evaluatePreFix(rightIsNaN); break;
+    	case unary_postfix:
+    	    result = evaluatePostFix(leftIsNaN); break;
+    	}
 	   	return setResult(result, id);
 	}
+
+    Object evaluateBinary(int id, boolean leftIsNaN, boolean rightIsNaN)
+    {
+        Object result = null;
+        if (!leftIsNaN && !rightIsNaN)
+        {
+            result = calculate(left, right, id);
+            // Assign operation updates left term with result
+            switch (operatorEnum)
+            {
+                case PLUSASSIGN: // "+"
+                case MINUSASSIGN: // "-"
+                case STARASSIGN: // "*"
+                case SLASHASSIGN: // "/"
+                case ANDASSIGN: // "&"
+                case ORASSIGN: // "|"
+                case XORASSIGN: // "^"
+                case REMASSIGN: // "%"
+                left.setValue(result);
+                default:
+            }
+        }
+        else if (leftIsNaN)
+            result = left.getValue();
+        else 
+            result = right.getValue();
+        return result;
+    }
+
+    Object evaluatePreFix(boolean rightIsNaN)
+    {
+        Object result = null;
+        // Prefix unary operation.
+        if (rightIsNaN)
+            result = right.getValue();
+        else
+            result = doPrefixUnary();
+        return result;
+    }
+    
+    Object evaluatePostFix(boolean leftIsNaN)
+    {
+        // Postfix unary operation.
+        // Result will automatically be NaN if left Term value is NaN
+        Object result = left.getValue();
+        if (!leftIsNaN)
+        {
+            Number post = left.getOperator().numberEvaluation(operatorEnum, left);
+            left.setValue(post);
+        }
+        return result;
+    }
 
 	/**
 	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 

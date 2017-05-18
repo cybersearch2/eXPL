@@ -503,19 +503,21 @@ public class LogicQueryTest
 	@Test
 	public void test_iterate_sole_soution_found()
 	{
+        Solution solution = new Solution();
 		final Axiom axiom = mock(Axiom.class);
 		Axiom solutionAxiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
 		Template template = mock(Template.class);
 		OperandWalker operandWalker = mock(OperandWalker.class);
-		when(operandWalker.visitAllNodes(isA(OperandVisitor.class))).thenReturn(true);
+		SolutionPairer pairer = mock(SolutionPairer.class);
+        when(template.getSolutionPairer(solution)).thenReturn(pairer);
+		when(operandWalker.visitAllNodes(pairer)).thenReturn(true);
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getOperandWalker()).thenReturn(operandWalker);
 		when(template.getKey()).thenReturn(NAME);
 		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
-		Solution solution = new Solution();
 		solution.put(NAME, solutionAxiom);
 		when(template.unify(axiom, solution)).thenReturn(true);
 		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
@@ -552,7 +554,6 @@ public class LogicQueryTest
 		query.setAxiomListener(axiomListener);
 		query.iterate(solution, template);
 		template.backup(true);
-		query.iterate(solution, template);
 		assertThat(count[0]).isEqualTo(2);
 	}
 	
