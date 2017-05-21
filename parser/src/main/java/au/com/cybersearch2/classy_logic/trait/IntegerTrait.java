@@ -21,7 +21,6 @@ import java.util.Scanner;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -60,15 +59,15 @@ public class IntegerTrait extends NumberTrait<Long>
 
     /**
      * cloneFromOperand
-     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand, Operand)
+     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand)
      */
     @Override
-    public IntegerOperand cloneFromOperand(StringOperand stringOperand, Operand expression)
+    public IntegerOperand cloneFromOperand(StringOperand stringOperand)
     {
         IntegerOperand clone = 
-            expression == null ? 
+            stringOperand.getLeftOperand() == null ? 
             new IntegerOperand(stringOperand.getQualifiedName(), 0) :
-            new IntegerOperand(stringOperand.getQualifiedName(), expression);
+            new IntegerOperand(stringOperand.getQualifiedName(), stringOperand.getLeftOperand());
         Parameter param = new Parameter(Term.ANONYMOUS, stringOperand.getValue().toString());
         param.setId(stringOperand.getId());
         Locale locale = stringOperand.getOperator().getTrait().getLocale();

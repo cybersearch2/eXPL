@@ -100,16 +100,8 @@ public class RegExOperand extends StringOperand
 		// Note id not required as this object id is set during unification
 		if (!isEmpty())
 		{
-			try
-			{
-				pattern = Pattern.compile(regex, flags | REGEX_DEFAULT_FLAGS);
-			}
-			catch(PatternSyntaxException e)
-			{
-				throw new ExpressionException("Error in regular expression", e);
-			}
 			// Retain value on match
-			Matcher matcher = pattern.matcher(value.toString());
+			Matcher matcher = getMatcher();
 			boolean isMatch = matcher.find();
 			if (!isMatch) // No match is same as unification failed
 				clearValue();
@@ -150,9 +142,14 @@ public class RegExOperand extends StringOperand
 	@Override
 	public String toString()
 	{
-		if (empty)
-			return getName() + " \\" + regex + "\\";
-		return super.toString();
+	    if (regex.isEmpty() && (regexOp != null) && !regexOp.isEmpty())
+            regex = regexOp.getValue().toString();
+		if (empty || regex.isEmpty())
+		    return getName() + " \\" + regex + "\\";
+		String text = super.toString();
+        if (!getMatcher().find())
+            text += ": false";
+        return text;
 	}
 
 	/**
@@ -178,4 +175,17 @@ public class RegExOperand extends StringOperand
 		return regexOp;
 	}
 
+	protected Matcher getMatcher()
+	{
+        try
+        {
+            pattern = Pattern.compile(regex, flags | REGEX_DEFAULT_FLAGS);
+        }
+        catch(PatternSyntaxException e)
+        {
+            throw new ExpressionException("Error in regular expression", e);
+        }
+        // Retain value on match
+        return pattern.matcher(value.toString());
+	}
 }

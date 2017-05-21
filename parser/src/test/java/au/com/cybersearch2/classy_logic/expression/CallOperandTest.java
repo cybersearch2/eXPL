@@ -26,6 +26,7 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
@@ -71,6 +72,11 @@ public class CallOperandTest
                         //System.out.println();
                         return null;
                     }
+
+                    @Override
+                    public void setExecutionContext(ExecutionContext context)
+                    {
+                    }
                     
             };
             throw new ExpressionException("Unknown function identifier: " + identifier);
@@ -111,6 +117,11 @@ public class CallOperandTest
                         }
                         return Long.valueOf(addendum);
                     }
+
+                    @Override
+                    public void setExecutionContext(ExecutionContext context)
+                    {
+                    }
                 };
             if (identifier.equals("avg"))
                 return new CallEvaluator<Number>(){
@@ -133,6 +144,11 @@ public class CallOperandTest
                             avaerage += param.longValue();
                         }
                         return Long.valueOf(avaerage / argumentList.size());
+                    }
+
+                    @Override
+                    public void setExecutionContext(ExecutionContext context)
+                    {
                     }};
              throw new ExpressionException("Unknown function identifier: " + identifier);
         }
@@ -185,6 +201,11 @@ public class CallOperandTest
                         }
                     }
                     return Long.valueOf(total);
+                }
+
+                @Override
+                public void setExecutionContext(ExecutionContext context)
+                {
                 }
             };
         }
@@ -612,6 +633,7 @@ public class CallOperandTest
     public void test_gemini_people()
     {
         queryProgram.parseScript(PERFECT_MATCH);
+        //queryProgram.setExecutionContext(new ExecutionContext());
         Result result = queryProgram.executeQuery("match");
         QualifiedName qname = QualifiedName.parseGlobalName("geminis");
         Iterator<Axiom> iterator = result.getIterator(qname);
@@ -649,6 +671,7 @@ public class CallOperandTest
     public void test_sort_cities()
     {
         queryProgram.parseScript(SORTED_CITIES);
+        //queryProgram.setExecutionContext(new ExecutionContext());
         Result result = queryProgram.executeQuery("sort_cities");
         Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("city_list"));
         int index = 0;

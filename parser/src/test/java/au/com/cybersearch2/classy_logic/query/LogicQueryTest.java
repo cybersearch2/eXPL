@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.axiom.AxiomListSource;
 import au.com.cybersearch2.classy_logic.axiom.EmptyAxiomSource;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;
@@ -129,7 +130,7 @@ public class LogicQueryTest
 		};
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource);
-		assertThat(logicQuery.iterate(solution, template)).isFalse();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isFalse();
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 	}
 
@@ -145,7 +146,7 @@ public class LogicQueryTest
 		when(template.getName()).thenReturn(NAME);
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getKey()).thenReturn(KEY);
-		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+		when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
@@ -170,7 +171,7 @@ public class LogicQueryTest
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
-		assertThat(logicQuery.iterate(solution, template)).isTrue();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isTrue();
 		assertThat(solution.getAxiom(NAME)).isEqualTo(solutionAxiom);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.in_progress);
 	}
@@ -190,7 +191,7 @@ public class LogicQueryTest
 		when(template.getKey()).thenReturn(KEY);
 		when(template.getName()).thenReturn(NAME);
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
-		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+		when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		when(template.unify(axiom, solution)).thenReturn(true);
@@ -214,7 +215,7 @@ public class LogicQueryTest
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource, solutionHandler);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
-		assertThat(logicQuery.iterate(solution, template)).isTrue();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isTrue();
 		assertThat(solution.getAxiom(NAME)).isEqualTo(solutionAxiom);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.in_progress);
 	}
@@ -234,7 +235,7 @@ public class LogicQueryTest
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
         when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
-		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+		when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		when(template.unify(axiom, solution)).thenReturn(true);
@@ -258,7 +259,7 @@ public class LogicQueryTest
 		};
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource, solutionHandler);
-		assertThat(logicQuery.iterate(solution, template)).isFalse();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isFalse();
         Axiom blankAxiom = solution.getAxiom(NAME);
 		assertThat(blankAxiom.getTermCount()).isEqualTo(0);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
@@ -277,7 +278,7 @@ public class LogicQueryTest
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
         when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
-		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+		when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(false);
 		when(template.unify(axiom, solution)).thenReturn(true);
 		final Iterator<Axiom> iterator = 	new Iterator<Axiom>(){
@@ -300,7 +301,7 @@ public class LogicQueryTest
 		};
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource, solutionHandler);
-		assertThat(logicQuery.iterate(solution, template)).isFalse();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isFalse();
 		Axiom blankAxiom = solution.getAxiom(NAME);
 		assertThat(blankAxiom.getTermCount()).isEqualTo(0);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
@@ -320,7 +321,7 @@ public class LogicQueryTest
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
         when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
-		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+		when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		when(template.getOperandWalker()).thenReturn(operandWalker);
@@ -346,8 +347,8 @@ public class LogicQueryTest
 		};
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource);
-		assertThat(logicQuery.iterate(solution, template)).isTrue();
-		assertThat(logicQuery.iterate(solution, template)).isFalse();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isTrue();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isFalse();
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 	}
 
@@ -362,7 +363,7 @@ public class LogicQueryTest
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
-		when(template.evaluate()).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
+		when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
@@ -387,7 +388,7 @@ public class LogicQueryTest
 		};
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource);
-		assertThat(logicQuery.iterate(solution, template)).isFalse();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isFalse();
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 		verify(template).backup(true);
 	}
@@ -427,7 +428,7 @@ public class LogicQueryTest
 		};
 		when(axiomSource.iterator()).thenReturn(iterator);
 		LogicQuery logicQuery = new LogicQuery(axiomSource);
-		assertThat(logicQuery.iterate(solution, template)).isFalse();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isFalse();
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 		verify(template).backup(true);
 	}
@@ -443,7 +444,7 @@ public class LogicQueryTest
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
         when(template.getTermCount()).thenReturn(1);
 		when(template.getKey()).thenReturn(NAME);
-		when(template.evaluate()).thenThrow(new ExpressionException("Syntax error"));
+		when(template.evaluate(isA(ExecutionContext.class))).thenThrow(new ExpressionException("Syntax error"));
 		when(template.toString()).thenReturn("surface_area(km2)");
 		final Axiom axiom = mock(Axiom.class);
 		when(axiom.getName()).thenReturn(NAME);
@@ -468,7 +469,7 @@ public class LogicQueryTest
 		when(axiomSource.iterator()).thenReturn(iterator);
 		try
 		{
-		    logicQuery.iterate(solution, template);
+		    logicQuery.iterate(solution, template, mock(ExecutionContext.class));
 		    failBecauseExceptionWasNotThrown(QueryExecutionException.class);
 		}
 		catch(QueryExecutionException e)
@@ -487,14 +488,14 @@ public class LogicQueryTest
 		Template template = mock(Template.class);
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getKey()).thenReturn(NAME);
-		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+		when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
 		when(template.unify(axiom, solution)).thenReturn(true);
 		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
-		assertThat(logicQuery.iterate(solution, template)).isFalse();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isFalse();
         Axiom blankAxiom = solution.getAxiom(NAME);
 		assertThat(blankAxiom.getTermCount()).isEqualTo(0);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
@@ -515,14 +516,14 @@ public class LogicQueryTest
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getOperandWalker()).thenReturn(operandWalker);
 		when(template.getKey()).thenReturn(NAME);
-		when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+		when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
 		when(template.isFact()).thenReturn(true);
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		solution.put(NAME, solutionAxiom);
 		when(template.unify(axiom, solution)).thenReturn(true);
 		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
-		assertThat(logicQuery.iterate(solution, template)).isTrue();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isTrue();
 		assertThat(solution.getAxiom(NAME)).isEqualTo(solutionAxiom);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 	}
@@ -552,7 +553,7 @@ public class LogicQueryTest
 			}};
 		LogicQuery query = new LogicQuery(new AxiomListSource(axiomList));
 		query.setAxiomListener(axiomListener);
-		query.iterate(solution, template);
+		query.iterate(solution, template, mock(ExecutionContext.class));
 		template.backup(true);
 		assertThat(count[0]).isEqualTo(2);
 	}

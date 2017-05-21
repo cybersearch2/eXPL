@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.query;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -32,7 +33,7 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
  * @author Andrew Bowley
  * 11 Jan 2015
  */
-public class Calculator implements SolutionFinder 
+public class Calculator implements SolutionFinder
 {
 	public static int CALCULATION_TIMEOUT_SECS = 2;
 	
@@ -61,10 +62,10 @@ public class Calculator implements SolutionFinder
      * @return Always true to indicate the query is resolved
 	 */
 	@Override
-	public boolean iterate(Solution solution, Template template)
+	public boolean iterate(Solution solution, Template template, ExecutionContext context)
 	{
 		template.initialize();
-		execute(template, solution);
+		execute(template, solution, context);
 		return true;
 	}
 	
@@ -76,10 +77,10 @@ public class Calculator implements SolutionFinder
 	 * @param template Template used on each iteration
      * @return Flag to indicate whether or not the query is resolved
 	 */
-	public boolean iterate(Axiom axiom, Solution solution, Template template)
+	public boolean iterate(Axiom axiom, Solution solution, Template template, ExecutionContext context)
 	{
 		template.initialize();
-		return execute(axiom, template, solution);
+		return execute(axiom, template, solution, context);
 	}
 	
 	/**
@@ -98,9 +99,9 @@ public class Calculator implements SolutionFinder
 	 * @param template Template used on each iteration
 	 * @param solution Container to aggregate results  
 	 */
-	public void execute(Template template, Solution solution)
+	public void execute(Template template, Solution solution, ExecutionContext context)
 	{
-		execute(null, template, solution);
+		execute(null, template, solution, context);
 	}
 	
 	/**
@@ -110,7 +111,7 @@ public class Calculator implements SolutionFinder
 	 * @param template Template used on each iteration
      * @return Flag to indicate whether or not the query is resolved
 	 */
-	public boolean execute(Axiom seedAxiom, Template template, Solution solution)
+	public boolean execute(Axiom seedAxiom, Template template, Solution solution, ExecutionContext context)
 	{
 		if (seedAxiom != null) 
 		{
@@ -139,7 +140,7 @@ public class Calculator implements SolutionFinder
             unifySolution(solution, template);
 		if (unificationSuccess)
 		{
-			if (completeSolution(solution, template))
+			if (completeSolution(solution, template, context))
 			{
 			    if (template.isReplicate())
 		            template.backup(true);
@@ -151,13 +152,13 @@ public class Calculator implements SolutionFinder
 		return false;
 	}
 
-	/**
+    /**
 	 * Complete finding solution following successful unification
 	 * @param solution Container to aggregate results  
 	 * @param template Template used on each iteration
 	 * @return Flag to indicate if the query is resolved
 	 */
-	protected boolean completeSolution(Solution solution, Template template)
+	protected boolean completeSolution(Solution solution, Template template, ExecutionContext context)
 	{
 		EvaluationStatus evaluationStatus = EvaluationStatus.SHORT_CIRCUIT;
 		try
@@ -166,7 +167,7 @@ public class Calculator implements SolutionFinder
 			// isfact() flags true if each term of the template is non-empty
 			if (choice == null)
 			{
-				evaluationStatus = template.evaluate();
+				evaluationStatus = template.evaluate(context);
 				if (evaluationStatus == EvaluationStatus.COMPLETE)
 				{
 					axiom = template.toAxiom();
@@ -177,7 +178,7 @@ public class Calculator implements SolutionFinder
 				    return evaluationStatus != EvaluationStatus.SKIP;
 			}
 			else
-				return choice.completeSolution(solution, template, axiom);
+				return choice.completeSolution(solution, template, axiom, context);
 		}
 		catch (ExpressionException e)
 		{   // evaluate() exceptions are thrown by Evaluator objects 
@@ -210,5 +211,6 @@ public class Calculator implements SolutionFinder
 		}
 		return false;
     }
+
 
 }

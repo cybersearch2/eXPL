@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -97,5 +98,10 @@ public class ParameterList<R>
                 operand.backup(id);
             }
         }
+    }
+
+    public void setExecutionContext(ExecutionContext context)
+    {
+        callEvaluator.setExecutionContext(context);
     }
 }

@@ -33,7 +33,7 @@ public class FileAxiomListenerTest
         Axiom axiom2 = new Axiom(NAME);
         axiom2.addTerm(testTerms[1]);
         File serializeFile = File.createTempFile("axiom_test_serialization", null, null);
-        System.out.println(serializeFile.toString());
+        //System.out.println(serializeFile.toString());
         serializeFile.deleteOnExit();
         FileAxiomListener underTest = new FileAxiomListener(NAME, serializeFile);
         Runnable onCloseHandler = underTest.getOnCloseHandler();

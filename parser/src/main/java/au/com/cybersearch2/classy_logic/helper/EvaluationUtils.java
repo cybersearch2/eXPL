@@ -138,7 +138,7 @@ public class EvaluationUtils
      */
     public static boolean isNaN(Operand operand, OperatorEnum operatorEnum)
     {
-        if (operand.isEmpty())
+        if ((operand == null) || operand.isEmpty())
             return false;
         Object value = operand.getValue();
         switch (operatorEnum)

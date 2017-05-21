@@ -23,7 +23,7 @@ import java.util.List;
  * @author Andrew Bowley
  * 30 Jul 2015
  */
-public interface CallEvaluator<R>
+public interface CallEvaluator<R> extends DebugTarget
 {
     /**
      * Returns name of function. Must be unique in context.

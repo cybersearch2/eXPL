@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
@@ -286,10 +287,10 @@ public class VariableType
             Operand countryOperand = (Operand)getProperty(QUALIFIER_OPERAND);
             if (countryOperand != null)
             {
-                QualifiedName countryQname = new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname);
+                //QualifiedName countryQname = new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname);
                 currencyOperand.setRightOperand(
                     new CountryOperand(
-                        countryQname, 
+                        countryOperand.getQualifiedName(), //countryQname, 
                         currencyOperator.getTrait(), 
                         countryOperand));
             }
@@ -350,6 +351,12 @@ public class VariableType
                         axiomList.assignItem(index++, axiomTermList);
                 }
                 return axiomList;
+            }
+
+            @Override
+            public void setExecutionContext(ExecutionContext context)
+            {
+                // Not supported
             }
         };
     }

@@ -27,12 +27,14 @@ import java.util.Set;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -43,7 +45,7 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
  * @author Andrew Bowley
  * 23 Jan 2015
  */
-public class ChainQueryExecuter 
+public class ChainQueryExecuter implements DebugTarget
 {
     /**  Query scope */
 	protected Scope scope;
@@ -60,6 +62,8 @@ public class ChainQueryExecuter
 	/** Template chain passed down chain to manage case of more than one query in chain
 	 *  eg. repeating same query in different scopes */
 	protected Deque<Template> templateChain;
+    /** Execution context for debugging */
+    protected ExecutionContext context;
 
 	/**
 	 * Construct ChainQueryExecuter object
@@ -89,7 +93,7 @@ public class ChainQueryExecuter
 		{
 		    // Query chain will add to solution or trigger short circuit
 		    headChainQuery.backup();
-		    return (headChainQuery.executeQuery(solution, templateChain) == EvaluationStatus.COMPLETE);
+		    return (headChainQuery.executeQuery(solution, templateChain, context) == EvaluationStatus.COMPLETE);
 		}
 		return true;
     }
@@ -220,7 +224,13 @@ public class ChainQueryExecuter
         return builder.toString();  
     }
 
-	/**
+    @Override
+    public void setExecutionContext(ExecutionContext context)
+    {
+        this.context = context;
+    }
+
+    /**
 	 * Force reset to initial state
 	 */
 	protected void reset() 

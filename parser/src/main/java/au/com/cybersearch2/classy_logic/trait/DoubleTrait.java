@@ -21,7 +21,6 @@ import java.util.Scanner;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -62,15 +61,15 @@ public class DoubleTrait extends NumberTrait<Double>
 
     /**
      * cloneFromOperand
-     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand, Operand)
+     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand)
      */
     @Override
-    public DoubleOperand cloneFromOperand(StringOperand stringOperand, Operand expression)
+    public DoubleOperand cloneFromOperand(StringOperand stringOperand)
     {
         DoubleOperand clone = 
-            expression == null ? 
+            stringOperand.getLeftOperand() == null ? 
             new DoubleOperand(stringOperand.getQualifiedName(), 0D) :
-            new DoubleOperand(stringOperand.getQualifiedName(), expression);
+            new DoubleOperand(stringOperand.getQualifiedName(), stringOperand.getLeftOperand());
         Parameter param = new Parameter(Term.ANONYMOUS, stringOperand.getValue().toString());
         param.setId(stringOperand.getId());
         Locale locale = stringOperand.getOperator().getTrait().getLocale();

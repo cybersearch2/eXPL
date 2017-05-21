@@ -80,8 +80,8 @@ public class HighCitiesAxiomsTest
         assertThat(sourceItem.toString()).isEqualTo("altitude?altitude>5000 (15,3) (15,28)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
-        System.out.println(sourceItem.toString());
-        //assertThat(sourceItem.toString()).isEqualTo("altitude?altitude>5000 (15,3) (15,28)");
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("high_cities+=high_city (16,3) (17,0)");
     }
     
     protected void checkSolution(BufferedReader reader, String shade)

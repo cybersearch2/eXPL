@@ -24,7 +24,10 @@ import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
+
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
@@ -90,7 +93,7 @@ public class CalculatorTest
         Calculator calculator = new Calculator();
 		Solution solution = mock(Solution.class);
         Template template = mock(Template.class);
-        when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+        when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
         when(template.getKey()).thenReturn(KEY);
         when(template.getName()).thenReturn(TEMPLATE_NAME);
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(TEMPLATE_NAME));
@@ -98,7 +101,7 @@ public class CalculatorTest
         when(axiom.getName()).thenReturn(TEMPLATE_NAME);
         when(template.toAxiom()).thenReturn(axiom);
         when(template.getId()).thenReturn(1);
-        assertThat(calculator.completeSolution(solution, template)).isTrue();
+        assertThat(calculator.completeSolution(solution, template, mock(ExecutionContext.class))).isTrue();
         verify(solution).put(TEMPLATE_NAME, axiom);
        
 	}
@@ -109,8 +112,8 @@ public class CalculatorTest
         Calculator calculator = new Calculator();
 		Solution solution = mock(Solution.class);
         Template template = mock(Template.class);
-        when(template.evaluate()).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
-        assertThat(calculator.completeSolution(solution, template)).isTrue();
+        when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
+        assertThat(calculator.completeSolution(solution, template, mock(ExecutionContext.class))).isTrue();
 	}
 
    @Test
@@ -123,10 +126,10 @@ public class CalculatorTest
         Axiom axiom = mock(Axiom.class);
         when(axiom.getTermByIndex(0)).thenReturn(new Parameter("x"));
         calculator.axiom = axiom;
-        when(choice.completeSolution(solution, template, axiom)).thenReturn(true);
+        when(choice.completeSolution(solution, template, axiom, mock(ExecutionContext.class))).thenReturn(true);
         when(template.isChoice()).thenReturn(true);
-        when(template.evaluate()).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
-        assertThat(calculator.completeSolution(solution, template)).isTrue();
+        when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.SHORT_CIRCUIT);
+        assertThat(calculator.completeSolution(solution, template, mock(ExecutionContext.class))).isTrue();
     }
 	    
 
@@ -136,8 +139,8 @@ public class CalculatorTest
         Calculator calculator = new Calculator();
 		Solution solution = mock(Solution.class);
         Template template = mock(Template.class);
-        when(template.evaluate()).thenReturn(EvaluationStatus.SKIP);
-        assertThat(calculator.completeSolution(solution, template)).isFalse();
+        when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.SKIP);
+        assertThat(calculator.completeSolution(solution, template, mock(ExecutionContext.class))).isFalse();
 	}
 	
 	@Test
@@ -148,10 +151,10 @@ public class CalculatorTest
         Template template = mock(Template.class);
         when(template.toString()).thenReturn("MyTemplate()");
         ExpressionException expressionException = new ExpressionException("Parser error");
-        when(template.evaluate()).thenThrow(expressionException);
+        when(template.evaluate(isA(ExecutionContext.class))).thenThrow(expressionException);
         try
         {
-            calculator.completeSolution(solution, template);
+            calculator.completeSolution(solution, template, mock(ExecutionContext.class));
             failBecauseExceptionWasNotThrown(QueryExecutionException.class);
         }
         catch(QueryExecutionException e)
@@ -167,7 +170,7 @@ public class CalculatorTest
         Calculator calculator = new Calculator();
 		Solution solution = mock(Solution.class);
         Template template = mock(Template.class);
-        when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+        when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
         when(template.getKey()).thenReturn(KEY);
         when(template.getName()).thenReturn(TEMPLATE_NAME);
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(TEMPLATE_NAME));
@@ -178,7 +181,7 @@ public class CalculatorTest
         when(solutionAxiom.getName()).thenReturn(TEMPLATE_NAME);
         when(template.toAxiom()).thenReturn(solutionAxiom);
         when(template.getId()).thenReturn(1);
-        calculator.execute(axiom, template, solution);
+        calculator.execute(axiom, template, solution, mock(ExecutionContext.class));
         verify(solution).put(TEMPLATE_NAME, solutionAxiom);
 	}
 	
@@ -198,7 +201,7 @@ public class CalculatorTest
 		Operand term3 = mock(Operand.class);
 		Term term4 = mock(Term.class);
 		when(term3.unifyTerm(term4, 1)).thenReturn(1);
-        when(template.evaluate()).thenReturn(EvaluationStatus.COMPLETE);
+        when(template.evaluate(isA(ExecutionContext.class))).thenReturn(EvaluationStatus.COMPLETE);
         when(template.getKey()).thenReturn(KEY);
         when(template.getName()).thenReturn(TEMPLATE_NAME);
         when(template.getQualifiedName()).thenReturn(qualifiedTemplateName);
@@ -209,7 +212,7 @@ public class CalculatorTest
         when(solutionAxiom.getName()).thenReturn(KEY);
         when(template.toAxiom()).thenReturn(solutionAxiom);
         when(template.getId()).thenReturn(1);
-        calculator.execute(template, solution);
+        calculator.execute(template, solution, mock(ExecutionContext.class));
         verify(solution).put(TEMPLATE_NAME, solutionAxiom);
 	}
 	
@@ -235,7 +238,7 @@ public class CalculatorTest
         calcTemplate.putInitData("limit", Long.valueOf(3));
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
-        calculator.iterate(solution, calcTemplate);
+        calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
         assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n=3, limit=3)");
 	}
     
@@ -264,7 +267,7 @@ public class CalculatorTest
         calcTemplate.putInitData("i", Long.valueOf(1));
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
-        calculator.iterate(solution, calcTemplate);
+        calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
         assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n=4, factorial=24, i=5)");
 	}
 
@@ -310,7 +313,7 @@ public class CalculatorTest
 			Calculator calculator = new Calculator();
 			calculator.setAxiomListener(axiomListener);
 	        calcTemplate.putInitData("n", Long.valueOf(count));
-			calculator.iterate(solution, calcTemplate);
+			calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
 			calcTemplate.backup(false);
 		}
     }
@@ -346,8 +349,9 @@ public class CalculatorTest
 		Axiom seedAxiom = new Axiom("Seed", new Parameter("amount", seedAmount));
 		template.setKey("Seed");
 		Solution solution = new Solution();
-		calculator.execute(seedAxiom, template, solution);
-		verify(choice).completeSolution(solution, template, seedAxiom);
+		ExecutionContext context = mock(ExecutionContext.class);
+		calculator.execute(seedAxiom, template, solution, context);
+		verify(choice).completeSolution(solution, template, seedAxiom, context);
 
 		/*
 		//System.out.println(solution.getAxiom(CHOICE_NAME).toString());

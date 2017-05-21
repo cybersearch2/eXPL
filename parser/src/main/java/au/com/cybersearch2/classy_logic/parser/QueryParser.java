@@ -1586,7 +1586,7 @@ public class QueryParser implements QueryParserConstants
       choiceToken = jj_consume_token(IDENTIFIER);
     qualifiedAxiomName = QualifiedName.parseName(choiceToken.image);
     qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
-    Template choiceTemplate = template.choiceInstance(parserAssembler.getTemplateAssembler().getTemplate(qualifiedTemplateName));
+    Template choiceTemplate = parserAssembler.getTemplateAssembler().createChoiceTemplate(template, qualifiedTemplateName);
     OperandMap operandMap = parserAssembler.getOperandMap();
     AxiomAssembler axiomAssembler = parserAssembler.getAxiomAssembler();
     for (String termName: axiomAssembler.getAxiomTermNameList(qualifiedAxiomName))

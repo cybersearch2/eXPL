@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.query;
 
 import java.util.Deque;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -41,9 +42,9 @@ public abstract class ChainQuery
      * @param templateChain Template chain to manage same query repeated in different scopes
 	 * @return EvaluationStatus enum: SHORT_CIRCUIT, SKIP or COMPLETE
  	 */
-	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain)
+	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain, ExecutionContext context)
 	{
-		return next == null ? EvaluationStatus.COMPLETE : next.executeQuery(solution, templateChain);
+		return next == null ? EvaluationStatus.COMPLETE : next.executeQuery(solution, templateChain, context);
  	}
 
 	/**

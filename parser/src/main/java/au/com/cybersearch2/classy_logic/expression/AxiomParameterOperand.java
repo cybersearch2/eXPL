@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -194,6 +195,12 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
             public AxiomTermList evaluate(List<Term> argumentList)
             {
                 return AxiomUtils.marshallAxiomTerms(axiomName, axiomName, argumentList);
+            }
+
+            @Override
+            public void setExecutionContext(ExecutionContext context)
+            {
+                // Not supported
             }};
     }
 

@@ -89,7 +89,7 @@ public class CalculateSquareMilesTest
         assertThat(sourceItem.toString()).isEqualTo("country (4,18) (4,24)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
-        System.out.println(sourceItem.toString());
+        //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("double surface_area_mi2=surface_area_Km2*=0.3861 (4,27) (4,91)");
     }
     

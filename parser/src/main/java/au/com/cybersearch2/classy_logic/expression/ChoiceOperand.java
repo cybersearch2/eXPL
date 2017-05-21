@@ -15,8 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -27,10 +29,12 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 5 Sep 2015
  */
-public class ChoiceOperand extends IntegerOperand
+public class ChoiceOperand extends IntegerOperand implements DebugTarget
 {
     protected Template template;
     protected Choice choice;
+    /** Execution context for debugging */
+    protected ExecutionContext context;
     
     public ChoiceOperand(QualifiedName qname, Template template, Choice choice)
     {
@@ -38,6 +42,7 @@ public class ChoiceOperand extends IntegerOperand
         this.template = template;
         this.choice = choice;
     }
+    
     /**
      * Evaluate loop
      * @param id Not used as evaluation and backup are local only
@@ -48,7 +53,7 @@ public class ChoiceOperand extends IntegerOperand
     {
         this.id = id;
         Parameter param = null;
-        if (choice.completeSolution(template, id))
+        if (choice.completeSolution(template, id, context))
             param = new Parameter(Term.ANONYMOUS, (long)choice.getSelection()); // Value indicates row index
         else
         {    
@@ -88,4 +93,13 @@ public class ChoiceOperand extends IntegerOperand
         return "choice " + name;
     }
 
+    /**
+     * setExecutionContext
+     * @see au.com.cybersearch2.classy_logic.interfaces.DebugTarget#setExecutionContext(au.com.cybersearch2.classy_logic.debug.ExecutionContext)
+     */
+    @Override
+    public void setExecutionContext(ExecutionContext context)
+    {
+        this.context = context;
+    }
 }

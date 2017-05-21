@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -72,7 +73,7 @@ public class CalculateChainQuery extends ChainQuery
 	 * @return EvaluationStatus enum: SHORT_CIRCUIT, SKIP or COMPLETE
 	 */
 	@Override
-	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain)
+	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain, ExecutionContext context)
 	{
 	    if (scopeNotifier != null)
 	        scopeNotifier.run();
@@ -98,7 +99,7 @@ public class CalculateChainQuery extends ChainQuery
             templateChain.push(template);
 	    }
 		if (axiom == null)
-			calculator.iterate(solution, template);
+			calculator.iterate(solution, template, context);
 		else 
 		{
 		    Axiom seedAxiom = axiom;
@@ -109,9 +110,9 @@ public class CalculateChainQuery extends ChainQuery
     		    if (seedAxiom == null)
     		        throw new QueryExecutionException("Calculator \"" + template.getName() + "\" cannot find axiom \"" + axiom.getName() + "\"");
     		}
-    		calculator.iterate(seedAxiom, solution, template);
+    		calculator.iterate(seedAxiom, solution, template, context);
 		}
-		return super.executeQuery(solution, templateChain);
+		return super.executeQuery(solution, templateChain, context);
  	}
 
  	/**

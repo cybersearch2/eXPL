@@ -697,7 +697,7 @@ public class EvaluatorTest
 		{
 			new UnaryTestData(2, "==", EVALUATION_FAIL + "==2"),
 			new UnaryTestData(2, "||", EVALUATION_FAIL + "||2"),
-			new UnaryTestData("-", "Right term is empty"),
+			new UnaryTestData("-", "Cannot evaluate -R"),
 			new UnaryTestData(new Null(), "-", EVALUATION_FAIL + "-null")
 		};
 		for (UnaryTestData datum: testData)
@@ -761,12 +761,12 @@ public class EvaluatorTest
 			new BinaryTestData(15, new TestBigDecimalOperand("mask", new BigDecimal("7")), "^", EVALUATION_FAIL + "15^7"),
 			new BinaryTestData(2, new TestIntegerOperand("height", 102), "||", EVALUATION_FAIL + "2||102"),
 			new BinaryTestData(new TestIntegerOperand("height", 102), "+", "Left term is empty"),
-			new BinaryTestData(2, new TestIntegerOperand("height"), "+", "Right term is empty"),
+			new BinaryTestData(2, new TestIntegerOperand("height"), "+", "Cannot evaluate 2+height"),
 			new BinaryTestData(new Null(),new TestIntegerOperand("height", 102), "+", EVALUATION_FAIL + "null+102"),
 			new BinaryTestData(102, new TestNullOperand("height"), "+", EVALUATION_FAIL + "102+null"),
 			new BinaryTestData(new Double("NaN"), new TestIntegerOperand("height", 102), "||", EVALUATION_FAIL + "NaN||102"),
 			new BinaryTestData(new TestDoubleOperand("height", new Double("NaN")), "+", "Left term is empty"),
-			new BinaryTestData(new Double("NaN"), new TestIntegerOperand("height"), "+", "Right term is empty")
+			new BinaryTestData(new Double("NaN"), new TestIntegerOperand("height"), "+", "Cannot evaluate NaN+height")
 		};
 		for (BinaryTestData datum: testData)
 		{

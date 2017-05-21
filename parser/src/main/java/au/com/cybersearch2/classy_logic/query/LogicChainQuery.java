@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.axiom.EmptyAxiomSource;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
@@ -63,7 +64,7 @@ public class LogicChainQuery extends ChainQuery
 	 * @return EvaluationStatus enum: SHORT_CIRCUIT, SKIP or COMPLETE
 	 */
 	@Override
-	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain)
+	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain, ExecutionContext context)
 	{
 		for (Template template: templateList)
 		{
@@ -75,10 +76,10 @@ public class LogicChainQuery extends ChainQuery
 			if ((axiomListenerMap != null) && axiomListenerMap.containsKey(template.getKey()))
 				for (AxiomListener axiomListener: axiomListenerMap.get(template.getKey()))
 					query.setAxiomListener(axiomListener);
-			if (!query.iterate(solution, template))
+			if (!query.iterate(solution, template, context))
 				return EvaluationStatus.SHORT_CIRCUIT;
 		}
-		return super.executeQuery(solution, templateChain);
+		return super.executeQuery(solution, templateChain, context);
  	}
 
 	/**

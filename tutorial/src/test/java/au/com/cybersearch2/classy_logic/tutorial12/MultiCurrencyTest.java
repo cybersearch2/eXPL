@@ -61,31 +61,32 @@ public class MultiCurrencyTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query price_query (11,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query price_query (14,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("price:charge_plus_gst (11,26) (11,48)");
+        assertThat(sourceItem.toString()).isEqualTo("price:total (14,26) (14,38)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc charge_plus_gst (3,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("calc format_total (9,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("country (5,3) (5,9)");
+        assertThat(sourceItem.toString()).isEqualTo("string total_text=country+ Total + gst: +amount_format (11,3) (12,0)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc total (3,1)"); 
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("currency country amount (5,3) (5,27)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency country charge=amount (6,3) (6,36)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency country total=charge*1.1 (7,3) (7,41)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string total_text=country+ Total + gst: +total_format (8,3) (9,0)");
+        assertThat(sourceItem.toString()).isEqualTo("amount*=1.1 (6,3) (7,0)");
+        assertThat(iterator.hasNext()).isFalse();
    }
     
     protected void checkSolution(BufferedReader reader, String price)

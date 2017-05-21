@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
@@ -55,7 +56,7 @@ public class LogicQuery implements SolutionFinder
     protected List<AxiomListener> axiomListenerList;
     /** Pairs axiom terms in a Solution object with terms in a template */
     protected SolutionPairer pairer;
-  
+ 
     /**
      * Construct QueryLogic object
      * @param axiomSource Source of axiom sequence
@@ -84,7 +85,7 @@ public class LogicQuery implements SolutionFinder
 	 * @return Flag to indicate if another solution may be available
 	 */
 	@Override
-	public boolean iterate(Solution solution, Template template)
+	public boolean iterate(Solution solution, Template template, ExecutionContext context)
 	{
 	    // An empty template is provided for unification with the incoming axiom, by first
 	    // populating it with empty operands to match the axiom terms.
@@ -104,7 +105,7 @@ public class LogicQuery implements SolutionFinder
 			if (queryStatus == QueryStatus.start)
 			   // When AxiomSource is absent or empty, allow unification solely with solution
 				return unifySolution(solution, template) &&
-					    completeSolution(solution, template);
+					    completeSolution(solution, template, context);
 		}
 		// Iterate through axioms to find solution
 		while (axiomIterator.hasNext())
@@ -126,7 +127,7 @@ public class LogicQuery implements SolutionFinder
 	            emptyTemplate = false;
 	        }
 			if (template.unify(axiom, solution) &&
-				completeSolution(solution, template))
+				completeSolution(solution, template, context))
 				return true;
 			template.backup(true);
 		}
@@ -134,7 +135,27 @@ public class LogicQuery implements SolutionFinder
 		return false;
 	}
 
-	/**
+    /**
+     * Set axiom listener to receive each solution as it is produced
+     * @param axiomListener The axiom listener object
+     */
+    @Override
+    public void setAxiomListener(AxiomListener axiomListener) 
+    {
+        if (axiomListenerList == null)
+            axiomListenerList = new ArrayList<AxiomListener>();
+        axiomListenerList.add(axiomListener);
+    }
+
+    /**
+     * Set query status to "complete" to stop any further query processing
+     */
+    public void setQueryStatusComplete() 
+    {
+        queryStatus = QueryStatus.complete;
+    }
+
+    /**
 	 * Unify template with solution.
 	 * @param solution Container to aggregate results  
 	 * @param template Structure to pair with axiom sequence
@@ -160,13 +181,13 @@ public class LogicQuery implements SolutionFinder
 	 * @param template Structure to pair with axiom sequence
 	 * @return Flag to indicate if the query is resolved
 	 */
-	protected boolean completeSolution(Solution solution, Template template)
+	protected boolean completeSolution(Solution solution, Template template, ExecutionContext context)
 	{
 		try
 		{
 			// evaluate() may result in a short circuit exit flagged by returning false
 			// isfact() flags true if each term of the template is non-empty
-			if ((template.evaluate() == EvaluationStatus.COMPLETE) && template.isFact())
+			if ((template.evaluate(context) == EvaluationStatus.COMPLETE) && template.isFact())
 			{
 			    String solutionKey = template.getQualifiedName().toString();
 				solution.put(solutionKey, template.toAxiom());
@@ -192,23 +213,4 @@ public class LogicQuery implements SolutionFinder
 		return queryStatus;
 	}
 
-	/**
-	 * Set query status to "complete" to stop any further query processing
-	 */
-	public void setQueryStatusComplete() 
-	{
-		queryStatus = QueryStatus.complete;
-	}
-
-	/**
-	 * Set axiom listener to receive each solution as it is produced
-	 * @param axiomListener The axiom listener object
-	 */
-	@Override
-	public void setAxiomListener(AxiomListener axiomListener) 
-	{
-		if (axiomListenerList == null)
-			axiomListenerList = new ArrayList<AxiomListener>();
-		axiomListenerList.add(axiomListener);
-	}
 }

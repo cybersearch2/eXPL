@@ -114,7 +114,7 @@ public class NestedLoopsTest
         assertThat(sourceItem.toString()).isEqualTo("sorted_var3=sorted_var2 (11,7) (11,31)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
-        System.out.println(sourceItem.toString());
+        //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("?--j>=0 (12,7) (13,4)");
    }
 

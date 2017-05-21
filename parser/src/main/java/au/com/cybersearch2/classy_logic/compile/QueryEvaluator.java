@@ -51,7 +51,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 1 Aug 2015
  */
-public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<AxiomTermList>, ParserRunner
+public class QueryEvaluator extends QueryLauncher implements CallEvaluator<AxiomTermList>, ParserRunner
 {
     /**
      * Library defined by name and function scope
@@ -268,7 +268,7 @@ public class QueryEvaluator  extends QueryLauncher implements CallEvaluator<Axio
                 innerTemplate.reset();
                 if (innerTemplate.unify(axiom, solution))
                 {
-                    if (innerTemplate.evaluate() == EvaluationStatus.COMPLETE);
+                    if (innerTemplate.evaluate(context) == EvaluationStatus.COMPLETE);
                     {
                         Axiom innerAxiom = new Axiom(innerTemplate.getKey());
                         for (int i = 0; i < (innerTemplate.getTermCount()); i++)

@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
@@ -71,7 +73,7 @@ public class CalculateChainQueryTest
         Solution solution = new Solution();
         
         CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate, null);
-        calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>());
+        calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>(), mock(ExecutionContext.class));
         assertThat(solution.getAxiom("calc").toString()).isEqualTo("calc(n=3, limit=3)");
 	}   
     
@@ -103,7 +105,7 @@ public class CalculateChainQueryTest
 
         Solution solution = new Solution();
         CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate, null);
-        calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>());
+        calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>(), mock(ExecutionContext.class));
         assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n=4, factorial=24, i=5)");
         calculateChainQuery.backupToStart();
         assertThat(n.isEmpty()).isFalse();
@@ -112,7 +114,7 @@ public class CalculateChainQueryTest
         assertThat(factorialExpression.isEmpty()).isTrue();
         assertThat(iExpression.isEmpty()).isTrue();
         assertThat(testExpression.isEmpty()).isTrue();
-        calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>());
+        calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>(), mock(ExecutionContext.class));
         assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n=4, factorial=24, i=5)");
 	}
 

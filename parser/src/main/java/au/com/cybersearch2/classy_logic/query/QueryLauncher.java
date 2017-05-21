@@ -20,9 +20,11 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
@@ -33,8 +35,10 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
  * @author Andrew Bowley
  * 1 Aug 2015
  */
-public class QueryLauncher
+public class QueryLauncher implements DebugTarget
 {
+    /** Execution context for debugging */
+    protected ExecutionContext context;
 
     /**
      * Execute query by specification
@@ -74,6 +78,7 @@ public class QueryLauncher
             }
         Solution solution = headQuery.getSolution();
         solution.setSolutionHandler(solutionHandler);
+        headQuery.setExecutionContext(context);
         while (headQuery.execute())
         {
             if ((solution.evaluate() == EvaluationStatus.SHORT_CIRCUIT) || isCalculation)
@@ -96,6 +101,12 @@ public class QueryLauncher
     {
         List<KeyName> keyNameList = querySpec.getKeyNameList();
         return keyNameList.get(keyNameList.size() - 1);
+    }
+
+    @Override
+    public void setExecutionContext(ExecutionContext context)
+    {
+        this.context = context;
     }
 
     /**

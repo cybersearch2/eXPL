@@ -35,7 +35,8 @@ import au.com.cybersearch2.classy_logic.pattern.TermList;
  */
 public class QueryExecuter extends ChainQueryExecuter
 {
-	/**
+
+    /**
 	 * QuerySolutionHander 
 	 * Chains to next query following solution found for prior query in the chain
 	 */
@@ -65,7 +66,7 @@ public class QueryExecuter extends ChainQueryExecuter
     		    nextTemplate.backup(true);
     		    solution.remove(nextTemplate.getQualifiedName().toString());
     		}
-    		if (nextQuery.iterate(solution, nextTemplate))
+    		if (nextQuery.iterate(solution, nextTemplate, context))
     			return true;
     		// Backup when query further down the chain fails to find a solution
 			backupToStart(index);
@@ -132,7 +133,7 @@ public class QueryExecuter extends ChainQueryExecuter
 			case start:
 				if (axiomListenerMap != null)
 					bindAxiomListeners(scope);
-				if (logicQuery.iterate(solution, templateList.get(0)))
+				if (logicQuery.iterate(solution, templateList.get(0), context))
 				{
 					if (super.execute())
 						return true;
@@ -248,6 +249,7 @@ public class QueryExecuter extends ChainQueryExecuter
 	    }
 	    return builder.toString();	
 	}
+
 
 
 }

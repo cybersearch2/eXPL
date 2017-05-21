@@ -81,6 +81,13 @@ public class TemplateAssembler
         return template;
     }
 
+    public Template createChoiceTemplate(Template outerTemplate, QualifiedName choiceQualifiedName)
+    {
+        Template choiceTemplate = outerTemplate.choiceInstance(getTemplate(choiceQualifiedName));
+        templateMap.put(choiceTemplate.getQualifiedName(), choiceTemplate);
+        return choiceTemplate;
+    }
+    
     /**
      * Add a term to a template
      * @param qualifiedTemplateName Qualified template name

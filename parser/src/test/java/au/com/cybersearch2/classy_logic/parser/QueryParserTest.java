@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.parser;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.mockito.Mockito.mock;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -39,7 +40,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
@@ -51,6 +51,7 @@ import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
@@ -388,7 +389,7 @@ public class QueryParserTest
 	static final String WORLD_CURRENCY_XPL =
 			"include \"world_currency.xpl\";\n" +
 			"template charge(currency $ country amount);\n" +
-	        "calc charge_plus_gst(currency(charge.country) total = charge.amount * 1.1);\n" +
+	        "calc charge_plus_gst(currency $ charge.country total = charge.amount * 1.1);\n" +
 	        "calc format_total(string total_text = charge.country + \" Total + gst: \" + format(charge_plus_gst.total));\n" +
 	        "list world_list(format_total);\n" +
 			"query price_query(price : charge) >> (charge_plus_gst) >> (format_total);";
@@ -467,6 +468,7 @@ public class QueryParserTest
     public void test_mega_cities3() throws IOException
     {
         QueryProgram queryProgram = new QueryProgram(provideProviderManager());
+        //queryProgram.setExecutionContext(new ExecutionContext());
         queryProgram.parseScript(MEGA_CITY3);
         //queryProgram.executeQuery("group_query", new SolutionHandler(){
        //   @Override
@@ -491,6 +493,7 @@ public class QueryParserTest
     public void test_choice_string_colors()
     {
         QueryProgram queryProgram = new QueryProgram();
+        //queryProgram.setExecutionContext(new ExecutionContext());
         queryProgram.parseScript(CHOICE_COLORS);
         // Create QueryParams object for Global scope and query "stamp_duty_query"
         QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "color_query");
@@ -612,6 +615,7 @@ public class QueryParserTest
     public void test_stamp_duty()
     {
 		QueryProgram queryProgram = new QueryProgram();
+        //queryProgram.setExecutionContext(new ExecutionContext());
 		queryProgram.parseScript(STAMP_DUTY_XPL);
 		queryProgram.executeQuery("stamp_duty_query", new SolutionHandler(){
 			@Override
@@ -622,11 +626,11 @@ public class QueryParserTest
 			}});
     }
  
-    @Ignore // TODO - Investigate test validity
     @Test
     public void test_world_currency_Format() throws IOException
     {
 		QueryProgram queryProgram = new QueryProgram();
+        queryProgram.setResourceBase(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
 		queryProgram.parseScript(WORLD_CURRENCY_XPL);
 		//queryProgram.executeQuery("price_query", new SolutionHandler(){
 		//	@Override
@@ -640,9 +644,10 @@ public class QueryParserTest
      	BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(worldCurrencyList), "UTF-8"));
         while(iterator.hasNext())
         {
-		    //System.out.println(iterator.next().toString());
+            String text = iterator.next().toString();
+		    //System.out.println(text);
  	    	String line = reader.readLine();
-  	    	assertThat(iterator.next().toString()).isEqualTo(line);
+  	    	assertThat(text).isEqualTo(line);
         }
  	    reader.close();
     }
@@ -675,6 +680,7 @@ public class QueryParserTest
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
         QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
+        //highCitiesQuery.setExecutionContext(new ExecutionContext());
 	    highCitiesQuery.chainCalculator(queryProgram.getGlobalScope(), null, calcTemplate);
 	    //System.out.println(highCitiesQuery.toString());
     	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude?altitude>5000)");
@@ -718,7 +724,7 @@ public class QueryParserTest
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
-        calculator.iterate(solution, calcTemplate);
+        calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
         assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n=3, limit=3)");
     }
     
@@ -733,7 +739,7 @@ public class QueryParserTest
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
-        calculator.iterate(solution, calcTemplate);
+        calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
         //System.out.println(solution.getAxiom("increment_n").toString());
         assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n=4, limit=3)");
     }
@@ -747,7 +753,7 @@ public class QueryParserTest
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
-        calculator.iterate(solution, calcTemplate);
+        calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
         //System.out.println(solution.getAxiom("increment_n").toString());
         assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n=4, i=3, limit=3)");
     }
@@ -763,7 +769,7 @@ public class QueryParserTest
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
-        calculator.iterate(solution, calcTemplate);
+        calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
         //System.out.println(solution.getAxiom("increment_n").toString());
         assertThat(solution.getAxiom("increment_n").toString()).isEqualTo("increment_n(n=4, i=3, limit=3)");
     }
@@ -777,7 +783,7 @@ public class QueryParserTest
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("factorial");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
-        calculator.iterate(solution, calcTemplate);
+        calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
         //System.out.println(solution.getAxiom("factorial").toString());
         assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(i=5, n=4, factorial=24)");
     }
@@ -791,7 +797,7 @@ public class QueryParserTest
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("km2_to_mi2");
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
-        calculator.iterate(solution, calcTemplate);
+        calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
         //System.out.println(solution.getAxiom("km2_to_mi2").toString());
         assertThat(solution.getAxiom("km2_to_mi2").toString()).isEqualTo("km2_to_mi2(km2=1323.98, mi2=511.188678, mi20=511.188678)");
     }

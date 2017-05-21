@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2017  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,27 +16,13 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
-import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * FindSolution
+ * DebugTarget
  * @author Andrew Bowley
- * 12 Jan 2015
+ * 19May,2017
  */
-public interface SolutionFinder 
+public interface DebugTarget
 {
-	/**
-	 * Find a solution for specified template
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
-	 * @param template Template used on each iteration
-	 * @return Flag to indicate if another solution may be available
-	 */
-	boolean iterate(Solution solution, Template template, ExecutionContext context);
-
-	/**
-	 * Set axiom listener to receive each solution as it is produced
-	 * @param axiomListener The axiom listener object
-	 */
-	void setAxiomListener(AxiomListener axiomListener);
+    void setExecutionContext(ExecutionContext context);
 }

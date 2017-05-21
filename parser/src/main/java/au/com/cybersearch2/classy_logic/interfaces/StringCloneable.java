@@ -29,8 +29,7 @@ public interface StringCloneable
      * Create an instance of same type as self and 
      * set it to the parsed value contained in given StringOperand
      * @param stringOperand The operand containing the text value
-     * @param expression Optional expression to dynamically evaluate a string value
      * @return Operand of same type as self
      */
-    Operand cloneFromOperand(StringOperand stringOperand, Operand expression);
+    Operand cloneFromOperand(StringOperand stringOperand);
 }

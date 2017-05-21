@@ -25,6 +25,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Mockito.*;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -79,7 +80,7 @@ public class TemplateTest
 		assertThat(id).isEqualTo(Template.referenceCount.get());
 		verify(templateArchetype, times(2)).addTerm(isA(TermMetaData.class));
 		verify(templateArchetype, times(0)).clearMutable();
-		underTest.evaluate();
+		underTest.evaluate(mock(ExecutionContext.class));
 		verify(parameter1).evaluate(id);
 		verify(parameter2).evaluate(id);
 	}
@@ -99,7 +100,7 @@ public class TemplateTest
         assertThat(id).isEqualTo(Template.referenceCount.get());
         verify(templateArchetype, times(2)).addTerm(isA(TermMetaData.class));
         verify(templateArchetype, times(0)).clearMutable();
-        underTest.evaluate();
+        underTest.evaluate(mock(ExecutionContext.class));
         verify(parameter1).evaluate(id);
         verify(parameter2).evaluate(id);
 	}
@@ -113,7 +114,7 @@ public class TemplateTest
         assertThat(underTest.getName()).isEqualTo(NAME);
         assertThat(underTest.getKey()).isEqualTo(NAME);
         assertThat(id).isEqualTo(Template.referenceCount.get());
-        underTest.evaluate();
+        underTest.evaluate(mock(ExecutionContext.class));
         verify(parameter1).evaluate(id);
         verify(parameter2).evaluate(id);
 	}
@@ -130,7 +131,7 @@ public class TemplateTest
         assertThat(underTest.getName()).isEqualTo(NAME);
         assertThat(underTest.getKey()).isEqualTo(KEY);
         assertThat(id).isEqualTo(Template.referenceCount.get());
-        underTest.evaluate();
+        underTest.evaluate(mock(ExecutionContext.class));
         verify(parameter1).evaluate(id);
         verify(parameter2).evaluate(id);
 	}

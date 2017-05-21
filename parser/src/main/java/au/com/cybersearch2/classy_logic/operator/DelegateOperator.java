@@ -57,6 +57,7 @@ public class DelegateOperator implements Operator
     protected Operator proxy;
     /** Current operator DelegateType */
     protected DelegateType delegateType;
+    protected boolean isProxyAssigned;
 
     /**
      * Construct DelegateOperator object
@@ -78,7 +79,8 @@ public class DelegateOperator implements Operator
         if (newDelegateType != delegateType)
         {
             delegateType = newDelegateType;
-            proxy = operatorInstance(newDelegateType);
+            if (!isProxyAssigned)
+                proxy = operatorInstance(newDelegateType);
         }
     }
 
@@ -90,6 +92,12 @@ public class DelegateOperator implements Operator
         return proxy;
     }
 
+    public void setProxy(Operator proxy)
+    {
+        this.proxy = proxy;
+        isProxyAssigned = true;
+    }
+    
     /**
      * @return the delegateType
      */

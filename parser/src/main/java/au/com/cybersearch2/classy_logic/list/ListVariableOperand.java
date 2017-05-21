@@ -105,6 +105,22 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
     }
 
    /**
+     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#toString()
+     */
+    @Override
+    public String toString()
+    {
+        if (empty)
+        {
+            if (expression != null)
+                return listName + "=" + expression.toString();
+            return name;
+        }
+        String valueText = ( value == null ? "null" : value.toString());
+        return listName + "=" + valueText;
+    }
+
+    /**
      * Returns Operand which accesses a list identified by name
      * @param listName Name of list
      * @param param1 Operand of first index

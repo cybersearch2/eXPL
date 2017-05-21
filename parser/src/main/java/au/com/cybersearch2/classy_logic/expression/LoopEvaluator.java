@@ -17,8 +17,10 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.util.Date;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Calculator;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -34,12 +36,14 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
  * @author Andrew Bowley
  * 23 Jan 2015
  */
-public class LoopEvaluator extends BooleanOperand
+public class LoopEvaluator extends BooleanOperand implements DebugTarget
 {
 	/** The Operand sequence to be evaluated is contained in a template */
 	protected Template template;
 	/** Flag whether run once or loop */
 	protected boolean runOnce;
+	/** Execution context for debugging */
+	protected ExecutionContext context;
 
 	/**
 	 * Construct a LoopEvaluator object
@@ -71,7 +75,7 @@ public class LoopEvaluator extends BooleanOperand
 		int count = 0;
 		while (true)
 		{
-			EvaluationStatus evaluationStatus = template.evaluate();
+			EvaluationStatus evaluationStatus = template.evaluate(context);
 			if (runOnce || (evaluationStatus == EvaluationStatus.SHORT_CIRCUIT))
 			{
 				setValue(Boolean.TRUE); // Value indicates successful completion
@@ -79,7 +83,7 @@ public class LoopEvaluator extends BooleanOperand
 			}
 			// Only backup local changes
 			template.backup(true);
-			if (++count == 10)
+			if ((context == null) && (++count == 10))
 			{
 				long now = new Date().getTime();
 				if (now - start >= timeoutMsecs)
@@ -137,5 +141,13 @@ public class LoopEvaluator extends BooleanOperand
         return builder.toString();
 	}
 
-	
+	/**
+	 * setExecutionContext
+	 * @see au.com.cybersearch2.classy_logic.interfaces.DebugTarget#setExecutionContext(au.com.cybersearch2.classy_logic.debug.ExecutionContext)
+	 */
+    @Override
+    public void setExecutionContext(ExecutionContext context)
+    {
+        this.context = context;
+    }
 }

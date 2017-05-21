@@ -22,7 +22,6 @@ import java.util.Scanner;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -72,15 +71,15 @@ public class BigDecimalTrait extends NumberTrait<BigDecimal>
 
     /**
      * cloneFromOperand
-     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand, Operand)
+     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand)
      */
     @Override
-    public BigDecimalOperand cloneFromOperand(StringOperand stringOperand, Operand expression)
+    public BigDecimalOperand cloneFromOperand(StringOperand stringOperand)
     {
         BigDecimalOperand clone = 
-            expression == null ? 
+            stringOperand.getLeftOperand() == null ? 
             new BigDecimalOperand(stringOperand.getQualifiedName(), BigDecimal.ZERO) :
-            new BigDecimalOperand(stringOperand.getQualifiedName(), expression);
+            new BigDecimalOperand(stringOperand.getQualifiedName(), stringOperand.getLeftOperand());
         Parameter param = new Parameter(Term.ANONYMOUS, stringOperand.getValue().toString());
         param.setId(stringOperand.getId());
         Locale locale = stringOperand.getOperator().getTrait().getLocale();

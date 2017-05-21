@@ -25,10 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
+import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.ArchiveIndexHelper.FixUp;
@@ -101,6 +104,8 @@ public class Template extends TermList<Operand>
     private List<ArchiveIndexHelper.FixUp> fixUpList;
     /** Template archetype - attribute avoids casting to get super archetype */
     private TemplateArchetype templateArchetype;
+    /** Registered debug targets */
+    private DebugTarget[] debugTargets;
    
     /**
      * Construct a replicate Template object. The new template has a unique id and specified qualified name 
@@ -324,12 +329,17 @@ public class Template extends TermList<Operand>
 	 * Evaluate Terms of this Template
 	 * @return EvaluationStatus
 	 */
-	public EvaluationStatus evaluate()
+	public EvaluationStatus evaluate(ExecutionContext executionContext)
 	{
 		if (!termList.isEmpty())
 		{
-			for (Term term: termList)
+		    if ((executionContext != null) && (debugTargets != null))
+		        for (DebugTarget debugTarget: debugTargets)
+		            debugTarget.setExecutionContext(executionContext);
+			for (Operand term: termList)
 			{
+			    if (executionContext != null)
+			        executionContext.beforeEvaluate(term);
 				EvaluationStatus evaluationStatus = term.evaluate(id);
 				if (evaluationStatus != EvaluationStatus.COMPLETE)
 					return evaluationStatus;
@@ -342,13 +352,16 @@ public class Template extends TermList<Operand>
 	 * Evaluate Terms of this Template until status COMPLETE is returned 
 	 * @return Position of first term to return status COMPLETE
 	 */
-	public int select()
+	public int select(ExecutionContext executionContext)
 	{
 		if (!termList.isEmpty())
 		{
 			int position = 0;
-			for (Term term: termList)
+			for (Operand term: termList)
 			{
+                if (executionContext != null)
+                    executionContext.beforeEvaluate(qname, position);
+                    
 				if (term.evaluate(id) == EvaluationStatus.COMPLETE)
 					return position;
 				++position;
@@ -376,12 +389,14 @@ public class Template extends TermList<Operand>
 	}
 
     /**
-     * Add Operand term. Parameters not allowed.
+     * Add Operand term. 
      * @param operand Operand object
      */
     public void addTerm(Operand operand)
     {
         super.addTerm(operand);
+        if (operand instanceof DebugTarget)
+            registerDebugTarget((DebugTarget)operand);
     }
 
     /**
@@ -423,6 +438,7 @@ public class Template extends TermList<Operand>
 	public Axiom toAxiom()
 	{
         Axiom axiom = new Axiom(qname.getTemplate());
+        List<Parameter> qualifiers = null;
 		for (Term term: termList)
 		{
 		    Operand operand = (Operand)term;
@@ -431,7 +447,26 @@ public class Template extends TermList<Operand>
 			{
 				Parameter param = new Parameter(operand.getName(), operand.getValue());
 				axiom.addTerm(param);
+				if (operand.getOperator().getTrait().getOperandType() == OperandType.CURRENCY)
+				{   // Append country operand, if exists and not already in solution
+				    if (operand.getRightOperand() != null) 
+				    {
+				        Operand countryOperand = operand.getRightOperand();
+				        {
+				            param = new Parameter(countryOperand.getName(), countryOperand.getValue());
+				            if (qualifiers == null)
+				                qualifiers = new ArrayList<Parameter>();
+				            qualifiers.add(param);
+				        }
+				    }
+				}
 			}
+		}
+		if (qualifiers != null)
+		{
+		    for (Parameter param: qualifiers)
+		        if (axiom.getTermByName(param.getName()) == null)
+		            axiom.addTerm(param);
 		}
 		return axiom;
 	}
@@ -698,6 +733,28 @@ public class Template extends TermList<Operand>
         // Create list of term pairs to unify
         return walker.visitAllNodes(new Unifier(this, axiom, termMapping, solution));
     }
+
+    /**
+     * Register debug target so execution context is injected before evaluation
+     * @param operand
+     */
+    private void registerDebugTarget(DebugTarget debugTarget)
+    {
+        // Uses basic storage approach as occurrence of debug operands will be low
+        if (debugTargets == null)
+        {
+            debugTargets = new DebugTarget[1];
+            debugTargets[0] = debugTarget;
+        }
+        else
+        {
+            DebugTarget[] newDebugTargets = new DebugTarget[debugTargets.length + 1];
+            System.arraycopy(debugTargets, 0, newDebugTargets, 0, debugTargets.length);
+            newDebugTargets[debugTargets.length] = debugTarget;
+            debugTargets = newDebugTargets;
+        }
+    }
+
 
     /**
      * Serial I/O

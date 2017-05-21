@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.LocaleCurrency;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
@@ -104,16 +103,16 @@ public class CurrencyTrait extends BigDecimalTrait implements StringCloneable
 
     /**
      * cloneFromOperand
-     * @see au.com.cybersearch2.classy_logic.trait.BigDecimalTrait#cloneFromOperand(au.com.cybersearch2.classy_logic.expression.StringOperand, au.com.cybersearch2.classy_logic.interfaces.Operand)
+     * @see au.com.cybersearch2.classy_logic.trait.BigDecimalTrait#cloneFromOperand(au.com.cybersearch2.classy_logic.expression.StringOperand)
      */
     @Override
-    public BigDecimalOperand cloneFromOperand(StringOperand stringOperand, Operand expression)
+    public BigDecimalOperand cloneFromOperand(StringOperand stringOperand)
     {
         CurrencyOperator currencyOperator = new CurrencyOperator();
         BigDecimalOperand clone = 
-                expression == null ? 
+                stringOperand.getLeftOperand() == null ? 
                 new BigDecimalOperand(stringOperand.getQualifiedName(), BigDecimal.ZERO) :
-                new BigDecimalOperand(stringOperand.getQualifiedName(), expression);
+                new BigDecimalOperand(stringOperand.getQualifiedName(), stringOperand.getLeftOperand());
         Parameter param = new Parameter(Term.ANONYMOUS, stringOperand.getValue().toString());
         param.setId(stringOperand.getId());
         Locale locale = stringOperand.getOperator().getTrait().getLocale();

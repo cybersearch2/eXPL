@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.tutorial16;
 
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
@@ -79,6 +80,12 @@ public class MathFunctionProvider implements FunctionProvider<Number>
                             throw new ExpressionException("math.add passed invalid value: " + term.getValue().toString());
                     }
                     return Long.valueOf(addendum);
+                }
+
+                @Override
+                public void setExecutionContext(ExecutionContext context)
+                {
+                    // Not supported
                 }
             };
             

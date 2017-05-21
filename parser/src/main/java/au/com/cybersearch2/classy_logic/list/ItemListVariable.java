@@ -150,13 +150,37 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
 			this.id = id;
 		}
 		else if (empty && itemList.hasItem(index))
-
 		{
 			onIndexSet(index);
 			this.id = id;
 		}
 		return EvaluationStatus.COMPLETE;
 	}
+
+    /**
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
+     */
+    @Override
+    public String toString()
+    {
+        if ((indexExpression != null) && !indexExpression.isEmpty())
+        {   
+            int select = -1;
+            if (indexExpression.getValueClass() == String.class)
+                select = getIndexForName(indexExpression.getValue().toString());
+            else if (indexExpression.getValue() instanceof Number)
+                select = ((Number)(indexExpression.getValue())).intValue();
+            if (select != -1) 
+            {
+                Object item = itemList.getItem(select);
+                if (item != null)
+                    return item.toString();
+            }
+        }
+        else if (empty && itemList.hasItem(index))
+            return itemList.getItem(index).toString();
+        return super.toString();
+    }
 
 	/**
 	 * Returns index for item referenced by name. Default return value is -1 for no match. 
@@ -323,6 +347,7 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
     {
         return archetypeIndex;
     }
+    
 	/**
 	 * Returns variable name given list name and suffix
 	 * @param listName

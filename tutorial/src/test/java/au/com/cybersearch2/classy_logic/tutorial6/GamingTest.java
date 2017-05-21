@@ -66,7 +66,7 @@ public class GamingTest
         assertThat(sourceItem.toString()).isEqualTo("spin(r1,r2,r3,r4)[1] (1,1) (1,37)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
-        System.out.println(sourceMarker.toString());
+        //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("query spin (5,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
@@ -75,15 +75,15 @@ public class GamingTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo_var0=combo_r1=<empty> (4,15) (4,25)");
+        assertThat(sourceItem.toString()).isEqualTo("combo=combo_r1=<empty> (4,15) (4,25)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo_var1=combo_r2=<empty> (4,28) (4,38)");
+        assertThat(sourceItem.toString()).isEqualTo("combo=combo_r2=<empty> (4,28) (4,38)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo_var2=combo_r3=<empty> (4,41) (4,51)");
+        assertThat(sourceItem.toString()).isEqualTo("combo=combo_r3=<empty> (4,41) (4,51)");
         assertThat(iterator.hasNext()).isFalse();
    }
 }

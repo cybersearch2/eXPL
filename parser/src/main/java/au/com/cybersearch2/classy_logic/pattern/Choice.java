@@ -21,6 +21,7 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -114,10 +115,10 @@ public class Choice
      * @param axiom Unification axiom
 	 * @return Flag set true if selection match was found
 	 */
-	public boolean completeSolution(Solution solution, Template template, Axiom axiom)
+	public boolean completeSolution(Solution solution, Template template, Axiom axiom, ExecutionContext context)
 	{
 	    // The emplate performs selection
-		selection = template.select();
+		selection = template.select(context);
 		if (selection == NO_MATCH)
 		    return false;
 		// Get selected axiom
@@ -173,7 +174,7 @@ public class Choice
      * @param template Template used to calculate choice
      * @return Flag set true if selection match was found
      */
-    public boolean completeSolution(Template template, int id)
+    public boolean completeSolution(Template template, int id, ExecutionContext context)
     {
         int index = 0;
         // Get selection operand
@@ -187,7 +188,7 @@ public class Choice
                 break; // Term is already populated so proceed to selection
             term.unifyTerm(operand, id);
         }
-        selection = template.select();
+        selection = template.select(context);
         if (selection == NO_MATCH)
             return false;
         // Get selected axiom, default being last one in choice axiom list

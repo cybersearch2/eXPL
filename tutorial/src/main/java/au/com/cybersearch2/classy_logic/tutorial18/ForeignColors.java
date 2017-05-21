@@ -26,6 +26,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.parser.FileAxiomProvider;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -86,6 +87,7 @@ scope german (language="de", region="DE")
     public List<Axiom> createForeignLexicon()
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("foreign-lexicon.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         try
         {

@@ -17,10 +17,12 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
+import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
@@ -32,7 +34,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  * @author Andrew Bowley
  * 7 Aug 2015
  */
-public class ParameterOperand<R> extends Variable
+public class ParameterOperand<R> extends Variable implements DebugTarget
 {
     /** Collects parameters from an Operand tree and passes them to a supplied function object */
     protected ParameterList<R> parameterList;
@@ -126,9 +128,16 @@ public class ParameterOperand<R> extends Variable
         return super.toString();
     }
  
+    @Override
+    public void setExecutionContext(ExecutionContext context)
+    {
+        parameterList.setExecutionContext(context);
+    }
+    
     protected String getOperandText(OperandParam param)
     {
        return param.getName().isEmpty() ? param.getOperand().toString() : param.getName(); 
     }
+
 
 }

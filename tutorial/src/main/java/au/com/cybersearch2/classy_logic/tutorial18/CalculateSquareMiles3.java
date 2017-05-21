@@ -24,6 +24,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -83,6 +84,7 @@ query<axiom> surface_area_query(surface_area : country_area);
 	{
 	    List<Axiom> resultList = new ArrayList<Axiom>(4);
         QueryProgram queryProgram = queryProgramParser.loadScript("tutorial18/calc-square-miles3.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("surface_area_query");
 		Iterator<Axiom> iterator = result.getIterator("surface_area_query");

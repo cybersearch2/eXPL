@@ -22,7 +22,8 @@ package au.com.cybersearch2.classy_logic.helper;
  */
 public enum EvaluationStatus 
 {
-	COMPLETE,      // Continue evaluation to completion
+	COMPLETE,       // Continue evaluation to completion
 	SHORT_CIRCUIT, // Abort evaluation because outcome determined
-	SKIP            // Proceed directly to next stage of evaluation
+	SKIP,           // Proceed directly to next stage of evaluation
+	FAIL            // Cannot proceed due to fatal error
 }

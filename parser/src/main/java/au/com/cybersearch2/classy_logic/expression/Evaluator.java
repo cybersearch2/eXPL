@@ -3,23 +3,14 @@
  */
 package au.com.cybersearch2.classy_logic.expression;
 
-import java.math.BigDecimal;
-import java.util.Locale;
-
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.AssignTypeEvaluatorOperator;
-import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.operator.EvaluatorOperator;
-
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.*;
 
 /**
  * Evaluator
@@ -33,23 +24,17 @@ import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.*;
  * @see DelegateOperand
  * @see Variable
  */
-public class Evaluator extends DelegateOperand
+public class Evaluator extends TreeEvaluator
 {
-	
-	/** Right hand operand. If null, then this is a unary postfix expression. */
-	protected Operand right;
+    /** Right hand operand. If null, then this is a unary postfix expression. */
+    protected Operand right;
     /** Left hand operand. If null, then this is a unary prefix expression. */
-	protected Operand left;
-    /** Operator as an enumerated value */
-	protected OperatorEnum operatorEnum;
-	/** Orientation - binary or unary (prefix or postfix) */
-	protected Orientation orientation;
-	/** Short circuit on boolean false result */
-	protected boolean shortCircuitOnFalse;
-	/** Short circuit on boolean true result */
-	protected boolean shortCircuitOnTrue;
+    protected Operand left;
+    /** Flag set true if value set by evaluation */
+    protected boolean isValueSet;
+    
 
-	/**
+    /**
 	 * Create Evaluator object for prefix/postfix unary expression 
 	 * @param term Operand left or right determined by orientation
 	 * @param operatorNotation Text representation of operator
@@ -86,6 +71,7 @@ public class Evaluator extends DelegateOperand
         this.right = rightTerm;
         this.left = leftTerm;
         checkBinaryTerms(operatorNotation);
+        postConstruct();
     }
 
     /**
@@ -101,6 +87,7 @@ public class Evaluator extends DelegateOperand
         this.right = rightTerm;
         this.left = leftTerm;
         checkBinaryTerms(operatorNotation);
+        postConstruct();
     }
 
 	/**
@@ -111,18 +98,38 @@ public class Evaluator extends DelegateOperand
 	 */
 	protected Evaluator(QualifiedName qname, String operatorNotation, Orientation orientation)
 	{
-		super(qname);
-	    this.orientation = orientation;
-	    operatorEnum = OperatorEnum.convertOperator(operatorNotation);
-	    // Short circuit adds logic to return false to evaluate().
-	    // It applies to operators "&&" and "||".
-	    // Note there is a unary form used for short circuit expressions ie. starting with '?'
-	    shortCircuitOnFalse = operatorEnum == OperatorEnum.SC_AND; 
-	    shortCircuitOnTrue = operatorEnum == OperatorEnum.SC_OR; 
+		super(qname, OperatorEnum.convertOperator(operatorNotation), orientation);
 	    if (operatorEnum == OperatorEnum.ASSIGN)
 	        operator = new AssignTypeEvaluatorOperator();
 	    else
 	        operator = new EvaluatorOperator();
+	}
+
+	/**
+	 * Complete construction after right and left terms set according to orientation
+	 */
+	protected void postConstruct()
+	{
+	    // Set operator for reflexive operations, in which case, delegation not required and
+	    // undesired when Evaluator value is set by unification prior to evaluation
+	    if (orientation == Orientation.binary)
+            switch (operatorEnum)
+            {
+            case PLUSASSIGN: // "+"
+            case MINUSASSIGN: // "-"
+            case STARASSIGN: // "*"
+            case SLASHASSIGN: // "/"
+            case ANDASSIGN: // "&"
+            case ORASSIGN: // "|"
+            case XORASSIGN: // "^"
+            case REMASSIGN: // "%"
+                if ((left != null) && (left.getOperator().getTrait().getOperandType() != OperandType.UNKNOWN))
+                    operator.setProxy(left.getOperator());
+            default:
+            }
+        // Delegate can be set in advance if result is boolean
+        // Otherwise, delegate will be set on value assigment
+        presetDelegate();
 	}
 	
 	/**
@@ -130,7 +137,7 @@ public class Evaluator extends DelegateOperand
 	 * There is a precedence for errors, in highest to lowest:
 	 * Term is empty
 	 * Number is NaN
-	 * Operation not permited for type of Term value
+	 * TreeEvaluator not permited for type of Term value
 	 * Term value is null
 	 * 
 	 * @param id Identity of caller, which must be provided for backup()
@@ -139,108 +146,38 @@ public class Evaluator extends DelegateOperand
     @Override
 	public EvaluationStatus evaluate(int id)
 	{
-    	boolean leftIsNaN = false;
-    	boolean rightIsNaN = false;
-    	if (left != null)
-    	{   // Left term may trigger short circuit or skip (nothing more to do)
-    		EvaluationStatus evaluationStatus = evaluateLeft(id);
-    		if (evaluationStatus == EvaluationStatus.SKIP)
-    			return EvaluationStatus.COMPLETE;
-    		if (evaluationStatus == EvaluationStatus.SHORT_CIRCUIT)
-    			return shortCircuitOnTrue || shortCircuitOnFalse ? EvaluationStatus.SHORT_CIRCUIT : EvaluationStatus.SKIP;
-    		// Remember if left is not a number
-    		leftIsNaN = isNaN(left, operatorEnum);
-    	}
-    	if (right != null)
-    	{
-    		// Only evaluate once between backups
-    	    // Assume non-empty with id == 0 implies static intialization
-    		if (right.isEmpty() || (right.getId() == 0))
-    		    right.evaluate(id);
-    		// If right hand term is empty, then cannot proceed. Maybe unification failed for this term.
-    		if (right.isEmpty())
-	   			throw new ExpressionException("Right term is empty");
-            if (orientation == Orientation.binary)
-                performOnFlyConversion();
-    		// Remember if right is not a number
-   			rightIsNaN = isNaN(right, operatorEnum);
-    		if ((!isValidRightOperand(right, operatorEnum) || isInvalidRightUnaryOp(left, operatorEnum)) &&
-    			 !((left != null) && isValidStringOperation(left, operatorEnum))) 
-    		{   
-     			// Operation not permited for type of Term value
-    			// NaN has precedence if operation has Numeric result
-     			if (!rightIsNaN && ((left == null) || !leftIsNaN))
-    				throw new ExpressionException("Cannot evaluate " + (left == null ? unaryRightToString() : binaryToString()));
-     		}
-    	}
-    	// Delegate can be set in advance if result is boolean
-    	// Otherwise, delegate will be set on value assigment
-    	presetDelegate();
+        EvaluationStatus evaluationStatus = super.evaluate(id);
+        switch (evaluationStatus)
+        {
+        case SKIP: // Operator && or ||
+            if (right != null)
+                // Binaray && and || assigns a value
+                setResult(shortCircuitOnTrue, id);
+            else
+                this.id = id;
+            return EvaluationStatus.COMPLETE;
+        case SHORT_CIRCUIT: // Left term evaluates to trigger short circuit - false for && and true for ||
+            this.id = id;
+            return isShortCircuit() ? EvaluationStatus.SHORT_CIRCUIT : EvaluationStatus.SKIP;
+        case FAIL:
+            if ((left != null) && left.isEmpty() && (operatorEnum != OperatorEnum.ASSIGN))
+                throw new ExpressionException("Left term is empty");            
+            throw new ExpressionException("Cannot evaluate " + toString());
+        default:
+        }
     	// Now perform evaluation, depending on status of left and right terms
         Object result = null;
     	switch (orientation)
     	{
     	case binary:
-    	    result = evaluateBinary(id, leftIsNaN, rightIsNaN); break;
+    	    result = evaluateBinary(id); break;
     	case unary_prefix:
-    	    result = evaluatePreFix(rightIsNaN); break;
+    	    result = evaluatePreFix(); break;
     	case unary_postfix:
-    	    result = evaluatePostFix(leftIsNaN); break;
+    	    result = evaluatePostFix(); break;
     	}
 	   	return setResult(result, id);
 	}
-
-    Object evaluateBinary(int id, boolean leftIsNaN, boolean rightIsNaN)
-    {
-        Object result = null;
-        if (!leftIsNaN && !rightIsNaN)
-        {
-            result = calculate(left, right, id);
-            // Assign operation updates left term with result
-            switch (operatorEnum)
-            {
-                case PLUSASSIGN: // "+"
-                case MINUSASSIGN: // "-"
-                case STARASSIGN: // "*"
-                case SLASHASSIGN: // "/"
-                case ANDASSIGN: // "&"
-                case ORASSIGN: // "|"
-                case XORASSIGN: // "^"
-                case REMASSIGN: // "%"
-                left.setValue(result);
-                default:
-            }
-        }
-        else if (leftIsNaN)
-            result = left.getValue();
-        else 
-            result = right.getValue();
-        return result;
-    }
-
-    Object evaluatePreFix(boolean rightIsNaN)
-    {
-        Object result = null;
-        // Prefix unary operation.
-        if (rightIsNaN)
-            result = right.getValue();
-        else
-            result = doPrefixUnary();
-        return result;
-    }
-    
-    Object evaluatePostFix(boolean leftIsNaN)
-    {
-        // Postfix unary operation.
-        // Result will automatically be NaN if left Term value is NaN
-        Object result = left.getValue();
-        if (!leftIsNaN)
-        {
-            Number post = left.getOperator().numberEvaluation(operatorEnum, left);
-            left.setValue(post);
-        }
-        return result;
-    }
 
 	/**
 	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 
@@ -252,6 +189,7 @@ public class Evaluator extends DelegateOperand
 	@Override
 	public boolean backup(int modifierId)
 	{
+	    isValueSet = false;
 		boolean backupOccurred = super.backup(modifierId);
 		if ((right != null) && right.backup(modifierId)) 
 			backupOccurred = true;
@@ -287,7 +225,7 @@ public class Evaluator extends DelegateOperand
 	@Override
 	public String toString()
 	{
-		if (empty)
+		if (!isValueSet && !(!empty && isShortCircuit()))
 		{   // Return evaluation to perform
 			if (orientation == Orientation.unary_prefix)
 				return  unaryRightToString();
@@ -298,6 +236,72 @@ public class Evaluator extends DelegateOperand
 		// Return value
 		return super.toString();
 	}
+
+	/**
+	 * Evaluate binary operation
+	 * @param id Modificatiion id
+	 * @return result object
+	 */
+	protected Object evaluateBinary(int id)
+    {
+        Object result = null;
+        if (!leftIsNaN && !rightIsNaN)
+        {
+            // Delegate calculation to sub class
+            result = calculate(left, right, id);
+            // Assign operation updates left term with result
+            switch (operatorEnum)
+            {
+                case PLUSASSIGN: // "+"
+                case MINUSASSIGN: // "-"
+                case STARASSIGN: // "*"
+                case SLASHASSIGN: // "/"
+                case ANDASSIGN: // "&"
+                case ORASSIGN: // "|"
+                case XORASSIGN: // "^"
+                case REMASSIGN: // "%"
+                left.setValue(result);
+                default:
+            }
+        }
+        else if (leftIsNaN)
+            result = left.getValue();
+        else 
+            result = right.getValue();
+        return result;
+    }
+
+	/**
+	 * Evaluate prefix unary operation
+     * @return result object
+	 */
+    protected Object evaluatePreFix()
+    {
+        Object result = null;
+        // Prefix unary operation.
+        if (rightIsNaN)
+            result = right.getValue();
+        else
+            result = doPrefixUnary();
+        return result;
+    }
+    
+    /**
+     * Evaluate postfix unary operation
+     * @return result object
+     */
+    protected Object evaluatePostFix()
+    {
+        // Postfix unary operation.
+        // Result will automatically be NaN if left Term value is NaN
+        Object result = left.getValue();
+        if (!leftIsNaN)
+        {
+            Number post = left.getOperator().numberEvaluation(operatorEnum, left);
+            left.setValue(post);
+        }
+        return result;
+    }
 
     /**
      * Perform prefix unary operation with right term: ++, --, !,  ~, + or -
@@ -324,70 +328,6 @@ public class Evaluator extends DelegateOperand
         return null;
     }
 
-    /**
-     * Evaluate left term.
-     * @param id Identity of caller, which must be provided for backup()
-     * @return EvaluationStatus enum: SHORT_CIRCUIT, SKIP or COMPLETE
-     */
-    protected EvaluationStatus evaluateLeft(int id) 
-    {
-        // Only evaluate once between backups
-        if (left.isEmpty())
-           left.evaluate(id);
-        if (left.isEmpty() && operatorEnum != OperatorEnum.ASSIGN)
-            // If left hand term is empty, then cannot proceed. Maybe unification failed for this term.
-            throw new ExpressionException("Left term is empty");
-        if (!isValidLeftOperand(left, right, operatorEnum) || isInvalidLeftUnaryOp(right, operatorEnum))
-        {   // Operation not permited for type of Term value
-            // NaN has precedence if operation has Numeric result
-            if (!isNaN(left, operatorEnum) && ((right == null) || !isNaN(right, operatorEnum)))
-                throw new ExpressionException("Cannot evaluate " + (right == null ? unaryLeftToString() : binaryToString()));
-        }
-        // Short circuit logic applies only to left term
-        if (shortCircuitOnFalse) // Operator &&
-        {
-            if ("false".equals(left.getValue().toString()))
-            {   // false && means short circuit
-                if (right == null) // Unary && does not assign a value
-                {
-                    this.id = id;
-                    return EvaluationStatus.SHORT_CIRCUIT;
-                }
-                else
-                {   // Nothing more to do
-                    setResult(Boolean.FALSE, id);
-                    return EvaluationStatus.SKIP;
-                }
-            }
-            else if (right == null)
-            {   // Nothing more to do
-                this.id = id;
-                return EvaluationStatus.SKIP;
-            }
-        }
-        else if (shortCircuitOnTrue ) // Operator ||
-        {   // true || means short circuit
-            if ("true".equals(left.getValue().toString()))
-            {
-                if (right == null) // Unary || does not assign a value
-                {
-                    this.id = id;
-                    return EvaluationStatus.SHORT_CIRCUIT;
-                }
-                else
-                {   // Nothing more to do
-                    setResult(Boolean.TRUE, id);
-                    return EvaluationStatus.SKIP;
-                }
-            }
-            else if (right == null)
-            {   // Nothing more to do
-                this.id = id;
-                return EvaluationStatus.SKIP;
-            }
-        }
-        return EvaluationStatus.COMPLETE;
-    }
 
     /**
      * Set value and determine evaluation return value
@@ -403,7 +343,7 @@ public class Evaluator extends DelegateOperand
         if (result != null)
         {
             setValue(result);
-            
+            isValueSet = true;
             this.id = id;
             // Check for boolean result
             switch(operatorEnum)
@@ -456,71 +396,10 @@ public class Evaluator extends DelegateOperand
     }
 
     /**
-     * Calculate binary expression
-     * @param leftTerm
-     * @param rightTerm
-     * @return Result as Object
+     * Set left or right term to given operand according to orientation
+     * @param term The operand to set
+     * @throws ExpressionException if orientation set to binary
      */
-    protected Object calculate(Operand leftTerm, Operand rightTerm, int modificationId) 
-    {
-        switch (operatorEnum)
-        {
-        case ASSIGN: // "="
-            return assignRightToLeft(leftTerm, rightTerm, modificationId);
-        case LT: // "<"
-        case GT: // ">"
-        case EQ: // "=="
-        case LE: // "<="
-        case GE: // ">="
-        case NE: // "!="
-        case SC_OR: // "||"
-        case SC_AND: // "&&"
-            return rightTerm.getValue().equals(null) ? // == or != null
-                    rightTerm.getOperator().booleanEvaluation(leftTerm, operatorEnum, leftTerm) :
-                    leftTerm.getOperator().booleanEvaluation(leftTerm, operatorEnum, rightTerm);
-        case PLUS: // "+"
-        case PLUSASSIGN: // "+"
-            if (isValidStringOperation(leftTerm, operatorEnum))
-                return ((Concaten<?>)leftTerm).concatenate(rightTerm);
-        case STAR: // "*"
-            if ((leftTerm.getValueClass() == Boolean.class) || (rightTerm.getValueClass() == Boolean.class))
-                return calculateBoolean(leftTerm, rightTerm);
-        case MINUS: // "-"
-        case SLASH: // "/"
-        case BIT_AND: // "&"
-        case BIT_OR: // "|"
-        case XOR: // "^"
-        case REM: // "%"
-        case MINUSASSIGN: // "-"
-        case STARASSIGN: // "*"
-        case SLASHASSIGN: // "/"
-        case ANDASSIGN: // "&"
-        case ORASSIGN: // "|"
-        case XORASSIGN: // "^"
-        case REMASSIGN: // "%"
-            // Prevent conversion of BigDecimal to Integer or Double by 
-            // always selecting the BigDecimal term to perform the operation
-            boolean leftIsBigDec = leftTerm.getValueClass() == BigDecimal.class;
-            boolean rightIsBigDec = rightTerm.getValueClass() == BigDecimal.class;
-            if (leftIsBigDec)
-                return leftTerm.getOperator().numberEvaluation(leftTerm, operatorEnum, rightTerm);
-            else if (rightIsBigDec)
-                return rightTerm.getOperator().numberEvaluation(leftTerm, operatorEnum, rightTerm);
-            // Prevent conversion of Double to Integer by 
-            // always selecting the Double term to perform the operation
-            boolean leftIsDouble = leftTerm.getValueClass() == Double.class;
-            boolean rightIsDouble = rightTerm.getValueClass() == Double.class;
-            if (leftIsDouble || !rightIsDouble)
-                return leftTerm.getOperator().numberEvaluation(leftTerm, operatorEnum, rightTerm);
-            else
-                return rightTerm.getOperator().numberEvaluation(leftTerm, operatorEnum, rightTerm);
-        case COMMA: // Comma operator builds a tree of operands instead of performing a calculation
-            return new Null(); // Set dummy value so this variable is no longer empty
-        default:
-        }
-        return null;
-    }
-
     protected void setUnaryTerm(Operand term)
     {
         switch (orientation)
@@ -536,6 +415,31 @@ public class Evaluator extends DelegateOperand
         }
     }
 
+    /**
+     * setLeftOperand
+     * @see au.com.cybersearch2.classy_logic.expression.TreeEvaluator#setLeftOperand(au.com.cybersearch2.classy_logic.interfaces.Operand)
+     */
+    @Override
+    protected void setLeftOperand(Operand left)
+    {
+        this.left = left;
+    }
+ 
+    /**
+     * setRightOperand
+     * @see au.com.cybersearch2.classy_logic.expression.TreeEvaluator#setRightOperand(au.com.cybersearch2.classy_logic.interfaces.Operand)
+     */
+    @Override
+    protected void setRightOperand(Operand right)
+    {
+        this.right = right;
+    }
+ 
+    /**
+     * Check for null binary terms
+     * @param operator Operator in text format
+     * @throws ExpressionException if null term encountered
+     */
     protected void checkBinaryTerms(String operator)
     {
         if (orientation == Orientation.binary) 
@@ -548,69 +452,6 @@ public class Evaluator extends DelegateOperand
             if (invalidTerm != null)
                 throw new ExpressionException("Binary operator \"" + operator + "\" cannot have null " + invalidTerm + " term");
         }
-    }
-
-    /**
-     * When number operation is to be performed with string on one side, convert the string to a number of same type as opposite
-     */
-    protected void performOnFlyConversion()
-    {
-        if (!performStringConversion())
-            performDecimalConversion();
-    }
-    
-    protected boolean performStringConversion()
-    {
-        boolean isLeftString = left instanceof StringOperand;
-        boolean isRightString = right instanceof StringOperand;
-        if ((!isLeftString && !isRightString) || (isLeftString && isRightString))
-            return (isLeftString && isRightString);
-        if (isRightString)
-        {
-            if (isValidOperand(left, operatorEnum, left.getOperator().getLeftOperandOps()) &&
-                (left.getOperator().getTrait() instanceof StringCloneable))
-            {
-                StringCloneable stringCloneable = (StringCloneable)left.getOperator().getTrait();
-                StringOperand stringOperand = (StringOperand)right;
-                right = stringCloneable.cloneFromOperand(stringOperand, stringOperand.expression);
-            }
-            return true;
-        }
-        if (isValidOperand(right, operatorEnum, right.getOperator().getRightOperandOps()) &&
-             (right.getOperator().getTrait() instanceof StringCloneable))
-        {
-            StringCloneable stringCloneable = (StringCloneable)right.getOperator().getTrait();
-            StringOperand stringOperand = (StringOperand)left;
-            left = stringCloneable.cloneFromOperand(stringOperand, stringOperand.expression);
-        }
-        return true;
-    }
-
-    protected boolean performDecimalConversion()
-    {
-        boolean isLeftDecimal = left instanceof BigDecimalOperand;
-        boolean isRightDecimal = right instanceof BigDecimalOperand;
-        if ((!isLeftDecimal && !isRightDecimal) || (isLeftDecimal && isRightDecimal))
-            return (isLeftDecimal && isRightDecimal);
-        if (isRightDecimal)
-        {
-            if (left.getOperator().getTrait().getOperandType() == OperandType.CURRENCY)
-                convertToCurrency((BigDecimalOperand)left);
-        }
-        else
-        {
-            if (right.getOperator().getTrait().getOperandType() == OperandType.CURRENCY)
-                convertToCurrency((BigDecimalOperand)right);
-        }
-       return true;
-    }
-
-    protected void convertToCurrency(BigDecimalOperand bigDecimalOperand)
-    {
-        Locale locale = bigDecimalOperand.getOperator().getTrait().getLocale();
-        CurrencyOperator currencyOperator = new CurrencyOperator();
-        bigDecimalOperand.setOperator(currencyOperator);
-        currencyOperator.getTrait().setLocale(locale);
     }
 
 	/**
