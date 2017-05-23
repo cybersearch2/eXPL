@@ -85,7 +85,7 @@ public class ParserTaskQueue
                 parserAssember.bindAxiomList(axiomTermList);
             }}, scope);
         // Boost priority so list is processed before any variables which reference it
-        parserTask.setPriority(2);
+        parserTask.setPriority(ParserTask.Priority.list.ordinal());
     }
 
     /**
@@ -101,7 +101,7 @@ public class ParserTaskQueue
                 parserAssember.bindAxiomList(axiomList);
             }}, scope);
         // Boost priority so list is processed before any variables which reference it
-        parserTask.setPriority(2);
+        parserTask.setPriority(ParserTask.Priority.list.ordinal());
     }
     
 }

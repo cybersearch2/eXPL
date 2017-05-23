@@ -15,6 +15,7 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
+import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
@@ -357,6 +358,24 @@ public class ParserAssembler implements LocaleListener
         return null;
     }
 
+    public Evaluator createReflexiveEvaluator(final Operand term, String operator, Operand assignExpression)
+    {
+        final Evaluator evaluator = new Evaluator(getContextName(term.getName()), term, operator, assignExpression);
+        if (term.getName().isEmpty())
+        {
+            ParserRunner nameFixer = new ParserRunner(){
+
+                @Override
+                public void run(ParserAssembler parserAssembler)
+                {
+                    evaluator.setName(term.getName());
+                }};
+            ParserTask parserTask = parserTaskQueue.addPending(nameFixer , scope);
+            parserTask.setPriority(ParserTask.Priority.fix.ordinal());
+        }
+        return evaluator;
+    }
+    
 	/**
      * Queue task to bind list to it's source which may not yet be declared
 	 * @param axiomTermList Axiom term list object
@@ -580,7 +599,7 @@ public class ParserAssembler implements LocaleListener
         QueryEvaluator queryEvaluator = 
              new QueryEvaluator(queryName, qualifiedQueryName, innerTemplate);
         ParserTask parserTask = parserTaskQueue.addPending(queryEvaluator, scope);
-        parserTask.setPriority(1);
+        parserTask.setPriority(ParserTask.Priority.list.ordinal());
         String library = queryEvaluator.getLibrayName(this);
         QualifiedName qualifiedCallName = new QualifiedName(library, qualifiedQueryName.getName());
         ParameterOperand<AxiomTermList> parameterOperand = new ParameterOperand<AxiomTermList>(qualifiedCallName, operandParamList, queryEvaluator);

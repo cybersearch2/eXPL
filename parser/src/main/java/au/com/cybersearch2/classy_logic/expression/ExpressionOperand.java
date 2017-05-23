@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
 
 /**
@@ -69,11 +70,22 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 	 */
 	protected ExpressionOperand(QualifiedName qname, Operand expression) 
 	{
-		super(qname.getName());
-		this.qname = qname;
-		this.expression = expression;
-        index = -1;
+		this(qname, expression, qname.getName());
 	}
+
+    /**
+     * Construct a non-empty named Variable object
+     * @param qname Qualified name
+     * @param expression Operand which evaluates value 
+     * @param name Term name - should be qname.name or empty string for later name change
+     */
+    protected ExpressionOperand(QualifiedName qname, Operand expression, String name) 
+    {
+        super(name);
+        this.qname = qname;
+        this.expression = expression;
+        index = -1;
+    }
 
     /**
      * Returns qualified name

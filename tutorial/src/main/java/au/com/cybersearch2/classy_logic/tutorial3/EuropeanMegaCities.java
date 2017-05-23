@@ -22,6 +22,7 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -91,6 +92,7 @@ query<axiom> euro_megacities (mega_city : euro_megacities);
     public Iterator<Axiom> findEuroMegaCities() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("euro_megacities.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("euro_megacities");
         return result.getIterator("euro_megacities");

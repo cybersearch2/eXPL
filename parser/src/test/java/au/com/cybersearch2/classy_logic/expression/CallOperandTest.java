@@ -261,9 +261,9 @@ public class CallOperandTest
     
     static final String[] MATH_SCORES =
     {
-        "math_score=list<term> subjects.marks_list()=marks_list(Math, mark_var1=a-)",
-        "math_score=list<term> subjects.marks_list()=marks_list(Math, mark_var1=b-)",
-        "math_score=list<term> subjects.marks_list()=marks_list(Math, mark_var1=a)"
+        "math_score=list<term> subjects.marks_list()=marks_list(Math, a-)",
+        "math_score=list<term> subjects.marks_list()=marks_list(Math, b-)",
+        "math_score=list<term> subjects.marks_list()=marks_list(Math, a)"
     };
     
     static final String[] SCHOOL_REPORT = 

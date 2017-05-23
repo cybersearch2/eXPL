@@ -156,9 +156,9 @@ public class OperandMap
 	 */
 	public void addOperand(Operand operand)
     {
-		if (operand.getName().isEmpty())
-			throw new ExpressionException("addOperand() passed annonymous object");
 		QualifiedName qname = operand.getQualifiedName();
+        if (qname.getName().isEmpty())
+            throw new ExpressionException("addOperand() passed annonymous object");
         duplicateOperandCheck(qname);
 		operandMap.put(qname, operand);
         nameSet.add(qname.getName());

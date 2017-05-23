@@ -373,7 +373,7 @@ public class ListAssembler
         if (!expression.isEmpty() && (expression instanceof IntegerOperand) && Term.ANONYMOUS.equals(expression.getName()))
         {
            index = ((Long)(expression.getValue())).intValue();
-           suffix = Long.toString(index);
+           suffix = name + "." + Long.toString(index);
         }
         else if (expression.isEmpty() && (expression instanceof Variable))
         {
@@ -397,7 +397,16 @@ public class ListAssembler
             }
         }
         if (suffix == null)
-            suffix = expression.getName().isEmpty() ? expression.toString() : expression.getName();
+        {
+            suffix = expression.getName();
+            if (suffix.isEmpty())
+            {
+                suffix = expression.getLeftOperand().getName();
+                if (suffix.isEmpty())
+                    suffix = expression.toString();
+            }
+            suffix = name + "." + suffix;
+        }
         // IntegerOperand value is treated as fixed
         if (index >= 0)
             listVariable = getListVariable(itemList, name, index, suffix);

@@ -38,7 +38,7 @@ public class GamingTest
         Gaming gaming = new Gaming();
         Axiom axiom = gaming.displayFruit();
         String spin = axiom.toString();
-        assertThat(spin).isEqualTo("spin(combo_r1=lemon, combo_r2=banana, combo_r3=apple, combo_r4=orange)");
+        assertThat(spin).isEqualTo("spin(r1=lemon, r2=banana, r3=apple, r4=orange)");
         Iterator<SourceMarker> iterator = gaming.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
@@ -75,15 +75,15 @@ public class GamingTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo=combo_r1=<empty> (4,15) (4,25)");
+        assertThat(sourceItem.toString()).isEqualTo("combo=r1=<empty> (4,15) (4,23)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo=combo_r2=<empty> (4,28) (4,38)");
+        assertThat(sourceItem.toString()).isEqualTo("combo=r2=<empty> (4,26) (4,34)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo=combo_r3=<empty> (4,41) (4,51)");
+        assertThat(sourceItem.toString()).isEqualTo("combo=r3=<empty> (4,37) (4,45)");
         assertThat(iterator.hasNext()).isFalse();
    }
 }

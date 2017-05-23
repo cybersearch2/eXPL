@@ -22,6 +22,7 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -93,6 +94,7 @@ query<axiom> asia_top_ten (mega_city : asia_top_ten);
     public Iterator<Axiom> findMegaCities() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("asia_top_ten.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("asia_top_ten");
         return result.getIterator("asia_top_ten");

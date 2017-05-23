@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -70,6 +71,7 @@ query<axiom> high_cities (city : high_city);
     public Iterator<Axiom> findHighCities() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
         Result result = queryProgram.executeQuery("high_cities");
         return result.getIterator("high_cities");
     }

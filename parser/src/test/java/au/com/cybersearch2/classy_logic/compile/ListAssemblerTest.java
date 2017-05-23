@@ -107,7 +107,7 @@ public class ListAssemblerTest
 		Operand expression = mock(Operand.class);
 		when(expression.isEmpty()).thenReturn(true);
 		when(expression.getName()).thenReturn("X");
-		when(itemList.newVariableInstance(expression, "X", 0)).thenReturn(itemListVariable);
+		when(itemList.newVariableInstance(expression, "ListName.X", 0)).thenReturn(itemListVariable);
 		assertThat(listAssembler.newListVariableInstance(itemList, expression)).isEqualTo(itemListVariable);
 	}
 		

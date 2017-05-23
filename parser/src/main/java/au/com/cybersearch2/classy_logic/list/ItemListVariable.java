@@ -73,8 +73,8 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
 	 * @param suffix To append to name
 	 */
 	public ItemListVariable(ItemList<?> itemList, Operator operator, int index, String suffix) 
-	{   // Use convention list name appended with '_' + suffix, where suffix depends on type of index
-		super(getVariableName(itemList.getName(), suffix));
+	{   // Use suffix for variable name so all variables referencing the same item have the same term name
+		super(suffix);
 		this.itemList = itemList;
         this.proxy = operator;
         this.index = index;
@@ -94,6 +94,7 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
 	public ItemListVariable(ItemList<?> itemList, Operator operator, Operand indexExpression, String suffix) 
 	{
 		super(getVariableName(itemList.getName(), suffix));
+        this.name = suffix;
 		this.itemList = itemList;
         this.proxy = operator;
         this.indexExpression = indexExpression;
@@ -111,6 +112,7 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
     {
         return qname;
     }
+    
 	/**
      * Assign a value and id to this Term from another term 
      * @param term Term containing non-null value and id to set

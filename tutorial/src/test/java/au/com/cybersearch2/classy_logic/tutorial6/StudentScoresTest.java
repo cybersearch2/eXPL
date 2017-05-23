@@ -68,7 +68,7 @@ public class StudentScoresTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mark=mark_1=f- (6,2) (6,16)");
+        assertThat(sourceItem.toString()).isEqualTo("mark=mark.1=f- (6,2) (6,16)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -76,7 +76,7 @@ public class StudentScoresTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mark=mark_2=f (7,2) (7,15)");
+        assertThat(sourceItem.toString()).isEqualTo("mark=mark.2=f (7,2) (7,15)");
         for (int index = 10; index < marks.length; ++index)
         {
             assertThat(iterator.hasNext()).isTrue();
@@ -86,7 +86,7 @@ public class StudentScoresTest
             sourceItem = sourceMarker.getHeadSourceItem();
             assertThat(sourceItem).isNotNull();
             //System.out.println(sourceItem.toString());
-            assertThat(sourceItem.toString()).isEqualTo("mark" + "=mark_" + (index + 1) + "=" + marks[index] + " (" + (index + 6) + ",2) (" + (index + 6) + "," + (14 + marks[index].length()) + ")");
+            assertThat(sourceItem.toString()).isEqualTo("mark" + "=mark." + (index + 1) + "=" + marks[index] + " (" + (index + 6) + ",2) (" + (index + 6) + "," + (14 + marks[index].length()) + ")");
         }
         for (int index = 2; index < 10; ++index)
         {
@@ -97,7 +97,7 @@ public class StudentScoresTest
             sourceItem = sourceMarker.getHeadSourceItem();
             assertThat(sourceItem).isNotNull();
             //System.out.println(sourceItem.toString());
-            assertThat(sourceItem.toString()).isEqualTo("mark" + "=mark_" + (index + 1) + "=" + marks[index] + " (" + (index + 6) + ",2) (" + (index + 6) + "," + (14 + marks[index].length()) + ")");
+            assertThat(sourceItem.toString()).isEqualTo("mark" + "=mark." + (index + 1) + "=" + marks[index] + " (" + (index + 6) + ",2) (" + (index + 6) + "," + (14 + marks[index].length()) + ")");
         }
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
@@ -114,15 +114,15 @@ public class StudentScoresTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mark=mark_english=<empty> (24,26) (24,38)");
+        assertThat(sourceItem.toString()).isEqualTo("mark=english=<empty> (24,26) (24,38)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mark=mark_maths=<empty> (24,41) (24,51)");
+        assertThat(sourceItem.toString()).isEqualTo("mark=maths=<empty> (24,41) (24,51)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mark=mark_history=<empty> (24,54) (24,66)");
+        assertThat(sourceItem.toString()).isEqualTo("mark=history=<empty> (24,54) (24,66)");
         assertThat(iterator.hasNext()).isFalse();
      }
 

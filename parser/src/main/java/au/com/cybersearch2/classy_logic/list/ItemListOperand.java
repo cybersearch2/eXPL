@@ -16,7 +16,6 @@
 package au.com.cybersearch2.classy_logic.list;
 
 import au.com.cybersearch2.classy_logic.compile.ListAssembler;
-import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
@@ -63,6 +62,7 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
             expression = setListVariable(listAssembler, itemList);
         else
             expression = newListVariableInstance(parserAssembler);
+        setName(expression.getName());
         if (sourceItem != null)
             sourceItem.setInformation(toString());
     }

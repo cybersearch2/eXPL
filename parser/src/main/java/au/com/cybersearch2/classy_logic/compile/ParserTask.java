@@ -26,6 +26,13 @@ import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
  */
 public class ParserTask implements ParserRunner, Comparable<ParserTask>
 {
+    public enum Priority
+    {
+        fix,
+        variable,
+        list
+    }
+    
     /** Pending task */
     protected ParserRunner pending;
     /** Qualified name of enclosing scope/template context */

@@ -114,7 +114,7 @@ public class GreekConstructionTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("charge (4,62) (4,67)");
+        assertThat(sourceItem.toString()).isEqualTo("charge=charge (4,62) (4,84)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

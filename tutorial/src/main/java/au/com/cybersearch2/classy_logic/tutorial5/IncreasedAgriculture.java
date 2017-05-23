@@ -22,6 +22,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -64,6 +65,7 @@ query<axiom> more_agriculture(Data : agri_10y, surface_area : surface_area_incre
     public Iterator<Axiom> findIncreasedAgriculture() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("tutorial5/more_agriculture.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("more_agriculture");
         return result.getIterator("more_agriculture");

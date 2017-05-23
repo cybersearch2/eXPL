@@ -36,7 +36,7 @@ public class Gaming {
 axiom spin (r1, r2, r3, r4) {3,2,0,1};
 axiom fruit() {"apple", "orange", "banana", "lemon"};
 list<term> combo(fruit);
-template play(combo[(r1)], combo[(r2)], combo[(r3)], combo[(r4)]);
+template play(combo[r1], combo[r2], combo[r3], combo[r4]);
 query<term> spin(spin : play);
 
 */
@@ -54,7 +54,7 @@ query<term> spin(spin : play);
 	 * The sample demonstrates enclosing a variable in parentheses to avoid it being interpreted as a term name.<br/>
 	 * Class StudentScores2 provides another example of parentheses.<\br>
 	 * The expected result:<br/>
-	 * play(combo_r1 = lemon, combo_r2 = banana, combo_r3 = apple, combo_r4 = orange)<br/>
+	 * play(r1=lemon, r2=banana, r3=apple, r4=orange)<br/>
 	 */
 	public Axiom displayFruit()
 	{

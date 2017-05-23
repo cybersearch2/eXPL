@@ -141,7 +141,7 @@ public class QueryParser implements QueryParserConstants
   {
     AxiomContainerOperand operand = new AxiomContainerOperand(qname, indexExpression1, indexExpression2);
     ParserTask parserTask = parserAssembler.addPending(operand);
-    //parserTask.setPriority(1);
+    parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
   }
 
@@ -159,7 +159,7 @@ public class QueryParser implements QueryParserConstants
     }
     ItemListOperand operand = new ItemListOperand(qname, indexExpression, assignExpression);
     ParserTask parserTask = context.getParserAssembler().addPending(operand);
-    //parserTask.setPriority(1);
+    parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
   }
 
@@ -1425,7 +1425,7 @@ public class QueryParser implements QueryParserConstants
     if ((index == null) && (!hasOperand))
       operandMap.addOperand(var);
     if (assignToken != null)
-      var = new Evaluator(qname, var, assignToken.image, assignExpression);
+      var = parserAssembler.createReflexiveEvaluator(var, assignToken.image, assignExpression);
     if ((equalsToken != null) && (index !=null))
       var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
     else if (hasOperand && (equalsToken != null))

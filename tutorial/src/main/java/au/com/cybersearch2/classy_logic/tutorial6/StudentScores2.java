@@ -70,10 +70,10 @@ axiom grades (student, english, maths, history)
 	 * Compiles the LISTS script and runs the "marks" query, displaying the solution on the console.<br/>
 	 * This sample demonstrates using an Axiom Term list as a value list.
 	 * The expected result:<br/>
-	 * 	score(student = George, english = b+, maths = b-, history = a-)<br/>
-	 *	score(student = Sarah, english = c+, maths = a, history = b+)<br/>
-	 *	score(student = Amy, english = b, maths = a-, history = e+)<br/>
-	 */
+        score(student=George, English=b+, Maths=b-, History=a-)<br/>
+        score(student=Sarah, English=c+, Maths=a, History=b+)<br/>
+        score(student=Amy, English=b, Maths=a-, History=e+)<br/>	 
+     */
     public Iterator<Axiom> displayLists()
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("student-scores2.xpl");

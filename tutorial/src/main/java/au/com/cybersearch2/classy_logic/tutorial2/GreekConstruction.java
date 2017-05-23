@@ -19,6 +19,7 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -48,7 +49,7 @@ axiom customer()
 axiom charge() : "greek_construction";
 axiom customer() : "greek_construction"; 
 template freight(city, charge);
-template customer_freight(name, city ? city == freight.city, charge);
+template customer_freight(name, city ? city == freight.city, charge = freight.charge);
         
 query customer_charge(charge:freight, customer:customer_freight);
 */
@@ -66,6 +67,7 @@ query customer_charge(charge:freight, customer:customer_freight);
     public ParserContext findCustomerCharges(SolutionHandler solutionHandler) 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("customer_charge.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
         // The first unification fills in variables "city" and "charge".
         // Both templates here share variables "city" and "charge", so only the "name" term
         // empty in the second unification.

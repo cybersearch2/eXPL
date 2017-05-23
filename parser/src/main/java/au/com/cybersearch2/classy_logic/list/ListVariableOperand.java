@@ -26,6 +26,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 
 /**
@@ -57,22 +58,12 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
     public ListVariableOperand(QualifiedName listName, 
                                 Operand indexExpression, 
                                 Operand expression2)
-    {
-        super(getQualifiedName(listName), null);
+    {   // Sub class to assign term name when parser task runs
+        super(getQualifiedName(listName), null, Term.ANONYMOUS);
         this.listName = listName.getName();
         this.indexExpression = indexExpression;
         this.expression2 = expression2;
         assignOnlyOperator = DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate();
-    }
-
-    /**
-     * Returns Parameter name
-     * @return String
-     */
-    @Override
-    public String getName()
-    {
-        return expression == null ? qname.getName() : expression.getName();
     }
 
     /**
@@ -86,6 +77,17 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
         if (!empty)
             expression.assign(this);
     }
+ 
+    /**
+     * Bypass unification as evaluation is unaffected by this operand's value and
+     * any term pairing is unintended
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#unifyTerm(au.com.cybersearch2.classy_logic.interfaces.Term, int)
+     */
+    @Override
+    public int unifyTerm(Term otherTerm, int id)
+    {
+        return id;
+    }
     
     /**
      * concatenate
@@ -98,6 +100,10 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
         return ((Concaten<String>)expression).concatenate(rightOperand);
     }
 
+    /**
+     * getOperator
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getOperator()
+     */
     @Override
     public Operator getOperator()
     {
@@ -114,7 +120,7 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
         {
             if (expression != null)
                 return listName + "=" + expression.toString();
-            return name;
+            return name.isEmpty() ? qname.getName() : name;
         }
         String valueText = ( value == null ? "null" : value.toString());
         return listName + "=" + valueText;
@@ -122,9 +128,6 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
 
     /**
      * Returns Operand which accesses a list identified by name
-     * @param listName Name of list
-     * @param param1 Operand of first index
-     * @param param2 Operand of second index or null if not specified
      * @return Operand from package au.com.cybersearch2.classy_logic.list
      */
     protected Operand newListVariableInstance(ParserAssembler parserAssembler)
@@ -149,7 +152,7 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
      * @param qualifiedListName Qualified name of list
      * @param param1 Operand of first index
      * @param param2 Operand of second index or null if not specified
-     * @return Operand from package au.com.cybersearch2.classy_logic.list
+     * @return list variable from package au.com.cybersearch2.classy_logic.list
      */
     protected Operand newListVariableInstance(ParserAssembler parserAssembler, QualifiedName qualifiedListName)
     {
@@ -169,7 +172,6 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
         }
         // A normal list should be ready to go
         itemList = parserAssembler.getListAssembler().getItemList(qualifiedListName);
-        //operandMap.addItemList(listName, itemList);
         if (expression2 == null) // Single index case is easy
             return listAssembler.newListVariableInstance(itemList, indexExpression);
         axiomListSpec = new AxiomListSpec((AxiomList)itemList, indexExpression, expression2);

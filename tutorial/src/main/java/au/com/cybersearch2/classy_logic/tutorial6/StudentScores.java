@@ -80,9 +80,9 @@ axiom grades (student, english, maths, history)
 	 * Compiles the LISTS script and runs the "marks" query, displaying the solution on the console.<br/>
 	 * Demonstrates a values list. See StudentScores2 for perhaps a better alternative to using a values list.
 	 * The expected result:<br/>
-        score(student = George, mark_english = b+, mark_maths = b-, mark_history = a-)<br/>
-        score(student = Sarah, mark_english = c+, mark_maths = a, mark_history = b+)<br/>
-        score(student = Amy, mark_english = b, mark_maths = a-, mark_history = e+)<br/>
+        score(student=George, mark_english=b+, mark_maths=b-, mark_history=a-)<br/>
+        score(student=Sarah, mark_english=c+, mark_maths=a, mark_history=b+)<br/>
+        score(student=Amy, mark_english=b, mark_maths=a-, mark_history = e+)<br/>
 	 */
 	public Iterator<Axiom> displayLists()
 	{

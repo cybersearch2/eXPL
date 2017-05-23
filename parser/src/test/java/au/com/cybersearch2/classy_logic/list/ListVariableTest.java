@@ -185,12 +185,12 @@ public class ListVariableTest
 		when(itemList.hasItem(0)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(0)).thenReturn(BigDecimal.TEN, BigDecimal.ZERO);
-		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), 0, "0");
-		assertThat(variable.toString()).isEqualTo("ListOperandName_0=10");
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), 0, "ListOperandName.0");
+		assertThat(variable.toString()).isEqualTo("ListOperandName.0=10");
 		Parameter param = new Parameter(NAME);
 		assertThat(variable.unifyTerm(param, 1)).isEqualTo(1);
 		assertThat(param.getValue()).isEqualTo(BigDecimal.ZERO);
-		assertThat(variable.toString()).isEqualTo("ListOperandName_0=0");
+		assertThat(variable.toString()).isEqualTo("ListOperandName.0=0");
 	}
     
     @Test
@@ -201,8 +201,8 @@ public class ListVariableTest
         when(itemList.getName()).thenReturn(NAME);
 		when(itemList.getQualifiedName()).thenReturn(QNAME);
 		Operand expression = new TestIntegerOperand("x", Integer.valueOf(5));
-		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), expression, "x");
-		assertThat(variable.toString()).isEqualTo("ListOperandName_x=<empty>");
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), expression, "ListOperandName.x");
+		assertThat(variable.toString()).isEqualTo("ListOperandName.x=<empty>");
 		assertThat(variable.getValue()).isNull();
 		verify(itemList).hasItem(-1);
 	}
