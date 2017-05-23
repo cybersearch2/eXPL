@@ -18,14 +18,13 @@ package au.com.cybersearch2.classy_logic.list;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
-import au.com.cybersearch2.classy_logic.terms.GenericParameter;
 import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
 
 /**
@@ -38,7 +37,7 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  * @see au.com.cybersearch2.classy_logic.list.ArrayItemList
  * @see au.com.cybersearch2.classy_logic.list.AxiomTermList
  */
-public class ItemListVariable<T> extends GenericParameter<T> implements Operand, RightOperand 
+public class ItemListVariable<T> extends ListVariable<T> implements RightOperand 
 {
     static Trait LIST_TRAIT;
     
@@ -48,8 +47,6 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
         LIST_TRAIT = new DefaultTrait(OperandType.UNKNOWN);
     }
     
-    /** Qualified name of operand */
-    protected QualifiedName qname;
 	/** The backing operand list */
     protected ItemList<?> itemList;
     /** Proxy to provide Operand evaluation */
@@ -58,12 +55,8 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
 	protected Operand indexExpression;
 	/** Curent index value. Will be constant if indexExpression is null.  */
 	protected int index;
-    /** Flag set true if operand not visible in solution */
-    protected boolean isPrivate;
     /** Optional operand for Currency type */
     protected Operand rightOperand;
-    /** Index of this Operand in the archetype of it's containing template */
-    private int archetypeIndex;
 
 	/**
 	 * Construct a fixed index ItemListVariable object
@@ -72,47 +65,19 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
 	 * @param index The index value to select the list item
 	 * @param suffix To append to name
 	 */
-	public ItemListVariable(ItemList<?> itemList, Operator operator, int index, String suffix) 
+	public ItemListVariable(ItemList<?> itemList, Operator operator, ListItemSpec listItemSpec) 
 	{   // Use suffix for variable name so all variables referencing the same item have the same term name
-		super(suffix);
+		//super(getVariableName(itemList, suffix), suffix);
+	    super(listItemSpec.getQualifiedListName(), listItemSpec.getSuffix());
 		this.itemList = itemList;
         this.proxy = operator;
-        this.index = index;
-        this.qname = getVariableName(itemList, suffix);
-        if (itemList.hasItem(index))
+        index = listItemSpec.getItemIndex();
+        if (index == -1)
+            this.indexExpression = listItemSpec.getItemExpression();
+        else if (itemList.hasItem(index))
 			onIndexSet(index);
-        archetypeIndex = -1;
 	}
 
-    /**
-	 * Construct an evaluated index ItemListVariable object
-	 * @param itemList The backing operand list
-     * @param delegateType Operator delegate type
-	 * @param indexExpression Operand to evaluate index
-	 * @param suffix To append to name
-	 */
-	public ItemListVariable(ItemList<?> itemList, Operator operator, Operand indexExpression, String suffix) 
-	{
-		super(getVariableName(itemList.getName(), suffix));
-        this.name = suffix;
-		this.itemList = itemList;
-        this.proxy = operator;
-        this.indexExpression = indexExpression;
-        this.qname = getVariableName(itemList, suffix);
-        index = -1; // Set index to invalid value to avoid accidental uninitialised list access
-        archetypeIndex = -1;
-	}
-
-    /**
-     * Returns qualified name of this operamd
-     * @return QualifiedName object
-     */
-    @Override
-    public QualifiedName getQualifiedName()
-    {
-        return qname;
-    }
-    
 	/**
      * Assign a value and id to this Term from another term 
      * @param term Term containing non-null value and id to set
@@ -231,6 +196,7 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
     }
 
 	@SuppressWarnings("unchecked")
+	@Override
 	protected T getItemValue()
 	{
 		T oldValue = super.getValue();
@@ -304,72 +270,9 @@ public class ItemListVariable<T> extends GenericParameter<T> implements Operand,
         this.rightOperand = rightOperand;
     }
     
-    /**
-     * Set this operand private - not visible in solution
-     * @param isPrivate Flag set true if operand not visible in solution
-     */
-    @Override
-    public void setPrivate(boolean isPrivate)
-    {
-        this.isPrivate = isPrivate;
-    }
-    
-    /**
-     * Returns flag set true if this operand is private
-     * @return
-     */
-    @Override
-    public boolean isPrivate()
-    {
-        return isPrivate;
-    }
-    
     @Override
     public Operator getOperator()
     {
         return proxy;
     }
-
-    /**
-     * setIndex
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#setIndex(int)
-     */
-    @Override
-    public void setArchetypeIndex(int archetypeIndex)
-    {
-        this.archetypeIndex = archetypeIndex;
-    }
-
-    /**
-     * getIndex
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getIndex()
-     */
-    @Override
-    public int getArchetypeIndex()
-    {
-        return archetypeIndex;
-    }
-    
-	/**
-	 * Returns variable name given list name and suffix
-	 * @param listName
-	 * @param suffix
-	 * @return String
-	 */
-    protected static String getVariableName(String listName, String suffix)
-    {
-        return listName + "_" + suffix;
-    }
-
-    /**
-     * Returns qualified variable name given item list and suffix
-     * @param itemList2 The item list
-     * @param suffix
-     * @return QualifiedName object
-     */
-    public static QualifiedName getVariableName(ItemList<?> itemList2, String suffix)
-    {
-        return new QualifiedName(getVariableName(itemList2.getName(), suffix), itemList2.getQualifiedName());
-    }
-
 }

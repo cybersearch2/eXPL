@@ -37,6 +37,7 @@ import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.ListIndex;
 import au.com.cybersearch2.classy_logic.list.AxiomListSpec;
 import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
@@ -411,7 +412,7 @@ public class ListAssembler
         if (index >= 0)
             listVariable = getListVariable(itemList, name, index, suffix);
         else
-            listVariable = itemList.newVariableInstance(expression, suffix, 0);
+            listVariable = (ItemListVariable<?>) itemList.newVariableInstance(new ListIndex(itemList.getQualifiedName(), expression, suffix));
         return listVariable;
     }
 
@@ -426,7 +427,7 @@ public class ListAssembler
     {
         AxiomListVariable listVariable = null;
         // IntegerOperand value is treated as fixed
-        if ((axiomListSpec.getAxiomIndex() >= 0) && (axiomListSpec.getTermIndex() >= 0))
+        if ((axiomListSpec.getAxiomIndex() >= 0) && (axiomListSpec.getItemIndex() >= 0))
             // The variable only has a single instance if both axiom and term indexes are fixed
             listVariable = getListVariable(axiomListSpec);
         else
@@ -434,11 +435,11 @@ public class ListAssembler
             AxiomList axiomList = axiomListSpec.getAxiomList();
             String suffix = axiomListSpec.getSuffix();
             if ((axiomListSpec.getAxiomIndex() >= 0))
-                listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getTermExpression(), suffix);
-            else if (axiomListSpec.getTermIndex() >= 0)
-                listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomExpression(), axiomListSpec.getTermIndex(), suffix);
+                listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getItemExpression(), suffix);
+            else if (axiomListSpec.getItemIndex() >= 0)
+                listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomExpression(), axiomListSpec.getItemIndex(), suffix);
             else
-                listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomExpression(), axiomListSpec.getTermExpression(), suffix);
+                listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomExpression(), axiomListSpec.getItemExpression(), suffix);
         }
         return listVariable;
     }
@@ -477,7 +478,7 @@ public class ListAssembler
         if (listVariable != null)
             return listVariable;
         // Use axiomList object to create new ItemListVariable instance
-        listVariable = axiomListSpec.getAxiomList().newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getTermIndex(), axiomListSpec.getSuffix());
+        listVariable = axiomListSpec.getAxiomList().newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getItemIndex(), axiomListSpec.getSuffix());
         return listVariable;
     }
 
@@ -500,7 +501,7 @@ public class ListAssembler
         if (listVariable != null)
             return listVariable;
         // Use ItemList object to create new ItemListVariable instance
-        listVariable = itemList.newVariableInstance(index, suffix, 0);
+        listVariable = (ItemListVariable<?>) itemList.newVariableInstance(new ListIndex(itemList.getQualifiedName(), index, suffix));
         return listVariable;
     }
 

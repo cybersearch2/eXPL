@@ -20,6 +20,7 @@ import java.util.List;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -30,7 +31,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 4 Aug 2015
  */
-public class AxiomListSpec
+public class AxiomListSpec implements ListItemSpec
 {
     /** Name of axiom list */
     protected QualifiedName qualifiedListName;
@@ -85,15 +86,24 @@ public class AxiomListSpec
     }
  
     /**
-     * Returns name of axiom list
-     * @return String
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getListName()
      */
+    @Override
     public String getListName()
     {
         return qualifiedListName.getName();
     }
 
     /**
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getQualifiedListName()
+     */
+    @Override
+    public QualifiedName getQualifiedListName()
+    {
+        return qualifiedListName;
+    }
+
+   /**
      * Returns backing axiom list
      * @return AxiomList object or null if waiting for evaluation
      */
@@ -121,10 +131,10 @@ public class AxiomListSpec
     }
 
     /**
-     * Returns term selection index
-     * @return Valid index or -1 if not used
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getItemIndex()
      */
-    public int getTermIndex()
+    @Override
+    public int getItemIndex()
     {
         return termIndex;
     }
@@ -139,18 +149,18 @@ public class AxiomListSpec
     }
 
     /**
-     * Returns Compiler operand for term selection
-     * @return Operand object
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getItemExpression()
      */
-    public Operand getTermExpression()
+    @Override
+    public Operand getItemExpression()
     {
         return termExpression;
     }
 
     /**
-     * Returns Text to append to name of variable
-     * @return String
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getSuffix()
      */
+    @Override
     public String getSuffix()
     {
         return suffix;

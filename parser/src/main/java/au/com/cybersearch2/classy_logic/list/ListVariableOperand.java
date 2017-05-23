@@ -127,8 +127,9 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
     }
 
     /**
-     * Returns Operand which accesses a list identified by name
-     * @return Operand from package au.com.cybersearch2.classy_logic.list
+     * Returns Operand to accesses a list identified by listName field
+     * @param parserAssembler Parser assembler belonging to list scope
+     * @return list variable from package au.com.cybersearch2.classy_logic.list
      */
     protected Operand newListVariableInstance(ParserAssembler parserAssembler)
     {
@@ -149,9 +150,8 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
 
     /**
      * Returns Operand which accesses a list identified by qualified name
+     * @param parserAssembler Parser assembler belonging to list scope
      * @param qualifiedListName Qualified name of list
-     * @param param1 Operand of first index
-     * @param param2 Operand of second index or null if not specified
      * @return list variable from package au.com.cybersearch2.classy_logic.list
      */
     protected Operand newListVariableInstance(ParserAssembler parserAssembler, QualifiedName qualifiedListName)

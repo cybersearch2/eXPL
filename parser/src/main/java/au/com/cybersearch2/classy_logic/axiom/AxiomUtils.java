@@ -23,15 +23,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.list.AxiomTermListVariable;
-import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -263,34 +260,6 @@ public class AxiomUtils
         return copyTerm;
     }
 
-    /**
-     * newVariableInstance for AxiomTermList - integer position index
-     * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String, int)
-     */
-    public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, int index, String suffix, int id) 
-    {
-        Variable variable = new Variable(ItemListVariable.getVariableName(axiomTermList, suffix));
-        Axiom axiom = axiomTermList.getAxiom();
-        if (axiom.getTermCount() > 0)
-        {
-            axiomTermList.verify(index);
-            // Assign a value to set the delegate
-            variable.assign(axiom.getTermByIndex(index));
-        }
-        return new AxiomTermListVariable(axiomTermList, variable, index, suffix, id);
-    }
-
-    /**
-     * newVariableInstance for AxiomTermList - operand variable index
-     * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String, int)
-     */
-    public static ItemListVariable<Object> newVariableInstance(AxiomTermList axiomTermList, Operand expression, String suffix, int id) 
-    {
-        Variable itemOperand = new Variable(ItemListVariable.getVariableName(axiomTermList, suffix));
-        // Assign a value to set the delegate must be delayed until the expression is evaluated
-        return new AxiomTermListVariable(axiomTermList, itemOperand, expression, suffix, id);
-    }
- 
     /**
      * Copy AxiomList to container holding iterable objects
      * @param qualifiedListName Qualified name of list

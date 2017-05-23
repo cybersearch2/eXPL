@@ -27,6 +27,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.ListIndex;
 import au.com.cybersearch2.classy_logic.list.AxiomListSpec;
 import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
@@ -58,7 +59,7 @@ public class ListAssemblerTest
 		when(itemList.getQualifiedName()).thenReturn(QNAME);
 		@SuppressWarnings("rawtypes")
 		ItemListVariable itemListVariable = mock(ItemListVariable.class);
-		when(itemList.newVariableInstance(0, "0", 0)).thenReturn(itemListVariable);
+		when(itemList.newVariableInstance(isA(ListIndex.class))).thenReturn(itemListVariable);
 		assertThat(listAssembler.getListVariable(itemList, LIST_NAME, 0, "0")).isEqualTo(itemListVariable);
 		verify(operandMap).get(isA(QualifiedName.class));
 	}
@@ -84,7 +85,7 @@ public class ListAssemblerTest
 		when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
 		when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
 		when(axiomListSpec.getAxiomIndex()).thenReturn(0);
-        when(axiomListSpec.getTermIndex()).thenReturn(0);
+        when(axiomListSpec.getItemIndex()).thenReturn(0);
         when(axiomListSpec.getSuffix()).thenReturn("0");
 		assertThat(listAssembler.getListVariable(axiomListSpec)).isEqualTo(axiomListVariable);
 		when(operandMap.get(isA(QualifiedName.class))).thenReturn(axiomListVariable);
@@ -107,7 +108,7 @@ public class ListAssemblerTest
 		Operand expression = mock(Operand.class);
 		when(expression.isEmpty()).thenReturn(true);
 		when(expression.getName()).thenReturn("X");
-		when(itemList.newVariableInstance(expression, "ListName.X", 0)).thenReturn(itemListVariable);
+		when(itemList.newVariableInstance(isA(ListIndex.class))).thenReturn(itemListVariable);
 		assertThat(listAssembler.newListVariableInstance(itemList, expression)).isEqualTo(itemListVariable);
 	}
 		
@@ -121,14 +122,14 @@ public class ListAssemblerTest
         when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
         when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
         when(axiomListSpec.getAxiomIndex()).thenReturn(-1);
-        when(axiomListSpec.getTermIndex()).thenReturn(-1);
+        when(axiomListSpec.getItemIndex()).thenReturn(-1);
         when(axiomListSpec.getSuffix()).thenReturn("0");
 		Operand axiomExpression = mock(Operand.class);
 		when(axiomExpression.isEmpty()).thenReturn(true);
 		when(axiomListSpec.getAxiomExpression()).thenReturn(axiomExpression);
 		Operand termExpression = mock(Operand.class);
 		when(termExpression.isEmpty()).thenReturn(true);
-		when(axiomListSpec.getTermExpression()).thenReturn(termExpression);
+		when(axiomListSpec.getItemExpression()).thenReturn(termExpression);
         AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(axiomExpression), eq(termExpression), isA(String.class))).thenReturn(axiomListVariable);
 		assertThat(listAssembler.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
@@ -145,12 +146,12 @@ public class ListAssemblerTest
         when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
         when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
         when(axiomListSpec.getAxiomIndex()).thenReturn(0);
-        when(axiomListSpec.getTermIndex()).thenReturn(-1);
+        when(axiomListSpec.getItemIndex()).thenReturn(-1);
         when(axiomListSpec.getSuffix()).thenReturn("0");
         when(axiomListSpec.getAxiomExpression()).thenReturn(axiomExpression);
         Operand termExpression = mock(Operand.class);
         when(termExpression.isEmpty()).thenReturn(true);
-        when(axiomListSpec.getTermExpression()).thenReturn(termExpression);
+        when(axiomListSpec.getItemExpression()).thenReturn(termExpression);
         AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(0), eq(termExpression), isA(String.class))).thenReturn(axiomListVariable);
 		assertThat(listAssembler.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
@@ -167,12 +168,12 @@ public class ListAssemblerTest
         when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
         when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
         when(axiomListSpec.getAxiomIndex()).thenReturn(-1);
-        when(axiomListSpec.getTermIndex()).thenReturn(0);
+        when(axiomListSpec.getItemIndex()).thenReturn(0);
         when(axiomListSpec.getSuffix()).thenReturn("0");
         Operand axiomExpression = mock(Operand.class);
         when(axiomExpression.isEmpty()).thenReturn(true);
         when(axiomListSpec.getAxiomExpression()).thenReturn(axiomExpression);
-        when(axiomListSpec.getTermExpression()).thenReturn(termExpression);
+        when(axiomListSpec.getItemExpression()).thenReturn(termExpression);
         AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(axiomExpression), eq(0), isA(String.class))).thenReturn(axiomListVariable);
 		assertThat(listAssembler.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);
@@ -195,10 +196,10 @@ public class ListAssemblerTest
         when(axiomListSpec.getListName()).thenReturn(LIST_NAME);
         when(axiomListSpec.getAxiomList()).thenReturn(axiomList);
         when(axiomListSpec.getAxiomIndex()).thenReturn(0);
-        when(axiomListSpec.getTermIndex()).thenReturn(0);
+        when(axiomListSpec.getItemIndex()).thenReturn(0);
         when(axiomListSpec.getSuffix()).thenReturn("0");
         when(axiomListSpec.getAxiomExpression()).thenReturn(axiomExpression);
-        when(axiomListSpec.getTermExpression()).thenReturn(termExpression);
+        when(axiomListSpec.getItemExpression()).thenReturn(termExpression);
 		AxiomListVariable axiomListVariable = mock(AxiomListVariable.class);
 		when(axiomList.newVariableInstance(eq(0), eq(0), isA(String.class))).thenReturn(axiomListVariable);
 		assertThat(listAssembler.newListVariableInstance(axiomListSpec)).isEqualTo(axiomListVariable);

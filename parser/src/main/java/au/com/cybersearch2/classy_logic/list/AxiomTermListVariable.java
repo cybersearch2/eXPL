@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.list;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.Concaten;
+import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
@@ -42,31 +43,13 @@ public class AxiomTermListVariable extends ItemListVariable<Object> implements C
 	 * @param proxy Operand object to perform evaluation
 	 * @param index Position of term in axiom
 	 * @param suffix To append to name
-     * @param id Id of owner to be assigned to variable
 	 */
-	public AxiomTermListVariable(AxiomTermList axiomTermList, Operand proxy, int index, String suffix, int id) 
+	public AxiomTermListVariable(AxiomTermList axiomTermList, Operand proxy, ListItemSpec listItemSpec) 
 	{
-		super(axiomTermList, DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate(), index, suffix);
+		super(axiomTermList, DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate(), listItemSpec);
 		this.axiomTermList = axiomTermList;
-		this.id = id;
 	}
 
-	/**
-	 * Construct an AxiomTermListVariable instance
-	 * @param axiomTermList The axiom term list being referenced
-	 * @param proxy Operand object to perform evaluation
-	 * @param indexExpression Operand object to evaluate position of term in axiom
-	 * @param suffix To append to name
-     * @param id Id of owner to be assigned to variable
-	 */
-	public AxiomTermListVariable(AxiomTermList axiomTermList, Operand proxy,
-			Operand indexExpression, String suffix, int id) 
-	{
-		super(axiomTermList, DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate(), indexExpression, suffix);
-        this.axiomTermList = axiomTermList;
-		this.id = id;
-	}
-	
 	/**
 	 * Set value from term in backing axiom	at specified position and update proxy with this term if 
 	 * class of value has changed.

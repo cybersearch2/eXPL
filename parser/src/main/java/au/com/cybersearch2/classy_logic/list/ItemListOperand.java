@@ -37,9 +37,9 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
 
     /**
      * Construct an ItemListOperand object
-     * @param listName
-     * @param indexExpression
-     * @param expression2
+     * @param listName List qualified name
+     * @param indexExpression Operand which evaluates the list index
+     * @param expression2 Second expression for assignment operation or null
      */
     public ItemListOperand(QualifiedName listName, Operand indexExpression,
             Operand expression2)
@@ -47,16 +47,20 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
         super(listName, indexExpression, expression2);
     }
 
+    /**
+     * Run parser task
+     * @see au.com.cybersearch2.classy_logic.interfaces.ParserRunner#run(au.com.cybersearch2.classy_logic.compile.ParserAssembler)
+     */
     @Override
     public void run(ParserAssembler parserAssembler)
     {
         ListAssembler listAssembler = parserAssembler.getListAssembler();
-        ItemList<?> itemList = parserAssembler.getListAssembler().findItemList(listName);
+        ItemList<?> itemList = listAssembler.findItemList(listName);
         if (itemList == null)
         {
             QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getQualifiedContextname());
             qualifiedListName.clearTemplate();
-            itemList = parserAssembler.getListAssembler().findItemList(qualifiedListName);
+            itemList = listAssembler.findItemList(qualifiedListName);
         }
         if (itemList != null)
             expression = setListVariable(listAssembler, itemList);
@@ -86,6 +90,10 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
         return variable;
     }
 
+    /**
+     * setSourceItem
+     * @see au.com.cybersearch2.classy_logic.interfaces.SourceInfo#setSourceItem(au.com.cybersearch2.classy_logic.compile.SourceItem)
+     */
     @Override
     public void setSourceItem(SourceItem sourceItem)
     {

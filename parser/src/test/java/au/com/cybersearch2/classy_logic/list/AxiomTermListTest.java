@@ -20,6 +20,8 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
@@ -40,6 +42,68 @@ import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrow
  */
 public class AxiomTermListTest 
 {
+    class TestListItemSpec implements ListItemSpec
+    {
+        String suffix;
+        int index;
+        Operand indexExpression;
+ 
+        public TestListItemSpec(int index, String suffix)
+        {
+            this.index = index;
+            this.suffix = suffix;
+        }
+        
+        public TestListItemSpec(Operand indexExpression, String suffix)
+        {
+            this.indexExpression = indexExpression;
+            index = -1;
+            this.suffix = suffix;
+        }
+        
+        @Override
+        public String getListName()
+        {
+            return NAME;
+        }
+
+        @Override
+        public QualifiedName getQualifiedListName()
+        {
+            return new QualifiedName(getVariableName(NAME, suffix), QNAME);
+        }
+
+        @Override
+        public int getItemIndex()
+        {
+            return index;
+        }
+
+        @Override
+        public Operand getItemExpression()
+        {
+            return indexExpression;
+        }
+
+        @Override
+        public String getSuffix()
+        {
+            return suffix;
+        }
+        
+        /**
+         * Returns variable name given list name and suffix
+         * @param listName
+         * @param suffix
+         * @return String
+         */
+        protected String getVariableName(String listName, String suffix)
+        {
+            return NAME + "_" + suffix;
+        }
+
+    }
+    
 	private static final String NAME = "ListOperandName";
     static QualifiedName QNAME = QualifiedName.parseName(NAME);
 	private static final String KEY = "AxiomKey";
@@ -63,14 +127,14 @@ public class AxiomTermListTest
 			assertThat(axiomTermList.getItem(i)).isEqualTo(axiom.getTermByIndex(i));
 		for (int i = 0; i < axiom.getTermCount(); i++)
 		{
-			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(i, Long.toString(i), 1);
+			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(new TestListItemSpec(i, Long.toString(i)));
 			assertThat(listVariable.getValue()).isEqualTo(axiom.getTermByIndex(i).getValue());
 		}
 		for (int i = 0; i < axiom.getTermCount(); i++)
 		{
 			IntegerOperand expression = new TestIntegerOperand("" + i);
 			expression.assign(new Parameter(Term.ANONYMOUS, Long.valueOf(i)));
-			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(expression, Long.toString(i), 1);
+			ItemListVariable<Object> listVariable = axiomTermList.newVariableInstance(new TestListItemSpec(expression, Long.toString(i)));
 			listVariable.evaluate(1);
 			assertThat(listVariable.getValue()).isEqualTo(axiom.getTermByIndex(i).getValue());
 		}
@@ -89,8 +153,8 @@ public class AxiomTermListTest
 		{
 			assertThat(e.getMessage()).isEqualTo(OUT_OF_BOUNDS_MESSAGE);
 		}
-		axiomOperandList.newVariableInstance(0, "0", 1);
-		ItemListVariable<Object> variable1 = axiomOperandList.newVariableInstance(new TestIntegerOperand("x"), "x", 1);
+		axiomOperandList.newVariableInstance(new TestListItemSpec(0, "0"));
+		ItemListVariable<Object> variable1 = axiomOperandList.newVariableInstance(new TestListItemSpec(new TestIntegerOperand("x"), "x"));
 		assertThat(variable1).isInstanceOf(AxiomTermListVariable.class);
 		axiomOperandList.setAxiom(new Axiom(KEY));
 		try
@@ -102,8 +166,8 @@ public class AxiomTermListTest
 		{
 			assertThat(e.getMessage()).isEqualTo(OUT_OF_BOUNDS_MESSAGE);
 		}
-		axiomOperandList.newVariableInstance(0, "0", 1);
-		ItemListVariable<Object> variable2 = axiomOperandList.newVariableInstance(new TestIntegerOperand("x"), "x", 1);
+		axiomOperandList.newVariableInstance(new TestListItemSpec(0, "0"));
+		ItemListVariable<Object> variable2 = axiomOperandList.newVariableInstance(new TestListItemSpec(new TestIntegerOperand("x"), "x"));
 		assertThat(variable2).isInstanceOf(AxiomTermListVariable.class);
 		assertThat(variable1).isNotEqualTo(variable2);
 	}

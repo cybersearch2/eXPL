@@ -38,6 +38,7 @@ import au.com.cybersearch2.classy_logic.expression.TestStringOperand;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.BigDecimalOperator;
@@ -54,6 +55,68 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class ListVariableTest 
 {
+    class TestListItemSpec implements ListItemSpec
+    {
+        String suffix;
+        int index;
+        Operand indexExpression;
+ 
+        public TestListItemSpec(int index, String suffix)
+        {
+            this.index = index;
+            this.suffix = suffix;
+        }
+        
+        public TestListItemSpec(Operand indexExpression, String suffix)
+        {
+            this.indexExpression = indexExpression;
+            index = -1;
+            this.suffix = suffix;
+        }
+        
+        @Override
+        public String getListName()
+        {
+            return NAME;
+        }
+
+        @Override
+        public QualifiedName getQualifiedListName()
+        {
+            return new QualifiedName(getVariableName(NAME, suffix), QNAME);
+        }
+
+        @Override
+        public int getItemIndex()
+        {
+            return index;
+        }
+
+        @Override
+        public Operand getItemExpression()
+        {
+            return indexExpression;
+        }
+
+        @Override
+        public String getSuffix()
+        {
+            return suffix;
+        }
+        
+        /**
+         * Returns variable name given list name and suffix
+         * @param listName
+         * @param suffix
+         * @return String
+         */
+        protected String getVariableName(String listName, String suffix)
+        {
+            return NAME + "_" + suffix;
+        }
+
+    }
+    
 	private static final String NAME = "ListOperandName";
     static QualifiedName QNAME = QualifiedName.parseName(NAME);
 
@@ -65,7 +128,7 @@ public class ListVariableTest
 		when(itemList.getQualifiedName()).thenReturn(QNAME);
 		when(itemList.hasItem(5)).thenReturn(false, true);
 		when(itemList.getItem(5)).thenReturn(Integer.valueOf(13));
-		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperator(), 5, "5");
+		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperator(), new TestListItemSpec(5, "5"));
 		Parameter otherTerm = new Parameter(NAME, Integer.valueOf(13));
 		assertThat(variable.unifyTerm(otherTerm, 1)).isEqualTo(1);
 		//variable.unifyTerm(otherTerm, 1);
@@ -88,7 +151,7 @@ public class ListVariableTest
 		when(itemList.getItem(5)).thenReturn(Long.valueOf(13));
 		IntegerOperand x = new TestIntegerOperand("x", Long.valueOf(5));
 		Operand indexExpression = new TestEvaluator("y", x, "++");
-		ItemListVariable<Long> variable = new ItemListVariable<Long>(itemList, new IntegerOperator(), indexExpression, "y");
+		ItemListVariable<Long> variable = new ItemListVariable<Long>(itemList, new IntegerOperator(), new TestListItemSpec(indexExpression, "y"));
 		Parameter otherTerm = new Parameter(NAME, Long.valueOf(13));
 		// No unification possible
 		assertThat(variable.unifyTerm(otherTerm, 1)).isEqualTo(0);
@@ -113,7 +176,7 @@ public class ListVariableTest
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(5)).thenReturn(Integer.valueOf(13));
 		Operand indexExpression = new TestIntegerOperand("x");
-		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperator(), indexExpression, "x");
+		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperator(), new TestListItemSpec(indexExpression, "x"));
 		try
 		{
 			variable.evaluate(1);
@@ -136,7 +199,7 @@ public class ListVariableTest
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(5)).thenReturn(Integer.valueOf(13));
 		Operand indexExpression = new TestBooleanOperand("x", Boolean.TRUE);
-		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperator(), indexExpression, "x");
+		ItemListVariable<Integer> variable = new ItemListVariable<Integer>(itemList, new IntegerOperator(), new TestListItemSpec(indexExpression, "x"));
 		try
 		{
 			variable.evaluate(1);
@@ -156,7 +219,7 @@ public class ListVariableTest
 		when(itemList.getQualifiedName()).thenReturn(QNAME);
 		when(itemList.hasItem(0)).thenReturn(false);
 		when(itemList.getLength()).thenReturn(10);
-		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), 0, "0");
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), new TestListItemSpec(0, "0"));
 		variable.assign(new Parameter(Term.ANONYMOUS, BigDecimal.ONE));
 	    verify(itemList).assignItem(0, BigDecimal.ONE);
 	}
@@ -170,7 +233,7 @@ public class ListVariableTest
 		when(itemList.hasItem(0)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(0)).thenReturn(BigDecimal.TEN);
-		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), 0, "0");
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), new TestListItemSpec(0, "0"));
 		variable.assign(new Parameter(Term.ANONYMOUS, BigDecimal.ONE));
 	    verify(itemList).assignItem(0, BigDecimal.ONE);
 	}
@@ -185,7 +248,7 @@ public class ListVariableTest
 		when(itemList.hasItem(0)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(0)).thenReturn(BigDecimal.TEN, BigDecimal.ZERO);
-		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), 0, "ListOperandName.0");
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), new TestListItemSpec(0, "ListOperandName.0"));
 		assertThat(variable.toString()).isEqualTo("ListOperandName.0=10");
 		Parameter param = new Parameter(NAME);
 		assertThat(variable.unifyTerm(param, 1)).isEqualTo(1);
@@ -201,7 +264,7 @@ public class ListVariableTest
         when(itemList.getName()).thenReturn(NAME);
 		when(itemList.getQualifiedName()).thenReturn(QNAME);
 		Operand expression = new TestIntegerOperand("x", Integer.valueOf(5));
-		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), expression, "ListOperandName.x");
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), new TestListItemSpec(expression, "ListOperandName.x"));
 		assertThat(variable.toString()).isEqualTo("ListOperandName.x=<empty>");
 		assertThat(variable.getValue()).isNull();
 		verify(itemList).hasItem(-1);
@@ -216,7 +279,7 @@ public class ListVariableTest
 		when(itemList.hasItem(0)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(0)).thenReturn(BigDecimal.TEN);
-		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), 0, "0");
+		ItemListVariable<BigDecimal> variable = new ItemListVariable<BigDecimal>(itemList, new BigDecimalOperator(), new TestListItemSpec(0, "0"));
 		Parameter otherTerm = new Parameter("x");
 		variable.unifyTerm(otherTerm, 1);
 		assertThat(otherTerm.getValue()).isEqualTo(BigDecimal.TEN);
@@ -236,7 +299,7 @@ public class ListVariableTest
 		when(itemList.hasItem(0)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(0)).thenReturn(Boolean.TRUE);
-		ItemListVariable<Boolean> variable = new ItemListVariable<Boolean>(itemList, new BooleanOperator(), 0, "0");
+		ItemListVariable<Boolean> variable = new ItemListVariable<Boolean>(itemList, new BooleanOperator(), new TestListItemSpec(0, "0"));
 		Parameter otherTerm = new Parameter("x");
 		variable.unifyTerm(otherTerm, 1);
 		assertThat(otherTerm.getValue()).isEqualTo(Boolean.TRUE);
@@ -254,7 +317,7 @@ public class ListVariableTest
 		when(itemList.hasItem(0)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(0)).thenReturn(Long.valueOf(13L));
-		ItemListVariable<Long> variable = new ItemListVariable<Long>(itemList, new IntegerOperator(), 0, "0");
+		ItemListVariable<Long> variable = new ItemListVariable<Long>(itemList, new IntegerOperator(), new TestListItemSpec(0, "0"));
 		Parameter otherTerm = new Parameter("x");
 		variable.unifyTerm(otherTerm, 1);
 		assertThat(otherTerm.getValue()).isEqualTo(13L);
@@ -274,7 +337,7 @@ public class ListVariableTest
 		when(itemList.hasItem(0)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(0)).thenReturn(Double.valueOf(55.98d));
-		ItemListVariable<Double> variable = new ItemListVariable<Double>(itemList, new DoubleOperator(), 0, "0");
+		ItemListVariable<Double> variable = new ItemListVariable<Double>(itemList, new DoubleOperator(), new TestListItemSpec(0, "0"));
 		Parameter otherTerm = new Parameter("x");
 		variable.unifyTerm(otherTerm, 1);
 		assertThat(otherTerm.getValue()).isEqualTo(55.98d);
@@ -294,7 +357,7 @@ public class ListVariableTest
 		when(itemList.hasItem(0)).thenReturn(true);
 		when(itemList.getLength()).thenReturn(10);
 		when(itemList.getItem(0)).thenReturn("1.0f");
-		ItemListVariable<String> variable = new ItemListVariable<String>(itemList, new StringOperator(), 0, "0");
+		ItemListVariable<String> variable = new ItemListVariable<String>(itemList, new StringOperator(), new TestListItemSpec(0, "0"));
 		Parameter otherTerm = new Parameter("x");
 		variable.unifyTerm(otherTerm, 1);
 		assertThat(otherTerm.getValue()).isEqualTo("1.0f");

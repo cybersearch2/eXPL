@@ -15,7 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
-import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
@@ -33,7 +32,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 28 Jan 2015
  */
-public class AxiomListVariable  extends Parameter implements Operand, Concaten<String>
+public class AxiomListVariable  extends ListVariable<Object> implements Concaten<String>
 {
     static AxiomList EMPTY_AXIOM_LIST;
     
@@ -56,12 +55,8 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	protected Operand termExpression;
 	/** AxiomList specification used for dynamic AxiomList */
 	protected AxiomListSpec axiomListSpec;
-    /** Flag set true if operand not visible in solution */
-    protected boolean isPrivate;
     /** Defines operations that an Operand performs with other operands. To be set by super. */
     protected Operator operator;
-    /** Index of this Operand in the archetype of it's containing template */
-    private int archetypeIndex;
 	
 	/**
 	 * Construct a fixed index AxiomListVariable object.
@@ -74,7 +69,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	 */
 	public AxiomListVariable(AxiomList axiomList, int axiomIndex, String suffix) 
 	{
-		super(axiomList.getName() + "_" + axiomIndex + "_" + suffix);
+		super(axiomList.getQualifiedName(), axiomList.getName() + "_" + axiomIndex + "_" + suffix);
 		this.axiomList = axiomList;
 		this.axiomIndex = axiomIndex;
 		init();
@@ -88,7 +83,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	 */
 	public AxiomListVariable(AxiomList axiomList, Operand axiomExpression, String suffix) 
 	{
-		super(axiomList.getName() + "_index" + "_" + suffix);
+		super(axiomList.getQualifiedName(), axiomList.getName() + "_index" + "_" + suffix);
 		this.axiomList = axiomList;
         this.axiomExpression = axiomExpression;
         axiomIndex = -1; // Set index to invalid value to avoid accidental uninitialised list access
@@ -101,9 +96,10 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	 */
 	public AxiomListVariable(AxiomListSpec axiomListSpec)
 	{
-        super(axiomListSpec.getListName() + 
-              (axiomListSpec.getAxiomIndex() < 0 ? "_index" : axiomListSpec.getAxiomIndex()) + 
-              "_" + axiomListSpec.getSuffix());
+        super(axiomListSpec.getQualifiedListName(),
+               axiomListSpec.getListName() + 
+                (axiomListSpec.getAxiomIndex() < 0 ? "_index" : axiomListSpec.getAxiomIndex()) + 
+                  "_" + axiomListSpec.getSuffix());
         this.axiomListSpec = axiomListSpec;
         // Set an empty axiom list to avoid NPEs
         axiomList = EMPTY_AXIOM_LIST;
@@ -114,16 +110,6 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
         init();
 	}
 
-    /**
-	 * getQualifiedName
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getQualifiedName()
-	 */
-    @Override
-    public QualifiedName getQualifiedName()
-    {
-        return axiomList.getQualifiedName();
-    }
-	
 	/**
 	 * Assign a value and set the delegate
 	 */
@@ -148,8 +134,8 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     	        int pos = name.lastIndexOf('_');
     	        String suffix = pos == -1 ? "" : name.substring(pos+ 1);
     	        variable = termExpression != null ? 
-    	                AxiomUtils.newVariableInstance(axiomTermList, termExpression, suffix, id) :
-    	                AxiomUtils.newVariableInstance(axiomTermList, termIndex, suffix, id);
+    	                axiomTermList.newVariableInstance(new ListIndex(qname, termExpression, suffix)) :
+    	                axiomTermList.newVariableInstance(new ListIndex(qname, termIndex, suffix));
     	        axiomTermListVariable = variable; 
 	        }
 	    }
@@ -175,6 +161,7 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
      * Returns value of current item
      * @return Object
      */
+    @Override
 	protected Object getItemValue()
 	{
 		Object oldValue = super.getValue();
@@ -280,12 +267,12 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 	        // Refresh index parameters which may have changed
 	        axiomIndex = axiomListSpec.getAxiomIndex();
 	        axiomExpression = axiomListSpec.getAxiomExpression();
-	        termIndex = axiomListSpec.getTermIndex();
-	        termExpression = axiomListSpec.getTermExpression();
-            if (axiomListSpec.getTermIndex() < 0) 
-                setTermExpression( axiomListSpec.getTermExpression(), modifierId);
+	        termIndex = axiomListSpec.getItemIndex();
+	        termExpression = axiomListSpec.getItemExpression();
+            if (axiomListSpec.getItemIndex() < 0) 
+                setTermExpression( axiomListSpec.getItemExpression(), modifierId);
             else
-                setTermIndex(axiomListSpec.getTermIndex(), modifierId);
+                setTermIndex(axiomListSpec.getItemIndex(), modifierId);
 	    }
 	    boolean axiomOnly = (termExpression == null) && (termIndex < 0);
 		if (axiomExpression != null)
@@ -335,26 +322,6 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 		return EvaluationStatus.COMPLETE;
 	}
 
-    /**
-     * Set this operand private - not visible in solution
-     * @param isPrivate Flag set true if operand not visible in solution
-     */
-    @Override
-    public void setPrivate(boolean isPrivate)
-    {
-        this.isPrivate = isPrivate;
-    }
-    
-    /**
-     * Returns flag set true if this operand is private
-     * @return
-     */
-    @Override
-    public boolean isPrivate()
-    {
-        return isPrivate;
-    }
-    
 	/**
 	 * Update this object's axiom term list variable
      * @param modifierId Identity of caller, which must be provided for backup()
@@ -382,8 +349,8 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
 		// Create new instance of a variable to access the axiom
 		ItemListVariable<Object> variable = null;
 		variable = termExpression != null ? 
-				                   axiomTermList.newVariableInstance(termExpression, suffix, modifierId) :
-				            	   axiomTermList.newVariableInstance(termIndex, suffix, modifierId);
+				                   axiomTermList.newVariableInstance(new ListIndex(qname, termExpression, suffix)) :
+				            	   axiomTermList.newVariableInstance(new ListIndex(qname, termIndex, suffix));
 		axiomTermListVariable = variable;
 	}
 
@@ -424,26 +391,6 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     }
 
     /**
-     * setIndex
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#setIndex(int)
-     */
-    @Override
-    public void setArchetypeIndex(int archetypeIndex)
-    {
-        this.archetypeIndex = archetypeIndex;
-    }
-
-    /**
-     * getIndex
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getIndex()
-     */
-    @Override
-    public int getArchetypeIndex()
-    {
-        return archetypeIndex;
-    }
-
-    /**
      * Returns default qualified name for axiom term list
      * @param axiomList2 The containing axiom list
      * @return QualifiedName object
@@ -456,7 +403,6 @@ public class AxiomListVariable  extends Parameter implements Operand, Concaten<S
     protected void init()
     {
         operator = DelegateType.NULL.getOperatorFactory().delegate();
-        archetypeIndex = -1;
     }
     
 }

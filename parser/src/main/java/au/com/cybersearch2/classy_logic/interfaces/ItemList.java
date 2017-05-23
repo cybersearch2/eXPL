@@ -16,7 +16,7 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.list.ItemListVariable;
+import au.com.cybersearch2.classy_logic.list.ListVariable;
 
 /**
  * ItemList
@@ -60,22 +60,11 @@ public interface ItemList<T> extends Iterable<T>, SourceInfo
     void assignItem(int index, Object value);
 
     /**
-     * Returns list variable to access list using fixed index
-     * @param index int
-     * @param suffix To append to name
-     * @param id Id of owner to be assigned to variable
-     * @return ItemListVariable 
+     * Returns list variable to access list by item specification
+     * @param listItemSpec Item specification 
+     * @return ListVariable object
      */
-    ItemListVariable<T> newVariableInstance(int index, String suffix, int id);
-
-    /**
-     * Returns list variable to access list using expression to evaluate index
-     * @param expression Operand
-     * @param suffix To append to name
-     * @param id Id of owner to be assigned to variable
-     * @return ItemListVariable   
-     */
-    ItemListVariable<T> newVariableInstance(Operand expression, String suffix, int id);
+    ListVariable<T> newVariableInstance(ListItemSpec listItemSpec);
 
     /**
      * Returns item referenced by index

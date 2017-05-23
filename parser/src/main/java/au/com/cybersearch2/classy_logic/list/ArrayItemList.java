@@ -29,6 +29,7 @@ import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 
 /**
@@ -153,88 +154,6 @@ public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOpera
     }
 
 	/**
-	 * newVariableInstance
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String, int)
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public ItemListVariable<T> newVariableInstance(int index, String suffix, int id)
-	{
-	    ItemListVariable<?> itemListVariable = null;
-	    switch(delegateType)
-	    {
-	    case STRING:
-	        itemListVariable = new ItemListVariable<String>(this, operator, index, suffix);
-            break;
-	    case INTEGER:
-            itemListVariable = new ItemListVariable<Long>(this, operator, index, suffix);
-            break;
-	    case DOUBLE:
-            itemListVariable = new ItemListVariable<Double>(this, operator, index, suffix);
-            break;
-	    case DECIMAL:
-            itemListVariable = new ItemListVariable<BigDecimal>(this, operator, index, suffix);
-            break;
-	    case BOOLEAN:
-            itemListVariable = new ItemListVariable<Boolean>(this, operator, index, suffix);
-            break;
-	    case ASSIGN_ONLY:
-	        itemListVariable = new AxiomArrayVariable(this, index, suffix);
-	        break;
-	    default:
-            // This is not expected to happen
-            throw new IllegalArgumentException(delegateType.toString() + " not allowed for item type");
-        }
-        if (rightOperand != null)
-        {   // The right operand is shared by all variables. First variable to evaluate will set the value
-            // which will be retained until it is cleared by the template which did the evaluation.
-            itemListVariable.setRightOperand(rightOperand);
-        }
-	    return (ItemListVariable<T>) itemListVariable;
-	}
-
-	/**
-	 * newVariableInstance
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(au.com.cybersearch2.classy_logic.interfaces.Operand, java.lang.String, int)
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public ItemListVariable<T> newVariableInstance(Operand expression, String suffix, int id)
-	{
-        ItemListVariable<?> itemListVariable = null;
-        switch(delegateType)
-        {
-        case STRING:
-            itemListVariable = new ItemListVariable<String>(this, operator, expression, suffix);
-            break;
-        case INTEGER:
-            itemListVariable = new ItemListVariable<Long>(this, operator, expression, suffix);
-            break;
-        case DOUBLE:
-            itemListVariable = new ItemListVariable<Double>(this, operator, expression, suffix);
-            break;
-        case DECIMAL:
-            itemListVariable = new ItemListVariable<BigDecimal>(this, operator, expression, suffix);
-            break;
-        case BOOLEAN:
-            itemListVariable = new ItemListVariable<Boolean>(this, operator, expression, suffix);
-            break;
-        case ASSIGN_ONLY:
-            itemListVariable = new AxiomArrayVariable(this, expression, suffix);
-            break;
-        default:
-            // This is not expected to happen
-            throw new IllegalArgumentException(delegateType.toString() + " not allowed for item type");
-        }
-        if (rightOperand != null)
-        {   // The right operand is shared by all variables. First variable to evaluate will set the value
-            // which will be retained until it is cleared by the template which did the evaluation.
-            itemListVariable.setRightOperand(rightOperand);
-        }
-        return (ItemListVariable<T>) itemListVariable;
-	}
-
-	/**
 	 * getItem
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getItem(int)
 	 */
@@ -344,4 +263,42 @@ public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOpera
     {
         return "List <" + clazz.getSimpleName() + ">[" + valueList.size() + "]";
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ListVariable<T> newVariableInstance(ListItemSpec listItemSpec)
+    {
+        ItemListVariable<?> itemListVariable = null;
+        switch(delegateType)
+        {
+        case STRING:
+            itemListVariable = new ItemListVariable<String>(this, operator, listItemSpec);
+            break;
+        case INTEGER:
+            itemListVariable = new ItemListVariable<Long>(this, operator, listItemSpec);
+            break;
+        case DOUBLE:
+            itemListVariable = new ItemListVariable<Double>(this, operator, listItemSpec);
+            break;
+        case DECIMAL:
+            itemListVariable = new ItemListVariable<BigDecimal>(this, operator, listItemSpec);
+            break;
+        case BOOLEAN:
+            itemListVariable = new ItemListVariable<Boolean>(this, operator, listItemSpec);
+            break;
+        case ASSIGN_ONLY:
+            itemListVariable = new ItemListVariable<AxiomTermList> (this, operator, listItemSpec);
+            break;
+        default:
+            // This is not expected to happen
+            throw new IllegalArgumentException(delegateType.toString() + " not allowed for item type");
+        }
+        if (rightOperand != null)
+        {   // The right operand is shared by all variables. First variable to evaluate will set the value
+            // which will be retained until it is cleared by the template which did the evaluation.
+            itemListVariable.setRightOperand(rightOperand);
+        }
+        return (ItemListVariable<T>) itemListVariable;
+    }
+
 }

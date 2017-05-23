@@ -26,6 +26,7 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 
@@ -36,6 +37,68 @@ import au.com.cybersearch2.classy_logic.operator.DelegateType;
  */
 public class ArrayItemListTest 
 {
+    class TestListItemSpec implements ListItemSpec
+    {
+        String suffix;
+        int index;
+        Operand indexExpression;
+ 
+        public TestListItemSpec(int index, String suffix)
+        {
+            this.index = index;
+            this.suffix = suffix;
+        }
+        
+        public TestListItemSpec(Operand indexExpression, String suffix)
+        {
+            this.indexExpression = indexExpression;
+            index = -1;
+            this.suffix = suffix;
+        }
+        
+        @Override
+        public String getListName()
+        {
+            return NAME;
+        }
+
+        @Override
+        public QualifiedName getQualifiedListName()
+        {
+            return new QualifiedName(getVariableName(NAME, suffix), QNAME);
+        }
+
+        @Override
+        public int getItemIndex()
+        {
+            return index;
+        }
+
+        @Override
+        public Operand getItemExpression()
+        {
+            return indexExpression;
+        }
+
+        @Override
+        public String getSuffix()
+        {
+            return suffix;
+        }
+        
+        /**
+         * Returns variable name given list name and suffix
+         * @param listName
+         * @param suffix
+         * @return String
+         */
+        protected String getVariableName(String listName, String suffix)
+        {
+            return NAME + "_" + suffix;
+        }
+
+    }
+    
 
 	private static final String NAME = "ListOperandName";
 	private static final QualifiedName QNAME = QualifiedName.parseGlobalName(NAME);
@@ -92,48 +155,48 @@ public class ArrayItemListTest
 	{
 		ArrayItemList<Long> intOperandList = new ArrayItemList<Long>(Long.class, QNAME);
 		intOperandList.assignItem(0, Long.valueOf(21));
-		ItemListVariable<Long> intListVariable = intOperandList.newVariableInstance(0, "0", 1);
+		ItemListVariable<Long> intListVariable = (ItemListVariable<Long>) intOperandList.newVariableInstance(new TestListItemSpec(0, "0"));
 		intListVariable.evaluate(1);
 		assertThat(intListVariable.getValue()).isEqualTo(21);
 		intOperandList.assignItem(0, Long.valueOf(72));
 		Operand expression = new TestIntegerOperand("test", Long.valueOf(0));
-		intListVariable = intOperandList.newVariableInstance(expression, "test", 1);
+		intListVariable = (ItemListVariable<Long>) intOperandList.newVariableInstance(new TestListItemSpec(expression, "test"));
 		intListVariable.evaluate(1);
 		assertThat(intListVariable.getValue()).isEqualTo(72);
 		ArrayItemList<Double> doubOperandList = new ArrayItemList<Double>(Double.class, QNAME);
 		doubOperandList.assignItem(0, Double.valueOf(5.23));
-		ItemListVariable<Double> doubListVariable = doubOperandList.newVariableInstance(0, "0", 1);
+		ItemListVariable<Double> doubListVariable = (ItemListVariable<Double>) doubOperandList.newVariableInstance(new TestListItemSpec(0, "0"));
 		doubListVariable.evaluate(1);
 		assertThat(doubListVariable.getValue()).isEqualTo(5.23);
 		doubOperandList.assignItem(0, Double.valueOf(97.34));
-		doubListVariable = doubOperandList.newVariableInstance(expression, "test", 1);
+		doubListVariable = (ItemListVariable<Double>) doubOperandList.newVariableInstance(new TestListItemSpec(expression, "test"));
 		doubListVariable.evaluate(1);
 		assertThat(doubListVariable.getValue()).isEqualTo(97.34);
 		ArrayItemList<String> sOperandList = new ArrayItemList<String>(String.class, QNAME);
 		sOperandList.assignItem(0, "testing123");
-		ItemListVariable<String> sListVariable = sOperandList.newVariableInstance(0, "0", 1);
+		ItemListVariable<String> sListVariable = (ItemListVariable<String>) sOperandList.newVariableInstance(new TestListItemSpec(0, "0"));
 		sListVariable.evaluate(1);
 		assertThat(sListVariable.getValue()).isEqualTo("testing123");
 		sOperandList.assignItem(0, "xmas2014");
-		sListVariable = sOperandList.newVariableInstance(expression, "test", 1);
+		sListVariable = (ItemListVariable<String>) sOperandList.newVariableInstance(new TestListItemSpec(expression, "test"));
 		sListVariable.evaluate(1);
 		assertThat(sListVariable.getValue()).isEqualTo("xmas2014");
 		ArrayItemList<Boolean> boolOperandList = new ArrayItemList<Boolean>(Boolean.class, QNAME);
 		boolOperandList.assignItem(0, Boolean.TRUE);
-		ItemListVariable<Boolean> boolListVariable = boolOperandList.newVariableInstance(0, "0", 1);
+		ItemListVariable<Boolean> boolListVariable = (ItemListVariable<Boolean>) boolOperandList.newVariableInstance(new TestListItemSpec(0, "0"));
 		boolListVariable.evaluate(1);
 		assertThat(boolListVariable.getValue()).isTrue();
 		boolOperandList.assignItem(0, Boolean.FALSE);
-		boolListVariable = boolOperandList.newVariableInstance(expression, "test", 1);
+		boolListVariable = (ItemListVariable<Boolean>) boolOperandList.newVariableInstance(new TestListItemSpec(expression, "test"));
 		boolListVariable.evaluate(1);
 		assertThat(boolListVariable.getValue()).isFalse();
 		ArrayItemList<BigDecimal> decOperandList = new ArrayItemList<BigDecimal>(BigDecimal.class, QNAME);
 		decOperandList.assignItem(0, BigDecimal.TEN);
-		ItemListVariable<BigDecimal> decListVariable = decOperandList.newVariableInstance(0, "0", 1);
+		ItemListVariable<BigDecimal> decListVariable = (ItemListVariable<BigDecimal>) decOperandList.newVariableInstance(new TestListItemSpec(0, "0"));
 		decListVariable.evaluate(1);
 		assertThat(decListVariable.getValue()).isEqualTo(BigDecimal.TEN);
 		decOperandList.assignItem(0, BigDecimal.ONE);
-		decListVariable = decOperandList.newVariableInstance(expression, "test", 1);
+		decListVariable = (ItemListVariable<BigDecimal>) decOperandList.newVariableInstance(new TestListItemSpec(expression, "test"));
 		decListVariable.evaluate(1);
 		assertThat(decListVariable.getValue()).isEqualTo(BigDecimal.ONE);
 	}

@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
+import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.ItemListVariable;
@@ -35,6 +36,68 @@ import static org.fest.assertions.api.Assertions.assertThat;
  */
 public class AxiomListTest 
 {
+    class TestListItemSpec implements ListItemSpec
+    {
+        String suffix;
+        int index;
+        Operand indexExpression;
+ 
+        public TestListItemSpec(int index, String suffix)
+        {
+            this.index = index;
+            this.suffix = suffix;
+        }
+        
+        public TestListItemSpec(Operand indexExpression, String suffix)
+        {
+            this.indexExpression = indexExpression;
+            index = -1;
+            this.suffix = suffix;
+        }
+        
+        @Override
+        public String getListName()
+        {
+            return NAME;
+        }
+
+        @Override
+        public QualifiedName getQualifiedListName()
+        {
+            return new QualifiedName(getVariableName(NAME, suffix), QNAME);
+        }
+
+        @Override
+        public int getItemIndex()
+        {
+            return index;
+        }
+
+        @Override
+        public Operand getItemExpression()
+        {
+            return indexExpression;
+        }
+
+        @Override
+        public String getSuffix()
+        {
+            return suffix;
+        }
+        
+        /**
+         * Returns variable name given list name and suffix
+         * @param listName
+         * @param suffix
+         * @return String
+         */
+        protected String getVariableName(String listName, String suffix)
+        {
+            return NAME + "_" + suffix;
+        }
+
+    }
+    
 	private static final String NAME = "ListOperandName";
 	private static QualifiedName QNAME = QualifiedName.parseName(NAME);
 	private static final String KEY = "AxiomKey";
@@ -74,13 +137,13 @@ public class AxiomListTest
 		AxiomList axiomList = new AxiomList(QNAME, Q_KEY);
 		AxiomTermList axiomTermList = new AxiomTermList(QNAME, Q_KEY);
 		axiomList.assignItem(0, axiomTermList);
-		ItemListVariable<AxiomTermList> axiomListVariable = axiomList.newVariableInstance(0, "0", 1);
+		ItemListVariable<AxiomTermList> axiomListVariable = (ItemListVariable<AxiomTermList>) axiomList.newVariableInstance(new TestListItemSpec(0, "0"));
 		axiomListVariable.evaluate(1);
 		assertThat(axiomListVariable.getValue()).isEqualTo(axiomTermList);
 		AxiomTermList axiomOperandList2 = new AxiomTermList(QualifiedName.parseName(KEY + 1), Q_KEY1);
 		axiomList.assignItem(0, axiomOperandList2);
 		Operand expression = new TestIntegerOperand("test", Integer.valueOf(0));
-		axiomListVariable = axiomList.newVariableInstance(expression, "test", 1);
+		axiomListVariable = (ItemListVariable<AxiomTermList>) axiomList.newVariableInstance(new TestListItemSpec(expression, "test"));
 		axiomListVariable.evaluate(1);
 		assertThat(axiomListVariable.getValue()).isEqualTo(axiomOperandList2);
 	}
