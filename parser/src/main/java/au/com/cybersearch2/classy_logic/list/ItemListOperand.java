@@ -41,10 +41,10 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
      * @param indexExpression Operand which evaluates the list index
      * @param expression2 Second expression for assignment operation or null
      */
-    public ItemListOperand(QualifiedName listName, Operand indexExpression,
+    public ItemListOperand(QualifiedName qname, QualifiedName listName, Operand indexExpression,
             Operand expression2)
     {
-        super(listName, indexExpression, expression2);
+        super(qname, listName, indexExpression, expression2);
     }
 
     /**
@@ -58,7 +58,7 @@ public class ItemListOperand extends ListVariableOperand implements ParserRunner
         ItemList<?> itemList = listAssembler.findItemList(listName);
         if (itemList == null)
         {
-            QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getQualifiedContextname());
+            QualifiedName qualifiedListName = QualifiedName.parseName(listName.getName(), parserAssembler.getQualifiedContextname());
             qualifiedListName.clearTemplate();
             itemList = listAssembler.findItemList(qualifiedListName);
         }

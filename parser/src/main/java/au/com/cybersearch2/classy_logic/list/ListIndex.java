@@ -15,9 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import java.util.List;
+
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
  * ListIndex
@@ -87,4 +94,20 @@ public class ListIndex implements ListItemSpec
         return listName + "_" + suffix;
     }
 
+    /**
+     * Returns index of item identified by name
+     * @param listName Name of list - used only for error reporting
+     * @param item Item name
+     * @param axiomTermNameList Term names of axiom source
+     * @return Index
+     */
+    protected int getIndexForName(String listName, String item, List<String> axiomTermNameList) 
+    {
+        for (int i = 0; i < axiomTermNameList.size(); i++)
+        {
+            if (item.equals(axiomTermNameList.get(i)))
+                return i;
+        }
+        throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + item + "\"");
+    }
 }

@@ -15,11 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import au.com.cybersearch2.classy_logic.compile.ListAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 
 /**
  * ListLength
@@ -27,10 +31,10 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
  * @author Andrew Bowley
  * 16 Jan 2015
  */
-public class ListLength extends Variable 
+public class ListLength extends Variable implements ParserRunner
 {
-	/** List name. This operand's name has "_length" appended */
-	protected QualifiedName qualifiedListName;
+	/** List name */
+	protected QualifiedName listName;
 	/** The list object */
     protected ItemList<?> itemList;
     /** Operand containing a list value */
@@ -38,27 +42,15 @@ public class ListLength extends Variable
 	
 	/**
 	 * Construct a ListLength object
-	 * @param qname Qualified name of Variable
+	 * @param qname Qualified name of Variable - list name with "_length" appended 
+	 * @param listName List name in text format
 	 * @param itemList The list object
 	 */
-	public ListLength(QualifiedName qname, ItemList<?> itemList) 
+	public ListLength(QualifiedName qname, QualifiedName listName) 
 	{
-		super(getLengthName(qname));
-		this.qualifiedListName = qname;
-        this.itemList = itemList;
+		super(qname);
+		this.listName = listName;
 	}
-
-    /**
-     * Construct a ListLength object
-     * @param qname Qualified name of Variable
-     * @param itemListOperand The operand to contain a list object after evaluation
-     */
-    public ListLength(QualifiedName qname, Operand itemListOperand) 
-    {
-        super(getLengthName(qname));
-        this.qualifiedListName = qname;
-        this.itemListOperand = itemListOperand;
-    }
 
 	/**
 	 * Evaluate list length. 
@@ -78,9 +70,24 @@ public class ListLength extends Variable
 		return EvaluationStatus.COMPLETE;
 	}
 
-    protected static QualifiedName getLengthName(QualifiedName qname)
+    @Override
+    public void run(ParserAssembler parserAssembler)
     {
-        return new QualifiedName(qname.getName().toString() + "_length", qname);
+        ListAssembler listAssembler = parserAssembler.getListAssembler();
+        itemList = listAssembler.findItemList(listName);
+        if (itemList == null)
+        {
+            itemListOperand = parserAssembler.findOperandByName(listName.getName());
+            if (itemListOperand == null)
+            {
+                if (!listName.getScope().isEmpty())
+                {
+                    listName.clearScope();
+                    itemList = listAssembler.findItemList(listName);
+                }
+                if (itemList == null)
+                    throw new ExpressionException("List \"" + listName + "\" cannot be found");
+            }
+        }
     }
-
 }

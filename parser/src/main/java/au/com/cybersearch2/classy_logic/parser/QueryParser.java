@@ -134,30 +134,32 @@ public class QueryParser implements QueryParserConstants
   }
 
   protected Operand axiomContainerOperand(
-      QualifiedName qname,
+      QualifiedName listName,
       ParserAssembler parserAssembler,
       Operand indexExpression1,
       Operand indexExpression2)
   {
-    AxiomContainerOperand operand = new AxiomContainerOperand(qname, indexExpression1, indexExpression2);
+    QualifiedName qname = new QualifiedName(listName.getName() + "_var" + listName.incrementReferenceCount(), listName);
+    AxiomContainerOperand operand = new AxiomContainerOperand(qname, listName, indexExpression1, indexExpression2);
     ParserTask parserTask = parserAssembler.addPending(operand);
     parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
   }
 
   protected Operand listItemOperand(
-      QualifiedName qname,
+      QualifiedName listName,
       ParserContext context,
       Operand indexExpression,
       Operand assignExpression) throws ParseException
   {
-    if (context.isQueryName(qname))
+    if (context.isQueryName(listName))
     {
       if (assignExpression != null)
-         throw new ParseException("Query variablee \u005c"" + qname.toString() + "\u005c" is read-only");
-      return axiomContainerOperand(qname, context.getParserAssembler(), indexExpression, null);
+         throw new ParseException("Query variable \u005c"" + listName.toString() + "\u005c" is read-only");
+      return axiomContainerOperand(listName, context.getParserAssembler(), indexExpression, null);
     }
-    ItemListOperand operand = new ItemListOperand(qname, indexExpression, assignExpression);
+    QualifiedName qname = new QualifiedName(listName + "_var" + listName.incrementReferenceCount(), listName);
+    ItemListOperand operand = new ItemListOperand(qname, listName, indexExpression, assignExpression);
     ParserTask parserTask = context.getParserAssembler().addPending(operand);
     parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
@@ -2247,13 +2249,13 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(LPAREN);
       name = Name(context);
       jj_consume_token(RPAREN);
-    qname = parserAssembler.getContextName(name);
-    operand = parserAssembler.findOperandByName(name);
+    QualifiedName listName = context.getQualifiedName(name);
+    qname = new QualifiedName(listName.getName().toString() + "_length", listName);
+    ListLength listLength = new ListLength(qname, listName);
+    ParserTask parserTask = context.getParserAssembler().addPending(listLength);
+    parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     context.onTokenIntercept(literal);
-    if (operand != null)
-        {if (true) return new ListLength(qname, operand);}
-    else
-        {if (true) return new ListLength(qname, parserAssembler.getListAssembler().getItemList(name));}
+    {if (true) return listLength;}
       break;
     case FORMAT:
       literal = jj_consume_token(FORMAT);
@@ -3197,16 +3199,6 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_72() {
-    if (jj_3R_73()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_88() {
-    if (jj_3R_90()) return true;
-    return false;
-  }
-
   private boolean jj_3R_83() {
     if (jj_scan_token(IDENTIFIER)) return true;
     return false;
@@ -3611,6 +3603,16 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_90() {
     if (jj_scan_token(UNKNOWN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_72() {
+    if (jj_3R_73()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_88() {
+    if (jj_3R_90()) return true;
     return false;
   }
 

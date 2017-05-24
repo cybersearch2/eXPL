@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import au.com.cybersearch2.classy_logic.compile.ListAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -36,10 +37,10 @@ public class AxiomContainerOperand extends ListVariableOperand implements Parser
      * @param indexExpression Operand which evaluates the list index
      * @param expression2 Second expression for selection or assignment depending on usage
      */
-    public AxiomContainerOperand(QualifiedName listName, Operand indexExpression,
+    public AxiomContainerOperand(QualifiedName qname, QualifiedName listName, Operand indexExpression,
             Operand expression2)
     {
-        super(listName, indexExpression, expression2);
+        super(qname, listName, indexExpression, expression2);
         this.listName = listName;
     }
 
@@ -49,9 +50,10 @@ public class AxiomContainerOperand extends ListVariableOperand implements Parser
     @Override
     public void run(ParserAssembler parserAssembler)
     {
+        ListAssembler listAssembler = parserAssembler.getListAssembler();
         if (!listName.getScope().isEmpty() && (parserAssembler.getScope().findScope(listName.getScope()) == null))
         {   // This is a list to return the result of a query call
-            final AxiomTermList itemList = parserAssembler.getListAssembler().getAxiomTerms(listName);
+            final AxiomTermList itemList = listAssembler.getAxiomTerms(listName);
             if (itemList.getAxiomTermNameList().size() == 1)
             {   // Set operand name to name of single term indicated by index expression name
                 setName(indexExpression.getName());
@@ -61,7 +63,7 @@ public class AxiomContainerOperand extends ListVariableOperand implements Parser
             }
             else
             {
-                expression = parserAssembler.getListAssembler().newListVariableInstance(itemList, indexExpression);
+                expression = listAssembler.newListVariableInstance(itemList, indexExpression);
                 setName(expression.getName());
             }
         } 

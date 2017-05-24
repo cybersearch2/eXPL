@@ -153,30 +153,32 @@ public class QueryParser
   } 
 
   protected Operand axiomContainerOperand(
-      QualifiedName qname, 
+      QualifiedName listName, 
       ParserAssembler parserAssembler, 
       Operand indexExpression1, 
       Operand indexExpression2)
   {
-    AxiomContainerOperand operand = new AxiomContainerOperand(qname, indexExpression1, indexExpression2);
+    QualifiedName qname = new QualifiedName(listName.getName() + "_var" + listName.incrementReferenceCount(), listName);
+    AxiomContainerOperand operand = new AxiomContainerOperand(qname, listName, indexExpression1, indexExpression2);
     ParserTask parserTask = parserAssembler.addPending(operand);
     parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
   }
   
   protected Operand listItemOperand(
-      QualifiedName qname, 
+      QualifiedName listName, 
       ParserContext context, 
       Operand indexExpression, 
       Operand assignExpression) throws ParseException
   {
-    if (context.isQueryName(qname))
+    if (context.isQueryName(listName))
     {
       if (assignExpression != null)
-         throw new ParseException("Query variablee \"" + qname.toString() + "\" is read-only");
-      return axiomContainerOperand(qname, context.getParserAssembler(), indexExpression, null);
+         throw new ParseException("Query variable \"" + listName.toString() + "\" is read-only");
+      return axiomContainerOperand(listName, context.getParserAssembler(), indexExpression, null);
     }
-    ItemListOperand operand = new ItemListOperand(qname, indexExpression, assignExpression);
+    QualifiedName qname = new QualifiedName(listName + "_var" + listName.incrementReferenceCount(), listName);
+    ItemListOperand operand = new ItemListOperand(qname, listName, indexExpression, assignExpression);
     ParserTask parserTask = context.getParserAssembler().addPending(operand);
     parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
@@ -1560,13 +1562,13 @@ Operand PrimaryExpression(ParserContext context) :
   |
   literal=<LENGTH> "("  name=Name(context) ")"
   {
-    qname = parserAssembler.getContextName(name);
-    operand = parserAssembler.findOperandByName(name);
+    QualifiedName listName = context.getQualifiedName(name);
+    qname = new QualifiedName(listName.getName().toString() + "_length", listName);
+    ListLength listLength = new ListLength(qname, listName);
+    ParserTask parserTask = context.getParserAssembler().addPending(listLength);
+    parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     context.onTokenIntercept(literal);
-    if (operand != null)
-        return new ListLength(qname, operand);
-    else 
-        return new ListLength(qname, parserAssembler.getListAssembler().getItemList(name));
+    return listLength;
   }
   |
   literal=<FORMAT> "("  name=Name(context) ")"

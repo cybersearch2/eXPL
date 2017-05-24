@@ -393,6 +393,10 @@ public class ParserContext
         QualifiedName qname = QualifiedName.parseName(name);
         if (qnameMap.containsKey(qname))
             return (qnameMap.get(qname));
+        if (qname.getScope().isEmpty() && qname.getTemplate().isEmpty() && (!scope.getAlias().isEmpty()))
+            qname = new QualifiedName(scope.getAlias(), name);
+        if (qnameMap.containsKey(qname))
+            return (qnameMap.get(qname));
         qnameMap.put(qname, qname);
         return qname;
     }

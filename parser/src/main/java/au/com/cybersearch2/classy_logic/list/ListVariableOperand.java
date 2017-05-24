@@ -40,7 +40,7 @@ import au.com.cybersearch2.classy_logic.operator.DelegateType;
 public abstract class ListVariableOperand extends ExpressionOperand<Object> implements Concaten<String>
 {
     /** Name of list */
-    protected String listName;
+    protected QualifiedName listName;
     /** Operand which evaluates the list index */
     protected Operand indexExpression = null;
     /** Optional Operand to select term in axiom - only applicable to Axiom lists */
@@ -55,12 +55,13 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
      * @param indexExpression Operand which evaluates the list index
      * @param expression2 Second expression for selection or assignment depending on usage
      */
-    public ListVariableOperand(QualifiedName listName, 
-                                Operand indexExpression, 
-                                Operand expression2)
+    protected ListVariableOperand(QualifiedName qname,
+                                   QualifiedName listName, 
+                                   Operand indexExpression, 
+                                   Operand expression2)
     {   // Sub class to assign term name when parser task runs
-        super(getQualifiedName(listName), null, Term.ANONYMOUS);
-        this.listName = listName.getName();
+        super(qname, null, Term.ANONYMOUS);
+        this.listName = listName;
         this.indexExpression = indexExpression;
         this.expression2 = expression2;
         assignOnlyOperator = DelegateType.ASSIGN_ONLY.getOperatorFactory().delegate();
@@ -133,18 +134,32 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
      */
     protected Operand newListVariableInstance(ParserAssembler parserAssembler)
     {
+        ListAssembler listAssembler = parserAssembler.getListAssembler();
         QualifiedName qualifiedListName = null;
-        ItemList<?> itemList = parserAssembler.getListAssembler().findItemList(listName);
+        ItemList<?> itemList = listAssembler.findItemList(listName);
         if (itemList != null)
+        {
             qualifiedListName = itemList.getQualifiedName(); 
+            listName = qualifiedListName;
+        }
         else 
         {
-            Operand operand = parserAssembler.findOperandByName(listName);
+            Operand operand = parserAssembler.findOperandByName(listName.getName());
             if (operand != null)
                  qualifiedListName = operand.getQualifiedName();
         }
         if (qualifiedListName == null)
-            throw new ExpressionException("List \"" + listName + "\" cannot be found");
+        {   // Search for list in global scope, if not already in global scope
+            if (!listName.getScope().isEmpty())
+            {
+                qualifiedListName = listName;
+                qualifiedListName.clearScope();
+                itemList = listAssembler.findItemList(qualifiedListName);
+            }
+            if (itemList == null)
+                throw new ExpressionException("List \"" + listName + "\" cannot be found");
+            listName = qualifiedListName;
+        }
         return newListVariableInstance(parserAssembler, qualifiedListName);
     }
 
@@ -178,13 +193,4 @@ public abstract class ListVariableOperand extends ExpressionOperand<Object> impl
         return listAssembler.newListVariableInstance(axiomListSpec);
     }
     
-   /**
-     * Returns generated qualified name based on list name
-     * @param name List name
-     * @return QualifiedName object
-     */
-    static protected QualifiedName getQualifiedName(QualifiedName listName)
-    {
-        return new QualifiedName(listName.getName() + "_var" + Integer.toString(listName.incrementReferenceCount()), listName);
-    }
 }

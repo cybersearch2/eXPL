@@ -194,24 +194,10 @@ public class ListAssembler
     }
 
     /**
-     * Returns item list identified by name
-     * @param listName
-     * @return ItemList
-     * @throws ExpressionException if item list not found
-     */
-    public ItemList<?> getItemList(String listName)
-    {
-        ItemList<?> itemList = findItemList(listName);
-        if (itemList == null)
-            itemList = getItemList(QualifiedName.parseName(listName));
-        return itemList;
-    }
-    
-    /**
      * Returns item list specified by qualified name.
      * @param qname Qualified name of list
      * @return ItemList object or null if an axiom parameter is named and is not yet set 
-    * @throws ExpressionException if item list not found
+     * @throws ExpressionException if item list not found
      */
     public ItemList<?> getItemList(QualifiedName qname)
     {
@@ -252,29 +238,6 @@ public class ListAssembler
         {
             qualifiedListName = new QualifiedName(listName);
             itemList = scope.getGlobalListAssembler().listMap.get(qualifiedListName);
-        }
-        return itemList;
-    }
-    
-    /**
-     * Returns item list specified by name. Search first using current context before 
-     * widening the search to current scope and then global scope as appropriate.
-     * @param listName Name of list
-     * @return ItemList object or null if not found
-     */
-    public ItemList<?> findItemList(String listName)
-    {
-        QualifiedName qualifiedListName = QualifiedName.parseName(listName, scope.getParserAssembler().getQualifiedContextname());
-        ItemList<?> itemList = findItemList(qualifiedListName);
-        if ((itemList == null) && !qualifiedListName.getTemplate().isEmpty())
-        {
-            qualifiedListName.clearTemplate();
-            itemList = findItemList(qualifiedListName);
-        }
-        if ((itemList == null) && !qualifiedListName.getScope().isEmpty())
-        {
-            qualifiedListName.clearScope();
-            itemList = findItemList(qualifiedListName);
         }
         return itemList;
     }
@@ -392,10 +355,7 @@ public class ListAssembler
 
             }
             else // Interpret identifier as a variable name for any primitive list
-            {
-                expression = new Variable(expression.getQualifiedName());
                 suffix = expression.getName();
-            }
         }
         if (suffix == null)
         {
