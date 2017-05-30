@@ -17,12 +17,10 @@ package au.com.cybersearch2.classy_logic.list;
 
 import java.util.List;
 
-import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
  * AxiomListSpec
@@ -35,36 +33,31 @@ public class AxiomListSpec implements ListItemSpec
 {
     /** Name of axiom list */
     protected QualifiedName qualifiedListName;
-    /** Backing axiom list */
-    protected AxiomList axiomList;
-    /** Axiom selection index. Value of -1 means not used */
+    /** The list */
+    protected ItemList<?> itemList;
+    protected ListItemSpec indexData;
+    protected ListItemSpec arrayData;
+    /** Axiom selection index. Value of -1 means not available or not used */
     protected int axiomIndex;
-    /** Term selection index. Value of -1 means not used */
+    /** Term selection index. Value of -1 means not available or not used */
     protected int termIndex;
-    /** Compiler operand for axiom selection */
-    protected Operand axiomExpression;
-    /** Compiler operand for term selection */
-    protected Operand termExpression;
-    /** Variable for term selection */
-    protected Operand termVariable;
-    /** Text to append to name of variable */
-    protected String suffix;
     /** Compiler operand to supply AxiomList object on evaluation */
     protected Operand axiomListVariable;
     /** Flag set true if assigned to an AxiomTermList */
     protected boolean isTermList;
- 
+    protected AxiomTermList axiomTermList;
+    
     /**
      * Construct AxiomListSpec object for case backing AxiomList is available
      * @param axiomList Backing axiom list
-     * @param axiomExpression Compiler operand for axiom selection
-     * @param termExpression Compiler operand for term selection
+     * @param indexDataArray 
      */
-    public AxiomListSpec(AxiomList axiomList, Operand axiomExpression, Operand termExpression)
+    public AxiomListSpec(AxiomList axiomList, ListItemSpec[] indexDataArray)
     {
-        this.axiomList = axiomList;
-        this.axiomExpression = axiomExpression;
-        this.termExpression = termExpression;
+        this.itemList = axiomList;
+        indexData = indexDataArray.length == 1 ? indexDataArray[0] : indexDataArray[1];
+        if (indexDataArray.length > 1)
+            arrayData = indexDataArray[0];
         this.qualifiedListName = axiomList.getQualifiedName();
         init();
     }
@@ -76,12 +69,13 @@ public class AxiomListSpec implements ListItemSpec
      * @param axiomExpression Compiler operand for axiom selection
      * @param termExpression Compiler operand for term selection
      */
-    public AxiomListSpec(QualifiedName qualifiedListName, Operand axiomListVariable, Operand axiomExpression, Operand termExpression)
-    {
-        this.qualifiedListName = qualifiedListName;
+   public AxiomListSpec(Operand axiomListVariable, ListItemSpec[] indexDataArray)
+   {
         this.axiomListVariable = axiomListVariable;
-        this.axiomExpression = axiomExpression;
-        this.termExpression = termExpression;
+        indexData = indexDataArray.length == 1 ? indexDataArray[0] : indexDataArray[1];
+        if (indexDataArray.length > 1)
+            arrayData = indexDataArray[0];
+        this.qualifiedListName = indexData.getQualifiedListName();
         init();
     }
  
@@ -107,20 +101,18 @@ public class AxiomListSpec implements ListItemSpec
      * Returns backing axiom list
      * @return AxiomList object or null if waiting for evaluation
      */
-    public AxiomList getAxiomList()
+    public ItemList<?> getItemList()
     {
-        return axiomList;
+        return itemList;
     }
 
-    /**
-     * Sets backing axiom list
-     * @param axiomList AxionList object
-     */
-    public void setAxiomList(AxiomList axiomList)
+    public AxiomTermList getAxiomTermList()
     {
-        this.axiomList = axiomList;
+        if (itemList == null)
+            return getEmptyAxiomTermList();
+        return (axiomTermList != null) ? axiomTermList :  ((AxiomList)itemList).getItem(axiomIndex);
     }
-
+    
     /**
      * Returns axiom selection index
      * @return Valid index or -1 if not used
@@ -139,13 +131,18 @@ public class AxiomListSpec implements ListItemSpec
         return termIndex;
     }
 
+    public Operand getAxiomListVariable()
+    {
+        return axiomListVariable;
+    }
+    
     /**
      * Returns Compiler operand for axiom selection
      * @return Operand object
      */
     public Operand getAxiomExpression()
     {
-        return axiomExpression;
+        return arrayData != null ? arrayData.getItemExpression() : indexData.getItemExpression();
     }
 
     /**
@@ -154,7 +151,7 @@ public class AxiomListSpec implements ListItemSpec
     @Override
     public Operand getItemExpression()
     {
-        return termExpression;
+        return arrayData != null ? indexData.getItemExpression() : null;
     }
 
     /**
@@ -163,7 +160,7 @@ public class AxiomListSpec implements ListItemSpec
     @Override
     public String getSuffix()
     {
-        return suffix;
+        return indexData.getSuffix();
     }
 
     /**
@@ -171,146 +168,8 @@ public class AxiomListSpec implements ListItemSpec
      */
     protected void init()
     {
-        axiomIndex = -1;
-        termIndex = -1;
-        // Check for non-empty Integer operand, which is used for a fixed index
-        if (!axiomExpression.isEmpty() && (axiomExpression instanceof IntegerOperand && Term.ANONYMOUS.equals(axiomExpression.getName())))
-            axiomIndex = ((Long)(axiomExpression.getValue())).intValue();
-        if (termExpression == null)
-        {
-            suffix = "";
-            return; // Single dimension
-        }
-        if (!termExpression.isEmpty() && (termExpression instanceof IntegerOperand) && Term.ANONYMOUS.equals(termExpression.getName()))
-        {
-            termIndex = ((Long)(termExpression.getValue())).intValue();
-            suffix = Integer.toString(termIndex);
-        }
-        else if (termExpression.isEmpty())
-        {
-            if ((axiomList != null) && 
-                (axiomList.getAxiomTermNameList() != null) &&
-                (getIndexForName(termExpression.getName(), axiomList.getAxiomTermNameList()) != -1))
-                suffix = termExpression.getName();
-        }
-        if (suffix == null)
-            suffix = termExpression.toString();
-    }
-
-    /**
-     * Complete any initialization dependent on completion of evaluation
-     * @param modifierId Identity of caller, which must be provided for backup()
-    * @return Flag set true if update occurred
-     */
-    public boolean update(int modifierId)
-    {
-        if (axiomListVariable == null)
-            return false;
-        if (axiomListVariable.isEmpty())
-            axiomListVariable.evaluate(modifierId);
-        if (axiomListVariable.isEmpty())
-            return false;
-        if (termVariable != null)
-        {
-            termExpression = termVariable;
-            setTermIndex();
-            return true;
-        }
-        Object itemListVariable = axiomListVariable.getValue();
-        AxiomTermList axiomTermList = null;
-        if (itemListVariable instanceof AxiomTermList)
-            axiomTermList = (AxiomTermList)itemListVariable;
-        else if (itemListVariable instanceof AxiomList)
-        {
-            axiomList = (AxiomList)itemListVariable;
-            boolean axiomOnly = (termExpression == null) && (termIndex < 0);
-            if (axiomOnly && (axiomList.getLength() == 1) && (axiomExpression.getValueClass() == String.class))
-            {
-                axiomTermList = axiomList.getItem(0);
-                termVariable = axiomExpression;
-            }
-        }
-        if (axiomTermList != null)
-        {   //Adjust variable parameters to index terms of axiom
-            if (termVariable == null)
-            {
-                QualifiedName axiomKey = axiomTermList.getKey();
-                QualifiedName axiomName = axiomTermList.getQualifiedName();
-                if ((axiomList == null) || 
-                     !axiomList.getName().equals(axiomTermList.getName()) ||
-                     !axiomList.getKey().equals(axiomTermList.getKey()))
-                {
-                    axiomList = new AxiomList(axiomName, axiomKey);
-                }
-                axiomList.assignItem(0, axiomTermList);
-            }
-            if (isTermList)
-                return true; // Ready to reference term in list
-            // Adjust index values for AxiomTermList
-            isTermList = true;
-            if (axiomIndex >= 0)
-                termIndex = axiomIndex;
-            else
-            {
-                termIndex = -1;
-                termExpression = axiomExpression;
-                suffix = termExpression.getName();
-                setTermIndex();
-            }
-            axiomIndex = 0;
-            axiomExpression = null;
-        }
-        else if (axiomList == null)
-            throw new ExpressionException("Value has incompatible type. Expecting " + (isTermList ? "AxiomTermList" : "AxiomList"));
-        if (termExpression != null)
-            setTermIndex();
-        return true;
-    }
-
-    /**
-     * Set term index for case it is specifed by name. 
-     * @param itemName
-     * Requires axiom term name list to be available. 
-     */
-    public void setTermIndex(String itemName)
-    {
-        suffix = itemName;
-        setTermIndex();
-    }
-    
-    /**
-     * Set term index for case it is specifed by name. 
-     * Requires axiom term name list to be available. 
-     */
-    protected void setTermIndex()
-    {
-        List<String> axiomTermNameList = axiomList.getAxiomTermNameList();
-        if (axiomTermNameList != null)
-        {
-            if (!termExpression.isEmpty() && termExpression.getValueClass().equals(String.class))
-                termIndex = getIndexForName(termExpression.getValue().toString(), axiomTermNameList);
-            if (termIndex == -1)
-                termIndex = getIndexForName(suffix, axiomTermNameList);
-            if (termIndex == -1)
-                 throw new ExpressionException("List \"" + qualifiedListName.toString() + "\" does not have term named \"" + suffix + "\"");
-            termExpression = null;
-        }
-        else // Note the following has no effect when called from update()
-            suffix = termExpression.toString();
-    }
-    
-    /**
-     * Returns index of item identified by name
-     * @param itemName Item name
-     * @param axiomTermNameList Term names of axiom source
-     * @return Index
-     */
-    protected int getIndexForName(String itemName, List<String> axiomTermNameList) 
-    {
-        int index = getIndexByName(itemName, axiomTermNameList);
-        if ((index == -1) && (termExpression != null) && !termExpression.isEmpty())
-            index = getIndexByName(termExpression.getValue().toString(), axiomTermNameList);
-        return index;
+        axiomIndex = arrayData != null ? arrayData.getItemIndex() : indexData.getItemIndex();
+        termIndex = arrayData != null ? indexData.getItemIndex() : -1;
     }
 
     /**
@@ -329,6 +188,73 @@ public class AxiomListSpec implements ListItemSpec
                 return i;
         }
         return -1;
+    }
+
+    @Override
+    public QualifiedName getVariableName()
+    {
+        return null;
+    }
+
+    @Override
+    public void assemble(ItemList<?> itemList)
+    {
+        indexData.assemble(itemList);
+    }
+
+    @Override
+    public boolean evaluate(ItemList<?> itemList, int id)
+    {
+        this.itemList = itemList;
+        axiomTermList = (itemList instanceof AxiomTermList) ? (AxiomTermList)itemList: null;
+        // Note: indexData.assemble() is always invoked because scope local axioms may change when scope changes
+        boolean isAxiomList = false;
+        if (arrayData != null)
+        {
+            if (axiomTermList == null)
+            {
+                arrayData.evaluate(itemList, id);
+                axiomIndex = arrayData.getItemIndex();
+                axiomTermList = ((AxiomList)itemList).getItem(axiomIndex);
+            }
+            else
+                axiomIndex = -1;
+        }
+        else
+        {
+            if (axiomTermList == null)
+            {   // indexData selects AxiomTermList item 
+                AxiomList axiomList = ((AxiomList)itemList);
+                isAxiomList = axiomList.getLength() > 1;
+                if (isAxiomList)
+                    termIndex = -1;
+                if (axiomList.isEmpty())
+                    axiomTermList = getEmptyAxiomTermList();
+                else
+                    axiomTermList = axiomList.getItem(0);
+            }
+        }
+        if (axiomTermList.isEmpty())
+        {
+            assemble(itemList);
+            indexData.evaluate(itemList, id);
+        }
+        else
+        {
+            assemble(axiomTermList);
+            indexData.evaluate(axiomTermList, id);
+        }
+        if (isAxiomList)
+            axiomIndex = indexData.getItemIndex();
+        else
+            termIndex = indexData.getItemIndex();
+        return true;
+    }
+
+    private AxiomTermList getEmptyAxiomTermList()
+    {
+        QualifiedName qname = new QualifiedName(getListName() + "_item", qualifiedListName);
+        return new AxiomTermList(qname, qname);
     }
 
 }

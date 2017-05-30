@@ -91,7 +91,7 @@ query<axiom> surface_area_query(surface_area : country_area);
         while(iterator.hasNext())
             resultList.add(iterator.next());
         result = queryProgram.executeQuery("au_surface_area_query");
-        iterator = result.getIterator("au_surface_area_query");
+		iterator = result.getIterator("au_surface_area_query");
         while(iterator.hasNext())
             resultList.add(iterator.next());
         return resultList;

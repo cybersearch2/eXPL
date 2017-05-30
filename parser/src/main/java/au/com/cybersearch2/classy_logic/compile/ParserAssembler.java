@@ -472,10 +472,11 @@ public class ParserAssembler implements LocaleListener
                 throw new ExpressionException("Template \"" + qualifiedTemplateName.toString() + "\" not found");
             isTemplateKey = true;
         }
+        Template template = null;
         if (!isTemplateKey)
         {
             // A choice is detected using a key in template form
-            Template template = 
+            template = 
                 targetScope.getParserAssembler()
                 .templateAssembler
                 .getTemplate(qualifiedTemplateName);
@@ -483,6 +484,9 @@ public class ParserAssembler implements LocaleListener
         }
         if (!isTemplateKey)
         {   // The final analysis is axiom (term) list which can be set now
+            AxiomArchetype archetype = axiomAssembler.getAxiomArchetype(qualifiedAxiomName);
+            if (archetype != null)
+                axiomContainer.setAxiomTermNameList(archetype.getAxiomTermNameList());
             List<Axiom> internalAxiomList = 
                 targetScope.getParserAssembler()
                     .getListAssembler()
@@ -492,6 +496,23 @@ public class ParserAssembler implements LocaleListener
                 listAssembler.setAxiomContainer(axiomContainer, internalAxiomList);
                 return;
             }
+        }
+        else 
+        {
+            if (template == null)
+                template = 
+                targetScope.getParserAssembler()
+                .templateAssembler
+                .getTemplate(qualifiedTemplateName);
+            if ((template == null) && (targetScope.getName() != QueryProgram.GLOBAL_SCOPE))
+            {
+                QualifiedName globalName = new QualifiedTemplateName(scope.getGlobalScope().getAlias(), qualifiedTemplateName.getTemplate());
+                template = 
+                scope.getGlobalTemplateAssembler()
+                .getTemplate(globalName);
+            }
+            if (template != null)
+                axiomContainer.setAxiomTermNameList(template.getArchetype().getAxiomTermNameList());
         }
         listAssembler.add(qualifiedTemplateName, axiomListener);
 	}

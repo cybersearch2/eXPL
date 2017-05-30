@@ -341,7 +341,7 @@ public class QueryParserTest
     static final String AXIOM_WRAPPER_XPL =
     		"axiom colors (red, green, blue) {0.75, 0.50, 0.25};\n" +
             "list<term> colors_list(colors);\n" +
-    		"template color_convert(red, green, blue, double r = colors_list[red], double g = colors_list[green], double b = colors_list[blue]);"
+    		"template color_convert(red, green, blue, double r = colors_list^red, double g = colors_list^green, double b = colors_list^blue);"
     		;
     
 	static final String CITY_EVELATIONS_SORTED =
@@ -748,7 +748,7 @@ public class QueryParserTest
     public void test_simple_variable_index_list_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(SIMPLE_VARIABLE_INDEX_LIST_CALCULATE);
-		assertThat(parserAssembler.getTemplateAssembler().getTemplate("increment_n").toString()).isEqualTo("increment_n(n, i, limit, increment_n1(number_list.i=n++ ... ?i<limit))");
+		assertThat(parserAssembler.getTemplateAssembler().getTemplate("increment_n").toString()).isEqualTo("increment_n(n, i, limit, increment_n1(i=n++ ... ?i<limit))");
 		//System.out.println(parserAssembler.getTemplateAssembler().getTemplate("increment_n"));
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
@@ -764,7 +764,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(SIMPLE_LIST_LENGTH_CALCULATE);
 		assertThat(parserAssembler.getTemplateAssembler().getTemplate("increment_n")
 				.toString()).isEqualTo(
-						"increment_n(n, i, limit, increment_n1(number_list.i=n++ ... ?number_list_length<limit))");
+						"increment_n(n, i, limit, increment_n1(i=n++ ... ?number_list_length<limit))");
 		//System.out.println(parserAssembler.getTemplateAssembler().getTemplate("increment_n"));
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("increment_n");
         Solution solution = new Solution();
@@ -920,7 +920,7 @@ public class QueryParserTest
         TestQueryExecuter colorsQuery = new TestQueryExecuter(queryParams);
  	    assertThat(colorsQuery.execute()).isTrue();
   	    //System.out.println(colorsQuery.getSolution().getAxiom("color_convert").toString());
- 	    assertThat(colorsQuery.getSolution().getAxiom("color_convert").toString()).isEqualTo("color_convert(red=0.75, green=0.5, blue=0.25, r=0.75, g=0.75, b=0.75)");
+ 	    assertThat(colorsQuery.getSolution().getAxiom("color_convert").toString()).isEqualTo("color_convert(red=0.75, green=0.5, blue=0.25, r=0.75, g=0.5, b=0.25)");
 	}
 
 	@Test

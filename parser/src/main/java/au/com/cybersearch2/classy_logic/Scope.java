@@ -22,10 +22,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
+import au.com.cybersearch2.classy_logic.axiom.LocalAxiomListener;
 import au.com.cybersearch2.classy_logic.compile.AxiomAssembler;
 import au.com.cybersearch2.classy_logic.compile.ListAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.ParserTask;
 import au.com.cybersearch2.classy_logic.compile.TemplateAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -102,6 +105,11 @@ public class Scope
         }
         if (!properties.isEmpty())
             addScopeList(properties);
+    }
+ 
+    public Set<String> getScopeNames()
+    {
+        return scopeMap.keySet();
     }
     
     /**
@@ -540,50 +548,20 @@ public class Scope
      * @param qualifiedAxiomName Local axiom qualified name
      * @param axiomListener The local axiom listener
      */
-    public void addLocalAxiomListener(final QualifiedName qualifiedAxiomName, final AxiomListener axiomListener) 
+    public void addLocalAxiomListener(QualifiedName qualifiedAxiomName, AxiomListener axiomListener) 
     {
         // Register locale listener with Global scope in which all local axioms must be declared
         final ParserAssembler parserAssembler = getGlobalScope().getParserAssembler();
-        LocaleListener localeListener = new LocaleListener(){
-
-            /**
-             * Assign backing axiom to local list. If no axiom source is found, create one
-             * in which each item is "unknown"
-             */
-            @Override
-            public void onScopeChange(Scope scope) 
-            {
-                Axiom localAxiom = null;
-                QualifiedName qname = new QualifiedName(scope.getName(), qualifiedAxiomName.getName());
-                AxiomSource axiomSource = scope.getParserAssembler().getAxiomSource(qname);
-                if (axiomSource == null)
-                    axiomSource = parserAssembler.getAxiomSource(qname);
-                if (axiomSource == null)
-                {
-                    axiomSource = getGlobalParserAssembler().getAxiomSource(qualifiedAxiomName);
-                    if (axiomSource != null)
-                        localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
-                    else if (scope.name.equals(QueryProgram.GLOBAL_SCOPE))
-                        return; // This is not an error when global scope context is being reset
-                    else
-                        throw new ExpressionException("Axiom source \"" + qualifiedAxiomName.toString() + "\" not found");
-                }
-                if (localAxiom == null)
-                {
-                    Iterator<Axiom> iterator = axiomSource.iterator();
-                    if (iterator.hasNext())
-                        localAxiom = iterator.next();
-                    else
-                        localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
-                }
-                axiomListener.onNextAxiom(qualifiedAxiomName, localAxiom);
-            }
-        };
+        LocalAxiomListener localeListener = new LocalAxiomListener(qualifiedAxiomName, axiomListener);
         // If the local is declared inside a scope, then it's scope never changes and a LocaleListener is not required
         if (!name.equals(QueryProgram.GLOBAL_SCOPE))
             localeListener.onScopeChange(this);
         else
+        {
             parserAssembler.registerLocaleListener(localeListener); 
+            ParserTask parserTask = parserAssembler.addPending(localeListener);
+            parserTask.setPriority(ParserTask.Priority.list.ordinal());
+        }
     }
 
     /**

@@ -103,7 +103,7 @@ public class RegexGroupsTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string in_word=word+, +expand_var0+- +def (20,3) (21,0)");
+        assertThat(sourceItem.toString()).isEqualTo("string in_word=word+, +expand.part+- +def (20,3) (21,0)");
    }
 
     protected void checkSolution(BufferedReader reader, String word)

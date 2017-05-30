@@ -59,12 +59,12 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	 * @param suffix The axiom term identity
      * @return ItemListVariable 
      */
-    public AxiomListVariable newVariableInstance(int axiomIndex, Operand termExpression, String suffix)
-    {
-    	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomIndex, suffix);
-    	axiomListVariable.setTermExpression(termExpression, 0);
-    	return axiomListVariable;
-    }
+    //public AxiomListVariable newVariableInstance(int axiomIndex, Operand termExpression, String suffix)
+    //{
+    //	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomIndex, suffix);
+    //	axiomListVariable.setTermExpression(termExpression, 0);
+    //	return axiomListVariable;
+    //}
 
     /**
      * Returns list variable to access axiom and term using 
@@ -73,12 +73,12 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	 * @param suffix The axiom term identity
      * @return ItemListVariable   
      */
-    public AxiomListVariable newVariableInstance(Operand axiomExpression, int termIndex, String suffix)
-    {
-    	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomExpression, suffix);
-    	axiomListVariable.setTermIndex(termIndex, 0);
-    	return axiomListVariable;
-    }
+    //public AxiomListVariable newVariableInstance(Operand axiomExpression, int termIndex, String suffix)
+    //{
+    //	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomExpression, suffix);
+    //	axiomListVariable.setTermIndex(termIndex, 0);
+    //	return axiomListVariable;
+    //}
 
     /**
      * Returns list variable to access axiom and term using 
@@ -87,12 +87,12 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	 * @param suffix The axiom term identity
      * @return ItemListVariable 
      */
-    public AxiomListVariable newVariableInstance(int axiomIndex, int termIndex, String suffix)
-    {
-    	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomIndex, suffix);
-    	axiomListVariable.setTermIndex(termIndex, 0);
-    	return axiomListVariable;
-    }
+    //public AxiomListVariable newVariableInstance(int axiomIndex, int termIndex, String suffix)
+    //{
+    //	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomIndex, suffix);
+    //	axiomListVariable.setTermIndex(termIndex, 0);
+    //	return axiomListVariable;
+    //}
 
     /**
      * Returns list variable to access axiom and term using 
@@ -101,12 +101,12 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	 * @param suffix The axiom term identity
      * @return ItemListVariable   
      */
-    public AxiomListVariable newVariableInstance(Operand axiomExpression, Operand termExpression, String suffix)
-    {
-    	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomExpression, suffix);
-    	axiomListVariable.setTermExpression(termExpression, 0);
-    	return axiomListVariable;
-    }
+    //public AxiomListVariable newVariableInstance(Operand axiomExpression, Operand termExpression, String suffix)
+    //{
+    //	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomExpression, suffix);
+    //	axiomListVariable.setTermExpression(termExpression, 0);
+    //	return axiomListVariable;
+    //}
 
     /**
      * Returns listener to add Axiom objects to this container
@@ -164,6 +164,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	 * Returns axiom term name list
 	 * @return List of axiom term names
 	 */
+    @Override
 	public List<String> getAxiomTermNameList() 
 	{
 		return axiomTermNameList;

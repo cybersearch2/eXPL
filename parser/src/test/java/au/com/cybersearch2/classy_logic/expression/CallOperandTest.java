@@ -365,7 +365,7 @@ public class CallOperandTest
             "    << subjects(english, math, history) >> (marks_list),\n" +
             "    math_score=score.subjects[1],\n" +
             "    << total_score(english, math, history) >> (label, value),\n" +
-            "    total=score.total_score[value],\n" +
+            "    total=score.total_score^value,\n" +
             "    axiom report = { marks_list, label + \": \" + value }\n" +
             ");\n" +
             "query<axiom> marks(grades : score);";

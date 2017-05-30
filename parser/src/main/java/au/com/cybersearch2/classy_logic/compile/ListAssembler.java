@@ -20,28 +20,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
-import au.com.cybersearch2.classy_logic.list.ListIndex;
-import au.com.cybersearch2.classy_logic.list.AxiomListSpec;
-import au.com.cybersearch2.classy_logic.list.AxiomListVariable;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.list.ItemListVariable;
 import au.com.cybersearch2.classy_logic.list.ListType;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
@@ -322,89 +314,6 @@ public class ListAssembler
     }
 
     /**
-     * Returns ItemListVariable object with specified name and index expression operand. 
-     * Will create object if it does not already exist.
-     * @param itemList The list
-     * @param expression Index expression operand
-     * @return ItemListVariable object
-     */
-    public ItemListVariable<?> newListVariableInstance(ItemList<?> itemList, Operand expression)
-    {
-        String name = itemList.getName();
-        ItemListVariable<?> listVariable = null;
-        int index = -1;
-        String suffix = null;
-        if (!expression.isEmpty() && (expression instanceof IntegerOperand) && Term.ANONYMOUS.equals(expression.getName()))
-        {
-           index = ((Long)(expression.getValue())).intValue();
-           suffix = name + "." + Long.toString(index);
-        }
-        else if (expression.isEmpty() && (expression instanceof Variable))
-        {
-            if (itemList instanceof AxiomTermList)
-            {
-                AxiomTermList axiomTermList = (AxiomTermList)itemList;
-                List<String> axiomTermNameList = axiomTermList.getAxiomTermNameList();
-                if (axiomTermNameList != null)
-                {
-                    suffix = expression.getName();
-                    index = getIndexForName(name, suffix, axiomTermNameList);
-                }
-                else
-                    suffix = expression.toString();
-
-            }
-            else // Interpret identifier as a variable name for any primitive list
-                suffix = expression.getName();
-        }
-        if (suffix == null)
-        {
-            suffix = expression.getName();
-            if (suffix.isEmpty())
-            {
-                suffix = expression.getLeftOperand().getName();
-                if (suffix.isEmpty())
-                    suffix = expression.toString();
-            }
-            suffix = name + "." + suffix;
-        }
-        // IntegerOperand value is treated as fixed
-        if (index >= 0)
-            listVariable = getListVariable(itemList, name, index, suffix);
-        else
-            listVariable = (ItemListVariable<?>) itemList.newVariableInstance(new ListIndex(itemList.getQualifiedName(), expression, suffix));
-        return listVariable;
-    }
-
-    /**
-     * Returns a list variable for a term in an axiom in a axiom list. 
-     * Both the axiom and the term are referenced by index.
-     * There is only one variable instance for any specific index combination.
-     * @param axiomListSpec AxiomList specification
-     * @return AxiomListVariable object
-     */
-    public AxiomListVariable newListVariableInstance(AxiomListSpec axiomListSpec) 
-    {
-        AxiomListVariable listVariable = null;
-        // IntegerOperand value is treated as fixed
-        if ((axiomListSpec.getAxiomIndex() >= 0) && (axiomListSpec.getItemIndex() >= 0))
-            // The variable only has a single instance if both axiom and term indexes are fixed
-            listVariable = getListVariable(axiomListSpec);
-        else
-        {
-            AxiomList axiomList = axiomListSpec.getAxiomList();
-            String suffix = axiomListSpec.getSuffix();
-            if ((axiomListSpec.getAxiomIndex() >= 0))
-                listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getItemExpression(), suffix);
-            else if (axiomListSpec.getItemIndex() >= 0)
-                listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomExpression(), axiomListSpec.getItemIndex(), suffix);
-            else
-                listVariable = axiomList.newVariableInstance(axiomListSpec.getAxiomExpression(), axiomListSpec.getItemExpression(), suffix);
-        }
-        return listVariable;
-    }
-
-    /**
      * Returns index of item identified by name
      * @param listName Name of list - used only for error reporting
      * @param item Item name
@@ -419,50 +328,6 @@ public class ListAssembler
                 return i;
         }
         throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + item + "\"");
-    }
-
-    /**
-     * Returns a list variable for a term in an axiom in a axiom list. 
-     * Both the axiom and the term are referenced by index.
-     * There is only one variable instance for any specific index combination.
-     * @param axiomListSpec AxiomList data, includine The owner list, list name and indexes
-     * @return AxiomListVariable object
-     */
-    protected AxiomListVariable getListVariable(AxiomListSpec axiomListSpec) 
-    {
-        OperandMap operandMap = scope.getParserAssembler().getOperandMap();
-        // Variable name is list name with '_' index suffix
-        String varName = axiomListSpec.getListName() + "_" + axiomListSpec.getAxiomIndex() + "_" + axiomListSpec.getSuffix();
-        QualifiedName qualifiedtVarName = new QualifiedName(varName, axiomListSpec.getAxiomList().getQualifiedName());
-        AxiomListVariable listVariable = (AxiomListVariable) operandMap.get(qualifiedtVarName);
-        if (listVariable != null)
-            return listVariable;
-        // Use axiomList object to create new ItemListVariable instance
-        listVariable = axiomListSpec.getAxiomList().newVariableInstance(axiomListSpec.getAxiomIndex(), axiomListSpec.getItemIndex(), axiomListSpec.getSuffix());
-        return listVariable;
-    }
-
-    /**
-     * Returns ItemListVariable object with specified name and index. 
-     * There is only one variable instance for any specific index.
-     * Will create object if it does not already exist.
-     * @param itemList The owner list
-     * @param name List name
-     * @param index int
-     * @param suffix To append to name
-     * @return ItemListVariable object
-     */
-    protected ItemListVariable<?> getListVariable(ItemList<?> itemList, String name, int index, String suffix)
-    {
-        OperandMap operandMap = scope.getParserAssembler().getOperandMap();
-        // Variable name is list name with '_' index suffix
-        QualifiedName listVarName = new QualifiedName(name + "_" + suffix, itemList.getQualifiedName());
-        ItemListVariable<?> listVariable = (ItemListVariable<?>) operandMap.get(listVarName);
-        if (listVariable != null)
-            return listVariable;
-        // Use ItemList object to create new ItemListVariable instance
-        listVariable = (ItemListVariable<?>) itemList.newVariableInstance(new ListIndex(itemList.getQualifiedName(), index, suffix));
-        return listVariable;
     }
 
     /**
@@ -526,4 +391,5 @@ public class ListAssembler
         else
             add(axiomKey, axiomListener);
     }
+
 }

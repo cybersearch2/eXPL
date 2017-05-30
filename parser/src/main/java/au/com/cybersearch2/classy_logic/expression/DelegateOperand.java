@@ -51,12 +51,21 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
 	 */
 	protected DelegateOperand(QualifiedName qname) 
 	{
-		super(qname.getName());
-		this.qname = qname;
-        operator = new DelegateOperator();
-        index = -1;
+		this(qname, qname.getName());
 	}
 
+    /**
+     * Construct empty DelegateOperand object with specified term name
+     * @param qname Qualified name of variable
+     */
+    protected DelegateOperand(QualifiedName qname, String termName) 
+    {
+        super(termName);
+        this.qname = qname;
+        operator = new DelegateOperator();
+        index = -1;
+    }
+    
     /**
      * Returns qualified name
      * @return QualifiedName object

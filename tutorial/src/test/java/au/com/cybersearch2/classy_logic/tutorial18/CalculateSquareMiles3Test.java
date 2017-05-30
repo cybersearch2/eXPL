@@ -109,11 +109,11 @@ public class CalculateSquareMiles3Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?scope_var0==United States (12,3) (13,2)");
+        assertThat(sourceItem.toString()).isEqualTo("?scope.location==United States (12,3) (13,2)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("scope_var0==United States&&country_area1_run_once (13,3) (17,0)");
+        assertThat(sourceItem.toString()).isEqualTo("scope.location==United States&&country_area1_run_once (13,3) (17,0)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

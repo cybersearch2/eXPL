@@ -15,7 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -29,7 +28,6 @@ import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 
 /**
@@ -263,42 +261,4 @@ public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOpera
     {
         return "List <" + clazz.getSimpleName() + ">[" + valueList.size() + "]";
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public ListVariable<T> newVariableInstance(ListItemSpec listItemSpec)
-    {
-        ItemListVariable<?> itemListVariable = null;
-        switch(delegateType)
-        {
-        case STRING:
-            itemListVariable = new ItemListVariable<String>(this, operator, listItemSpec);
-            break;
-        case INTEGER:
-            itemListVariable = new ItemListVariable<Long>(this, operator, listItemSpec);
-            break;
-        case DOUBLE:
-            itemListVariable = new ItemListVariable<Double>(this, operator, listItemSpec);
-            break;
-        case DECIMAL:
-            itemListVariable = new ItemListVariable<BigDecimal>(this, operator, listItemSpec);
-            break;
-        case BOOLEAN:
-            itemListVariable = new ItemListVariable<Boolean>(this, operator, listItemSpec);
-            break;
-        case ASSIGN_ONLY:
-            itemListVariable = new ItemListVariable<AxiomTermList> (this, operator, listItemSpec);
-            break;
-        default:
-            // This is not expected to happen
-            throw new IllegalArgumentException(delegateType.toString() + " not allowed for item type");
-        }
-        if (rightOperand != null)
-        {   // The right operand is shared by all variables. First variable to evaluate will set the value
-            // which will be retained until it is cleared by the template which did the evaluation.
-            itemListVariable.setRightOperand(rightOperand);
-        }
-        return (ItemListVariable<T>) itemListVariable;
-    }
-
 }

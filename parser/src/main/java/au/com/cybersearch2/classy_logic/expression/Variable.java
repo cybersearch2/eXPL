@@ -41,7 +41,16 @@ public class Variable extends DelegateOperand
 	 */
 	public Variable(QualifiedName qname) 
 	{
-		super(qname);
+		this(qname, qname.getName());
+    }
+
+    /**
+     * Construct a Variable object with specified term name
+     * @param qname Qualified name
+     */
+    public Variable(QualifiedName qname, String termName) 
+    {
+        super(qname, termName);
     }
 
 	/**

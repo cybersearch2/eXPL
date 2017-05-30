@@ -107,7 +107,7 @@ query<axiom> in_words(lexicon : in_words);
 	        RegexGroups regexGroups = new RegexGroups();
 	        Iterator<Axiom> iterator = regexGroups.getRegexGroups();
 	        while(iterator.hasNext())
-	            System.out.println(iterator.next().getTermByName("in_word").toString().substring(10));
+	            System.out.println(iterator.next().getTermByName("in_word").toString().substring(8));
 		} 
         catch (ExpressionException e) 
         { // Display nested ParseException

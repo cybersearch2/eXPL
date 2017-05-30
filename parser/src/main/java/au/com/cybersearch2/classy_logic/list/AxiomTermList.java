@@ -20,12 +20,10 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
-import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.TermListManager;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -89,7 +87,7 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
                     archetypeName = axiomArchetype.toString();
                 }
 		        if (sourceItem != null)
-		            sourceItem.setInformation(toString());
+		            sourceItem.setInformation(AxiomTermList.this.toString());
 			}};
 	}
 
@@ -115,6 +113,7 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 	/**
 	 * @return the axiomTermNameList
 	 */
+    @Override
 	public List<String> getAxiomTermNameList() 
 	{
 		return axiomTermNameList;
@@ -213,28 +212,6 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 	{   
 		verify(index);
 		axiom.getTermByIndex(index).setValue(value);
-	}
-
-	/**
-	 * newVariableInstance
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#newVariableInstance(int, java.lang.String, int)
-	 */
-	@Override
-	public ItemListVariable<Object> newVariableInstance(ListItemSpec listItemSpec) 
-	{
-	    QualifiedName varName = 
-	        new QualifiedName(listItemSpec.getListName() + 
-	            listItemSpec.getQualifiedListName().incrementReferenceCount(), 
-	            listItemSpec.getQualifiedListName());
-        Variable variable = new Variable(varName);
-        if ((listItemSpec.getItemIndex() != -1) && (axiom.getTermCount() > 0))
-        {
-            verify(listItemSpec.getItemIndex());
-            // Assign a value to set the delegate
-            variable.assign(axiom.getTermByIndex(listItemSpec.getItemIndex()));
-        }
-        // else Assign a value to set the delegate must be delayed until the expression is evaluated
-        return new AxiomTermListVariable(this, variable, listItemSpec);
 	}
 
 	/**

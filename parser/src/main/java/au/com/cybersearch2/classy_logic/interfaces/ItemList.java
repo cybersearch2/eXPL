@@ -16,7 +16,6 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.list.ListVariable;
 
 /**
  * ItemList
@@ -58,13 +57,6 @@ public interface ItemList<T> extends Iterable<T>, SourceInfo
      * @param value Object
      */
     void assignItem(int index, Object value);
-
-    /**
-     * Returns list variable to access list by item specification
-     * @param listItemSpec Item specification 
-     * @return ListVariable object
-     */
-    ListVariable<T> newVariableInstance(ListItemSpec listItemSpec);
 
     /**
      * Returns item referenced by index

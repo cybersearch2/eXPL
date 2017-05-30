@@ -18,71 +18,44 @@ package au.com.cybersearch2.classy_logic.list;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
  * ListIndex
  * @author Andrew Bowley
  * 23May,2017
  */
-public class ListIndex implements ListItemSpec
+public class ListIndex extends ArrayIndex
 {
-    String suffix;
-    int index;
-    Operand indexExpression;
-    QualifiedName qname;
-
-    public ListIndex(QualifiedName qname, int index, String suffix)
+    protected String selection;
+    
+    public ListIndex(QualifiedName qname, String selection)
     {
-        this.qname = qname;
-        this.index = index;
-        this.suffix = suffix;
+        super(qname, null, selection);
+        this.selection = selection;
     }
     
-    public ListIndex(QualifiedName qname, Operand indexExpression, String suffix)
+    public ListIndex(QualifiedName qname, Operand indexExpression)
     {
-        this.qname = qname;
-        this.indexExpression = indexExpression;
-        index = -1;
-        this.suffix = suffix;
+        super(qname, indexExpression);
     }
     
     @Override
-    public String getListName()
+    public void assemble(ItemList<?> itemList)
     {
-        return qname.getName();
-    }
-
-    @Override
-    public QualifiedName getQualifiedListName()
-    {
-        return new QualifiedName(getVariableName(qname.getName(), suffix), qname);
-    }
-
-    @Override
-    public int getItemIndex()
-    {
-        return index;
-    }
-
-    @Override
-    public Operand getItemExpression()
-    {
-        return indexExpression;
-    }
-
-    @Override
-    public String getSuffix()
-    {
-        return suffix;
+        if (/*(index == -1) &&*/ (selection != null) && (itemList instanceof AxiomContainer))
+            setAxiomTermListIndex((AxiomContainer)itemList);
+        super.assemble(itemList);
     }
     
+    @Override
+    public QualifiedName getVariableName()
+    {
+        return new QualifiedName(getVariableName(qname.getName(), suffix) + qname.incrementReferenceCount(), qname);
+    }
     /**
      * Returns variable name given list name and suffix
      * @param listName
@@ -94,20 +67,51 @@ public class ListIndex implements ListItemSpec
         return listName + "_" + suffix;
     }
 
+    protected void setIntIndex()
+    {
+        index = ((Long)indexExpression.getValue()).intValue();
+        if (indexExpression.getName().isEmpty())
+            suffix = getListName() + "." + index;
+        else 
+            suffix = indexExpression.getName();
+    }
+
+    @Override
+    protected void setStringIndex(ItemList<?> itemList)
+    {
+        if (itemList instanceof AxiomTermList)
+        {
+            suffix = selection = indexExpression.getValue().toString();
+            setAxiomTermListIndex((AxiomTermList)itemList);
+        }
+    }
+    
+    protected void setAxiomTermListIndex(AxiomContainer axiomContainer)
+    {
+        List<String> axiomTermNameList = axiomContainer.getAxiomTermNameList();
+        if ((axiomTermNameList != null) && !suffix.isEmpty())
+            index = getIndexForName(suffix, axiomTermNameList);
+        else
+            throw new ExpressionException("List \"" + getListName() + "\" term names not available for indexed access");
+    }
+
+
     /**
      * Returns index of item identified by name
-     * @param listName Name of list - used only for error reporting
      * @param item Item name
      * @param axiomTermNameList Term names of axiom source
      * @return Index
      */
-    protected int getIndexForName(String listName, String item, List<String> axiomTermNameList) 
+    protected int getIndexForName(String item, List<String> axiomTermNameList) 
     {
         for (int i = 0; i < axiomTermNameList.size(); i++)
         {
             if (item.equals(axiomTermNameList.get(i)))
                 return i;
         }
-        throw new ExpressionException("List \"" + listName + "\" does not have term named \"" + item + "\"");
+        throw new ExpressionException("List \"" + getListName() + "\" does not have term named \"" + item + "\"");
     }
+
+
+
 }

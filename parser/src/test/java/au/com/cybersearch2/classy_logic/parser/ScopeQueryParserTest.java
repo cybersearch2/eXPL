@@ -285,8 +285,8 @@ public class ScopeQueryParserTest
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
             "  calc format_summary(string summary = " +
-            "  \"language = \" + scope[language] + " +
-            "  \", region = \" + scope[region]);\n" +
+            "  \"language = \" + scope^language + " +
+            "  \", region = \" + scope^region);\n" +
             "  query properties_query(format_summary);\n" +
             "}";
 

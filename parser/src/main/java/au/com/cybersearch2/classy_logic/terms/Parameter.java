@@ -209,14 +209,14 @@ public class Parameter implements Term
 	@Override
     public boolean equals(Object obj) 
 	{
-		if ((obj == null) || (value.equals(null)))
+		if (obj == null)
 			return false;
 		if (obj instanceof Parameter)
 		{
 			Parameter other =  (Parameter)obj;
 			if (other.value == null)
-				return false;
-			return value.equals(other.value);
+				return value == null;
+			return (value != null) && this.value.equals(other.value) && (this.name.equals(other.name));
 		}
 		return false;
 	}

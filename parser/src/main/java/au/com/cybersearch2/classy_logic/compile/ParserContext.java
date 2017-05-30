@@ -438,11 +438,6 @@ public class ParserContext
         return addSourceItem(builder.toString());
     }
     
-    public boolean isQueryName(QualifiedName qname)
-    {
-        return scope.isTemplateName(qname.getScope()) && qname.getScope().equals(getContextName().getTemplate());
-    }
-    
     /**
      * Set current source marker, set it's source document id and add to marker set
      * @param sourceMarker the sourceMarker to set

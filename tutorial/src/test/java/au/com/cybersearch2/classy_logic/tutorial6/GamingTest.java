@@ -75,15 +75,15 @@ public class GamingTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo=r1=<empty> (4,15) (4,23)");
+        assertThat(sourceItem.toString()).isEqualTo("r1 (4,15) (4,23)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo=r2=<empty> (4,26) (4,34)");
+        assertThat(sourceItem.toString()).isEqualTo("r2 (4,26) (4,34)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("combo=r3=<empty> (4,37) (4,45)");
+        assertThat(sourceItem.toString()).isEqualTo("r3 (4,37) (4,45)");
         assertThat(iterator.hasNext()).isFalse();
    }
 }

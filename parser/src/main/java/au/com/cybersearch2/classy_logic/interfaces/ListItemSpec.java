@@ -18,6 +18,12 @@ public interface ListItemSpec
     QualifiedName getQualifiedListName();
 
     /**
+     * Returns unique name for variable to reference axiom list
+     * @return String
+     */
+    QualifiedName getVariableName();
+
+    /**
      * Returns term selection index
      * @return Valid index or -1 if not used
      */
@@ -35,4 +41,6 @@ public interface ListItemSpec
      */
     String getSuffix();
 
+    void assemble(ItemList<?> itemList);
+    boolean evaluate(ItemList<?> itemList, int id);
 }

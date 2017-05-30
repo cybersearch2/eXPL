@@ -31,5 +31,6 @@ public interface AxiomContainer
     QualifiedName getKey();
     AxiomListener getAxiomListener();
     void setAxiomTermNameList(List<String> axiomTermNameList);
+    List<String> getAxiomTermNameList();
     OperandType getOperandType();
 }
