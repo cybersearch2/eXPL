@@ -129,8 +129,6 @@ public class AxiomListTest
 		assertThat(axiomList.getLength()).isEqualTo(0);
 		assertThat(axiomList.hasItem(0)).isFalse();
 		assertThat(axiomList.isEmpty()).isTrue();
-        assertThat(axiomList.delegateType).isEqualTo(DelegateType.ASSIGN_ONLY);
-        assertThat(axiomList.operator.getTrait().getOperandType()).isEqualTo(OperandType.UNKNOWN);
 	}
 	
 	@Test

@@ -124,17 +124,15 @@ public class ArrayItemListTest
 	@Test
 	public void test_constructor()
 	{
-		ArrayItemList<Integer> listOperand = new ArrayItemList<Integer>(Integer.class, QNAME);
+		ArrayItemList<Integer> listOperand = new ArrayItemList<Integer>(OperandType.INTEGER, QNAME);
 		assertThat(listOperand.getName()).isEqualTo(NAME);
 		assertThat(listOperand.isEmpty()).isTrue();
-		assertThat(listOperand.delegateType).isEqualTo(DelegateType.INTEGER);
-		assertThat(listOperand.operator.getTrait().getOperandType()).isEqualTo(OperandType.INTEGER);
 	}
 	
 	@Test
 	public void test_assign()
 	{
-		ArrayItemList<Long> listOperand = new ArrayItemList<Long>(Long.class, QNAME);
+		ArrayItemList<Long> listOperand = new ArrayItemList<Long>(OperandType.INTEGER, QNAME);
 		listOperand.assignItem(0, Long.valueOf(17));
 		assertThat(listOperand.getItem(0)).isEqualTo(17);
 		listOperand.assignItem(0, Long.valueOf(21));
@@ -156,15 +154,6 @@ public class ArrayItemListTest
 		catch (ExpressionException e)
 		{
 			assertThat(e.getMessage()).isEqualTo(NAME + " item 2 not found");
-		}
-		try
-		{
-			listOperand.assignItem(0, Double.valueOf(99.9));
-		    failBecauseExceptionWasNotThrown(ExpressionException.class);
-		}
-		catch (ExpressionException e)
-		{
-			assertThat(e.getMessage()).isEqualTo("Cannot assign type java.lang.Double to List " + NAME);
 		}
 	}
 /*	

@@ -36,7 +36,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  * @author Andrew Bowley
  * 19 Jan 2015
  */
-public class AxiomTermList implements ItemList<Object>, AxiomContainer 
+public class AxiomTermList implements ItemList<Term>, AxiomContainer 
 {
 	/** Qualified name of list */
 	protected QualifiedName qname;
@@ -208,10 +208,10 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#assignItem(int, java.lang.Object)
 	 */
 	@Override
-	public void assignItem(int index, Object value) 
+	public void assignItem(int index, Term term) 
 	{   
 		verify(index);
-		axiom.getTermByIndex(index).setValue(value);
+		axiom.getTermByIndex(index).setValue(term.getValue());
 	}
 
 	/**
@@ -248,7 +248,7 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
-	public Iterator<Object> iterator() 
+	public Iterator<Term> iterator() 
 	{
 		return getIterable().iterator();
 	}
@@ -258,18 +258,18 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getIterable()
 	 */
 	@Override
-	public Iterable<Object> getIterable() 
+	public Iterable<Term> getIterable() 
 	{
 		// Use copy of axiom in case clear() is called
         final Axiom axiom2 = new Axiom(axiom.getName());
         for (int i = 0; i < axiom.getTermCount(); i++)
         	axiom2.addTerm(axiom.getTermByIndex(i));
-		return new Iterable<Object>()
+		return new Iterable<Term>()
 		{
 			@Override
-			public Iterator<Object> iterator() 
+			public Iterator<Term> iterator() 
 			{
-				return new Iterator<Object>()
+				return new Iterator<Term>()
 				{
 		            int index = 0;
 		            
@@ -280,9 +280,9 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 					}
 		
 					@Override
-					public Object next() 
+					public Term next() 
 					{
-						return axiom2.getTermByIndex(index++).getValue();
+						return axiom2.getTermByIndex(index++);
 					}
 		
 					@Override
@@ -293,16 +293,6 @@ public class AxiomTermList implements ItemList<Object>, AxiomContainer
 			}
 		};
 	}
-
-	/**
-	 * getItemClass
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getItemClass()
-	 */
-    @Override
-    public Class<?> getItemClass()
-    {
-        return Term.class;
-    }
 
     /**
      * setSourceItem

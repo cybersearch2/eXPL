@@ -17,7 +17,6 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import java.util.List;
 
-import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
@@ -28,12 +27,13 @@ import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.operator.AxiomParameterOperator;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * AxiomParameterOperand
  * Populates an axiom from a parameter list after the list operands have been evaluated.
- * As this class extends AxiomOperand it supports AxiomList concatenation and assignment.
  * @author Andrew Bowley
  * 9 Aug 2015
  */
@@ -194,7 +194,7 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
             @Override
             public AxiomTermList evaluate(List<Term> argumentList)
             {
-                return AxiomUtils.marshallAxiomTerms(axiomName, axiomName, argumentList);
+                return marshallAxiomTerms(axiomName, axiomName, argumentList);
             }
 
             @Override
@@ -202,6 +202,28 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
             {
                 // Not supported
             }};
+    }
+
+    /**
+     * Returns an AxiomList object given a list of terms to marshall into an axiom
+     * @param qualifiedListName Qualified name of axiom list to return
+     * @param axiomKey Axiom name
+     * @param argumentList List of terms
+     * @return AxiomList object containing marshalled axiom
+     */
+    public AxiomTermList marshallAxiomTerms(QualifiedName qualifiedListName, QualifiedName axiomKey, List<Term> argumentList)
+    {
+        // Give axiom same name as operand
+        Axiom axiom = new Axiom(axiomKey.getName());
+        for (Term arg: argumentList)
+        {   // Copy value to Parameter to make it immutable
+            Parameter param = new Parameter(arg.getName(), arg.getValue());
+            axiom.addTerm(param);
+        }
+        // Wrap axiom in AxiomList object to allow interaction with other AxiomLists
+        AxiomTermList axiomTermList = new AxiomTermList(qualifiedListName, axiomKey);
+        axiomTermList.setAxiom(axiom);
+        return axiomTermList;
     }
 
 }

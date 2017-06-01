@@ -40,6 +40,7 @@ import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
 import au.com.cybersearch2.classy_logic.expression.Orientation;
 import au.com.cybersearch2.classy_logic.list.ListItemVariable;
 import au.com.cybersearch2.classy_logic.list.ArrayIndex;
+import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.ListIndex;
 import au.com.cybersearch2.classy_logic.list.ListLength;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
@@ -164,13 +165,13 @@ public class QueryParser implements QueryParserConstants
     if (assignExpression == null)
          throw new ParseException("Statement to initialize List \u005c"" + indexData.getListName() + "\u005c"  must be assigned a value");
     ParserAssembler parserAssembler = context.getParserAssembler();
-    ItemList<?> itemList = parserAssembler.getListAssembler().findItemList(indexData.getQualifiedListName());
+    ArrayItemList<?> itemList = (ArrayItemList<?>) parserAssembler.getListAssembler().findItemList(indexData.getQualifiedListName());
     if (itemList == null)
          throw new ParseException("List \u005c"" + indexData.getListName() + "\u005c" must be declared before being initialized");
     int index = indexData.getItemIndex();
     if (index == -1)
          throw new ParseException("Invalid index \u005c"" + assignExpression.toString() + "\u005c" for list \u005c"" + indexData.getListName() + "\u005c" ");
-    itemList.assignItem(index, assignExpression.getValue());
+    itemList.assignItem(index, assignExpression);
     return null; // No operand created indicated by null returned
   }
 

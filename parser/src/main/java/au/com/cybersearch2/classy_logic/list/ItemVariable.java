@@ -15,12 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * ItemVariable
@@ -28,17 +30,17 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 1Jun.,2017
  */
-public class ItemVariable implements ListItemDelegate
+public class ItemVariable<T> implements ListItemDelegate
 {
     /** The list to reference */
-    protected ItemList<?> itemList;
+    protected ItemList<T> itemList;
     /** Index information for value selection  */
     protected ListItemSpec indexData;
 
     /**
      * @param itemList The list to reference 
      */
-    public ItemVariable(ItemList<?> itemList, ListItemSpec indexData)
+    public ItemVariable(ItemList<T> itemList, ListItemSpec indexData)
     {
         this.itemList = itemList;
         this.indexData = indexData;
@@ -58,7 +60,7 @@ public class ItemVariable implements ListItemDelegate
     }
     
     @Override
-    public ItemList<?> getItemList()
+    public ItemList<T> getItemList()
     {
         return itemList;
     }
@@ -92,6 +94,7 @@ public class ItemVariable implements ListItemDelegate
      * 
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate#setItemValue(java.lang.Object)
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void setItemValue(Object value)
     {
@@ -109,7 +112,12 @@ public class ItemVariable implements ListItemDelegate
                 proceed = !itemValue.equals(value);
             }
             if (proceed)
-                itemList.assignItem(indexData.getItemIndex(), value);
+            {
+                if (itemList.getOperandType() == OperandType.TERM)
+                    itemList.assignItem(indexData.getItemIndex(), (T) new Parameter(Term.ANONYMOUS, value));
+                else
+                    itemList.assignItem(indexData.getItemIndex(), (T)value);
+            }
         }
     }
 

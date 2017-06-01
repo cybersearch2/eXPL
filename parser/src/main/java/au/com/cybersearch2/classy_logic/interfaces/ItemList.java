@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 
 /**
@@ -56,7 +57,7 @@ public interface ItemList<T> extends Iterable<T>, SourceInfo
      * @param index int
      * @param value Object
      */
-    void assignItem(int index, Object value);
+    void assignItem(int index, T value);
 
     /**
      * Returns item referenced by index
@@ -66,10 +67,10 @@ public interface ItemList<T> extends Iterable<T>, SourceInfo
 	T getItem(int index);
 
 	/**
-	 * Returns class of items in this container
-	 * @return Class
+	 * Returns OperandType of items in this container
+	 * @return OperandType enum
 	 */
-	Class<?> getItemClass();
+	OperandType getOperandType();
 	
 	/**
 	 * Returns true if index is valid and item exists reference by that index
@@ -88,4 +89,5 @@ public interface ItemList<T> extends Iterable<T>, SourceInfo
 	 * Clear item list
 	 */
 	void clear();
+
 }

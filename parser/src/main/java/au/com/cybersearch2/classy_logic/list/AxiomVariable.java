@@ -142,7 +142,7 @@ public class AxiomVariable implements ListItemDelegate
                 // Something unexpected has happened - cannot proceed
                 return;
             // Assign value to item list
-            itemList.assignItem(index, value);
+            ((AxiomList)itemList).assignItem(index, (AxiomTermList)value);
         }
         else
         {   

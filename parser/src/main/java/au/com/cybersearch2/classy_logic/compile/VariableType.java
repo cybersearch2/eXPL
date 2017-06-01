@@ -238,23 +238,22 @@ public class VariableType
 	    switch (operandType)
 	    {
         case INTEGER:
-            arrayItemList = new ArrayItemList<Long>(Long.class, qname);
+            arrayItemList = new ArrayItemList<Long>(operandType, qname);
             break; 
         case DOUBLE:
-            arrayItemList = new ArrayItemList<Double>(Double.class, qname);
+            arrayItemList = new ArrayItemList<Double>(operandType, qname);
             break;
         case BOOLEAN:
-            arrayItemList = new ArrayItemList<Boolean>(Boolean.class, qname);
+            arrayItemList = new ArrayItemList<Boolean>(operandType, qname);
             break; 
         case STRING:
-            arrayItemList = new ArrayItemList<String>(String.class, qname);
+            arrayItemList = new ArrayItemList<String>(operandType, qname);
             break; 
         case DECIMAL:
-            arrayItemList = new ArrayItemList<BigDecimal>(BigDecimal.class, qname);
+            arrayItemList = new ArrayItemList<BigDecimal>(operandType, qname);
             break;
         case CURRENCY:
-            arrayItemList = new ArrayItemList<BigDecimal>(BigDecimal.class, qname);
-            arrayItemList.setOperator(getCurrencyOperator(qname, arrayItemList));
+            arrayItemList = new ArrayItemList<BigDecimal>(operandType, qname);
             break;
         case TERM:
             final AxiomTermList itemList = new AxiomTermList(qname, axiomKey);
@@ -272,7 +271,6 @@ public class VariableType
         default:
             throw new ParseException("List " + qname.toString() + " type unknown");
        }
-       parserAssembler.registerLocaleListener(arrayItemList);
        return arrayItemList;
     }
   	

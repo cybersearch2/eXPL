@@ -18,17 +18,12 @@ package au.com.cybersearch2.classy_logic.list;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.Operator;
-import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
-import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
-import au.com.cybersearch2.classy_logic.operator.DelegateType;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 
 /**
  * ArrayItemList
@@ -38,50 +33,29 @@ import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
  * @author Andrew Bowley
  * 15 Jan 2015
  */
-public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOperand 
+public class ArrayItemList<T> implements ItemList<T> 
 {
     /** The list items */
-    protected ArrayList<Object> valueList;
+    protected ArrayList<T> valueList;
     /** Source item to be updated in parser task */
     protected SourceItem sourceItem;
     /** Qualified name */
     protected QualifiedName qname;
-    /** Defines operations that an Operand performs with other operands. */
-    Operator operator;
-    /** Default object defines operations based on item class. */
-    DelegateOperator delegateOperator;
-    /** Operator DelegateType for type of item */
-    protected DelegateType delegateType;
-    /** List class type */
-    protected Class<T> clazz;
-    /** Optional operand for Currency type */
-    protected Operand rightOperand;
+    /** Operand type */
+    protected OperandType operandType;
 
     /**
      * Construct a ListOperand object
      * @param clazz Class of list items 
      * @param qname Qualified name 
      */
-	public ArrayItemList(Class<T> clazz, QualifiedName qname) 
+	public ArrayItemList(OperandType operandType, QualifiedName qname) 
 	{
-	    this.clazz = clazz;
+	    this.operandType = operandType;
 		this.qname = qname;
-		valueList = new ArrayList<Object>();
-		delegateOperator = new DelegateOperator();
-		delegateOperator.setDelegate(clazz);
-		operator = delegateOperator;
-		delegateType = delegateOperator.getDelegateType();
-		if (((delegateType == DelegateType.ASSIGN_ONLY) &&
-		    (delegateOperator.getDelegateTypeForClass(clazz) == null)) ||
-		    (delegateType == DelegateType.NULL))
-		    throw new ExpressionException("Class \"" + clazz.getSimpleName() + "\" not a valid list type");
+		valueList = new ArrayList<T>();
 	}
 
-	public void setOperator(Operator operator)
-	{
-	    this.operator = operator;
-	}
-	
 	/**
 	 * Returns number of items in array
 	 * @return int
@@ -127,11 +101,8 @@ public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOpera
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#assignItem(int, java.lang.Object)
 	 */
 	@Override
-	public void assignItem(int index, Object value) 
+	public void assignItem(int index, T value) 
 	{
-	    DelegateType valueDelegationType = delegateOperator.getDelegateTypeForClass(value.getClass());
-		if (valueDelegationType != delegateType)
-			throw new ExpressionException("Cannot assign type " + value.getClass().getName() + " to List " + getName());
 		if (index < valueList.size())
 			valueList.set(index, value);
 		else
@@ -145,17 +116,10 @@ public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOpera
 		}
 	}
 
-    @Override
-    public void onScopeChange(Scope scope)
-    {
-        operator.getTrait().setLocale(scope.getLocale());
-    }
-
 	/**
 	 * getItem
 	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getItem(int)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public T getItem(int index) 
 	{
@@ -181,7 +145,6 @@ public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOpera
 	 * iterator
 	 * @see java.lang.Iterable#iterator()
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public Iterator<T> iterator() 
 	{
@@ -196,13 +159,11 @@ public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOpera
 	public Iterable<T> getIterable() 
 	{
 		/** Copy of the list items so original can be cleared */
-		final   ArrayList<Object> valueList2 = new ArrayList<Object>();
+		final   ArrayList<T> valueList2 = new ArrayList<T>();
 		valueList2.addAll(valueList);
 
 		return new Iterable<T>()
 		{
-
-			@SuppressWarnings("unchecked")
 			@Override
 			public Iterator<T> iterator() 
 			{   // Return iterator pointing to first non-null member of list
@@ -230,28 +191,12 @@ public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOpera
             sourceItem.setInformation(toString());
 	}
 
-	/**
-	 * getItemClass
-	 * @see au.com.cybersearch2.classy_logic.interfaces.ItemList#getItemClass()
-	 */
-    @Override
-    public Class<?> getItemClass()
-    {
-        return clazz;
-    }
-
     @Override
     public void setSourceItem(SourceItem sourceItem)
     {
         this.sourceItem = sourceItem;
     }
 
-    @Override
-    public void setRightOperand(Operand rightOperand)
-    {
-        this.rightOperand = rightOperand;
-    }
-    
     /**
      * toString
      * @see java.lang.Object#toString()
@@ -259,6 +204,24 @@ public class ArrayItemList<T> implements ItemList<T>, LocaleListener, RightOpera
     @Override
     public String toString() 
     {
-        return "List <" + clazz.getSimpleName() + ">[" + valueList.size() + "]";
+        return "List <" + operandType.toString().toLowerCase() + ">[" + valueList.size() + "]";
+    }
+
+    @Override
+    public OperandType getOperandType()
+    {
+        return operandType;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void assignItem(int index, Term term)
+    {
+        assignItem(index, (T) term.getValue());
+    }
+
+    @SuppressWarnings("unchecked")
+    public void assignObject(int index, Object value)
+    {
+        assignItem(index, (T)value);
     }
 }

@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
+import au.com.cybersearch2.classy_logic.interfaces.TermListIterable;
 import au.com.cybersearch2.classy_logic.interfaces.TermListManager;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
@@ -29,7 +30,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  * @author Andrew Bowley
  * 28 Jan 2015
  */
-public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomContainer 
+public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomContainer, TermListIterable 
 {
     /** Axiom listener is notified of axiom to add to list */
 	protected AxiomListener axiomListener;
@@ -47,7 +48,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	 */
 	public AxiomList(QualifiedName qname, QualifiedName key) 
 	{
-		super(AxiomTermList.class, qname);
+		super(OperandType.AXIOM, qname);
 		this.key = key;
 	}
 
@@ -122,16 +123,6 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	{
 		this.axiomTermNameList = axiomTermNameList;
 	}
-
-	/**
-	 * getItemClass
-	 * @see au.com.cybersearch2.classy_logic.list.ArrayItemList#getItemClass()
-	 */
-    @Override
-    public Class<?> getItemClass()
-    {
-        return Axiom.class;
-    }
 
     /**
 	 * @see java.lang.Object#toString()

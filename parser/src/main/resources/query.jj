@@ -189,7 +189,7 @@ public class QueryParser
     int index = indexData.getItemIndex();
     if (index == -1)
          throw new ParseException("Invalid index \"" + assignExpression.toString() + "\" for list \"" + indexData.getListName() + "\" ");
-    itemList.assignItem(index, assignExpression.getValue());
+    itemList.assignItem(index, assignExpression);
     return null; // No operand created indicated by null returned
   }
    

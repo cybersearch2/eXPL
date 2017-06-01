@@ -15,6 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import java.math.BigDecimal;
+
 import au.com.cybersearch2.classy_logic.compile.ListAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
@@ -146,7 +148,7 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
             // Two dimension case requires AxiomList helper
             delegate = new AxiomVariable((AxiomList)itemList, new ListItemSpec[] { arrayData, indexData });
         if (delegate == null)
-            delegate = new ItemVariable(itemList, indexData);
+            delegate = itemVariableInstance(itemList);
         // Set term name of this variable now at last opportunity. Append the suffix of the index used to select the value.
         // The suffix is formed using available data, and may be a name required by an index operand to achieve unification
         setName(indexData.getSuffix());
@@ -370,8 +372,8 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
             @Override
             public ItemList<?> getItemList()
             {
-                ArrayItemList<Object> itemList = new ArrayItemList<Object>(Object.class, qname);
-                itemList.assignItem(0, value);
+                ArrayItemList<Term> itemList = new ArrayItemList<Term>(operator.getTrait().getOperandType(), qname);
+                itemList.assignObject(0, value);
                 return itemList;
             }
 
@@ -414,5 +416,30 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
             }};
     }
 
+    @SuppressWarnings("unchecked")
+    private ItemVariable<?> itemVariableInstance(ItemList<?> itemList)
+    {
+        switch (itemList.getOperandType())
+        {
+        case INTEGER:
+            return new ItemVariable<Long>((ItemList<Long>)itemList, indexData);
+        case DOUBLE:
+            return new ItemVariable<Double>((ItemList<Double>)itemList, indexData);
+        case BOOLEAN:
+            return new ItemVariable<Boolean>((ItemList<Boolean>)itemList, indexData);
+        case STRING:
+            return new ItemVariable<String>((ItemList<String>)itemList, indexData);
+        case DECIMAL:
+        case CURRENCY:
+            return new ItemVariable<BigDecimal>((ItemList<BigDecimal>)itemList, indexData);
+        case TERM:
+            return new ItemVariable<Term>((AxiomTermList)itemList, indexData);
+        case AXIOM:
+            return new ItemVariable<AxiomTermList>((AxiomList)itemList, indexData);
+        default:
+       }
+        // Not expected
+       throw new ExpressionException("List " + qname.toString() + " type " + itemList.getOperandType() + " not supported");
+    }
 
 }

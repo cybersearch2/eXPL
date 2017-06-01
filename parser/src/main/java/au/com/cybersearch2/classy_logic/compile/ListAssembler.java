@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.compile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,17 +26,19 @@ import java.util.TreeMap;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
-import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.TermListIterable;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.ListType;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * ListAssembler
@@ -263,18 +266,18 @@ public class ListAssembler
 
     /**
      * Copy axiom lists as iterables to supplied container
-     * @param axiomIterable Container to receive lists
+     * @param axiomIterableMap Container to receive lists
      */
-    public void copyLists(Map<QualifiedName, Iterable<Axiom>> axiomIterable) 
+    public void copyLists(Map<QualifiedName, Iterable<Axiom>> axiomIterableMap) 
     {
         for (Entry<QualifiedName, ItemList<?>> entry: listMap.entrySet())
         {
             ItemList<?> itemList = entry.getValue();
-            if (itemList.getItemClass().equals(Axiom.class))
-                AxiomUtils.copyList(entry.getKey(), (AxiomList)itemList, axiomIterable);
+            if (itemList instanceof TermListIterable)
+                axiomIterableMap.put(entry.getKey(), getAxiomIterable((TermListIterable)itemList, itemList.getLength()));
         }
         if (!scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
-            scope.getGlobalListAssembler().copyLists(axiomIterable);
+            scope.getGlobalListAssembler().copyLists(axiomIterableMap);
     }
 
     /**
@@ -284,7 +287,7 @@ public class ListAssembler
     public void copyAxioms(Map<QualifiedName, Axiom> axiomMap)
     {
         for (Entry<QualifiedName, ItemList<?>> entry: listMap.entrySet())
-            AxiomUtils.copyAxiom(entry, axiomMap);
+            copyAxiom(entry, axiomMap);
     }
     
     /**
@@ -311,6 +314,25 @@ public class ListAssembler
             if (itemList.isEmpty())
                 listNames.add(itemList.getQualifiedName());
         return listNames;
+    }
+
+    /**
+     * Copy AxiomList to container holding iterable objects
+     * @param termListIterable AxiomTermList iterable source of axioms
+     */
+    public Iterable<Axiom> getAxiomIterable(TermListIterable termListIterable, int listSize)
+    {
+        final List<Axiom> axiomList = new ArrayList<Axiom>(listSize);
+        Iterator<AxiomTermList> axiomTermListIterator = termListIterable.iterator();
+        while (axiomTermListIterator.hasNext())
+            axiomList.add(axiomTermListIterator.next().getAxiom());
+        return new Iterable<Axiom>(){
+        
+            @Override
+            public Iterator<Axiom> iterator()
+            {
+                return axiomList.iterator();
+            }};
     }
 
     /**
@@ -392,4 +414,33 @@ public class ListAssembler
             add(axiomKey, axiomListener);
     }
 
+    /**
+     * Copy result axioms to supplied container
+     * @param axiomMap Container to receive axioms
+     */
+    protected Axiom copyAxiom(Entry<QualifiedName, ItemList<?>> entry, Map<QualifiedName, Axiom> axiomMap)
+    {
+        ItemList<?> itemList = entry.getValue();
+        // Create deep copy in case item list is cleared
+        Axiom axiom = null;
+        if (itemList.getOperandType().equals(OperandType.TERM))
+        {   // AxiomTermList contains backing axiom
+            AxiomTermList axiomTermList = (AxiomTermList)itemList;
+            axiom = new Axiom(entry.getKey().getName());
+            Axiom source = axiomTermList.getAxiom();
+            for (int i = 0; i < source.getTermCount(); i++)
+                axiom.addTerm(source.getTermByIndex(i));
+        }
+        else if (!itemList.getOperandType().equals(OperandType.AXIOM))
+        {   // Regular ItemList contains objects which are packed into axiom to return
+            axiom = new Axiom(entry.getKey().getName());
+            Iterator<?> iterator = itemList.getIterable().iterator();
+            while (iterator.hasNext())
+                axiom.addTerm(new Parameter(Term.ANONYMOUS, iterator.next()));
+        }
+        if (axiom != null)
+            // Use fully qualified key to avoid name collisions
+            axiomMap.put(itemList.getQualifiedName(), axiom);
+        return axiom;
+    }
 }

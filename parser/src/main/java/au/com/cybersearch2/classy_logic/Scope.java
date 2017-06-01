@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic;
 import java.util.Collections;
 import java.util.HashMap;
 //import java.util.IllformedLocaleException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -33,12 +32,10 @@ import au.com.cybersearch2.classy_logic.compile.TemplateAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
-import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -608,21 +605,6 @@ public class Scope
     public AxiomAssembler getGlobalAxiomAssembler()
     {
         return getGlobalParserAssembler().getAxiomAssembler();
-    }
-
-   /**
-     * Create placeholder axiom with "unknown" items
-     * @param axiomName
-     * @param termNameList List of term names
-     * @return Axiom object
-     */
-    private Axiom createUnknownAxiom(String axiomName, List<String> termNameList)
-    {
-        Axiom axiom = new Axiom(axiomName);
-        Unknown unknown = new Unknown();
-        for (String termName: termNameList)
-            axiom.addTerm(new Parameter(termName, unknown));
-        return axiom;
     }
 
     /**
