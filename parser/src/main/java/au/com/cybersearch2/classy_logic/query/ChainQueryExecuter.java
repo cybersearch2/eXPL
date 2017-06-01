@@ -100,43 +100,17 @@ public class ChainQueryExecuter implements DebugTarget
 
 	/**
 	 * Add chain query
-	 * @param axiomEnsemble2 A collection of axiom sources which are referenced by name
-	 * @param templateList2 The template sequence. Chain resolved first time all templates solved.
+	 * @param axiomCollection A collection of axiom sources which are referenced by name
+	 * @param templateList The template sequence. Chain resolved first time all templates solved.
 	 */
-	public void chain(AxiomCollection axiomEnsemble2, List<Template> templateList2)
+	public void chain(AxiomCollection axiomCollection, List<Template> templateList)
 	{
-		ChainQuery chainQuery = new LogicChainQuery(axiomEnsemble2, templateList2);
+	    LogicChainQuery chainQuery = new LogicChainQuery(axiomCollection, templateList);
 		if (axiomListenerMap != null)
 			// Bind each axiom listener to a query or the solution depending 
-			// on the referenced axiom being available in the axiom ensemble
-			for (Template template: templateList2)
-			{
-				String key = template.getKey();
-				QualifiedName qname = QualifiedName.parseGlobalName(key);
-		        if (axiomListenerMap.containsKey(qname))
-		        {
-		        	AxiomSource axiomSource = axiomEnsemble2.getAxiomSource(key);
-		        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
-		        	if (axiomSource != null)
-		        	{
-		        		for (AxiomListener axiomListener: axiomListenerList)
-		        			chainQuery.setAxiomListener(qname, axiomListener);
-		        		axiomListenerMap.remove(qname);
-		        	}
-		        }
-	        	else
-	        	{
-	        	    qname = template.getQualifiedName();
-			        if (axiomListenerMap.containsKey(qname))
-			        {
-			        	List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
-		        		for (AxiomListener axiomListener: axiomListenerList)
-		        			solution.setAxiomListener(qname, axiomListener);
-		        		axiomListenerMap.remove(qname);
-			        }
-	        	}
-
-			}
+			// on the referenced axiom being available in the axiom collection
+			for (Template template: templateList)
+			    bindAxiomListener(template, chainQuery);
 		addChainQuery(chainQuery);
 	}
 
@@ -146,7 +120,7 @@ public class ChainQueryExecuter implements DebugTarget
 	 * @param axiom Optional axiom to initialize Calculator
 	 * @param template Template to unify and evaluate
 	 */
-	public void chainCalculator(final Scope templateScope, Axiom axiom, Template template) 
+	public void chainCalculator(Scope templateScope, Axiom axiom, Template template) 
 	{
 		if (axiom == null)
 		{
@@ -160,15 +134,8 @@ public class ChainQueryExecuter implements DebugTarget
 		Runnable scopeNotifier = null;
 		if (!templateScope.getName().equals(calcScope.getName()))
 		{   // Create object to pre-execute scope localisation
-		    scopeNotifier = new Runnable(){
-
-                @Override
-                public void run()
-                {
-                    notifyScopes(templateScope.getName());
-                    bindAxiomListeners(templateScope);
-                }};
-                calcScope = templateScope;
+		    scopeNotifier = new ScopeNotifier(this, templateScope);
+            calcScope = templateScope;
 		}
 		CalculateChainQuery chainQuery = new CalculateChainQuery(axiom, template, scopeNotifier);
         QualifiedName qname = template.getQualifiedName();
@@ -181,25 +148,7 @@ public class ChainQueryExecuter implements DebugTarget
 			chainQuery.setChoice(choice);
 		}
 		if (axiomListenerMap != null)
-		{
-		    List<AxiomListener> axiomListenerList = null;
-	        if (axiomListenerMap.containsKey(qname))
-	        	axiomListenerList = axiomListenerMap.get(qname);
-	        else if (template.isReplicate()) 
-	        {
-	            // TODO - check if scope meant to be cleared on template object
-	            //qname.clearScope();
-	            qname = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, qname.getTemplate());
-	            if (axiomListenerMap.containsKey(qname))
-	                axiomListenerList = axiomListenerMap.get(qname);
-	        }
-	        if (axiomListenerList != null)
-	        {
-        		for (AxiomListener axiomListener: axiomListenerList)
-        			solution.setAxiomListener(qname, axiomListener);
-        		axiomListenerMap.remove(qname);
-	        }
-		}
+		    bindCalculatorAxiomListener(template);
 		addChainQuery(chainQuery);
 	}
 
@@ -328,38 +277,92 @@ public class ChainQueryExecuter implements DebugTarget
             if (!key.getTemplate().isEmpty())
                 continue;  // Templates are output
             AxiomSource axiomSource = localScope.findAxiomSource(key);
-            if ((axiomSource ==null) && !localScope.getName().equals(QueryProgram.GLOBAL_SCOPE))
+            if ((axiomSource == null) && !localScope.getName().equals(QueryProgram.GLOBAL_SCOPE))
                 axiomSource = scope.getGlobalScope().findAxiomSource(key);
             // TODO - Log warning if axiom source not found
-            if (axiomSource !=null)
-            {
-                List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
-                for (AxiomListener axiomListener: axiomListenerList)
-                {
-                    Iterator<Axiom> iterator = axiomSource.iterator();
-                    if (!iterator.hasNext())
-                        break;
-                    Axiom axiom = iterator.next();
-                    if (axiom != null)
-                        axiomListener.onNextAxiom(key, axiom);
-                }
-            }
+            if (axiomSource != null)
+                bindAxiomSource(axiomSource, key);
         }
         // Delete the axiom listener map as binding is complete
         axiomListenerMap = null;
     }
 
     /**
-     * Update scope listeners with locale details and
-     * copy all axiom listeners in scope to this executer
-     * @param scopeName Scope name
+     * Bind axiom source to listener collection identified by name
+     * @param axiomSource The axiom source 
+     * @param key Listener collection identity
      */
-    private void notifyScopes(String scopeName)
+    protected void bindAxiomSource(AxiomSource axiomSource, QualifiedName key)
     {
+        List<AxiomListener> axiomListenerList = axiomListenerMap.get(key);
+        for (AxiomListener axiomListener: axiomListenerList)
         {
-            Scope templateScope = scope.findScope(scopeName);
-            setAxiomListeners(templateScope); 
-            scope.getParserAssembler().onScopeChange(templateScope);
+            Iterator<Axiom> iterator = axiomSource.iterator();
+            if (!iterator.hasNext())
+                break;
+            Axiom axiom = iterator.next();
+            if (axiom != null)
+                axiomListener.onNextAxiom(key, axiom);
+        }
+    }
+
+    /**
+     * Bind axiom listeners to solution for calculator
+     * @param template Calculator
+     */
+    protected void bindCalculatorAxiomListener(Template template)
+    {
+        QualifiedName qname = template.getQualifiedName();
+        List<AxiomListener> axiomListenerList = null;
+        if (axiomListenerMap.containsKey(qname))
+            axiomListenerList = axiomListenerMap.get(qname);
+        else if (template.isReplicate()) 
+        {
+            // TODO - check if scope meant to be cleared on template object
+            //qname.clearScope();
+            qname = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, qname.getTemplate());
+            if (axiomListenerMap.containsKey(qname))
+                axiomListenerList = axiomListenerMap.get(qname);
+        }
+        if (axiomListenerList != null)
+        {
+            for (AxiomListener axiomListener: axiomListenerList)
+                solution.setAxiomListener(qname, axiomListener);
+            axiomListenerMap.remove(qname);
+        }
+    }
+
+    /**
+     * Bind each axiom listener to a query or the solution depending on the referenced axiom 
+     * being available in the axiom collection belonging to the chain query
+     * @param template Chain template
+     * @param chainQuery Chain query
+     */
+    protected void bindAxiomListener(Template template, LogicChainQuery chainQuery)
+    {
+        String key = template.getKey();
+        QualifiedName qname = QualifiedName.parseGlobalName(key);
+        if (axiomListenerMap.containsKey(qname))
+        {
+            AxiomSource axiomSource = chainQuery.getAxiomSource(key);
+            List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
+            if (axiomSource != null)
+            {
+                for (AxiomListener axiomListener: axiomListenerList)
+                    chainQuery.setAxiomListener(qname, axiomListener);
+                axiomListenerMap.remove(qname);
+            }
+        }
+        else
+        {
+            qname = template.getQualifiedName();
+            if (axiomListenerMap.containsKey(qname))
+            {
+                List<AxiomListener> axiomListenerList = axiomListenerMap.get(qname);
+                for (AxiomListener axiomListener: axiomListenerList)
+                    solution.setAxiomListener(qname, axiomListener);
+                axiomListenerMap.remove(qname);
+            }
         }
     }
 
@@ -367,7 +370,7 @@ public class ChainQueryExecuter implements DebugTarget
      * Copy all axiom listeners in scope to this executer
      * @param scope Scope object
      */
-    private void setAxiomListeners(Scope scope)
+    protected void setAxiomListeners(Scope scope)
     {
         if (scope.getAxiomListenerMap() != null)
         {   // Create a copy of the axiom listener map and remove entries as axiom listeners are bound to processors
@@ -377,4 +380,12 @@ public class ChainQueryExecuter implements DebugTarget
         }
     }
 
+    /**
+     * Notify all locale listeners that the scope has changed
+     * @param templateScope Notification scope
+     */
+    protected void onScopeChange(Scope templateScope) 
+    {
+        scope.getParserAssembler().onScopeChange(templateScope);
+    }
 }

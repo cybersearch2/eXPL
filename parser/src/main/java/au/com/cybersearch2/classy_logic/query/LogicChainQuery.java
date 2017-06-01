@@ -50,11 +50,21 @@ public class LogicChainQuery extends ChainQuery
 	 * @param axiomCollection A set of AxiomSource objects referenced by name
 	 * @param templateList List of templates to unify and evaluate
 	 */
- 	public LogicChainQuery(AxiomCollection axiomCollection,	List<Template> templateList) 
+ 	public LogicChainQuery(AxiomCollection axiomCollection,	 List<Template> templateList) 
     {
 		this.templateList = templateList;
 		this.axiomCollection = axiomCollection;
 	}
+
+    /**
+     * Returns axiom source referenced by name
+     * @param name
+     * @return AxiomSource object
+     */
+    AxiomSource getAxiomSource(String name)
+    {
+        return axiomCollection.getAxiomSource(name);
+    }
 
 	/**
  	 * Execute query and if not tail, chain to next.

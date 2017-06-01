@@ -90,7 +90,6 @@ public class ArrayIndex implements ListItemSpec
     @Override
     public void assemble(ItemList<?> itemList)
     {
-        System.out.println("Completed parser task for " + qname.getName() + "." + suffix);
     }
     
     @Override

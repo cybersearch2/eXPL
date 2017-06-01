@@ -21,7 +21,6 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.TermListManager;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
@@ -51,62 +50,6 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 		super(AxiomTermList.class, qname);
 		this.key = key;
 	}
-
-    /**
-     * Returns list variable to access axiom and term using fixed index and evaluated index respectively
-     * @param axiomIndex int
-     * @param termExpression Operand which evaluates the axiom term list index value
-	 * @param suffix The axiom term identity
-     * @return ItemListVariable 
-     */
-    //public AxiomListVariable newVariableInstance(int axiomIndex, Operand termExpression, String suffix)
-    //{
-    //	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomIndex, suffix);
-    //	axiomListVariable.setTermExpression(termExpression, 0);
-    //	return axiomListVariable;
-    //}
-
-    /**
-     * Returns list variable to access axiom and term using 
-     * @param axiomExpression Operand which evaluates the axiom list index value
-     * @param termIndex int
-	 * @param suffix The axiom term identity
-     * @return ItemListVariable   
-     */
-    //public AxiomListVariable newVariableInstance(Operand axiomExpression, int termIndex, String suffix)
-    //{
-    //	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomExpression, suffix);
-    //	axiomListVariable.setTermIndex(termIndex, 0);
-    //	return axiomListVariable;
-    //}
-
-    /**
-     * Returns list variable to access axiom and term using 
-     * @param axiomIndex int
-     * @param termIndex int
-	 * @param suffix The axiom term identity
-     * @return ItemListVariable 
-     */
-    //public AxiomListVariable newVariableInstance(int axiomIndex, int termIndex, String suffix)
-    //{
-    //	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomIndex, suffix);
-    //	axiomListVariable.setTermIndex(termIndex, 0);
-    //	return axiomListVariable;
-    //}
-
-    /**
-     * Returns list variable to access axiom and term using 
-     * @param axiomExpression Operand which evaluates the axiom list index value
-     * @param termExpression Operand which evaluates the axiom term list index val
-	 * @param suffix The axiom term identity
-     * @return ItemListVariable   
-     */
-    //public AxiomListVariable newVariableInstance(Operand axiomExpression, Operand termExpression, String suffix)
-    //{
-    //	AxiomListVariable axiomListVariable = new AxiomListVariable(this, axiomExpression, suffix);
-    //	axiomListVariable.setTermExpression(termExpression, 0);
-    //	return axiomListVariable;
-    //}
 
     /**
      * Returns listener to add Axiom objects to this container

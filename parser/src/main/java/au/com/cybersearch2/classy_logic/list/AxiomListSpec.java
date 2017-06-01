@@ -24,33 +24,32 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
  * AxiomListSpec
- * Specification of an AxiomList variable which allows for dynamic assignment
- * of the backing AxiomList
- * @author Andrew Bowley
+ * Assists list variable with evaluation of list operand (AxiomList) and parameter resolution for
+ * one or two dimensions. Also unwraps list containing a single item.
+  * @author Andrew Bowley
  * 4 Aug 2015
  */
 public class AxiomListSpec implements ListItemSpec
 {
     /** Name of axiom list */
     protected QualifiedName qualifiedListName;
-    /** The list */
+    /** The list to be accessed. if a list operand is provided, then setting this field is delayed until evaluation. */
     protected ItemList<?> itemList;
+    /** Index information for value selection  */
     protected ListItemSpec indexData;
+    /** Index information for 2 dimension case - select axiom, then select term in axiom */
     protected ListItemSpec arrayData;
     /** Axiom selection index. Value of -1 means not available or not used */
     protected int axiomIndex;
     /** Term selection index. Value of -1 means not available or not used */
     protected int termIndex;
-    /** Compiler operand to supply AxiomList object on evaluation */
-    protected Operand axiomListVariable;
-    /** Flag set true if assigned to an AxiomTermList */
-    protected boolean isTermList;
+    /** Item extracted or produced in most recent evaluation. May be empty. It is a valid selection value only if termIndex is valid. */
     protected AxiomTermList axiomTermList;
     
     /**
-     * Construct AxiomListSpec object for case backing AxiomList is available
+     * Construct AxiomListSpec object using suppled AxiomList and index data
      * @param axiomList Backing axiom list
-     * @param indexDataArray 
+     * @param indexDataArray Index data - 1 or 2 dimensional
      */
     public AxiomListSpec(AxiomList axiomList, ListItemSpec[] indexDataArray)
     {
@@ -58,28 +57,31 @@ public class AxiomListSpec implements ListItemSpec
         indexData = indexDataArray.length == 1 ? indexDataArray[0] : indexDataArray[1];
         if (indexDataArray.length > 1)
             arrayData = indexDataArray[0];
-        this.qualifiedListName = axiomList.getQualifiedName();
-        init();
-    }
+        this.qualifiedListName = 
+            (axiomList != null) ? 
+            axiomList.getQualifiedName() : 
+            indexData.getQualifiedListName();
+        // Initialize index fields. Determines what type of selection has been evaluated:
+        // Both indexes valid = 2-dimensional selection
+        // Only axiomIndex valid - axiom selected from AxiomList
+        // Only termIndex valid = term selected from AxiomTermList
+        // Both indexes invalid = no value available.
+        axiomIndex = arrayData != null ? arrayData.getItemIndex() : indexData.getItemIndex();
+        termIndex = arrayData != null ? indexData.getItemIndex() : -1;
+     }
 
     /**
-    * Construct AxiomListSpec object for case backing AxiomList needs to be evaluated
-     * @param qualifiedListName Qualified nName of axiom list
-     * @param axiomListVariable Compiler operand to supply AxiomList object on evaluation
-     * @param axiomExpression Compiler operand for axiom selection
-     * @param termExpression Compiler operand for term selection
+     * Construct AxiomListSpec object using suppled list operand and index data.
+     * The list name is taken from the index data.
+     * @param indexDataArray Index data - 1 or 2 dimensional
      */
-   public AxiomListSpec(Operand axiomListVariable, ListItemSpec[] indexDataArray)
-   {
-        this.axiomListVariable = axiomListVariable;
-        indexData = indexDataArray.length == 1 ? indexDataArray[0] : indexDataArray[1];
-        if (indexDataArray.length > 1)
-            arrayData = indexDataArray[0];
-        this.qualifiedListName = indexData.getQualifiedListName();
-        init();
+    public AxiomListSpec(ListItemSpec[] indexDataArray)
+    {
+        this((AxiomList)null, indexDataArray);
     }
  
     /**
+     * getListName
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getListName()
      */
     @Override
@@ -89,6 +91,7 @@ public class AxiomListSpec implements ListItemSpec
     }
 
     /**
+     * getQualifiedListName
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getQualifiedListName()
      */
     @Override
@@ -98,14 +101,18 @@ public class AxiomListSpec implements ListItemSpec
     }
 
    /**
-     * Returns backing axiom list
-     * @return AxiomList object or null if waiting for evaluation
+     * Returns axiom list, if one supplied, otherwise, axiom list or axiom term list depending on outcome of most recent evaluation
+     * @return ItemList object or possibly null if using list operand and waiting for evaluation
      */
     public ItemList<?> getItemList()
     {
         return itemList;
     }
 
+    /**
+     * Returns item extracted or produced in most recent evaluation. This is a selection value if termIndex is valid. 
+     * @return AxiomTermList object. This may be empty, but never null.
+     */
     public AxiomTermList getAxiomTermList()
     {
         if (itemList == null)
@@ -123,6 +130,7 @@ public class AxiomListSpec implements ListItemSpec
     }
 
     /**
+     * getItemIndex
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getItemIndex()
      */
     @Override
@@ -131,13 +139,8 @@ public class AxiomListSpec implements ListItemSpec
         return termIndex;
     }
 
-    public Operand getAxiomListVariable()
-    {
-        return axiomListVariable;
-    }
-    
     /**
-     * Returns Compiler operand for axiom selection
+     * Returns operand to evaluate axiom selection value for either 1 and 2 dimension cases
      * @return Operand object
      */
     public Operand getAxiomExpression()
@@ -146,6 +149,8 @@ public class AxiomListSpec implements ListItemSpec
     }
 
     /**
+     * getItemExpression
+     * Returns operand to evaluate term selection value. Applies to 2 dimension case only.
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getItemExpression()
      */
     @Override
@@ -155,6 +160,7 @@ public class AxiomListSpec implements ListItemSpec
     }
 
     /**
+     * getSuffix
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getSuffix()
      */
     @Override
@@ -164,12 +170,82 @@ public class AxiomListSpec implements ListItemSpec
     }
 
     /**
-     * Initialize this object. Determines if index values are available or need to be evaluated.
+     * getVariableName
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getVariableName()
      */
-    protected void init()
+    @Override
+    public QualifiedName getVariableName()
     {
-        axiomIndex = arrayData != null ? arrayData.getItemIndex() : indexData.getItemIndex();
-        termIndex = arrayData != null ? indexData.getItemIndex() : -1;
+        return indexData.getVariableName();
+    }
+
+    /**
+     * assemble
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#assemble(au.com.cybersearch2.classy_logic.interfaces.ItemList)
+     */
+    @Override
+    public void assemble(ItemList<?> itemList)
+    {   // Note arrayData is assumed to not require assembly as it only deals with integer selection values
+        indexData.assemble(itemList);
+    }
+
+    /**
+     * evaluate
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#evaluate(au.com.cybersearch2.classy_logic.interfaces.ItemList, int)
+     */
+    @Override
+    public boolean evaluate(ItemList<?> itemList, int id)
+    {
+        // The itemList object may be AxiomList or AxiomTermList depending on usage
+        this.itemList = itemList;
+        axiomTermList = (itemList instanceof AxiomTermList) ? (AxiomTermList)itemList: null;
+        boolean isAxiomList = false;
+        if (arrayData != null)
+        {   // 2 - dimensional if AxiomList passed, otherwise invalidate axiom index
+            if (axiomTermList == null)
+            {
+                arrayData.evaluate(itemList, id);
+                axiomIndex = arrayData.getItemIndex();
+                axiomTermList = ((AxiomList)itemList).getItem(axiomIndex);
+            }
+            else
+                axiomIndex = -1;
+        }
+        else
+        {   // Unwrap AxiomList if it contains only a single item
+            // Flag list is axiom array if the list contains more than one item
+            // 
+            if (axiomTermList == null)
+            {   // indexData selects AxiomTermList item 
+                AxiomList axiomList = ((AxiomList)itemList);
+                isAxiomList = axiomList.getLength() > 1;
+                if (isAxiomList)
+                    termIndex = -1;
+                if (axiomList.isEmpty())
+                    // This is not expected. Prevent NPE.
+                    axiomTermList = getEmptyAxiomTermList();
+                else
+                    // The item is only a sample if isAxiomList is true
+                    axiomTermList = axiomList.getItem(0);
+            }
+        }
+        // Note: assemble() invoked because referenced axiom may local axiom which changes when scope changes
+        if (axiomTermList.isEmpty())
+        {
+            assemble(itemList);
+            indexData.evaluate(itemList, id);
+        }
+        else
+        {
+            assemble(axiomTermList);
+            indexData.evaluate(axiomTermList, id);
+        }
+        // Set correct field to select value. For an axiom list, this is axiomIndex.
+        if (isAxiomList)
+            axiomIndex = indexData.getItemIndex();
+        else
+            termIndex = indexData.getItemIndex();
+        return true;
     }
 
     /**
@@ -190,67 +266,10 @@ public class AxiomListSpec implements ListItemSpec
         return -1;
     }
 
-    @Override
-    public QualifiedName getVariableName()
-    {
-        return null;
-    }
-
-    @Override
-    public void assemble(ItemList<?> itemList)
-    {
-        indexData.assemble(itemList);
-    }
-
-    @Override
-    public boolean evaluate(ItemList<?> itemList, int id)
-    {
-        this.itemList = itemList;
-        axiomTermList = (itemList instanceof AxiomTermList) ? (AxiomTermList)itemList: null;
-        // Note: indexData.assemble() is always invoked because scope local axioms may change when scope changes
-        boolean isAxiomList = false;
-        if (arrayData != null)
-        {
-            if (axiomTermList == null)
-            {
-                arrayData.evaluate(itemList, id);
-                axiomIndex = arrayData.getItemIndex();
-                axiomTermList = ((AxiomList)itemList).getItem(axiomIndex);
-            }
-            else
-                axiomIndex = -1;
-        }
-        else
-        {
-            if (axiomTermList == null)
-            {   // indexData selects AxiomTermList item 
-                AxiomList axiomList = ((AxiomList)itemList);
-                isAxiomList = axiomList.getLength() > 1;
-                if (isAxiomList)
-                    termIndex = -1;
-                if (axiomList.isEmpty())
-                    axiomTermList = getEmptyAxiomTermList();
-                else
-                    axiomTermList = axiomList.getItem(0);
-            }
-        }
-        if (axiomTermList.isEmpty())
-        {
-            assemble(itemList);
-            indexData.evaluate(itemList, id);
-        }
-        else
-        {
-            assemble(axiomTermList);
-            indexData.evaluate(axiomTermList, id);
-        }
-        if (isAxiomList)
-            axiomIndex = indexData.getItemIndex();
-        else
-            termIndex = indexData.getItemIndex();
-        return true;
-    }
-
+    /**
+     * Returns empty axiom term list
+     * @return AxiomTermList object
+     */
     private AxiomTermList getEmptyAxiomTermList()
     {
         QualifiedName qname = new QualifiedName(getListName() + "_item", qualifiedListName);
