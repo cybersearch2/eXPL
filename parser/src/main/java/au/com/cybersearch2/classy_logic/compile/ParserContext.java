@@ -410,7 +410,7 @@ public class ParserContext
     {
         StringBuilder builder = new StringBuilder("choice ");
         builder.append(qualifiedAxionName).append('(');
-        List<String> termNames = parserAssembler.getAxiomAssembler().getAxiomTermNameList(qualifiedAxionName);
+        List<String> termNames = parserAssembler.getAxiomAssembler().getTermNameList(qualifiedAxionName);
         boolean firstTime = true;
         for (String termname: termNames)
         {

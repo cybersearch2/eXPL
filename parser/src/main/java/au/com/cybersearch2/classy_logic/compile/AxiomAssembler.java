@@ -110,12 +110,12 @@ public class AxiomAssembler
      * Returns list of axiom term names
      * @param qualifiedAxionName
      */
-    public List<String> getAxiomTermNameList(QualifiedName qualifiedAxiomName)
+    public List<String> getTermNameList(QualifiedName qualifiedAxiomName)
     {
         AxiomArchetype axiomArchetype = scope.getGlobalAxiomAssembler().axiomArchetypeMap.get(qualifiedAxiomName);
         if ((axiomArchetype == null) && !QueryProgram.GLOBAL_SCOPE.equals(scope.getName()))
             axiomArchetype = axiomArchetypeMap.get(qualifiedAxiomName);
-        return axiomArchetype == null ? EMPTY_NAME_LIST : axiomArchetype.getAxiomTermNameList();
+        return axiomArchetype == null ? EMPTY_NAME_LIST : axiomArchetype.getTermNameList();
     }
     
     /**
@@ -142,13 +142,13 @@ public class AxiomAssembler
         if (axiomArchetype == null)
             axiomTermNameList = Collections.emptyList();
         else
-            axiomTermNameList = axiomArchetype.getAxiomTermNameList();
+            axiomTermNameList = axiomArchetype.getTermNameList();
         return axiomTermNameList;
     }
     
     protected AxiomSource createAxiomSource(QualifiedName qualifiedAxiomName, List<Axiom> axiomList)
     {
-        List<String> terminalNameList = axiomArchetypeMap.get(qualifiedAxiomName).getAxiomTermNameList();
+        List<String> terminalNameList = axiomArchetypeMap.get(qualifiedAxiomName).getTermNameList();
         AxiomListSource axiomListSource = new AxiomListSource(axiomList);
         axiomListSource.setAxiomTermNameList(terminalNameList);
         return axiomListSource;

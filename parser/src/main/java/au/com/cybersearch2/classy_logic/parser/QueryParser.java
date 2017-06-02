@@ -1601,7 +1601,7 @@ public class QueryParser implements QueryParserConstants
     Template choiceTemplate = parserAssembler.getTemplateAssembler().createChoiceTemplate(template, qualifiedTemplateName);
     OperandMap operandMap = parserAssembler.getOperandMap();
     AxiomAssembler axiomAssembler = parserAssembler.getAxiomAssembler();
-    for (String termName: axiomAssembler.getAxiomTermNameList(qualifiedAxiomName))
+    for (String termName: axiomAssembler.getTermNameList(qualifiedAxiomName))
       operandMap.addOperand(termName, null, parserAssembler.getQualifiedContextname());
     QualifiedName contextName = context.getContextName();
     QualifiedName qname = QualifiedName.parseName(qualifiedAxiomName.getName(), contextName);

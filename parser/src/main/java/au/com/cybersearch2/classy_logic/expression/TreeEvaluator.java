@@ -23,7 +23,7 @@ import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isNaN;
 import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isValidLeftOperand;
 import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isValidOperand;
 import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isValidRightOperand;
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isValidStringOperation;
+import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isConcatenateValid;
 
 import java.math.BigDecimal;
 import java.util.Locale;
@@ -32,9 +32,10 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
+import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
 
 /**
@@ -202,7 +203,7 @@ abstract class TreeEvaluator extends DelegateOperand
         // Remember if right is not a number
         rightIsNaN = isNaN(right, operatorEnum);
         if ((!isValidRightOperand(right, operatorEnum) || isInvalidRightUnaryOp(left, operatorEnum)) &&
-             !((left != null) && isValidStringOperation(left, operatorEnum))) 
+             !((left != null) && isConcatenateValid(left, operatorEnum))) 
         {   
             // TreeEvaluator not permited for type of Term value
             // NaN has precedence if operation has Numeric result
@@ -238,11 +239,27 @@ abstract class TreeEvaluator extends DelegateOperand
                     leftTerm.getOperator().booleanEvaluation(leftTerm, operatorEnum, rightTerm);
         case PLUS: // "+"
         case PLUSASSIGN: // "+"
-            if (isValidStringOperation(leftTerm, operatorEnum))
-                return ((Concaten<?>)leftTerm).concatenate(rightTerm);
+            if (isConcatenateValid(leftTerm, operatorEnum))
+            {
+                OperandType leftOperandType = leftTerm.getOperator().getTrait().getOperandType();
+                if (leftOperandType == OperandType.STRING)
+                    return leftTerm.getValue().toString() + rightTerm.getValue().toString();
+                OperandType rightOperandType = rightTerm.getOperator().getTrait().getOperandType();
+                if (leftOperandType == OperandType.AXIOM)
+                {
+                    AxiomList axiomList = (AxiomList)leftTerm.getValue();
+                    if (rightOperandType == OperandType.AXIOM)
+                        return axiomList.concatenate((AxiomList)rightTerm.getValue());
+                    if (rightOperandType == OperandType.TERM)
+                        return axiomList.concatenate((AxiomTermList)rightTerm.getValue());
+                }
+                throw new ExpressionException("Cannot concatenate " + leftTerm.toString() + " to " + rightTerm.toString());
+            }
+            // Deliberately fall through if not concatination
         case STAR: // "*"
             if ((leftTerm.getValueClass() == Boolean.class) || (rightTerm.getValueClass() == Boolean.class))
                 return calculateBoolean(leftTerm, rightTerm);
+            // Deliberately fall through if not boolean "*"
         case MINUS: // "-"
         case SLASH: // "/"
         case BIT_AND: // "&"

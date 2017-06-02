@@ -133,6 +133,6 @@ public class ParameterOperandTest
         assertThat(iterator.hasNext()).isFalse();
         //System.out.println(result.getItem(0).getAxiom().getArchetype().getAxiomTermNameList());
         if (termNames != null)
-            assertThat(result.getItem(0).getAxiom().getArchetype().getAxiomTermNameList().toString()).isEqualTo("[" + termNames + "]");
+            assertThat(result.getItem(0).getAxiom().getArchetype().getTermNameList().toString()).isEqualTo("[" + termNames + "]");
     }
 }

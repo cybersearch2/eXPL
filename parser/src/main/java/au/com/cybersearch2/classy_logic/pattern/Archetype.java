@@ -207,7 +207,7 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
     }
  
     @Override
-    public List<String> getAxiomTermNameList()
+    public List<String> getTermNameList()
     {
         List<String> termNameList = new ArrayList<String>(termMetaList.size());
         for (TermMetaData termMetaData: termMetaList)

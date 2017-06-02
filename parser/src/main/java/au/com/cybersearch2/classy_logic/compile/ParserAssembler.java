@@ -343,7 +343,7 @@ public class ParserAssembler implements LocaleListener
         }
         if (axiomArchetype != null)
         {
-            List<String> termNameList = axiomArchetype.getAxiomTermNameList();
+            List<String> termNameList = axiomArchetype.getTermNameList();
             if (!termNameList.isEmpty())
             {
                 Template template = templateAssembler.createTemplate(templateName, false);
@@ -486,7 +486,7 @@ public class ParserAssembler implements LocaleListener
         {   // The final analysis is axiom (term) list which can be set now
             AxiomArchetype archetype = axiomAssembler.getAxiomArchetype(qualifiedAxiomName);
             if (archetype != null)
-                axiomContainer.setAxiomTermNameList(archetype.getAxiomTermNameList());
+                axiomContainer.setAxiomTermNameList(archetype.getTermNameList());
             List<Axiom> internalAxiomList = 
                 targetScope.getParserAssembler()
                     .getListAssembler()
@@ -512,7 +512,7 @@ public class ParserAssembler implements LocaleListener
                 .getTemplate(globalName);
             }
             if (template != null)
-                axiomContainer.setAxiomTermNameList(template.getArchetype().getAxiomTermNameList());
+                axiomContainer.setAxiomTermNameList(template.getArchetype().getTermNameList());
         }
         listAssembler.add(qualifiedTemplateName, axiomListener);
 	}

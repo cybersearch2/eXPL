@@ -43,10 +43,10 @@ public interface Operator
      OperatorEnum[] getLeftOperandOps();
 
     /**
-     * Returns OperatorEnum values for which this Term is a valid String operand
+     * Returns OperatorEnum values for which this Term is a valid concatenate operand
      * @return OperatorEnum[]
      */
-     OperatorEnum[] getStringOperandOps();
+     OperatorEnum[] getConcatenateOps();
 
     /**
      * Evaluate a unary expression 

@@ -16,17 +16,14 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.Scope;
-import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
-import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -34,7 +31,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 25 Dec 2014
  */
-public abstract class DelegateOperand extends Parameter implements Operand, Concaten<Object>, LocaleListener 
+public abstract class DelegateOperand extends Parameter implements Operand, LocaleListener 
 {
 	/** Qualified name of operand */
 	protected QualifiedName qname;
@@ -147,13 +144,12 @@ public abstract class DelegateOperand extends Parameter implements Operand, Conc
      * concatenate
      * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
      */
-    @Override
-    public Object concatenate(Operand rightOperand)
-    {   // Axioms are special case
-        if (operator.getDelegateType() ==DelegateType.AXIOM)
-            return AxiomUtils.concatenate(this, rightOperand);
-        return value.toString() + rightOperand.getValue().toString();
-    }
+    //public Object concatenate(Operand rightOperand)
+    //{   // Axioms are special case
+    //    if (operator.getDelegateType() == DelegateType.AXIOM)
+    //        return AxiomUtils.concatenate(this, rightOperand);
+    //    return value.toString() + rightOperand.getValue().toString();
+    //}
 
     /**
      * Backup to intial state if given id matches id assigned on unification or given id = 0. 

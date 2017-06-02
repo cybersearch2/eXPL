@@ -15,17 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
-import au.com.cybersearch2.classy_logic.axiom.AxiomUtils;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
-import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.operator.AxiomOperator;
 
 /**
@@ -36,7 +33,7 @@ import au.com.cybersearch2.classy_logic.operator.AxiomOperator;
  * @author Andrew Bowley
  * 5 Aug 2015
  */
-public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concaten<AxiomList>
+public class AxiomOperand extends ExpressionOperand<AxiomList>
 {
     /** Axiom key to use when an empty list is created */
     protected QualifiedName axiomKey;
@@ -108,7 +105,19 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
             paramsTreeRoot = OperandParam.buildOperandTree(parameterList.getOperandParamList());
         init();
     }
-
+/*
+    @Override
+    public void setValue(Object value)
+    {
+        super.setValue(value);
+    }
+    
+    @Override
+    public int unifyTerm(Term otherTerm, int id)
+    {
+        return super.unify(otherTerm, id);
+    }
+*/    
     /**
      * Execute operation for expression
      * @param id Identity of caller, which must be provided for backup()
@@ -164,32 +173,6 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>implements Concate
         AxiomList axiomList = (AxiomList)term.getValue();
         if (axiomListListener != null)
             axiomListListener.addAxiomList(qname, axiomList);
-    }
-
-    /**
-     * concatenate
-     * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
-     */
-    @Override
-    public AxiomList concatenate(Operand rightOperand)
-    {
-        AxiomList leftList = (AxiomList)getValue();
-        if (leftList.getLength() == 0)
-        {
-            QualifiedName key;
-            if (rightOperand.getValueClass().equals(AxiomList.class))
-            {
-                AxiomList rightList = (AxiomList)rightOperand.getValue();
-                key = rightList.getKey();
-            }
-            else
-            {
-                AxiomTermList rightList = (AxiomTermList)rightOperand.getValue();
-                key = rightList.getKey();
-            }
-            leftList.setKey(key);
-        }
-        return AxiomUtils.concatenate(this, rightOperand);
     }
 
     /**

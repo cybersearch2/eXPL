@@ -156,12 +156,12 @@ public class DelegateOperator implements Operator
 
     /**
      * getStringOperandOps
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getStringOperandOps()
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getConcatenateOps()
      */
      @Override
-     public OperatorEnum[] getStringOperandOps()
+     public OperatorEnum[] getConcatenateOps()
      {
-         return proxy.getStringOperandOps();
+         return proxy.getConcatenateOps();
      }
 
     /**

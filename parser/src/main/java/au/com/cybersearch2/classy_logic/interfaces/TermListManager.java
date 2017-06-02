@@ -39,7 +39,7 @@ public interface TermListManager
     boolean isMutable();
     boolean isAnonymousTerms();
     int getNamedTermCount();
-    List<String> getAxiomTermNameList();
+    List<String> getTermNameList();
     void clearMutable();
     TermMetaData analyseTerm(Term term, int index);
 }

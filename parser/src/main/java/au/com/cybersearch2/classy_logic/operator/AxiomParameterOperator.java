@@ -80,7 +80,7 @@ public class AxiomParameterOperator implements Operator
      * @return OperatorEnum[]
      */
     @Override
-    public OperatorEnum[] getStringOperandOps()
+    public OperatorEnum[] getConcatenateOps()
     {
         return EMPTY_OPERAND_OPS;
     }

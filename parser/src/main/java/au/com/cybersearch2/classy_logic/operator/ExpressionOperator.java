@@ -51,13 +51,13 @@ public abstract class ExpressionOperator implements Operator
     /**
      * Returns OperatorEnum values for which this Term is a valid String operand
      * @return OperatorEnum[]
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getStringOperandOps()
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getConcatenateOps()
      */
      @Override
-     public OperatorEnum[] getStringOperandOps()
+     public OperatorEnum[] getConcatenateOps()
      {
          if (expression != null)
-             return expression.getOperator().getStringOperandOps();
+             return expression.getOperator().getConcatenateOps();
          return EMPTY_OPERAND_OPS;
      }
 }

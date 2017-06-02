@@ -39,7 +39,7 @@ public class EvaluationUtils
         for (OperatorEnum operatorEnum2: leftTerm.getOperator().getLeftOperandOps())
             if (operatorEnum2 == operatorEnum)
                 return true;
-        if (isValidStringOperation(leftTerm, operatorEnum) || 
+        if (isConcatenateValid(leftTerm, operatorEnum) || 
             // Comma operator valid if right operand present    
             ((operatorEnum == OperatorEnum.COMMA) && (rightTerm != null)))
             return true;
@@ -47,13 +47,13 @@ public class EvaluationUtils
     }
 
     /**
-     * Returns flag to indicate if supplied term is allowed to perform String operations
+     * Returns flag to indicate if supplied term is allowed to perform concatenation
      * @param term
      * @return boolean
      */
-    public static boolean isValidStringOperation(Operand term, OperatorEnum operatorEnum)
+    public static boolean isConcatenateValid(Operand term, OperatorEnum operatorEnum)
     {
-        for (OperatorEnum operatorEnum2: term.getOperator().getStringOperandOps())
+        for (OperatorEnum operatorEnum2: term.getOperator().getConcatenateOps())
             if (operatorEnum2 == operatorEnum)
                 return true;
         return false;

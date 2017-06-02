@@ -15,9 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
@@ -52,6 +55,44 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 		this.key = key;
 	}
 
+    public AxiomList concatenate(AxiomList rightList)
+    {
+        if (rightList.isEmpty())
+            return this;
+        if (isEmpty())
+            setKey(rightList.getKey());
+        else
+        {
+            getArchetypeName();
+            // Check for congruence. Axiom archetypes must match
+            if ((archetypeName == null) || !archetypeName.equals(rightList.getArchetypeName()))
+                checkTermNameCongruence(rightList);
+        }
+        // Update this and return 
+        Iterator<AxiomTermList> iterator = rightList.getIterable().iterator();
+        int index = getLength();
+        while (iterator.hasNext())
+            assignItem(index++, iterator.next());
+        return this;
+    }
+ 
+    public AxiomList concatenate(AxiomTermList axiomTermList)
+    {
+        if (axiomTermList.isEmpty())
+            return this;
+        if (!isEmpty())
+        {
+            getArchetypeName();
+            // Check for congruence. Axiom archetypes must match
+            if ((archetypeName == null) || !archetypeName.equals(axiomTermList.archetypeName))
+                checkTermNameCongruence(axiomTermList);
+        }
+        // Update this and return 
+        int index = getLength();
+            assignItem(index, axiomTermList);
+        return this;
+    }
+ 
     /**
      * Returns listener to add Axiom objects to this container
      * @return AxiomListener
@@ -68,12 +109,12 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 				axiomListOperand.setAxiom(axiom);
 				assignItem(getLength(), axiomListOperand);
 				TermListManager axiomArchetype = axiom.getArchetype();
-				if ((archetypeName == null) | 
-				     !axiomArchetype.toString().equals(archetypeName) |
+				if ((archetypeName == null) || 
+				     !axiomArchetype.toString().equals(archetypeName) ||
 	                 ((axiomTermNameList != null) && 
 	                  (axiom.getTermCount() > axiomTermNameList.size())))
 				{
-				    axiomTermNameList = axiom.getArchetype().getAxiomTermNameList();
+				    axiomTermNameList = axiom.getArchetype().getTermNameList();
 				    archetypeName = axiomArchetype.toString();
 				}
 			}};
@@ -111,6 +152,13 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
     @Override
 	public List<String> getAxiomTermNameList() 
 	{
+        if (axiomTermNameList == null)
+        {
+            if (getLength() > 0)
+                axiomTermNameList = getItem(0).axiomTermNameList;
+            else
+                return Collections.emptyList();
+        }
 		return axiomTermNameList;
 	}
 
@@ -148,5 +196,35 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
     public OperandType getOperandType()
     {
         return OperandType.AXIOM;
+    }
+
+    protected void checkTermNameCongruence(AxiomContainer axiomContainer)
+    {
+        List<String> rightNames = axiomContainer.getAxiomTermNameList();
+        int size = getAxiomTermNameList().size();
+        boolean isCongruent = size == rightNames.size();
+        if (isCongruent)
+            for (int i = 0; i < axiomTermNameList.size(); i++)
+            {
+                if (!axiomTermNameList.get(i).equals(rightNames.get(i)))
+                {
+                    isCongruent = false;
+                    break;
+                }
+            }
+        if (!isCongruent)
+            throw new ExpressionException("Cannot concatenate " + toString() + " to " + axiomContainer.toString());
+    }
+    
+    protected String getArchetypeName()
+    {
+        if (archetypeName == null)
+        {
+            if (getLength() > 0)
+                archetypeName = getItem(0).archetypeName;
+            else
+                return "";
+        }
+        return archetypeName;
     }
 }

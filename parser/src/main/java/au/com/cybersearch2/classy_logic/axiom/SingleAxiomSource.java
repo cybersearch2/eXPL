@@ -43,7 +43,7 @@ public class SingleAxiomSource implements AxiomSource, Iterator<Axiom>, Iterable
     public SingleAxiomSource(Axiom axiom)
     {
     	this.axiom = axiom;
-    	axiomTermNameList = axiom.getArchetype().getAxiomTermNameList();
+    	axiomTermNameList = axiom.getArchetype().getTermNameList();
     }
 
     /**

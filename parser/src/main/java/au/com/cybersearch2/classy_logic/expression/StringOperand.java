@@ -17,7 +17,6 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Concaten;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
@@ -29,7 +28,7 @@ import au.com.cybersearch2.classy_logic.operator.StringOperator;
  * @author Andrew Bowley
  * 8 Dec 2014
  */
-public class StringOperand  extends ExpressionOperand<String> implements Concaten<String>, LocaleListener
+public class StringOperand  extends ExpressionOperand<String> implements LocaleListener
 {
     /** Defines operations that an Operand performs with other operands. To be set by super. */
     protected StringOperator operator;
@@ -76,16 +75,6 @@ public class StringOperand  extends ExpressionOperand<String> implements Concate
 		setValue(term.getValue().toString());
 		id = term.getId();
 	}
-
-	/**
-	 * concatenate
-	 * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
-	 */
-    @Override
-    public String concatenate(Operand rightOperand)
-    {
-        return value.toString() + rightOperand.getValue().toString();
-    }
 
     @Override
     public void onScopeChange(Scope scope)

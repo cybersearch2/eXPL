@@ -97,10 +97,10 @@ public class StringOperator extends ExpressionOperator implements LocaleListener
 
     /**
      * getStringOperandOps
-     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#getStringOperandOps()
+     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#getConcatenateOps()
      */
      @Override
-     public OperatorEnum[] getStringOperandOps()
+     public OperatorEnum[] getConcatenateOps()
      {
         return  new OperatorEnum[]
         { 

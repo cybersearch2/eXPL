@@ -59,6 +59,7 @@ import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
 import au.com.cybersearch2.classy_logic.expression.Orientation;
 import au.com.cybersearch2.classy_logic.list.ListItemVariable;
 import au.com.cybersearch2.classy_logic.list.ArrayIndex;
+import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.ListIndex;
 import au.com.cybersearch2.classy_logic.list.ListLength;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
@@ -183,7 +184,7 @@ public class QueryParser
     if (assignExpression == null)
          throw new ParseException("Statement to initialize List \"" + indexData.getListName() + "\"  must be assigned a value");
     ParserAssembler parserAssembler = context.getParserAssembler();
-    ItemList<?> itemList = parserAssembler.getListAssembler().findItemList(indexData.getQualifiedListName());
+    ArrayItemList<?> itemList = (ArrayItemList<?>) parserAssembler.getListAssembler().findItemList(indexData.getQualifiedListName());
     if (itemList == null)
          throw new ParseException("List \"" + indexData.getListName() + "\" must be declared before being initialized");
     int index = indexData.getItemIndex();
@@ -1087,7 +1088,7 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
     Template choiceTemplate = parserAssembler.getTemplateAssembler().createChoiceTemplate(template, qualifiedTemplateName);
     OperandMap operandMap = parserAssembler.getOperandMap();
     AxiomAssembler axiomAssembler = parserAssembler.getAxiomAssembler();
-    for (String termName: axiomAssembler.getAxiomTermNameList(qualifiedAxiomName))
+    for (String termName: axiomAssembler.getTermNameList(qualifiedAxiomName))
       operandMap.addOperand(termName, null, parserAssembler.getQualifiedContextname());
     QualifiedName contextName = context.getContextName();
     QualifiedName qname = QualifiedName.parseName(qualifiedAxiomName.getName(), contextName); 

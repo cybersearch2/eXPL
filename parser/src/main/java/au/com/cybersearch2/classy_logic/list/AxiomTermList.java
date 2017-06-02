@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -78,12 +79,12 @@ public class AxiomTermList implements ItemList<Term>, AxiomContainer
 			{
 				axiom = nextAxiom;
                 TermListManager axiomArchetype = axiom.getArchetype();
-                if ((archetypeName == null) | 
-                    !axiomArchetype.toString().equals(archetypeName) |
+                if ((archetypeName == null) || 
+                    !axiomArchetype.toString().equals(archetypeName) ||
                     ((axiomTermNameList != null) && 
                      (axiom.getTermCount() > axiomTermNameList.size())))
                 {
-                    axiomTermNameList = axiom.getArchetype().getAxiomTermNameList();
+                    axiomTermNameList = axiom.getArchetype().getTermNameList();
                     archetypeName = axiomArchetype.toString();
                 }
 		        if (sourceItem != null)
@@ -116,6 +117,13 @@ public class AxiomTermList implements ItemList<Term>, AxiomContainer
     @Override
 	public List<String> getAxiomTermNameList() 
 	{
+        if (axiomTermNameList == null)
+        {
+            if (!isEmpty())
+                axiomTermNameList = axiom.getArchetype().getTermNameList();
+            else
+                return Collections.emptyList();
+        }
 		return axiomTermNameList;
 	}
 
@@ -145,7 +153,9 @@ public class AxiomTermList implements ItemList<Term>, AxiomContainer
 	public void setAxiom(Axiom axiom)
 	{
 		this.axiom = axiom;
-        axiomTermNameList = axiom.getArchetype().getAxiomTermNameList();
+        TermListManager archetype = axiom.getArchetype();
+        axiomTermNameList = archetype.getTermNameList();
+        archetypeName = archetype.toString();
 		if (sourceItem != null)
 		    sourceItem.setInformation(toString());
 	}

@@ -32,6 +32,8 @@ import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.operator.AxiomParameterOperator;
+import au.com.cybersearch2.classy_logic.operator.DelegateType;
 
 /**
  * ListItemVariable
@@ -234,8 +236,8 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
         // Check if new value same as old value
         if (!empty && this.value.equals(value))
             return;
-        // Set term value - easy
-        super.setValue(value);
+        // Set term value - first
+        setTermValue(value);
         delegate.setItemValue(value);
     }
     
@@ -311,7 +313,7 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
      */
     protected void setValue(int newIndex)
     {   
-        super.setValue(delegate.getValue(newIndex));
+        setTermValue(delegate.getValue(newIndex));
     }
 
     /**
@@ -343,10 +345,18 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
         if (itemValue instanceof Term)
             itemValue = ((Term)itemValue).getValue();
         if (!itemValue.equals(oldValue))
-            super.setValue(itemValue);
+            setTermValue(itemValue);
         return itemValue;
     }
- 
+
+    protected void setTermValue(Object value)
+    {
+        // Preset operator if value type is AxiomTermList, or wrong operator will be set
+        if ((getDelegateType() == DelegateType.ASSIGN_ONLY) && (value instanceof AxiomTermList))
+            operator.setProxy(new AxiomParameterOperator());
+        super.setValue(value);
+    }
+    
     /**
      * Searches for and returns item list using global scope version of name
      * @param listName Name of list with non-global scope part

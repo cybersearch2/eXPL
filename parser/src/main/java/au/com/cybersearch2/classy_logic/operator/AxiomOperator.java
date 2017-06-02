@@ -77,10 +77,10 @@ public class AxiomOperator implements Operator
 
     /**
      * getStringOperandOps
-     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#getStringOperandOps()
+     * @see au.com.cybersearch2.classy_logic.expression.ExpressionOperand#getConcatenateOps()
      */
     @Override
-    public OperatorEnum[] getStringOperandOps()
+    public OperatorEnum[] getConcatenateOps()
     {  // Allow concatenation like String
        // Two operands must be congruent, the left hand operand is
        // appended to the right hand one
