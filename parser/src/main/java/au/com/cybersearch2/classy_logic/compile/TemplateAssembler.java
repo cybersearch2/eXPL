@@ -155,7 +155,7 @@ public class TemplateAssembler
     /**
      * Create new template and add to head template chain
      * @param outerTemplateName Qualified name of head template
-     * @param innerTemplateName Qualified name of inner template
+     * @param name Qualified name of inner template
      * @return Template object
      */
     public Template chainTemplate(QualifiedName outerTemplateName, String name) 
@@ -165,7 +165,7 @@ public class TemplateAssembler
         templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
         return chainTemplate;
     }
- 
+
     /**
      * Run parser task for every non=empty template. For each operand in the template, 
      * the task walks the operand tree and adds all terms to the archetype which belong

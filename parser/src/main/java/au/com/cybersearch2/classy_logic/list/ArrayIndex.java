@@ -138,6 +138,12 @@ public class ArrayIndex implements ListItemSpec
     }
 
     @Override
+    public void setSuffix(String suffix)
+    {
+        this.suffix = suffix;
+    }
+    
+    @Override
     public String getSuffix()
     {
         return suffix;
@@ -175,4 +181,5 @@ public class ArrayIndex implements ListItemSpec
         // Override if string indexes supported
         index = 0;
     }
+
 }

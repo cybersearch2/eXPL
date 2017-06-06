@@ -31,7 +31,6 @@ import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.ParameterList;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
-import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
@@ -45,6 +44,9 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
+import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -134,8 +136,8 @@ public class VariableType
         boolean hasExpression = expression != null;
 		Operand operand = null;
         QualifiedName axiomKey = null;
-        List<OperandParam> initializeList = null;
-
+        List<Template> initializeList = null;
+        Template initializeTemplate = null;
         AxiomListListener axiomListListener = null;
         if (operandType == OperandType.AXIOM || operandType == OperandType.LIST || operandType == OperandType.TERM)
         {
@@ -144,8 +146,10 @@ public class VariableType
                 axiomKey = qname;
             axiomListListener = parserAssembler.getListAssembler().axiomListListenerInstance();
         }
-        if (operandType == OperandType.LIST || operandType == OperandType.TERM)
-            initializeList = (List<OperandParam>)getProperty(PARAMS);
+        if (operandType == OperandType.LIST)
+            initializeList = (List<Template>)getProperty(PARAMS);
+        else if (operandType == OperandType.TERM)
+            initializeTemplate = (Template)getProperty(PARAMS);
 	    switch (operandType)
 	    {
 	    case INTEGER:
@@ -165,7 +169,7 @@ public class VariableType
 	    	break;
         case TERM:
             // Expression is an initializer list Operand. 
-            operand = new AxiomParameterOperand(new QualifiedName(qname.getName() + "_params", qname), axiomKey, initializeList);
+            operand = new AxiomParameterOperand(new QualifiedName(qname.getName() + "_params", qname), axiomKey, initializeTemplate);
             hasExpression = true;
             break;
         case AXIOM:
@@ -340,13 +344,21 @@ public class VariableType
             public AxiomList evaluate(List<Term> argumentList)
             {
                 AxiomList axiomList = new AxiomList(qname, axiomKey);
+                AxiomArchetype archetype = new AxiomArchetype(axiomKey);
                 int index = 0;
                 for (Term term: argumentList)
                 {
-                    AxiomTermList axiomTermList = (AxiomTermList) term.getValue();
+                    @SuppressWarnings("unchecked")
+                    List<Term> termList =  (List<Term>) term.getValue();
                     // Do not add empty axioms to list
-                    if (!axiomTermList.isEmpty())
+                    if (termList.size() > 0)
+                    {
+                        AxiomTermList axiomTermList = new AxiomTermList(qname, axiomKey);
+                        axiomTermList.setAxiom(new Axiom(archetype, termList));
+                        if (index == 0)
+                            archetype.clearMutable();
                         axiomList.assignItem(index++, axiomTermList);
+                    }
                 }
                 return axiomList;
             }

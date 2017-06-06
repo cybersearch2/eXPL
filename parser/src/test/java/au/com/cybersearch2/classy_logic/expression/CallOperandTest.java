@@ -254,16 +254,16 @@ public class CallOperandTest
  
     static final String[] MARKS_GRADES_RESULTS2 = 
     {
-        "total=36",
-        "total=44",
-        "total=44"
+        "total=Total score: 36",
+        "total=Total score: 44",
+        "total=Total score: 44"
     };
     
     static final String[] MATH_SCORES =
     {
-        "math_score=list<term> subjects.marks_list()=marks_list(Math, a-)",
-        "math_score=list<term> subjects.marks_list()=marks_list(Math, b-)",
-        "math_score=list<term> subjects.marks_list()=marks_list(Math, a)"
+        "math_score=list<term> subjects.marks_list()=marks_list(Math, mark=a-)",
+        "math_score=list<term> subjects.marks_list()=marks_list(Math, mark=b-)",
+        "math_score=list<term> subjects.marks_list()=marks_list(Math, mark=a)"
     };
     
     static final String[] SCHOOL_REPORT = 
@@ -339,7 +339,7 @@ public class CallOperandTest
         "calc score(\n" +
         "    << school.subjects(english, math, history) >> (marks_list),\n" +
         "    << school.total_score(english, math, history) >> (label, value),\n" +
-        "    axiom report={ marks_list, label + \": \" + value }\n" +
+        "    axiom report={ marks_list,  total = label + \": \" + value }\n" +
         ");\n" +
         "query marks(grades : score);";
 
@@ -358,7 +358,7 @@ public class CallOperandTest
             "    integer math,\n" +
             "    integer history,\n" +
             "    string label = \"Total score\",\n" +
-            "    integer value  =english + math + history\n" +
+            "    integer value = english + math + history\n" +
             "  );\n" +
             "\n" +
             "calc score(\n" +
@@ -366,7 +366,7 @@ public class CallOperandTest
             "    math_score=score.subjects[1],\n" +
             "    << total_score(english, math, history) >> (label, value),\n" +
             "    total=score.total_score^value,\n" +
-            "    axiom report = { marks_list, label + \": \" + value }\n" +
+            "    axiom report = { marks_list, string total = label + \": \" + value }\n" +
             ");\n" +
             "query<axiom> marks(grades : score);";
 
@@ -515,7 +515,6 @@ public class CallOperandTest
             "              {\"melissa\", \"f\", 30, \"virgo\"}\n" + 
             "              {\"Tom\", \"m\", 22, \"cancer\"}\n" + 
             "              {\"Bill\", \"m\", 19, \"virgo\"};\n" + 
-            "axiom geminis = {};" +
             "list person_list(person);\n" +
             "calc people_by_starsign(\n" +
             "  string starsign,\n" +
@@ -534,6 +533,7 @@ public class CallOperandTest
             ". << people_by_starsign(\"gemini\") >> (candidates),\n" +
             " candidate_list = match.people_by_starsign,\n" +
             ". integer i = 0,\n" +
+            "axiom geminis = {}," +
             "  {\n" +
             "    ? i < length(candidates),\n" +
             "    geminis += candidates[i++]\n" +
@@ -579,7 +579,7 @@ public class CallOperandTest
             "       },\n" +
             "       candidates += person\n" +
             "    },\n" +
-            "    (++i)\n" +
+            "    ++i\n" +
             "  }\n" +
             ");\n" +
             "calc match(\n" +
@@ -635,18 +635,20 @@ public class CallOperandTest
         queryProgram.parseScript(PERFECT_MATCH);
         //queryProgram.setExecutionContext(new ExecutionContext());
         Result result = queryProgram.executeQuery("match");
-        QualifiedName qname = QualifiedName.parseGlobalName("geminis");
-        Iterator<Axiom> iterator = result.getIterator(qname);
+        QualifiedName qname = QualifiedName.parseGlobalName("match");
+        Axiom matchAxiom = result.getIterator(qname).next();
+        AxiomList axiomList = (AxiomList) matchAxiom.getTermByName("geminis").getValue();
+        Iterator<AxiomTermList> listIterator = axiomList.getIterable().iterator();
         int index = 0;
-        while(iterator.hasNext())
+        while(listIterator.hasNext())
             //System.out.println(iterator.next().toString());
-            assertThat(iterator.next().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
+            assertThat(listIterator.next().getAxiom().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
         assertThat(index).isEqualTo(4);
         qname = QualifiedName.parseGlobalName("match");
-        iterator = result.getIterator(qname);
+        Iterator<Axiom> iterator = result.getIterator(qname);
         Axiom axiom = iterator.next();
         //System.out.println(axiom); //iterator.next().toString()); 
-        AxiomList axiomList = (AxiomList) (axiom.getTermByName("candidate_list").getValue());
+        axiomList = (AxiomList) (axiom.getTermByName("candidate_list").getValue());
         for (index = 0; index < axiomList.getLength(); ++index)
             //System.out.println(axiomList.getItem(index).getAxiom().toString());
             assertThat(axiomList.getItem(index).getAxiom().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
@@ -784,7 +786,7 @@ public class CallOperandTest
         while (iterator.hasNext())
         {
             Axiom score = iterator.next();
-            //System.out.println(score.getTermByName("math_score"));
+            //System.out.println(score.getTermByName("math_score").toString());
             assertThat(score.getTermByName("math_score").toString()).isEqualTo(MATH_SCORES[index]);
             //System.out.println(score.getTermByName("total"));
             assertThat(score.getTermByName("total").toString()).isEqualTo(MARKS_GRADES_RESULTS2[index++]);
@@ -810,8 +812,8 @@ public class CallOperandTest
                 while (subjects.hasNext())
                 {
                     Axiom subject = subjects.next().getAxiom();
-                    //System.out.println(subject.toString());
-                    assertThat(subject.getTermByIndex(0).toString() + " " + subject.getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
+                    //System.out.println(subject.getTermByIndex(0).getValue().toString() + " " + subject.getTermByIndex(1).getValue().toString());
+                    assertThat(subject.getTermByIndex(0).getValue().toString() + " " + subject.getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
                 }
                 //System.out.println(item.getAxiom().getTermByIndex(1).getValue());
                 assertThat(item.getAxiom().getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);

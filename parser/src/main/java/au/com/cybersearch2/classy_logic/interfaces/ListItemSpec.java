@@ -41,6 +41,23 @@ public interface ListItemSpec
      */
     String getSuffix();
 
+    /**
+     * Sets text to append to name of variable
+     * @param suffix
+     */
+    void setSuffix(String suffix);
+
+    /**
+     * Complete binding to item list
+     * @param itemList The item list
+     */
     void assemble(ItemList<?> itemList);
+    
+    /**
+     * Evaluate index used to select value
+     * @param itemList The item list
+     * @param id Modification id
+     * @return flag set true if evaluation successful
+     */
     boolean evaluate(ItemList<?> itemList, int id);
 }

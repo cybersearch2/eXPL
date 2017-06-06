@@ -78,7 +78,7 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
 	public void assign(Term term) 
 	{
 		setValue((Boolean)term.getValue());
-		id = term.getId();
+		//id = term.getId();
 	}
 
     /**

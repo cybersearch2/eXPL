@@ -100,7 +100,7 @@ public class IntegerOperand extends ExpressionOperand<Long> implements LocaleLis
 	public void assign(Term term) 
 	{
 		setValue(operator.convertObject(term.getValue(), term.getValueClass()));
-		id = term.getId();
+		//id = term.getId();
 	}
 
     @Override

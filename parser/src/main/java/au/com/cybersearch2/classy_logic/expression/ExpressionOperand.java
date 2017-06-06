@@ -162,6 +162,8 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
 		EvaluationStatus status = EvaluationStatus.COMPLETE;
 		if ((expression != null) && empty)
 		{
+            if (!expression.isEmpty() && (this.id == 0))
+                id = 0;
 			status = expression.evaluate(id);
 			if (!expression.isEmpty())
 			{

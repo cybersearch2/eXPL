@@ -20,7 +20,6 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
@@ -574,36 +573,36 @@ public class ParserAssembler implements LocaleListener
 		return QueryProgram.GLOBAL_SCOPE.equals(scope.getName()) ? name : (scope.getName() + "." + name);
 	}
 
-	/**
-	 * Returns operand which invokes a function call in script. The function must be
-	 * provided in an external library.
-	 * The function name must consist of 2 parts. The first is the name of a library.
-	 * If the first part is a library name, then the second part is the name of a function in that library.
-	 * The type of object returned from the call depends on the library.
-	 * @param qname Qualified function name
-	 * @param operandParamList List of Operand arguments or null for no arguments
-	 * @return CallOperand object
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-    public Operand getCallOperand(QualifiedName qname, List<OperandParam> operandParamList)
-	{
+    /**
+     * Returns operand which invokes a function call in script. The function must be
+     * provided in an external library.
+     * The function name must consist of 2 parts. The first is the name of a library.
+     * If the first part is a library name, then the second part is the name of a function in that library.
+     * The type of object returned from the call depends on the library.
+     * @param qname Qualified function name
+     * @param parametersTemplate Operand arguments packaged in an inner template or null for no arguments
+     * @return CallOperand object
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public Operand getCallOperand(QualifiedName qname, Template parametersTemplate)
+    {
         String library = qname.getTemplate();
         String name = qname.getName();
         if (library.isEmpty())
             throw new ExpressionException("Call name \"" + qname.toString() + "\" is invalid");
         String callName = library + "." + name;
-	    if (externalFunctionProvider == null)
-	    {
-	    	if (functionManager == null)
-	    		functionManager = new FunctionManager(){};
-	        externalFunctionProvider = new ExternalFunctionProvider(functionManager);
-	    }
-	    FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
-	    CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
-	    if (callEvaluator == null)
-	        throw new ExpressionException("Function \"" + name + "\" not supported");
-        return new ParameterOperand(QualifiedName.parseName(callName, qname), operandParamList, callEvaluator);
-	}
+        if (externalFunctionProvider == null)
+        {
+            if (functionManager == null)
+                functionManager = new FunctionManager(){};
+            externalFunctionProvider = new ExternalFunctionProvider(functionManager);
+        }
+        FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
+        CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
+        if (callEvaluator == null)
+            throw new ExpressionException("Function \"" + name + "\" not supported");
+        return new ParameterOperand(QualifiedName.parseName(callName, qname), parametersTemplate, callEvaluator);
+    }
 
 	/**
 	 * Returns operand which invokes a query call.
@@ -613,7 +612,7 @@ public class ParserAssembler implements LocaleListener
 	 * @return CallOperand object containing a QueryEvaluator object
 	 * @see QueryEvaluator
 	 */
-    public Operand getQueryOperand(String queryName, QualifiedName qualifiedQueryName, List<OperandParam> operandParamList, Template innerTemplate)
+    public Operand getQueryOperand(String queryName, QualifiedName qualifiedQueryName, List<Template> templateParamList, Template innerTemplate)
     {
         if ((innerTemplate != null) && !operandMap.hasOperand(innerTemplate.getQualifiedName()))
             addInnerTemplate(innerTemplate);
@@ -623,9 +622,28 @@ public class ParserAssembler implements LocaleListener
         parserTask.setPriority(ParserTask.Priority.list.ordinal());
         String library = queryEvaluator.getLibrayName(this);
         QualifiedName qualifiedCallName = new QualifiedName(library, qualifiedQueryName.getName());
-        ParameterOperand<AxiomTermList> parameterOperand = new ParameterOperand<AxiomTermList>(qualifiedCallName, operandParamList, queryEvaluator);
+        ParameterOperand<AxiomTermList> parameterOperand = new ParameterOperand<AxiomTermList>(qualifiedCallName, templateParamList, queryEvaluator);
         return parameterOperand;
     }
+
+    public Operand getQueryOperand(
+            String queryName, 
+            QualifiedName qualifiedQueryName,
+            Template parameterTemplate,
+            Template innerTemplate)
+    {
+        if ((innerTemplate != null) && !operandMap.hasOperand(innerTemplate.getQualifiedName()))
+            addInnerTemplate(innerTemplate);
+        QueryEvaluator queryEvaluator = 
+             new QueryEvaluator(queryName, qualifiedQueryName, innerTemplate);
+        ParserTask parserTask = parserTaskQueue.addPending(queryEvaluator, scope);
+        parserTask.setPriority(ParserTask.Priority.list.ordinal());
+        String library = queryEvaluator.getLibrayName(this);
+        QualifiedName qualifiedCallName = new QualifiedName(library, qualifiedQueryName.getName());
+        ParameterOperand<AxiomTermList> parameterOperand = new ParameterOperand<AxiomTermList>(qualifiedCallName, parameterTemplate, queryEvaluator);
+        return parameterOperand;
+    }
+
 
 	/**
 	 * Returns axiom provider specified by resource name
@@ -737,5 +755,5 @@ public class ParserAssembler implements LocaleListener
         return operand;
 
     }
-    
+
 }

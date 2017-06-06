@@ -83,6 +83,7 @@ public class LoopEvaluator extends BooleanOperand implements DebugTarget
 			}
 			// Only backup local changes
 			template.backup(true);
+			/*
 			if ((context == null) && (++count == 10))
 			{
 				long now = new Date().getTime();
@@ -93,6 +94,7 @@ public class LoopEvaluator extends BooleanOperand implements DebugTarget
 				}
 				count = 0;
 			}
+			*/
 		}
 	}
 

@@ -81,7 +81,7 @@ public class Variable extends DelegateOperand
 	public void assign(Term term) 
 	{
 	    setValue(term.getValue());
-	    id = term.getId();
+//	    id = term.getId();
 	}
 
 	/**

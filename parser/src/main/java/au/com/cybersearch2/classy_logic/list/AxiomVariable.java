@@ -76,12 +76,9 @@ public class AxiomVariable implements ListItemDelegate
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate#unifyTerm(au.com.cybersearch2.classy_logic.interfaces.Term, int)
      */
     @Override
-    public int unifyTerm(Term otherTerm, int id)
+    public Operand getOperand()
     {
-        Operand indexExpression = axiomListSpec.getItemExpression();
-        if (indexExpression != null)
-            return indexExpression.unifyTerm(otherTerm, id);
-        return 0;
+        return axiomListSpec.getItemExpression();
     }
     
     /**

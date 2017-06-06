@@ -18,18 +18,14 @@ package au.com.cybersearch2.classy_logic.list;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.failBecauseExceptionWasNotThrown;
 
-import java.math.BigDecimal;
-
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.TestIntegerOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.operator.DelegateType;
 
 /**
  * ListOperandTest
@@ -85,6 +81,12 @@ public class ArrayItemListTest
         public String getSuffix()
         {
             return suffix;
+        }
+        
+        @Override
+        public void setSuffix(String suffix)
+        {
+            this.suffix = suffix;
         }
         
         /**

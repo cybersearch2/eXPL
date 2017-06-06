@@ -26,12 +26,13 @@ import java.util.TreeSet;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
-import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.Token;
+import au.com.cybersearch2.classy_logic.pattern.Template;
 
 /**
  * ParserContext
@@ -78,6 +79,8 @@ public class ParserContext
     Token itemToken;
     /** Store for qualified names which employ reference counting eg. lists */
     Map<QualifiedName, QualifiedName> qnameMap; 
+    /** Name of current outer template - provided to allow ad hoc inner template creation */
+    QualifiedName outerTemplate;
 
     /**
      * Contruct ParserContext with empty source document path
@@ -140,6 +143,28 @@ public class ParserContext
     public SourceMarker getSourceMarker()
     {
         return sourceMarker;
+    }
+
+    /**
+     * @return the outerTemplate
+     */
+    public QualifiedName getTemplateName()
+    {
+        if (outerTemplate == null)
+        {
+            outerTemplate = new QualifiedTemplateName(scope.getAlias(), "scope");
+            // Do not set context name for scope template
+            parserAssembler.getTemplateAssembler().createTemplate(outerTemplate, true); 
+        }
+        return outerTemplate;
+    }
+
+    /**
+     * @param outerTemplate the outerTemplate to set
+     */
+    public void setTemplateName(QualifiedName outerTemplate)
+    {
+        this.outerTemplate = outerTemplate;
     }
 
     /**
@@ -424,15 +449,19 @@ public class ParserContext
         return addSourceItem(builder.toString());
     }
 
-    public SourceItem addCalcQuery(QualifiedName qname, List<OperandParam> operandParamList)
+    public SourceItem addCalcQuery(QualifiedName qname, Template parameterTemplate)
     {
         StringBuilder builder = new StringBuilder("<< ");
         builder.append(qname.toString()).append('(');
-        if ((operandParamList != null) && (operandParamList.size() > 0))
+        if (parameterTemplate != null)
         {
-            builder.append(getOperandText(operandParamList.get(0)));
-            if (operandParamList.size() > 1)
-                builder.append(" ... ").append(getOperandText(operandParamList.get(operandParamList.size() - 1)));
+            int count = parameterTemplate.getTermCount();
+            if ((parameterTemplate != null) && (count > 0))
+            {
+                builder.append(parameterTemplate.getTermByIndex(0));
+                if (count > 1)
+                    builder.append(" ... ").append(parameterTemplate.getTermByIndex(count - 1));
+            }
         }
         builder.append(')');
         return addSourceItem(builder.toString());
@@ -448,10 +477,5 @@ public class ParserContext
         sourceMarker.setSourceDocumentId(sourceDocumentId);
         sourceMarkerSet.add(sourceMarker);
         isSourceItemPending = true;
-    }
-
-    protected String getOperandText(OperandParam param)
-    {
-       return param.getName().isEmpty() ? param.getOperand().toString() : param.getName(); 
     }
 }

@@ -20,10 +20,10 @@ import java.util.Collections;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
-import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * ParameterList
@@ -38,8 +38,9 @@ public class ParameterList<R>
     /** Performs function using parameters collected after query evaluation and returns value */
     protected CallEvaluator<R> callEvaluator;
     /** List of Operand arguments or null for no arguments */
-    protected List<OperandParam> operandParamList;
- 
+    protected List<Template> templateParamList;
+    Template parametersTemplate;
+    
     static
     {
         EMPTY_TERM_LIST = Collections.emptyList();
@@ -48,22 +49,34 @@ public class ParameterList<R>
     /**
      * Construct a ParameterList object which uses parameters in an an Expression operand 
      * and a supplied evaluator object to create it's value
-     * @param operandParamList List of Operand arguments or null for no arguments
+     * @param templateParamList List of Operand arguments or null for no arguments
      * @param callEvaluator Executes function using parameters and returns object of generic type
      */
-    public ParameterList(List<OperandParam> operandParamList, CallEvaluator<R> callEvaluator) 
+    public ParameterList(List<Template> templateParamList, CallEvaluator<R> callEvaluator) 
     {
-        this.operandParamList = operandParamList;
+        this.templateParamList = templateParamList;
         this.callEvaluator = callEvaluator;
     }
 
     /**
+     * Construct a ParameterList object which uses parameters in an an Expression operand 
+     * and a supplied evaluator object to create it's value
+     * @param parametersTemplate Operand arguments packaged in an inner template or null for no arguments
+     * @param callEvaluator Executes function using parameters and returns object of generic type
+     */
+    public ParameterList(Template parametersTemplate, CallEvaluator<R> callEvaluator) 
+    {
+        this.parametersTemplate = parametersTemplate;
+        this.callEvaluator = callEvaluator;
+    }
+    
+    /**
      * Returns list of parameters
      * @return List of OperandParam objects
      */
-    public List<OperandParam> getOperandParamList()
+    public int size()
     {
-        return operandParamList;
+        return parametersTemplate != null ? 1 : templateParamList.size();
     }
 
     /**
@@ -72,32 +85,41 @@ public class ParameterList<R>
      */
     public R evaluate(int id)
     {
-        if ((operandParamList == null) || operandParamList.isEmpty())
-            return callEvaluator.evaluate(EMPTY_TERM_LIST);
-        final List<Term> argumentList = new ArrayList<Term>(operandParamList.size());
-        if ((operandParamList != null) && !operandParamList.isEmpty())
-        {   
-            for (OperandParam operandParam: operandParamList)
-            {
-                Operand operand = operandParam.getOperand();
-                if (operand.isEmpty())
-                    operand.evaluate(id);
-                argumentList.add(operandParam);
+        if (parametersTemplate== null)
+        {
+            if ((templateParamList == null) || templateParamList.isEmpty())
+                return callEvaluator.evaluate(EMPTY_TERM_LIST);
+        }
+        List<Term> argumentList = null;
+        if (templateParamList != null)
+        {
+            argumentList = new ArrayList<Term>(templateParamList.size());
+            if ((templateParamList != null) && !templateParamList.isEmpty())
+            {   
+                for (Template template: templateParamList)
+                {
+                    template.evaluate(null);
+                    argumentList.add(new Parameter(Term.ANONYMOUS, template.toArray()));
+                }
             }
+        }
+        else
+        {
+            parametersTemplate.evaluate(null);
+            argumentList = parametersTemplate.toArray();
         }
         return callEvaluator.evaluate(argumentList);
     }
 
     public void backup(int id)
     {
-        if ((operandParamList != null) && !operandParamList.isEmpty())
+        if ((templateParamList != null) && !templateParamList.isEmpty())
         {   
-            for (OperandParam operandParam: operandParamList)
-            {
-                Operand operand = operandParam.getOperand();
-                operand.backup(id);
-            }
+            for (Template template: templateParamList)
+                template.backup(id != 0);
         }
+        else if (parametersTemplate != null)
+            parametersTemplate.backup(id != 0);
     }
 
     public void setExecutionContext(ExecutionContext context)

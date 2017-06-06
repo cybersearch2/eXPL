@@ -125,7 +125,7 @@ public class AgeDiscrimination2Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo(">> perfect_match1.age_rating (26,23) (26,25)");
+        assertThat(sourceItem.toString()).isEqualTo(">> perfect_match2.age_rating (26,23) (26,25)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

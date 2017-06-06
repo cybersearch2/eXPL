@@ -73,7 +73,7 @@ public class StringOperand  extends ExpressionOperand<String> implements LocaleL
 	public void assign(Term term) 
 	{
 		setValue(term.getValue().toString());
-		id = term.getId();
+		//id = term.getId();
 	}
 
     @Override

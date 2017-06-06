@@ -235,7 +235,8 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
         {
             // All parameters are Parameters with names set by caller and possibly empty for match by position.
             String argName = argument.getName();
-            if (argName.isEmpty())
+            List<String> termNames = template.getArchetype().getTermNameList();
+            if (argName.isEmpty() || !termNames.contains(argName))
             {
                 if (index == template.getTermCount())
                     throw new ExpressionException("Unnamed argument at position " + index + " out of bounds");
@@ -265,7 +266,9 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
             if (axiom.getTermCount() > 0)
             {
                 // No backup, so reset before unification
-                innerTemplate.reset();
+                //innerTemplate.reset();
+                for (int i = 0; i < innerTemplate.getTermCount(); ++i)
+                    innerTemplate.getTermByIndex(i).backup(0);
                 if (innerTemplate.unify(axiom, solution))
                 {
                     if (innerTemplate.evaluate(context) == EvaluationStatus.COMPLETE);

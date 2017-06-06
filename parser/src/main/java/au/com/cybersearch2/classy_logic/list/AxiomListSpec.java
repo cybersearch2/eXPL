@@ -156,9 +156,15 @@ public class AxiomListSpec implements ListItemSpec
     @Override
     public Operand getItemExpression()
     {
-        return arrayData != null ? indexData.getItemExpression() : null;
+        return indexData.getItemExpression();
     }
 
+    @Override
+    public void setSuffix(String suffix)
+    {
+        indexData.setSuffix(suffix);
+    }
+    
     /**
      * getSuffix
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getSuffix()

@@ -104,6 +104,12 @@ public class ListVariableTest
             return suffix;
         }
         
+        @Override
+        public void setSuffix(String suffix)
+        {
+            this.suffix = suffix;
+        }
+
         /**
          * Returns variable name given list name and suffix
          * @param listName

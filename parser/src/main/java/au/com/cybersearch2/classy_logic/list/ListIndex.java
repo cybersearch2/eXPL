@@ -42,6 +42,11 @@ public class ListIndex extends ArrayIndex
     {
         super(qname, indexExpression);
     }
+ 
+    public String getSelection()
+    {
+        return selection;
+    }
     
     @Override
     public void assemble(ItemList<?> itemList)

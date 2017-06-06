@@ -108,7 +108,7 @@ public class AgeDiscrimination3Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("is_age_weight_fact&&perfect_match2_run_once (29,22) (29,42)");
+        assertThat(sourceItem.toString()).isEqualTo("is_age_weight_fact&&perfect_match3_run_once (29,22) (29,42)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -132,7 +132,7 @@ public class AgeDiscrimination3Test
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo(">> perfect_match1.age_rating (28,22) (28,24)");
+        assertThat(sourceItem.toString()).isEqualTo(">> perfect_match2.age_rating (28,22) (28,24)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

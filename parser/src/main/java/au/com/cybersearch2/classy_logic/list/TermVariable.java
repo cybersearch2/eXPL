@@ -59,6 +59,7 @@ public class TermVariable extends Variable
     public EvaluationStatus evaluate(int id)
     {
         indexExpression.evaluate(id);
+        this.id = id;
         boolean isIntegerIndex = indexExpression.getValueClass() == Long.class;
         Term term = itemList.getAxiom().getTermByIndex(0);
         if (term.getValueClass() == AxiomList.class)
@@ -97,5 +98,11 @@ public class TermVariable extends Variable
         else
             throw new ExpressionException("\"" + term.getName() + "\" cannot be indexed by " + indexExpression.toString());
         return EvaluationStatus.COMPLETE;
+    }
+    
+    @Override
+    public boolean backup(int id)
+    {
+        return super.backup(id);
     }
 }

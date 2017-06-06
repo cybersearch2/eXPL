@@ -113,6 +113,12 @@ public class AxiomListTest
             return false;
         }
 
+        @Override
+        public void setSuffix(String suffix)
+        {
+            this.suffix = suffix;
+        }
+
      }
     
 	private static final String NAME = "ListOperandName";

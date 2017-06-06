@@ -16,7 +16,6 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -41,8 +40,6 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     protected ParameterList<AxiomList> parameterList;
     /** Axiom listener to notify when an axiom list is created/assigned */
     protected AxiomListListener axiomListListener;
-    /** Root of Operand tree for unification */
-    protected Operand paramsTreeRoot;
     /** Defines operations that an Operand performs with other operands. To be set by super. */
     protected AxiomOperator operator;
     
@@ -100,18 +97,15 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
         this.axiomKey = axiomKey;
         this.parameterList = parameterList;
         this.axiomListListener = axiomListListener;
-        if ((parameterList.getOperandParamList() != null) && 
-                !parameterList.getOperandParamList().isEmpty())
-            paramsTreeRoot = OperandParam.buildOperandTree(parameterList.getOperandParamList());
         init();
     }
-/*
+    /*
     @Override
     public void setValue(Object value)
     {
         super.setValue(value);
     }
-    
+        
     @Override
     public int unifyTerm(Term otherTerm, int id)
     {
@@ -137,6 +131,9 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
         else if (parameterList != null)
         {   // Perform static intialisation to a list of axioms
             setValue(parameterList.evaluate(id));
+            // Do not set id if list is in global scope as backup will clear the value
+            if (!qname.getTemplate().isEmpty())
+                this.id = id;
             // Do not set id as the change is permanent unless
             // a subsequent evaluation overrides this initialisation
             axiomListListener.addAxiomList(qname, getValue());
@@ -157,8 +154,8 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     @Override
     public boolean backup(int id)
     {
-        if (paramsTreeRoot != null)
-            paramsTreeRoot.backup(id);
+        if (parameterList != null)
+            parameterList.backup(id);
         return super.backup(id);
     }
     
@@ -176,16 +173,6 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     }
 
     /**
-     * Returns operand tree fur parameter unification     
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperand()
-     */
-    @Override
-    public Operand getRightOperand() 
-    {
-        return paramsTreeRoot;
-    }
- 
-    /**
      * Override toString() to incorporate intialization list
      * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
      */
@@ -196,7 +183,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
         {
             StringBuilder builder = new StringBuilder("list<axiom> ");
             builder.append(qname.toString());
-            int length = empty ? parameterList.getOperandParamList().size() : ((AxiomList)getValue()).getLength();
+            int length = empty ? parameterList.size() : ((AxiomList)getValue()).getLength();
             builder.append('[').append(Integer.toString(length)).append(']');
             return builder.toString();
         }

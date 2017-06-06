@@ -126,7 +126,7 @@ public class LogicQuery implements SolutionFinder
 	            template.getParserTask().run();
 	            emptyTemplate = false;
 	        }
-			if (template.unify(axiom, solution) &&
+			if (unify(axiom, template, solution) && //template.unify(axiom, solution) &&
 				completeSolution(solution, template, context))
 				return true;
 			template.backup(true);
@@ -134,6 +134,19 @@ public class LogicQuery implements SolutionFinder
 		queryStatus = QueryStatus.start;
 		return false;
 	}
+
+	boolean unify(Axiom axiom, Template template, Solution solution)
+    {   // Unify enclosed templates which will participate in ensuing evaluation
+	    boolean success = template.unify(axiom, solution);
+        Template chainTemplate = template.getNext();
+        while (chainTemplate != null)
+        {
+            if (!chainTemplate.unify(axiom , solution))
+                success = false;
+            chainTemplate = chainTemplate.getNext();
+        }
+        return success;
+    }
 
     /**
      * Set axiom listener to receive each solution as it is produced

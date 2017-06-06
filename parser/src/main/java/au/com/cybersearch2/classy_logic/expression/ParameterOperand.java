@@ -19,14 +19,13 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.Template;
 
 /**
  * ParameterOperand
@@ -38,8 +37,7 @@ public class ParameterOperand<R> extends Variable implements DebugTarget
 {
     /** Collects parameters from an Operand tree and passes them to a supplied function object */
     protected ParameterList<R> parameterList;
-    /** Root of Operand tree for unification */
-    protected Operand paramsTreeRoot;
+    protected String listInfo;
 
     /**
      * Construct a ParameterOperand object
@@ -47,13 +45,35 @@ public class ParameterOperand<R> extends Variable implements DebugTarget
      * @param operandParamList List of Operand arguments or null for no arguments
      * @param callEvaluator Executes function using parameters and returns object of generic type
      */
-    public ParameterOperand(QualifiedName qname, List<OperandParam> operandParamList, CallEvaluator<R> callEvaluator) 
+    public ParameterOperand(QualifiedName qname, List<Template> templateParamList, CallEvaluator<R> callEvaluator) 
     {
         super(qname);
-        parameterList = new ParameterList<R>(operandParamList, callEvaluator);
-        if ((operandParamList != null) && 
-            !operandParamList.isEmpty())
-            paramsTreeRoot = OperandParam.buildOperandTree(operandParamList);
+        parameterList = new ParameterList<R>(templateParamList, callEvaluator);
+    }
+
+    /**
+     * Construct a ParameterOperand object
+     * @param qname Qualified name
+     * @param parameterTemplate Operand arguments packaged in an inner template or null for no arguments
+     * @param callEvaluator Executes function using parameters and returns object of generic type
+     */
+    public ParameterOperand(QualifiedName qname, Template parameterTemplate, CallEvaluator<R> callEvaluator) 
+    {
+        super(qname);
+        parameterList = new ParameterList<R>(parameterTemplate, callEvaluator);
+        if (parameterTemplate != null)
+        {
+            StringBuilder builder = new StringBuilder();
+            Term op1 = parameterTemplate.getTermByIndex(0);
+            builder.append(op1.toString());
+            int count = parameterTemplate.getTermCount();
+            if (count > 1)
+            {
+                Term op2 = parameterTemplate.getTermByIndex(count - 1);
+                builder.append(" ... ").append(op2.toString());
+            }
+            listInfo = builder.toString();
+        }
     }
 
     /**
@@ -89,21 +109,10 @@ public class ParameterOperand<R> extends Variable implements DebugTarget
     @Override
     public boolean backup(int id)
     {
-        if (paramsTreeRoot != null)
-            paramsTreeRoot.backup(id);
+        parameterList.backup(id);
         return super.backup(id);
     }
     
-    /**
-     * Returns operand tree fur parameter unification     
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperand()
-     */
-    @Override
-    public Operand getRightOperand() 
-    {
-        return paramsTreeRoot;
-    }
-
     /**
      * @see au.com.cybersearch2.classy_logic.expression.Variable#toString()
      */
@@ -114,14 +123,8 @@ public class ParameterOperand<R> extends Variable implements DebugTarget
         {
             StringBuilder builder = new StringBuilder(qname.toString());
             builder.append('(');
-            if (paramsTreeRoot != null)
-            {
-                List<OperandParam> opParamList = parameterList.getOperandParamList();
-                OperandParam op1 = opParamList.get(0);
-                builder.append(getOperandText(op1));
-                if (opParamList.size() > 1)
-                    builder.append(" ... ").append(getOperandText(opParamList.get(opParamList.size() - 1)));
-            }
+            if (listInfo != null)
+                builder.append(listInfo);
             builder.append(')');
             return builder.toString();
         }
@@ -133,11 +136,4 @@ public class ParameterOperand<R> extends Variable implements DebugTarget
     {
         parameterList.setExecutionContext(context);
     }
-    
-    protected String getOperandText(OperandParam param)
-    {
-       return param.getName().isEmpty() ? param.getOperand().toString() : param.getName(); 
-    }
-
-
 }

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -37,6 +38,7 @@ import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
 import au.com.cybersearch2.classy_logic.expression.Orientation;
+import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.list.ListItemVariable;
 import au.com.cybersearch2.classy_logic.list.ArrayIndex;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
@@ -59,7 +61,6 @@ import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
-import au.com.cybersearch2.classy_logic.helper.OperandParam;
 
 /** Token Manager. */
 public class QueryParserTokenManager implements QueryParserConstants

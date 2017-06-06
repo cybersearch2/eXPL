@@ -19,7 +19,6 @@ import java.util.List;
 
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-import au.com.cybersearch2.classy_logic.helper.OperandParam;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -28,6 +27,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.operator.AxiomParameterOperator;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.GenericParameter;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -47,6 +47,7 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     protected QualifiedName axiomName;
     /** Root of Operand tree for unification */
     protected Operand paramsTreeRoot;
+    Template initializeTemplate;
     /** Flag set true if operand not visible in solution */
     protected boolean isPrivate;
     /** Defines operations that an Operand performs with other operands. To be set by super. */
@@ -60,7 +61,8 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
      * @param axiomKey Qualified name of backing axiom list
      * @param initializeList List of parameters to initialize this Operand
      */
-    public AxiomParameterOperand(QualifiedName qname, QualifiedName axiomName, List<OperandParam> initializeList)
+    /*
+    public AxiomParameterOperand(QualifiedName qname, QualifiedName axiomName, List<Template> initializeList)
     {
         super(qname.getName());
         this.qname = qname;
@@ -68,7 +70,27 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
         if ((initializeList != null) && !initializeList.isEmpty())
         {
             parameterList = new ParameterList<AxiomTermList>(initializeList, axiomGenerator());
-            paramsTreeRoot = OperandParam.buildOperandTree(initializeList);
+            //paramsTreeRoot = OperandParam.buildOperandTree(initializeList);
+        }
+        operator = new AxiomParameterOperator();
+        index = -1;
+    }
+*/
+    /**
+     * Construct an AxiomParameterOperand object
+     * @param qname Qualified name of operand
+     * @param axiomKey Qualified name of backing axiom list
+     * @param initializeTemplate Contains arameters to initialize this Operand
+     */
+    public AxiomParameterOperand(QualifiedName qname, QualifiedName axiomName, Template initializeTemplate)
+    {
+        super(qname.getName());
+        this.qname = qname;
+        this.axiomName = axiomName;
+        this.initializeTemplate = initializeTemplate;
+        if ((initializeTemplate != null))
+        {
+            parameterList = new ParameterList<AxiomTermList>(initializeTemplate, axiomGenerator());
         }
         operator = new AxiomParameterOperator();
         index = -1;
@@ -111,6 +133,8 @@ public class AxiomParameterOperand extends GenericParameter<AxiomTermList> imple
     {
         if (paramsTreeRoot != null)
             paramsTreeRoot.backup(id);
+        else if (initializeTemplate != null)
+            initializeTemplate.backup(id != 0);
         return super.backup(id);
     }
     

@@ -338,8 +338,10 @@ public class Template extends TermList<Operand>
 		            debugTarget.setExecutionContext(executionContext);
 			for (Operand term: termList)
 			{
-			    if (executionContext != null)
-			        executionContext.beforeEvaluate(term);
+			    if (!term.isEmpty() && (term.getId() != id))
+			        continue;
+                if (executionContext != null)
+                    executionContext.beforeEvaluate(term);
 				EvaluationStatus evaluationStatus = term.evaluate(id);
 				if (evaluationStatus != EvaluationStatus.COMPLETE)
 					return evaluationStatus;
@@ -443,7 +445,9 @@ public class Template extends TermList<Operand>
 		{
 		    Operand operand = (Operand)term;
             if (!operand.isEmpty() && !operand.isPrivate()  && 
-			    (isReplicate || qname.inSameSpace(operand.getQualifiedName())))
+			    (isReplicate || 
+			     qname.inSameSpace(operand.getQualifiedName()) ||
+			     ((contextName != qname) && contextName.inSameSpace(operand.getQualifiedName()))))
 			{
 				Parameter param = new Parameter(operand.getName(), operand.getValue());
 				axiom.addTerm(param);
@@ -470,6 +474,17 @@ public class Template extends TermList<Operand>
 		}
 		return axiom;
 	}
+
+    public List<Term> toArray()
+    {
+        List<Term> arrayList  = new ArrayList<Term>();
+        for (Operand operand: termList)
+        {
+            Parameter param = new Parameter(operand.getName(), operand.getValue());
+            arrayList.add(param);
+        }
+        return arrayList;
+    }
 
 	/**
 	 * Returns an OperandWalker object for navigating this template
@@ -767,4 +782,5 @@ public class Template extends TermList<Operand>
     {
         archetype = new TemplateArchetype(qname);
     }
+
 }

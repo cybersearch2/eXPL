@@ -66,10 +66,21 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
      */
     public ListItemVariable(QualifiedName qname, ListItemSpec indexData)
     {
-        super(qname, Term.ANONYMOUS);
-        this.indexData = indexData;
+        this(Term.ANONYMOUS, qname, indexData);
     }
 
+    /**
+     * Create ListItemVariable object which uses a single index to select values
+     * @param name Term name
+     * @param qname Unique operand name
+     * @param indexData  Index information for value selection
+     */
+    public ListItemVariable(String name, QualifiedName qname, ListItemSpec indexData)
+    {
+        super(qname, name);
+        this.indexData = indexData;
+    }
+    
     /**
      * Create ListItemVariable object for 2 dimensional list access
      * @param qname Unique operand name
@@ -79,11 +90,25 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
     {
         // For 2-dimension case, the first dimension selects an item in the list
         // and the second dimension selects a term within the item
-        this(qname, indexDataArray.length == 1 ? indexDataArray[0] : indexDataArray[1]);
+        this(qname, indexDataArray[indexDataArray.length - 1]);
         if (indexDataArray.length > 1)
             arrayData = indexDataArray[0];
     }
 
+    /**
+     * Create ListItemVariable object for 2 dimensional list access
+     * @param qname Unique operand name
+     * @param indexDataArray  Index information for value selection 
+     */
+    public ListItemVariable(String name, QualifiedName qname, ListItemSpec[] indexDataArray)
+    {
+        // For 2-dimension case, the first dimension selects an item in the list
+        // and the second dimension selects a term within the item
+        this(name, qname,  indexDataArray[indexDataArray.length - 1]);
+        if (indexDataArray.length > 1)
+            arrayData = indexDataArray[0];
+    }
+    
     /**
      * Run parser task after creation of all lists so they can be found by name
      * @see au.com.cybersearch2.classy_logic.interfaces.ParserRunner#run(au.com.cybersearch2.classy_logic.compile.ParserAssembler)
@@ -106,7 +131,8 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
             {   // Unwrap axiom term list to select single term result
                 // The value is evaluated as an expression, bypassing the item list altogether
                 expression = assembleQueryTerm(axiomTermList);
-                setName(indexData.getSuffix());
+                if (name.isEmpty())
+                    setName(indexData.getSuffix());
                 if (sourceItem != null)
                     sourceItem.setInformation(expression.toString());
                 setNonDelegate(listName);
@@ -153,7 +179,8 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
             delegate = itemVariableInstance(itemList);
         // Set term name of this variable now at last opportunity. Append the suffix of the index used to select the value.
         // The suffix is formed using available data, and may be a name required by an index operand to achieve unification
-        setName(indexData.getSuffix());
+        if (name.isEmpty())
+            setName(indexData.getSuffix());
         if (sourceItem != null)
             sourceItem.setInformation(toString());
     }
@@ -168,9 +195,18 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
     @Override
     public int unifyTerm(Term otherTerm, int id)
     {
-        return delegate.unifyTerm(otherTerm, id);
+        return 0; //delegate.unifyTerm(otherTerm, id);
     }
 
+    /**
+     * Returns left child of Operand
+     * @return Operand object or null if there is no child
+     */
+    public Operand getLeftOperand()
+    {
+        return delegate != null ? delegate.getOperand() : null;
+    }
+    
     /**
      * Evaluate to complete list binding, if using a list operand, and resolve list parameters
      * @param id Identity of caller, which must be provided for backup()
@@ -219,7 +255,7 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
     public void assign(Term term) 
     {
         setValue(term);
-        id = term.getId();
+        //id = term.getId();
     }
 
     /**
@@ -388,9 +424,9 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
             }
 
             @Override
-            public int unifyTerm(Term otherTerm, int id)
+            public Operand getOperand()
             {
-                return 0;
+                return null;
             }
 
             @Override

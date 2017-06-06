@@ -31,7 +31,7 @@ public interface ListItemDelegate
      * The value of this variable is not set directly by unification.
      * @see au.com.cybersearch2.classy_logic.terms.Parameter#unifyTerm(au.com.cybersearch2.classy_logic.interfaces.Term, int)
      */
-    int unifyTerm(Term otherTerm, int id);
+    Operand getOperand();
 
     /**
      * Evaluate to complete list binding, if using a list operand, and resolve list parameters

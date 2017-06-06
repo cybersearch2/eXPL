@@ -21,7 +21,7 @@ local translate(lexicon);
 calc charge_plus_gst
 (
   currency amount,
-  << tax_rate(scope^region) >> (percent /= 100),
+  << tax_rate(country = scope^region) >> (percent /= 100),
   currency total = amount * (1.0 + percent)
 );
 
