@@ -80,6 +80,8 @@ public class TemplateTest
 		assertThat(id).isEqualTo(Template.referenceCount.get());
 		verify(templateArchetype, times(2)).addTerm(isA(TermMetaData.class));
 		verify(templateArchetype, times(0)).clearMutable();
+        when(parameter1.isEmpty()).thenReturn(true);
+        when(parameter2.isEmpty()).thenReturn(true);
 		underTest.evaluate(mock(ExecutionContext.class));
 		verify(parameter1).evaluate(id);
 		verify(parameter2).evaluate(id);
@@ -100,6 +102,8 @@ public class TemplateTest
         assertThat(id).isEqualTo(Template.referenceCount.get());
         verify(templateArchetype, times(2)).addTerm(isA(TermMetaData.class));
         verify(templateArchetype, times(0)).clearMutable();
+        when(parameter1.isEmpty()).thenReturn(true);
+        when(parameter2.isEmpty()).thenReturn(true);
         underTest.evaluate(mock(ExecutionContext.class));
         verify(parameter1).evaluate(id);
         verify(parameter2).evaluate(id);
@@ -114,6 +118,8 @@ public class TemplateTest
         assertThat(underTest.getName()).isEqualTo(NAME);
         assertThat(underTest.getKey()).isEqualTo(NAME);
         assertThat(id).isEqualTo(Template.referenceCount.get());
+        when(parameter1.isEmpty()).thenReturn(true);
+        when(parameter2.isEmpty()).thenReturn(true);
         underTest.evaluate(mock(ExecutionContext.class));
         verify(parameter1).evaluate(id);
         verify(parameter2).evaluate(id);
@@ -131,6 +137,8 @@ public class TemplateTest
         assertThat(underTest.getName()).isEqualTo(NAME);
         assertThat(underTest.getKey()).isEqualTo(KEY);
         assertThat(id).isEqualTo(Template.referenceCount.get());
+        when(parameter1.isEmpty()).thenReturn(true);
+        when(parameter2.isEmpty()).thenReturn(true);
         underTest.evaluate(mock(ExecutionContext.class));
         verify(parameter1).evaluate(id);
         verify(parameter2).evaluate(id);
