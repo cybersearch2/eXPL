@@ -17,7 +17,8 @@ import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.expression.ParameterOperand;
+import au.com.cybersearch2.classy_logic.expression.CallOperand;
+import au.com.cybersearch2.classy_logic.expression.TermOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -38,6 +39,7 @@ import au.com.cybersearch2.classy_logic.list.ListType;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Template;
+import au.com.cybersearch2.classy_logic.query.QueryEvaluator;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 
@@ -423,6 +425,20 @@ public class ParserAssembler implements LocaleListener
 			localeListener.onScopeChange(scope);
 		if (this.scope != scope)
 		    scope.getParserAssembler().onScopeChange(scope);
+        Template scopeTemplate = templateAssembler.getTemplate(new QualifiedTemplateName(scope.getAlias(), "scope"));
+        if (scopeTemplate != null)
+        {
+            scopeTemplate.backup(true);
+            while ((scopeTemplate = scopeTemplate.getNext()) != null)
+                scopeTemplate.evaluate(null);
+        }
+        scopeTemplate = this.scope.getGlobalTemplateAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, "scope"));
+        if (scopeTemplate != null)
+        {
+            scopeTemplate.backup(true);
+            while ((scopeTemplate = scopeTemplate.getNext()) != null)
+                scopeTemplate.evaluate(null);
+        }
 	}
 
 	/**
@@ -601,29 +617,7 @@ public class ParserAssembler implements LocaleListener
         CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
         if (callEvaluator == null)
             throw new ExpressionException("Function \"" + name + "\" not supported");
-        return new ParameterOperand(QualifiedName.parseName(callName, qname), parametersTemplate, callEvaluator);
-    }
-
-	/**
-	 * Returns operand which invokes a query call.
-	 * @param qualifiedQueryName Qualified query name - can be qualified by the name of a scope
-     * @param operandParamList List of Operand arguments null for no arguments
-	 * @param innerTemplate Optional template to recieve query results
-	 * @return CallOperand object containing a QueryEvaluator object
-	 * @see QueryEvaluator
-	 */
-    public Operand getQueryOperand(String queryName, QualifiedName qualifiedQueryName, List<Template> templateParamList, Template innerTemplate)
-    {
-        if ((innerTemplate != null) && !operandMap.hasOperand(innerTemplate.getQualifiedName()))
-            addInnerTemplate(innerTemplate);
-        QueryEvaluator queryEvaluator = 
-             new QueryEvaluator(queryName, qualifiedQueryName, innerTemplate);
-        ParserTask parserTask = parserTaskQueue.addPending(queryEvaluator, scope);
-        parserTask.setPriority(ParserTask.Priority.list.ordinal());
-        String library = queryEvaluator.getLibrayName(this);
-        QualifiedName qualifiedCallName = new QualifiedName(library, qualifiedQueryName.getName());
-        ParameterOperand<AxiomTermList> parameterOperand = new ParameterOperand<AxiomTermList>(qualifiedCallName, templateParamList, queryEvaluator);
-        return parameterOperand;
+        return new CallOperand(QualifiedName.parseName(callName, qname), parametersTemplate, callEvaluator);
     }
 
     public Operand getQueryOperand(
@@ -640,8 +634,8 @@ public class ParserAssembler implements LocaleListener
         parserTask.setPriority(ParserTask.Priority.list.ordinal());
         String library = queryEvaluator.getLibrayName(this);
         QualifiedName qualifiedCallName = new QualifiedName(library, qualifiedQueryName.getName());
-        ParameterOperand<AxiomTermList> parameterOperand = new ParameterOperand<AxiomTermList>(qualifiedCallName, parameterTemplate, queryEvaluator);
-        return parameterOperand;
+        AxiomTermListEvaluator evaluator = new AxiomTermListEvaluator(qualifiedCallName, queryEvaluator, parameterTemplate);
+         return new TermOperand(evaluator);
     }
 
 

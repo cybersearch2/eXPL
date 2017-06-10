@@ -20,8 +20,8 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.StringOperator;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * StringOperand
@@ -65,15 +65,14 @@ public class StringOperand  extends ExpressionOperand<String> implements LocaleL
         init();
 	}
 
-	/**
-     * Assign a value and id to this Term from another term 
-     * @param term Term containing non-null value and id to set
-	 */
-	@Override
-	public void assign(Term term) 
+    /**
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
+     */
+    @Override
+    public void assign(Parameter parameter)
 	{
-		setValue(term.getValue().toString());
-		//id = term.getId();
+		setValue(parameter.getValue().toString());
 	}
 
     @Override

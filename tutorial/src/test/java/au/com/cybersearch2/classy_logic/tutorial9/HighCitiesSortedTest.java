@@ -66,7 +66,7 @@ public class HighCitiesSortedTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> high_cities[1] (14,1) (14,22)");
+        assertThat(sourceItem.toString()).isEqualTo("list<axiom> high_cities[0] (14,1) (14,22)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

@@ -15,14 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.compile.AxiomListEvaluator;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.operator.AxiomOperator;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * AxiomOperand
@@ -36,15 +37,15 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
 {
     /** Axiom key to use when an empty list is created */
     protected QualifiedName axiomKey;
-    /** Parameter container which creates an AxiomList object on evaluation */
-    protected ParameterList<AxiomList> parameterList;
+    /** Creates an AxiomList object on evaluation */
+    protected AxiomListEvaluator axiomListEvaluator;
     /** Axiom listener to notify when an axiom list is created/assigned */
     protected AxiomListListener axiomListListener;
     /** Defines operations that an Operand performs with other operands. To be set by super. */
     protected AxiomOperator operator;
     
     /**
-     * Axiom Variable
+     * Axiom list variable
      * @param qname Qualified name
      * @param axiomKey Axiom key to use when an empty list is created
      * @param axiomListListener Axiom listener to notify when an axiom list is created/assigned
@@ -58,7 +59,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     }
 
     /**
-     * Axiom Literal
+     * Axiom list literal
      * @param qname Qualified name
      * @param value Axiom list literal value
      */
@@ -70,48 +71,21 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     }
 
     /**
-     * Axiom Variable with Expression operand to evaluate value
-     * @param axiomKey Axiom key to use when an empty list is created
-     * @param qname Qualified name
-     * @param expression Operand which evaluates value
-     * @param axiomListListener Axiom listener to notify when an axiom list is created
-     */
-    public AxiomOperand(QualifiedName qname, QualifiedName axiomKey, Operand expression, AxiomListListener axiomListListener) 
-    {
-        super(qname, expression);
-        this.axiomKey = axiomKey;
-        this.axiomListListener = axiomListListener;
-        init();
-    }
-
-    /**
      * Axiom List
      * @param qname Qualified name
      * @param axiomKey Axiom key to use when an empty list is created
      * @param parameterList Parameter container which creates an AxiomList object on evaluation
      * @param axiomListListener Axiom listener to notify when an axiom list is created
      */
-    public AxiomOperand(QualifiedName qname, QualifiedName axiomKey, ParameterList<AxiomList> parameterList, AxiomListListener axiomListListener) 
+    public AxiomOperand(AxiomListEvaluator axiomListEvaluator, AxiomListListener axiomListListener) 
     {
-        super(qname);
-        this.axiomKey = axiomKey;
-        this.parameterList = parameterList;
+        super(axiomListEvaluator.getQualifiedName());
+        this.axiomKey = axiomListEvaluator.getAxiomKey();
+        this.axiomListEvaluator = axiomListEvaluator;
         this.axiomListListener = axiomListListener;
         init();
     }
-    /*
-    @Override
-    public void setValue(Object value)
-    {
-        super.setValue(value);
-    }
-        
-    @Override
-    public int unifyTerm(Term otherTerm, int id)
-    {
-        return super.unify(otherTerm, id);
-    }
-*/    
+
     /**
      * Execute operation for expression
      * @param id Identity of caller, which must be provided for backup()
@@ -121,18 +95,11 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     public EvaluationStatus evaluate(int id)
     {
         EvaluationStatus status = EvaluationStatus.COMPLETE;
-        if (expression != null)
-        {   // Evaluate value using expression operand  
-            boolean firstTime = empty;
-            status = super.evaluate(id);
-            if (firstTime && !empty)
-                axiomListListener.addAxiomList(qname, getValue());
-        }
-        else if (parameterList != null)
+        if (axiomListEvaluator != null)
         {   // Perform static intialisation to a list of axioms
-            setValue(parameterList.evaluate(id));
-            // Do not set id if list is in global scope as backup will clear the value
-            if (!qname.getTemplate().isEmpty())
+            setValue(axiomListEvaluator.evaluate(id));
+            // Do not set id if list is created empty
+            if (axiomListEvaluator.size() > 0)
                 this.id = id;
             // Do not set id as the change is permanent unless
             // a subsequent evaluation overrides this initialisation
@@ -154,20 +121,20 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     @Override
     public boolean backup(int id)
     {
-        if (parameterList != null)
-            parameterList.backup(id);
+        if (axiomListEvaluator != null)
+            axiomListEvaluator.backup(id);
         return super.backup(id);
     }
     
     /**
-     * Assign a value and id to this Term from another term 
-     * @param term Term containing non-null value and id to set
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
      */
     @Override
-    public void assign(Term term) 
+    public void assign(Parameter parameter)
     {
-        super.assign(term);
-        AxiomList axiomList = (AxiomList)term.getValue();
+        super.assign(parameter);
+        AxiomList axiomList = (AxiomList)parameter.getValue();
         if (axiomListListener != null)
             axiomListListener.addAxiomList(qname, axiomList);
     }
@@ -179,11 +146,11 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     @Override
     public String toString()
     {
-        if (parameterList != null)
+        if (axiomListEvaluator != null)
         {
             StringBuilder builder = new StringBuilder("list<axiom> ");
             builder.append(qname.toString());
-            int length = empty ? parameterList.size() : ((AxiomList)getValue()).getLength();
+            int length = empty ? axiomListEvaluator.size() : ((AxiomList)getValue()).getLength();
             builder.append('[').append(Integer.toString(length)).append(']');
             return builder.toString();
         }
@@ -191,12 +158,19 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
             return super.toString();
     }
 
+    /**
+     * getOperator
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getOperator()
+     */
     @Override
     public Operator getOperator()
     {
         return operator;
     }
 
+    /**
+     * Set operator
+     */
     private void init()
     {
         operator = new AxiomOperator();

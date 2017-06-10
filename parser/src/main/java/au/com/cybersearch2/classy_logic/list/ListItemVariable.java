@@ -32,7 +32,8 @@ import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.operator.AxiomParameterOperator;
+import au.com.cybersearch2.classy_logic.operator.TermOperator;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 
 /**
@@ -187,7 +188,8 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
 
     /**
      * unifyTerm - 
-     * If it exists, unify index operand for value selection. 
+     * The variable is not set by unification. However, if the index is an operand, then it is set for value selection by
+     * assigning it as the left operand.
      * Note that in a 2 dimension case, when the first index is an operand, it must be set by a prior unify-evaluation step
      * The value of this variable is not set directly by unification.
      * @see au.com.cybersearch2.classy_logic.terms.Parameter#unifyTerm(au.com.cybersearch2.classy_logic.interfaces.Term, int)
@@ -195,7 +197,7 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
     @Override
     public int unifyTerm(Term otherTerm, int id)
     {
-        return 0; //delegate.unifyTerm(otherTerm, id);
+        return 0; 
     }
 
     /**
@@ -248,14 +250,13 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
     }
 
     /**
-     * Assign a value and id to this Term from another term 
-     * @param term Term containing non-null value and id to set
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
      */
     @Override
-    public void assign(Term term) 
+    public void assign(Parameter parameter)
     {
-        setValue(term);
-        //id = term.getId();
+        setValue(parameter);
     }
 
     /**
@@ -389,7 +390,7 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
     {
         // Preset operator if value type is AxiomTermList, or wrong operator will be set
         if ((getDelegateType() == DelegateType.ASSIGN_ONLY) && (value instanceof AxiomTermList))
-            operator.setProxy(new AxiomParameterOperator());
+            operator.setProxy(new TermOperator());
         super.setValue(value);
     }
     

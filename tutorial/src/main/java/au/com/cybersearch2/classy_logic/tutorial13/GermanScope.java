@@ -80,7 +80,7 @@ scope german (language="de", region="DE")
         parserContext = queryProgramParser.getContext();
 		// Create QueryParams object for scope "german" and query "item_query"
 		QueryParams queryParams = queryProgram.getQueryParams("german", "item_query");
-		// Add an item Axiom with a single "2.345,67 EUR" term
+		// Add an item Axiom with a single "12.345,67 EUR" term
 		// This axiom goes into the Global scope and is removed at the start of the next query.
         Solution initialSolution = queryParams.getInitialSolution();
         initialSolution.put("item", new Axiom("item", new Parameter("amount", "12.345,67 €")));

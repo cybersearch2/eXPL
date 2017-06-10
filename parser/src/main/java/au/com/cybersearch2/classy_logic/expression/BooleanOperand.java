@@ -20,8 +20,8 @@ import java.math.BigDecimal;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.BooleanOperator;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * BooleanVariable
@@ -71,14 +71,13 @@ public class BooleanOperand extends ExpressionOperand<Boolean>
 	}
 
     /**
-     * Assign a value and id to this Term from another term 
-     * @param term Term containing non-null value and id to set
-	 */
-	@Override
-	public void assign(Term term) 
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
+     */
+    @Override
+    public void assign(Parameter parameter)
 	{
-		setValue((Boolean)term.getValue());
-		//id = term.getId();
+		setValue((Boolean)parameter.getValue());
 	}
 
     /**

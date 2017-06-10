@@ -49,7 +49,7 @@ public class CallContext
         OperandContext operandContext = null;
  		for (int i = 0; i < template.getTermCount(); i++)
 		{
-		    Term term = template.getTermByIndex(i);
+		    Operand term = template.getTermByIndex(i);
 		    OperandContext nextOperandContext = new OperandContext(term);
 		    if (i == 0)
 	            contextRootList.add(nextOperandContext);

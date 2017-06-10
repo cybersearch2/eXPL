@@ -51,7 +51,7 @@ public class ListIndex extends ArrayIndex
     @Override
     public void assemble(ItemList<?> itemList)
     {
-        if (/*(index == -1) &&*/ (selection != null) && (itemList instanceof AxiomContainer))
+        if ((selection != null) && (itemList instanceof AxiomContainer))
             setAxiomTermListIndex((AxiomContainer)itemList);
         super.assemble(itemList);
     }

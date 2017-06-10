@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import java.util.Collections;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
@@ -23,57 +24,33 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 
 /**
- * ParameterOperand
- * Variable which is set using a supplied function object and parameters contained in an Operand tree
+ * CallOperand
+ * Variable which is set using a supplied function object and parameters contained in a template.
+ * The generic "R" type is the function return type.
  * @author Andrew Bowley
  * 7 Aug 2015
  */
-public class ParameterOperand<R> extends Variable implements DebugTarget
+public class CallOperand<R> extends Variable implements DebugTarget
 {
-    /** Collects parameters from an Operand tree and passes them to a supplied function object */
-    protected ParameterList<R> parameterList;
-    protected String listInfo;
+    protected static List<Term> EMPTY_TERM_LIST = Collections.emptyList();
+    /** Template containing parameters or null for no arguments */
+    protected Template template;
+    protected CallEvaluator<R> callEvaluator;
 
     /**
-     * Construct a ParameterOperand object
+     * Construct a CallOperand object
      * @param qname Qualified name
-     * @param operandParamList List of Operand arguments or null for no arguments
-     * @param callEvaluator Executes function using parameters and returns object of generic type
+     * @param tmplate Template containing parameters or null for no arguments
+     * @param callEvaluator Executes function using parameters and returns object of generic type "R"
      */
-    public ParameterOperand(QualifiedName qname, List<Template> templateParamList, CallEvaluator<R> callEvaluator) 
+    public CallOperand(QualifiedName qname, Template template, CallEvaluator<R> callEvaluator) 
     {
         super(qname);
-        parameterList = new ParameterList<R>(templateParamList, callEvaluator);
-    }
-
-    /**
-     * Construct a ParameterOperand object
-     * @param qname Qualified name
-     * @param parameterTemplate Operand arguments packaged in an inner template or null for no arguments
-     * @param callEvaluator Executes function using parameters and returns object of generic type
-     */
-    public ParameterOperand(QualifiedName qname, Template parameterTemplate, CallEvaluator<R> callEvaluator) 
-    {
-        super(qname);
-        parameterList = new ParameterList<R>(parameterTemplate, callEvaluator);
-        if (parameterTemplate != null)
-        {
-            StringBuilder builder = new StringBuilder();
-            Term op1 = parameterTemplate.getTermByIndex(0);
-            builder.append(op1.toString());
-            int count = parameterTemplate.getTermCount();
-            if (count > 1)
-            {
-                Term op2 = parameterTemplate.getTermByIndex(count - 1);
-                builder.append(" ... ").append(op2.toString());
-            }
-            listInfo = builder.toString();
-        }
+        this.callEvaluator = callEvaluator;
+        this.template = template;
     }
 
     /**
@@ -83,18 +60,15 @@ public class ParameterOperand<R> extends Variable implements DebugTarget
      */
     public EvaluationStatus evaluate(int id)
     {
-        R returnValue = parameterList.evaluate(id);
-        if ((returnValue != null) && (returnValue instanceof AxiomTermList))
+        List<Term> termList;
+        if (template != null)
         {
-            AxiomTermList axiomTermList = (AxiomTermList)returnValue;
-            Axiom axiom = axiomTermList.getAxiom();
-            if (axiom.getTermCount() == 1)
-                setValue(axiom.getTermByIndex(0).getValue());
-            else
-                setValue(axiom);
+            template.evaluate(null);
+            termList = template.toArray();
         }
         else
-            setValue(returnValue);
+            termList = EMPTY_TERM_LIST;
+        setValue(callEvaluator.evaluate(termList));
         this.id = id;
         return EvaluationStatus.COMPLETE;
     }
@@ -109,7 +83,8 @@ public class ParameterOperand<R> extends Variable implements DebugTarget
     @Override
     public boolean backup(int id)
     {
-        parameterList.backup(id);
+        if (template != null)
+            template.backup(id != 0);
         return super.backup(id);
     }
     
@@ -123,17 +98,30 @@ public class ParameterOperand<R> extends Variable implements DebugTarget
         {
             StringBuilder builder = new StringBuilder(qname.toString());
             builder.append('(');
-            if (listInfo != null)
-                builder.append(listInfo);
+            if (template != null)
+            {
+                Term op1 = template.getTermByIndex(0);
+                builder.append(op1.toString());
+                int count = template.getTermCount();
+                if (count > 1)
+                {
+                    Term op2 = template.getTermByIndex(count - 1);
+                    builder.append(" ... ").append(op2.toString());
+                }
+            }
             builder.append(')');
             return builder.toString();
         }
         return super.toString();
     }
  
+    /**
+     * setExecutionContext
+     * @see au.com.cybersearch2.classy_logic.interfaces.DebugTarget#setExecutionContext(au.com.cybersearch2.classy_logic.debug.ExecutionContext)
+     */
     @Override
     public void setExecutionContext(ExecutionContext context)
     {
-        parameterList.setExecutionContext(context);
+        callEvaluator.setExecutionContext(context);
     }
 }

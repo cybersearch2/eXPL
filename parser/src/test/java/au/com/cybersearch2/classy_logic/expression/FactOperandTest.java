@@ -72,8 +72,8 @@ public class FactOperandTest
         axiom.addTerm(y);
         factOperand.evaluate(3);
         assertThat((Boolean)factOperand.getValue()).isFalse();
-        x.assign(new Parameter(Term.ANONYMOUS, Long.valueOf(1)));
-        y.assign(new Parameter(Term.ANONYMOUS, Long.valueOf(2)));
+        x.setValue(Long.valueOf(1));
+        y.setValue(Long.valueOf(2));
         factOperand.evaluate(4);
         assertThat((Boolean)factOperand.getValue()).isTrue();
     }

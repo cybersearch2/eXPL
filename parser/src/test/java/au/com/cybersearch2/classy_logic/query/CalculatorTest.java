@@ -32,7 +32,7 @@ import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
+import au.com.cybersearch2.classy_logic.expression.TemplateOperand;
 import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.TestBooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.TestEvaluator;
@@ -231,7 +231,7 @@ public class CalculatorTest
 	    Template template = new Template(loopArchetype);
 		for (Operand operand: operandList)
 			template.addTerm(operand);
-    	LoopEvaluator loopy = new LoopEvaluator(template);
+    	TemplateOperand loopy = new TemplateOperand(template);
         TemplateArchetype calcArchetype = new TemplateArchetype(parseTemplateName("calc"));
         Template calcTemplate = new Template(calcArchetype, n, loopy, limit);
         calcTemplate.putInitData("n", Long.valueOf(1));
@@ -260,7 +260,7 @@ public class CalculatorTest
 	    Template template = new Template(loopArchetype);
 		for (Operand operand: operandList)
 			template.addTerm(operand);
-    	LoopEvaluator loopy = new LoopEvaluator(template);
+    	TemplateOperand loopy = new TemplateOperand(template);
         TemplateArchetype factorialArchetype = new TemplateArchetype(parseTemplateName("factorial"));
         Template calcTemplate = new Template(factorialArchetype, n, factorialExpression, i, loopy);
         calcTemplate.putInitData("factorial", Integer.valueOf(1));
@@ -290,7 +290,7 @@ public class CalculatorTest
 	    Template template = new Template(loopArchetype);
 		for (Operand operand: operandList)
 			template.addTerm(operand);
-    	LoopEvaluator loopy = new LoopEvaluator(template);
+    	TemplateOperand loopy = new TemplateOperand(template);
         TemplateArchetype factorialArchetype = new TemplateArchetype(parseTemplateName("factorial"));
         Template calcTemplate = new Template(factorialArchetype, n, factorialExpression, i, loopy);
         calcTemplate.putInitData("factorial", Long.valueOf(1));

@@ -28,10 +28,11 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * DelegateOperand
+ * Varaiable base class which delegates an operator according to value type
  * @author Andrew Bowley
  * 25 Dec 2014
  */
-public abstract class DelegateOperand extends Parameter implements Operand, LocaleListener 
+public abstract class DelegateOperand extends Operand implements LocaleListener 
 {
 	/** Qualified name of operand */
 	protected QualifiedName qname;
@@ -40,7 +41,7 @@ public abstract class DelegateOperand extends Parameter implements Operand, Loca
     /** Defines operations that an Operand performs with other operands. */
     protected DelegateOperator operator;
     /** Index of this Operand in the archetype of it's containing template */
-    private int index;
+    private int archetypeIndex;
 
 	/**
      * Construct empty DelegateOperand object
@@ -60,7 +61,7 @@ public abstract class DelegateOperand extends Parameter implements Operand, Loca
         super(termName);
         this.qname = qname;
         operator = new DelegateOperator();
-        index = -1;
+        archetypeIndex = -1;
     }
     
     /**
@@ -112,18 +113,15 @@ public abstract class DelegateOperand extends Parameter implements Operand, Loca
 		}
 	}
 
-   /**
-     * Assign a value to this Operand. It may overwrite and existing value
-     * This value will be overwritten on next call to evaluate(), so calling
-     * assign() on an Evaluator is pointless.
+    /**
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
      */
     @Override
-    public void assign(Term term) 
+    public void assign(Parameter parameter)
     {
-         setValue(term.getValue());
-         //id = term.getId();
+         setValue(parameter.getValue());
     }
-
 
 	/**
 	 * Delegate to perform actual unification with other Term. If successful, two terms will be equivalent. 
@@ -139,17 +137,6 @@ public abstract class DelegateOperand extends Parameter implements Operand, Loca
 		operator.setDelegate(getValueClass());
 		return result;
 	}
-
-    /**
-     * concatenate
-     * @see au.com.cybersearch2.classy_logic.interfaces.Concaten#concatenate(au.com.cybersearch2.classy_logic.interfaces.Operand)
-     */
-    //public Object concatenate(Operand rightOperand)
-    //{   // Axioms are special case
-    //    if (operator.getDelegateType() == DelegateType.AXIOM)
-    //        return AxiomUtils.concatenate(this, rightOperand);
-    //    return value.toString() + rightOperand.getValue().toString();
-    //}
 
     /**
      * Backup to intial state if given id matches id assigned on unification or given id = 0. 
@@ -193,23 +180,23 @@ public abstract class DelegateOperand extends Parameter implements Operand, Loca
     }
     
     /**
-     * setIndex
+     * setArchetypeIndex
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#setIndex(int)
      */
     @Override
-    public void setArchetypeIndex(int index)
+    public void setArchetypeIndex(int archetypeIndex)
     {
-        this.index = index;
+        this.archetypeIndex = archetypeIndex;
     }
 
     /**
-     * getIndex
+     * getArchetypeIndex
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getIndex()
      */
     @Override
     public int getArchetypeIndex()
     {
-        return index;
+        return archetypeIndex;
     }
 
     /**
@@ -251,10 +238,4 @@ public abstract class DelegateOperand extends Parameter implements Operand, Loca
             visit(operand.getRightOperand(), visitor, depth + 1);
         return true;
     }
-
-    protected static QualifiedName getDelegateQualifiedName(QualifiedName qname)
-    {
-        return new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname);
-    }
-
 }

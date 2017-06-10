@@ -33,7 +33,7 @@ import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.RegExOperand;
 import au.com.cybersearch2.classy_logic.expression.MatchOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
-import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
+import au.com.cybersearch2.classy_logic.expression.TemplateOperand;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
@@ -56,7 +56,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
-import au.com.cybersearch2.classy_logic.interfaces.AssignType;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -210,6 +209,22 @@ public class QueryParser implements QueryParserConstants
      default:
          return context.addSourceItem(var);
      }
+  }
+
+  void initializeList(ItemList<?> itemList, List<Parameter> literalList)
+  {
+    for (int i = 0; i < literalList.size(); ++i)
+    {
+      Parameter param = literalList.get(i);
+      if (param instanceof IntegerTerm)
+        ((ItemList<Long>)itemList).assignItem(i, (Long)param.getValue());
+      else if (param instanceof DoubleTerm)
+        ((ItemList<Double>)itemList).assignItem(i, (Double)param.getValue());
+      else if (param instanceof StringTerm)
+        ((ItemList<String>)itemList).assignItem(i, (String)param.getValue());
+      else if (param instanceof BooleanTerm)
+        ((ItemList<BooleanTerm>)itemList).assignItem(i, (BooleanTerm)param.getValue());
+    }
   }
 
 /** Root production. */
@@ -529,7 +544,6 @@ public class QueryParser implements QueryParserConstants
 
   final public void Statement(ParserContext context) throws ParseException
   {
-  Operand var;
   context.setSourceItemPending(false);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
@@ -844,48 +858,14 @@ public class QueryParser implements QueryParserConstants
 
   final public Operand AxiomVariable(QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
   {
-  Operand expression = null;
-  List<Template> axiomList = null;
+  List<Template> axiomList;
   ParserAssembler parserAssembler = context.getParserAssembler();
     jj_consume_token(ASSIGN);
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-    {
-    case SCOPE:
-    case FACT:
-    case LENGTH:
-    case FORMAT:
-    case INTEGER_LITERAL:
-    case FLOATING_POINT_LITERAL:
-    case STRING_LITERAL:
-    case TRUE:
-    case FALSE:
-    case UNKNOWN:
-    case IDENTIFIER:
-    case LPAREN:
-    case BANG:
-    case INCR:
-    case DECR:
-    case PLUS:
-    case MINUS:
-    case 81:
-      expression = Expression(context);
-      break;
-    case LBRACE:
-      axiomList = AxiomList(qualifiedAxiomName, context);
-      break;
-    default:
-      jj_la1[26] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-     VariableType varType = new VariableType(axiomList == null ? OperandType.AXIOM : OperandType.LIST);
-     if (expression != null)
-         varType.setProperty(VariableType.EXPRESSION, expression);
-     else
-         varType.setProperty(VariableType.PARAMS, axiomList);
+    axiomList = AxiomList(qualifiedAxiomName, context);
+     VariableType varType = new VariableType(OperandType.LIST);
+     varType.setProperty(VariableType.PARAMS, axiomList);
      Operand operand = varType.getInstance(parserAssembler, qualifiedAxiomName);
-     if (expression != null)
-         parserAssembler.setParameter(operand.getQualifiedName());
+     parserAssembler.setParameter(operand.getQualifiedName());
      {if (true) return operand;}
     throw new Error("Missing return statement in function");
   }
@@ -905,7 +885,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[27] = jj_gen;
+        jj_la1[26] = jj_gen;
         break label_10;
       }
       template = AxiomInitializer(qualifiedAxiomName.getName(), qualifiedAxiomName, context);
@@ -938,7 +918,7 @@ public class QueryParser implements QueryParserConstants
       initializeTemplate = Parameters(listName, context, true);
       break;
     default:
-      jj_la1[28] = jj_gen;
+      jj_la1[27] = jj_gen;
       ;
     }
     jj_consume_token(RBRACE);
@@ -974,7 +954,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[29] = jj_gen;
+        jj_la1[28] = jj_gen;
         break label_11;
       }
       delimitToken = jj_consume_token(COMMA);
@@ -1020,7 +1000,7 @@ public class QueryParser implements QueryParserConstants
       privateToken = jj_consume_token(DOT);
       break;
     default:
-      jj_la1[30] = jj_gen;
+      jj_la1[29] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -1061,7 +1041,7 @@ public class QueryParser implements QueryParserConstants
       operand = CalculatorQuery(template, context);
       break;
     default:
-      jj_la1[31] = jj_gen;
+      jj_la1[30] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1078,7 +1058,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[32] = jj_gen;
+        jj_la1[31] = jj_gen;
         break label_12;
       }
       delimitToken = jj_consume_token(COMMA);
@@ -1089,7 +1069,7 @@ public class QueryParser implements QueryParserConstants
         privateToken = jj_consume_token(DOT);
         break;
       default:
-        jj_la1[33] = jj_gen;
+        jj_la1[32] = jj_gen;
         ;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -1130,7 +1110,7 @@ public class QueryParser implements QueryParserConstants
         operand = CalculatorQuery(template, context);
         break;
       default:
-        jj_la1[34] = jj_gen;
+        jj_la1[33] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1147,7 +1127,7 @@ public class QueryParser implements QueryParserConstants
       InitialiserList(properties, context);
       break;
     default:
-      jj_la1[35] = jj_gen;
+      jj_la1[34] = jj_gen;
       ;
     }
     if (properties.size() > 0)
@@ -1189,7 +1169,7 @@ public class QueryParser implements QueryParserConstants
       varType = Type(context);
       break;
     default:
-      jj_la1[36] = jj_gen;
+      jj_la1[35] = jj_gen;
       ;
     }
     name = Name(context);
@@ -1202,7 +1182,7 @@ public class QueryParser implements QueryParserConstants
       listIndexData = IndexExpression(context.getQualifiedName(name), context);
       break;
     default:
-      jj_la1[37] = jj_gen;
+      jj_la1[36] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -1234,7 +1214,7 @@ public class QueryParser implements QueryParserConstants
           assignToken = jj_consume_token(PLUSASSIGN);
           break;
         default:
-          jj_la1[38] = jj_gen;
+          jj_la1[37] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1249,7 +1229,7 @@ public class QueryParser implements QueryParserConstants
              axiomQname = QualifiedName.parseName(axiomName);
             break;
           default:
-            jj_la1[39] = jj_gen;
+            jj_la1[38] = jj_gen;
             ;
           }
           axiomList = AxiomList(axiomQname, context);
@@ -1280,7 +1260,7 @@ public class QueryParser implements QueryParserConstants
           expression = Expression(context);
           break;
         default:
-          jj_la1[40] = jj_gen;
+          jj_la1[39] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1324,7 +1304,7 @@ public class QueryParser implements QueryParserConstants
           assignToken = jj_consume_token(REMASSIGN);
           break;
         default:
-          jj_la1[41] = jj_gen;
+          jj_la1[40] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1342,7 +1322,7 @@ public class QueryParser implements QueryParserConstants
           regexId = jj_consume_token(IDENTIFIER);
           break;
         default:
-          jj_la1[42] = jj_gen;
+          jj_la1[41] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1352,7 +1332,7 @@ public class QueryParser implements QueryParserConstants
           group = GroupDeclaration(template, name, parserAssembler);
           break;
         default:
-          jj_la1[43] = jj_gen;
+          jj_la1[42] = jj_gen;
           ;
         }
         jj_consume_token(RPAREN);
@@ -1383,20 +1363,20 @@ public class QueryParser implements QueryParserConstants
           parameterTemplate = Parameters(name, context, true);
           break;
         default:
-          jj_la1[44] = jj_gen;
+          jj_la1[43] = jj_gen;
           ;
         }
         jj_consume_token(RPAREN);
              template.addTerm(parserAssembler.getCallOperand(qname, parameterTemplate));
         break;
       default:
-        jj_la1[45] = jj_gen;
+        jj_la1[44] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[46] = jj_gen;
+      jj_la1[45] = jj_gen;
       ;
     }
     boolean isDeclaration = varType != null;
@@ -1467,7 +1447,7 @@ public class QueryParser implements QueryParserConstants
         scToken = jj_consume_token(QMARK);
         break;
       default:
-        jj_la1[47] = jj_gen;
+        jj_la1[46] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1477,7 +1457,7 @@ public class QueryParser implements QueryParserConstants
       {
       case LBRACE:
         delimitToken = jj_consume_token(LBRACE);
-        Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName, "");
+        Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName);
         context.addSourceItem(scToken.image+expression.toString()).setEnd(delimitToken);
         context.pushSourceMarker();
         Token token = Token.newToken(QueryParserConstants.CALC);
@@ -1489,7 +1469,7 @@ public class QueryParser implements QueryParserConstants
       context.onTokenIntercept(delimitToken);
         break;
       default:
-        jj_la1[48] = jj_gen;
+        jj_la1[47] = jj_gen;
         ;
       }
     String operator = scToken.image == "?" ? "&&" : "||";
@@ -1555,7 +1535,7 @@ public class QueryParser implements QueryParserConstants
         expression = Expression(context);
         break;
       default:
-        jj_la1[49] = jj_gen;
+        jj_la1[48] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1566,7 +1546,7 @@ public class QueryParser implements QueryParserConstants
       delimitToken = jj_consume_token(LBRACE);
       context.onTokenIntercept(delimitToken);
       context.pushSourceMarker();
-      Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName, "");
+      Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName);
       Token token = Token.newToken(QueryParserConstants.CALC);
       token.beginLine = delimitToken.beginLine;
       token.beginColumn = delimitToken.beginColumn;
@@ -1606,7 +1586,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return choiceOperand;}
       break;
     default:
-      jj_la1[50] = jj_gen;
+      jj_la1[49] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1654,7 +1634,7 @@ public class QueryParser implements QueryParserConstants
       parameterTemplate = Parameters(callName, context, false);
       break;
     default:
-      jj_la1[51] = jj_gen;
+      jj_la1[50] = jj_gen;
       ;
     }
     delimitToken = jj_consume_token(RPAREN);
@@ -1668,7 +1648,7 @@ public class QueryParser implements QueryParserConstants
       innerTemplate = InnerTemplateDeclaration(outerTemplateName, callName, context);
       break;
     default:
-      jj_la1[52] = jj_gen;
+      jj_la1[51] = jj_gen;
       ;
     }
     Operand queryOperand = context.getParserAssembler().getQueryOperand(queryName, qname, parameterTemplate, innerTemplate);
@@ -1688,7 +1668,7 @@ public class QueryParser implements QueryParserConstants
   String queryKey = outerTemplateName.getTemplate() + "." + callName;
     templateToken = jj_consume_token(78);
       ParserAssembler parserAssembler = context.getParserAssembler();
-      template = parserAssembler.getTemplateAssembler().chainTemplate(outerTemplateName, callName);
+      template = parserAssembler.getTemplateAssembler().createQueryTemplate(outerTemplateName, callName);
       template.setKey(queryKey);
       context.onTokenIntercept(templateToken);
     delimitToken = jj_consume_token(LPAREN);
@@ -1705,7 +1685,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[53] = jj_gen;
+        jj_la1[52] = jj_gen;
         break label_13;
       }
       delimitToken = jj_consume_token(COMMA);
@@ -1737,7 +1717,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[54] = jj_gen;
+        jj_la1[53] = jj_gen;
         break label_14;
       }
       delimitToken = jj_consume_token(COMMA);
@@ -1746,9 +1726,9 @@ public class QueryParser implements QueryParserConstants
       sourceItem=addSourceVariable(expression, context);
     }
     delimitToken = jj_consume_token(RBRACE);
-    LoopEvaluator loopEvaluator = new LoopEvaluator(template, runOnce);
+    TemplateOperand templateOperand = new TemplateOperand(template, runOnce);
     sourceItem.setEnd(delimitToken);
-    {if (true) return loopEvaluator;}
+    {if (true) return templateOperand;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1777,7 +1757,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[55] = jj_gen;
+        jj_la1[54] = jj_gen;
         break label_15;
       }
       jj_consume_token(COMMA);
@@ -1795,7 +1775,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[56] = jj_gen;
+        jj_la1[55] = jj_gen;
         break label_16;
       }
     }
@@ -1840,7 +1820,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[57] = jj_gen;
+        jj_la1[56] = jj_gen;
         break label_17;
       }
       jj_consume_token(COMMA);
@@ -1885,7 +1865,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[58] = jj_gen;
+        jj_la1[57] = jj_gen;
         break label_18;
       }
       delimitToken = jj_consume_token(COMMA);
@@ -1923,7 +1903,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[59] = jj_gen;
+        jj_la1[58] = jj_gen;
         break label_19;
       }
       jj_consume_token(COMMA);
@@ -1959,7 +1939,7 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[60] = jj_gen;
+        jj_la1[59] = jj_gen;
         break label_20;
       }
       jj_consume_token(COMMA);
@@ -1986,6 +1966,7 @@ public class QueryParser implements QueryParserConstants
   final public Operand VariableDeclaration(ParserContext context) throws ParseException
   {
   Token nameToken;
+  String name;
   boolean isUntyped = true;
   VariableType varType = null;
   ListItemSpec[] listIndexData = null;
@@ -2006,10 +1987,11 @@ public class QueryParser implements QueryParserConstants
       isUntyped = false;
       break;
     default:
-      jj_la1[61] = jj_gen;
+      jj_la1[60] = jj_gen;
       ;
     }
     nameToken = jj_consume_token(IDENTIFIER);
+    name = nameToken.image;
     if (isUntyped)
       context.onTokenIntercept(nameToken);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2019,7 +2001,7 @@ public class QueryParser implements QueryParserConstants
       listIndexData = IndexExpression(context.getQualifiedName(nameToken.image), context);
       break;
     default:
-      jj_la1[62] = jj_gen;
+      jj_la1[61] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2029,11 +2011,10 @@ public class QueryParser implements QueryParserConstants
       expression = Expression(context);
       break;
     default:
-      jj_la1[63] = jj_gen;
+      jj_la1[62] = jj_gen;
       ;
     }
-     String name = nameToken.image;
-     if ((listIndexData !=null) && (listIndexData.length > 1))
+      if ((listIndexData !=null) && (listIndexData.length > 1))
        {if (true) throw new ParseException("Axiom list variable \u005c"" + name + "\u005c" cannot be declared here");}
      if (listIndexData !=null)
        {if (true) return initList(context, listIndexData[0], expression);}
@@ -2055,6 +2036,7 @@ public class QueryParser implements QueryParserConstants
   VariableType varType = null;
   QualifiedName qualifiedBindingName = null;
   QualifiedName qualifiedAxiomName = null;
+  Template template = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
@@ -2065,7 +2047,7 @@ public class QueryParser implements QueryParserConstants
       keywordToken = jj_consume_token(LOCAL);
       break;
     default:
-      jj_la1[64] = jj_gen;
+      jj_la1[63] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2077,7 +2059,7 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(GT);
       break;
     default:
-      jj_la1[65] = jj_gen;
+      jj_la1[64] = jj_gen;
       ;
     }
     nameToken = jj_consume_token(IDENTIFIER);
@@ -2087,19 +2069,35 @@ public class QueryParser implements QueryParserConstants
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LPAREN:
-      jj_consume_token(LPAREN);
-      qualifiedAxiomName = Axiom(context);
+    case ASSIGN:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
-      case COLON:
-        jj_consume_token(COLON);
-        qualifiedBindingName = ResourceBinding(QueryParserConstants.TEMPLATE, qualifiedAxiomName, parserAssembler);
+      case LPAREN:
+        jj_consume_token(LPAREN);
+        qualifiedAxiomName = Axiom(context);
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+        {
+        case COLON:
+          jj_consume_token(COLON);
+          qualifiedBindingName = ResourceBinding(QueryParserConstants.TEMPLATE, qualifiedAxiomName, parserAssembler);
+          break;
+        default:
+          jj_la1[65] = jj_gen;
+          ;
+        }
+        jj_consume_token(RPAREN);
+        break;
+      case ASSIGN:
+        jj_consume_token(ASSIGN);
+        jj_consume_token(LBRACE);
+        template = ListParameters(listName, varType, context);
+        jj_consume_token(RBRACE);
         break;
       default:
         jj_la1[66] = jj_gen;
-        ;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
-      jj_consume_token(RPAREN);
       break;
     default:
       jj_la1[67] = jj_gen;
@@ -2109,20 +2107,64 @@ public class QueryParser implements QueryParserConstants
     boolean isLocal = keywordToken.kind == QueryParserConstants.LOCAL;
     boolean isTermList = (varType != null) && varType.getOperandType() == OperandType.TERM;
     if ((varType == null) && (qualifiedAxiomName == null))
-        {if (true) throw new ParseException("Invalid declaration for list \u005c"" + listName + "\u005c". Missing type or axiom name.");}
+      {if (true) throw new ParseException("Invalid declaration for list \u005c"" + listName + "\u005c". Missing type or axiom name.");}
     if ((varType != null) && isLocal)
-        {if (true) throw new ParseException("Invalid declaration for local \u005c"" + listName + "\u005c". Type in declaration not allowed.");}
+      {if (true) throw new ParseException("Invalid declaration for local \u005c"" + listName + "\u005c". Type in declaration not allowed.");}
     if ((qualifiedBindingName != null) && !isTermList)
-        {if (true) throw new ParseException("Invalid declaration for " + keywordToken.image + " \u005c"" + listName + "\u005c". Only Term type list can be bound to a resource");}
+      {if (true) throw new ParseException("Invalid declaration for " + keywordToken.image + " \u005c"" + listName + "\u005c". Only Term type list can be bound to a resource");}
     if (qualifiedBindingName != null)
-        qualifiedAxiomName = qualifiedBindingName;
+      qualifiedAxiomName = qualifiedBindingName;
     if (varType == null)
-        varType = isLocal ? new VariableType(OperandType.LOCAL) : new VariableType(OperandType.AXIOM);
+      varType = isLocal ? new VariableType(OperandType.LOCAL) : new VariableType(OperandType.AXIOM);
     if (qualifiedAxiomName != null)
-        varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
-    ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
+      varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
+    ItemList<?> itemList;
+    if (template != null)
+      itemList = varType.getDynamicListInstance(parserAssembler, listName, template);
+    else
+      itemList = varType.getItemListInstance(parserAssembler, listName);
     parserAssembler.getListAssembler().addItemList(itemList.getQualifiedName(), itemList);
     context.addSourceItem(itemList).setEnd(delimitToken);
+  }
+
+  final public Template ListParameters(String listName, VariableType varType, ParserContext context) throws ParseException
+  {
+  Operand expression;
+  QualifiedName outerTemplateName = context.getTemplateName();
+  ParserAssembler parserAssembler = context.getParserAssembler();
+  Template template = parserAssembler.getTemplateAssembler().chainTemplate(outerTemplateName);
+  Operand var = null;
+  if (varType == null)
+      throw new ParseException("Invalid declaration for list \u005c"" + listName + "\u005c". Type omitted from declaration.");
+    expression = Expression(context);
+    if (varType.getOperandType() == expression.getOperator().getTrait().getOperandType())
+      var = expression;
+    if (var == null)
+      var = varType.getInstance(parserAssembler, expression.getQualifiedName(), expression);
+    template.addTerm(var);
+    label_21:
+    while (true) 
+    {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+      {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[68] = jj_gen;
+        break label_21;
+      }
+      jj_consume_token(COMMA);
+      expression = Expression(context);
+      var = null;
+      if (varType.getOperandType() == expression.getOperator().getTrait().getOperandType())
+        var = expression;
+      if (var == null)
+        var = varType.getInstance(parserAssembler, expression.getQualifiedName(), expression);
+      template.addTerm(var);
+    }
+    {if (true) return template;}
+    throw new Error("Missing return statement in function");
   }
 
   final public void Include(ParserContext context) throws ParseException
@@ -2180,14 +2222,14 @@ public class QueryParser implements QueryParserConstants
         assignToken = jj_consume_token(REMASSIGN);
         break;
       default:
-        jj_la1[68] = jj_gen;
+        jj_la1[69] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       assignOperand = Expression(context);
       break;
     default:
-      jj_la1[69] = jj_gen;
+      jj_la1[70] = jj_gen;
       ;
     }
     if (assignOperand == null)
@@ -2287,7 +2329,7 @@ public class QueryParser implements QueryParserConstants
         {if (true) throw new ParseException("Operand " + name + " not found");}
       break;
     default:
-      jj_la1[70] = jj_gen;
+      jj_la1[71] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2346,7 +2388,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return name.image;}
       break;
     default:
-      jj_la1[71] = jj_gen;
+      jj_la1[72] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2393,7 +2435,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return new NullOperand(QualifiedName.ANONYMOUS, new Unknown());}
       break;
     default:
-      jj_la1[72] = jj_gen;
+      jj_la1[73] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2460,13 +2502,13 @@ public class QueryParser implements QueryParserConstants
           qualifierId = Name(context);
           break;
         default:
-          jj_la1[73] = jj_gen;
+          jj_la1[74] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
         break;
       default:
-        jj_la1[74] = jj_gen;
+        jj_la1[75] = jj_gen;
         ;
       }
       varType = new VariableType(OperandType.CURRENCY);
@@ -2477,7 +2519,7 @@ public class QueryParser implements QueryParserConstants
        {if (true) return varType;}
       break;
     default:
-      jj_la1[75] = jj_gen;
+      jj_la1[76] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2497,7 +2539,7 @@ public class QueryParser implements QueryParserConstants
     partToken = jj_consume_token(IDENTIFIER);
     name = partToken.image;
     context.onTokenIntercept(partToken);
-    label_21:
+    label_22:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2506,8 +2548,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[76] = jj_gen;
-        break label_21;
+        jj_la1[77] = jj_gen;
+        break label_22;
       }
       jj_consume_token(DOT);
       partToken = jj_consume_token(IDENTIFIER);
@@ -2552,7 +2594,7 @@ public class QueryParser implements QueryParserConstants
         parametersTemplate = Parameters(name, context, true);
         break;
       default:
-        jj_la1[77] = jj_gen;
+        jj_la1[78] = jj_gen;
         ;
       }
       jj_consume_token(RPAREN);
@@ -2560,7 +2602,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return parserAssembler.getCallOperand(qname, parametersTemplate);}
       break;
     default:
-      jj_la1[78] = jj_gen;
+      jj_la1[79] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2573,11 +2615,11 @@ public class QueryParser implements QueryParserConstants
   QualifiedName outerTemplateName = context.getTemplateName();
   String functionKey = outerTemplateName.getTemplate() + "." + callName;
   ParserAssembler parserAssembler = context.getParserAssembler();
-  Template template = parserAssembler.getTemplateAssembler().chainTemplate(outerTemplateName, callName);
+  Template template = parserAssembler.getTemplateAssembler().chainTemplate(outerTemplateName);
   template.setKey(functionKey);
     expression = ParameterExpression(context, nameRequired);
       template.addTerm(expression);
-    label_22:
+    label_23:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2586,8 +2628,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[79] = jj_gen;
-        break label_22;
+        jj_la1[80] = jj_gen;
+        break label_23;
       }
       jj_consume_token(COMMA);
       expression = ParameterExpression(context, nameRequired);
@@ -2618,7 +2660,7 @@ public class QueryParser implements QueryParserConstants
       varType = Type(context);
       break;
     default:
-      jj_la1[80] = jj_gen;
+      jj_la1[81] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2632,7 +2674,7 @@ public class QueryParser implements QueryParserConstants
         listIndexData = IndexExpression(context.getQualifiedName(identifier.image), context);
         break;
       default:
-        jj_la1[81] = jj_gen;
+        jj_la1[82] = jj_gen;
         ;
       }
       break;
@@ -2645,7 +2687,7 @@ public class QueryParser implements QueryParserConstants
       parameter = LiteralTerm(context);
       break;
     default:
-      jj_la1[82] = jj_gen;
+      jj_la1[83] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2656,7 +2698,7 @@ public class QueryParser implements QueryParserConstants
       expression = Expression(context);
       break;
     default:
-      jj_la1[83] = jj_gen;
+      jj_la1[84] = jj_gen;
       ;
     }
      String name = (identifier == null) ? Term.ANONYMOUS : identifier.image;
@@ -2723,7 +2765,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return new LiteralParameter(Term.ANONYMOUS, new Unknown(), LiteralType.unknown);}
       break;
     default:
-      jj_la1[84] = jj_gen;
+      jj_la1[85] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2746,7 +2788,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return false;}
       break;
     default:
-      jj_la1[85] = jj_gen;
+      jj_la1[86] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2765,7 +2807,7 @@ public class QueryParser implements QueryParserConstants
   Operand[] params = new Operand[2];
   Token op;
     params[0] = ConditionalAndExpression(context);
-    label_23:
+    label_24:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2774,8 +2816,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[86] = jj_gen;
-        break label_23;
+        jj_la1[87] = jj_gen;
+        break label_24;
       }
       op = jj_consume_token(SC_OR);
       params[1] = ConditionalAndExpression(context);
@@ -2790,7 +2832,7 @@ public class QueryParser implements QueryParserConstants
   Operand[] params = new Operand[2];
   Token op;
     params[0] = InclusiveOrExpression(context);
-    label_24:
+    label_25:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2799,8 +2841,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[87] = jj_gen;
-        break label_24;
+        jj_la1[88] = jj_gen;
+        break label_25;
       }
       op = jj_consume_token(SC_AND);
       params[1] = InclusiveOrExpression(context);
@@ -2815,7 +2857,7 @@ public class QueryParser implements QueryParserConstants
   Operand[] params = new Operand[2];
   Token op;
     params[0] = ExclusiveOrExpression(context);
-    label_25:
+    label_26:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2824,8 +2866,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[88] = jj_gen;
-        break label_25;
+        jj_la1[89] = jj_gen;
+        break label_26;
       }
       op = jj_consume_token(BIT_OR);
       params[1] = ExclusiveOrExpression(context);
@@ -2840,7 +2882,7 @@ public class QueryParser implements QueryParserConstants
   Operand[] params = new Operand[2];
   Token op;
     params[0] = AndExpression(context);
-    label_26:
+    label_27:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2849,8 +2891,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[89] = jj_gen;
-        break label_26;
+        jj_la1[90] = jj_gen;
+        break label_27;
       }
       op = jj_consume_token(XOR);
       params[1] = AndExpression(context);
@@ -2865,7 +2907,7 @@ public class QueryParser implements QueryParserConstants
   Operand[] params = new Operand[2];
   Token op;
     params[0] = EqualityExpression(context);
-    label_27:
+    label_28:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2874,8 +2916,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[90] = jj_gen;
-        break label_27;
+        jj_la1[91] = jj_gen;
+        break label_28;
       }
       op = jj_consume_token(BIT_AND);
       params[1] = EqualityExpression(context);
@@ -2890,7 +2932,7 @@ public class QueryParser implements QueryParserConstants
   Operand[] params = new Operand[2];
   Token op;
     params[0] = RelationalExpression(context);
-    label_28:
+    label_29:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2900,8 +2942,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[91] = jj_gen;
-        break label_28;
+        jj_la1[92] = jj_gen;
+        break label_29;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
@@ -2912,7 +2954,7 @@ public class QueryParser implements QueryParserConstants
         op = jj_consume_token(NE);
         break;
       default:
-        jj_la1[92] = jj_gen;
+        jj_la1[93] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2928,7 +2970,7 @@ public class QueryParser implements QueryParserConstants
   Operand[] params = new Operand[2];
   Token op;
     params[0] = AdditiveExpression(context);
-    label_29:
+    label_30:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2940,8 +2982,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[93] = jj_gen;
-        break label_29;
+        jj_la1[94] = jj_gen;
+        break label_30;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
@@ -2958,7 +3000,7 @@ public class QueryParser implements QueryParserConstants
         op = jj_consume_token(GE);
         break;
       default:
-        jj_la1[94] = jj_gen;
+        jj_la1[95] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2974,7 +3016,7 @@ public class QueryParser implements QueryParserConstants
   Operand[] params = new Operand[2];
   Token op;
     params[0] = MultiplicativeExpression(context);
-    label_30:
+    label_31:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -2984,8 +3026,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[95] = jj_gen;
-        break label_30;
+        jj_la1[96] = jj_gen;
+        break label_31;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
@@ -2996,7 +3038,7 @@ public class QueryParser implements QueryParserConstants
         op = jj_consume_token(MINUS);
         break;
       default:
-        jj_la1[96] = jj_gen;
+        jj_la1[97] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -3012,7 +3054,7 @@ public class QueryParser implements QueryParserConstants
   Operand[] params = new Operand[2];
   Token op;
     params[0] = UnaryExpression(context);
-    label_31:
+    label_32:
     while (true) 
     {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
@@ -3023,8 +3065,8 @@ public class QueryParser implements QueryParserConstants
         ;
         break;
       default:
-        jj_la1[97] = jj_gen;
-        break label_31;
+        jj_la1[98] = jj_gen;
+        break label_32;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
       {
@@ -3038,7 +3080,7 @@ public class QueryParser implements QueryParserConstants
         op = jj_consume_token(REM);
         break;
       default:
-        jj_la1[98] = jj_gen;
+        jj_la1[99] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -3064,18 +3106,18 @@ public class QueryParser implements QueryParserConstants
       {
       case PLUS:
         jj_consume_token(PLUS);
-    plus = true;
+      plus = true;
         break;
       case MINUS:
         jj_consume_token(MINUS);
-    minus = true;
+      minus = true;
         break;
       case 81:
         jj_consume_token(81);
-    tilde = true;
+      tilde = true;
         break;
       default:
-        jj_la1[99] = jj_gen;
+        jj_la1[100] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -3113,7 +3155,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return param;}
       break;
     default:
-      jj_la1[100] = jj_gen;
+      jj_la1[101] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3164,7 +3206,7 @@ public class QueryParser implements QueryParserConstants
     {if (true) return param;}
       break;
     default:
-      jj_la1[101] = jj_gen;
+      jj_la1[102] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3185,20 +3227,20 @@ public class QueryParser implements QueryParserConstants
       {
       case INCR:
         jj_consume_token(INCR);
-    incr = true;
+      incr = true;
         break;
       case DECR:
         jj_consume_token(DECR);
-    decr = true;
+      decr = true;
         break;
       default:
-        jj_la1[102] = jj_gen;
+        jj_la1[103] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[103] = jj_gen;
+      jj_la1[104] = jj_gen;
       ;
     }
     if (incr)
@@ -3223,151 +3265,33 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_100() {
+  private boolean jj_3R_52() {
     if (jj_3R_65()) return true;
     return false;
   }
 
-  private boolean jj_3R_99() {
-    if (jj_scan_token(STRING_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_67() {
-    if (jj_3R_70()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_86() {
-    if (jj_3R_87()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_98() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_47() {
-    if (jj_3R_50()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_46() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_95() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_97()) {
-    jj_scanpos = xsp;
-    if (jj_3R_98()) {
-    jj_scanpos = xsp;
-    if (jj_3R_99()) {
-    jj_scanpos = xsp;
-    if (jj_3R_100()) {
-    jj_scanpos = xsp;
-    if (jj_3R_101()) return true;
-    }
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_97() {
-    if (jj_scan_token(INTEGER_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_45() {
-    if (jj_3R_49()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_43() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_45()) jj_scanpos = xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_46()) {
-    jj_scanpos = xsp;
-    if (jj_3R_47()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_85() {
-    if (jj_3R_86()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_64() {
-    if (jj_3R_67()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_83() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_84()) {
-    jj_scanpos = xsp;
-    if (jj_3R_85()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_84() {
-    if (jj_scan_token(BANG)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_33()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_37() {
-    if (jj_scan_token(XOR)) return true;
-    if (jj_scan_token(IDENTIFIER)) return true;
-    return false;
-  }
-
   private boolean jj_3R_82() {
-    if (jj_scan_token(DECR)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_36() {
-    if (jj_scan_token(LBRACKET)) return true;
-    if (jj_3R_40()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_33() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_36()) {
-    jj_scanpos = xsp;
-    if (jj_3R_37()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_51() {
-    if (jj_3R_64()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_81() {
     if (jj_scan_token(INCR)) return true;
     return false;
   }
 
-  private boolean jj_3R_41() {
-    if (jj_3R_43()) return true;
+  private boolean jj_3R_42() {
+    if (jj_3R_44()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_78() {
+    if (jj_3R_84()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_40() {
+    if (jj_3R_42()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_49() {
+    if (jj_3R_52()) return true;
     return false;
   }
 
@@ -3377,12 +3301,16 @@ public class QueryParser implements QueryParserConstants
   }
 
   private boolean jj_3R_39() {
-    if (jj_3R_41()) return true;
+    if (jj_3R_34()) return true;
     return false;
   }
 
-  private boolean jj_3R_48() {
-    if (jj_3R_51()) return true;
+  private boolean jj_3R_36() {
+    if (jj_scan_token(LPAREN)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_40()) jj_scanpos = xsp;
+    if (jj_scan_token(RPAREN)) return true;
     return false;
   }
 
@@ -3391,179 +3319,158 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_38() {
-    if (jj_3R_33()) return true;
-    return false;
-  }
-
   private boolean jj_3R_35() {
-    if (jj_scan_token(LPAREN)) return true;
+    if (jj_3R_39()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_33() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_39()) jj_scanpos = xsp;
-    if (jj_scan_token(RPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_75() {
-    if (jj_3R_81()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_34() {
-    if (jj_3R_38()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_32() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_34()) {
+    if (jj_3R_35()) {
     jj_scanpos = xsp;
-    if (jj_3R_35()) return true;
+    if (jj_3R_36()) return true;
     }
     return false;
   }
 
-  private boolean jj_3R_44() {
-    if (jj_3R_48()) return true;
+  private boolean jj_3R_45() {
+    if (jj_3R_49()) return true;
     return false;
   }
 
-  private boolean jj_3R_80() {
+  private boolean jj_3R_81() {
     if (jj_scan_token(81)) return true;
     return false;
   }
 
-  private boolean jj_3R_94() {
+  private boolean jj_3R_95() {
     if (jj_scan_token(FACT)) return true;
     return false;
   }
 
-  private boolean jj_3R_79() {
+  private boolean jj_3R_80() {
     if (jj_scan_token(MINUS)) return true;
     return false;
   }
 
-  private boolean jj_3R_78() {
+  private boolean jj_3R_79() {
     if (jj_scan_token(PLUS)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_73() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_74()) {
-    jj_scanpos = xsp;
-    if (jj_3R_75()) {
-    jj_scanpos = xsp;
-    if (jj_3R_76()) {
-    jj_scanpos = xsp;
-    if (jj_3R_77()) return true;
-    }
-    }
-    }
     return false;
   }
 
   private boolean jj_3R_74() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_78()) {
+    if (jj_3R_75()) {
     jj_scanpos = xsp;
-    if (jj_3R_79()) {
+    if (jj_3R_76()) {
     jj_scanpos = xsp;
-    if (jj_3R_80()) return true;
+    if (jj_3R_77()) {
+    jj_scanpos = xsp;
+    if (jj_3R_78()) return true;
+    }
     }
     }
     return false;
   }
 
-  private boolean jj_3R_93() {
+  private boolean jj_3R_75() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_79()) {
+    jj_scanpos = xsp;
+    if (jj_3R_80()) {
+    jj_scanpos = xsp;
+    if (jj_3R_81()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_94() {
     if (jj_scan_token(FORMAT)) return true;
     return false;
   }
 
-  private boolean jj_3R_96() {
+  private boolean jj_3R_97() {
     if (jj_scan_token(IDENTIFIER)) return true;
     return false;
   }
 
-  private boolean jj_3R_42() {
-    if (jj_3R_44()) return true;
+  private boolean jj_3R_43() {
+    if (jj_3R_45()) return true;
     return false;
   }
 
-  private boolean jj_3R_92() {
+  private boolean jj_3R_93() {
     if (jj_scan_token(LENGTH)) return true;
     return false;
   }
 
   private boolean jj_3_1() {
-    if (jj_3R_32()) return true;
+    if (jj_3R_33()) return true;
     return false;
   }
 
-  private boolean jj_3R_66() {
+  private boolean jj_3R_67() {
     if (jj_scan_token(UNKNOWN)) return true;
     return false;
   }
 
-  private boolean jj_3R_91() {
+  private boolean jj_3R_92() {
     if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 
-  private boolean jj_3R_90() {
+  private boolean jj_3R_91() {
     if (jj_scan_token(SCOPE)) return true;
     return false;
   }
 
-  private boolean jj_3R_72() {
-    if (jj_3R_73()) return true;
+  private boolean jj_3R_73() {
+    if (jj_3R_74()) return true;
     return false;
   }
 
-  private boolean jj_3R_69() {
+  private boolean jj_3R_70() {
     if (jj_scan_token(FALSE)) return true;
     return false;
   }
 
-  private boolean jj_3R_58() {
+  private boolean jj_3R_59() {
     if (jj_scan_token(CURRENCY)) return true;
     return false;
   }
 
-  private boolean jj_3R_89() {
-    if (jj_3R_96()) return true;
+  private boolean jj_3R_90() {
+    if (jj_3R_97()) return true;
     return false;
   }
 
-  private boolean jj_3R_65() {
+  private boolean jj_3R_66() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_68()) {
+    if (jj_3R_69()) {
     jj_scanpos = xsp;
-    if (jj_3R_69()) return true;
+    if (jj_3R_70()) return true;
     }
     return false;
   }
 
-  private boolean jj_3R_68() {
+  private boolean jj_3R_69() {
     if (jj_scan_token(TRUE)) return true;
     return false;
   }
 
-  private boolean jj_3R_57() {
+  private boolean jj_3R_58() {
     if (jj_scan_token(TERM)) return true;
     return false;
   }
 
-  private boolean jj_3R_87() {
+  private boolean jj_3R_88() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_88()) {
-    jj_scanpos = xsp;
     if (jj_3R_89()) {
     jj_scanpos = xsp;
     if (jj_3R_90()) {
@@ -3574,7 +3481,9 @@ public class QueryParser implements QueryParserConstants
     jj_scanpos = xsp;
     if (jj_3R_93()) {
     jj_scanpos = xsp;
-    if (jj_3R_94()) return true;
+    if (jj_3R_94()) {
+    jj_scanpos = xsp;
+    if (jj_3R_95()) return true;
     }
     }
     }
@@ -3584,13 +3493,28 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_88() {
-    if (jj_3R_95()) return true;
+  private boolean jj_3R_89() {
+    if (jj_3R_96()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_57() {
+    if (jj_scan_token(DECIMAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_64() {
+    if (jj_3R_67()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_72() {
+    if (jj_3R_73()) return true;
     return false;
   }
 
   private boolean jj_3R_56() {
-    if (jj_scan_token(DECIMAL)) return true;
+    if (jj_scan_token(STRING)) return true;
     return false;
   }
 
@@ -3600,50 +3524,33 @@ public class QueryParser implements QueryParserConstants
   }
 
   private boolean jj_3R_55() {
-    if (jj_scan_token(STRING)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_62() {
-    if (jj_3R_65()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_71() {
-    if (jj_3R_72()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_54() {
     if (jj_scan_token(DOUBLE)) return true;
     return false;
   }
 
-  private boolean jj_3R_61() {
+  private boolean jj_3R_62() {
     if (jj_scan_token(STRING_LITERAL)) return true;
     return false;
   }
 
-  private boolean jj_3R_53() {
+  private boolean jj_3R_54() {
     if (jj_scan_token(BOOLEAN)) return true;
     return false;
   }
 
-  private boolean jj_3R_60() {
+  private boolean jj_3R_61() {
     if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
     return false;
   }
 
-  private boolean jj_3R_52() {
+  private boolean jj_3R_53() {
     if (jj_scan_token(INTEGER)) return true;
     return false;
   }
 
-  private boolean jj_3R_49() {
+  private boolean jj_3R_50() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_52()) {
-    jj_scanpos = xsp;
     if (jj_3R_53()) {
     jj_scanpos = xsp;
     if (jj_3R_54()) {
@@ -3654,7 +3561,9 @@ public class QueryParser implements QueryParserConstants
     jj_scanpos = xsp;
     if (jj_3R_57()) {
     jj_scanpos = xsp;
-    if (jj_3R_58()) return true;
+    if (jj_3R_58()) {
+    jj_scanpos = xsp;
+    if (jj_3R_59()) return true;
     }
     }
     }
@@ -3664,28 +3573,28 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_40() {
-    if (jj_3R_42()) return true;
+  private boolean jj_3R_41() {
+    if (jj_3R_43()) return true;
     return false;
   }
 
-  private boolean jj_3R_59() {
+  private boolean jj_3R_60() {
     if (jj_scan_token(INTEGER_LITERAL)) return true;
     return false;
   }
 
-  private boolean jj_3R_50() {
+  private boolean jj_3R_51() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3R_59()) {
-    jj_scanpos = xsp;
     if (jj_3R_60()) {
     jj_scanpos = xsp;
     if (jj_3R_61()) {
     jj_scanpos = xsp;
     if (jj_3R_62()) {
     jj_scanpos = xsp;
-    if (jj_3R_63()) return true;
+    if (jj_3R_63()) {
+    jj_scanpos = xsp;
+    if (jj_3R_64()) return true;
     }
     }
     }
@@ -3693,13 +3602,146 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_70() {
-    if (jj_3R_71()) return true;
+  private boolean jj_3R_71() {
+    if (jj_3R_72()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_102() {
+    if (jj_3R_67()) return true;
     return false;
   }
 
   private boolean jj_3R_101() {
     if (jj_3R_66()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_100() {
+    if (jj_scan_token(STRING_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_68() {
+    if (jj_3R_71()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_87() {
+    if (jj_3R_88()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_99() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_48() {
+    if (jj_3R_51()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_47() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_96() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_98()) {
+    jj_scanpos = xsp;
+    if (jj_3R_99()) {
+    jj_scanpos = xsp;
+    if (jj_3R_100()) {
+    jj_scanpos = xsp;
+    if (jj_3R_101()) {
+    jj_scanpos = xsp;
+    if (jj_3R_102()) return true;
+    }
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_98() {
+    if (jj_scan_token(INTEGER_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_46() {
+    if (jj_3R_50()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_44() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_46()) jj_scanpos = xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_47()) {
+    jj_scanpos = xsp;
+    if (jj_3R_48()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_86() {
+    if (jj_3R_87()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_65() {
+    if (jj_3R_68()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_84() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_85()) {
+    jj_scanpos = xsp;
+    if (jj_3R_86()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_85() {
+    if (jj_scan_token(BANG)) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_34()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_38() {
+    if (jj_scan_token(XOR)) return true;
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_83() {
+    if (jj_scan_token(DECR)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_37() {
+    if (jj_scan_token(LBRACKET)) return true;
+    if (jj_3R_41()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_34() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_37()) {
+    jj_scanpos = xsp;
+    if (jj_3R_38()) return true;
+    }
     return false;
   }
 
@@ -3714,7 +3756,7 @@ public class QueryParser implements QueryParserConstants
   private Token jj_scanpos, jj_lastpos;
   private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[104];
+  final private int[] jj_la1 = new int[105];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -3726,15 +3768,15 @@ public class QueryParser implements QueryParserConstants
   }
   private static void jj_la1_init_0() 
   {
-    jj_la1_0 = new int[] { 0x400000,0x6a7dfc0,0x6a7dfc0,0x0,0x0,0x6a75fc0,0x6a75fc0,0x201000,0x0,0x0,0x0,0x0,0x0,0x6a65fc0,0x0,0x0,0x0,0x8400000,0x90000000,0x0,0x0,0x0,0x400000,0x0,0x0,0x90000000,0x91188000,0x0,0x90a007c0,0x0,0x0,0x95b897c0,0x0,0x0,0x95b897c0,0x0,0xa007c0,0x0,0x0,0x0,0x91189000,0x0,0x0,0x0,0x90a007c0,0x2000,0x2000,0x0,0x0,0x91b887c0,0x95b897c0,0x90a007c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xa007c0,0x0,0x0,0x2040000,0x0,0x0,0x0,0x0,0x0,0x91188000,0x0,0x90000000,0x0,0x0,0xa007c0,0x0,0x90a007c0,0x0,0x0,0xa007c0,0x0,0x90000000,0x0,0x90000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x91188000,0x91188000,0x0,0x0, };
+    jj_la1_0 = new int[] { 0x400000,0x6a7dfc0,0x6a7dfc0,0x0,0x0,0x6a75fc0,0x6a75fc0,0x201000,0x0,0x0,0x0,0x0,0x0,0x6a65fc0,0x0,0x0,0x0,0x8400000,0x90000000,0x0,0x0,0x0,0x400000,0x0,0x0,0x90000000,0x0,0x90a007c0,0x0,0x0,0x95b897c0,0x0,0x0,0x95b897c0,0x0,0xa007c0,0x0,0x0,0x0,0x91189000,0x0,0x0,0x0,0x90a007c0,0x2000,0x2000,0x0,0x0,0x91b887c0,0x95b897c0,0x90a007c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xa007c0,0x0,0x0,0x2040000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x91188000,0x0,0x90000000,0x0,0x0,0xa007c0,0x0,0x90a007c0,0x0,0x0,0xa007c0,0x0,0x90000000,0x0,0x90000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x91188000,0x91188000,0x0,0x0, };
   }
   private static void jj_la1_init_1() 
   {
-    jj_la1_1 = new int[] { 0x0,0x40,0x40,0x80,0x80,0x40,0x40,0x0,0x40000,0x0,0x4000,0x80,0x100000,0x40,0x10080,0x4000,0x40,0x2,0x3e,0x200,0x100200,0x100200,0x2,0x4000,0x0,0x3e,0xf00802de,0x200,0x5e,0x4000,0x8000,0xf03802de,0x4000,0x8000,0xf03802de,0x80,0x0,0x800,0x10000,0x40,0xf00800de,0x300000,0x42,0x200,0x5e,0x310280,0x310280,0x300000,0x200,0xf00800de,0xf03802de,0x5e,0x0,0x4000,0x4000,0x4000,0x200,0x4000,0x4000,0x4000,0x4000,0x0,0x800,0x10000,0x0,0x40000,0x100000,0x80,0x10000,0x10000,0xde,0x800,0x1e,0x42,0x0,0x0,0x8000,0x5e,0x880,0x4000,0x0,0x800,0x5e,0x10000,0x1e,0xc,0x4000000,0x8000000,0x0,0x0,0x0,0x2400000,0x2400000,0x1860000,0x1860000,0xc0000000,0xc0000000,0x0,0x0,0xc0000000,0xf00800de,0x800de,0x30000000,0x30000000, };
+    jj_la1_1 = new int[] { 0x0,0x40,0x40,0x80,0x80,0x40,0x40,0x0,0x40000,0x0,0x4000,0x80,0x100000,0x40,0x10080,0x4000,0x40,0x2,0x3e,0x200,0x100200,0x100200,0x2,0x4000,0x0,0x3e,0x200,0x5e,0x4000,0x8000,0xf03802de,0x4000,0x8000,0xf03802de,0x80,0x0,0x800,0x10000,0x40,0xf00800de,0x300000,0x42,0x200,0x5e,0x310280,0x310280,0x300000,0x200,0xf00800de,0xf03802de,0x5e,0x0,0x4000,0x4000,0x4000,0x200,0x4000,0x4000,0x4000,0x4000,0x0,0x800,0x10000,0x0,0x40000,0x100000,0x10080,0x10080,0x4000,0x10000,0x10000,0xde,0x800,0x1e,0x42,0x0,0x0,0x8000,0x5e,0x880,0x4000,0x0,0x800,0x5e,0x10000,0x1e,0xc,0x4000000,0x8000000,0x0,0x0,0x0,0x2400000,0x2400000,0x1860000,0x1860000,0xc0000000,0xc0000000,0x0,0x0,0xc0000000,0xf00800de,0x800de,0x30000000,0x30000000, };
   }
   private static void jj_la1_init_2() 
   {
-    jj_la1_2 = new int[] { 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x0,0x0,0x0,0x0,0x0,0x8,0x0,0x20000,0x0,0x0,0x0,0x0,0x28000,0x0,0x0,0x28000,0x0,0x0,0x10,0x40,0x0,0x20000,0x3f80,0x0,0x0,0x0,0x3fc0,0x3fc0,0x0,0x0,0x20000,0x20000,0x0,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x3fc0,0x3fc0,0x0,0x10,0x0,0x0,0x10000,0x0,0x0,0x0,0x10,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x10,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x23,0x23,0x20000,0x20000,0x0,0x0,0x0, };
+    jj_la1_2 = new int[] { 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x0,0x0,0x0,0x0,0x0,0x8,0x0,0x0,0x0,0x0,0x0,0x28000,0x0,0x0,0x28000,0x0,0x0,0x10,0x40,0x0,0x20000,0x3f80,0x0,0x0,0x0,0x3fc0,0x3fc0,0x0,0x0,0x20000,0x20000,0x0,0x4000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3fc0,0x3fc0,0x0,0x10,0x0,0x0,0x10000,0x0,0x0,0x0,0x10,0x0,0x0,0x10,0x0,0x0,0x0,0x0,0x0,0x0,0x8,0x10,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x23,0x23,0x20000,0x20000,0x0,0x0,0x0, };
   }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -3760,7 +3802,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 104; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 105; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -3784,7 +3826,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 104; i++)
+    for (int i = 0; i < 105; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3798,7 +3840,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 104; i++)
+    for (int i = 0; i < 105; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3812,7 +3854,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 104; i++)
+    for (int i = 0; i < 105; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3825,7 +3867,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 104; i++)
+    for (int i = 0; i < 105; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3838,7 +3880,7 @@ public class QueryParser implements QueryParserConstants
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 104; i++)
+    for (int i = 0; i < 105; i++)
       jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++)
       jj_2_rtns[i] = new JJCalls();
@@ -3988,7 +4030,7 @@ public class QueryParser implements QueryParserConstants
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 104; i++) 
+    for (int i = 0; i < 105; i++) 
     {
       if (jj_la1[i] == jj_gen) 
       {

@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
-import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -30,14 +30,14 @@ public class OperandContext
     protected Object value;
     protected OperandContext left;
     protected OperandContext right;
-    protected Term term;
+    protected Operand term;
     protected OperandContext next;
 
     /**
      * Create OperandContext object
      * @param term Term to preserve
      */
-    public OperandContext(Term term)
+    public OperandContext(Operand term)
     {
         this.term = term;
         id = term.getId();

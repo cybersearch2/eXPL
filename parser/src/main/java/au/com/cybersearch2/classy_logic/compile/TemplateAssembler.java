@@ -151,17 +151,31 @@ public class TemplateAssembler
             return scope.getGlobalScope();
         return null; 
     }
- 
+
+    /**
+     * Create new calculator query template
+     * @param outerTemplateName Qualified name of head template
+     * @param name Query name
+     * @return Template object
+     */
+    public Template createQueryTemplate(QualifiedName outerTemplateName, String name) 
+    {
+        Template template = getTemplate(outerTemplateName);
+        Template chainTemplate = template.innerTemplateInstance(name);
+        templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
+        return chainTemplate;
+    }
+    
     /**
      * Create new template and add to head template chain
      * @param outerTemplateName Qualified name of head template
      * @param name Qualified name of inner template
      * @return Template object
      */
-    public Template chainTemplate(QualifiedName outerTemplateName, String name) 
+    public Template chainTemplate(QualifiedName outerTemplateName) 
     {
         Template template = getTemplate(outerTemplateName);
-        Template chainTemplate = template.innerTemplateInstance(name);
+        Template chainTemplate = template.innerTemplateInstance();
         templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
         return chainTemplate;
     }

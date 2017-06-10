@@ -52,7 +52,7 @@ import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.RegExOperand;
 import au.com.cybersearch2.classy_logic.expression.MatchOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
-import au.com.cybersearch2.classy_logic.expression.LoopEvaluator;
+import au.com.cybersearch2.classy_logic.expression.TemplateOperand;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
 import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
@@ -75,7 +75,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
-import au.com.cybersearch2.classy_logic.interfaces.AssignType;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -231,6 +230,21 @@ public class QueryParser
      }
   }
   
+  void initializeList(ItemList<?> itemList, List<Parameter> literalList)
+  {
+    for (int i = 0; i < literalList.size(); ++i)
+    {
+      Parameter param = literalList.get(i);
+      if (param instanceof IntegerTerm)
+        ((ItemList<Long>)itemList).assignItem(i, (Long)param.getValue());
+      else if (param instanceof DoubleTerm)
+        ((ItemList<Double>)itemList).assignItem(i, (Double)param.getValue());
+      else if (param instanceof StringTerm)
+        ((ItemList<String>)itemList).assignItem(i, (String)param.getValue());
+      else if (param instanceof BooleanTerm)
+        ((ItemList<BooleanTerm>)itemList).assignItem(i, (BooleanTerm)param.getValue());
+    }
+  }
 }
 PARSER_END(QueryParser)
 
@@ -523,7 +537,6 @@ KeyName KeyName(QuerySpec querySpec, ParserContext context) :
 
 void Statement(ParserContext context):
 {
-  Operand var;
   context.setSourceItemPending(false);
 }
 {
@@ -718,26 +731,16 @@ String Fact(QualifiedName qualifiedAxiomName, ParserContext context) :
 
 Operand AxiomVariable(QualifiedName qualifiedAxiomName, ParserContext context) :
 {
-  Operand expression = null;
-  List<Template> axiomList = null;
+  List<Template> axiomList;
   ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
-  "="
-  ( 
-     expression=Expression(context) 
-  | 
-     axiomList=AxiomList(qualifiedAxiomName, context) 
-  )
+  "=" axiomList=AxiomList(qualifiedAxiomName, context) 
   {
-     VariableType varType = new VariableType(axiomList == null ? OperandType.AXIOM : OperandType.LIST);
-     if (expression != null)
-         varType.setProperty(VariableType.EXPRESSION, expression);
-     else
-         varType.setProperty(VariableType.PARAMS, axiomList);
+     VariableType varType = new VariableType(OperandType.LIST);
+     varType.setProperty(VariableType.PARAMS, axiomList);
      Operand operand = varType.getInstance(parserAssembler, qualifiedAxiomName);
-     if (expression != null)
-         parserAssembler.setParameter(operand.getQualifiedName());
+     parserAssembler.setParameter(operand.getQualifiedName());
      return operand;
   }
 } 
@@ -1031,7 +1034,7 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
     ( 
       delimitToken="{"
       {
-        Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName, "");
+        Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName);
         context.addSourceItem(scToken.image+expression.toString()).setEnd(delimitToken);
         context.pushSourceMarker();
         Token token = Token.newToken(QueryParserConstants.CALC);
@@ -1065,7 +1068,7 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
     {
       context.onTokenIntercept(delimitToken);
       context.pushSourceMarker();
-      Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName, "");
+      Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName);
       Token token = Token.newToken(QueryParserConstants.CALC);
       token.beginLine = delimitToken.beginLine;
       token.beginColumn = delimitToken.beginColumn;
@@ -1172,7 +1175,7 @@ Template InnerTemplateDeclaration(QualifiedName outerTemplateName, String callNa
     templateToken=">>"
     {
       ParserAssembler parserAssembler = context.getParserAssembler();
-      template = parserAssembler.getTemplateAssembler().chainTemplate(outerTemplateName, callName);
+      template = parserAssembler.getTemplateAssembler().createQueryTemplate(outerTemplateName, callName);
       template.setKey(queryKey);
       context.onTokenIntercept(templateToken);
     }
@@ -1232,9 +1235,9 @@ Operand InnerCalculator(Template template, QualifiedName outerTemplateName, Pars
   )* 
   delimitToken="}"
   {
-    LoopEvaluator loopEvaluator = new LoopEvaluator(template, runOnce);
+    TemplateOperand templateOperand = new TemplateOperand(template, runOnce);
     sourceItem.setEnd(delimitToken);
-    return loopEvaluator;
+    return templateOperand;
   }
 }
 
@@ -1441,6 +1444,7 @@ void VariableInitialization(ParserContext context) :
 Operand VariableDeclaration(ParserContext context) :
 {
   Token nameToken;
+  String name;
   boolean isUntyped = true;
   VariableType varType = null;
   ListItemSpec[] listIndexData = null;
@@ -1457,14 +1461,14 @@ Operand VariableDeclaration(ParserContext context) :
   )? 
   nameToken=<IDENTIFIER> 
   {
+    name = nameToken.image;
     if (isUntyped)
       context.onTokenIntercept(nameToken);
   }
   ( listIndexData=IndexExpression(context.getQualifiedName(nameToken.image), context) )? 
-  ("=" expression=Expression(context) )?
+  ( "=" expression=Expression(context) )?
   {
-     String name = nameToken.image;
-     if ((listIndexData !=null) && (listIndexData.length > 1))
+      if ((listIndexData !=null) && (listIndexData.length > 1))
        throw new ParseException("Axiom list variable \"" + name + "\" cannot be declared here");
      if (listIndexData !=null)
        return initList(context, listIndexData[0], expression);
@@ -1486,37 +1490,81 @@ void ListDeclaration(ParserContext context) :
   VariableType varType = null;
   QualifiedName qualifiedBindingName = null;
   QualifiedName qualifiedAxiomName = null;
+  Template template = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
   ( keywordToken=<LIST> | keywordToken=<LOCAL> ) 
-  [ "<" varType=Type(context) ">" ] 
+  ( "<" varType=Type(context) ">" )? 
   nameToken=<IDENTIFIER> 
   {
     listName = nameToken.image;
     context.setSourceMarker(keywordToken, listName);
     context.setSourceItemPending(false);
   }
-  [ "(" qualifiedAxiomName=Axiom(context)  ( ":" qualifiedBindingName = ResourceBinding(QueryParserConstants.TEMPLATE, qualifiedAxiomName, parserAssembler) )? ")" ]
+  (
+    ( "(" qualifiedAxiomName=Axiom(context)  ( ":" qualifiedBindingName = ResourceBinding(QueryParserConstants.TEMPLATE, qualifiedAxiomName, parserAssembler) )? ")" )
+    |
+    ( "=" <LBRACE> template=ListParameters(listName, varType, context) <RBRACE> )   
+  )?
   delimitToken = ";"
   {
     boolean isLocal = keywordToken.kind == QueryParserConstants.LOCAL;
     boolean isTermList = (varType != null) && varType.getOperandType() == OperandType.TERM;
     if ((varType == null) && (qualifiedAxiomName == null))
-        throw new ParseException("Invalid declaration for list \"" + listName + "\". Missing type or axiom name.");
+      throw new ParseException("Invalid declaration for list \"" + listName + "\". Missing type or axiom name.");
     if ((varType != null) && isLocal)
-        throw new ParseException("Invalid declaration for local \"" + listName + "\". Type in declaration not allowed.");
+      throw new ParseException("Invalid declaration for local \"" + listName + "\". Type in declaration not allowed.");
     if ((qualifiedBindingName != null) && !isTermList)
-        throw new ParseException("Invalid declaration for " + keywordToken.image + " \"" + listName + "\". Only Term type list can be bound to a resource");
+      throw new ParseException("Invalid declaration for " + keywordToken.image + " \"" + listName + "\". Only Term type list can be bound to a resource");
     if (qualifiedBindingName != null)
-        qualifiedAxiomName = qualifiedBindingName;
+      qualifiedAxiomName = qualifiedBindingName;
     if (varType == null)
-        varType = isLocal ? new VariableType(OperandType.LOCAL) : new VariableType(OperandType.AXIOM);
+      varType = isLocal ? new VariableType(OperandType.LOCAL) : new VariableType(OperandType.AXIOM);
     if (qualifiedAxiomName != null)
-        varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
-    ItemList<?> itemList = varType.getItemListInstance(parserAssembler, listName);
+      varType.setProperty(VariableType.AXIOM_KEY, qualifiedAxiomName);
+    ItemList<?> itemList;    
+    if (template != null)
+      itemList = varType.getDynamicListInstance(parserAssembler, listName, template);
+    else
+      itemList = varType.getItemListInstance(parserAssembler, listName);
     parserAssembler.getListAssembler().addItemList(itemList.getQualifiedName(), itemList);
     context.addSourceItem(itemList).setEnd(delimitToken);
+  }
+}
+
+Template ListParameters(String listName, VariableType varType, ParserContext context) :
+{
+  Operand expression;
+  QualifiedName outerTemplateName = context.getTemplateName();
+  ParserAssembler parserAssembler = context.getParserAssembler();
+  Template template = parserAssembler.getTemplateAssembler().chainTemplate(outerTemplateName);
+  Operand var = null;
+  if (varType == null)
+      throw new ParseException("Invalid declaration for list \"" + listName + "\". Type omitted from declaration.");
+}
+{ 
+  expression=Expression(context)
+  { 
+    if (varType.getOperandType() == expression.getOperator().getTrait().getOperandType())
+      var = expression;
+    if (var == null)
+      var = varType.getInstance(parserAssembler, expression.getQualifiedName(), expression);
+    template.addTerm(var);
+  }
+  ( ","
+    expression=Expression(context)
+    { 
+      var = null;
+      if (varType.getOperandType() == expression.getOperator().getTrait().getOperandType())
+        var = expression;
+      if (var == null)
+        var = varType.getInstance(parserAssembler, expression.getQualifiedName(), expression);
+      template.addTerm(var);
+    }
+  )*
+  {
+    return template;
   }
 }
 
@@ -1840,7 +1888,7 @@ Template Parameters(String callName, ParserContext context, boolean nameRequired
   QualifiedName outerTemplateName = context.getTemplateName();
   String functionKey = outerTemplateName.getTemplate() + "." + callName;
   ParserAssembler parserAssembler = context.getParserAssembler();
-  Template template = parserAssembler.getTemplateAssembler().chainTemplate(outerTemplateName, callName);
+  Template template = parserAssembler.getTemplateAssembler().chainTemplate(outerTemplateName);
   template.setKey(functionKey);
 }
 {
@@ -2130,9 +2178,9 @@ Operand AdditiveExpression(ParserContext context) :
   Operand[] params = new Operand[2];
   Token op;
 }
-{
+{ 
   params[0]=MultiplicativeExpression(context)
-  ( 
+  (  
     ( 
     op="+" 
     | 
@@ -2180,22 +2228,22 @@ Operand UnaryExpression(ParserContext context) :
   boolean minus = false;
   boolean tilde = false;
 }
-{
+{ 
   ( 
     "+"
-  {
-    plus = true;
-  }
-  | 
+    {
+      plus = true;
+    }
+    | 
     "-"
-  {
-    minus = true;
-  }
-  |
-    "~"
-  {
-    tilde = true;
-  }
+    {
+      minus = true;
+    }
+    |
+      "~"
+    {
+      tilde = true;
+    }
   ) 
   param=UnaryExpression(context)
   {
@@ -2207,7 +2255,7 @@ Operand UnaryExpression(ParserContext context) :
       return new Evaluator(param, "~", Orientation.unary_prefix);
     return param;
   }
-  |
+  | 
   param=PreIncrementExpression(context)
   {
     return param;
@@ -2228,7 +2276,7 @@ Operand PreIncrementExpression(ParserContext context) :
 {
   Operand param;
 }
-{
+{ 
   "++" param=PrimaryExpression(context)
   {
     return new Evaluator(param, "++", Orientation.unary_prefix);
@@ -2250,7 +2298,7 @@ Operand UnaryExpressionNotPlusMinus(ParserContext context) :
 {
   Operand param;
 }
-{
+{ 
   "!" param=UnaryExpression(context)
   {
     return new Evaluator(param, "!", Orientation.unary_prefix);
@@ -2268,19 +2316,19 @@ Operand PostfixExpression(ParserContext context) :
   boolean incr = false;
   boolean decr = false;
 }
-{
+{ 
   param=PrimaryExpression(context)
-  [ 
-    "++"
-  {
-    incr = true;
-  }
-  | 
-    "--"
-  {
-    decr = true; 
-  }
-  ]
+  (   
+    <INCR>
+    {
+      incr = true;
+    }
+    | 
+    <DECR>
+    {
+      decr = true; 
+    }
+  )?
   {
     if (incr)
        return new Evaluator(param, "++", Orientation.unary_postfix);
@@ -2289,4 +2337,5 @@ Operand PostfixExpression(ParserContext context) :
     return param;
   } 
 }
+
 

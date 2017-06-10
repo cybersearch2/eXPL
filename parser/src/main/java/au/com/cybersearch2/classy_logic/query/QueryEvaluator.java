@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.compile;
+package au.com.cybersearch2.classy_logic.query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,27 +21,24 @@ import java.util.List;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.ScopeContext;
+import au.com.cybersearch2.classy_logic.compile.ListAssembler;
+import au.com.cybersearch2.classy_logic.compile.OperandMap;
+import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.expression.TermOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
-import au.com.cybersearch2.classy_logic.helper.Unknown;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
-import au.com.cybersearch2.classy_logic.query.QueryLauncher;
-import au.com.cybersearch2.classy_logic.query.QuerySpec;
-import au.com.cybersearch2.classy_logic.query.QueryType;
-import au.com.cybersearch2.classy_logic.query.Solution;
-import au.com.cybersearch2.classy_logic.terms.LiteralParameter;
-import au.com.cybersearch2.classy_logic.terms.LiteralType;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -75,7 +72,7 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
     /** Optional inner Template to receive query results */
     protected Template innerTemplate;
     /** Term belonging to inner template - holds AxiomTermList */
-    protected Term innerTerm;
+    protected Operand innerTerm;
     /** Axiom listeners for results */
     protected List<AxiomListener> axiomListenerList;
 
@@ -132,9 +129,9 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
         else
         {   // Create empty AxiomTermList to avoid null issues
             KeyName firstKeyname = queryParams.getQuerySpec().getKeyNameList().get(0);
-            QualifiedName qname = QualifiedName.parseName(firstKeyname.getTemplateName().getName(), callerScope.getParserAssembler().getQualifiedContextname());
+            QualifiedName qname = QualifiedName.parseName(firstKeyname.getTemplateName().getTemplate(), callerScope.getParserAssembler().getQualifiedContextname());
             // Create empty AxiomTermList to return as query result. 
-            innerTerm = new Parameter(qname.getName(), new AxiomTermList(qname, firstKeyname.getTemplateName()));
+            innerTerm = new TermOperand(new AxiomTermList(qname, firstKeyname.getTemplateName()));
         }
     }
 
@@ -237,7 +234,7 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
             String argName = argument.getName();
             List<String> termNames = template.getArchetype().getTermNameList();
             if (argName.isEmpty() || !termNames.contains(argName))
-            {
+            {   // Place by position if argument name not available or not matching any term name
                 if (index == template.getTermCount())
                     throw new ExpressionException("Unnamed argument at position " + index + " out of bounds");
                 argName = template.getTermByIndex(index).getName();
@@ -254,53 +251,11 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
      * @param id Modification id
      * @return SolutionHandler object which does nothing if there is no inner template
      */
-    protected SolutionHandler getSolutionHandler(final String solutionName, final int id)
+    protected SolutionHandler getSolutionHandler(String solutionName, int id)
     {
         return innerTemplate == null ? 
                 QueryParams.DO_NOTHING : 
-                new SolutionHandler(){
-        @Override
-        public boolean onSolution(Solution solution)
-        {
-            Axiom axiom = solution.getAxiom(solutionName);
-            if (axiom.getTermCount() > 0)
-            {
-                // No backup, so reset before unification
-                //innerTemplate.reset();
-                for (int i = 0; i < innerTemplate.getTermCount(); ++i)
-                    innerTemplate.getTermByIndex(i).backup(0);
-                if (innerTemplate.unify(axiom, solution))
-                {
-                    if (innerTemplate.evaluate(context) == EvaluationStatus.COMPLETE);
-                    {
-                        Axiom innerAxiom = new Axiom(innerTemplate.getKey());
-                        for (int i = 0; i < (innerTemplate.getTermCount()); i++)
-                        {
-                            String termName = innerTemplate.getTermByIndex(i).getName();
-                            Term term = axiom.getTermByName(termName);
-                            if (term == null)
-                                term = new Parameter(termName);
-                            innerAxiom.addTerm(term);
-                        }
-                        innerAxiom.getArchetype().clearMutable();
-                        axiomTermListInstance(id).setAxiom(innerAxiom);
-                    }
-                }
-            }
-            else
-            {
-                Axiom innerAxiom = new Axiom(innerTemplate.getKey());
-                for (int i = 0; i < (innerTemplate.getTermCount()); i++)
-                {
-                    String termName = innerTemplate.getTermByIndex(i).getName();
-                    Term term = new LiteralParameter(termName, new Unknown(), LiteralType.unknown);
-                    innerAxiom.addTerm(term);
-                }
-                innerAxiom.getArchetype().clearMutable();
-                axiomTermListInstance(id).setAxiom(innerAxiom);
-            }
-            return true;
-        }};
+                new EvaluatorHandler(innerTemplate, solutionName, axiomTermListInstance(id));
     }
  
     /**

@@ -21,8 +21,8 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.DoubleOperator;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * DoubleOperand
@@ -90,15 +90,14 @@ public class DoubleOperand extends ExpressionOperand<Double> implements LocaleLi
         return status;
     }
 
-	/**
-     * Assign a value and id to this Term from another term 
-     * @param term Term containing non-null value and id to set
-     * @see au.com.cybersearch2.classy_logic.terms.Parameter#assign(au.com.cybersearch2.classy_logic.interfaces.Term)
+    /**
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
      */
-	@Override
-	public void assign(Term term) 
+    @Override
+    public void assign(Parameter parameter)
 	{
-		setValue(operator.convertObject(term.getValue(), term.getValueClass()));
+		setValue(operator.convertObject(parameter.getValue(), parameter.getValueClass()));
 	}
 
 	/**

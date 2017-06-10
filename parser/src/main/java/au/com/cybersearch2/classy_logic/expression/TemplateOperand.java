@@ -27,7 +27,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 
 /**
- * LoopEvaluator
+ * TemplateOperand
  * Operand which performs evaluation a sequence of operands. 
  * A short circuit causes a return to the start (ie. expression prefixed with '?' evaluates to 'false') 
  * On each iteration, a backup clears the results of the previous evaluations. 
@@ -36,7 +36,7 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
  * @author Andrew Bowley
  * 23 Jan 2015
  */
-public class LoopEvaluator extends BooleanOperand implements DebugTarget
+public class TemplateOperand extends BooleanOperand implements DebugTarget
 {
 	/** The Operand sequence to be evaluated is contained in a template */
 	protected Template template;
@@ -46,15 +46,15 @@ public class LoopEvaluator extends BooleanOperand implements DebugTarget
 	protected ExecutionContext context;
 
 	/**
-	 * Construct a LoopEvaluator object
+	 * Construct a TemplateOperand object
 	 * @param template Container for the Operand sequence to be evaluated
 	 */
-	public LoopEvaluator(Template template) 
+	public TemplateOperand(Template template) 
 	{
 		this(template, false);
 	}
 
-	public LoopEvaluator(Template template, boolean runOnce) 
+	public TemplateOperand(Template template, boolean runOnce) 
 	{
 		super(new QualifiedName((template.getQualifiedName().getTemplate()) + (runOnce ? "_run_once" : "_loop"), template.getQualifiedName()));
 		this.template = template;
@@ -83,7 +83,6 @@ public class LoopEvaluator extends BooleanOperand implements DebugTarget
 			}
 			// Only backup local changes
 			template.backup(true);
-			/*
 			if ((context == null) && (++count == 10))
 			{
 				long now = new Date().getTime();
@@ -94,7 +93,6 @@ public class LoopEvaluator extends BooleanOperand implements DebugTarget
 				}
 				count = 0;
 			}
-			*/
 		}
 	}
 

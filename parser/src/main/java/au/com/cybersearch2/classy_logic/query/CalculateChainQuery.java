@@ -83,21 +83,28 @@ public class CalculateChainQuery extends ChainQuery
 			    calculator.setAxiomListener(axiomListener);
 	    if (template.isChoice())
 	    	calculator.setChoice(choice);
-	    // A chain is used to detect if a template with same name as head template encountered.
-	    // This may happen for same query repeated in different scopes.
-	    if (templateChain.isEmpty())
-	        templateChain.push(template);
-	    else
-	    {
-	        String key = template.getName();
-	        Template head = templateChain.peekLast();
-	        if (head.getName().equals(key))
-	        {   // New query, so reset template chain
-	            while ((head = templateChain.pollLast()) != null)
-	                head.reset();
-	        }
-            templateChain.push(template);
-	    }
+        if (next != null)
+        {
+    	    // A chain is used to detect if a template with same name as head template encountered.
+    	    // This may happen for same query repeated in different scopes.
+    	    if (templateChain.isEmpty())
+    	    {
+                templateChain.push(template);
+    	    }
+    	    else
+    	    {
+    	        String key = template.getName();
+    	        Template head = templateChain.peekLast();
+    	        if (head.getName().equals(key))
+    	        {   // New query, so reset template chain
+    	            while ((head = templateChain.pollLast()) != null)
+    	                head.reset();
+    	        }
+                templateChain.push(template);
+    	    }
+        }
+        else
+            templateChain.clear();
 		if (axiom == null)
 			calculator.iterate(solution, template, context);
 		else 

@@ -17,10 +17,9 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.NullOperator;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * NullOperand
@@ -28,7 +27,7 @@ import au.com.cybersearch2.classy_logic.operator.NullOperator;
  * @author Andrew Bowley
  * 8 Dec 2014
  */
-public class NullOperand extends ExpressionOperand<Object> implements Operand
+public class NullOperand extends ExpressionOperand<Object>
 {
     /** Defines operations that an Operand performs with other operands. */
     protected NullOperator operator;
@@ -62,15 +61,13 @@ public class NullOperand extends ExpressionOperand<Object> implements Operand
         init();
     }
 
-	/**
-	 * This Operand value is immutable
-     * Interface: Assign a value and id to this Term from another term 
-     * @param term Term containing non-null value and id to set
-	 */
-	@Override
-	public void assign(Term term) 
+    /**
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
+     */
+    @Override
+    public void assign(Parameter parameter)
 	{
-	    id = term.getId();
 	}
 
     @Override

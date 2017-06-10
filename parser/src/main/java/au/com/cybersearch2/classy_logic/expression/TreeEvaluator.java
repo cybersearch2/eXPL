@@ -15,16 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.assignRightToLeft;
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.calculateBoolean;
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isInvalidLeftUnaryOp;
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isInvalidRightUnaryOp;
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isNaN;
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isValidLeftOperand;
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isValidOperand;
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isValidRightOperand;
-import static au.com.cybersearch2.classy_logic.helper.EvaluationUtils.isConcatenateValid;
-
 import java.math.BigDecimal;
 import java.util.Locale;
 
@@ -32,6 +22,7 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.EvaluationUtils;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
@@ -59,6 +50,8 @@ abstract class TreeEvaluator extends DelegateOperand
     protected boolean leftIsNaN;
     /** Right term is not an number */
     protected boolean rightIsNaN;
+    /** Evaulation helper methods */
+    protected EvaluationUtils utils;
  
     /**
      * @param qname
@@ -69,6 +62,7 @@ abstract class TreeEvaluator extends DelegateOperand
         super(qname);
         this.operatorEnum = operatorEnum;
         this.orientation = orientation;
+        utils = new EvaluationUtils();
         // Short circuit adds logic to return false to evaluate().
         // It applies to operators "&&" and "||".
         // Note there is a unary form used for short circuit expressions ie. starting with '?'
@@ -113,7 +107,7 @@ abstract class TreeEvaluator extends DelegateOperand
         if (evaluationStatus == EvaluationStatus.COMPLETE) 
         {
             // Remember if left is not a number
-            leftIsNaN = isNaN(left, operatorEnum);
+            leftIsNaN = utils.isNaN(left, operatorEnum);
             if (right != null)
                 evaluationStatus = evaluateRight(left, right, id);
         }
@@ -137,10 +131,10 @@ abstract class TreeEvaluator extends DelegateOperand
             // If left hand term is empty, then cannot proceed. Maybe unification failed for this term.
             //throw new ExpressionException("Left term is empty");
             return EvaluationStatus.FAIL;
-        if (!isValidLeftOperand(left, right, operatorEnum) || isInvalidLeftUnaryOp(right, operatorEnum))
+        if (!utils.isValidLeftOperand(left, right, operatorEnum) || utils.isInvalidLeftUnaryOp(right, operatorEnum))
         {   // TreeEvaluator not permited for type of Term value
             // NaN has precedence if operation has Numeric result
-            if (!isNaN(left, operatorEnum) && ((right == null) || !isNaN(right, operatorEnum)))
+            if (!utils.isNaN(left, operatorEnum) && ((right == null) || !utils.isNaN(right, operatorEnum)))
                 //throw new ExpressionException("Cannot evaluate " + (right == null ? unaryLeftToString() : binaryToString()));
                 return EvaluationStatus.FAIL;
         }
@@ -201,9 +195,9 @@ abstract class TreeEvaluator extends DelegateOperand
             right = getRightOperand();
         }
         // Remember if right is not a number
-        rightIsNaN = isNaN(right, operatorEnum);
-        if ((!isValidRightOperand(right, operatorEnum) || isInvalidRightUnaryOp(left, operatorEnum)) &&
-             !((left != null) && isConcatenateValid(left, operatorEnum))) 
+        rightIsNaN = utils.isNaN(right, operatorEnum);
+        if ((!utils.isValidRightOperand(right, operatorEnum) || utils.isInvalidRightUnaryOp(left, operatorEnum)) &&
+             !((left != null) && utils.isConcatenateValid(left, operatorEnum))) 
         {   
             // TreeEvaluator not permited for type of Term value
             // NaN has precedence if operation has Numeric result
@@ -225,7 +219,7 @@ abstract class TreeEvaluator extends DelegateOperand
         switch (operatorEnum)
         {
         case ASSIGN: // "="
-            return assignRightToLeft(leftTerm, rightTerm, modificationId);
+            return utils.assignRightToLeft(leftTerm, rightTerm, modificationId);
         case LT: // "<"
         case GT: // ">"
         case EQ: // "=="
@@ -239,7 +233,7 @@ abstract class TreeEvaluator extends DelegateOperand
                     leftTerm.getOperator().booleanEvaluation(leftTerm, operatorEnum, rightTerm);
         case PLUS: // "+"
         case PLUSASSIGN: // "+"
-            if (isConcatenateValid(leftTerm, operatorEnum))
+            if (utils.isConcatenateValid(leftTerm, operatorEnum))
             {
                 OperandType leftOperandType = leftTerm.getOperator().getTrait().getOperandType();
                 if (leftOperandType == OperandType.STRING)
@@ -258,7 +252,7 @@ abstract class TreeEvaluator extends DelegateOperand
             // Deliberately fall through if not concatination
         case STAR: // "*"
             if ((leftTerm.getValueClass() == Boolean.class) || (rightTerm.getValueClass() == Boolean.class))
-                return calculateBoolean(leftTerm, rightTerm);
+                return utils.calculateBoolean(leftTerm, rightTerm);
             // Deliberately fall through if not boolean "*"
         case MINUS: // "-"
         case SLASH: // "/"
@@ -322,7 +316,7 @@ abstract class TreeEvaluator extends DelegateOperand
             return (isLeftString && isRightString);
         if (isRightString)
         {
-            if (isValidOperand(left, operatorEnum, left.getOperator().getLeftOperandOps()) &&
+            if (utils.isValidOperand(left, operatorEnum, left.getOperator().getLeftOperandOps()) &&
                 (left.getOperator().getTrait() instanceof StringCloneable))
             {
                 StringCloneable stringCloneable = (StringCloneable)left.getOperator().getTrait();
@@ -331,7 +325,7 @@ abstract class TreeEvaluator extends DelegateOperand
             }
             return true;
         }
-        if (isValidOperand(right, operatorEnum, right.getOperator().getRightOperandOps()) &&
+        if (utils.isValidOperand(right, operatorEnum, right.getOperator().getRightOperandOps()) &&
              (right.getOperator().getTrait() instanceof StringCloneable))
         {
             StringCloneable stringCloneable = (StringCloneable)right.getOperator().getTrait();

@@ -336,6 +336,22 @@ public class ListAssembler
     }
 
     /**
+     * Returns list of axiom listeners for specified name, creating the list if it does not already exist.
+     * @param qualifiedName Name of list
+     * @return List containing AxiomListener objects or null if list not found
+     */
+    public List<AxiomListener> getAxiomListenerList(QualifiedName qualifiedName)
+    {
+        List<AxiomListener> axiomListenerList = axiomListenerMap.get(qualifiedName);
+        if (axiomListenerList == null)
+        {
+            axiomListenerList = new ArrayList<AxiomListener>();
+            axiomListenerMap.put(qualifiedName, axiomListenerList);
+        }
+        return axiomListenerList;
+    }
+
+    /**
      * Returns index of item identified by name
      * @param listName Name of list - used only for error reporting
      * @param item Item name
@@ -378,22 +394,6 @@ public class ListAssembler
     protected List<Axiom> removeAxiomItems(QualifiedName qualifiedName)
     {
         return axiomListMap.remove(qualifiedName);
-    }
-
-    /**
-     * Returns list of axiom listeners for specified name, creating the list if it does not already exist.
-     * @param qualifiedName Name of list
-     * @return List containing AxiomListener objects or null if list not found
-     */
-    protected List<AxiomListener> getAxiomListenerList(QualifiedName qualifiedName)
-    {
-        List<AxiomListener> axiomListenerList = axiomListenerMap.get(qualifiedName);
-        if (axiomListenerList == null)
-        {
-            axiomListenerList = new ArrayList<AxiomListener>();
-            axiomListenerMap.put(qualifiedName, axiomListenerList);
-        }
-        return axiomListenerList;
     }
 
     /**

@@ -106,7 +106,7 @@ public abstract class TermList <T extends Term> implements Serializable
      * @param name String
      * @return Term object or null if not found
      */
-    public Term getTermByName(String name)
+    public T getTermByName(String name)
     {
        if (name == null)
             throw new IllegalArgumentException("Parameter \"name\" is null");

@@ -16,17 +16,18 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.terms.GenericParameter;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * ExpressionOperand - Named typed Parameter, with optional expression to assign a value
  * @author Andrew Bowley
  * @since 28/09/2010
  */
-public abstract class ExpressionOperand<T> extends GenericParameter<T> implements Operand
+public abstract class ExpressionOperand<T> extends Operand
 {
 	/** Optional Parameter which evaluates value */
 	protected Operand expression;
@@ -114,7 +115,28 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
     @Override
     public void setValue(Object value)
     {
-        super.setTypeValue((T) value);
+        setTypeValue((T) value);
+    }
+
+	   /**
+     * Returns value
+     * @return Object of generic type T
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public T getValue()
+    {
+        return (T) value;
+    }
+
+    /**
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
+     */
+    @Override
+    public void assign(Parameter parameter)
+    {
+        setValue(parameter.getValue());
     }
 
 	/**
@@ -230,6 +252,19 @@ public abstract class ExpressionOperand<T> extends GenericParameter<T> implement
     public int getArchetypeIndex()
     {
         return index;
+    }
+
+    /**
+     * Set value type safe
+     * @param value Object of generic type T
+     */
+    protected void setTypeValue(T value)
+    {
+        if (value == null)
+            this.value = new Null();
+        else
+            this.value = value;
+        this.empty = false;
     }
 
 }

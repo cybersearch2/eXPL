@@ -45,8 +45,8 @@ public class ArrayItemList<T> implements ItemList<T>
     protected OperandType operandType;
 
     /**
-     * Construct a ListOperand object
-     * @param clazz Class of list items 
+     * Construct a ArrayItemList object
+     * @param operandType Operand type of list items 
      * @param qname Qualified name 
      */
 	public ArrayItemList(OperandType operandType, QualifiedName qname) 

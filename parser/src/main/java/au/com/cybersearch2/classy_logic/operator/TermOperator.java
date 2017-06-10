@@ -21,16 +21,14 @@ import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
-import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 
 /**
- * AxiomParameterOperator
+ * TermOperator
  * Operator for Operand which populates an axiom from a parameter list after the list operands have been evaluated
- * @see AxiomParameterOperand
  * @author Andrew Bowley
  * 28Apr.,2017
  */
-public class AxiomParameterOperator implements Operator
+public class TermOperator implements Operator
 {
     static Trait AXIOM_PARAMETER_TRAIT;
     

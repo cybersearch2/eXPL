@@ -534,7 +534,7 @@ public class Template extends TermList<Operand>
 		{
 			for (String name: initData.keySet())
 			{
-                Term term = getTermByName(name);
+                Operand term = getTermByName(name);
 				if (term != null)
 				{
 				    if (term instanceof Evaluator)
@@ -587,24 +587,35 @@ public class Template extends TermList<Operand>
         template.next = nextTemplate;
 	}
 
-	/**
-	 * Returns inner template instance for which this is the outer template
-	 * @param name Additional name part to afix to the qualified name - optional, can be empty
-	 * @return
-	 */
+	   /**
+     * Returns query template instance
+     * @param name Query name to be appended to template qualified name
+     * @return Template object
+     */
     public Template innerTemplateInstance(String name)
     {
+        boolean isQueryTemplate = (name != null);
         QualifiedName innerTemplateName = new QualifiedTemplateName(
                 qname.getScope(), 
                 qname.getTemplate() + 
                 Integer.toString(qname.incrementReferenceCount() + 1));
-        if (!name.isEmpty())
+        if (isQueryTemplate)
             innerTemplateName = new QualifiedName(name, innerTemplateName);
         TemplateArchetype newTemplateArchetype = new TemplateArchetype(innerTemplateName);
         Template newTemplate = new Template(newTemplateArchetype, qname);
         newTemplate.isInnerTemplate = true;
-        setNext(newTemplate);
+        if (!isQueryTemplate)
+            setNext(newTemplate);
         return newTemplate;
+    }
+    
+	/**
+	 * Returns inner template instance chained to this template
+	 * @return Template object
+	 */
+    public Template innerTemplateInstance()
+    {
+        return innerTemplateInstance(null);
     }
 
     /**
@@ -615,7 +626,7 @@ public class Template extends TermList<Operand>
      */
     public Template choiceInstance(Template master)
     {
-        Template choiceTemplate = innerTemplateInstance("");
+        Template choiceTemplate = innerTemplateInstance();
         choiceTemplate.contextName = master.getQualifiedName();
         for (Operand operand: master.termList)
             choiceTemplate.addTerm(operand);

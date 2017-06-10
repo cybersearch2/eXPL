@@ -27,6 +27,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.BigDecimalOperator;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * BigDecimalOperand
@@ -113,15 +114,14 @@ public class BigDecimalOperand extends ExpressionOperand<BigDecimal> implements 
         return super.backup(id);
     }
     
-	/**
-     * Assign a value and id to this Term from another term 
-     * @param term Term containing non-null value and id to set
-	 */
-	@Override
-	public void assign(Term term) 
+    /**
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
+     */
+    @Override
+    public void assign(Parameter parameter)
 	{
-		setValue(operator.convertObject(term.getValue(), term.getValueClass()));
-		//id = term.getId();
+		setValue(operator.convertObject(parameter.getValue(), parameter.getValueClass()));
 	}
 
     /**

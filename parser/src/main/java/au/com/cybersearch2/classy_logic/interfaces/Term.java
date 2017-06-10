@@ -87,12 +87,6 @@ public interface Term
 	 */
 	EvaluationStatus evaluate(int id);
 
-	/**
-	 * Assign a value and id to this Term from another term 
-	 * @param term Term containing non-null value and id to set
-	 */
-	void assign(Term term);
-
     /**
      * Set value, mark Term as not empty
      * @param value Object. If null a Null object will be set and empty status unchanged

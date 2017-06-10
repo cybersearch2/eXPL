@@ -8,7 +8,6 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.operator.AssignTypeEvaluatorOperator;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.operator.EvaluatorOperator;
 
@@ -99,10 +98,7 @@ public class Evaluator extends TreeEvaluator
 	protected Evaluator(QualifiedName qname, String operatorNotation, Orientation orientation)
 	{
 		super(qname, OperatorEnum.convertOperator(operatorNotation), orientation);
-	    if (operatorEnum == OperatorEnum.ASSIGN)
-	        operator = new AssignTypeEvaluatorOperator();
-	    else
-	        operator = new EvaluatorOperator();
+	    operator = new EvaluatorOperator();
 	}
 
 	/**

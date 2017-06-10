@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * Operand 
@@ -23,53 +24,87 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
  * @author Andrew Bowley
  * 1 Dec 2014
  */
-public interface Operand extends Term 
+public abstract class Operand extends Parameter
 {
-	/**
+    /**
+     * @param name
+      */
+	public Operand(String name)
+    {
+        super(name);
+    }
+
+    /**
+     * @param name
+     * @param value
+     */
+    public Operand(String name, int value)
+    {
+        super(name, value);
+        
+    }
+
+    /**
+     * @param name
+     * @param value
+     */
+    public Operand(String name, Object value)
+    {
+        super(name, value);
+        
+    }
+
+    /**
 	 * Returns qualified name
 	 * @return QualifiedName object
 	 */
-	QualifiedName getQualifiedName();
+	public abstract QualifiedName getQualifiedName();
 	
+    /**
+     * Assign a value to this Operand derived from a parameter 
+     * @param parameter Parameter containing non-null value
+     */
+	public abstract void assign(Parameter parameter);
+
     /**
      * Returns left child of Operand
      * @return Operand object or null if there is no child
      */
-    Operand getLeftOperand();
+	public abstract Operand getLeftOperand();
     
     /**
      * Returns right child of Operand
      * @return Operand object or null if there is no child
      */
-    Operand getRightOperand();
+	public abstract Operand getRightOperand();
 
 	/**
 	 * Set this operand private - not visible in solution
 	 * @param isPrivate Flag set true if operand not visible in solution
 	 */
-	void setPrivate(boolean isPrivate);
+	public abstract void setPrivate(boolean isPrivate);
 	
 	/**
 	 * Returns flag set true if this operand is private
 	 * @return
 	 */
-	boolean isPrivate();
+	public abstract boolean isPrivate();
 
 	/**
 	 * Returns object which defines operations that an Operand performs with other operands
 	 * @return Operator object
 	 */
-	Operator getOperator();
+	public abstract Operator getOperator();
 
     /**
      * Sets index of this Operand in the archetype of it's containing template
      * @param index int value
      */
-    void setArchetypeIndex(int index);
+	public abstract void setArchetypeIndex(int index);
  
     /**
      * Returns index of this Operand in the archetype of it's containing template.
      * @return non-negative number, if set, otherwise -1
      */
-    int getArchetypeIndex();
+	public abstract int getArchetypeIndex();
 }

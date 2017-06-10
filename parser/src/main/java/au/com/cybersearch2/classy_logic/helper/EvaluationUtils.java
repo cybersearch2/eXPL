@@ -34,7 +34,7 @@ public class EvaluationUtils
      * @param leftTerm Left Operand
      * @return Flag set true to indicate valid left operand
      */
-    public static boolean isValidLeftOperand(Operand leftTerm, Operand rightTerm, OperatorEnum operatorEnum) 
+    public boolean isValidLeftOperand(Operand leftTerm, Operand rightTerm, OperatorEnum operatorEnum) 
     {
         for (OperatorEnum operatorEnum2: leftTerm.getOperator().getLeftOperandOps())
             if (operatorEnum2 == operatorEnum)
@@ -51,7 +51,7 @@ public class EvaluationUtils
      * @param term
      * @return boolean
      */
-    public static boolean isConcatenateValid(Operand term, OperatorEnum operatorEnum)
+    public boolean isConcatenateValid(Operand term, OperatorEnum operatorEnum)
     {
         for (OperatorEnum operatorEnum2: term.getOperator().getConcatenateOps())
             if (operatorEnum2 == operatorEnum)
@@ -64,7 +64,7 @@ public class EvaluationUtils
      * @param leftTerm Left Operand. If not null then operation is binary
      * @return Flag set true to indicate invalid right operand
      */
-    public static boolean isInvalidRightUnaryOp(Operand leftTerm, OperatorEnum operatorEnum)
+    public boolean isInvalidRightUnaryOp(Operand leftTerm, OperatorEnum operatorEnum)
     {
         if (leftTerm != null)
             return false;
@@ -83,7 +83,7 @@ public class EvaluationUtils
      * @param rightTerm Right Operand
      * @return Flag set true to indicate valid right operand
      */
-    public static boolean isValidRightOperand(Operand rightTerm, OperatorEnum operatorEnum) 
+    public boolean isValidRightOperand(Operand rightTerm, OperatorEnum operatorEnum) 
     {
         for (OperatorEnum operatorEnum2: rightTerm.getOperator().getRightOperandOps())
             if (operatorEnum2 == operatorEnum)
@@ -92,7 +92,7 @@ public class EvaluationUtils
         return operatorEnum == OperatorEnum.COMMA;
     }
 
-    public static boolean isValidOperand(Operand term, OperatorEnum operatorEnum, OperatorEnum[] operatorEnums) 
+    public boolean isValidOperand(Operand term, OperatorEnum operatorEnum, OperatorEnum[] operatorEnums) 
     {
         for (OperatorEnum operatorEnum2: operatorEnums)
             if (operatorEnum2 == operatorEnum)
@@ -105,7 +105,7 @@ public class EvaluationUtils
      * @param rightTerm Right Operand. If not null then operation is binary
      * @return Flag set true to indicate invalid left operand
      */
-    public static boolean isInvalidLeftUnaryOp(Operand rightTerm, OperatorEnum operatorEnum)
+    public boolean isInvalidLeftUnaryOp(Operand rightTerm, OperatorEnum operatorEnum)
     {
         if (rightTerm != null)
             return false;
@@ -119,16 +119,33 @@ public class EvaluationUtils
 
 
     /**
-     * Returns flag true if number is not suitable for Number evaluation. 
-     * Checks for number converted to double has value = Double.NaN
-     * @param number Object value perporting to be Number subclass
-     * @return Flag set true to indicate not a number
+     * Assign right term value to left term
+     * @param leftTerm Left Operand
+     * @param rightTerm Riht Operand
+     * @param modificationId Modification version
+     * @return Value as Object
      */
-    public static boolean isNaN(Object number)
+    public Object assignRightToLeft(Operand leftTerm, Operand rightTerm, int modificationId)
     {
-        if ((number == null) || (!(number instanceof Number || number instanceof Boolean)))
-            return true;
-        return number.toString().equals(NAN);
+        Object value = rightTerm.getValue();
+        leftTerm.assign(rightTerm);
+        // When the value class is not supported as a delegate, substitute a Null object.
+        // This is defensive only as Operands are expected to only support Delegate classes
+        return DelegateOperator.isDelegateClass(rightTerm.getValueClass()) ? value : new Null();
+    }
+
+    /**
+     * Calculate a number using a boolean term converted to 1.0 for true and 0.0 for false.
+     * At least one parameter is expected to contain a Boolean object
+     * @param leftTerm Left operand
+     * @param rightTerm Right operand
+     * @return Number object (actualy BigDecimal)
+     */
+    public Number calculateBoolean(Operand leftTerm, Operand rightTerm)
+    {
+        if (leftTerm.getValueClass() == Boolean.class)
+            return leftTerm.getOperator().numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
+        return rightTerm.getOperator().numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
     }
 
     /**
@@ -136,7 +153,7 @@ public class EvaluationUtils
      * @param operand Operand to test
      * @return Flag set true to indicate not a number
      */
-    public static boolean isNaN(Operand operand, OperatorEnum operatorEnum)
+    public boolean isNaN(Operand operand, OperatorEnum operatorEnum)
     {
         if ((operand == null) || operand.isEmpty())
             return false;
@@ -170,32 +187,16 @@ public class EvaluationUtils
     }
 
     /**
-     * Assign right term value to left term
-     * @param leftTerm Left Operand
-     * @param rightTerm Riht Operand
-     * @param modificationId Modification version
-     * @return Value as Object
+     * Returns flag true if number is not suitable for Number evaluation. 
+     * Checks for number converted to double has value = Double.NaN
+     * @param number Object value perporting to be Number subclass
+     * @return Flag set true to indicate not a number
      */
-    public static Object assignRightToLeft(Operand leftTerm, Operand rightTerm, int modificationId)
+    public static boolean isNaN(Object number)
     {
-        Object value = rightTerm.getValue();
-        leftTerm.assign(rightTerm);
-        // When the value class is not supported as a delegate, substitute a Null object.
-        // This is defensive only as Operands are expected to only support Delegate classes
-        return DelegateOperator.isDelegateClass(rightTerm.getValueClass()) ? value : new Null();
+        if ((number == null) || (!(number instanceof Number || number instanceof Boolean)))
+            return true;
+        return number.toString().equals(NAN);
     }
 
-    /**
-     * Calculate a number using a boolean term converted to 1.0 for true and 0.0 for false.
-     * At least one parameter is expected to contain a Boolean object
-     * @param leftTerm Left operand
-     * @param rightTerm Right operand
-     * @return Number object (actualy BigDecimal)
-     */
-    public static Number calculateBoolean(Operand leftTerm, Operand rightTerm)
-    {
-        if (leftTerm.getValueClass() == Boolean.class)
-            return leftTerm.getOperator().numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
-        return rightTerm.getOperator().numberEvaluation(leftTerm, OperatorEnum.STAR, rightTerm);
-    }
 }

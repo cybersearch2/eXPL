@@ -20,20 +20,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
-import au.com.cybersearch2.classy_logic.expression.AxiomParameterOperand;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.CountryOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.ParameterList;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.expression.TermOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
-import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -42,29 +39,29 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.list.DynamicList;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * VariableType
- * Factory class creates instances of logic programming types
+ * Factory class creates variables of specified types
  * @author Andrew Bowley
  * 10 Mar 2015
  */
 public class VariableType 
 {
-    /** Logic programming type enumeration */
+    /** Type of variable */
 	protected OperandType operandType;
 	/** Type qualifier properties eg. Currency country */
 	protected Map<String, Object> properties;
 	
-	/** Key value for axiom name property */
+	/** Key value for axiom key property, which allows an axiom list to 
+	 *  contain axioms with a different name to that of the list */
 	public final static String AXIOM_KEY = "AxiomKey";
-    /** Key value for operand initialization property */
+    /** Key value for operand expression property. The expression sets the intial value of the operand. */
 	public final static String EXPRESSION = "Expression";
     /** Key value for parameter initialization property */
     public final static String PARAMS = "Params";
@@ -72,8 +69,10 @@ public class VariableType
 	public final static String QUALIFIER_STRING = "QualifierString";
     /** Key value for Currency country evaluation operand property */
 	public final static String QUALIFIER_OPERAND = "QualifierOperand";
-    /** Key value for literal operand property - used only for global variables */
+    /** Key value for literal operand property - evaluation not required */
     public final static String LITERAL = "Literal";
+    /** Key value for list initialization template */
+    public final static String TEMPLATE = "Template";
 	
 	/**
 	 * Construct VariableType object
@@ -100,6 +99,7 @@ public class VariableType
 	{
 	    operandType = OperandType.UNKNOWN;
 	}
+	
 	/**
 	 * Set property
 	 * @param key  Key - AxiomKey, Expression, QualifierString or QualifierOperand
@@ -129,10 +129,20 @@ public class VariableType
      * @param qname Qualified name of new variable
      * @return Operand object
      */
-    @SuppressWarnings("unchecked")
     public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname)
     {
-        Operand expression = (Operand)getProperty(EXPRESSION);
+        return getInstance(parserAssembler, qname, (Operand)getProperty(EXPRESSION));
+    }
+    
+    /**
+     * Return new Operand instance of this type
+     * @param parserAssembler ParserAssembler object
+     * @param qname Qualified name of new variable
+     * @return Operand object
+     */
+    @SuppressWarnings("unchecked")
+    public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname, Operand expression)
+    {
         boolean hasExpression = expression != null;
 		Operand operand = null;
         QualifiedName axiomKey = null;
@@ -168,24 +178,18 @@ public class VariableType
         	operand = !hasExpression ? new BigDecimalOperand(qname) : new BigDecimalOperand(qname, expression);
 	    	break;
         case TERM:
-            // Expression is an initializer list Operand. 
-            operand = new AxiomParameterOperand(new QualifiedName(qname.getName() + "_params", qname), axiomKey, initializeTemplate);
-            hasExpression = true;
+            operand = new TermOperand(new AxiomTermListEvaluator(qname, axiomKey, initializeTemplate));
             break;
         case AXIOM:
-            operand = !hasExpression ? 
-                          new AxiomOperand(qname, axiomKey, axiomListListener) : 
-                          new AxiomOperand(qname, axiomKey, expression, axiomListListener);
+            operand = new AxiomOperand(qname, axiomKey, axiomListListener);
             break;
         case LIST:
-            // Expression is an initializer list 
-            ParameterList<AxiomList> parameterList = new ParameterList<AxiomList>(initializeList, axiomListGenerator(qname, axiomKey));
-            operand = new AxiomOperand(qname, axiomKey, parameterList, axiomListListener);
+            operand = new AxiomOperand(new AxiomListEvaluator(qname, axiomKey, initializeList), axiomListListener);
             break;
         case CURRENCY:
         {
             BigDecimalOperand currencyOperand = !hasExpression ? new BigDecimalOperand(qname) : new BigDecimalOperand(qname, expression);
-            currencyOperand.setOperator(getCurrencyOperator(qname, currencyOperand));
+            currencyOperand.setOperator(getCurrencyOperator(currencyOperand));
             operand = currencyOperand;
 	    	break;
         }
@@ -215,9 +219,24 @@ public class VariableType
   	    return getItemListInstance(parserAssembler, qualifiedListName);
 	}
   	
+    /**
+     * Returns Dynamic ItemList object for this type in current scope. 
+     * NOTE: AxiomKey property must be set for Term, Axiom or Local type
+     * @param parserAssembler ParserAssembler object
+     * @param listName Name of new variable
+     * @param template Initialization template
+     * @return ItemList object
+     * @throws ParseException
+     */
+    public ItemList<?> getDynamicListInstance(ParserAssembler parserAssembler, String listName, Template template) throws ParseException
+    {
+        QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getQualifiedContextname());
+        return getDynamicListInstance(parserAssembler, qualifiedListName, template);
+    }
+    
   	 /**
      * Returns ItemList object for this type. 
-     * NOTE: AxiomKey proptery must be set for Term, Axiom or Local type
+     * NOTE: AxiomKey property must be set for Term, Axiom or Local type
      * @param parserAssembler ParserAssembler object
      * @param qname Qualified name of new variable
      * @return ItemList object
@@ -278,18 +297,58 @@ public class VariableType
        return arrayItemList;
     }
   	
-    protected CurrencyOperator getCurrencyOperator(QualifiedName qname, RightOperand currencyOperand)
+    /**
+     * Returns Dynamic ItemList object for this type. 
+     * @param parserAssembler ParserAssembler object
+     * @param qname Qualified name of new variable
+     * @param template Initialization template
+     * @return ItemList object
+     * @throws ParseException
+     */
+    protected ItemList<?> getDynamicListInstance(final ParserAssembler parserAssembler, QualifiedName qname, Template template) throws ParseException
+    {
+        DynamicList<?> dynamicListList = null;
+        switch (operandType)
+        {
+        case INTEGER:
+            dynamicListList = new DynamicList<Long>(operandType, qname, template);
+            break; 
+        case DOUBLE:
+            dynamicListList = new DynamicList<Double>(operandType, qname, template);
+            break;
+        case BOOLEAN:
+            dynamicListList = new DynamicList<Boolean>(operandType, qname, template);
+            break; 
+        case STRING:
+            dynamicListList = new DynamicList<String>(operandType, qname, template);
+            break; 
+        case DECIMAL:
+        case CURRENCY:
+            dynamicListList = new DynamicList<BigDecimal>(operandType, qname, template);
+            break;
+        default:
+            throw new ParseException("List " + qname.toString() + " type does not permit initialization with list of values");
+       }
+       return dynamicListList;
+    }
+ 
+    /**
+     * Returns operator for Currency Operand with country code set up according to
+     * setting of QUALIFIER_STRING and QUALIFIER_OPERAND properties.
+     * @param currencyOperand Currency operand, which has right operand assigned if QUALIFIER_OPERAND is set
+     * @return CurrencyOperator object
+     */
+    protected CurrencyOperator getCurrencyOperator(RightOperand currencyOperand)
     {
         CurrencyOperator currencyOperator = new CurrencyOperator();
         String country = getPropertyString(QUALIFIER_STRING);
-        if (country != null)
+        if (country != null) // Country code set statically
             currencyOperator.setLocaleByCode(country);
         else
-        {
+        {   // Country code set by evaluating a right operand assigned to the Currency Operand
             Operand countryOperand = (Operand)getProperty(QUALIFIER_OPERAND);
             if (countryOperand != null)
             {
-                //QualifiedName countryQname = new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname);
                 currencyOperand.setRightOperand(
                     new CountryOperand(
                         countryOperand.getQualifiedName(), //countryQname, 
@@ -322,53 +381,5 @@ public class VariableType
 	{
 		return properties == null ? null : properties.get(key);
 	}
-
-    /**
-     * Returns an object which implements CallEvaluator interface returning an AxiomList
-     * given a list of axioms to marshall into an axiom list
-     * @param qname Qualified name of list to be created
-     * @param axiomKey Qualified name of axiom backing the list
-     * @return CallEvaluator object of generic type AxiomList
-     */
-    protected CallEvaluator<AxiomList> axiomListGenerator(final QualifiedName qname, final QualifiedName axiomKey) 
-    {
-        return new CallEvaluator<AxiomList>(){
-
-            @Override
-            public String getName()
-            {
-                return qname.toString();
-            }
-
-            @Override
-            public AxiomList evaluate(List<Term> argumentList)
-            {
-                AxiomList axiomList = new AxiomList(qname, axiomKey);
-                AxiomArchetype archetype = new AxiomArchetype(axiomKey);
-                int index = 0;
-                for (Term term: argumentList)
-                {
-                    @SuppressWarnings("unchecked")
-                    List<Term> termList =  (List<Term>) term.getValue();
-                    // Do not add empty axioms to list
-                    if (termList.size() > 0)
-                    {
-                        AxiomTermList axiomTermList = new AxiomTermList(qname, axiomKey);
-                        axiomTermList.setAxiom(new Axiom(archetype, termList));
-                        if (index == 0)
-                            archetype.clearMutable();
-                        axiomList.assignItem(index++, axiomTermList);
-                    }
-                }
-                return axiomList;
-            }
-
-            @Override
-            public void setExecutionContext(ExecutionContext context)
-            {
-                // Not supported
-            }
-        };
-    }
 
 }

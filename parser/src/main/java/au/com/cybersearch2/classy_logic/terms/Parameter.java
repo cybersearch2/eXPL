@@ -274,17 +274,6 @@ public class Parameter implements Term
 	}
 
 	/**
-     * Assign a value and id to this Term from another term 
-     * @param term Term containing non-null value and id to set
-	 */
-	@Override
-	public void assign(Term term) 
-	{
-		setValue(term.getValue());
-		//id = term.getId();
-	}
-
-	/**
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
