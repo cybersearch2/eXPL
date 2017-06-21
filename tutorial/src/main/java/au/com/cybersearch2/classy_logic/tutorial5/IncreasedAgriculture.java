@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -41,11 +40,10 @@ public class IncreasedAgriculture
 include "agriculture-land.xpl";
 include "surface-land.xpl";
 
-template agri_10y (country ? Y2010 - Y1990 > 1.0, double Y1990, double Y2010);
-template surface_area_increase (
+template agri_10y (double agri_change = Y2010 - Y1990, country ? agri_change > 1.0);
+calc surface_area_increase (
   country? country == agri_10y.country,
-  double surface_area = (agri_10y.Y2010 - agri_10y.Y1990)/100
-    * surface_area_Km2);
+  double surface_area = (agri_10y.agri_change)/100.0 * surface_area_Km2);
 query<axiom> more_agriculture(Data : agri_10y, surface_area : surface_area_increase); 
 
 */
@@ -65,7 +63,6 @@ query<axiom> more_agriculture(Data : agri_10y, surface_area : surface_area_incre
     public Iterator<Axiom> findIncreasedAgriculture() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("tutorial5/more_agriculture.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("more_agriculture");
         return result.getIterator("more_agriculture");

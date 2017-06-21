@@ -25,9 +25,13 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.EvaluationUtils;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
+import au.com.cybersearch2.classy_logic.trait.NumberTrait;
 
 /**
  * TreeEvaluator
@@ -310,27 +314,48 @@ abstract class TreeEvaluator extends DelegateOperand
      */
     protected boolean performStringConversion(Operand left, Operand right)
     {
-        boolean isLeftString = left instanceof StringOperand;
-        boolean isRightString = right instanceof StringOperand;
+        boolean isLeftString = left.getValueClass() == String.class;
+        boolean isRightString = right.getValueClass() == String.class;
         if ((!isLeftString && !isRightString) || (isLeftString && isRightString))
             return (isLeftString && isRightString);
+        if ((operatorEnum == OperatorEnum.PLUS) || (operatorEnum == OperatorEnum.PLUSASSIGN))
+            // Exclude strings from conversion when performing concatenation
+            return true;
         if (isRightString)
         {
+            Trait trait = left.getOperator().getTrait();
             if (utils.isValidOperand(left, operatorEnum, left.getOperator().getLeftOperandOps()) &&
-                (left.getOperator().getTrait() instanceof StringCloneable))
+                (trait instanceof StringCloneable))
             {
-                StringCloneable stringCloneable = (StringCloneable)left.getOperator().getTrait();
-                StringOperand stringOperand = (StringOperand)right;
-                setRightOperand(stringCloneable.cloneFromOperand(stringOperand));
+                if (right.getOperator().getTrait().getOperandType() == OperandType.STRING)
+                {
+                    StringCloneable stringCloneable = (StringCloneable)left.getOperator().getTrait();
+                    setRightOperand(stringCloneable.cloneFromOperand(right));
+                }
+                else
+                {
+                    value = ((NumberTrait<?>)trait).parseValue(right.getValue().toString());
+                    right.assign(new Parameter(Term.ANONYMOUS, value));
+                    setRightOperand(right);
+                }
             }
             return true;
         }
+        Trait trait = right.getOperator().getTrait();
         if (utils.isValidOperand(right, operatorEnum, right.getOperator().getRightOperandOps()) &&
-             (right.getOperator().getTrait() instanceof StringCloneable))
+             (trait instanceof StringCloneable))
         {
-            StringCloneable stringCloneable = (StringCloneable)right.getOperator().getTrait();
-            StringOperand stringOperand = (StringOperand)left;
-            setLeftOperand(stringCloneable.cloneFromOperand(stringOperand));
+            if (left.getOperator().getTrait().getOperandType() == OperandType.STRING)
+            {
+                StringCloneable stringCloneable = (StringCloneable)right.getOperator().getTrait();
+                setLeftOperand(stringCloneable.cloneFromOperand(left));
+            }
+            else
+            {
+                value = ((NumberTrait<?>)trait).parseValue(left.getValue().toString());
+                left.assign(new Parameter(Term.ANONYMOUS, value));
+                setLeftOperand(left);
+            }
         }
         return true;
     }

@@ -16,7 +16,6 @@
 package au.com.cybersearch2.classy_logic.pattern;
 
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * OperandContext
@@ -118,21 +117,15 @@ public class OperandContext
     }
 
     /**
-     * Restore term to original state. 
+     * Restore values to terms which originally not empty 
      * Propagates to tree and siblings with this OperandContext as root
      */
     public void restore()
     {
-        if (value == null)
-        {   // Term was empty
-            if (!term.isEmpty())
-                term.clearValue();
-        }
-        else
+        if (value != null)
         {   // Term had value
-            Parameter param = new Parameter(term.getName(), value);
-            param.setId(id);
-            term.assign(param);
+             term.setValue(value);
+             term.setId(id);
         }
         if (left != null)
             left.restore();

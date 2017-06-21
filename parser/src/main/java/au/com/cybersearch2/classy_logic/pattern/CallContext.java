@@ -31,22 +31,24 @@ public class CallContext
 {
     /** Names of lists which are empty at time of object construction */
     protected List<String> emptyListNames;
-    /** Template used for call */
-    protected Template template;
     /** Tree of operand contexts used to save and restore initial state */
     protected List<OperandContext> contextRootList;
     /** Next CallContext object in stack */
     protected CallContext next;
+    /** Reference to template properties */
+    protected List<Term> properties;
+    /** Saved template properties or null if no properties */
+    protected List<Term> contextProperties;
 
 	/**
 	 * Construct CallContext object
-	 * @param template Template to be preserved
+	 * @param template Template to perform call
 	 */
 	public CallContext(Template template) 
 	{
-		this.template = template;
 		contextRootList = new ArrayList<OperandContext>();
         OperandContext operandContext = null;
+        // Build operand context tree by visiting all operands 
  		for (int i = 0; i < template.getTermCount(); i++)
 		{
 		    Operand term = template.getTermByIndex(i);
@@ -58,7 +60,13 @@ public class CallContext
             operandContext = nextOperandContext;
 		    visit(term, operandContext);
 		}
-        template.reset();
+  		if (!template.getProperties().isEmpty())
+ 		{
+  		    // Save template properties reference and contents
+  	        properties = template.getProperties();
+  	        contextProperties = new ArrayList<Term>();
+  	        contextProperties.addAll(properties);
+ 		}
 	}
 
 	/**
@@ -80,12 +88,17 @@ public class CallContext
     }
 
     /**
-	 * Restore template initial state by clearing all operands and then assigning default values
+	 * Restore template operand values and properties
 	 */
 	public void restoreContext()
 	{
 	    for (OperandContext  operandContext: contextRootList)
 	        operandContext.restore();
+	    if (contextProperties != null)
+	    {
+	        properties.clear();
+	        properties.addAll(contextProperties);
+	    }
 	}
 
 	/**
@@ -93,11 +106,8 @@ public class CallContext
 	 * @param term Term object
 	 * @param operandContext OperandObject associated with term
 	 */
-    protected void visit(Term term, OperandContext operandContext)
+    protected void visit(Operand operand, OperandContext operandContext)
     {
-        if (!(term instanceof Operand))
-            return;
-        Operand operand = (Operand)term;
         Operand left = operand.getLeftOperand();
         if (left != null)
         {

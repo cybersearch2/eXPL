@@ -16,12 +16,10 @@
 package au.com.cybersearch2.classy_logic.pattern;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.TermListManager;
@@ -36,73 +34,60 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
  */
 public class ArchiveIndexHelper implements OperandVisitor
 {
-    /** Container for quick access to fix up data */
-    static class FixUp
-    {
-        public Operand operand;
-        public int preFixIndex;
-        public int postFixIndex;
-    }
- 
-    static List<FixUp> EMPTY_FIXUP_LIST = Collections.emptyList();
-    
     /** Current archive index used when visiting operands */
     private int index;
     /** Map of term names and archive indexes used to detect multiple occurences of the same 
      *  unification pairing eg. same operand appearing in different places */
     private Map<String, Integer> indexMap;
-    /** Fixup data for operands requiring restoration of archive index value post-unification */
-    private List<FixUp> fixUpList;
     /** Template archetype to be updated with operand metadata */
     private TermListManager archetype;
-    /** Template narrowed to term list super class */
-    private TermList<Operand> termList;
-    /** Template context name(s) used to determine which operands are in template name space */
-    private QualifiedName[] contextNames;
+    /** Template to assemble */
+    private Template template;
  
     /**
      * Construct ArchiveIndexHelper object
-     * @param template Template to process
+     * @param template Template to assemble
      */
     public ArchiveIndexHelper(Template template)
     {
         this.archetype = template.getArchetype();
-        this.termList = template;
-        this.contextNames = template.getContextNames();
+        this.template = template;
     }
     
     /**
      * Set term meta data in archetype for template operands in evaluation tree. 
+     * Has 2 passes. The first if for operands in template namespace, where operands are bound to the archetype.
+     * The second pass only updates archtypes and covers operands outside the template namespace.
+     * @param pass Which one of two passes - 1 or 2.
      */
-    public List<FixUp> setOperandTree() 
+    public void setOperandTree(int pass) 
     {
-        index = termList.getTermCount();
         getIndexMap();
-        for (int i = 0; i < index; i++)
+        List<Operand> operandList = new ArrayList<Operand>();
+        for (int i = 0; i < template.getTermCount(); i++)
         {
-            Operand operand = termList.getTermByIndex(i);
-            if (inSameSpace(operand))
+            Operand operand = template.getTermByIndex(i);
+            boolean isTemplateOperand = operand.getQualifiedName().getTemplate().equals(template.getQualifiedName().getTemplate());
+            if (((pass == 1) && isTemplateOperand) || 
+                 ((pass == 2) && !isTemplateOperand))
             {
                 indexMap.put(archetype.getMetaData(i).getName(), i);
-                setArchiveIndex(operand, i);
+                operandList.add(operand);
+                if (operand.getArchetypeId() == 0)
+                {
+                    operand.setArchetypeId(template.getId());
+                    setArchiveIndex(operand, i);
+                }
             }
-            else
-                unsetArchiveIndex(operand);
         }
-        for (int i = 0; i < termList.getTermCount(); ++i)
+        index = template.getTermCount();
+        for (Operand operand: operandList)
         {
-            Operand operand =  termList.getTermByIndex(i);
             OperandWalker operandWalker = new OperandWalker(operand);
             operandWalker.visitAllNodes(this);
         }
         // Remove indexMap reference as it is only needed while visiting operands
         indexMap = null;
-        if (fixUpList == null)
-            return EMPTY_FIXUP_LIST;
-        // Remove fixUpList reference as it is only needed while visiting operands
-        List<FixUp> fixUps = fixUpList;
-        fixUpList = null;
-        return fixUps;
     }
 
     /**
@@ -114,58 +99,30 @@ public class ArchiveIndexHelper implements OperandVisitor
     {
         String name = operand.getName();
         // Skip anonymous Evaluator operands
-        if (!name.isEmpty())
-        {   // Strategy depends on whether operand in same name space as template 
-            if (inSameSpace(operand))
-            {   // Set operand archive index or create fix up if a different value is already assigned
-                getIndexMap();
-                if (indexMap.containsKey(name))
-                {   // Index for name already assigned. Assumes meta data is identical to that of original operand.
-                    int archiveIndex = indexMap.get(name);
-                    setArchiveIndex(operand, archiveIndex);
-                }
-                else
-                {   // Add term meta data to archetype and index map
-                    int archiveIndex = index++;
-                    indexMap.put(name, archiveIndex);
-                    setArchiveIndex(operand, archiveIndex);
-                    archetype.addTerm(new TermMetaData(operand, archiveIndex));
-                }
+        if ((depth > 1) && !name.isEmpty()) 
+        {    
+            // Set operand archive index or create fix up if a different value is already assigned
+            getIndexMap();
+            if (indexMap.containsKey(name))
+            {
+                if (operand.getArchetypeId() == 0)
+                    // Index for name already assigned. Assumes meta data is identical to that of original operand.
+                    setArchiveIndex(operand, indexMap.get(name));
             }
             else
-                // Ensure archetype index is set to default -1 for unification so
-                // there is no axiom pairing, only solution pairing
-                unsetArchiveIndex(operand);
+            {   // Add term meta data to archetype and index map
+                int archiveIndex = index++;
+                indexMap.put(name, archiveIndex);
+                if (archiveIndex >= archetype.getTermCount())
+                    archetype.addTerm(new TermMetaData(operand, archiveIndex));
+                if (operand.getArchetypeId() == 0)
+                    setArchiveIndex(operand, archiveIndex);
+            }
+            if (operand.getArchetypeId() == 0)
+                operand.setArchetypeId(template.getId());
         }
         // Keep going
         return true;
-    }
-
-    /**
-     * Create fix up for given operand and archive index and add to fix up list
-     * @param operand The operand to fix
-     * @param archiveIndex The archive index to apply
-     */
-    protected void addFixUp(Operand operand, int archiveIndex)
-    {
-        FixUp fixUp = new FixUp();
-        fixUp.operand = operand;
-        fixUp.preFixIndex = fixUp.operand.getArchetypeIndex();
-        fixUp.postFixIndex = archiveIndex;
-        getFixUpList().add(fixUp);
-    }
-
-    /**
-     * Return flag set true if operand belongs to same name space as template
-     * @param operand The operand to analyse
-     * @return boolean
-     */
-    private boolean inSameSpace(Operand operand)
-    {
-        for (QualifiedName contextName: contextNames)
-            if (contextName.inSameSpace(operand.getQualifiedName())) 
-                return true;
-        return false;
     }
 
     /**
@@ -177,32 +134,8 @@ public class ArchiveIndexHelper implements OperandVisitor
     {
         if (operand.getArchetypeIndex() == -1)
             operand.setArchetypeIndex(archiveIndex);
-        else if (operand.getArchetypeIndex() != archiveIndex)
-            addFixUp(operand, archiveIndex);
     }
 
-    /**
-     * Ensure archetype index for given operand is set to default -1
-     * @param operand The operand to set
-     */
-    private void unsetArchiveIndex(Operand operand)
-    {
-        int archiveIndex = operand.getArchetypeIndex();
-        if (archiveIndex != -1)
-            addFixUp(operand, -1);
-    }
-
-    /**
-     * Returns fix up list, creating it if required
-     * @return FixUp list
-     */
-    private List<FixUp> getFixUpList()
-    {
-        if (fixUpList == null)
-            fixUpList = new ArrayList<FixUp>();
-        return fixUpList;
-    }
- 
     /**
      * Returns index map, creating it if required 
      * @return index map

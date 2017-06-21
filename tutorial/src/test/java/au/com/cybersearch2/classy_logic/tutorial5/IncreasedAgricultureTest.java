@@ -47,6 +47,7 @@ public class IncreasedAgricultureTest
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         IncreasedAgriculture increasedAgriculture = new IncreasedAgriculture();
         Iterator<Axiom> countryIterator = increasedAgriculture.findIncreasedAgriculture();
+        assertThat(countryIterator.hasNext()).isTrue();
         while (countryIterator.hasNext()) 
                 checkSolution(reader, countryIterator.next().toString());
         reader.close();
@@ -73,17 +74,17 @@ public class IncreasedAgricultureTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query more_agriculture (10,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query more_agriculture (8,1)");
         assertThat(sourceMarker.getSourceDocumentId()).isEqualTo(0);
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("Data:agri_10y (10,31) (10,45)");
+        assertThat(sourceItem.toString()).isEqualTo("Data:agri_10y (8,31) (8,45)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area:surface_area_increase (10,48) (10,83)");
+        assertThat(sourceItem.toString()).isEqualTo("surface_area:surface_area_increase (8,48) (8,83)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -102,7 +103,7 @@ public class IncreasedAgricultureTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double Y1990 (4,20) (4,31)");
+        assertThat(sourceItem.toString()).isEqualTo("double agri_change=Y2010-Y1990 (4,20) (4,53)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -114,7 +115,7 @@ public class IncreasedAgricultureTest
         assertThat(sourceItem.toString()).isEqualTo("country?country==country (6,3) (6,38)");
         sourceItem = sourceItem.getNext();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double surface_area_Km2 (7,3) (7,25)");
+        assertThat(sourceItem.toString()).isEqualTo("double surface_area=agri_change/100.0*surface_area_Km2 (7,3) (7,71)");
     }
     
     protected void checkSolution(BufferedReader reader, String country)

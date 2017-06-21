@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic;
+package au.com.cybersearch2.classy_logic.axiom;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;

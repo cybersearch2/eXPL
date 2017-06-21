@@ -74,7 +74,8 @@ public class ListIndex extends ArrayIndex
 
     protected void setIntIndex()
     {
-        index = ((Long)indexExpression.getValue()).intValue();
+        Object object = indexExpression.getValue();
+        index = (object instanceof Long) ? ((Long)object).intValue() : ((Integer)object).intValue();
         if (indexExpression.getName().isEmpty())
             suffix = getListName() + "." + index;
         else 

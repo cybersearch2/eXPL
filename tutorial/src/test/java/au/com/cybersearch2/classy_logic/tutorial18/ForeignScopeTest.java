@@ -47,6 +47,17 @@ public class ForeignScopeTest
             checkSolution(reader, formatedTotal.toString());
     }
 
+    @Test
+    public void testForeignScope2() throws Exception
+    {
+        File testFile = new File("src/main/resources/tutorial18", "foreign-scope2.txt");
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
+        ForeignScope2 foreignScope2 = new ForeignScope2();
+        List<Axiom> solutionList = foreignScope2.getFormatedTotalAmount();
+        for (Axiom formatedTotal: solutionList)
+            checkSolution(reader, formatedTotal.toString());
+    }
+    
     protected void checkSolution(BufferedReader reader, String total)
     {
         try

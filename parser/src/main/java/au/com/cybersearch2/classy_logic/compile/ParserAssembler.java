@@ -617,7 +617,9 @@ public class ParserAssembler implements LocaleListener
         CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
         if (callEvaluator == null)
             throw new ExpressionException("Function \"" + name + "\" not supported");
-        return new CallOperand(QualifiedName.parseName(callName, qname), parametersTemplate, callEvaluator);
+        CallOperand callOperand = new CallOperand(QualifiedName.parseName(callName, qname), parametersTemplate, callEvaluator);
+        scope.addDebugTarget(callOperand);
+        return callOperand;
     }
 
     public Operand getQueryOperand(
@@ -630,6 +632,7 @@ public class ParserAssembler implements LocaleListener
             addInnerTemplate(innerTemplate);
         QueryEvaluator queryEvaluator = 
              new QueryEvaluator(queryName, qualifiedQueryName, innerTemplate);
+        scope.addDebugTarget(queryEvaluator);
         ParserTask parserTask = parserTaskQueue.addPending(queryEvaluator, scope);
         parserTask.setPriority(ParserTask.Priority.list.ordinal());
         String library = queryEvaluator.getLibrayName(this);

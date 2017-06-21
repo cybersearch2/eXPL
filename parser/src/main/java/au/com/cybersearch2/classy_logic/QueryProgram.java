@@ -26,6 +26,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.ParserTask;
 import au.com.cybersearch2.classy_logic.compile.TemplateAssembler;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -140,6 +141,19 @@ public class QueryProgram extends QueryLauncher
 		scopes.put(GLOBAL_SCOPE, globalScope);
 	}
 
+	/**
+	 * setExecutionContext
+	 * @see au.com.cybersearch2.classy_logic.query.QueryLauncher#setExecutionContext(au.com.cybersearch2.classy_logic.debug.ExecutionContext)
+	 */
+    @Override
+    public void setExecutionContext(ExecutionContext context)
+    {
+        super.setExecutionContext(context);
+        // Set execution context in debug targets registered with scopes
+        for (Scope scope: scopes.values())
+            scope.setExecutionContext(context);
+    }
+    
     /**
      * Returns File set to resource path
      * @return File object

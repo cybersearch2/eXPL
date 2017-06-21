@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.compile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +25,8 @@ import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.ArchiveIndexHelper;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 
@@ -105,10 +108,10 @@ public class TemplateAssembler
      * @param properties
      * @see au.com.cybersearch2.classy_logic.pattern.Template#initialize()
      */
-    public void addTemplate(QualifiedName qualifiedTemplateName, Map<String, Object> properties)
+    public void addTemplate(QualifiedName qualifiedTemplateName, List<Term> properties)
     {
         Template template = templateMap.get(qualifiedTemplateName);
-        template.addProperties(properties);
+        template.setInitData(properties);
     }
 
     /**
@@ -189,7 +192,22 @@ public class TemplateAssembler
     {
         for (Template template: templateMap.values())
             if (template.getTermCount() > 0)
-                template.getParserTask().run();
+            {
+                // Complete archetype initialization. This cannot be performed earlier due to fact parser tasks, 
+                // which can modify operand terms, run after template construction.
+                // Note replicate templates share the master fixUpList as this operation can only be performed once.
+                ArchiveIndexHelper archiveIndexHelper = new ArchiveIndexHelper(template);
+                archiveIndexHelper.setOperandTree(1);
+            }
+        for (Template template: templateMap.values())
+            if (template.getTermCount() > 0)
+            {
+                ArchiveIndexHelper archiveIndexHelper = new ArchiveIndexHelper(template);
+                archiveIndexHelper.setOperandTree(2);
+                // The archetype meta data needs to include all operands found by walking the operand trees 
+                // The archetype is mutable until this is completed
+                template.getArchetype().clearMutable();
+            }
     }
 
 }

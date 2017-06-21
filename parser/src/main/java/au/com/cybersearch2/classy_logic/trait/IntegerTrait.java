@@ -20,7 +20,7 @@ import java.util.Scanner;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -59,10 +59,10 @@ public class IntegerTrait extends NumberTrait<Long>
 
     /**
      * cloneFromOperand
-     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand)
+     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(Operand)
      */
     @Override
-    public IntegerOperand cloneFromOperand(StringOperand stringOperand)
+    public IntegerOperand cloneFromOperand(Operand stringOperand)
     {
         IntegerOperand clone = 
             stringOperand.getLeftOperand() == null ? 

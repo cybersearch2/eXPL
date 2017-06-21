@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.axiom.AxiomListSource;
@@ -528,6 +529,7 @@ public class LogicQueryTest
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 	}
 
+	@Ignore
 	@Test 
 	public void test_axiom_listener()
 	{

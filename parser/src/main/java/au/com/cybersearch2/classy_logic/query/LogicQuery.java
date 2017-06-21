@@ -29,6 +29,7 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionFinder;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.ArchiveIndexHelper;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
 import au.com.cybersearch2.classy_logic.pattern.SolutionPairer;
@@ -122,8 +123,8 @@ public class LogicQuery implements SolutionFinder
 	                if (!term.getName().equals(Term.ANONYMOUS))
 	                    template.addTerm(new Variable(new QualifiedName(term.getName(), QualifiedName.ANONYMOUS)));
 	            }
-	            // Run parser task delayed until template is populated
-	            template.getParserTask().run();
+                ArchiveIndexHelper archiveIndexHelper = new ArchiveIndexHelper(template);
+                archiveIndexHelper.setOperandTree(1);
 	            emptyTemplate = false;
 	        }
 			if (unify(axiom, template, solution) && //template.unify(axiom, solution) &&

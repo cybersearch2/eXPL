@@ -41,6 +41,7 @@ public class AxiomListEvaluator
     protected QualifiedName axiomKey;
     /** List of templates, each defining the terms of an axiom to add to the list */
     protected List<Template> initializeList;
+    protected boolean empty;
     
     /**
      * Evaluates to create an AxiomList from an initialization list
@@ -53,6 +54,7 @@ public class AxiomListEvaluator
         this.qname = qname;
         this.axiomKey = axiomKey;
         this.initializeList = initializeList == null ? EMPTY_TEMPLATE_LIST : initializeList;
+        empty = true;
     }
     
     /**
@@ -105,6 +107,7 @@ public class AxiomListEvaluator
                 axiomList.assignItem(index++, axiomTermList);
             }
         }
+        empty = false;
         return axiomList;
     }
 
@@ -116,8 +119,14 @@ public class AxiomListEvaluator
     {
         for (Template template: initializeList)
             template.backup(id != 0);
+        empty = true;
     }
 
+    public boolean isEmpty()
+    {
+        return empty;
+    }
+    
     /**
      * Returns list size
      * @return int

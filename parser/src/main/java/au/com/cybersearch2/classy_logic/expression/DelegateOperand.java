@@ -40,8 +40,6 @@ public abstract class DelegateOperand extends Operand implements LocaleListener
 	protected boolean isPrivate;
     /** Defines operations that an Operand performs with other operands. */
     protected DelegateOperator operator;
-    /** Index of this Operand in the archetype of it's containing template */
-    private int archetypeIndex;
 
 	/**
      * Construct empty DelegateOperand object
@@ -61,7 +59,6 @@ public abstract class DelegateOperand extends Operand implements LocaleListener
         super(termName);
         this.qname = qname;
         operator = new DelegateOperator();
-        archetypeIndex = -1;
     }
     
     /**
@@ -157,46 +154,6 @@ public abstract class DelegateOperand extends Operand implements LocaleListener
             backupOccurred = true;
         }
         return backupOccurred;
-    }
-
-    /**
-     * Set this operand private - not visible in solution
-     * @param isPrivate Flag set true if operand not visible in solution
-     */
-    @Override
-    public void setPrivate(boolean isPrivate)
-    {
-        this.isPrivate = isPrivate;
-    }
-    
-    /**
-     * Returns flag set true if this operand is private
-     * @return
-     */
-    @Override
-    public boolean isPrivate()
-    {
-        return isPrivate;
-    }
-    
-    /**
-     * setArchetypeIndex
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#setIndex(int)
-     */
-    @Override
-    public void setArchetypeIndex(int archetypeIndex)
-    {
-        this.archetypeIndex = archetypeIndex;
-    }
-
-    /**
-     * getArchetypeIndex
-     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getIndex()
-     */
-    @Override
-    public int getArchetypeIndex()
-    {
-        return archetypeIndex;
     }
 
     /**

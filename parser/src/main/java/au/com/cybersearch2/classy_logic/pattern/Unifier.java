@@ -15,9 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import java.util.List;
+
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.TermListManager;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -68,7 +71,14 @@ public class Unifier implements OperandVisitor
     {
         if (!operand.getName().isEmpty())
         {
-            int index = operand.getArchetypeIndex();
+            int index;
+            if (operand.getArchetypeId() == template.getId())
+                index = operand.getArchetypeIndex();
+            else
+            {
+                TermListManager archetype = template.getArchetype();
+                index = archetype.getIndexForName(operand.getName());
+            }
             if (index != -1)
             {   // Operand in template context
                 // Pair by mapped index 

@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.TermListManager;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -48,6 +49,7 @@ public class UnifierTest
         when(axiom.getTermByIndex(1)).thenReturn(term2);
 		when(operand.isEmpty()).thenReturn(true);
 		when(operand.getArchetypeIndex()).thenReturn(0);
+        when(operand.getArchetypeId()).thenReturn(3);
 		Template template = mock(Template.class);
 		when(template.getId()).thenReturn(3);
 		int[] termMapping = new int[] { 1, 0};
@@ -70,6 +72,7 @@ public class UnifierTest
         when(operand.isEmpty()).thenReturn(false);
         when(operand.getValue()).thenReturn(new Integer(2));
         when(operand.getArchetypeIndex()).thenReturn(0);
+        when(operand.getArchetypeId()).thenReturn(3);
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(3);
         int[] termMapping = new int[] { 1, 0};
@@ -92,6 +95,7 @@ public class UnifierTest
         when(operand.isEmpty()).thenReturn(false);
         when(operand.getValue()).thenReturn(new Integer(2));
         when(operand.getArchetypeIndex()).thenReturn(0);
+        when(operand.getArchetypeId()).thenReturn(3);
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(3);
         int[] termMapping = new int[] { 1, 0};
@@ -115,6 +119,7 @@ public class UnifierTest
         when(operand.isEmpty()).thenReturn(false);
         when(operand.getValue()).thenReturn(new Integer(2));
         when(operand.getArchetypeIndex()).thenReturn(0);
+        when(operand.getArchetypeId()).thenReturn(3);
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(3);
         int[] termMapping = new int[] { 1, 0};
@@ -146,11 +151,17 @@ public class UnifierTest
         Axiom axiom = mock(Axiom.class);
         Operand operand = mock(Operand.class);
         Term term2 = mock(Term.class);
+        when(axiom.getTermByIndex(1)).thenReturn(term2);
         when(operand.getName()).thenReturn(OPERAND_NAME);
         when(operand.getArchetypeIndex()).thenReturn(-1);
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(3);
+        TermListManager archetype = mock(TermListManager.class);
+        when(template.getArchetype()).thenReturn(archetype);
+        when(archetype.getIndexForName(OPERAND_NAME)).thenReturn(0);
         int[] termMapping = new int[] { 1, 0};
+        when(operand.getValue()).thenReturn("TestValue");
+        when(term2.getValue()).thenReturn("TestValue");
         Unifier underTest = new Unifier(template, axiom, termMapping, new Solution());
         assertThat(underTest.next(operand, 1)).isTrue();
         verify(operand, times(0)).unifyTerm(term2, 3);
@@ -163,10 +174,14 @@ public class UnifierTest
         Axiom axiom = mock(Axiom.class);
         Operand operand = mock(Operand.class);
         Term term2 = mock(Term.class);
+        when(axiom.getTermByIndex(1)).thenReturn(term2);
         when(operand.getName()).thenReturn(OPERAND_NAME);
         when(operand.getArchetypeIndex()).thenReturn(-1);
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(3);
+        TermListManager archetype = mock(TermListManager.class);
+        when(template.getArchetype()).thenReturn(archetype);
+        when(archetype.getIndexForName(OPERAND_NAME)).thenReturn(0);
         int[] termMapping = new int[] { 1, 0};
         Solution solution = mock(Solution.class);
         Set<String> keyset = new HashSet<String>();
@@ -175,6 +190,8 @@ public class UnifierTest
         SolutionPairer solutionPairer = mock(SolutionPairer.class);
         when(template.getSolutionPairer(solution)).thenReturn(solutionPairer);
         when(solutionPairer.next(operand, 0)).thenReturn(true);
+        when(operand.getValue()).thenReturn("TestValue");
+        when(term2.getValue()).thenReturn("TestValue");
         Unifier underTest = new Unifier(template, axiom, termMapping, solution);
         assertThat(underTest.next(operand, 1)).isTrue();
         verify(operand, times(0)).unifyTerm(term2, 3);

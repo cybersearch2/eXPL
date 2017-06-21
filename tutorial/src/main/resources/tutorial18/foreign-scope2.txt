@@ -1,0 +1,8 @@
+format_total(catalog_no=0, country=DE, text= Gesamtkosten Steuer: 14.567,89 EUR)
+format_total(catalog_no=0, country=FR, text= le total impôt: 14 197,52 EUR)
+format_total(catalog_no=0, country=BE, text= le total impôt: 13.703,69 EUR)
+format_total(catalog_no=0, country=BE, text= totale kosten belasting: 13.703,69 EUR)
+format_total(catalog_no=1, country=DE, text= Gesamtkosten Steuer: 590,00 EUR)
+format_total(catalog_no=1, country=FR, text= le total impôt: 575,00 EUR)
+format_total(catalog_no=1, country=BE, text= le total impôt: 555,00 EUR)
+format_total(catalog_no=1, country=BE, text= totale kosten belasting: 555,00 EUR)

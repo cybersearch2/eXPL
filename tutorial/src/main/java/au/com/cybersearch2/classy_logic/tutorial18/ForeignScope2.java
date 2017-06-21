@@ -40,8 +40,15 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class ForeignScope2 
 {
-/* foreign-scope.xpl
-axiom item (amount) : parameter;
+/* foreign-scope2.xpl
+axiom catalog_no (catalog_no) : parameter;
+
+string country = scope^region;
+list<currency $ country> item_list =
+{
+  "12.345,67 €",
+  "500,00 €"
+};
 
 choice tax_rate
  (country, percent)
@@ -49,7 +56,6 @@ choice tax_rate
      {"FR",15.0}
      {"BE",11.0};
      
-axiom lexicon (Total, tax);
 axiom german.lexicon (Total, tax)
   {"Gesamtkosten","Steuer"};
 axiom french.lexicon (Total, tax)
@@ -63,14 +69,15 @@ local translate(lexicon);
 
 calc charge_plus_gst
 (
-  currency amount,
-  << tax_rate(scope^region) >> (percent /= 100),
+  currency amount = item_list[catalog_no],
+  << tax_rate(country) >> (percent /= 100),
   currency total = amount * (1.0 + percent)
 );
 
 calc format_total
 (
-  string country = scope^region,
+  catalog_no,
+  country,
   string text = " " + translate^Total + " " + translate^tax + ": " + 
     format(charge_plus_gst.total)
 );
@@ -80,10 +87,10 @@ scope french (language="fr", region="FR"){}
 scope belgium_fr (language="fr", region="BE"){}
 scope belgium_nl (language="nl", region="BE"){}
 
-query item_query(item : german.charge_plus_gst) >> (german.format_total) >>
-   (item : french.charge_plus_gst) >> (french.format_total) >>
-   (item : belgium_fr.charge_plus_gst) >> (belgium_fr.format_total) >>
-   (item : belgium_nl.charge_plus_gst) >> (belgium_nl.format_total);
+query item_query(catalog_no : german.charge_plus_gst) >> (catalog_no : german.format_total) >>
+   (catalog_no : french.charge_plus_gst) >> (catalog_no : french.format_total) >>
+   (catalog_no : belgium_fr.charge_plus_gst) >> (catalog_no : belgium_fr.format_total) >>
+   (catalog_no : belgium_nl.charge_plus_gst) >> (catalog_no : belgium_nl.format_total);
 
 */
     

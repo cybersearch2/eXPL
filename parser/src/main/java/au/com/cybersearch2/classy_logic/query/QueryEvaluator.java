@@ -36,7 +36,6 @@ import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -168,25 +167,25 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
         Scope scope = queryParams.getScope();
         Template template = scope.findTemplate(templateName);
         final String solutionName =  template.getQualifiedName().toString();
-        // Marshall arguments provided as a list of Variables into a properties container 
-        if (argumentList.size() > 0)
-            prepareArguments(argumentList, template);
         // Set SolutionHander to collect results
         SolutionHandler solutionHandler = getSolutionHandler(solutionName, template.getId());
         queryParams.setSolutionHandler(solutionHandler);
-        // Do query using QueryLauncher utility class
+        // Save scope context if calling in another scope otherwise push operand values on call stack
         ScopeContext scopeContext = isCallInScope ? null : scope.getContext(true);
         if (isCallInScope)
             template.push();
+        template.backup(false);
+        // Marshall arguments provided as a list of Variables  
+        if (argumentList.size() > 0)
+            template.setInitData(argumentList);
         try
         {
             launch(queryParams);
         }
         finally
-        {   // Clear call properties so query params can be recycled
-            queryParams.clearParameters(templateName.getTemplate());
+        {   
             if (scopeContext != null)
-               // Scope restored to original state
+                // Scope restored to original state
                 scopeContext.resetScope();
             else
                 template.pop();
@@ -219,32 +218,6 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
         return library;
     }
     
-    /**
-     * Set query parameters object with query arguments packed into an axiom
-     * @param argumentList List of terms holding argument values
-     * @param template Target query template
-     */
-    protected void prepareArguments(List<Term> argumentList, Template template)
-    {
-        int index = 0; // Map unnamed arguments to template term names
-        Axiom axiom = new Axiom(template.getKey());
-        for (Term argument: argumentList)
-        {
-            // All parameters are Parameters with names set by caller and possibly empty for match by position.
-            String argName = argument.getName();
-            List<String> termNames = template.getArchetype().getTermNameList();
-            if (argName.isEmpty() || !termNames.contains(argName))
-            {   // Place by position if argument name not available or not matching any term name
-                if (index == template.getTermCount())
-                    throw new ExpressionException("Unnamed argument at position " + index + " out of bounds");
-                argName = template.getTermByIndex(index).getName();
-            }
-            axiom.addTerm(new Parameter(argName, argument.getValue()));
-            ++index;
-        }
-        queryParams.putParameters(template.getQualifiedName(), axiom);
-    }
-
     /**
      * Returns solution handler to marshall query result into axiom term list
      * @param solutionName Name to use to obtain solution

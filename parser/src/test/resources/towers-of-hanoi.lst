@@ -1,0 +1,7 @@
+moves(move=Move disk 1 from rod A to rod C)
+moves(move=Move disk 2 from rod A to rod B)
+moves(move=Move disk 1 from rod C to rod B)
+moves(move=Move disk 3 from rod A to rod C)
+moves(move=Move disk 1 from rod B to rod A)
+moves(move=Move disk 2 from rod B to rod C)
+moves(move=Move disk 1 from rod A to rod C)

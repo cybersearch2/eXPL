@@ -23,11 +23,13 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,10 +44,12 @@ import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
@@ -54,6 +58,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.LexiconSource;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
@@ -61,9 +66,13 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
+import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
@@ -86,6 +95,45 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class QueryParserTest 
 {
+    static class SystemFunctionProvider implements FunctionProvider<Void>
+    {
+        @Override
+        public String getName()
+        {
+            return "system";
+        }
+
+        @Override
+        public CallEvaluator<Void> getCallEvaluator(String identifier)
+        {
+            if (identifier.equals("print"))
+                return new CallEvaluator<Void>(){
+    
+                    @Override
+                    public String getName()
+                    {
+                        return "print";
+                    }
+    
+                    @Override
+                    public Void evaluate(List<Term> argumentList)
+                    {
+                        for (Term term: argumentList)
+                            System.out.print(term.getValue().toString());
+                        System.out.println();
+                        return null;
+                    }
+
+                    @Override
+                    public void setExecutionContext(ExecutionContext context)
+                    {
+                    }
+                    
+            };
+            throw new ExpressionException("Unknown function identifier: " + identifier);
+        }
+    }
+    
 	static final String SCRIPT1 =
 	    "integer twoFlip = ~2;\n" +
         "integer mask = 2;\n" +
@@ -464,6 +512,30 @@ public class QueryParserTest
     {
     }
 
+    @Test
+    public void test_towers_of_hanoi() throws IOException
+    {
+        File resourcePath = new File("src/test/resources");
+        FunctionManager functionManager = new FunctionManager();
+        SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
+        functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
+        QueryProgramParser queryProgramParser = new QueryProgramParser(resourcePath, functionManager);
+        QueryProgram queryProgram = queryProgramParser.loadScript("towers-of-hanoi.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
+        //queryProgram.executeQuery("towers_of_hanoi");
+        Result result = queryProgram.executeQuery("towers_of_hanoi");
+        Iterator<Axiom> iterator = result.getIterator("moves");
+        File towersList = new File("src/test/resources", "towers-of-hanoi.lst");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(towersList), "UTF-8"));
+        while (iterator.hasNext())
+        {
+            //System.out.println(iterator.next().toString());
+            String line = reader.readLine();
+            assertThat(iterator.next().toString()).isEqualTo(line);
+        }
+        reader.close();
+    }
+    
     @Test
     public void test_mega_cities3() throws IOException
     {

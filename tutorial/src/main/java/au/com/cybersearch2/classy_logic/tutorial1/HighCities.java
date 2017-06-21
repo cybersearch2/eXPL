@@ -19,8 +19,8 @@ import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
-import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.Result;
+import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;

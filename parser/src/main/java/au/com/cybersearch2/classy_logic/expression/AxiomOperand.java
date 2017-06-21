@@ -43,6 +43,8 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     protected AxiomListListener axiomListListener;
     /** Defines operations that an Operand performs with other operands. To be set by super. */
     protected AxiomOperator operator;
+    /** The axiom list - reference kept to recover from partial backup */
+    protected AxiomList axiomList;
     
     /**
      * Axiom list variable
@@ -95,15 +97,17 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     public EvaluationStatus evaluate(int id)
     {
         EvaluationStatus status = EvaluationStatus.COMPLETE;
-        if (axiomListEvaluator != null)
-        {   // Perform static intialisation to a list of axioms
-            setValue(axiomListEvaluator.evaluate(id));
-            // Do not set id if list is created empty
-            if (axiomListEvaluator.size() > 0)
-                this.id = id;
-            // Do not set id as the change is permanent unless
-            // a subsequent evaluation overrides this initialisation
-            axiomListListener.addAxiomList(qname, getValue());
+        if (empty && (axiomListEvaluator != null))
+        {   // Create list if not set or parameters have changed
+            if ((axiomList == null) || ((axiomListEvaluator.size() > 0) && axiomListEvaluator.isEmpty()))
+            {
+                axiomList = axiomListEvaluator.evaluate(id);
+                // Do not set id if list is created empty
+                if (axiomListEvaluator.size() > 0)
+                    this.id = id;
+                axiomListListener.addAxiomList(qname, axiomList);
+            }
+            setValue(axiomList);
         }
         if (isEmpty())
             // If an error occurs populate with an empty list for graceful handling

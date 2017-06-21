@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 //import java.util.IllformedLocaleException;
@@ -29,12 +30,14 @@ import au.com.cybersearch2.classy_logic.compile.ListAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.ParserTask;
 import au.com.cybersearch2.classy_logic.compile.TemplateAssembler;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
@@ -51,7 +54,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 28 Dec 2014
  */
-public class Scope 
+public class Scope implements DebugTarget 
 {
     /** scope literal */
     static final protected String SCOPE = "scope";
@@ -69,6 +72,7 @@ public class Scope
     protected Map<String, Scope> scopeMap;
     /** A scope locale can be different to the system default */
     protected Locale locale;
+    protected List<DebugTarget> debugTargetList;
     
     static protected Map<String, Object> EMPTY_PROPERTIES;
 
@@ -102,6 +106,7 @@ public class Scope
         }
         if (!properties.isEmpty())
             addScopeList(properties);
+        debugTargetList = new ArrayList<DebugTarget>();
     }
  
     public Set<String> getScopeNames()
@@ -607,6 +612,18 @@ public class Scope
         return getGlobalParserAssembler().getAxiomAssembler();
     }
 
+    public void addDebugTarget(DebugTarget debugTarget)
+    {
+        debugTargetList.add(debugTarget);
+    }
+    
+    @Override
+    public void setExecutionContext(ExecutionContext context)
+    {
+        for (DebugTarget debugTarget: debugTargetList)
+            debugTarget.setExecutionContext(context);
+    }
+    
     /**
      * Add "scope" builtin term list to access scope properties
      * @param properties Scope properties
@@ -670,5 +687,6 @@ public class Scope
         }
         return false;
     }
+
 
 }

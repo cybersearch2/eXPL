@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.query;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -29,6 +28,8 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.ArchiveIndexHelper;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -153,7 +154,7 @@ public class QueryExecuterAdapter
             String templateName = template.getName();
             QualifiedName qname = new QualifiedTemplateName(QualifiedName.EMPTY, templateName);
             String templateKey = template.getKey();
-            Map<String, Object> props = template.getProperties();
+            List<Term> props = template.getProperties();
             parserAssembler.getTemplateAssembler().createTemplate(qname, false);
             parserAssembler.getTemplateAssembler().getTemplate(qname).setKey(templateKey);
             if (props != null)
@@ -161,7 +162,8 @@ public class QueryExecuterAdapter
             Template newTemplate = parserAssembler.getTemplateAssembler().getTemplate(qname);
             for (int i = 0; i < template.getTermCount(); i++)
                 newTemplate.addTerm((Operand)template.getTermByIndex(i));
-            newTemplate.getParserTask().run();
+            ArchiveIndexHelper archiveIndexHelper = new ArchiveIndexHelper(newTemplate);
+            archiveIndexHelper.setOperandTree(1);
         }
     }
     

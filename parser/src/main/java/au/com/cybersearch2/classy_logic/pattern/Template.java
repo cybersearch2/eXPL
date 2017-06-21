@@ -20,22 +20,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamField;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
-import au.com.cybersearch2.classy_logic.expression.Evaluator;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.pattern.ArchiveIndexHelper.FixUp;
-import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -63,6 +60,7 @@ public class Template extends TermList<Operand>
 
     public static List<String>  EMPTY_NAMES_LIST;
     public static List<Operand> EMPTY_OPERAND_LIST;
+    public static List<Term> EMPTY_TERM_LIST;
     
     /** Unique identity generator */
     static protected AtomicInteger referenceCount;
@@ -72,6 +70,7 @@ public class Template extends TermList<Operand>
         referenceCount = new AtomicInteger();
         EMPTY_OPERAND_LIST = Collections.emptyList();
         EMPTY_NAMES_LIST = Collections.emptyList();
+        EMPTY_TERM_LIST = Collections.emptyList();
     }
     
     /** Qualified name of template */
@@ -83,7 +82,7 @@ public class Template extends TermList<Operand>
     /** Identity used in backup to allow partial backup to last unifying agent */
     protected int id;
     /** Initialization data (optional) */
-    protected Map<String, Object> initData;
+    protected List<Term> initData;
     /** Link to next Template in chain. Used by Calculator. */
     protected Template next;
     /** Flag true if template declared a calculator */
@@ -100,8 +99,6 @@ public class Template extends TermList<Operand>
     protected CallContext tailCallContext;
     /** Pairs axiom terms in a Solution object with terms in a template */
     protected SolutionPairer solutionPairer;
-    /** Operand archive index fix ups */
-    private List<ArchiveIndexHelper.FixUp> fixUpList;
     /** Template archetype - attribute avoids casting to get super archetype */
     private TemplateArchetype templateArchetype;
     /** Registered debug targets */
@@ -130,7 +127,7 @@ public class Template extends TermList<Operand>
         for (Operand operand: master.termList)
             termList.add(operand);
         termCount = termList.size();
-        fixUpList = master.fixUpList;
+        initData =  EMPTY_TERM_LIST;
     }
 
     /**
@@ -145,7 +142,7 @@ public class Template extends TermList<Operand>
         qname = templateArchetype.getQualifiedName();
         key = qname.getTemplate();
         id = referenceCount.incrementAndGet();
-        fixUpList = new ArrayList<FixUp>();
+        initData =  EMPTY_TERM_LIST;
     }
 
 	/**
@@ -413,13 +410,7 @@ public class Template extends TermList<Operand>
      */
     public boolean unify(TermList<Term> axiom, Solution solution)
     {
-        for (ArchiveIndexHelper.FixUp fixUp: fixUpList)
-            fixUp.operand.setArchetypeIndex(fixUp.postFixIndex);
-        int[] termMapping = templateArchetype.getTermMapping(axiom.getArchetype());
-        boolean unificationComplete = unify(axiom, solution, termMapping);
-        for (ArchiveIndexHelper.FixUp fixUp: fixUpList)
-            fixUp.operand.setArchetypeIndex(fixUp.preFixIndex);
-        return unificationComplete;
+        return unify(axiom, solution, templateArchetype.getTermMapping(axiom.getArchetype()));
     }
 
     /**
@@ -429,7 +420,11 @@ public class Template extends TermList<Operand>
      */
     public SolutionPairer getSolutionPairer(Solution solution)
     {
-        return new SolutionPairer(solution, id, getContextNames());
+        QualifiedName[] contextNames =
+            (contextName == qname) ? 
+            new QualifiedName[] { qname } :
+            new QualifiedName[] { qname, contextName };
+       return new SolutionPairer(solution, id, contextNames);
     }
     
     /**
@@ -475,6 +470,10 @@ public class Template extends TermList<Operand>
 		return axiom;
 	}
 
+	/**
+	 * Returns all term values as a list. Unlike toAxiom(), there is no filtering eg. no honooring "private" flag 
+	 * @return Term list
+	 */
     public List<Term> toArray()
     {
         List<Term> arrayList  = new ArrayList<Term>();
@@ -514,42 +513,62 @@ public class Template extends TermList<Operand>
 	}
 
 	/**
-	 * Set initialization data, used for seeding calculations
-	 * @param name Property name
-	 * @param value Property value
+	 * Set initial value for one term
+	 * @param name Term name - can be empty for selection by position
+	 * @param value Term value
 	 */
 	public void putInitData(String name, Object value)
 	{
-		if (initData == null)
-			initData = new HashMap<String, Object> ();
-		initData.put(name, value);
+		if (initData.isEmpty())
+			initData = new ArrayList<Term> ();
+		initData.add(new Parameter(name, value));
 	}
 
 	/**
-	 * Set term initial data. 
+	 * Set initial term values
+	 * @param termList List of terms. A term may be anonymous, but must not be empty.
+	 */
+	public void setInitData(List<Term> termList)
+	{
+        if (initData.isEmpty())
+            initData = new ArrayList<Term>();
+        else
+            initData.clear();
+	    initData.addAll(termList);
+	}
+	
+	/**
+	 * Set initial term values using provided data, if any
+	 * @see #putInitData(String, Object)
+	 * @see #setInitData(List) 
 	 */
 	public void initialize()
 	{
-		if (initData != null)
+		if (initData.isEmpty())
+		    return;
+        int index = 0; // Map unnamed arguments to template term names
+		for (Term argument: initData)
 		{
-			for (String name: initData.keySet())
-			{
-                Operand term = getTermByName(name);
-				if (term != null)
-				{
-				    if (term instanceof Evaluator)
-				    {
-				        Operand left = ((Evaluator)term).getLeftOperand();
-				        if ((left != null) && name.equals(left.getName()))
-				            term = left;
-				        else
-				            term = null;
-				    }
-				}
-				if (term == null)
-				    throw new QueryExecutionException("Template \"" + getName() + "\" does not have term \"" + name + "\"");
-				term.assign(new Parameter(Term.ANONYMOUS, initData.get(name)));
-			}
+            Operand term = null;
+            // All parameters are Parameters with names set by caller and possibly empty for match by position.
+            String argName = argument.getName();
+            if (!argName.isEmpty())
+                term = getTermByName(argName);
+            if (term == null)
+            {   // Place by position if argument name not available or not matching any term name
+                if (index == getTermCount())
+                    throw new ExpressionException("Argument at position " + (index + 1) + " out of bounds");
+                term = getTermByIndex(index);
+            }
+            // Set value but leave id at zero so it is not backed out as intitialization occurs just once
+            term.setValue(argument.getValue());
+            if (isChoice)
+            {
+                for (int i = 1; i < getTermCount(); ++i)
+                    getTermByIndex(i).setValue(argument.getValue());
+                break;
+            }
+            ++index;
 		}
 	}
 
@@ -559,11 +578,23 @@ public class Template extends TermList<Operand>
 	 */
 	public void addProperties(Map<String, Object> properties) 
 	{
-		if (initData == null)
-			initData = properties;
-		else
-			initData.putAll(properties);
+	    if (!properties.isEmpty())
+	    {
+	        if (initData.isEmpty())
+	            initData = new ArrayList<Term>();
+	        for (Map.Entry<String,Object> entry: properties.entrySet())
+	            initData.add(new Parameter(entry.getKey(), entry.getValue()));
+	    }
 	}
+
+    /**
+     * Returns properties
+     * @return List of terms, possibly empty
+     */
+    public List<Term> getProperties()
+    {
+        return initData;
+    }
 
 	/**
 	 * Returns next template in chain
@@ -587,11 +618,11 @@ public class Template extends TermList<Operand>
         template.next = nextTemplate;
 	}
 
-	   /**
-     * Returns query template instance
-     * @param name Query name to be appended to template qualified name
-     * @return Template object
-     */
+   /**
+    * Returns query template instance
+    * @param name Query name to be appended to template qualified name
+    * @return Template object
+    */
     public Template innerTemplateInstance(String name)
     {
         boolean isQueryTemplate = (name != null);
@@ -634,17 +665,8 @@ public class Template extends TermList<Operand>
         return choiceTemplate;
     }
     
-	/**
-	 * Returns properties
-	 * @return Map container or null if no properties
-	 */
-    public Map<String, Object> getProperties()
-    {
-        return initData;
-    }
-
     /**
-     * Push template terms on stack
+     * Push template operand values on stack
      */
     public void push()
     {
@@ -660,14 +682,14 @@ public class Template extends TermList<Operand>
             tailCallContext = newCallContext;
         }
         Template template = getNext();
+        // Do full backup of chain templates so parameters can be re-evaluatoed
         while (template != null)
         {
-            template.push();
+            template.backup(false);
             template = template.getNext();
         }
-        
     }
- 
+
     /**
      * Pop template terms off stack
      */
@@ -689,33 +711,27 @@ public class Template extends TermList<Operand>
                 tailCallContext = newTail;
             }
         }
-        Template template = getNext();
-        while (template != null)
-        {
-            template.pop();
-            template = template.getNext();
-        }
     }
 
+    /**
+     * Returns task to complete assembly of this template
+     * @return Runnable
+     */
     public Runnable getParserTask()
     {
         return new Runnable(){
 
             @Override
             public void run()
-            {
-                // The archetype meta data needs to include all operands found by walking the operand trees 
-                // The archetype is mutable until this is completed
-                if ((archetype.isMutable()))
-                {
-                    // Complete archetype initialization. This cannot be performed earlier due to fact parser tasks, 
-                    // which can modify operand terms, run after template construction.
-                    // Note replicate templates share the master fixUpList as this operation can only be performed once.
-                    fixUpList.addAll(getFixUpList());
-                    archetype.clearMutable();
-                }
+            {   // Use helper to set archive index and id in all operands
+                ArchiveIndexHelper archiveIndexHelper = new ArchiveIndexHelper(Template.this);
+                archiveIndexHelper.setOperandTree(1);
+                archiveIndexHelper.setOperandTree(2);
+                // Lock archetype
+                getArchetype().clearMutable();
             }};
     }
+    
     /**
      * Returns template context name(s)
      * @return QualifiedName array 
@@ -736,16 +752,6 @@ public class Template extends TermList<Operand>
         return templateArchetype;
     }
  
-    /**
-     * Returns fix up list which is used to adjust operand archive indexes for unification
-     * @return FixUp list
-     */
-    protected List<ArchiveIndexHelper.FixUp> getFixUpList()
-    {
-        ArchiveIndexHelper archiveIndexHelper = new ArchiveIndexHelper(this);
-        return archiveIndexHelper.setOperandTree();
-    }
-
     /**
      * Unify template using given axiom and solution
      * @param axiom Axiom with which to unify as TermList object 

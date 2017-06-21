@@ -1213,24 +1213,32 @@ Template InnerTemplateDeclaration(QualifiedName outerTemplateName, String callNa
 Operand InnerCalculator(Template template, QualifiedName outerTemplateName, ParserContext context, boolean runOnce) :
 {
 
-  Operand expression;
+  Operand operand;
   SourceItem sourceItem;
   Token delimitToken;
   context.setSourceItemPending(true);
 }
 {
-  expression=CalculatorExpression(template, outerTemplateName, context)
+  ( 
+    operand=CalculatorExpression(template, outerTemplateName, context)
+    |
+    operand = CalculatorQuery(template, context)
+  )
   {
-     sourceItem=addSourceVariable(expression, context);
+     sourceItem=addSourceVariable(operand, context);
   }
   (
     delimitToken="," 
     {
       sourceItem.setEnd(delimitToken);
     }
-    expression=CalculatorExpression(template, outerTemplateName, context)
+    (
+      operand=CalculatorExpression(template, outerTemplateName, context)
+      |
+      operand = CalculatorQuery(template, context)
+    )
     {
-      sourceItem=addSourceVariable(expression, context);
+      sourceItem=addSourceVariable(operand, context);
     }
   )* 
   delimitToken="}"

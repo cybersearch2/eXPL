@@ -17,7 +17,7 @@ package au.com.cybersearch2.classy_logic.tutorial2;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
-import au.com.cybersearch2.classy_logic.ResourceAxiomProvider;
+import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;

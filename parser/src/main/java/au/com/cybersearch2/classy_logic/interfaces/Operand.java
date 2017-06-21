@@ -26,12 +26,20 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public abstract class Operand extends Parameter
 {
+    /** Flag set true if operand not visible in solution */
+    protected boolean isPrivate;
+    /** Identity of container which registered the archetype index */
+    protected int archetypeId;
+    /** Index of this Operand in the registered archetype */
+    protected int archetypeIndex;
+
     /**
      * @param name
       */
 	public Operand(String name)
     {
         super(name);
+        archetypeIndex = -1;
     }
 
     /**
@@ -41,7 +49,7 @@ public abstract class Operand extends Parameter
     public Operand(String name, int value)
     {
         super(name, value);
-        
+        archetypeIndex = -1;
     }
 
     /**
@@ -51,7 +59,7 @@ public abstract class Operand extends Parameter
     public Operand(String name, Object value)
     {
         super(name, value);
-        
+        archetypeIndex = -1;
     }
 
     /**
@@ -79,32 +87,60 @@ public abstract class Operand extends Parameter
 	public abstract Operand getRightOperand();
 
 	/**
-	 * Set this operand private - not visible in solution
-	 * @param isPrivate Flag set true if operand not visible in solution
-	 */
-	public abstract void setPrivate(boolean isPrivate);
-	
-	/**
-	 * Returns flag set true if this operand is private
-	 * @return
-	 */
-	public abstract boolean isPrivate();
-
-	/**
 	 * Returns object which defines operations that an Operand performs with other operands
 	 * @return Operator object
 	 */
 	public abstract Operator getOperator();
 
     /**
+     * Set this operand private - not visible in solution
+     * @param isPrivate Flag set true if operand not visible in solution
+     */
+    public void setPrivate(boolean isPrivate)
+    {
+        this.isPrivate = isPrivate;
+    }
+    
+    /**
+     * Returns flag set true if this operand is private
+     * @return boolean
+     */
+    public boolean isPrivate()
+    {
+        return isPrivate;
+    }
+
+    /**
+     * setArchetypeId
+     */
+    public void setArchetypeId(int archetypeId)
+    {
+        this.archetypeId = archetypeId;
+    }
+
+     /**
+     * getArchetypeId
+     */
+    public int getArchetypeId()
+    {
+        return archetypeId;
+    }
+
+     /**
      * Sets index of this Operand in the archetype of it's containing template
      * @param index int value
      */
-	public abstract void setArchetypeIndex(int index);
- 
+    public void setArchetypeIndex(int archetypeIndex)
+    {
+        this.archetypeIndex = archetypeIndex;
+    }
+
     /**
      * Returns index of this Operand in the archetype of it's containing template.
      * @return non-negative number, if set, otherwise -1
      */
-	public abstract int getArchetypeIndex();
+    public int getArchetypeIndex()
+    {
+        return archetypeIndex;
+    }
 }

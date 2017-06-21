@@ -30,6 +30,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * AxiomList
+ * List of AxiomTermList-wrapped Axions 
  * @author Andrew Bowley
  * 28 Jan 2015
  */
@@ -47,7 +48,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 	/**
 	 * Construct an AxiomList object
 	 * @param qname Name of axiom list
-	 * @param key Axiom key
+	 * @param key Axiom key, may be same as name of list
 	 */
 	public AxiomList(QualifiedName qname, QualifiedName key) 
 	{
@@ -55,20 +56,27 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 		this.key = key;
 	}
 
+	/**
+	 * Concatenate given axiom list to this list
+	 * @param rightList The list to add, which is on the right in a concatenation expression
+	 * @return this list post concatenation
+	 */
     public AxiomList concatenate(AxiomList rightList)
     {
         if (rightList.isEmpty())
+            // No items to add
             return this;
         if (isEmpty())
+            // Adding to empty list, so set axiom key to same as on right 
             setKey(rightList.getKey());
         else
-        {
+        {   // Check that left and right lists are compatible, which is true if tboth share them same archetype 
             getArchetypeName();
-            // Check for congruence. Axiom archetypes must match
             if ((archetypeName == null) || !archetypeName.equals(rightList.getArchetypeName()))
+                // When archetypes cannot be compared or are different, fall back to ensuring term names align
                 checkTermNameCongruence(rightList);
         }
-        // Update this and return 
+        // Update this list and return 
         Iterator<AxiomTermList> iterator = rightList.getIterable().iterator();
         int index = getLength();
         while (iterator.hasNext())
@@ -76,18 +84,25 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
         return this;
     }
  
+    /**
+     * Concatenate given axiom term list to this list
+     * @param rightList The axiom term list to add, which is on the right in a concatenation expression
+     * @return this list post concatenation
+     */
     public AxiomList concatenate(AxiomTermList axiomTermList)
     {
         if (axiomTermList.isEmpty())
+            // Do not add empty axiom term list
             return this;
         if (!isEmpty())
         {
+            // Check that left and right lists are compatible, which is true if tboth share them same archetype 
             getArchetypeName();
-            // Check for congruence. Axiom archetypes must match
             if ((archetypeName == null) || !archetypeName.equals(axiomTermList.archetypeName))
+                // When archetypes cannot be compared or are different, fall back to ensuring term names align
                 checkTermNameCongruence(axiomTermList);
         }
-        // Update this and return 
+        // Update this list and return 
         int index = getLength();
             assignItem(index, axiomTermList);
         return this;
@@ -109,6 +124,7 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 				axiomListOperand.setAxiom(axiom);
 				assignItem(getLength(), axiomListOperand);
 				TermListManager axiomArchetype = axiom.getArchetype();
+				// Set term name list if out of sync 
 				if ((archetypeName == null) || 
 				     !axiomArchetype.toString().equals(archetypeName) ||
 	                 ((axiomTermNameList != null) && 
@@ -192,12 +208,21 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
 		return builder.toString();
 	}
 
+	/**
+	 * getOperandType
+	 * @see au.com.cybersearch2.classy_logic.list.ArrayItemList#getOperandType()
+	 */
     @Override
     public OperandType getOperandType()
     {
         return OperandType.AXIOM;
     }
 
+    /**
+     * Ensure term names align
+     * @param axiomContainer List with which to compare term names
+     * @throws ExpressionException if term names do not match 
+     */
     protected void checkTermNameCongruence(AxiomContainer axiomContainer)
     {
         List<String> rightNames = axiomContainer.getAxiomTermNameList();
@@ -215,7 +240,11 @@ public class AxiomList extends ArrayItemList<AxiomTermList> implements AxiomCont
         if (!isCongruent)
             throw new ExpressionException("Cannot concatenate " + toString() + " to " + axiomContainer.toString());
     }
-    
+
+    /**
+     * Returns current archetype name
+     * @return name of the first item's archetype or empty string if list is empty
+     */
     protected String getArchetypeName()
     {
         if (archetypeName == null)

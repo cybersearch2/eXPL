@@ -175,21 +175,6 @@ public class QueryParams
     /**
      * Add axiom key / template name pair for calculator query, along with optional properties
      * @param qualifiedTemplateName Qualified name of template to which the properties apply
-     * @param parametersAxiom Calculator parameters contained in a axiom object
-     */
-    public void putParameters(QualifiedName qualifiedTemplateName, Axiom parametersAxiom) 
-    {
-        if ((parametersAxiom != null) && (parametersAxiom.getTermCount() > 0))
-        {
-            if (parametersMap == null)
-                parametersMap = new HashMap<QualifiedName, Axiom>();
-            parametersMap.put(qualifiedTemplateName, parametersAxiom);
-        }
-    }
-
-    /**
-     * Add axiom key / template name pair for calculator query, along with optional properties
-     * @param qualifiedTemplateName Qualified name of template to which the properties apply
      * @param properties Calculator properties
      */
     public void putProperties(QualifiedName qualifiedTemplateName, Map<String, Object> properties) 
@@ -213,17 +198,6 @@ public class QueryParams
     public Axiom getParameter(QualifiedName qualifiedTemplateName) 
     {
         return parametersMap == null ? null : parametersMap.get(qualifiedTemplateName);
-    }
-
-    /**
-     * Clears parameters referenced by template name
-     * @param templateName Template name of calculator
-     */
-    public void clearParameters(String templateName) 
-    {
-        if ((parametersMap != null) && parametersMap.containsKey(templateName))
-            
-            parametersMap.remove(templateName);
     }
 
     /**

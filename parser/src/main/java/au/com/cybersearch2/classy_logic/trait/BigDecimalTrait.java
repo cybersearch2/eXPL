@@ -21,7 +21,7 @@ import java.util.Scanner;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
-import au.com.cybersearch2.classy_logic.expression.StringOperand;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -71,10 +71,10 @@ public class BigDecimalTrait extends NumberTrait<BigDecimal>
 
     /**
      * cloneFromOperand
-     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(StringOperand)
+     * @see au.com.cybersearch2.classy_logic.interfaces.StringCloneable#cloneFromOperand(Operand)
      */
     @Override
-    public BigDecimalOperand cloneFromOperand(StringOperand stringOperand)
+    public BigDecimalOperand cloneFromOperand(Operand stringOperand)
     {
         BigDecimalOperand clone = 
             stringOperand.getLeftOperand() == null ? 

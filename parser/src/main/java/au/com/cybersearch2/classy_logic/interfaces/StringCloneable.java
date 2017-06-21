@@ -15,11 +15,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
-import au.com.cybersearch2.classy_logic.expression.StringOperand;
-
 /**
  * StringCloneable
- * Support for conversion of text in format to suit locate to a number
+ * Support for conversion of text in format to suit locale to a number
  * @author Andrew Bowley
  * 27Apr.,2017
  */
@@ -31,5 +29,5 @@ public interface StringCloneable
      * @param stringOperand The operand containing the text value
      * @return Operand of same type as self
      */
-    Operand cloneFromOperand(StringOperand stringOperand);
+    Operand cloneFromOperand(Operand stringOperand);
 }
