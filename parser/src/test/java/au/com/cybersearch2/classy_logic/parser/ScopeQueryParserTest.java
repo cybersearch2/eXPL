@@ -418,8 +418,8 @@ public class ScopeQueryParserTest
 	{
 		QueryProgram queryProgram = new QueryProgram();
 		openScript(FACTORIAL_CALCULATE_XPL, queryProgram);
-		Scope sortScope = queryProgram.getScope("factorial_example");
-		assertThat(sortScope).isNotNull();
+		Scope factorialScope = queryProgram.getScope("factorial_example");
+		assertThat(factorialScope).isNotNull();
 		SolutionHandler solutionHandler = new SolutionHandler(){
 			@Override
 			public boolean onSolution(Solution solution) {

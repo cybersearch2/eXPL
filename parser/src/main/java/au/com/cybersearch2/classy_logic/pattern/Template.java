@@ -82,7 +82,7 @@ public class Template extends TermList<Operand>
     /** Identity used in backup to allow partial backup to last unifying agent */
     protected int id;
     /** Initialization data (optional) */
-    protected List<Term> initData;
+    protected List<Term>[] initData;
     /** Link to next Template in chain. Used by Calculator. */
     protected Template next;
     /** Flag true if template declared a calculator */
@@ -109,6 +109,7 @@ public class Template extends TermList<Operand>
      * @param master Template object to replicate
      * @param qname New Template qualified name. 
      */
+    @SuppressWarnings("unchecked")
     public Template(Template master, QualifiedName qname) 
     {
         // Replicates share the master template archetype
@@ -127,13 +128,14 @@ public class Template extends TermList<Operand>
         for (Operand operand: master.termList)
             termList.add(operand);
         termCount = termList.size();
-        initData =  EMPTY_TERM_LIST;
+        initData =  new List[]{EMPTY_TERM_LIST,EMPTY_TERM_LIST};
     }
 
     /**
      * Construct Template object
      * @param qname Template qualified name. The axiom key is set to the name part as a default.
      */
+    @SuppressWarnings("unchecked")
     private Template(TemplateArchetype templateArchetype, QualifiedName contextName) 
     {
         super(templateArchetype);
@@ -142,7 +144,7 @@ public class Template extends TermList<Operand>
         qname = templateArchetype.getQualifiedName();
         key = qname.getTemplate();
         id = referenceCount.incrementAndGet();
-        initData =  EMPTY_TERM_LIST;
+        initData =  new List[]{EMPTY_TERM_LIST,EMPTY_TERM_LIST};
     }
 
 	/**
@@ -519,9 +521,9 @@ public class Template extends TermList<Operand>
 	 */
 	public void putInitData(String name, Object value)
 	{
-		if (initData.isEmpty())
-			initData = new ArrayList<Term> ();
-		initData.add(new Parameter(name, value));
+		if (initData[0].isEmpty())
+			initData[0] = new ArrayList<Term> ();
+		initData[0].add(new Parameter(name, value));
 	}
 
 	/**
@@ -530,11 +532,11 @@ public class Template extends TermList<Operand>
 	 */
 	public void setInitData(List<Term> termList)
 	{
-        if (initData.isEmpty())
-            initData = new ArrayList<Term>();
+        if (initData[0].isEmpty())
+            initData[0] = new ArrayList<Term>();
         else
-            initData.clear();
-	    initData.addAll(termList);
+            initData[0].clear();
+	    initData[0].addAll(termList);
 	}
 	
 	/**
@@ -542,13 +544,15 @@ public class Template extends TermList<Operand>
 	 * @see #putInitData(String, Object)
 	 * @see #setInitData(List) 
 	 */
-	public void initialize()
-	{
-		if (initData.isEmpty())
-		    return;
+    public void initialize()
+    {
+        List<Term> properties = getProperties();
+        if (termList.isEmpty())
+            return;
         int index = 0; // Map unnamed arguments to template term names
-		for (Term argument: initData)
-		{
+        Axiom axiom = new Axiom(getKey());
+        for (Term argument: properties)
+        {
             Operand term = null;
             // All parameters are Parameters with names set by caller and possibly empty for match by position.
             String argName = argument.getName();
@@ -560,32 +564,47 @@ public class Template extends TermList<Operand>
                     throw new ExpressionException("Argument at position " + (index + 1) + " out of bounds");
                 term = getTermByIndex(index);
             }
-            // Set value but leave id at zero so it is not backed out as intitialization occurs just once
-            term.setValue(argument.getValue());
-            if (isChoice)
-            {
-                for (int i = 1; i < getTermCount(); ++i)
-                    getTermByIndex(i).setValue(argument.getValue());
-                break;
-            }
+            axiom.addTerm(new Parameter(term.getName(), argument.getValue()));
             ++index;
-		}
-	}
+        }
+        OperandWalker walker = new OperandWalker(termList);
+        // Create list of term pairs to unify
+        walker.visitAllNodes(new Unifier(this, axiom));
+    }
 
 	/**
 	 * Set initialization data, used for seeding calculations
 	 * @param properties Initialization properties
 	 */
-	public void addProperties(Map<String, Object> properties) 
+	public void setProperties(Map<String, Object> properties) 
 	{
 	    if (!properties.isEmpty())
 	    {
-	        if (initData.isEmpty())
-	            initData = new ArrayList<Term>();
+	        if (initData[0].isEmpty())
+	            initData[0] = new ArrayList<Term>();
+	        else
+	            initData[0].clear();
 	        for (Map.Entry<String,Object> entry: properties.entrySet())
-	            initData.add(new Parameter(entry.getKey(), entry.getValue()));
+	            initData[0].add(new Parameter(entry.getKey(), entry.getValue()));
 	    }
 	}
+
+    /**
+     * Add initialization data, used for seeding calculations
+     * @param properties Initialization properties
+     */
+    public void addProperties(Map<String, Object> properties) 
+    {
+        if (!properties.isEmpty())
+        {
+            if (initData[1].isEmpty())
+                initData[1] = new ArrayList<Term>();
+            else
+                initData[1].clear();
+            for (Map.Entry<String,Object> entry: properties.entrySet())
+                initData[1].add(new Parameter(entry.getKey(), entry.getValue()));
+        }
+    }
 
     /**
      * Returns properties
@@ -593,7 +612,14 @@ public class Template extends TermList<Operand>
      */
     public List<Term> getProperties()
     {
-        return initData;
+        if (initData[1].isEmpty())
+            return initData[0];
+        if (initData[0].isEmpty())
+            return initData[1];
+        List<Term> allProperties = new ArrayList<Term>();
+        allProperties.addAll(initData[0]);
+        allProperties.addAll(initData[1]);
+        return allProperties;
     }
 
 	/**

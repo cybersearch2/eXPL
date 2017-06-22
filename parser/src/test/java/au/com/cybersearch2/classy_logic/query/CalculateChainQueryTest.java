@@ -69,7 +69,7 @@ public class CalculateChainQueryTest
     	TemplateOperand loopy = new TemplateOperand(template);
         TemplateArchetype calcArchetype = new TemplateArchetype(parseTemplateName("calc"));
         Template calcTemplate = new Template(calcArchetype, n, loopy, limit);
-        calcTemplate.addProperties(props);
+        calcTemplate.setProperties(props);
         Solution solution = new Solution();
         
         CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate, null);
@@ -101,7 +101,7 @@ public class CalculateChainQueryTest
     	TemplateOperand loopy = new TemplateOperand(template);
         TemplateArchetype factorialArchetype = new TemplateArchetype(parseTemplateName("factorial"));
         Template calcTemplate = new Template(factorialArchetype, n, factorial, i, loopy);
-        calcTemplate.addProperties(props);
+        calcTemplate.setProperties(props);
 
         Solution solution = new Solution();
         CalculateChainQuery calculateChainQuery = new CalculateChainQuery(null, calcTemplate, null);

@@ -146,7 +146,7 @@ public class QueryLauncher implements DebugTarget
         Template template = scope.getTemplate(getCalculatorKeyName(querySpec).getTemplateName());
         Map<String, Object> properties = querySpec.getProperties(template.getName()); 
         if (properties != null)
-            template.addProperties(properties);
+            template.setProperties(properties);
         return template;
     }
 

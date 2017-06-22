@@ -110,9 +110,9 @@ public class ChoiceTest
             int index = 0;
             @Override
             public boolean onSolution(Solution solution) {
-                System.out.println(solution.getAxiom("shader").getTermByName("rgb").toString());
-                //assertThat(solution.getAxiom("shader").getTermByName("rgb").toString()).isEqualTo(CHOICE_COLORS_LIST[index]);
-                //assertThat((Long)solution.getAxiom("shader").getTermByName("swatch").getValue()).isEqualTo(CHOICE_SELECTION_LIST[index]);
+                //System.out.println(solution.getAxiom("shader").getTermByName("rgb").toString());
+                assertThat(solution.getAxiom("shader").getTermByName("rgb").toString()).isEqualTo(CHOICE_COLORS_LIST[index]);
+                assertThat((Long)solution.getAxiom("shader").getTermByName("swatch").getValue()).isEqualTo(CHOICE_SELECTION_LIST[index]);
                 ++index;
                 return true;
             }});

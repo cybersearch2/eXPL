@@ -7,9 +7,11 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.operator.EvaluatorOperator;
+import au.com.cybersearch2.classy_logic.pattern.OperandWalker;
 
 /**
  * Evaluator
@@ -25,6 +27,34 @@ import au.com.cybersearch2.classy_logic.operator.EvaluatorOperator;
  */
 public class Evaluator extends TreeEvaluator
 {
+    static class EvaluationVisitor implements OperandVisitor
+    {
+        Operand resultOperand;
+        String name;
+  
+        public EvaluationVisitor(String name)
+        {
+            this.name = name;
+        }
+ 
+        public Operand getResultOperand()
+        {
+            return resultOperand;
+        }
+        
+        @Override
+        public boolean next(Operand operand, int depth)
+        {
+            if (operand.getName().equals(name))
+            {
+                resultOperand = operand;
+                return false;
+            }
+            return true;
+        }
+        
+    }
+    
     /** Right hand operand. If null, then this is a unary postfix expression. */
     protected Operand right;
     /** Left hand operand. If null, then this is a unary prefix expression. */
@@ -147,10 +177,28 @@ public class Evaluator extends TreeEvaluator
         {
         case SKIP: // Operator && or ||
             if (right != null)
-                // Binaray && and || assigns a value
+                // Binary && and || assigns a value
                 setResult(shortCircuitOnTrue, id);
             else
+            {
+                if (empty)
+                {
+                    if (getName().isEmpty())
+                        setValue(left.getValue());
+                    else
+                    {
+                        OperandWalker walker = new OperandWalker(left);
+                        EvaluationVisitor visitor = new EvaluationVisitor(getName());
+                        walker.visitAllNodes(visitor);
+                        Operand resultOperand = visitor.getResultOperand();
+                        if (resultOperand == null)
+                            resultOperand = left;
+                        setValue(resultOperand.getValue());
+                    }
+                }
+                isValueSet = true;
                 this.id = id;
+            }
             return EvaluationStatus.COMPLETE;
         case SHORT_CIRCUIT: // Left term evaluates to trigger short circuit - false for && and true for ||
             this.id = id;

@@ -664,9 +664,9 @@ public class CallOperandTest
         Iterator<Axiom> iterator = result.getIterator(qname);
         int index = 0;
         while(iterator.hasNext())
-            System.out.println(iterator.next().toString());
-            //assertThat(iterator.next().toString()).isEqualTo(FACTUAL_GEMINIS[index++]);
-        //assertThat(index).isEqualTo(3);
+            //System.out.println(iterator.next().toString());
+            assertThat(iterator.next().toString()).isEqualTo(FACTUAL_GEMINIS[index++]);
+        assertThat(index).isEqualTo(3);
     }
     
     @Test
