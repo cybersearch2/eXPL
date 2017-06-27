@@ -15,8 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
-import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-
 /**
  * Term
  * Interface for all parameters which participate in iterations of unify, evaluate, backup.
@@ -67,7 +65,7 @@ public interface Term
 	 * @see #unifyTerm(Term otherParam, int id)
 	 * @see #evaluate(int id)
 	 */
-	boolean backup(int id);
+	//boolean backup(int id);
 
 	/**
 	 * Perform unification with other Term. 
@@ -85,7 +83,7 @@ public interface Term
 	 * @param id Identity of caller, which must be provided for backup()
 	 * @return EvaluationStatus.continue if evaluation is to continue
 	 */
-	EvaluationStatus evaluate(int id);
+	//EvaluationStatus evaluate(int id);
 
     /**
      * Set value, mark Term as not empty

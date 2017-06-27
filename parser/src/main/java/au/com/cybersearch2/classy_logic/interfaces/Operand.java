@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
+import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -92,6 +93,31 @@ public abstract class Operand extends Parameter
 	 */
 	public abstract Operator getOperator();
 
+    /**
+     * Evaluate value using data gathered during unification.
+     * @param id Identity of caller, which must be provided for backup()
+     * @return EvaluationStatus
+     */
+    public EvaluationStatus evaluate(int id) 
+    {
+        return EvaluationStatus.COMPLETE;
+    }
+
+    /**
+     * Backup to intial state if given id matches id assigned on unification or given id = 0. 
+     * @param id Identity of caller. 
+     * @return boolean true if backup occurred
+     * @see #unify(Term otherParam, int id)
+     * @see #evaluate(int id)
+     */
+    public boolean backup(int id)
+    {
+        if ((this.id == 0) || ((id != 0) && (this.id != id)))
+            return false;
+        clearValue();
+        return true;
+    }
+    
     /**
      * Set this operand private - not visible in solution
      * @param isPrivate Flag set true if operand not visible in solution

@@ -255,6 +255,23 @@ public class AxiomListSpec implements ListItemSpec
     }
 
     /**
+     * backup
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate#backup(int)
+     */
+    public boolean backup(int id) 
+    {  
+        boolean flag = false;
+        if (indexData.getItemExpression() != null)
+             flag = indexData.getItemExpression().backup(id);
+        if (arrayData != null)
+        {
+            if (arrayData.getItemExpression() != null)
+                flag = arrayData.getItemExpression().backup(id);
+        }
+        return flag;
+    }
+    
+    /**
      * Returns item index given name of item
      * @param itemName
      * @param axiomTermNameList List of axiom term names

@@ -16,7 +16,6 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import java.util.List;
-import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.Scope;
@@ -26,6 +25,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -144,9 +144,9 @@ public class QueryLauncher implements DebugTarget
     protected Template getCalculatorTemplate(Scope scope, QuerySpec querySpec)
     {   // Calculator uses a single template
         Template template = scope.getTemplate(getCalculatorKeyName(querySpec).getTemplateName());
-        Map<String, Object> properties = querySpec.getProperties(template.getName()); 
+        List<Term> properties = querySpec.getProperties(template.getName()); 
         if (properties != null)
-            template.setProperties(properties);
+            template.setInitData(properties);
         return template;
     }
 

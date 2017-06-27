@@ -100,12 +100,19 @@ public class RegExOperand extends StringOperand
 		// Note id not required as this object id is set during unification
 		if (!isEmpty())
 		{
-			// Retain value on match
-			Matcher matcher = getMatcher();
-			boolean isMatch = matcher.find();
+		    boolean isMatch = false;
+		    Matcher matcher = null;
+		    if (regex.isEmpty())
+		        isMatch = value.toString().isEmpty();
+		    else
+		    {
+		        // Retain value on match
+		        matcher = getMatcher();
+			    isMatch = matcher.find();
+		    }
 			if (!isMatch) // No match is same as unification failed
 				clearValue();
-			else if (group != null)
+			else if ((group != null) && (matcher != null))
 			{   // Assign values to group operands which are members of the same template as this term
 				List<Operand> groupList = group.getGroupList();
 				String[] groupValues = getGroups(matcher);

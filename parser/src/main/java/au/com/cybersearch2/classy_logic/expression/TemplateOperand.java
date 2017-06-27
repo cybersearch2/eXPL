@@ -76,13 +76,13 @@ public class TemplateOperand extends BooleanOperand implements DebugTarget
 		while (true)
 		{
 			EvaluationStatus evaluationStatus = template.evaluate(context);
+            // Only backup local changes
+            template.backup(true);
 			if (runOnce || (evaluationStatus == EvaluationStatus.SHORT_CIRCUIT))
 			{
 				setValue(Boolean.TRUE); // Value indicates successful completion
 				return EvaluationStatus.COMPLETE;
 			}
-			// Only backup local changes
-			template.backup(true);
 			if ((context == null) && (++count == 10))
 			{
 				long now = new Date().getTime();

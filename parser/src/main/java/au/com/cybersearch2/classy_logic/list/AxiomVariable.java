@@ -113,9 +113,7 @@ public class AxiomVariable implements ListItemDelegate
     @Override
     public boolean backup(int id) 
     {  
-        Operand indexExpression = axiomListSpec.getItemExpression();
-        if (indexExpression != null)
-            indexExpression.backup(id);
+        axiomListSpec.backup(id);
         if (listOperand != null)  
             listOperand.backup(id);
         return true;

@@ -72,6 +72,7 @@ public class Scope implements DebugTarget
     protected Map<String, Scope> scopeMap;
     /** A scope locale can be different to the system default */
     protected Locale locale;
+    /** List of registerd debug targets */
     protected List<DebugTarget> debugTargetList;
     
     static protected Map<String, Object> EMPTY_PROPERTIES;
@@ -109,6 +110,10 @@ public class Scope implements DebugTarget
         debugTargetList = new ArrayList<DebugTarget>();
     }
  
+    /**
+     * Returns set of scope names
+     * @return String set
+     */
     public Set<String> getScopeNames()
     {
         return scopeMap.keySet();
@@ -155,10 +160,10 @@ public class Scope implements DebugTarget
      * @param querySpec Query specification under construction
      * @param firstKeyname Keyname object at head of query chain
      * @param keynameCount Number of keynames in chain so far
-     * @param properties Query parameters. Optional, so may be empty
+     * @param termList Query parameters. Optional, so may be empty
      * @return QuerySpec The query specification object passed as a parameter or a new head query specifiection object  
      */
-    public QuerySpec buildQuerySpec(QuerySpec querySpec, KeyName firstKeyname, int keynameCount, Map<String, Object> properties)
+    public QuerySpec buildQuerySpec(QuerySpec querySpec, KeyName firstKeyname, int keynameCount, List<Term> termList)
     {
            QualifiedName templateName = firstKeyname.getTemplateName();
            Template firstTemplate = getTemplate(templateName);
@@ -169,8 +174,8 @@ public class Scope implements DebugTarget
            // Query type
            querySpec.setQueryType(QueryType.calculator);
            // Query parameters specified as properties
-           if (properties.size() > 0)
-              querySpec.putProperties(firstKeyname, properties);
+           if (termList.size() > 0)
+              querySpec.putProperties(firstKeyname, termList);
            String axiomName = firstKeyname.getAxiomKey().getName();
            // Check if logic query needs to be inserted in front of head calculator
            if (!querySpec.isHeadQuery() || axiomName.isEmpty())
@@ -185,8 +190,8 @@ public class Scope implements DebugTarget
            KeyName calculateKeyname = new KeyName(firstKeyname.getTemplateName());
            chainQuerySpec.addKeyName(calculateKeyname);
            chainQuerySpec.setQueryType(QueryType.calculator);
-           if (properties.size() > 0)
-              chainQuerySpec.putProperties(calculateKeyname, properties);
+           if (termList.size() > 0)
+              chainQuerySpec.putProperties(calculateKeyname, termList);
            firstTemplate.setKey(axiomName);
            // Check for logic query template already exists. Not expected to exist.
            // The template name is taken from the axiom key
@@ -333,6 +338,11 @@ public class Scope implements DebugTarget
         return axiomSource;
     }
 
+    /**
+     * Returns flag set true if supplied name is the name of a template
+     * @param templateName Name to check
+     * @return boolean
+     */
     public boolean isTemplateName(String templateName)
     {
         boolean isTemplateKey = false;

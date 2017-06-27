@@ -8,12 +8,12 @@ template shade
 (
   name, 
   // Invert colors
-  color^red ^= 255, 
-  color^green ^= 255, 
-  color^blue ^= 255, 
+  color->red ^= 255, 
+  color->green ^= 255, 
+  color->blue ^= 255, 
   // Check colors have expected values
-  integer r = rgb^red, 
-  integer g = rgb^green, 
-  integer b = rgb^blue
+  integer r = rgb->red, 
+  integer g = rgb->green, 
+  integer b = rgb->blue
 );
 query<axiom> colors(swatch : shade);

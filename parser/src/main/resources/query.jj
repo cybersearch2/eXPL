@@ -344,6 +344,7 @@ TOKEN :
 | < SEMICOLON: ";" >
 | < COMMA: "," >
 | < DOT: "." >
+| < ARROW: "->" >
 }
 
 /* OPERATORS */
@@ -484,7 +485,7 @@ QuerySpec QueryDeclaration(QuerySpec querySpec, ParserContext context) :
   Token delimitToken;
   SourceItem sourceItem;
   int keynameCount = 1;
-  Map<String, Object> properties = new HashMap<String, Object>();
+  List<Term> termList = new ArrayList<Term>();
 }
 {
    "(" 
@@ -512,9 +513,9 @@ QuerySpec QueryDeclaration(QuerySpec querySpec, ParserContext context) :
       {
         sourceItem.setEnd(delimitToken);
       }
-      ( InitialiserList(properties, context) )?
+      ( TermList(termList, context) )?
     {
-        return context.getScope().buildQuerySpec(querySpec, firstKeyname, keynameCount, properties);
+        return context.getScope().buildQuerySpec(querySpec, firstKeyname, keynameCount, termList);
     }
 }
 
@@ -841,13 +842,14 @@ void CalculatorTemplate(ParserContext context) :
   Token delimitToken;
   Operand operand;
   SourceItem sourceItem;
+  Token typeToken = null;
   Token privateToken = null;
-  Map<String, Object> properties = new HashMap<String, Object>();
+  List<Term> termList = new ArrayList<Term>();
   ParserAssembler parserAssembler = context.getParserAssembler();
   QualifiedName contextName = context.getContextName();
 }
 {  
-  calcToken=<CALC> template=Template(context, true) "(" 
+  calcToken=<CALC> ( "<" (typeToken=<TERM>) ">" )? template=Template(context, true) "(" 
   {
     context.setTemplateName(template.getQualifiedName());
     context.setSourceMarker(calcToken, template.getQualifiedName());
@@ -885,11 +887,19 @@ void CalculatorTemplate(ParserContext context) :
     {
       sourceItem.setEnd(delimitToken);
     }
-  [ InitialiserList(properties, context) ]
+  [ TermList(termList, context) ]
   {
-    if (properties.size() > 0)
-        template.addProperties(properties);
+    if (termList.size() > 0)
+        template.addProperties(termList);
     context.setContextName(contextName);
+  }
+  {
+    if (typeToken == null)
+      return;
+    VariableType varType = new VariableType(OperandType.TERM);
+    varType.setProperty(VariableType.AXIOM_KEY, template.getQualifiedName());
+    ItemList<?> itemList = varType.getItemListInstance(parserAssembler, template.getName());
+    parserAssembler.getListAssembler().addItemList(itemList.getQualifiedName(), itemList);
   }
 }
 
@@ -1385,6 +1395,49 @@ String InitialiserDeclaration(Map<String, Object> properties, ParserContext cont
   }
 }
 
+void TermList(List<Term> termList, ParserContext context) :
+{
+  String property;
+  SourceItem sourceItem;
+  Token delimitToken;
+}
+{
+  "("
+  property = TermDeclaration(termList, context)
+  {
+    sourceItem = context.addSourceItem(property);
+  }
+  (
+    delimitToken="," 
+    {
+      sourceItem.setEnd(delimitToken);
+    }
+    property = TermDeclaration(termList, context) 
+    {
+      sourceItem = context.addSourceItem(property);
+    }
+  )* 
+  delimitToken=")"
+  {
+    sourceItem.setEnd(delimitToken);
+  }
+}
+
+String TermDeclaration(List<Term> termList, ParserContext context) :
+{
+  Parameter param;
+  String name = Term.ANONYMOUS;
+}
+{
+  ( name=Name(context) "=" )? param=LiteralTerm(context)
+  {
+     termList.add(new Parameter(name, param.getValue()));
+     if (name.isEmpty())
+       return param.getValue().toString();
+     return name + "=" + param.getValue().toString();
+  }
+}
+
 Group GroupDeclaration(Template template, String name, ParserAssembler parserAssembler) :
 {
   Group group = new Group(name);
@@ -1694,7 +1747,7 @@ ListItemSpec[] IndexExpression(QualifiedName listName, ParserContext context) :
   int dimension = 1;
 }
 { 
-   index1 = ListSelection(context) ( LOOKAHEAD(2)  index2 = ListSelection(context) { ++dimension; } )?
+   index1 = ListSelection1(context) ( LOOKAHEAD(2)  index2 = ListSelection2(context) { ++dimension; } )?
    {
      if ((dimension == 2) && (index1 instanceof String))
        throw new ParseException("Axiom list \"" + listName.getName() + "\" axiom cannot be selected by name");
@@ -1716,7 +1769,7 @@ ListItemSpec[] IndexExpression(QualifiedName listName, ParserContext context) :
    }
 }
 
-Object ListSelection(ParserContext context) :
+Object ListSelection1(ParserContext context) :
 {
   Token name;
   Operand param;
@@ -1727,7 +1780,24 @@ Object ListSelection(ParserContext context) :
     return param;
   }
   | 
-  ( "^" name=<IDENTIFIER> )
+  ( <ARROW> name=<IDENTIFIER> )
+  {
+    return name.image;
+  }
+}
+
+Object ListSelection2(ParserContext context) :
+{
+  Token name;
+  Operand param;
+}
+{
+  ( <LBRACKET> param=Expression(context) <RBRACKET> ) 
+  {
+    return param;
+  }
+  | 
+  ( <DOT> name=<IDENTIFIER> )
   {
     return name.image;
   }

@@ -10,7 +10,7 @@ calc total
   amount *= 1.1
 );
 
-calc format_total(string total_text = translate^Total + " + gst: " + format(total.amount));
+calc format_total(string total_text = translate->Total + " + gst: " + format(total.amount));
 
 local translate(lexicon);
 

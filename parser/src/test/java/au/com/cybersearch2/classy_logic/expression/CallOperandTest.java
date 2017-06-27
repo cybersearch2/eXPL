@@ -365,7 +365,7 @@ public class CallOperandTest
             "    << subjects(english, math, history) >> (marks_list),\n" +
             "    math_score = score.subjects[1],\n" +
             "    << total_score(english, math, history) >> (label, value),\n" +
-            "    marks_total = score.total_score^value,\n" +
+            "    marks_total = score.total_score->value,\n" +
             "    axiom report = { marks_list, string total = label + \": \" + value }\n" +
             ");\n" +
             "query<axiom> marks(grades : score);";
@@ -386,16 +386,16 @@ public class CallOperandTest
     static final String CITY_AVERAGE_HEIGHT_CALC = CITY_EVELATIONS +
             "list city_list(city);\n" +
             "calc average (integer average_height=math.avg(" +
-            "  city_list[0]^altitude,\n" +
-            "  city_list[1]^altitude,\n" +
-            "  city_list[2]^altitude,\n" +
-            "  city_list[3]^altitude,\n" +
-            "  city_list[4]^altitude,\n" +
-            "  city_list[5]^altitude,\n" +
-            "  city_list[6]^altitude,\n" +
-            "  city_list[7]^altitude,\n" +
-            "  city_list[8]^altitude,\n" +
-            "  city_list[9]^altitude\n" +
+            "  city_list[0].altitude,\n" +
+            "  city_list[1].altitude,\n" +
+            "  city_list[2].altitude,\n" +
+            "  city_list[3].altitude,\n" +
+            "  city_list[4].altitude,\n" +
+            "  city_list[5].altitude,\n" +
+            "  city_list[6].altitude,\n" +
+            "  city_list[7].altitude,\n" +
+            "  city_list[8].altitude,\n" +
+            "  city_list[9].altitude\n" +
             "));\n" +
             "query average_height (average);";
     
@@ -407,7 +407,7 @@ public class CallOperandTest
             "  integer index=0;\n" +
            "   calc average_height(\n" +
             "  {\n" +
-            "    accum += city_list[index]^altitude,\n" +
+            "    accum += city_list[index].altitude,\n" +
             "    ? ++index < length(city_list)\n" +
             "  },\n" +
             "  average=accum / index\n" +
@@ -433,10 +433,10 @@ public class CallOperandTest
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);" +
             "choice swatch (shade, red, green, blue)\n" +
-            "{colors^aqua, 0, 255, 255}\n" +
-            "{colors^black, 0, 0, 0}\n" +
-            "{colors^blue, 0, 0, 255}\n" +
-            "{colors^white, 255, 255, 255};\n" +
+            "{colors->aqua, 0, 255, 255}\n" +
+            "{colors->black, 0, 0, 0}\n" +
+            "{colors->blue, 0, 0, 255}\n" +
+            "{colors->white, 255, 255, 255};\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
             "}\n" +
@@ -522,7 +522,7 @@ public class CallOperandTest
             "  integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(person_list),\n" +
-            "    ? person_list[i]^starsign == starsign\n" +
+            "    ? person_list[i].starsign == starsign\n" +
             "    {\n" +
             "       candidates += person_list[i]\n" +
             "    },\n" +
@@ -565,17 +565,17 @@ public class CallOperandTest
             "  integer i = 0,\n" +
             "  {\n" +
             "    ? i < length(person_list),\n" +
-            "    ? person_list[i]^starsign == starsign\n" +
+            "    ? person_list[i].starsign == starsign\n" +
             "    {\n" +
-            "       age = person_list[i]^age,\n" +
+            "       age = person_list[i].age,\n" +
             "       ? age < 18\n" +
             "       { age = unknown },\n" +
             "       axiom person =\n" +
             "       {\n" +
-            "         string name = person_list[i]^name,\n" +
-            "         string sex = person_list[i]^sex,\n" +
+            "         string name = person_list[i].name,\n" +
+            "         string sex = person_list[i].sex,\n" +
             "         age,\n" +
-            "         string starsign =  person_list[i]^starsign\n" +
+            "         string starsign =  person_list[i].starsign\n" +
             "       },\n" +
             "       candidates += person\n" +
             "    },\n" +
@@ -593,10 +593,10 @@ public class CallOperandTest
             "    {\n" +
             "      axiom person =\n" +
             "      {\n" + 
-            "       string name = gemini^name,\n" +
-            "       string sex = gemini^sex,\n" +
-            "       integer age = gemini^age,\n" +
-            "       string starsign = gemini^starsign\n" +
+            "       string name = gemini->name,\n" +
+            "       string sex = gemini->sex,\n" +
+            "       integer age = gemini->age,\n" +
+            "       string starsign = gemini->starsign\n" +
             "      },\n" +
             "      eligible += person\n" +
             "    }\n" +

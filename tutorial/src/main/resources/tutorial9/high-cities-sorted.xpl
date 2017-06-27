@@ -30,12 +30,12 @@ calc insert_sort
   // j is the swap index
   integer j = i - 1,
   // Get last altitude for sort comparison
-  integer altitude = high_cities[i]^altitude,
+  integer altitude = high_cities[i].altitude,
   // Save axiom to swap
   temp = high_cities[i],
   // Shuffle list until sort order restored
   {
-    ? altitude < high_cities[j]^altitude,
+    ? altitude < high_cities[j].altitude,
     high_cities[j + 1] = high_cities[j],
     ? --j >= 0
   },

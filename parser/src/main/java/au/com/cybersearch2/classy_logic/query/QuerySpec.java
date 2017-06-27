@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 
 /**
@@ -40,7 +41,7 @@ public class QuerySpec
 	/** Specificatiion list for chained queries */
 	protected List<QuerySpec> queryChainList;
 	/** Properties for calculations referenced by template name */
-	protected Map<String, Map<String, Object>> propertiesMap;
+	protected Map<String, List<Term>> propertiesMap;
 
 	/**
 	 * Construct a QuerySpec object 
@@ -51,7 +52,7 @@ public class QuerySpec
 		this.name = name;
 		queryType = QueryType.logic;
 		keyNameList = new ArrayList<KeyName>();
-		propertiesMap = new HashMap<String, Map<String, Object>>();
+		propertiesMap = new HashMap<String, List<Term>>();
 	}
 
 	/**
@@ -94,7 +95,7 @@ public class QuerySpec
 	 * @param keyName KeyName object, axiomKey may be empty
 	 * @param properties Calculator properties - may be empty
 	 */
-	public void putProperties(KeyName keyName, Map<String, Object> properties) 
+	public void putProperties(KeyName keyName, List<Term> properties) 
 	{
 		if ((properties != null) && properties.size() > 0)
 			propertiesMap.put(keyName.getTemplateName().getTemplate(), properties);
@@ -149,9 +150,9 @@ public class QuerySpec
 	/**
 	 * Returns properties referenced by template name or null if no properties found
 	 * @param tempateName Template name of calculator
-	 * @return Properties object
+	 * @return Term list
 	 */
-	public Map<String, Object> getProperties(String tempateName) 
+	public List<Term> getProperties(String tempateName) 
 	{
 		return propertiesMap.get(tempateName);
 	}

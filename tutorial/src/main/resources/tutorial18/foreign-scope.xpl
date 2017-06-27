@@ -21,14 +21,14 @@ local translate(lexicon);
 calc charge_plus_gst
 (
   currency amount,
-  << tax_rate(country = scope^region) >> (percent /= 100),
+  << tax_rate(country = scope->region) >> (percent /= 100),
   currency total = amount * (1.0 + percent)
 );
 
 calc format_total
 (
-  string country = scope^region,
-  string text = " " + translate^Total + " " + translate^tax + ": " + 
+  string country = scope->region,
+  string text = " " + translate->Total + " " + translate->tax + ": " + 
     format(charge_plus_gst.total)
 );
 

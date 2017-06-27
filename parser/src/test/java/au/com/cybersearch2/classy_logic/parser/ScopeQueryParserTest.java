@@ -258,7 +258,7 @@ public class ScopeQueryParserTest
 	        "local translate(lexicon);" +
 			"template charge(currency amount);\n" +
 			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +
-			"calc format_total(string total_text = translate^Total + \" + gst: \" + format(charge_plus_gst.total));\n" +
+			"calc format_total(string total_text = translate->Total + \" + gst: \" + format(charge_plus_gst.total));\n" +
 			"scope german (language=\"de\", region=\"DE\")\n" +
 			"{\n" +
 			"  axiom item() {\"12.345,67 €\"};\n" +
@@ -271,10 +271,10 @@ public class ScopeQueryParserTest
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
             "local colors(lexicon);" +
             "choice swatch (name, red, green, blue)\n" +
-            "{colors^aqua, 0, 255, 255}\n" +
-            "{colors^black, 0, 0, 0}\n" +
-            "{colors^blue, 0, 0, 255}\n" +
-            "{colors^white, 255, 255, 255};\n" +
+            "{colors->aqua, 0, 255, 255}\n" +
+            "{colors->black, 0, 0, 0}\n" +
+            "{colors->blue, 0, 0, 255}\n" +
+            "{colors->white, 255, 255, 255};\n" +
             "axiom shade (name) : parameter;\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
@@ -285,8 +285,8 @@ public class ScopeQueryParserTest
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
             "  calc format_summary(string summary = " +
-            "  \"language = \" + scope^language + " +
-            "  \", region = \" + scope^region);\n" +
+            "  \"language = \" + scope->language + " +
+            "  \", region = \" + scope->region);\n" +
             "  query properties_query(format_summary);\n" +
             "}";
 

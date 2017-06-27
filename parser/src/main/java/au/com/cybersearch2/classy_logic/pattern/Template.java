@@ -380,7 +380,7 @@ public class Template extends TermList<Operand>
 	{
 		boolean isMutable = false;
 		if (!termList.isEmpty())
-			for (Term term: termList)
+			for (Operand term: termList)
 			{
 				boolean backupPerformed = (partial ? term.backup(id) : term.backup(0));
 				if (backupPerformed)
@@ -507,9 +507,8 @@ public class Template extends TermList<Operand>
 	    while (template != null)
 	    {
     		if (!template.termList.isEmpty())
-    			for (Term term: template.termList)
+    			for (Operand term: template.termList)
     			    term.backup(0);
-    				//((Parameter)term).clearValue();
     		template = template.getNext();
 	    }
 	}
@@ -593,16 +592,17 @@ public class Template extends TermList<Operand>
      * Add initialization data, used for seeding calculations
      * @param properties Initialization properties
      */
-    public void addProperties(Map<String, Object> properties) 
+    public void addProperties(List<Term> termList) 
     {
-        if (!properties.isEmpty())
+        if (!termList.isEmpty())
         {
             if (initData[1].isEmpty())
-                initData[1] = new ArrayList<Term>();
+                initData[1] = termList;
             else
+            {
                 initData[1].clear();
-            for (Map.Entry<String,Object> entry: properties.entrySet())
-                initData[1].add(new Parameter(entry.getKey(), entry.getValue()));
+                initData[1].addAll(termList);
+            }
         }
     }
 

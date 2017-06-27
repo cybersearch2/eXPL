@@ -94,7 +94,7 @@ public class Solution
     {
         axiomMap.put(key, axiom);
         QualifiedName qname = QualifiedName.parseTemplateName(key);
-        if ((axiomListenerMap != null) && axiomListenerMap.containsKey(qname))
+        if ((axiomListenerMap != null) && axiomListenerMap.containsKey(qname) && (axiom.getTermCount() > 0))
             for (AxiomListener axiomListener: axiomListenerMap.get(qname))
                 axiomListener.onNextAxiom(new QualifiedName(key), axiom);
         keyStack[1] = keyStack[0];

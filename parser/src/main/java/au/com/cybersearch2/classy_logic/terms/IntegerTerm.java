@@ -40,7 +40,7 @@ public class IntegerTerm extends GenericParameter<Long>
 	 */
 	public IntegerTerm(String value) 
 	{
-		super(Term.ANONYMOUS, Long.parseLong(value));
+		super(Term.ANONYMOUS, (value.indexOf('x', 0) == 1 || value.indexOf('X', 0) == 1) ? Long.parseLong(value.substring(2), 16) : Long.parseLong(value));
 
 	}
 

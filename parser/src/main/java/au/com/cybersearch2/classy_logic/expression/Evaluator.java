@@ -392,6 +392,10 @@ public class Evaluator extends TreeEvaluator
             // Check for boolean result
             switch(operatorEnum)
             {
+            case SC_OR: // "||"
+            case SC_AND: // "&&"
+                if (orientation == Orientation.binary)
+                    break;
             case NOT:// "!"
             case LT: // "<"
             case GT: // ">"
@@ -399,8 +403,6 @@ public class Evaluator extends TreeEvaluator
             case LE: // "<="
             case GE: // ">="
             case NE: // "!="
-            case SC_OR: // "||"
-            case SC_AND: // "&&"
             boolean flag = ((Boolean)result).booleanValue();
                 trueResult = flag;
                 falseResult = !flag;

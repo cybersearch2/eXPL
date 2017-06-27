@@ -28,6 +28,7 @@ import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.TermListManager;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 
 /**
  * AxiomTermList
@@ -220,8 +221,28 @@ public class AxiomTermList implements ItemList<Term>, AxiomContainer
 	@Override
 	public void assignItem(int index, Term term) 
 	{   
-		verify(index);
-		axiom.getTermByIndex(index).setValue(term.getValue());
+	    if (axiom.getTermCount() == 0)
+	    {
+	        if (index == 0)
+	        {
+	            AxiomArchetype archetype = null;
+	            if (key.getName().isEmpty())
+                    archetype = new AxiomArchetype(new QualifiedName(key.getScope(), key.getTemplate()));
+	            else
+	                archetype = new AxiomArchetype(key);
+	            axiomListener.onNextAxiom(archetype.getQualifiedName(), new Axiom(archetype));
+	            axiom.addTerm(term);
+	        }
+	        else
+	            verify(index);
+	    }
+	    else if (index == axiom.getTermCount())
+            axiom.addTerm(term);
+	    else
+	    {
+	        verify(index);
+	        axiom.getTermByIndex(index).setValue(term.getValue());
+	    }
 	}
 
 	/**

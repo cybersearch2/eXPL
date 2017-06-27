@@ -1,6 +1,6 @@
 axiom catalog_no (catalog_no) : parameter;
 
-string country = scope^region;
+string country = scope->region;
 list<currency $ country> item_list =
 {
   "12.345,67 €",
@@ -35,7 +35,7 @@ calc format_total
 (
   catalog_no,
   country,
-  string text = " " + translate^Total + " " + translate^tax + ": " + 
+  string text = " " + translate->Total + " " + translate->tax + ": " + 
     format(charge_plus_gst.total)
 );
 

@@ -64,10 +64,11 @@ public class ArrayIndex implements ListItemSpec
                         suffix = operand.getName();
                         break;
                     }
+                    operand = operand.getLeftOperand();
                 }
                 if (suffix.isEmpty())
                     // This is not expected
-                    suffix = operand.toString();
+                    suffix = indexExpression.toString();
             }
         }
     }

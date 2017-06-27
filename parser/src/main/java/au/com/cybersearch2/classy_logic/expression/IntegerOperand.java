@@ -16,7 +16,6 @@
 package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.Scope;
-import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -41,7 +40,7 @@ public class IntegerOperand extends ExpressionOperand<Long> implements LocaleLis
 	public IntegerOperand(QualifiedName qname) 
 	{
 		super(qname);
-		init();
+        operator = new IntegerOperator();
 	}
 
     /**
@@ -51,8 +50,8 @@ public class IntegerOperand extends ExpressionOperand<Long> implements LocaleLis
      */
     public IntegerOperand(QualifiedName qname, Integer value) 
     {
-        super(qname, value.longValue());
-        init();
+        this(qname);
+        super.setValue(value.longValue());
     }
 
 	/**
@@ -62,8 +61,8 @@ public class IntegerOperand extends ExpressionOperand<Long> implements LocaleLis
 	 */
 	public IntegerOperand(QualifiedName qname, Long value) 
 	{
-		super(qname, value);
-        init();
+		this(qname);
+        super.setValue(value);
 	}
 
 	/**
@@ -74,22 +73,17 @@ public class IntegerOperand extends ExpressionOperand<Long> implements LocaleLis
 	public IntegerOperand(QualifiedName qname, Operand expression) 
 	{
 		super(qname, expression);
-        init();
+        operator = new IntegerOperator();
 	}
 
     /**
-     * Evaluate value if expression exists
-     * @param id Identity of caller, which must be provided for backup()
-     * @return Flag set true if evaluation is to continue
+     * Set value, mark Term as not empty
+     * @param value Object. If null a Null object will be set and empty status unchanged
      */
     @Override
-    public EvaluationStatus evaluate(int id)
+    public void setValue(Object value)
     {
-        EvaluationStatus status = super.evaluate(id);
-        if ((status == EvaluationStatus.COMPLETE) && !isEmpty())
-            // Perform conversion to Long, if required
-            setValue(operator.convertObject(value, getValueClass()));
-        return status;
+        setTypeValue(operator.convertObject(value, value.getClass()));
     }
 
     /**
@@ -99,7 +93,7 @@ public class IntegerOperand extends ExpressionOperand<Long> implements LocaleLis
     @Override
     public void assign(Parameter parameter)
 	{
-		setValue(operator.convertObject(parameter.getValue(), parameter.getValueClass()));
+		setValue(parameter.getValue());
 	}
 
     @Override
@@ -113,10 +107,4 @@ public class IntegerOperand extends ExpressionOperand<Long> implements LocaleLis
     {
         return operator;
     }
-
-    private void init()
-    {
-        operator = new IntegerOperator();
-    }
-
 }

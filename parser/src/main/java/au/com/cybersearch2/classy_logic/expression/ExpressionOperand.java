@@ -42,8 +42,8 @@ public abstract class ExpressionOperand<T> extends Operand
 	protected ExpressionOperand(QualifiedName qname)
 	{
 		super(qname.getName());
-		if (name.isEmpty())
-			throw new IllegalArgumentException("Param \"name\" is empty");
+		//if (name.isEmpty())
+		//	throw new IllegalArgumentException("Param \"name\" is empty");
 		this.qname = qname;
 	}
 

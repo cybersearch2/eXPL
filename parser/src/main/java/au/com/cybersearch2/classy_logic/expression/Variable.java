@@ -84,21 +84,6 @@ public class Variable extends DelegateOperand
 	}
 
 	/**
-	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 
-	 * @param id Identity of caller. 
-	 * @return boolean true if backup occurred
-	 * @see au.com.cybersearch2.classy_logic.terms.Parameter#unify(Term otherParam, int id)
-	 * @see au.com.cybersearch2.classy_logic.terms.Parameter#evaluate(int id)
-	 */
-	@Override
-	public boolean backup(int id)
-	{
-		if (expression != null)
-			expression.backup(id);
-		return super.backup(id);
-	}
-	
-	/**
 	 * Execute operation for expression
 	 * @param id Identity of caller, which must be provided for backup()
 	 * @return EvaluationStatus
@@ -110,17 +95,40 @@ public class Variable extends DelegateOperand
 		{
 		    if (expression.isEmpty())
 		        status =  expression.evaluate(id);
-			if (!expression.isEmpty())
+		    // Only use expression value if empty or 
+		    // same id used as last time value was set on this variable
+			if (!expression.isEmpty() && empty || (id == this.id))
 			{
 				setValue(expression.getValue());
 			    this.id = id;
 			}
-			else
-			    throw new ExpressionException("Evaluation failed for " + expression.getQualifiedName().toString());
 		}
 		return status;
 	}
 	
+    /**
+     * Backup to intial state if given id matches id assigned on unification or given id = 0. 
+     * @param id Identity of caller. 
+     * @return boolean true if backup occurred
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#unify(Term otherParam, int id)
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#evaluate(int id)
+     */
+    @Override
+    public boolean backup(int id)
+    {
+        if (expression != null)
+            expression.backup(id);
+        // Only backup if forced (id = 0) or same id as used for evaluation
+        if ((id == 0) || (id == this.id))
+        {
+            super.backup(id);
+            // Set id back to zero to recreate initial empty state
+            this.id = 0;
+            return true;
+        }
+        return false;
+    }
+    
 	/**
 	 * Returns expression Operand to an operand visitor
 	 * @return Operand object or null if expression not set

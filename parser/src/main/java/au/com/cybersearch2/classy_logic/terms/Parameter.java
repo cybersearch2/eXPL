@@ -15,7 +15,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.terms;
 
-import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 
@@ -143,22 +142,6 @@ public class Parameter implements Term
     }
     
 	/**
-	 * Backup to intial state if given id matches id assigned on unification or given id = 0. 
-	 * @param id Identity of caller. 
-	 * @return boolean true if backup occurred
-	 * @see #unify(Term otherParam, int id)
-	 * @see #evaluate(int id)
-	 */
-	@Override
-	public boolean backup(int id)
-	{
-		if ((this.id == 0) || ((id != 0) && (this.id != id)))
-			return false;
-		clearValue();
-		return true;
-	}
-	
-	/**
 	 * Perform unification with other Term. If successful, two terms will be equivalent.
 	 * Determines Term ordering and then delegates to evaluate()  
 	 * @param otherTerm Term with which to unify
@@ -262,17 +245,6 @@ public class Parameter implements Term
 		id = 0;
 	}
 	
-	/**
-	 * Evaluate value using data gathered during unification.
-	 * @param id Identity of caller, which must be provided for backup()
-	 * @return EvaluationStatus
-	 */
-	@Override
-	public EvaluationStatus evaluate(int id) 
-	{
-		return EvaluationStatus.COMPLETE;
-	}
-
 	/**
 	 * @see java.lang.Object#hashCode()
 	 */

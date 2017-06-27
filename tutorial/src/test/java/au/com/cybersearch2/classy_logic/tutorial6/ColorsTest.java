@@ -83,15 +83,15 @@ public class ColorsTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("red (6,22) (6,30)");
+        assertThat(sourceItem.toString()).isEqualTo("red (6,22) (6,31)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("green (6,33) (6,43)");
+        assertThat(sourceItem.toString()).isEqualTo("green (6,34) (6,45)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("blue (6,46) (6,55)");
+        assertThat(sourceItem.toString()).isEqualTo("blue (6,48) (6,58)");
         assertThat(iterator.hasNext()).isFalse();
    }
     

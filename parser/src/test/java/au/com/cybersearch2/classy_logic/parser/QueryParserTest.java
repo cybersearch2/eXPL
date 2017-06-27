@@ -389,7 +389,7 @@ public class QueryParserTest
     static final String AXIOM_WRAPPER_XPL =
     		"axiom colors (red, green, blue) {0.75, 0.50, 0.25};\n" +
             "list<term> colors_list(colors);\n" +
-    		"template color_convert(red, green, blue, double r = colors_list^red, double g = colors_list^green, double b = colors_list^blue);"
+    		"template color_convert(red, green, blue, double r = colors_list->red, double g = colors_list->green, double b = colors_list->blue);"
     		;
     
 	static final String CITY_EVELATIONS_SORTED =
@@ -410,10 +410,10 @@ public class QueryParserTest
     		"  integer i = length(city_list) - 1, \n" +
     		"  : i < 1, \n" +
     		"  integer j = i - 1, \n" +
-    		"  integer altitude = city_list[i]^altitude, \n" +
+    		"  integer altitude = city_list[i].altitude, \n" +
     		"  . temp = city_list[i],\n" +
     		"  {\n" +
-    		"    ? altitude < city_list[j]^altitude,\n" +
+    		"    ? altitude < city_list[j].altitude,\n" +
        		"    city_list[j + 1] = city_list[j],\n" +
     		"    ? --j >= 0\n" +
     		"  },\n" +
@@ -507,11 +507,57 @@ public class QueryParserTest
             /** Named query to find all cities */
     static public final String ALL_CITIES = "all_cities";
 
-    @Before
-    public void setup() throws Exception
-    {
-    }
+    static String DIVIDE_TEST =
+        "calc divide ( integer i = 35, integer j = 7, integer result = i/j );\n " +
+        "query<term> divide_query (divide);";
+    
+    static String LOOP_TEST =
+            "axiom test ( x) { 1 } { 2 } { 3 } { 4 };\n" +
+            "list test(test);\n" +
+            "calc loop ( i = 0, integer k = 0, { j = 0, { system.print(test[i + j].x), : ++j == 2 }, : (i += 2) == 4, : (k += 2) == 4 } );\n " +
+            "calc loop1 ( i = 0, integer k = 0, { system.print(test[i].x), : ++i == 3, : ++k == 3 } );\n " +
+            "query<term> loop_query (loop);\n" +
+            "query<term> loop1_query (loop1);";
 
+    @Test
+    public void test_loop()
+    {
+        FunctionManager functionManager = new FunctionManager();
+        SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
+        functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
+        QueryProgram queryProgram = new QueryProgram(functionManager);
+        //queryProgram.setExecutionContext(new ExecutionContext());
+        queryProgram.parseScript(LOOP_TEST);
+        Result result = queryProgram.executeQuery("loop1_query");
+        System.out.println(result.getAxiom("loop1_query").toString());
+        System.out.println("Dual inner loop test");
+        result = queryProgram.executeQuery("loop_query");
+        System.out.println(result.getAxiom("loop_query").toString());
+    }
+    
+   @Test
+    public void test_divide()
+    {
+        QueryProgram queryProgram = new QueryProgram();
+        queryProgram.parseScript(DIVIDE_TEST);
+        Result result = queryProgram.executeQuery("divide_query");
+        System.out.println(result.getAxiom("divide_query").toString());
+    }
+    
+    @Test
+    public void test_sudoku() throws IOException
+    {
+        FunctionManager functionManager = new FunctionManager();
+        SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
+        functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
+        File resourcePath = new File("src/test/resources");
+        QueryProgramParser queryProgramParser = new QueryProgramParser(resourcePath, functionManager);
+        QueryProgram queryProgram = queryProgramParser.loadScript("sudoku.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
+        Result result = queryProgram.executeQuery("sudoku");
+        System.out.println(result.getAxiom("puzzle").toString());
+    }
+    
     @Test
     public void test_towers_of_hanoi() throws IOException
     {

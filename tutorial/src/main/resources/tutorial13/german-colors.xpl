@@ -4,10 +4,10 @@ axiom german.lexicon
  
 choice swatch 
   (   name,      red, green, blue)
-  {colors^aqua,    0, 255, 255}
-  {colors^black,   0,   0,   0}
-  {colors^blue,    0  , 0, 255}
-  {colors^white, 255, 255, 255};
+  {colors->aqua,    0, 255, 255}
+  {colors->black,   0,   0,   0}
+  {colors->blue,    0  , 0, 255}
+  {colors->white, 255, 255, 255};
   
 axiom shade (name) : parameter;
 
