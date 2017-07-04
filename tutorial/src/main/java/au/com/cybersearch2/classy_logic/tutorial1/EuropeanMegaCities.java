@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial3;
+package au.com.cybersearch2.classy_logic.tutorial1;
 
 import java.util.Iterator;
 
@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -92,7 +91,6 @@ query<axiom> euro_megacities (mega_city : euro_megacities);
     public Iterator<Axiom> findEuroMegaCities() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("euro_megacities.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("euro_megacities");
         return result.getIterator("euro_megacities");

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial3;
+package au.com.cybersearch2.classy_logic.tutorial1;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -41,7 +41,7 @@ public class EuropeanMegaCitiesTest
     @Test
     public void testEuropeanMegaCities() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial3", "euro_megacities.txt");
+        File testFile = new File("src/main/resources/tutorial1", "euro_megacities.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         EuropeanMegaCities europeanMegaCities = new EuropeanMegaCities();
         Iterator<Axiom> cityIterator = europeanMegaCities.findEuroMegaCities();

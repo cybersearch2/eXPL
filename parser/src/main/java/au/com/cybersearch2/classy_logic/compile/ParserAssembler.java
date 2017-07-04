@@ -590,10 +590,8 @@ public class ParserAssembler implements LocaleListener
 	}
 
     /**
-     * Returns operand which invokes a function call in script. The function must be
-     * provided in an external library.
+     * Returns operand which invokes an external function call. 
      * The function name must consist of 2 parts. The first is the name of a library.
-     * If the first part is a library name, then the second part is the name of a function in that library.
      * The type of object returned from the call depends on the library.
      * @param qname Qualified function name
      * @param parametersTemplate Operand arguments packaged in an inner template or null for no arguments
@@ -622,6 +620,37 @@ public class ParserAssembler implements LocaleListener
         return callOperand;
     }
 
+    /**
+     * Macro to invoke function and return value in anonymous parameter
+     * @param library Function library
+     * @param name Function name
+     * @param termList List of call parameters, may be empty
+     * @return Parameter object
+     */
+    public Parameter callFunction(String library, String name,  List<Term> termList)
+    {
+        if (externalFunctionProvider == null)
+        {
+            if (functionManager == null)
+                functionManager = new FunctionManager(){};
+            externalFunctionProvider = new ExternalFunctionProvider(functionManager);
+        }
+        FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
+        CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
+        if (callEvaluator == null)
+            throw new ExpressionException("Function \"" + name + "\" not supported");
+        Object object = callEvaluator.evaluate(termList);
+        return new Parameter(Term.ANONYMOUS, object);
+    }
+
+    /**
+     * Returns operand which invokes a calculator query.
+     * @param queryName Name used to identify query
+     * @param qualifiedQueryName Qualified query name - can be qualified by the name of a scope
+     * @param parameterTemplate Template to evaluate parameters passed to calculator
+     * @param innerTemplate Template to receive solution
+     * @return TermOperand object
+     */
     public Operand getQueryOperand(
             String queryName, 
             QualifiedName qualifiedQueryName,
@@ -638,7 +667,7 @@ public class ParserAssembler implements LocaleListener
         String library = queryEvaluator.getLibrayName(this);
         QualifiedName qualifiedCallName = new QualifiedName(library, qualifiedQueryName.getName());
         AxiomTermListEvaluator evaluator = new AxiomTermListEvaluator(qualifiedCallName, queryEvaluator, parameterTemplate);
-         return new TermOperand(evaluator);
+        return new TermOperand(evaluator);
     }
 
 

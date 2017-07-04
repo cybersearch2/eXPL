@@ -717,7 +717,7 @@ String Fact(QualifiedName qualifiedAxiomName, ParserContext context) :
   ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
-  param=LiteralTerm(context)
+  ( param=LiteralTerm(context) | param=MacroLiteralTerm(context))
   {
     parserAssembler.getAxiomAssembler().addAxiom(qualifiedAxiomName, param);
     return param.getValue().toString();
@@ -2075,6 +2075,36 @@ Parameter LiteralTerm(ParserContext context) :
   {
     return new LiteralParameter(Term.ANONYMOUS, new Unknown(), LiteralType.unknown);
   }
+}
+
+Parameter MacroLiteralTerm(ParserContext context) :
+{
+  VariableType varType;
+  Parameter literal;
+}
+{
+  varType=Type(context) "(" literal=LiteralTerm(context) ")"
+  {
+    return varType.getParameter(literal);
+  }
+  |
+  literal=Function(context)
+  {
+    return literal;
+  }
+}
+
+Parameter Function(ParserContext context) :
+{
+  Token name;
+  Token library;
+  List<Term> termList = new ArrayList<Term>();
+}
+{
+   library=<IDENTIFIER> "." name=<IDENTIFIER> "(" ( TermList(termList, context) )? ")"
+   {
+     return context.getParserAssembler().callFunction(library.image, name.image, termList);
+   }
 }
 
 boolean BooleanLiteral(ParserContext context) :

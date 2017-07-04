@@ -77,6 +77,7 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
 
     /**
      * Construct a QueryEvaluator object for a query specified by query parameters
+     * @param queryName Name used to identify query
      * @param qualifiedQueryName Qualified query name - can be qualified by the name of a scope
      * @param innerTemplate Optional inner Template to receive query results
      */

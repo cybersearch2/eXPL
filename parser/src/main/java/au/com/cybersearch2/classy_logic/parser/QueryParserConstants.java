@@ -97,67 +97,65 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int ARROW = 48;
   /** RegularExpression Id. */
-  int BLANK = 49;
+  int ASSIGN = 49;
   /** RegularExpression Id. */
-  int ASSIGN = 50;
+  int GT = 50;
   /** RegularExpression Id. */
-  int GT = 51;
+  int LT = 51;
   /** RegularExpression Id. */
-  int LT = 52;
+  int BANG = 52;
   /** RegularExpression Id. */
-  int BANG = 53;
+  int COLON = 53;
   /** RegularExpression Id. */
-  int COLON = 54;
+  int QMARK = 54;
   /** RegularExpression Id. */
-  int QMARK = 55;
+  int EQ = 55;
   /** RegularExpression Id. */
-  int EQ = 56;
+  int LE = 56;
   /** RegularExpression Id. */
-  int LE = 57;
+  int GE = 57;
   /** RegularExpression Id. */
-  int GE = 58;
+  int NE = 58;
   /** RegularExpression Id. */
-  int NE = 59;
+  int SC_OR = 59;
   /** RegularExpression Id. */
-  int SC_OR = 60;
+  int SC_AND = 60;
   /** RegularExpression Id. */
-  int SC_AND = 61;
+  int INCR = 61;
   /** RegularExpression Id. */
-  int INCR = 62;
+  int DECR = 62;
   /** RegularExpression Id. */
-  int DECR = 63;
+  int PLUS = 63;
   /** RegularExpression Id. */
-  int PLUS = 64;
+  int MINUS = 64;
   /** RegularExpression Id. */
-  int MINUS = 65;
+  int STAR = 65;
   /** RegularExpression Id. */
-  int STAR = 66;
+  int SLASH = 66;
   /** RegularExpression Id. */
-  int SLASH = 67;
+  int BIT_AND = 67;
   /** RegularExpression Id. */
-  int BIT_AND = 68;
+  int BIT_OR = 68;
   /** RegularExpression Id. */
-  int BIT_OR = 69;
+  int XOR = 69;
   /** RegularExpression Id. */
-  int XOR = 70;
+  int REM = 70;
   /** RegularExpression Id. */
-  int REM = 71;
+  int PLUSASSIGN = 71;
   /** RegularExpression Id. */
-  int PLUSASSIGN = 72;
+  int MINUSASSIGN = 72;
   /** RegularExpression Id. */
-  int MINUSASSIGN = 73;
+  int STARASSIGN = 73;
   /** RegularExpression Id. */
-  int STARASSIGN = 74;
+  int SLASHASSIGN = 74;
   /** RegularExpression Id. */
-  int SLASHASSIGN = 75;
+  int ANDASSIGN = 75;
   /** RegularExpression Id. */
-  int ANDASSIGN = 76;
+  int ORASSIGN = 76;
   /** RegularExpression Id. */
-  int ORASSIGN = 77;
+  int XORASSIGN = 77;
   /** RegularExpression Id. */
-  int XORASSIGN = 78;
-  /** RegularExpression Id. */
-  int REMASSIGN = 79;
+  int REMASSIGN = 78;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -213,7 +211,6 @@ public interface QueryParserConstants {
     "\",\"",
     "\".\"",
     "\"->\"",
-    "\"`\"",
     "\"=\"",
     "\">\"",
     "\"<\"",

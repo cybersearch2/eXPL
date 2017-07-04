@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -30,7 +29,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 /**
  * HighCities2
  * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
- * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
+ * The cities are defined as an axiom source with each axiom containing a name term and an elevation term.
  * The terms are name, so unification term pairing is performed by name and position does not matter as
  * shown by the fact the axiom terms are in reverse order to the template terms.
  * @author Andrew Bowley
@@ -70,7 +69,6 @@ query<axiom> high_cities (city : high_city);
     public Iterator<Axiom> findHighCities() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("high_cities");
         return result.getIterator("high_cities");

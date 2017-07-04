@@ -21,21 +21,20 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
+import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * HighCities
  * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
- * The cities are defined as an axiom source with each axiom containing a name term and an elavation term.
+ * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
  * The terms are anonymous, so unification term pairing is performed by position.
  * @author Andrew Bowley
  * 20 Feb 2015
  */
-public class HighCities implements SolutionHandler
+public class Madrid
 {
 /* cities.xpl
 axiom city() 
@@ -50,71 +49,44 @@ axiom city()
     {"spokane", 1909}
     {"wichita", 1305};  
 */   
-/* high_cities.xpl
+/* madrid.xpl
 axiom city() : resource;
-template high_city(name ? altitude > 5000, altitude);
-query<axiom> high_cities (city : high_city); 
+template high_city(name { "madrid" }, altitude);
+query<axiom> madrid (city : madrid); 
 */
 
     protected QueryProgramParser queryProgramParser;
  
-    public HighCities()
+    public Madrid()
     {
         ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("city", "cities.xpl", 1);
         queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
      }
 
     /**
-     * Compiles the high_cities.xpl script and runs the "high_city" query
+     * Compiles the madrid.xpl script and runs the "madrid" query
      */
-    public Iterator<Axiom> findHighCities() 
+    public Iterator<Axiom> findMadrid() 
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
-        Result result = queryProgram.executeQuery("high_cities");
-        return result.getIterator("high_cities");
+        QueryProgram queryProgram = queryProgramParser.loadScript("madrid.xpl");
+        //queryProgram.setExecutionContext(new ExecutionContext());
+        Result result = queryProgram.executeQuery("madrid");
+        return result.getIterator("madrid");
     }
 
 	/**
-	 * Compiles the high_cities.xpl script and runs the "high_city" query
-	 */
-	public void findHighCities(SolutionHandler solutionHandler) 
-	{
-		QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
-		queryProgram.executeQuery("high_cities", solutionHandler);
-	}
-
-	/**
-	 * onSolution - Handler for alternative query solution collection
-	 * @see au.com.cybersearch2.classy_logic.interfaces.SolutionHandler#onSolution(au.com.cybersearch2.classy_logic.query.Solution)
-	 */
-    @Override
-    public boolean onSolution(Solution solution) 
-    {
-        System.out.println(solution.getAxiom("high_city").toString());
-        // Return false if you want to terminaate query when a particular solution has been found
-        return true;
-    }
-    
-	/**
-     * Displays the solution to the high_cities query on the console.<br/>
+     * Displays the solution to the madrid query on the console.<br/>
      * The expected result:<br/>
-     * high_city(name = addis ababa, altitude = 8000)<br/>
-     * high_city(name = denver, altitude = 5280)<br/>
-     * high_city(name = flagstaff, altitude = 6970)<br/>
-     * high_city(name = leadville, altitude = 10200)<br/>	
+     * madrid(name=madrid, altitude=1305)<br/>
      */
 	public static void main(String[] args)
 	{
 		try 
 		{
-	        HighCities highCities = new HighCities();
-	        Iterator<Axiom> iterator = highCities.findHighCities();
+	        Madrid madrid = new Madrid();
+	        Iterator<Axiom> iterator = madrid.findMadrid();
 	        while (iterator.hasNext())
 	            System.out.println(iterator.next().toString());
-	        
-	        /* Alternative approach using SolutionHandler, which HighCities implements
-			highCities.findHighCities(highCities);
-	        */
 		} 
 		catch (ExpressionException e) 
 		{

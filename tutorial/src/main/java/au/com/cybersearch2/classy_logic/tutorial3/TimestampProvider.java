@@ -13,8 +13,9 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial19;
+package au.com.cybersearch2.classy_logic.tutorial3;
 
+import java.util.Date;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
@@ -28,7 +29,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 22Jun.,2017
  */
-public class SystemFunctionProvider implements FunctionProvider<Void>
+public class TimestampProvider implements FunctionProvider<Object>
 {
     @Override
     public String getName()
@@ -37,24 +38,21 @@ public class SystemFunctionProvider implements FunctionProvider<Void>
     }
 
     @Override
-    public CallEvaluator<Void> getCallEvaluator(String identifier)
+    public CallEvaluator<Object> getCallEvaluator(String identifier)
     {
-        if (identifier.equals("print"))
-            return new CallEvaluator<Void>(){
+        if (identifier.equals("timestamp"))
+            return new CallEvaluator<Object>(){
 
                 @Override
                 public String getName()
                 {
-                    return "print";
+                    return "timestamp";
                 }
 
                 @Override
-                public Void evaluate(List<Term> argumentList)
+                public Object evaluate(List<Term> argumentList)
                 {
-                    for (Term term: argumentList)
-                        System.out.print(term.getValue().toString());
-                    System.out.println();
-                    return null;
+                    return new Date();
                 }
 
                 @Override

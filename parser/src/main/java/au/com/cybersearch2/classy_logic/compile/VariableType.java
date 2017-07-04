@@ -34,6 +34,7 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
@@ -41,6 +42,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.DynamicList;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
+import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -233,7 +235,81 @@ public class VariableType
         QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getQualifiedContextname());
         return getDynamicListInstance(parserAssembler, qualifiedListName, template);
     }
-    
+
+    /**
+     * Macro to convert a literal value and return the result in a parameter
+     * @param literal Literal value contained in an anonymous parameter
+     * @return Parameter object
+     * @throws ParseException if type not supported
+     */
+    public Parameter getParameter(final Parameter literal) throws ParseException
+    {
+        Operand operand = null;
+        final QualifiedName qname = QualifiedName.ANONYMOUS;
+        Operand expression = new Operand(Term.ANONYMOUS, literal.getValue()){
+
+            @Override
+            public QualifiedName getQualifiedName()
+            {
+                return qname;
+            }
+
+            @Override
+            public void assign(Parameter parameter)
+            {
+            }
+
+            @Override
+            public Operand getLeftOperand()
+            {
+                return null;
+            }
+
+            @Override
+            public Operand getRightOperand()
+            {
+                return null;
+            }
+
+            @Override
+            public Operator getOperator()
+            {
+                DelegateOperator operator = new DelegateOperator();
+                operator.setDelegate(literal.getValueClass());
+                return operator;
+            }};
+        switch (operandType)
+        {
+        case INTEGER:
+            operand = new IntegerOperand(qname, expression);
+            break;
+        case DOUBLE:
+            operand = new DoubleOperand(qname, expression);
+            break;
+        case BOOLEAN:
+            operand = new BooleanOperand(qname, expression);
+            break;
+        case STRING:
+            operand = new StringOperand(qname, expression);
+            break;
+        case DECIMAL:
+            operand = new BigDecimalOperand(qname, expression);
+            break;
+        case CURRENCY:
+        {
+            BigDecimalOperand currencyOperand =new BigDecimalOperand(qname, expression);
+            currencyOperand.setOperator(getCurrencyOperator(currencyOperand));
+            operand = currencyOperand;
+            break;
+        }
+        default:
+            throw new ParseException(operandType.toString() + " is not a literal type");
+        }
+        operand.evaluate(0);
+        return operand;
+    }
+
+
   	 /**
      * Returns ItemList object for this type. 
      * NOTE: AxiomKey property must be set for Term, Axiom or Local type

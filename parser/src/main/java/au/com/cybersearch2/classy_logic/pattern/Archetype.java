@@ -115,7 +115,7 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
             termMetaData.setIndex(getTermCount());
         if (termMetaList.isEmpty())
             termMetaList = new ArrayList<TermMetaData>();
-        else if (termMetaList.contains(termMetaData))
+        else if (termMetaList.contains(termMetaData) && (termMetaData.getLiteralType() != LiteralType.unspecified))
             throw new ExpressionException("Term " + termMetaData.getName() + " already exists in " + toString());
         if (termMetaData.getIndex() < termMetaList.size())
         {
