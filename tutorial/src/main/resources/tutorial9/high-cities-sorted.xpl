@@ -24,7 +24,7 @@ template high_city
 calc insert_sort 
 (
   // i is index to last item appended to the list
-  integer i = length(high_cities) - 1,
+  integer i = high_cities.length - 1,
   // Skip first time when only one item in list
   : i < 1,
   // j is the swap index
@@ -43,4 +43,4 @@ calc insert_sort
   high_cities[j + 1] = temp
 );
 
-query high_cities (city : high_city) >> (insert_sort); 
+query high_cities (city : high_city) -> (insert_sort); 

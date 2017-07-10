@@ -25,8 +25,8 @@ choice age_rating
 calc perfect_match
 (
 . rating = unknown,
-. << age_rating(age) >> (age_weight),
-  ? fact(age_weight) {rating = age_weight},
+. <- age_rating(age) -> (age_weight),
+  ? age_weight.fact {rating = age_weight},
   name, sex, starsign, age_rating = rating
 );
 

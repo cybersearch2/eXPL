@@ -99,7 +99,7 @@ public class ScopeQueryParserTest
 	    "{\n" +
 	    "  query more_agriculture(Data : agri_10y, surface_area : surface_area_increase);\n" + 
 	    "  query more_agriculture_mi2(Data :agri_10y, surface_area : surface_area_increase)\n" + 
-	    "  >> (km2_to_mi2);" +
+	    "  -> (km2_to_mi2);" +
 		"}\n";
  
 	static final String GREEK_CONSTRUCTION =
@@ -112,7 +112,7 @@ public class ScopeQueryParserTest
 		"scope greek_construction\n" +
 	    "{\n" +
 	    "  query greek_business(customer:customer, charge:charge)\n" + 
-		"  >> (fee:account) >> (freight:delivery);" +
+		"  -> (fee:account) -> (freight:delivery);" +
 		"}\n"
 	;
 
@@ -228,7 +228,7 @@ public class ScopeQueryParserTest
     		"      ? --j >= 0\n" +
     		"    },\n" +
      		"    sort_list[j + 1] = temp,\n" +
-    		"    ? ++i < length(sort_list)\n" +
+    		"    ? ++i < sort_list.length\n" +
     		"  }\n" +
             "  ) (i = 1);\n" +
 		    "  query insert_sort (insert_sort);\n" + 
@@ -258,11 +258,11 @@ public class ScopeQueryParserTest
 	        "local translate(lexicon);" +
 			"template charge(currency amount);\n" +
 			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +
-			"calc format_total(string total_text = translate->Total + \" + gst: \" + format(charge_plus_gst.total));\n" +
+			"calc format_total(string total_text = translate->Total + \" + gst: \" + charge_plus_gst.total.format);\n" +
 			"scope german (language=\"de\", region=\"DE\")\n" +
 			"{\n" +
 			"  axiom item() {\"12.345,67 €\"};\n" +
-			"  query item_query(item : charge) >> (charge_plus_gst) >> (format_total);\n" +
+			"  query item_query(item : charge) -> (charge_plus_gst) -> (format_total);\n" +
 	        "}";
 
     static final String GERMAN_COLORS =
@@ -301,7 +301,7 @@ public class ScopeQueryParserTest
             "  {Population >= \"20.000.000\", \"Huge\"}\n" +
             "  {Population <  \"20.000.000\", \"Large\"};\n" +
             "  list city_group_list(german.population_group);\n" +
-            "  query group_query (mega_city:city) >> (city:population_group);\n" +
+            "  query group_query (mega_city:city) -> (city:population_group);\n" +
             "}\n";
 
 

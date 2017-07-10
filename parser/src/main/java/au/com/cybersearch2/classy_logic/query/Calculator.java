@@ -64,8 +64,11 @@ public class Calculator implements SolutionFinder
 	@Override
 	public boolean iterate(Solution solution, Template template, ExecutionContext context)
 	{
-		template.initialize();
-		execute(template, solution, context);
+		Axiom axiom = template.initialize();
+		if ((axiom != null) && (axiom.getTermCount() > 0))
+		    execute(axiom, template, solution, context);
+		else
+		    execute(template, solution, context);
 		return true;
 	}
 	
@@ -79,7 +82,14 @@ public class Calculator implements SolutionFinder
 	 */
 	public boolean iterate(Axiom axiom, Solution solution, Template template, ExecutionContext context)
 	{
-		template.initialize();
+	    Axiom seedAxiom = template.initialize();
+        if (seedAxiom != null)
+        {
+            for (int i = 0; i < axiom.getTermCount(); ++i)
+                seedAxiom.addTerm(axiom.getTermByIndex(i));
+            seedAxiom.getArchetype().clearMutable();
+            return execute(seedAxiom, template, solution, context);
+       }
 		return execute(axiom, template, solution, context);
 	}
 	

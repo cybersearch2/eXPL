@@ -30,8 +30,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
  */
 public class FormatterOperand extends StringOperand implements LocaleListener
 {
-	/** Operand to format */
-	protected Operand operand;
 	/** The locale */
 	protected Locale locale;
 	
@@ -42,9 +40,8 @@ public class FormatterOperand extends StringOperand implements LocaleListener
 	 */
 	public FormatterOperand(QualifiedName qname, Operand operand, Locale locale) 
 	{
-		super(qname);
-        this.operand = operand;
-        this.locale = locale;
+		super(qname, operand);
+         this.locale = locale;
 	}
 
 	/**
@@ -55,22 +52,13 @@ public class FormatterOperand extends StringOperand implements LocaleListener
 	@Override
 	public EvaluationStatus evaluate(int id) 
 	{
-		if (operand.isEmpty())
-			operand.evaluate(id);
-		String formatValue = operand.getOperator().getTrait().formatValue(operand.getValue());
+	    EvaluationStatus status = super.evaluate(id);
+	    if (status != EvaluationStatus.COMPLETE)
+	        return status;
+		String formatValue = expression.getOperator().getTrait().formatValue(expression.getValue());
 		setValue(formatValue);
 		this.id = id;
 		return EvaluationStatus.COMPLETE;
-	}
-
-	/**
-	 * Returns expression Operand to an operand visitor
-	 * @return Operand object or null if expression not set
-	 */
-	@Override
-	public Operand getLeftOperand() 
-	{
-		return operand;
 	}
 
 	/**

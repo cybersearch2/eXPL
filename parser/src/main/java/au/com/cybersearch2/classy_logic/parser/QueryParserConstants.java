@@ -95,11 +95,11 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int DOT = 47;
   /** RegularExpression Id. */
-  int ARROW = 48;
+  int RARROW = 48;
   /** RegularExpression Id. */
-  int ASSIGN = 49;
+  int LARROW = 49;
   /** RegularExpression Id. */
-  int GT = 50;
+  int ASSIGN = 50;
   /** RegularExpression Id. */
   int LT = 51;
   /** RegularExpression Id. */
@@ -141,21 +141,35 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int REM = 70;
   /** RegularExpression Id. */
-  int PLUSASSIGN = 71;
+  int LSHIFT = 71;
   /** RegularExpression Id. */
-  int MINUSASSIGN = 72;
+  int PLUSASSIGN = 72;
   /** RegularExpression Id. */
-  int STARASSIGN = 73;
+  int MINUSASSIGN = 73;
   /** RegularExpression Id. */
-  int SLASHASSIGN = 74;
+  int STARASSIGN = 74;
   /** RegularExpression Id. */
-  int ANDASSIGN = 75;
+  int SLASHASSIGN = 75;
   /** RegularExpression Id. */
-  int ORASSIGN = 76;
+  int ANDASSIGN = 76;
   /** RegularExpression Id. */
-  int XORASSIGN = 77;
+  int ORASSIGN = 77;
   /** RegularExpression Id. */
-  int REMASSIGN = 78;
+  int XORASSIGN = 78;
+  /** RegularExpression Id. */
+  int REMASSIGN = 79;
+  /** RegularExpression Id. */
+  int LSHIFTASSIGN = 80;
+  /** RegularExpression Id. */
+  int RSIGNEDSHIFTASSIGN = 81;
+  /** RegularExpression Id. */
+  int RUNSIGNEDSHIFTASSIGN = 82;
+  /** RegularExpression Id. */
+  int RUNSIGNEDSHIFT = 83;
+  /** RegularExpression Id. */
+  int RSIGNEDSHIFT = 84;
+  /** RegularExpression Id. */
+  int GT = 85;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -211,8 +225,8 @@ public interface QueryParserConstants {
     "\",\"",
     "\".\"",
     "\"->\"",
+    "\"<-\"",
     "\"=\"",
-    "\">\"",
     "\"<\"",
     "\"!\"",
     "\":\"",
@@ -233,6 +247,7 @@ public interface QueryParserConstants {
     "\"|\"",
     "\"^\"",
     "\"%\"",
+    "\"<<\"",
     "\"+=\"",
     "\"-=\"",
     "\"*=\"",
@@ -241,8 +256,12 @@ public interface QueryParserConstants {
     "\"|=\"",
     "\"^=\"",
     "\"%=\"",
+    "\"<<=\"",
+    "\">>=\"",
+    "\">>>=\"",
+    "\">>>\"",
     "\">>\"",
-    "\"<<\"",
+    "\">\"",
     "\"$\"",
     "\"~\"",
   };

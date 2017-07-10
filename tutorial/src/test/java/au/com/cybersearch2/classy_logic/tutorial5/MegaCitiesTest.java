@@ -41,8 +41,8 @@ public class MegaCitiesTest
     {
         File testFile = new File("src/main/resources/tutorial5", "asia_top_ten.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        MegaCities megaCities = new MegaCities();
-        Iterator<Axiom> iterator = megaCities.findMegaCities();
+        AsiaTopTen asiaTopTen = new AsiaTopTen();
+        Iterator<Axiom> iterator = asiaTopTen.findMegaCities();
         while (iterator.hasNext())
             checkSolution(reader, iterator.next().toString());
         reader.close();

@@ -6,9 +6,9 @@ calc tower_of_hanoi
     system.print("Move disk 1 from rod ", from_rod, " to rod ", to_rod)
   },
   : n == 1,
-  << tower_of_hanoi(disk=n - 1, from=from_rod, to=aux_rod, aux=to_rod),
+  <- tower_of_hanoi(disk=n - 1, from=from_rod, to=aux_rod, aux=to_rod),
   system.print("Move disk ", n, " from rod ", from_rod, " to rod ", to_rod),
-  << tower_of_hanoi(disk=n - 1, from=aux_rod, to=to_rod, aux=from_rod)
+  <- tower_of_hanoi(disk=n - 1, from=aux_rod, to=to_rod, aux=from_rod)
 )(from_rod="A", to_rod="C", aux_rod="B");
 
 query towers_of_hanoi1(tower_of_hanoi)(n=1);

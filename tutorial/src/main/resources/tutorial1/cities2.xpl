@@ -1,4 +1,4 @@
-axiom city(altitude, name) 
+axiom city_altitude(altitude, city) 
     {1718, "bilene"}
     {8000, "addis ababa"}
     {5280, "denver"}

@@ -23,8 +23,8 @@
    
  calc perfect_match
  (
-.  << age_rating(age) >> (age_weight),
-   ? fact(age_weight),
+.  <- age_rating(age) -> (age_weight),
+   ? age_weight.fact,
    name, sex, starsign,
    double rating = age_weight + 0.2 * (starsign == "gemini")
  );

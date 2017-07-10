@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -56,10 +55,10 @@ axiom transacton_amount
 
 calc stamp_duty_payable(
 . currency amount,
-. << bracket(amount) >> (bracket, threshold, base, percent),
+. <- bracket(amount) -> (bracket, threshold, base, percent),
 . currency duty = base + (amount - threshold) * (percent / 100),
   bracket,
-  string property_value = format(amount),
+  string property_value = amount.format,
   string payable = format(duty)
 );
 
@@ -88,7 +87,6 @@ query<axiom> stamp_duty(transacton_amount : stamp_duty_payable);
 	public Iterator<Axiom> getStampDuty()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("stamp-duty3.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("stamp_duty");
         return result.getIterator("stamp_duty");

@@ -62,12 +62,13 @@ choice age_rating
 calc perfect_match
 (
 . rating = unknown,
-. << age_rating(age) >> (age_weight),
-  ? fact(age_weight) {rating = age_weight},
+. <- age_rating(age) -> (age_weight),
+  ? age_weight.fact {rating = age_weight},
   name, sex, starsign, age_rating = rating
 );
 
 query<axiom> star_people(person : perfect_match);
+
      */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
@@ -80,8 +81,23 @@ query<axiom> star_people(person : perfect_match);
 
     /**
      * Compiles the STAR_PERSON script and runs the "star_people" query which gives each person 
-     * over the age of 20 an age rating and excludes those aged 20 and under.<br/>
+     * over the age of 20 an age rating and those not rated have an unknown value.<br/>
      * The expected result:<br/>
+        (name=John, sex=m, starsign=gemini, age_rating=1.0)<br/>
+        (name=Sue, sex=f, starsign=cancer, age_rating=unknown)<br/>
+        (name=Sam, sex=m, starsign=scorpio, age_rating=0.3)<br/>
+        (name=Jenny, sex=f, starsign=gemini, age_rating=0.6)<br/>
+        (name=Andrew, sex=m, starsign=virgo, age_rating=0.6)<br/>
+        (name=Alice, sex=f, starsign=pices, age_rating=unknown)<br/>
+        (name=Ingrid, sex=f, starsign=cancer, age_rating=1.0)<br/>
+        (name=Jack, sex=m, starsign=pices, age_rating=0.3)<br/>
+        (name=Sonia, sex=f, starsign=gemini, age_rating=0.3)<br/>
+        (name=Alex, sex=m, starsign=aquarius, age_rating=1.0)<br/>
+        (name=Jill, sex=f, starsign=cancer, age_rating=0.3)<br/>
+        (name=Fiona, sex=f, starsign=gemini, age_rating=0.6)<br/>
+        (name=melissa, sex=f, starsign=virgo, age_rating=0.3)<br/>
+        (name=Tom, sex=m, starsign=cancer, age_rating=1.0)<br/>
+        (name=Bill, sex=m, starsign=virgo, age_rating=unknown)<br/>     
      * @return Axiom iterator
      */
     public Iterator<Axiom> getAgeRating()

@@ -95,11 +95,11 @@ public class RegexGroupsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\ (18,3) (18,23)");
+        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\?word (18,3) (18,24)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("definition \\^(.)\\. (.*+)\\ (19,3) (19,42)");
+        assertThat(sourceItem.toString()).isEqualTo("definition \\^(.)\\. (.*+)\\?definition (19,3) (19,43)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

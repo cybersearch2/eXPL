@@ -149,6 +149,9 @@ public class Evaluator extends TreeEvaluator
             case ORASSIGN: // "|"
             case XORASSIGN: // "^"
             case REMASSIGN: // "%"
+            case LSHIFTASSIGN:
+            case RSIGNEDSHIFTASSIGN:
+            case RUNSIGNEDSHIFTASSIGN:
                 if ((left != null) && (left.getOperator().getTrait().getOperandType() != OperandType.UNKNOWN))
                     operator.setProxy(left.getOperator());
             default:
@@ -177,8 +180,13 @@ public class Evaluator extends TreeEvaluator
         {
         case SKIP: // Operator && or ||
             if (right != null)
-                // Binary && and || assigns a value
-                setResult(shortCircuitOnTrue, id);
+            {
+                if ((operatorEnum == OperatorEnum.HOOK) || (operatorEnum == OperatorEnum.COLON))
+                    setResult(right.getValue(), id);
+                else
+                    // Binary && and || assigns a value
+                    setResult(shortCircuitOnTrue, id);
+            }
             else
             {
                 if (empty)
@@ -304,6 +312,9 @@ public class Evaluator extends TreeEvaluator
                 case ORASSIGN: // "|"
                 case XORASSIGN: // "^"
                 case REMASSIGN: // "%"
+                case LSHIFTASSIGN:
+                case RSIGNEDSHIFTASSIGN:
+                case RUNSIGNEDSHIFTASSIGN:
                 left.setValue(result);
                 default:
             }
@@ -507,18 +518,32 @@ public class Evaluator extends TreeEvaluator
 	protected String binaryToString() 
 	{
 		// By default, show left by name, if empty, otherwise by value
-		String leftTerm = (left.isEmpty() ? left.getName() : left.getValue().toString()); 
+		String leftTerm = (left.isEmpty() ? formatLeft() : left.getValue().toString()); 
 		if (left.getName().isEmpty() && left.isEmpty())
 			// Possibly recurse if left is an Evaluator with no name and empty
 			leftTerm = left.toString();
 		// By default, show right by name, if empty, otherwise by value
-		String rightTerm = (right.isEmpty() ? right.getName() : right.getValue().toString()); 
+		String rightTerm = (right.isEmpty() ? formatRight() : right.getValue().toString()); 
 		if (right.getName().isEmpty() && right.isEmpty())
 			// Possibly recurse if right is an Evaluator with no name and empty
 			rightTerm = right.toString();
 		return leftTerm  + operatorEnum.toString() + rightTerm;
 	}
 
+	protected String formatLeft()
+	{
+        if ((operatorEnum == OperatorEnum.HOOK) || (operatorEnum == OperatorEnum.COLON))
+            return left.toString();
+        return left.getName();
+	}
+	
+    protected String formatRight()
+    {
+        if ((operatorEnum == OperatorEnum.HOOK) || (operatorEnum == OperatorEnum.COLON))
+            return right.toString();
+        return right.getName();
+    }
+	
 	/**
 	 * Represent a postfix unary evaluator as a String
 	 * @return String

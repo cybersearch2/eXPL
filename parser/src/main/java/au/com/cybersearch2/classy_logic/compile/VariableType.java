@@ -96,10 +96,12 @@ public class VariableType
 
 	/**
 	 * Set type to UNKNOWN to force Variable instance creation
+	 * Returns self
 	 */
-	public void setUnknownType()
+	public VariableType setUnknownType()
 	{
 	    operandType = OperandType.UNKNOWN;
+	    return this;
 	}
 	
 	/**

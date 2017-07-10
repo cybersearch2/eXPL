@@ -38,7 +38,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 public class HighCities2 
 {
 /* cities2.xpl
- axiom city(altitude, name) 
+ axiom city_altitude(altitude, name) 
     {1718, "bilene"}
     {8000, "addis ababa"}
     {5280, "denver"}
@@ -52,14 +52,14 @@ public class HighCities2
  */
 /* high_cities.xpl
 template high_city(name ? altitude > 5000, altitude);
-query<axiom> high_cities (city : high_city); 
+query<axiom> high_cities (city_altitude : high_city); 
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
     
     public HighCities2()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("city", "cities2.xpl", 1);
+        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("city_altitude", "cities2.xpl", 1);
         queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
      }
 

@@ -170,9 +170,9 @@ public class QueryParserTest
 	static final String GREEK_BUSINESS = "include \"greek_business.xpl\";";
     static final String GREEK_BUSINESS2 = "include \"greek_business2.xpl\";";
 	static final String NAMED_GREEK_BUSINESS = "include \"named_greek_business.xpl\";";
-	static final String LEXICAL_SEARCH = "template in_words (Word regex(\"^in[^ ]+\"), string Definition);";
-	static final String NOUN_LEXICAL_SEARCH = "template in_words (Word regex(\"^in[^ ]+\"), Definition regex(\"^n\"));";
-	static final String REGEX_GROUPS = "template dictionary (Word, Definition regex( \"^(.)\\. (.*+)\" { part, text }));";
+	static final String LEXICAL_SEARCH = "template in_words (Word ? regex \"^in[^ ]+\", string Definition);";
+	static final String NOUN_LEXICAL_SEARCH = "template in_words (Word ? regex \"^in[^ ]+\", Definition ? regex \"^n\");";
+	static final String REGEX_GROUPS = "template dictionary (Word, Definition ? regex \"^(.)\\. (.*+)\" { part, text });";
 
 	static final String AGRICULTURAL_LAND = 
 		"include \"agriculture-land.xpl\";" +
@@ -361,7 +361,7 @@ public class QueryParserTest
     		"integer limit, \n" +
     		"{\n" +
     		"  number_list[i++] = n++,\n" +
-    		"  ? length(number_list) < limit\n" +
+    		"  ? number_list.length < limit\n" +
     		"}\n" +
     		")\n" +
     		"(n = 1, i = 0, limit = 3);"
@@ -381,7 +381,7 @@ public class QueryParserTest
     		"    ? --j >= 0\n" +
     		"  },\n" +
      		"  sort_list[j + 1] = temp,\n" +
-    		"  ? ++i < length(sort_list)\n" +
+    		"  ? ++i < sort_list.length\n" +
     		"}\n" +
             ")(i = 1);"
     		;
@@ -407,7 +407,7 @@ public class QueryParserTest
 			"template high_city(string name, altitude ? altitude > 5000);\n" +
             "list city_list(high_city);\n" +
     		"calc insert_sort (\n" +
-    		"  integer i = length(city_list) - 1, \n" +
+    		"  integer i = city_list.length- 1, \n" +
     		"  : i < 1, \n" +
     		"  integer j = i - 1, \n" +
     		"  integer altitude = city_list[i].altitude, \n" +
@@ -431,16 +431,16 @@ public class QueryParserTest
 			"axiom item() {\"$1234.56\"};\n" +
 			"template charge(currency $ \"AU\" amount);\n" +
 	        "calc charge_plus_gst(currency $ \"AU\" total = charge.amount * 1.1);\n" +
-	        "calc format_total(string total_text = \"Total + gst: \" + format(charge_plus_gst.total));\n" +
-			"query item_query(item : charge) >> (charge_plus_gst) >> (format_total);";
+	        "calc format_total(string total_text = \"Total + gst: \" + charge_plus_gst.total.format);\n" +
+			"query item_query(item : charge) -> (charge_plus_gst) -> (format_total);";
 	
 	static final String WORLD_CURRENCY_XPL =
 			"include \"world_currency.xpl\";\n" +
 			"template charge(currency $ country amount);\n" +
 	        "calc charge_plus_gst(currency $ charge.country total = charge.amount * 1.1);\n" +
-	        "calc format_total(string total_text = charge.country + \" Total + gst: \" + format(charge_plus_gst.total));\n" +
+	        "calc format_total(string total_text = charge.country + \" Total + gst: \" + charge_plus_gst.total.format);\n" +
 	        "list world_list(format_total);\n" +
-			"query price_query(price : charge) >> (charge_plus_gst) >> (format_total);";
+			"query price_query(price : charge) -> (charge_plus_gst) -> (format_total);";
   			
 	static final String STAMP_DUTY_XPL =
 			"choice bracket "
@@ -457,7 +457,7 @@ public class QueryParserTest
 			"\n" +
 			"axiom transacton_amount (amount) { 123458 };\n" +
 			"calc payable(duty = bracket.base + (amount - bracket.threshold) * (bracket.percent / 100));\n" +
-			"query stamp_duty_query (transacton_amount : bracket) >> (payable);\n";
+			"query stamp_duty_query (transacton_amount : bracket) -> (payable);\n";
 
     static final String CHOICE_COLORS =
             "choice swatch\n" +
@@ -482,14 +482,13 @@ public class QueryParserTest
             ;
 
     static final String CHOICE_COLORS3 =
-            "integer unknown_rgb;\n" +
-            "choice swatch\n" +
+             "choice swatch\n" +
             "(rgb, color, red, green, blue)\n" +
             "{0x00FFFF, \"aqua\", 0, 255, 255}\n" +
             "{0x000000, \"black\", 0, 0, 0}\n" +
             "{0x0000FF, \"blue\", 0, 0, 255}\n" +
             "{0xFFFFFF, \"white\", 255, 255, 255}\n" +
-            "{unknown_rgb,  \"unknown\", 0, 0, 0};\n" +
+            "{unknown,  \"unknown\", 0, 0, 0};\n" +
             "axiom shade (rgb) : parameter;\n" +
             "query color_query (shade : swatch);\n";
             ;
@@ -801,7 +800,7 @@ public class QueryParserTest
         //highCitiesQuery.setExecutionContext(new ExecutionContext());
 	    highCitiesQuery.chainCalculator(queryProgram.getGlobalScope(), null, calcTemplate);
 	    //System.out.println(highCitiesQuery.toString());
-    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude?altitude>5000)");
+    	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude>5000?altitude)");
  	    while (highCitiesQuery.execute())
  	    {
  	        //Axiom axiom = calcTemplate.toAxiom();
@@ -1070,7 +1069,7 @@ public class QueryParserTest
 			}};
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
 	    QueryExecuter greekChargeCustomerQuery = new QueryExecuter(adapter.getQueryParams());
-	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city?city==city, fee)");
+	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city==city?city, fee)");
     	int index = 0;
  	    while (greekChargeCustomerQuery.execute())
  	        //System.out.println(greekChargeCustomerQuery.toString());
@@ -1106,7 +1105,7 @@ public class QueryParserTest
             }};
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
         QueryExecuter greekChargeCustomerQuery = new QueryExecuter(adapter.getQueryParams());
-        assertThat(greekChargeCustomerQuery.toString()).isEqualTo("charge(city, fee), customer(name, city?city==city)");
+        assertThat(greekChargeCustomerQuery.toString()).isEqualTo("charge(city, fee), customer(name, city==city?city)");
         int index = 0;
         while (greekChargeCustomerQuery.execute())
             //System.out.println(greekChargeCustomerQuery.toString());
@@ -1142,7 +1141,7 @@ public class QueryParserTest
 			}};
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
 	    QueryExecuter greekChargeCustomerQuery = new QueryExecuter(adapter.getQueryParams());
-	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city?city==city, fee)");
+	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city==city?city, fee)");
     	int index = 0;
  	    while (greekChargeCustomerQuery.execute())
  	        //System.out.println(greekChargeCustomerQuery.toString());
@@ -1160,7 +1159,7 @@ public class QueryParserTest
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
         TestQueryExecuter agriculturalQuery = new TestQueryExecuter(queryParams);
-    	assertThat(agriculturalQuery.toString()).isEqualTo("agri_10y(Y1990, Y2010, country?Y2010-Y1990>1.0)");
+    	assertThat(agriculturalQuery.toString()).isEqualTo("agri_10y(Y1990, Y2010, Y2010-Y1990>1.0?country)");
     	File agriList = new File("src/test/resources", "agriculture-land.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(agriList));
         while (agriculturalQuery.execute())
@@ -1221,7 +1220,7 @@ public class QueryParserTest
  	    }
  	    catch(QueryExecutionException e)
  	    {
- 	    	assertThat(e.getMessage()).isEqualTo("Error evaluating: agri_10y(Y1990=43.5, Y2010, country=Kosovo)");
+ 	    	assertThat(e.getMessage()).isEqualTo("Error evaluating: agri_10y(Y1990=43.5, Y2010, Y2010-43.5>1.0?Kosovo)");
  	    	assertThat(e.getCause().getMessage()).isEqualTo("Left term is empty");
  	    }
 	}
@@ -1232,7 +1231,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(LEXICAL_SEARCH);
 		Template inWordsTemplate = parserAssembler.getTemplateAssembler().getTemplate("in_words");
 		inWordsTemplate.setKey("Lexicon");
-		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\, Definition)");
+		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\?Word, Definition)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
@@ -1324,7 +1323,7 @@ public class QueryParserTest
 		ParserAssembler parserAssembler = openScript(NOUN_LEXICAL_SEARCH);
 		Template inWordsTemplate = parserAssembler.getTemplateAssembler().getTemplate("in_words");
 		inWordsTemplate.setKey("Lexicon");
-		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\, Definition \\^n\\)");
+		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\?Word, Definition \\^n\\?Definition)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();

@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -64,15 +63,15 @@ local translate(lexicon);
 calc charge_plus_gst
 (
   currency amount,
-  << tax_rate(scope^region) >> (percent /= 100),
+  <- tax_rate(scope^region) -> (percent /= 100),
   currency total = amount * (1.0 + percent)
 );
 
 calc format_total
 (
-  string country = scope^region,
+  string country = scope->region,
   string text = " " + translate^Total + " " + translate^tax + ": " + 
-    format(charge_plus_gst.total)
+    charge_plus_gst.total.format
 );
 
 scope german (language="de", region="DE"){}
@@ -80,10 +79,10 @@ scope french (language="fr", region="FR"){}
 scope belgium_fr (language="fr", region="BE"){}
 scope belgium_nl (language="nl", region="BE"){}
 
-query item_query(item : german.charge_plus_gst) >> (german.format_total) >>
-   (item : french.charge_plus_gst) >> (french.format_total) >>
-   (item : belgium_fr.charge_plus_gst) >> (belgium_fr.format_total) >>
-   (item : belgium_nl.charge_plus_gst) >> (belgium_nl.format_total);
+query item_query(item : german.charge_plus_gst) -> (german.format_total) ->
+   (item : french.charge_plus_gst) -> (french.format_total) ->
+   (item : belgium_fr.charge_plus_gst) -> (belgium_fr.format_total) ->
+   (item : belgium_nl.charge_plus_gst) -> (belgium_nl.format_total);
 
 */
     
@@ -103,7 +102,6 @@ query item_query(item : german.charge_plus_gst) >> (german.format_total) >>
     public List<Axiom> getFormatedTotalAmount()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("foreign-scope.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
 		// Create QueryParams object for  query "item_query"
 		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "item_query");

@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -32,7 +31,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 24 Feb 2015
  */
-public class MegaCities 
+public class AsiaTopTen 
 {
 /* mega_city.xpl
 axiom mega_city (Rank,Megacity,Country,Continent,Population)
@@ -74,15 +73,23 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
  */
 /* asia_top_ten.xpl
 axiom mega_city (Rank,Megacity,Country,Continent,Population): resource;
+
 integer count = 0;
-template asia_top_ten (Megacity ? Continent == "Asia" && count++ < 10, Country, Population); 
+
+template asia_top_ten 
+(
+  rank = count ? Continent == "Asia" && count++ < 10, 
+  city = Megacity, country = Country, population = format(Population)
+); 
+
 query<axiom> asia_top_ten (mega_city : asia_top_ten); 
+
 */
     
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
     
-    public MegaCities()
+    public AsiaTopTen()
     {
         ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 5);
         queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
@@ -94,7 +101,6 @@ query<axiom> asia_top_ten (mega_city : asia_top_ten);
     public Iterator<Axiom> findMegaCities() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("asia_top_ten.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("asia_top_ten");
         return result.getIterator("asia_top_ten");
@@ -108,23 +114,23 @@ query<axiom> asia_top_ten (mega_city : asia_top_ten);
 	/**
 	 * Displays the asia_top_ten solution on the console.<br/>
 	 * The expected result:<br/>
-		asia_top_ten(Megacity = Tokyo, Country = Japan, Population = 37900000)<br/>
-		asia_top_ten(Megacity = Delhi, Country = India, Population = 26580000)<br/>
-		asia_top_ten(Megacity = Seoul, Country = South,Korea, Population = 26100000)<br/>
-		asia_top_ten(Megacity = Shanghai, Country = China, Population = 25400000)<br/>
-		asia_top_ten(Megacity = Mumbai, Country = India, Population = 23920000)<br/>
-		asia_top_ten(Megacity = Beijing, Country = China, Population = 21650000)<br/>
-		asia_top_ten(Megacity = Jakarta, Country = Indonesia, Population = 20500000)<br/>
-		asia_top_ten(Megacity = Karachi, Country = Pakistan, Population = 20290000)<br/>
-		asia_top_ten(Megacity = Osaka, Country = Japan, Population = 20260000)<br/>
-		asia_top_ten(Megacity = Manila, Country = Philippines, Population = 20040000)<br/>
+        asia_top_ten(rank=1, city=Tokyo, country=Japan, population=37,900,000)<br/>
+        asia_top_ten(rank=2, city=Delhi, country=India, population=26,580,000)<br/>
+        asia_top_ten(rank=3, city=Seoul, country=South,Korea, population=26,100,000)<br/>
+        asia_top_ten(rank=4, city=Shanghai, country=China, population=25,400,000)<br/>
+        asia_top_ten(rank=5, city=Mumbai, country=India, population=23,920,000)<br/>
+        asia_top_ten(rank=6, city=Beijing, country=China, population=21,650,000)<br/>
+        asia_top_ten(rank=7, city=Jakarta, country=Indonesia, population=20,500,000)<br/>
+        asia_top_ten(rank=8, city=Karachi, country=Pakistan, population=20,290,000)<br/>
+        asia_top_ten(rank=9, city=Osaka, country=Japan, population=20,260,000)<br/>
+        asia_top_ten(rank=10, city=Manila, country=Philippines, population=20,040,000)<br/>
 	 */
     public static void main(String[] args)
     {
         try 
         {
-            MegaCities megaCities = new MegaCities();
-            Iterator<Axiom> iterator = megaCities.findMegaCities();
+            AsiaTopTen asiaTopTen = new AsiaTopTen();
+            Iterator<Axiom> iterator = asiaTopTen.findMegaCities();
             while (iterator.hasNext())
                 System.out.println(iterator.next().toString());
             /* Uncomment to run query a second time to check the count variable 

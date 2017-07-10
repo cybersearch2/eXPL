@@ -15,8 +15,8 @@ axiom expand =
    
 calc in_words 
 (
-. word regex(wordRegex), 
-. definition regex(defRegex { part, def }),
+. word ? regex wordRegex, 
+. definition ? regex defRegex { part, def },
   string in_word = word + ", " + expand[part] + "- " + def
 );
 

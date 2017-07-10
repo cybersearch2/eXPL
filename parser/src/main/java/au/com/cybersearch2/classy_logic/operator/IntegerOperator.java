@@ -88,6 +88,9 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
             OperatorEnum.BIT_OR,
             OperatorEnum.XOR,
             OperatorEnum.REM,   
+            OperatorEnum.LSHIFT,
+            OperatorEnum.RSIGNEDSHIFT,
+            OperatorEnum.RUNSIGNEDSHIFT,
             OperatorEnum.INCR,
             OperatorEnum.DECR,
             OperatorEnum.PLUSASSIGN,
@@ -97,7 +100,10 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
             OperatorEnum.ANDASSIGN,
             OperatorEnum.ORASSIGN,
             OperatorEnum.XORASSIGN,
-            OperatorEnum.REMASSIGN  ,       
+            OperatorEnum.REMASSIGN,       
+            OperatorEnum.LSHIFTASSIGN, // "<<="
+            OperatorEnum.RSIGNEDSHIFTASSIGN, // ">>="
+            OperatorEnum.RUNSIGNEDSHIFTASSIGN, // ">>>="
             OperatorEnum.TILDE      
         };
     }
@@ -126,6 +132,9 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
                 OperatorEnum.BIT_OR,
                 OperatorEnum.XOR,
                 OperatorEnum.REM,       
+                OperatorEnum.LSHIFT,
+                OperatorEnum.RSIGNEDSHIFT,
+                OperatorEnum.RUNSIGNEDSHIFT,
                 OperatorEnum.INCR,
                 OperatorEnum.DECR,
                 OperatorEnum.PLUSASSIGN,
@@ -135,7 +144,10 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
                 OperatorEnum.ANDASSIGN,
                 OperatorEnum.ORASSIGN,
                 OperatorEnum.XORASSIGN,
-                OperatorEnum.REMASSIGN
+                OperatorEnum.REMASSIGN,
+                OperatorEnum.LSHIFTASSIGN, // "<<="
+                OperatorEnum.RSIGNEDSHIFTASSIGN, // ">>="
+                OperatorEnum.RUNSIGNEDSHIFTASSIGN // ">>>="
         };
     }
 
@@ -188,6 +200,12 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
         case XOR:       calc = left ^ right; break;
         case REMASSIGN: // "%="
         case REM:       calc = left % right; break;
+        case LSHIFT:
+        case LSHIFTASSIGN: calc = left << right; break;
+        case RSIGNEDSHIFT: 
+        case RSIGNEDSHIFTASSIGN: calc = left >> right; break;
+        case RUNSIGNEDSHIFT: 
+        case RUNSIGNEDSHIFTASSIGN: calc = left >>> right; break;
         default:
         }
         return new Long(calc);

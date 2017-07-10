@@ -8,7 +8,7 @@ calc total
 
 calc format_total
 (
-  string total_text = total.country + " Total + gst: " + format(total.amount)
+  string total_text = total.country + " Total + gst: " + total.amount.format
 );
 
-query<axiom> price_query(price : total) >> (format_total);
+query<axiom> price_query(price : total) -> (format_total);

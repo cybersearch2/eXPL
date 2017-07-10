@@ -113,7 +113,14 @@ abstract class TreeEvaluator extends DelegateOperand
             // Remember if left is not a number
             leftIsNaN = utils.isNaN(left, operatorEnum);
             if (right != null)
+            {
                 evaluationStatus = evaluateRight(left, right, id);
+                if (evaluationStatus == EvaluationStatus.COMPLETE)
+                {
+                    if ((operatorEnum == OperatorEnum.HOOK) || (operatorEnum == OperatorEnum.COLON))
+                        return EvaluationStatus.SKIP;
+                }
+            }
         }
         return evaluationStatus;
     }
@@ -170,6 +177,15 @@ abstract class TreeEvaluator extends DelegateOperand
             else if (right == null)
                 // Nothing more to do
                 return EvaluationStatus.SKIP;
+        }
+        else if ((operatorEnum == OperatorEnum.HOOK) || (operatorEnum == OperatorEnum.COLON))
+        {
+            // Binary short circuit. Left has logic control.
+            String leftValue = left.getValue().toString();
+            if ((operatorEnum == OperatorEnum.HOOK) && leftValue.equals("false"))
+                return EvaluationStatus.SHORT_CIRCUIT;
+            if ((operatorEnum == OperatorEnum.COLON) && leftValue.equals("true"))
+                return EvaluationStatus.SHORT_CIRCUIT;
         }
         return EvaluationStatus.COMPLETE;
     }

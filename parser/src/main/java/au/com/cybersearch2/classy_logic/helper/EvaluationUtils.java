@@ -43,6 +43,8 @@ public class EvaluationUtils
             // Comma operator valid if right operand present    
             ((operatorEnum == OperatorEnum.COMMA) && (rightTerm != null)))
             return true;
+        if ((operatorEnum == OperatorEnum.HOOK) || (operatorEnum == OperatorEnum.COLON))
+            return true;
         return false;
     }
 
@@ -88,8 +90,8 @@ public class EvaluationUtils
         for (OperatorEnum operatorEnum2: rightTerm.getOperator().getRightOperandOps())
             if (operatorEnum2 == operatorEnum)
                 return true;
-        // Only Comma operator is valid at this point
-        return operatorEnum == OperatorEnum.COMMA;
+        // Only comma, ? and : operators are valid at this point
+        return (operatorEnum == OperatorEnum.COMMA) || (operatorEnum == OperatorEnum.HOOK) || (operatorEnum == OperatorEnum.COLON);
     }
 
     public boolean isValidOperand(Operand term, OperatorEnum operatorEnum, OperatorEnum[] operatorEnums) 

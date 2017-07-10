@@ -10,11 +10,11 @@ calc total
   amount *= 1.1
 );
 
-calc format_total(string total_text = translate->Total + " + gst: " + format(total.amount));
+calc format_total(string total_text = translate->Total + " + gst: " + total.amount.format);
 
 local translate(lexicon);
 
 scope german (language="de", region="DE")
 {
-  query<term> item_query(item : total) >> (format_total);
+  query<term> item_query(item : total) -> (format_total);
 }

@@ -47,6 +47,8 @@ public enum OperatorEnum
     XOR, // "^"
     REM, // "%"
     LSHIFT, // "<<"
+    RSIGNEDSHIFT, // ">>"
+    RUNSIGNEDSHIFT, // ">>>"
     PLUSASSIGN, // "+="
     MINUSASSIGN, // "-="
     STARASSIGN, // "*="

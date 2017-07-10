@@ -112,7 +112,7 @@ public class IncreasedAgricultureTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("country?country==country (6,3) (6,38)");
+        assertThat(sourceItem.toString()).isEqualTo("country==country?country (6,3) (6,38)");
         sourceItem = sourceItem.getNext();
         //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("double surface_area=agri_change/100.0*surface_area_Km2 (7,3) (7,71)");

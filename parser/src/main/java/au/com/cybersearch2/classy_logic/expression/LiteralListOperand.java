@@ -31,16 +31,20 @@ public class LiteralListOperand extends Variable
 {
     /** Parameter list containing values to match on */
     protected List<Parameter> literalList;
+    /**  Flag set true if match logic is reversed */
+    protected boolean isNot;
 
     /**
      * Construct LiteralListOperand object
      * @param qname Qualified name of this operand
      * @param literalList Parameter list containing values to match on
+     * @param isNot Flag set true if match logic is reversed
      */
-    public LiteralListOperand(QualifiedName qname, List<Parameter> literalList)
+    public LiteralListOperand(QualifiedName qname, List<Parameter> literalList, boolean isNot)
     {
         super(qname);
         this.literalList = literalList;
+        this.isNot = isNot;
     }
 
     /**
@@ -62,6 +66,8 @@ public class LiteralListOperand extends Variable
                 }
         }
         this.id = id;
+        if (isNot)
+            match = !match;
         return match ? EvaluationStatus.COMPLETE : EvaluationStatus.SHORT_CIRCUIT;
     }
 
@@ -76,7 +82,10 @@ public class LiteralListOperand extends Variable
         if (empty)
         {
             StringBuilder builder = new StringBuilder(string);
-            builder.append(" {");
+            builder.append(' ');
+            if (isNot)
+                builder.append('!');
+            builder.append('{');
             boolean firstTime = true;
             for (Parameter param: literalList)
             {

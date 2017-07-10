@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -61,8 +60,8 @@ public class AgeDiscrimination2
    
  calc perfect_match
  (
-.  template age_rating(age_weight) << age_rating(age),
-   ? fact(age_rating),
+.  template age_rating(age_weight) <- age_rating(age),
+   ? age_rating.fact,
    name, sex, starsign,
    double rating = age_weight + 0.2 * (starsign == "gemini")
  );
@@ -92,7 +91,6 @@ query<axiom> star_people(person : perfect_match);
     public Iterator<Axiom> getAgeRating()
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("age-discrimination2.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("star_people");
         return result.getIterator("star_people");

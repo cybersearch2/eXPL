@@ -17,7 +17,7 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -27,6 +27,7 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import au.com.cybersearch2.classy_logic.LexiconSource;
 import au.com.cybersearch2.classy_logic.QueryParams;
@@ -39,6 +40,7 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 import au.com.cybersearch2.classy_logic.query.QueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * RegExTest
@@ -61,10 +63,11 @@ public class RegExTest
         TemplateArchetype wordArchetype = new TemplateArchetype(new QualifiedTemplateName(QualifiedName.EMPTY, "in_words"));
 		Template inWordsTemplate = new Template(wordArchetype);
 		inWordsTemplate.setKey("Lexicon");
-		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Word"), "^in[^ ]+", 0, null);
-		inWordsTemplate.addTerm(regExOperand);
+		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Word"), "^in[^ ]+", null, 0, null);
+		Variable var = new Variable(regExOperand.getQualifiedName());
+		inWordsTemplate.addTerm(new Evaluator(regExOperand.getQualifiedName(), regExOperand, "?", var));
 		inWordsTemplate.addTerm(new TestStringOperand("Definition"));
-		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\, Definition)");
+		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\?Word, Definition)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
@@ -91,7 +94,7 @@ public class RegExTest
 		Operand g2 = mock(Operand.class);
 		group.addGroup(g1);
 		group.addGroup(g2);
-		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Definition"), "^(.)\\. (.*+)", 0, group);
+		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Definition"), "^(.)\\. (.*+)", null, 0, group);
 		dictionaryTemplate.addTerm(new TestStringOperand("Word"));
 		dictionaryTemplate.addTerm(regExOperand);
 		dictionaryTemplate.getParserTask().run();
@@ -104,9 +107,12 @@ public class RegExTest
 		if (dictionaryQuery.execute())
 		{
 		    // TODO - capture to verify
-			//verify(g1).assign(new Parameter(Term.ANONYMOUS, "n"));
-			//verify(g2).assign(new Parameter(Term.ANONYMOUS, "a monastery ruled by an abbot"));
-			assertThat(regExOperand.getValue().toString()).isEqualTo("n. a monastery ruled by an abbot");
+		    ArgumentCaptor<Parameter> paramCaptor = ArgumentCaptor.forClass(Parameter.class);
+			verify(g1).assign(paramCaptor.capture());
+			assertThat(paramCaptor.getValue().toString()).isEqualTo( "n");
+			verify(g2).assign(paramCaptor.capture());
+	        assertThat(paramCaptor.getValue().toString()).isEqualTo( "a monastery ruled by an abbot");
+			assertThat(regExOperand.toString()).isEqualTo("Definition=true"); 
 		}
 		else
 			fail("Query execute returned false");

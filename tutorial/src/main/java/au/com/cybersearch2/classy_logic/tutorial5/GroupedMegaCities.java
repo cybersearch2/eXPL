@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial1;
+package au.com.cybersearch2.classy_logic.tutorial5;
 
 import java.util.Iterator;
 
@@ -31,7 +31,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 24 Feb 2015
  */
-public class EuropeanMegaCities 
+public class GroupedMegaCities 
 {
 /* mega_city.xpl
 axiom mega_city (Rank,Megacity,Country,Continent,Population)
@@ -70,30 +70,47 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 {33,"Paris","France","Europe",10770000}
 {34,"Chennai","India","Asia",10350000}
 {35,"Hyderabad","India","Asia",10100000};
-*/
-/* euro_megacities.xpl
-axiom mega_city (Rank,Megacity,Country,Continent,Population) : resource;
-template euro_megacities (Megacity, Country, Continent { "Europe" } );
-query<axiom> euro_megacities (mega_city : euro_megacities);
-*/
+ */
+/* grouping.xpl
+axiom mega_city (Rank,Megacity,Country,Continent,Population): resource;
+
+axiom continents(continent)
+  { "Asia" }
+  { "Africa"}
+  { "Europe" }
+  { "South America" }
+  { "North America" };
+
+template continent 
+(
+  continent
+); 
+
+template continent_group 
+(
+  continent ? continent == Continent, city = Megacity, country = Country, rank = Rank, population = Population.format
+); 
+
+query<axiom> mega_cities_by_continent (continents : continent, mega_city : continent_group); */
+    
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
-	 
-    public EuropeanMegaCities()
+    
+    public GroupedMegaCities()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 1);
+        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 5);
         queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
      }
 
     /**
-     * Compiles the euro_megacities.xpl script and runs the "euro_megacities" query
+     * Compiles the asia_top_ten.xpl script and runs the "asia_top_ten" query
      */
-    public Iterator<Axiom> findEuroMegaCities() 
+    public Iterator<Axiom> findMegaCities() 
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("euro_megacities.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("grouping.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("euro_megacities");
-        return result.getIterator("euro_megacities");
+        Result result = queryProgram.executeQuery("mega_cities_by_continent");
+        return result.getIterator("mega_cities_by_continent");
     }
 
     public ParserContext getParserContext()
@@ -102,22 +119,34 @@ query<axiom> euro_megacities (mega_city : euro_megacities);
     }
     
 	/**
-	 * Displays the euro_megacities solution on the console.<br/>
+	 * Displays the asia_top_ten solution on the console.<br/>
 	 * The expected result:<br/>
-		euro_megacities(Megacity = Moscow, Country = Russia, Continent = Europe)<br/>
-		euro_megacities(Megacity = London, Country = UK, Continent = Europe)<br/>
-		euro_megacities(Megacity = Istanbul, Country = Turkey, Continent = Europe)<br/>
-		euro_megacities(Megacity = Rhine-Ruhr, Country = Germany, Continent = Europe)<br/>
-		euro_megacities(Megacity = Paris, Country = France, Continent = Europe)<br/>
+        asia_top_ten(rank=1, city=Tokyo, country=Japan, population=37,900,000)<br/>
+        asia_top_ten(rank=2, city=Delhi, country=India, population=26,580,000)<br/>
+        asia_top_ten(rank=3, city=Seoul, country=South,Korea, population=26,100,000)<br/>
+        asia_top_ten(rank=4, city=Shanghai, country=China, population=25,400,000)<br/>
+        asia_top_ten(rank=5, city=Mumbai, country=India, population=23,920,000)<br/>
+        asia_top_ten(rank=6, city=Beijing, country=China, population=21,650,000)<br/>
+        asia_top_ten(rank=7, city=Jakarta, country=Indonesia, population=20,500,000)<br/>
+        asia_top_ten(rank=8, city=Karachi, country=Pakistan, population=20,290,000)<br/>
+        asia_top_ten(rank=9, city=Osaka, country=Japan, population=20,260,000)<br/>
+        asia_top_ten(rank=10, city=Manila, country=Philippines, population=20,040,000)<br/>
 	 */
     public static void main(String[] args)
     {
         try 
         {
-            EuropeanMegaCities europeanMegaCities = new EuropeanMegaCities();
-            Iterator<Axiom> iterator = europeanMegaCities.findEuroMegaCities();
+            GroupedMegaCities megaCities = new GroupedMegaCities();
+            Iterator<Axiom> iterator = megaCities.findMegaCities();
             while (iterator.hasNext())
                 System.out.println(iterator.next().toString());
+            /* Uncomment to run query a second time to check the count variable 
+             * is reset back to initial value of 0
+            iterator = megaCities.findMegaCities();
+            while (iterator.hasNext())
+                System.out.println(iterator.next().toString());
+
+             */
         } 
         catch (ExpressionException e) 
         {

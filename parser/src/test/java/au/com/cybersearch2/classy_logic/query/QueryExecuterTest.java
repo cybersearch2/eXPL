@@ -537,7 +537,7 @@ public class QueryExecuterTest
         query.chain(ensemble, chainTemplateList);
         QualifiedName spartaOnlyName = QualifiedName.parseTemplateName("sparta_only");
         QualifiedName spartaLitListName = new QualifiedName("city", spartaOnlyName);
-        Operand spartaLiteral = new LiteralListOperand(spartaLitListName, Collections.singletonList(new Parameter(Term.ANONYMOUS, "Sparta")));
+        Operand spartaLiteral = new LiteralListOperand(spartaLitListName, Collections.singletonList(new Parameter(Term.ANONYMOUS, "Sparta")), false);
         TemplateArchetype spartaOnlyArchetype = new TemplateArchetype(spartaOnlyName);
         Template spartaOnly = new Template(spartaOnlyArchetype, spartaLiteral);
         spartaOnly.getParserTask().run();
@@ -551,7 +551,7 @@ public class QueryExecuterTest
         //System.out.println(it.next().toString());
         assertThat(it.next().toString()).isEqualTo("sparta_only(city {Sparta})");
         //while (it.hasNext())
-        //    System.out.println(">>" + it.next().toString());
+        //    System.out.println("->" + it.next().toString());
         assertThat(query.execute()).isTrue();
         assertThat(query.getSolution().getAxiom("account").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[0]);
         assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[1]);
@@ -781,7 +781,7 @@ public class QueryExecuterTest
         query.chain(ensemble, chainTemplateList);
         QualifiedName spartaOnlyName = QualifiedName.parseTemplateName("sparta_only");
         QualifiedName spartaLitListName = new QualifiedName("city", spartaOnlyName);
-        Operand spartaLiteral = new LiteralListOperand(spartaLitListName, Collections.singletonList(new Parameter(Term.ANONYMOUS, "Sparta")));
+        Operand spartaLiteral = new LiteralListOperand(spartaLitListName, Collections.singletonList(new Parameter(Term.ANONYMOUS, "Sparta")), false);
         TemplateArchetype spartaOnlyArchetype = new TemplateArchetype(spartaOnlyName);
         Template spartaOnly = new Template(spartaOnlyArchetype, spartaLiteral);
         spartaOnly.getParserTask().run();
@@ -793,7 +793,7 @@ public class QueryExecuterTest
         assertThat(it.next().toString()).isEqualTo("account(name?name==name, fee), delivery(city?city==city, freight)");
         assertThat(it.next().toString()).isEqualTo("sparta_only(city {Sparta})");
         while (it.hasNext())
-            System.out.println(">>" + it.next().toString());
+            System.out.println("->" + it.next().toString());
         assertThat(query.execute()).isTrue();
         assertThat(query.getSolution().getAxiom("account").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[0]);
         assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[1]);

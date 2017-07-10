@@ -108,9 +108,9 @@ public class CalculateChainQueryTest
         calculateChainQuery.executeQuery(solution, new ArrayDeque<Template>(), mock(ExecutionContext.class));
         assertThat(solution.getAxiom("factorial").toString()).isEqualTo("factorial(n=4, factorial=24, i=5)");
         calculateChainQuery.backupToStart();
-        assertThat(n.isEmpty()).isFalse();
-        assertThat(factorial.isEmpty()).isFalse();
-        assertThat(i.isEmpty()).isFalse();
+        assertThat(n.isEmpty()).isTrue();
+        assertThat(factorial.isEmpty()).isTrue();
+        assertThat(i.isEmpty()).isTrue();
         assertThat(factorialExpression.isEmpty()).isTrue();
         assertThat(iExpression.isEmpty()).isTrue();
         assertThat(testExpression.isEmpty()).isTrue();

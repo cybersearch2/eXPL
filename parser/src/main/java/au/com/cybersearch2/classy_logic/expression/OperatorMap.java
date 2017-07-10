@@ -74,7 +74,9 @@ public class OperatorMap
 		new OperatorChar('|', OperatorEnum.BIT_OR),
 		new OperatorChar('^', OperatorEnum.XOR),
 		new OperatorChar('%', OperatorEnum.REM),
-        new OperatorChar(',', OperatorEnum.COMMA)
+        new OperatorChar(',', OperatorEnum.COMMA),
+        new OperatorChar('?', OperatorEnum.HOOK),
+        new OperatorChar(':', OperatorEnum.COLON)
 	};
 
 	/** Initialisation String data */
@@ -88,6 +90,9 @@ public class OperatorMap
 	    new OperatorString("&&", OperatorEnum.SC_AND),
 	    new OperatorString("++", OperatorEnum.INCR),
 	    new OperatorString("--", OperatorEnum.DECR),
+        new OperatorString("<<", OperatorEnum.LSHIFT),
+        new OperatorString(">>", OperatorEnum.RSIGNEDSHIFT),
+        new OperatorString(">>>", OperatorEnum.RUNSIGNEDSHIFT),
 	    new OperatorString("+=", OperatorEnum.PLUSASSIGN),
 	    new OperatorString("-=", OperatorEnum.MINUSASSIGN),
 	    new OperatorString("*=", OperatorEnum.STARASSIGN),
@@ -95,7 +100,10 @@ public class OperatorMap
 	    new OperatorString("&=", OperatorEnum.ANDASSIGN),
 	    new OperatorString("|=", OperatorEnum.ORASSIGN),
 	    new OperatorString("^=", OperatorEnum.XORASSIGN),
-	    new OperatorString("%=", OperatorEnum.REMASSIGN)
+	    new OperatorString("%=", OperatorEnum.REMASSIGN),
+        new OperatorString("<<", OperatorEnum.LSHIFTASSIGN),
+        new OperatorString(">>", OperatorEnum.RSIGNEDSHIFTASSIGN),
+        new OperatorString(">>>", OperatorEnum.RUNSIGNEDSHIFTASSIGN)
 	};
 
 	/** Tree map for all operators for fast look up */

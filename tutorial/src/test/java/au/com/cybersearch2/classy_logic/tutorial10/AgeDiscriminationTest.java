@@ -61,15 +61,15 @@ public class AgeDiscriminationTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("{age?age>29,0.3} (19,5) (19,17)");
+        assertThat(sourceItem.toString()).isEqualTo("{age>29,0.3} (19,5) (19,17)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("{age?age>25,0.6} (20,5) (20,17)");
+        assertThat(sourceItem.toString()).isEqualTo("{age>25,0.6} (20,5) (20,17)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("{age?age>20,1.0} (21,5) (21,17)");
+        assertThat(sourceItem.toString()).isEqualTo("{age>20,1.0} (21,5) (21,17)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

@@ -113,7 +113,7 @@ public abstract class TermList <T extends Term> implements Serializable
        int index = archetype.getIndexForName(name);
        if (index == -1)
             return null;
-        return termList.get(index);
+        return getTermByIndex(index);
     }
 
     /**

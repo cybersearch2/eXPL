@@ -35,7 +35,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 20 Dec 2014
  */
-public class RegExOperand extends StringOperand 
+public class RegExOperand extends BooleanOperand 
 {
 	// In multiline mode the expressions '^' and '$' match
     // just after or just before, respectively, a line terminator or the end of
@@ -51,17 +51,20 @@ public class RegExOperand extends StringOperand
 	protected int flags;
 	/** Regular expression operand */
 	protected Operand regexOp;
+	/** Text to match on */
+    protected String input;
 	
 	/**
 	 * Construct RegExOperand object
      * @param qname Qualified name
 	 * @param regex Regular expression
+	 * @param inputOp Input operand (optional)
 	 * @param flags Optional flags to modify regular expression behavior
 	 * @param group Group object or null if grouping not used
 	 */
-	public RegExOperand(QualifiedName qname, String regex, int flags, Group group) 
+	public RegExOperand(QualifiedName qname, String regex, Operand inputOp, int flags, Group group) 
 	{
-		this(qname, (Operand)null, flags, group);
+		this(qname, (Operand)null, inputOp, flags, group);
 		this.regex = regex;
 	}
 
@@ -71,9 +74,9 @@ public class RegExOperand extends StringOperand
 	 * @param flags Optional flags to modify regular expression behavior
 	 * @param group Group object or null if grouping not used
 	 */
-	public RegExOperand(QualifiedName qname, Operand regexOp, int flags, Group group) 
+	public RegExOperand(QualifiedName qname, Operand regexOp, Operand inputOp, int flags, Group group) 
 	{
-		super(qname);
+		super(qname, inputOp);
 		this.flags = flags;
 		this.group = group;
 		this.regexOp = regexOp;
@@ -83,6 +86,21 @@ public class RegExOperand extends StringOperand
 			regex = "";
 	}
 
+   /**
+     * Delegate to perform actual unification with other Term. If successful, two terms will be equivalent. 
+     * @param otherTerm Term with which to unify
+     * @param id Identity of caller, which must be provided for backup()
+     * @return Identity passed in param "id" or zero if unification failed
+     * @see #backup(int id)
+     */
+    @Override
+    public int unify(Term otherTerm, int id)
+    {
+        this.id = id;
+        input = otherTerm.getValue().toString();
+        return this.id;
+    }
+
 	/**
 	 * Evaluate value using data gathered during unification.
 	 * @param id Identity of caller, which must be provided for backup()
@@ -91,6 +109,17 @@ public class RegExOperand extends StringOperand
 	@Override
 	public EvaluationStatus evaluate(int id) 
 	{
+	    this.id = id;
+        if (expression != null)
+        {
+            EvaluationStatus status = expression.evaluate(id);
+            if (status != EvaluationStatus.COMPLETE)
+                return status;
+            if (expression.isEmpty())
+                input = "";
+            else
+                input = expression.getValue().toString();
+        }
 		if (regexOp != null) 
 		{
 			if (regexOp.isEmpty())
@@ -98,21 +127,19 @@ public class RegExOperand extends StringOperand
 			regex = regexOp.getValue().toString();
 		}
 		// Note id not required as this object id is set during unification
-		if (!isEmpty())
+        boolean isMatch = false;
+		if (input != null)
 		{
-		    boolean isMatch = false;
 		    Matcher matcher = null;
 		    if (regex.isEmpty())
-		        isMatch = value.toString().isEmpty();
+		        isMatch = input.isEmpty();
 		    else
 		    {
 		        // Retain value on match
 		        matcher = getMatcher();
 			    isMatch = matcher.find();
 		    }
-			if (!isMatch) // No match is same as unification failed
-				clearValue();
-			else if ((group != null) && (matcher != null))
+			if (isMatch && (group != null) && (matcher != null))
 			{   // Assign values to group operands which are members of the same template as this term
 				List<Operand> groupList = group.getGroupList();
 				String[] groupValues = getGroups(matcher);
@@ -135,12 +162,26 @@ public class RegExOperand extends StringOperand
 					}
 				}
 			}
-			// Returning false for no match will cause evaluation short circuit
-			return isMatch ? EvaluationStatus.COMPLETE : EvaluationStatus.SHORT_CIRCUIT;
 		}
+		setValue(isMatch);
 		return EvaluationStatus.COMPLETE;
 	}
 
+   /**
+     * Backup to intial state if given id matches id assigned on unification or given id = 0. 
+     * @param id Identity of caller. 
+     * @return boolean true if backup occurred
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#unify(Term otherParam, int id)
+     * @see au.com.cybersearch2.classy_logic.terms.Parameter#evaluate(int id)
+     */
+    @Override
+    public boolean backup(int id)
+    {
+        input = null;
+        if (regexOp != null)
+            regexOp.backup(id);
+        return super.backup(id);
+    }
 
 	/**
 	 * Override toString() to report &lt;empty&gt;, null or value
@@ -177,7 +218,7 @@ public class RegExOperand extends StringOperand
 	 * @return Operand object or null if expression not set
 	 */
 	@Override
-	public Operand getLeftOperand() 
+	public Operand getRightOperand() 
 	{
 		return regexOp;
 	}
@@ -193,6 +234,6 @@ public class RegExOperand extends StringOperand
             throw new ExpressionException("Error in regular expression", e);
         }
         // Retain value on match
-        return pattern.matcher(value.toString());
+        return pattern.matcher(input);
 	}
 }

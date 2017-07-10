@@ -41,15 +41,15 @@ public class StampDuty3Test
 {
     static String[] BRACKETS =
     {
-        "{amount?amount<12000,0,0.0,1.0} (3,6) (3,44)",
-        "{amount?amount<30000,12000,120.0,2.0} (4,6) (4,44)",
-        "{amount?amount<50000,30000,480.0,3.0} (5,6) (5,44)",
-        "{amount?amount<100000,50000,1080.0,3.5} (6,6) (6,44)",
-        "{amount?amount<200000,100000,2830.0,4.0} (7,6) (7,44)",
-        "{amount?amount<250000,200000,6830.0,4.25} (8,6) (8,44)",
-        "{amount?amount<300000,250000,8955.0,4.75} (9,6) (9,44)",
-        "{amount?amount<500000,300000,11330.0,5.0} (10,6) (10,44)",
-        "{amount?amount>500000,500000,21330.0,5.5} (11,6) (11,44)"
+        "{amount<12000,0,0.0,1.0} (3,6) (3,44)",
+        "{amount<30000,12000,120.0,2.0} (4,6) (4,44)",
+        "{amount<50000,30000,480.0,3.0} (5,6) (5,44)",
+        "{amount<100000,50000,1080.0,3.5} (6,6) (6,44)",
+        "{amount<200000,100000,2830.0,4.0} (7,6) (7,44)",
+        "{amount<250000,200000,6830.0,4.25} (8,6) (8,44)",
+        "{amount<300000,250000,8955.0,4.75} (9,6) (9,44)",
+        "{amount<500000,300000,11330.0,5.0} (10,6) (10,44)",
+        "{amount>500000,500000,21330.0,5.5} (11,6) (11,44)"
     };
  
     static String[] STATEMENTS =
@@ -57,8 +57,8 @@ public class StampDuty3Test
         "bracket(amount) (21,3) (21,59)",
         "currency duty=base+amount-threshold*percent/100 (22,3) (22,63)",
         "bracket (23,3) (23,9)",
-        "string property_value=amount_format (24,3) (24,40)",
-        "string payable=duty_format (25,3) (26,0)"
+        "string property_value=amount_format=amount (24,3) (24,39)",
+        "string payable=duty_format=duty=base+amount-threshold*percent/100 (25,3) (26,0)"
     };
     
     @Test

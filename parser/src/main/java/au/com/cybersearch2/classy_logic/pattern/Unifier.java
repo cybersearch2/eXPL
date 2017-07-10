@@ -113,6 +113,9 @@ public class Unifier implements OperandVisitor
                     int id = ((modificationId != 0) || (operand instanceof Evaluator)) ?  template.getId() : 0;
                     return pairTerms(operand, axiom.getTermByIndex(pairIndex), id);
                 }
+                else if (solutionPairer != null)
+                    // Operand in another template context and solution available for unification
+                    return solutionPairer.next(operand, 0);
             }
             else if (solutionPairer != null)
                 // Operand in another template context and solution available for unification

@@ -74,7 +74,7 @@ public class GermanScopeTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string total_text=translate.Total+ + gst: +amount_format (13,19) (13,90)");
+        assertThat(sourceItem.toString()).isEqualTo("string total_text=translate.Total+ + gst: +amount_format (13,19) (13,89)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

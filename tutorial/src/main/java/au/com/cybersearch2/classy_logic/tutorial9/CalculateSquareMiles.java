@@ -45,7 +45,7 @@ public class CalculateSquareMiles
     list surface_area(km2_to_mi2);
     // Chained query with calculator performing conversion:
     query surface_area_mi2(surface_area : surface_area)
-      >> (km2_to_mi2);
+      #> (km2_to_mi2);
       
 */
     protected QueryProgramParser queryProgramParser;

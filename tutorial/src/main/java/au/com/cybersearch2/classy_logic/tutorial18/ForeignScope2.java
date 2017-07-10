@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -70,7 +69,7 @@ local translate(lexicon);
 calc charge_plus_gst
 (
   currency amount = item_list[catalog_no],
-  << tax_rate(country) >> (percent /= 100),
+  <- tax_rate(country) -> (percent /= 100),
   currency total = amount * (1.0 + percent)
 );
 
@@ -79,7 +78,7 @@ calc format_total
   catalog_no,
   country,
   string text = " " + translate^Total + " " + translate^tax + ": " + 
-    format(charge_plus_gst.total)
+    charge_plus_gst.total.format
 );
 
 scope german (language="de", region="DE"){}
@@ -87,10 +86,10 @@ scope french (language="fr", region="FR"){}
 scope belgium_fr (language="fr", region="BE"){}
 scope belgium_nl (language="nl", region="BE"){}
 
-query item_query(catalog_no : german.charge_plus_gst) >> (catalog_no : german.format_total) >>
-   (catalog_no : french.charge_plus_gst) >> (catalog_no : french.format_total) >>
-   (catalog_no : belgium_fr.charge_plus_gst) >> (catalog_no : belgium_fr.format_total) >>
-   (catalog_no : belgium_nl.charge_plus_gst) >> (catalog_no : belgium_nl.format_total);
+query item_query(catalog_no : german.charge_plus_gst) -> (catalog_no : german.format_total) ->
+   (catalog_no : french.charge_plus_gst) -> (catalog_no : french.format_total) ->
+   (catalog_no : belgium_fr.charge_plus_gst) -> (catalog_no : belgium_fr.format_total) ->
+   (catalog_no : belgium_nl.charge_plus_gst) -> (catalog_no : belgium_nl.format_total);
 
 */
     
@@ -110,7 +109,6 @@ query item_query(catalog_no : german.charge_plus_gst) >> (catalog_no : german.fo
     public List<Axiom> getFormatedTotalAmount()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("foreign-scope2.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
 		// Create QueryParams object for  query "item_query"
 		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "item_query");
@@ -145,10 +143,14 @@ query item_query(catalog_no : german.charge_plus_gst) >> (catalog_no : german.fo
     /**
      * Run tutorial
      * The expected result:<br/>
-        format_total(country = DE, text =  Gesamtkosten Steuer: 14.567,89 EUR)<br/>
-        format_total(country = FR, text =  le total impôt: 14 197,52 EUR)<br/>
-        format_total(country = BE, text =  le total impôt: 13.703,69 EUR)<br/>
-        format_total(country = BE, text =  totale kosten belasting: 13.703,69 EUR)<br/>
+        format_total(catalog_no=0, country=DE, text= Gesamtkosten Steuer: 14.567,89 EUR)<br/>
+        format_total(catalog_no=0, country=FR, text= le total impôt: 14 197,52 EUR)<br/>
+        format_total(catalog_no=0, country=BE, text= le total impôt: 13.703,69 EUR)<br/>
+        format_total(catalog_no=0, country=BE, text= totale kosten belasting: 13.703,69 EUR)<br/>
+        format_total(catalog_no=1, country=DE, text= Gesamtkosten Steuer: 590,00 EUR)<br/>
+        format_total(catalog_no=1, country=FR, text= le total impôt: 575,00 EUR)<br/>
+        format_total(catalog_no=1, country=BE, text= le total impôt: 555,00 EUR)<br/>
+        format_total(catalog_no=1, country=BE, text= totale kosten belasting: 555,00 EUR)<br/>
      * @param args
      */
 	public static void main(String[] args)

@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -45,17 +44,19 @@ axiom german.lexicon
   ( Total)
   {"Gesamtkosten"};
   
-template charge(currency amount);
+calc total
+(
+  currency amount,
+  amount *= 1.1
+);
 
-calc charge_plus_gst(currency total = charge.amount * 1.1);
-
-calc format_total(string total_text = translate^Total + " + gst: " + format(charge_plus_gst.total));
+calc format_total(string total_text = translate->Total + " + gst: " + total.amount.format);
 
 local translate(lexicon);
 
 scope german (language="de", region="DE")
 {
-  query<term> item_query(item : charge) >> (charge_plus_gst) >> (format_total);
+  query<term> item_query(item : total) -> (format_total);
 }
 
 */
@@ -76,7 +77,6 @@ scope german (language="de", region="DE")
     public Axiom getFormatedTotalAmount()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("german-scope.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
 		// Create QueryParams object for scope "german" and query "item_query"
 		QueryParams queryParams = queryProgram.getQueryParams("german", "item_query");

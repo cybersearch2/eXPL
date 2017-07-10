@@ -42,17 +42,18 @@ public class MultiCurrency
 /* multi-currency.xpl
 include "world_currency.xpl";
 
-calc charge_plus_gst
+calc total
 (
-  country,
-  currency $ country charge = amount,
-  currency $ country total = charge * 1.1,
-  string total_text = country + " Total + gst: " + format(total)
+  currency $ country amount,
+  amount *= 1.1
 );
 
-list world_list(charge_plus_gst);
+calc format_total
+(
+  string total_text = total.country + " Total + gst: " + total.amount.format
+);
 
-query<axiom> price_query(price : charge_plus_gst);
+query<axiom> price_query(price : total) -> (format_total);
 
 */
 

@@ -49,7 +49,7 @@ calc insert_sort
       ? --j >= 0
     },
     sorted[j + 1] = temp,
-    ? ++i < length(sorted)
+    ? ++i < sorted.length
   }
 )
 query sort_axiom (insert_sort);

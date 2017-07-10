@@ -311,7 +311,7 @@ public class CallOperandTest
         "  );\n" +
          "}\n"  +
         "calc score(\n" +
-        "    << school.total_score(english,math,history) >> (label, value),\n" +
+        "    <- school.total_score(english,math,history) -> (label, value),\n" +
         "    string total_text = label + \": \" + value\n" +
         ");\n" +
         "query marks(grades : score);";
@@ -337,8 +337,8 @@ public class CallOperandTest
         "  );\n" +
         "}\n"  +
         "calc score(\n" +
-        "    << school.subjects(english, math, history) >> (marks_list),\n" +
-        "    << school.total_score(english, math, history) >> (label, value),\n" +
+        "    <- school.subjects(english, math, history) -> (marks_list),\n" +
+        "    <- school.total_score(english, math, history) -> (label, value),\n" +
         "    axiom report={ marks_list,  total = label + \": \" + value }\n" +
         ");\n" +
         "query marks(grades : score);";
@@ -362,9 +362,9 @@ public class CallOperandTest
             "  );\n" +
             "\n" +
             "calc score(\n" +
-            "    << subjects(english, math, history) >> (marks_list),\n" +
+            "    <- subjects(english, math, history) -> (marks_list),\n" +
             "    math_score = score.subjects[1],\n" +
-            "    << total_score(english, math, history) >> (label, value),\n" +
+            "    <- total_score(english, math, history) -> (label, value),\n" +
             "    marks_total = score.total_score->value,\n" +
             "    axiom report = { marks_list, string total = label + \": \" + value }\n" +
             ");\n" +
@@ -408,13 +408,13 @@ public class CallOperandTest
            "   calc average_height(\n" +
             "  {\n" +
             "    accum += city_list[index].altitude,\n" +
-            "    ? ++index < length(city_list)\n" +
+            "    ? ++index < city_list.length\n" +
             "  },\n" +
             "  average=accum / index\n" +
             "  );\n" +
             "}\n"  +
             "calc average_height(\n" +
-            "  << city.average_height() >> (average),\n" +
+            "  <- city.average_height() -> (average),\n" +
             "  average\n" +
             ");\n" +
             "query average_height (average_height);"
@@ -423,9 +423,9 @@ public class CallOperandTest
             "calc german_colors\n" +
             "(\n" +
             "  axiom colors={},\n" +
-            "  << german.swatch(shade=\"Wasser\") >> (red, green, blue),\n" + 
+            "  <- german.swatch(shade=\"Wasser\") -> (red, green, blue),\n" + 
             "  colors += axiom aqua { red, green, blue },\n" +
-            "  << german.swatch(shade=\"blau\") >> (red, green, blue),\n" + 
+            "  <- german.swatch(shade=\"blau\") -> (red, green, blue),\n" + 
             "  colors += axiom blue { red, green, blue }\n" +
             "  \n" + 
             ");\n" +
@@ -443,10 +443,10 @@ public class CallOperandTest
             "query colors (german_colors);\n" +
             "calc german_orange\n" +
             "(\n" +
-            "  << german.swatch(shade=\"Orange\") >> (red, green, blue),\n" + 
-            "  boolean hasRed=fact(red),\n" +
-            "  boolean hasGreen=fact(green),\n" +
-            "  boolean hasBlue=fact(blue)\n" +
+            "  <- german.swatch(shade=\"Orange\") -> (red, green, blue),\n" + 
+            "  boolean hasRed=red.fact,\n" +
+            "  boolean hasGreen=green.fact,\n" +
+            "  boolean hasBlue=blue.fact\n" +
             ");\n" +
             "query orange (german_orange);"
             ;
@@ -458,7 +458,7 @@ public class CallOperandTest
             "  sort_list,\n" +
             "  string column,\n" +
             "  // i is index to last item appended to the list\n" +
-            "  integer i=length(sort_list) - 1,\n" +
+            "  integer i= sort_list.length - 1,\n" +
             "  // Skip first time when only one item in list\n" +
             "  : i < 1,\n" +
             "  // j is the swap index\n" + 
@@ -480,7 +480,7 @@ public class CallOperandTest
             "calc sort_cities(\n" +
             "  axiom sort_city = { name, altitude },\n" +
             "  city_list += sort_city,\n" +
-            "  << list_sort(city_list, \"altitude\")\n" +
+            "  <- list_sort(city_list, \"altitude\")\n" +
             ");\n" +
             "query sort_cities (city : sort_cities);\n"; 
 
@@ -521,7 +521,7 @@ public class CallOperandTest
             "  axiom candidates = {},\n" +
             "  integer i = 0,\n" +
             "  {\n" +
-            "    ? i < length(person_list),\n" +
+            "    ? i < person_list.length,\n" +
             "    ? person_list[i].starsign == starsign\n" +
             "    {\n" +
             "       candidates += person_list[i]\n" +
@@ -530,12 +530,12 @@ public class CallOperandTest
             "  }\n" +
             ");\n" +
             "calc match(\n" +
-            ". << people_by_starsign(\"gemini\") >> (candidates),\n" +
+            ". <- people_by_starsign(\"gemini\") -> (candidates),\n" +
             " candidate_list = match.people_by_starsign,\n" +
             ". integer i = 0,\n" +
             "axiom geminis = {}," +
             "  {\n" +
-            "    ? i < length(candidates),\n" +
+            "    ? i < candidates.length,\n" +
             "    geminis += candidates[i++]\n" +
             "  }\n" +
             " );\n" +
@@ -564,7 +564,7 @@ public class CallOperandTest
             "  axiom candidates = {},\n" +
             "  integer i = 0,\n" +
             "  {\n" +
-            "    ? i < length(person_list),\n" +
+            "    ? i < person_list.length,\n" +
             "    ? person_list[i].starsign == starsign\n" +
             "    {\n" +
             "       age = person_list[i].age,\n" +
@@ -584,12 +584,12 @@ public class CallOperandTest
             ");\n" +
             "calc match(\n" +
             "  axiom eligible = {},\n" +
-            "  << people_by_starsign(\"gemini\") >> (candidates),\n" +
+            "  <- people_by_starsign(\"gemini\") -> (candidates),\n" +
             "  integer i = 0,\n" +
             "  {\n" +
-            "    ? i < length(candidates),\n" +
+            "    ? i < candidates.length,\n" +
             "    gemini = candidates[i++],\n" +
-            "    ? fact(gemini)\n" +
+            "    ? gemini.fact\n" +
             "    {\n" +
             "      axiom person =\n" +
             "      {\n" + 

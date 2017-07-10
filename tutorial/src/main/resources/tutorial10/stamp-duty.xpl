@@ -14,4 +14,4 @@ axiom transaction_amount (amount) : parameter;
 
 calc payable(duty = base + (amount - threshold) * (percent / 100));
 
-query<term> stamp_duty(transaction_amount : bracket) >> (payable);
+query<term> stamp_duty(transaction_amount : bracket) -> (payable);

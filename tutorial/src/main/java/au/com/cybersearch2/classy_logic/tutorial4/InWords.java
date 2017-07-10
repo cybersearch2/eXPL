@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -48,7 +47,7 @@ absurd - j. inconsistent with reason or logic or common sense
 */
 /* query_in_words.xpl
 axiom lexicon (word, definition) : resource;
-template in_words (word regex("^in[^ ]+"), string definition);
+template in_words (word ? "^in[^ ]+", string definition);
 query<axiom> query_in_words(lexicon : in_words); 
 */
     protected QueryProgramParser queryProgramParser;
@@ -68,7 +67,6 @@ query<axiom> query_in_words(lexicon : in_words);
     public Iterator<Axiom> findInWords() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("query_in_words.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("query_in_words");
         return result.getIterator("query_in_words");

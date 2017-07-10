@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial1;
+package au.com.cybersearch2.classy_logic.tutorial4;
 
 import java.util.Iterator;
 
@@ -28,6 +28,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * EuropeanMegaCities
+ * Solves: European cities demonstrating negated set selector: !{ "Asia", "Africa", "South America", "North America" }
  * @author Andrew Bowley
  * 24 Feb 2015
  */
@@ -73,7 +74,7 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 */
 /* euro_megacities.xpl
 axiom mega_city (Rank,Megacity,Country,Continent,Population) : resource;
-template euro_megacities (Megacity, Country, Continent { "Europe" } );
+template euro_megacities (Megacity, Country, Continent !{ "Asia", "Africa", "South America", "North America" } );
 query<axiom> euro_megacities (mega_city : euro_megacities);
 */
     protected QueryProgramParser queryProgramParser;
@@ -81,7 +82,7 @@ query<axiom> euro_megacities (mega_city : euro_megacities);
 	 
     public EuropeanMegaCities()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 1);
+        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 4);
         queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
      }
 

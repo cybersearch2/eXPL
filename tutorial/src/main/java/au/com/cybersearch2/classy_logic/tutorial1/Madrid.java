@@ -21,7 +21,6 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -37,7 +36,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 public class Madrid
 {
 /* cities.xpl
-axiom city() 
+axiom city_altitude() 
     {"bilene", 1718}
     {"addis ababa", 8000}
     {"denver", 5280}
@@ -50,16 +49,16 @@ axiom city()
     {"wichita", 1305};  
 */   
 /* madrid.xpl
-axiom city() : resource;
-template high_city(name { "madrid" }, altitude);
-query<axiom> madrid (city : madrid); 
+axiom city_altitude() : resource;
+template high_city(city { "madrid" }, altitude);
+query<axiom> madrid (city_altitude : madrid); 
 */
 
     protected QueryProgramParser queryProgramParser;
  
     public Madrid()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("city", "cities.xpl", 1);
+        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("city_altitude", "cities.xpl", 1);
         queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
      }
 
@@ -69,7 +68,6 @@ query<axiom> madrid (city : madrid);
     public Iterator<Axiom> findMadrid() 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("madrid.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         Result result = queryProgram.executeQuery("madrid");
         return result.getIterator("madrid");
     }

@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.Variable;
-import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -112,32 +111,28 @@ public class Choice
 	 * Complete solution for given parameters
 	 * @param solution Solution containing query results so far
 	 * @param template Template used to calculate choice
-     * @param axiom Unification axiom
+     * @param axiom Axiom which initialized the template - first term is the selection value
 	 * @return Flag set true if selection match was found
 	 */
 	public boolean completeSolution(Solution solution, Template template, Axiom axiom, ExecutionContext context)
 	{
-	    // The emplate performs selection
-		selection = template.select(context);
+        // Selection term
+        int index = 0;
+        Operand operand = variableList.get(index++);
+	    Term selectionTerm = axiom.getTermByName(operand.getName());
+	    if (selectionTerm == null)
+	        // Selection by positition is fallback 
+	        selectionTerm = axiom.getTermByIndex(0);
+        operand.backup(0);
+        operand.unifyTerm(selectionTerm, template.getId());
+	    // The template performs selection
+		selection = template.select(selectionTerm, context);
 		if (selection == NO_MATCH)
 		    return false;
 		// Get selected axiom
         Axiom choiceAxiom = choiceAxiomList.get(selection);
-        // Get selection value
-        Term term = template.getTermByIndex(selection);
-        if (term.getValue() instanceof Null) // Ensure value is valid
-        {   // Use initializer axiom term as fallback
-            Term selectionTerm = axiom.getTermByName(choiceAxiom.getTermByIndex(0).getName());
-            if (selectionTerm != null)
-                term = selectionTerm;
-        }
         // Set variables and create solution axiom
         Axiom solutionAxiom = new Axiom(template.getName());
-		// Selection term
-		int index = 0;
-		Operand operand = variableList.get(index++);
-        operand.backup(0);
-        term.unifyTerm(operand, template.getId());
         solutionAxiom.addTerm(new Parameter(operand.getName(), operand.getValue()));
 		// Constants
 		while (index < choiceAxiom.getTermCount())
@@ -152,7 +147,7 @@ public class Choice
 		// Add pass-thru variables, if any, to solution
 		while (index < variableList.size())
 		{
-		    term = axiom.getTermByName(termNameList.get(index));
+		    Term term = axiom.getTermByName(termNameList.get(index));
 		    if (term != null)
 		    {
 	            operand = variableList.get(index);
@@ -162,8 +157,8 @@ public class Choice
 		    }
             ++index;
 		}
-		Parameter selectionTerm = new Parameter(template.getName(), (long)selection);
-        solutionAxiom.addTerm(selectionTerm);
+		Parameter selectionIndexTerm = new Parameter(template.getName(), (long)selection);
+        solutionAxiom.addTerm(selectionIndexTerm);
         solutionAxiom.getArchetype().clearMutable();
 		solution.put(template.getQualifiedName().toString(), solutionAxiom);
 		return true;
@@ -179,21 +174,16 @@ public class Choice
         int index = 0;
         // Get selection operand
         Operand operand = variableList.get(index++);
-        // Unifiy template terms if this has not already happened
-        for (int i = 0; i < template.getTermCount(); i++)
-        {   // Every term in the choice template has the same name
-            // and all terms are set to the same value
-            Term term = template.getTermByIndex(i);
-            if (!term.isEmpty())
-                break; // Term is already populated so proceed to selection
-            term.unifyTerm(operand, id);
-        }
-        selection = template.select(context);
+        QualifiedName templateName = template.getQualifiedName();
+        AxiomArchetype archetype = new AxiomArchetype(new QualifiedName(templateName.getScope(), templateName.getTemplate()));
+        Axiom axiom = new Axiom(archetype);
+        axiom.addTerm(operand);
+        template.unify(axiom, null);
+        selection = template.select(operand, context);
         if (selection == NO_MATCH)
             return false;
         // Get selected axiom, default being last one in choice axiom list
         Axiom choiceAxiom = choiceAxiomList.get(selection);
-        operand.unifyTerm(template.getTermByIndex(selection), id);
         while (index < choiceAxiom.getTermCount())
         {
             operand = variableList.get(index);

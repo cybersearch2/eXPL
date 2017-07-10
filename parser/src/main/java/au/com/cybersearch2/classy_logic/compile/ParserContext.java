@@ -426,32 +426,9 @@ public class ParserContext
         return qname;
     }
 
-    /**
-     * Add choice declaration source item, which includes term names
-     * @param qualifiedAxionName Qualified axiom name of choice
-     * @return SourceItem object added to current source marker
-     */
-    public SourceItem addChoiceItem(QualifiedName qualifiedAxionName)
-    {
-        StringBuilder builder = new StringBuilder("choice ");
-        builder.append(qualifiedAxionName).append('(');
-        List<String> termNames = parserAssembler.getAxiomAssembler().getTermNameList(qualifiedAxionName);
-        boolean firstTime = true;
-        for (String termname: termNames)
-        {
-            if (firstTime)
-                firstTime = false;
-            else
-                builder.append(',');
-            builder.append(termname);
-        }
-        builder.append(')');
-        return addSourceItem(builder.toString());
-    }
-
     public SourceItem addCalcQuery(QualifiedName qname, Template parameterTemplate)
     {
-        StringBuilder builder = new StringBuilder("<< ");
+        StringBuilder builder = new StringBuilder("<- ");
         builder.append(qname.toString()).append('(');
         if (parameterTemplate != null)
         {

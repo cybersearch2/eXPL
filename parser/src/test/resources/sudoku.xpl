@@ -193,5 +193,5 @@ query sudoku(puzzle)
   0, 0, 0, 0,
   0, 0, 0, 0,
   3, 4, 0, 0
-) >> (encode_puzzle) >> (column) >> (row) >> (column) >> (square) >> (square) >> (decode_puzzle) >> (print_puzzle);
+) -> (encode_puzzle) -> (column) -> (row) -> (column) -> (square) -> (square) -> (decode_puzzle) -> (print_puzzle);
  

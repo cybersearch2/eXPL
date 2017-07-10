@@ -77,7 +77,7 @@ public class HighCitiesAxiomsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("altitude?altitude>5000 (15,3) (15,28)");
+        assertThat(sourceItem.toString()).isEqualTo("altitude>5000?altitude (15,3) (15,28)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

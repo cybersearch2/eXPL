@@ -9,4 +9,4 @@ axiom french.colors (aqua, black, blue, white)
 axiom german.colors (aqua, black, blue, white)
   {"Wasser", "schwarz", "blau", "weiß"};
   
-query color_query (german.colors:german.colors) >> (french.colors:french.colors);
+query color_query (german.colors:german.colors) -> (french.colors:french.colors);

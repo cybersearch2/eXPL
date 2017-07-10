@@ -17,6 +17,7 @@ options
   BUILD_TOKEN_MANAGER = true;
   SANITY_CHECK = true;
   FORCE_LA_CHECK = false;
+  TOKEN_FACTORY = "au.com.cybersearch2.classy_logic.parser.MyToken";
 }
 
 PARSER_BEGIN(QueryParser)
@@ -50,7 +51,6 @@ import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.NullOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.RegExOperand;
-import au.com.cybersearch2.classy_logic.expression.MatchOperand;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.TemplateOperand;
 import au.com.cybersearch2.classy_logic.expression.FormatterOperand;
@@ -344,7 +344,8 @@ TOKEN :
 | < SEMICOLON: ";" >
 | < COMMA: "," >
 | < DOT: "." >
-| < ARROW: "->" >
+| < RARROW: "->" >
+| < LARROW: "<-" >
 }
 
 /* OPERATORS */
@@ -352,7 +353,6 @@ TOKEN :
 TOKEN :
 {
   < ASSIGN: "=" >
-| < GT: ">" >
 | < LT: "<" >
 | < BANG: "!" >
 | < COLON: ":" >
@@ -373,6 +373,7 @@ TOKEN :
 | < BIT_OR: "|" >
 | < XOR: "^" >
 | < REM: "%" >
+| < LSHIFT: "<<" >
 | < PLUSASSIGN: "+=" >
 | < MINUSASSIGN: "-=" >
 | < STARASSIGN: "*=" >
@@ -381,6 +382,29 @@ TOKEN :
 | < ORASSIGN: "|=" >
 | < XORASSIGN: "^=" >
 | < REMASSIGN: "%=" >
+| < LSHIFTASSIGN: "<<=" >
+| < RSIGNEDSHIFTASSIGN: ">>=" >
+| < RUNSIGNEDSHIFTASSIGN: ">>>=" >
+}
+
+/* >'s need special attention due to generics syntax. */
+TOKEN :
+{
+  < RUNSIGNEDSHIFT: ">>>" >
+  {
+     matchedToken.kind = GT;
+     ((MyToken)matchedToken).realKind = RUNSIGNEDSHIFT;
+     input_stream.backup(2);
+     matchedToken.image = ">";
+  }
+| < RSIGNEDSHIFT: ">>" >
+  {
+     matchedToken.kind = GT;
+     ((MyToken)matchedToken).realKind = RSIGNEDSHIFT;
+     input_stream.backup(1);
+     matchedToken.image = ">";
+  }
+| < GT: ">" >
 }
 
 /** Root production. */
@@ -449,7 +473,7 @@ void QueryChain(ParserContext context) :
   }
   querySpec=QueryDeclaration(querySpec, context) 
   ( 
-    chainToken=">>" 
+    chainToken="->" 
     {
       context.onTokenIntercept(chainToken);
     }
@@ -914,12 +938,11 @@ Operand TemplateExpression(Template template, ParserContext context) :
     Token scToken = null;
     Token assignToken = null;
     Token equalsToken = null;
-    Token regexLit = null;
-    Token regexId = null;
     Token interceptToken = null;
+    Token notToken = null;
     Operand expression = null;
+    Operand shortCircuit = null;
     ListItemSpec[] listIndexData = null;
-    Group group = null;
     ParserAssembler parserAssembler = context.getParserAssembler();
     OperandMap operandMap = parserAssembler.getOperandMap();
     List<Parameter> literalList = null;
@@ -933,74 +956,74 @@ Operand TemplateExpression(Template template, ParserContext context) :
     axiomQname = qname;
   }
   ( listIndexData=IndexExpression(context.getQualifiedName(name), context) )? 
-  (
-     ( 
-       ( equalsToken="=" | assignToken=<PLUSASSIGN> )
-       ( <AXIOM> 
-         ( 
-           axiomName=Name(context) 
-           {
-             axiomQname = QualifiedName.parseName(axiomName);
-           }
-         ) ? 
-         axiomList=AxiomList(axiomQname, context) 
-       {
-         VariableType axiomListVarType = new VariableType(OperandType.LIST);
-         axiomListVarType.setProperty(VariableType.PARAMS, axiomList);
-         if (axiomName != null)
-           axiomListVarType.setProperty(VariableType.AXIOM_KEY, axiomQname);
-         expression = axiomListVarType.getInstance(parserAssembler, axiomQname);
-       } 
-       |
-       expression=Expression(context) )
+  ( 
+   (
+    (
+      ( equalsToken="=" | assignToken=<PLUSASSIGN> )
+      ( <AXIOM> 
+        ( 
+          axiomName=Name(context) 
+          {
+            axiomQname = QualifiedName.parseName(axiomName);
+          }
+        ) ? 
+        axiomList=AxiomList(axiomQname, context) 
+        {
+          VariableType axiomListVarType = new VariableType(OperandType.LIST);
+          axiomListVarType.setProperty(VariableType.PARAMS, axiomList);
+          if (axiomName != null)
+            axiomListVarType.setProperty(VariableType.AXIOM_KEY, axiomQname);
+          expression = axiomListVarType.getInstance(parserAssembler, axiomQname);
+        } 
+        |
+        expression=Expression(context) 
+      )
     )
     |
     (  
       ( 
-        scToken=<COLON> | scToken=<QMARK>  
-        | assignToken=<MINUSASSIGN>
+        assignToken=<MINUSASSIGN>
         | assignToken=<STARASSIGN>
         | assignToken=<SLASHASSIGN>
         | assignToken=<ANDASSIGN>
         | assignToken=<ORASSIGN>
         | assignToken=<XORASSIGN>
         | assignToken=<REMASSIGN> 
+        | assignToken=<LSHIFTASSIGN> 
+        | assignToken=<RSIGNEDSHIFTASSIGN> 
+        | assignToken=<RUNSIGNEDSHIFTASSIGN> 
       )
       expression=Expression(context) 
     )
     |
-        interceptToken=<REGEX> "(" ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(template, name, parserAssembler) )? ")"
-    |
-        interceptToken=<LBRACE> literalList = LiteralList(context) <RBRACE> 
+    ( notToken="!" ) ? interceptToken=<LBRACE> literalList = LiteralList(context) <RBRACE> 
     |
      "(" ( parameterTemplate = Parameters(name, context, true) )? ")"
 	{
-	     template.addTerm(parserAssembler.getCallOperand(qname, parameterTemplate));
+	  template.addTerm(parserAssembler.getCallOperand(qname, parameterTemplate));
 	}
+   )?
+  )
+  (
+    ( scToken=<COLON> | scToken=<QMARK> ) ( shortCircuit=RegularExpression(qname, template, context) | shortCircuit=Expression(context) )
   )?
   {
     boolean isDeclaration = varType != null; 
+    boolean isNot = notToken != null;
+    if (isNot)
+      interceptToken = notToken;
     boolean hasOperand = operandMap.hasOperand(name, parserAssembler.getQualifiedContextname());
     if (!isDeclaration)
       varType = new VariableType(OperandType.UNKNOWN);
     Operand assignExpression = (assignToken != null) ? expression : null;
-    Operand regexOp = null;
-    if (regexLit != null)
-      regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
-    else if (regexId != null)
-      regexOp = operandMap.addOperand(regexId.image, null, parserAssembler.getQualifiedContextname());
     if (assignToken != null)
       expression = null;
     if (expression != null)
       varType.setProperty(VariableType.EXPRESSION, expression);
     if (listIndexData !=null)
       var = listIndexData.length == 1 ? listItemOperand(context, listIndexData[0]) : axiomContainerOperand(parserAssembler, listIndexData);
-    else if (regexOp != null)
-      var = new RegExOperand(qname, regexOp, 0, group);
-    else if (scToken != null) 
-      var = new Evaluator(qname, expression, (scToken.image == "?" ? "&&" : "||"), Orientation.unary_postfix);
     else if (literalList != null)
-      var = new LiteralListOperand(qname, literalList);
+      var = new LiteralListOperand(qname, literalList, isNot);
     else 
       var = operandMap.getOperand(qname);
     if ((var != null) && isDeclaration)
@@ -1017,6 +1040,8 @@ Operand TemplateExpression(Template template, ParserContext context) :
       var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
     else if (hasOperand && (equalsToken != null))
       var = new Evaluator(parserAssembler.getContextName(var.getName() + var.getQualifiedName().incrementReferenceCount()), var, "=", expression);
+    else if (scToken != null) 
+      var = new Evaluator(qname, shortCircuit, scToken.image, var);
     if (interceptToken != null)
       context.onTokenIntercept(interceptToken);
     return var;
@@ -1129,6 +1154,31 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
   }
 }
 
+Operand RegularExpression(QualifiedName qname, Template template, ParserContext context) :
+{
+  String inputName = null;
+  Token regexLit = null;
+  Token regexId = null;
+  Group group = null;
+  ParserAssembler parserAssembler = context.getParserAssembler();
+}
+{
+  <REGEX>  ( LOOKAHEAD(2) inputName=Name(context) "==" )?
+  ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(qname.getName(), template, parserAssembler) )? 
+  {
+    Operand regexOp = null;
+    if (regexLit != null)
+      regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
+    else 
+      regexOp = parserAssembler.getOperandMap().addOperand(regexId.image, null, parserAssembler.getQualifiedContextname());
+    Operand inputOp = null;
+    if (inputName != null)
+      inputOp = parserAssembler.getOperandMap().addOperand(inputName, null, parserAssembler.getQualifiedContextname());
+    Operand var = new RegExOperand(qname, regexOp, inputOp, 0, group);
+    return var;
+  }
+}
+
 Operand CalculatorQuery(Template template, ParserContext context) :
 {
   Token queryToken;
@@ -1141,7 +1191,7 @@ Operand CalculatorQuery(Template template, ParserContext context) :
   Template parameterTemplate = null;
 }
 {
-  queryToken="<<"
+  queryToken="<-"
   {
     context.onTokenIntercept(queryToken);
     context.pushSourceMarker();
@@ -1182,7 +1232,7 @@ Template InnerTemplateDeclaration(QualifiedName outerTemplateName, String callNa
   String queryKey = outerTemplateName.getTemplate() + "." + callName;
 }
 {
-    templateToken=">>"
+    templateToken="->"
     {
       ParserAssembler parserAssembler = context.getParserAssembler();
       template = parserAssembler.getTemplateAssembler().createQueryTemplate(outerTemplateName, callName);
@@ -1191,7 +1241,7 @@ Template InnerTemplateDeclaration(QualifiedName outerTemplateName, String callNa
     }
     delimitToken="(" 
     {
-      context.addSourceItem(">> " + template.getQualifiedName().toString()).setEnd(delimitToken);
+      context.addSourceItem("-> " + template.getQualifiedName().toString()).setEnd(delimitToken);
     }
       ( 
         expression=TemplateExpression(template, context)
@@ -1262,51 +1312,52 @@ Operand InnerCalculator(Template template, QualifiedName outerTemplateName, Pars
 QualifiedName ChoiceDeclaration(ParserContext context) :
 {
   Token choiceToken;
+  Token nameToken;
   Token delimitToken;
-  QualifiedName qualifiedAxiomName;
+  QualifiedName qualifiedChoiceName;
+  Template template;
+  String termName;
   int selection = 0;
   boolean isSourceItemPending = context.isSourceItemPending();
   ParserAssembler parserAssembler = context.getParserAssembler();
   OperandMap operandMap = parserAssembler.getOperandMap();
   QualifiedName contextName = context.getContextName();
+  StringBuilder builder = new StringBuilder();
 }
 {
-  choiceToken=<CHOICE> qualifiedAxiomName=Choice(context) 
+  choiceToken=<CHOICE> nameToken=<IDENTIFIER> 
   {
-    if (!isSourceItemPending)
-      context.setSourceMarker(choiceToken, qualifiedAxiomName);
+    qualifiedChoiceName = parserAssembler.getContextName(nameToken.image);
+    parserAssembler.getListAssembler().createAxiomItemList(qualifiedChoiceName);
+    template = parserAssembler.getTemplateAssembler().createTemplate(qualifiedChoiceName, true);
+    context.setContextName(new QualifiedTemplateName(context.getScope().getAlias(), nameToken.image));
+    context.setSourceMarker(choiceToken, qualifiedChoiceName);
+    builder.append("choice ").append(nameToken.image).append('(');
   }
   "(" 
-    TermName(qualifiedAxiomName, parserAssembler) ("," TermName(qualifiedAxiomName, parserAssembler) )*  
+    termName=TermName(qualifiedChoiceName, parserAssembler)
+    {
+      builder.append(termName);
+    }
+    (
+      "," termName=TermName(qualifiedChoiceName, parserAssembler) 
+    {
+      builder.append(',').append(termName);
+    }
+    )*  
   delimitToken=")" 
   {
-    context.addChoiceItem(qualifiedAxiomName).setEnd(delimitToken); 
+    builder.append(')');
+    context.addSourceItem(builder.toString()).setEnd(delimitToken); 
   }
-  ( ChoiceItem(selection++, qualifiedAxiomName, context) )+ 
+  ( ChoiceItem(selection++, qualifiedChoiceName, template, context) )+ 
   {
     context.setContextName(contextName);
-    return qualifiedAxiomName;
+    return qualifiedChoiceName;
   }
 } 
 
-QualifiedName Choice(ParserContext context) :
-{
-    Token choiceToken;
-    ParserAssembler parserAssembler = context.getParserAssembler();
-    Scope scope = context.getScope();
-}
-{
-  choiceToken=<IDENTIFIER>
-  { 
-    QualifiedName qualifiedChoiceName = parserAssembler.getContextName(choiceToken.image);
-    parserAssembler.getListAssembler().createAxiomItemList(qualifiedChoiceName);
-    parserAssembler.getTemplateAssembler().createTemplate(qualifiedChoiceName, true);
-    context.setContextName(new QualifiedTemplateName(scope.getAlias(), choiceToken.image));
-    return qualifiedChoiceName;
-  }
-}
- 
-void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserContext context) :
+void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, Template template, ParserContext context) :
 {
     Operand operand;
     String fact;
@@ -1315,10 +1366,11 @@ void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserContext c
     AxiomAssembler axiomAssembler = parserAssembler.getAxiomAssembler();
     String name = axiomAssembler.getAxiomTermName(qualifiedAxiomName, 0);
     parserAssembler.getAxiomAssembler().addAxiom(qualifiedAxiomName, new StringTerm(name + selection));
+    QualifiedName term0Name = context.getParserAssembler().getContextName(name);
     StringBuilder builder = new StringBuilder();
 }
 {
-   <LBRACE> operand=ChoiceExpression(name, context)
+   <LBRACE> operand=ChoiceExpression(term0Name, template, context)
    {
      builder.append('{').append(operand.toString());
    }
@@ -1337,19 +1389,28 @@ void ChoiceItem(int selection, QualifiedName qualifiedAxiomName, ParserContext c
     }
 }
 
-Operand ChoiceExpression(String name, ParserContext context) :
+Operand ChoiceExpression(QualifiedName qname, Template template, ParserContext context) :
 {
-    Operand operand;
-    QualifiedName qname = context.getParserAssembler().getContextName(name);
+  Operand operand;
+  ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
+    operand=Literal(context)
+    {
+      if (operand.getValueClass() == Unknown.class)
+        return new BooleanOperand(QualifiedName.ANONYMOUS, true);
+      Variable choiceOperand = new Variable(qname); 
+      return new Evaluator(parserAssembler.getContextName(qname.getName() + qname.incrementReferenceCount()), choiceOperand, "==", operand);
+    }
+    |
     operand=Expression(context)
     {
-      if (operand instanceof Evaluator)
-          return new Evaluator(qname, operand, "&&", Orientation.unary_postfix ); 
-      if (operand instanceof StringOperand)
-          return new RegExOperand(qname, operand, 0, null);
-      return new MatchOperand(qname, operand);
+      return operand;
+    }
+    |
+    operand=RegularExpression(qname, template, context)
+    {
+      return operand;
     }
 }
 
@@ -1438,19 +1499,19 @@ String TermDeclaration(List<Term> termList, ParserContext context) :
   }
 }
 
-Group GroupDeclaration(Template template, String name, ParserAssembler parserAssembler) :
+Group GroupDeclaration(String name, Template template, ParserAssembler parserAssembler) :
 {
   Group group = new Group(name);
 }
 {
-  "{" Group(group, template, name, parserAssembler) ("," Group(group, template, name, parserAssembler) )* "}"
+  "{" Group(group, template, parserAssembler) ("," Group(group, template, parserAssembler) )* "}"
   {
     return group;
   }
 }
 
  
-void Group(Group group, Template template, String name, ParserAssembler parserAssembler) :
+void Group(Group group, Template template, ParserAssembler parserAssembler) :
 {
   Token groupToken;
 }
@@ -1657,6 +1718,9 @@ Operand Expression(ParserContext context) :
         | assignToken=<ORASSIGN>
         | assignToken=<XORASSIGN>
         | assignToken=<REMASSIGN>
+        | assignToken=<LSHIFTASSIGN>
+        | assignToken=<RSIGNEDSHIFTASSIGN>
+        | assignToken=<RUNSIGNEDSHIFTASSIGN>
       )
       assignOperand=Expression(context) )?
   {
@@ -1703,41 +1767,6 @@ Operand PrimaryExpression(ParserContext context) :
   {
     return param1;
   }
-  |
-  literal=<LENGTH> "("  name=Name(context) ")"
-  {
-    QualifiedName listName = context.getQualifiedName(name);
-    qname = new QualifiedName(listName.getName().toString() + "_length", listName);
-    ListLength listLength = new ListLength(qname, listName);
-    ParserTask parserTask = context.getParserAssembler().addPending(listLength);
-    parserTask.setPriority(ParserTask.Priority.variable.ordinal());
-    context.onTokenIntercept(literal);
-    return listLength;
-  }
-  |
-  literal=<FORMAT> "("  name=Name(context) ")"
-  {
-    qname = parserAssembler.getContextName(name + "_format");
-    operand = parserAssembler.findOperandByName(name);
-    if (operand == null)
-        throw new ParseException("Variable \"" + name + "\" not found");
-    Scope scope = parserAssembler.getScope();
-    FormatterOperand formatter = new FormatterOperand(qname, operand, parserAssembler.getScopeLocale());
-    if (scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
-        parserAssembler.registerLocaleListener(formatter);
-    context.onTokenIntercept(literal);
-    return formatter;
-  }
-  |
-  literal=<FACT> "("  name=Name(context) ")"
-  {
-    Operand factOperand = parserAssembler.findOperandByName(name);
-    context.onTokenIntercept(literal);
-    if (factOperand != null)
-        return new FactOperand(factOperand);
-    else 
-        throw new ParseException("Operand " + name + " not found");
-  }
 }
 
 ListItemSpec[] IndexExpression(QualifiedName listName, ParserContext context) :
@@ -1780,7 +1809,7 @@ Object ListSelection1(ParserContext context) :
     return param;
   }
   | 
-  ( <ARROW> name=<IDENTIFIER> )
+  ( <RARROW> name=<IDENTIFIER> )
   {
     return name.image;
   }
@@ -1928,6 +1957,7 @@ String Name(ParserContext context) :
     context.onTokenIntercept(partToken);
   }
   (
+    LOOKAHEAD(2)
     "." 
     partToken=<IDENTIFIER>
     {
@@ -1958,6 +1988,36 @@ Operand NamedExpression(String name, ParserContext context) :
     QualifiedName qname = parserAssembler.getContextName(name);
     return parserAssembler.getCallOperand(qname, parametersTemplate);
   }
+  |
+  "." 
+  (
+    <LENGTH>
+    {
+      QualifiedName listName = context.getQualifiedName(name);
+      qname = new QualifiedName(listName.getName().toString() + "_length", listName);
+      ListLength listLength = new ListLength(qname, listName);
+      ParserTask parserTask = context.getParserAssembler().addPending(listLength);
+      parserTask.setPriority(ParserTask.Priority.variable.ordinal());
+      return listLength;
+    }
+    |
+    <FORMAT>
+    {
+      Operand operand = parserAssembler.addOperand(name);
+      qname = parserAssembler.getContextName(name + "_format");
+      Scope scope = parserAssembler.getScope();
+      FormatterOperand formatter = new FormatterOperand(qname, operand, parserAssembler.getScopeLocale());
+      if (scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
+        parserAssembler.registerLocaleListener(formatter);
+      return formatter;
+    }
+    |
+    <FACT>
+    {
+      Operand factOperand = parserAssembler.addOperand(name);
+      return new FactOperand(factOperand);
+    }
+  )
 }
 
 Template Parameters(String callName, ParserContext context, boolean nameRequired) :
@@ -2271,9 +2331,43 @@ Operand RelationalExpression(ParserContext context) :
     | 
     op=">=" 
     ) 
-    params[1]=AdditiveExpression(context) 
+    params[1]=ShiftExpression(context) 
     {
       params[0] = new Evaluator(params[0], op.image, params[1]);
+    }
+  )*
+  {
+    return params[0];
+  }
+}
+
+Operand ShiftExpression(ParserContext context):
+{
+  Operand[] params = new Operand[2];
+  String op;
+}
+{
+  params[0]=AdditiveExpression(context) 
+  ( 
+    ( 
+      "<<" 
+      {
+        op="<<";
+      }
+      | 
+      RSIGNEDSHIFT() 
+      {
+        op=">>";
+      }
+      | 
+      RUNSIGNEDSHIFT() 
+      {
+         op=">>>";
+      }
+    ) 
+    params[1]=AdditiveExpression(context) 
+    {
+       params[0] = new Evaluator(params[0], op, params[1]);
     }
   )*
   {
@@ -2445,5 +2539,29 @@ Operand PostfixExpression(ParserContext context) :
     return param;
   } 
 }
+
+/* We use productions to match >>>, >> and > so that we can keep the
+ * type declaration syntax with generics clean
+ */
+
+void RUNSIGNEDSHIFT():
+{}
+{
+  ( LOOKAHEAD({ getToken(1).kind == GT &&
+                ((MyToken)getToken(1)).realKind == RUNSIGNEDSHIFT} )
+   ">" ">" ">"
+  )
+}
+
+void RSIGNEDSHIFT():
+{}
+{
+  ( LOOKAHEAD({ getToken(1).kind == GT &&
+                ((MyToken)getToken(1)).realKind == RSIGNEDSHIFT} )
+  ">" ">"
+  )
+}
+
+
 
 

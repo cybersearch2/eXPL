@@ -78,7 +78,7 @@ public class HighCitiesSortedTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("altitude?altitude>5000 (19,3) (19,28)");
+        assertThat(sourceItem.toString()).isEqualTo("altitude>5000?altitude (19,3) (19,28)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -90,7 +90,7 @@ public class HighCitiesSortedTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer i=high_cities_length-1 (27,3) (27,37)");
+        assertThat(sourceItem.toString()).isEqualTo("integer i=high_cities_length-1 (27,3) (27,36)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

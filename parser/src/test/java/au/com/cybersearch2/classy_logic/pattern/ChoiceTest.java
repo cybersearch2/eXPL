@@ -73,7 +73,7 @@ public class ChoiceTest
             "  currency amount,\n" +
             "  choice bracket,\n" +
             "  currency duty = base + (amount - threshold) * (percent / 100),\n" +
-            "  string display = format(duty)\n" +
+            "  string display = duty.format\n" +
             ");\n" +
             "query stamp_duty_query (transacton_amount : stamp_duty_payable);\n";
 

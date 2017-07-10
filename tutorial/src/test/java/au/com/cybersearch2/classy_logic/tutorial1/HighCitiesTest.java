@@ -74,12 +74,12 @@ public class HighCitiesTest
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom city (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom city_altitude (1,1)");
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city():resource (1,1) (1,23)");
+        assertThat(sourceItem.toString()).isEqualTo("city_altitude():resource (1,1) (1,32)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         assertThat(sourceMarker.toString()).isEqualTo("query high_cities (3,1)");
@@ -87,7 +87,7 @@ public class HighCitiesTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city:high_city (3,27) (3,42)");
+        assertThat(sourceItem.toString()).isEqualTo("city_altitude:high_city (3,27) (3,51)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -95,7 +95,7 @@ public class HighCitiesTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("name?altitude>5000 (2,20) (2,41)");
+        assertThat(sourceItem.toString()).isEqualTo("altitude>5000?city (2,20) (2,41)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

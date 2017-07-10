@@ -22,7 +22,6 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -58,7 +57,7 @@ calc stamp_duty_payable(
   currency amount,
   choice bracket,
   currency duty = base + (amount - threshold) * (percent / 100),
-  string display = format(duty)
+  string display = duty.format
 );
 
 query<axiom> stamp_duty_query (transaction_amount : stamp_duty_payable);
@@ -79,15 +78,14 @@ query<axiom> stamp_duty_query (transaction_amount : stamp_duty_payable);
 	 * Choice named "bracket" here is a term of the "stamp_duty_payable"a calculator.
 	 * Note how selection term "amount" is declared preceding the Choice so as to give it a specific type.<br/>
 	 * The expected results (with locale currency code, here "AUD":<br/>
-        stamp_duty_payable(amount = 123458.0, bracket = true, duty = 3768.320, display = AUD3,768.32)<br/>
-        stamp_duty_payable(amount = 55876.33, bracket = true, duty = 1285.67155, display = AUD1,285.67)<br/>
-        stamp_duty_payable(amount = 1245890.0, bracket = true, duty = 62353.9500, display = AUD62,353.95)
+        stamp_duty_payable(amount = 123458.0, bracket = 4, duty = 3768.320, display = AUD3,768.32)<br/>
+        stamp_duty_payable(amount = 55876.33, bracket = 3, duty = 1285.67155, display = AUD1,285.67)<br/>
+        stamp_duty_payable(amount = 1245890.0, bracket = 8, duty = 62353.9500, display = AUD62,353.95)
      * @return Axiom iterator
 	 */
 	public Iterator<Axiom> getStampDuty()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("stamp-duty2.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("stamp_duty_query");
         return result.getIterator("stamp_duty_query");

@@ -20,7 +20,7 @@ calc stamp_duty_payable(
   currency amount,
   choice bracket,
   currency duty = base + (amount - threshold) * (percent / 100),
-  string display = format(duty)
+  string display = duty.format
 );
 
 query<axiom> stamp_duty_query (transaction_amount : stamp_duty_payable);

@@ -351,24 +351,38 @@ public class Template extends TermList<Operand>
 
 	/**
 	 * Evaluate Terms of this Template until status COMPLETE is returned 
-	 * @return Position of first term to return status COMPLETE
+	 * @param selectionTerm Term containing selection value
+	 * @param executionContext Execution context - may be null
+	 * @return Position of first term selected or Choice.NO_MATCH if evaluation does not return status COMPLETE
 	 */
-	public int select(ExecutionContext executionContext)
+	public int select(Term selectionTerm, ExecutionContext executionContext)
 	{
+        int position = 0;
 		if (!termList.isEmpty())
 		{
-			int position = 0;
 			for (Operand term: termList)
 			{
                 if (executionContext != null)
                     executionContext.beforeEvaluate(qname, position);
                     
 				if (term.evaluate(id) == EvaluationStatus.COMPLETE)
-					return position;
-				++position;
+				{
+				    Object value = term.getValue();
+				    if (term.getValueClass() == Boolean.class)
+				    {
+				        if ((Boolean) value == Boolean.TRUE)
+				            return position;
+                    }
+				    else if (value.equals(selectionTerm.getValue()))
+                        return position;
+				}
+				else
+			        return Choice.NO_MATCH;
+                ++position;
 			}
 		}
-		return Choice.NO_MATCH;
+		// NO Default
+        return Choice.NO_MATCH;
 	}
 
 	/**
@@ -540,14 +554,15 @@ public class Template extends TermList<Operand>
 	
 	/**
 	 * Set initial term values using provided data, if any
+	 * @return axiom to initialize template - maybe empty or null
 	 * @see #putInitData(String, Object)
 	 * @see #setInitData(List) 
 	 */
-    public void initialize()
+     public Axiom initialize()
     {
         List<Term> properties = getProperties();
         if (termList.isEmpty())
-            return;
+            return null;
         int index = 0; // Map unnamed arguments to template term names
         Axiom axiom = new Axiom(getKey());
         for (Term argument: properties)
@@ -566,9 +581,7 @@ public class Template extends TermList<Operand>
             axiom.addTerm(new Parameter(term.getName(), argument.getValue()));
             ++index;
         }
-        OperandWalker walker = new OperandWalker(termList);
-        // Create list of term pairs to unify
-        walker.visitAllNodes(new Unifier(this, axiom));
+        return axiom;
     }
 
 	/**
@@ -644,7 +657,24 @@ public class Template extends TermList<Operand>
         template.next = nextTemplate;
 	}
 
-   /**
+    /**
+     * Returns Term referenced by name
+     * @param name String
+     * @return Term object or null if not found
+     */
+	@Override
+    public Operand getTermByName(String name)
+    {
+	    Operand term = super.getTermByName(name);
+        if (term == null)
+        {
+            OperandFinder operandFinder = new OperandFinder(termList, name);
+            term = operandFinder.findNode();
+        }
+        return term;
+    }
+
+   /**	
     * Returns query template instance
     * @param name Query name to be appended to template qualified name
     * @return Template object

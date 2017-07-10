@@ -20,4 +20,4 @@ template account(name ? name == customer.name, fee);
 template delivery(city ? city == customer.city, freight);
 		
 query greek_business(customer:customer) 
-  >> (fee:account) >> (freight:delivery);
+  -> (fee:account) -> (freight:delivery);

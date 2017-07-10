@@ -60,24 +60,24 @@ public class InWordsTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query query_in_words (3,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query query_in_words (5,1)");
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon:in_words (3,29) (3,46)");
+        assertThat(sourceItem.toString()).isEqualTo("lexicon:in_words (5,29) (5,46)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template in_words (2,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template in_words (3,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\ (2,20) (2,41)");
+        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\?word (3,20) (3,42)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string definition (2,44) (2,60)");
+        assertThat(sourceItem.toString()).isEqualTo("string definition (3,45) (3,61)");
     }
     
     protected void checkSolution(BufferedReader reader, String word)
