@@ -28,7 +28,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * TowersOfHanoi
+ * Pets
  * Demonstrates library function call
  * @author Andrew Bowley
  * 14 Sep 2015

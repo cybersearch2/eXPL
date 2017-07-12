@@ -29,7 +29,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * InWords
- * Shows regular expression selecting from list of words terms starting with "in"
+ * Shows regular expression selecting from a list, words starting with "in"
  * @author Andrew Bowley
  * 3 Mar 2015
  */
@@ -47,8 +47,11 @@ absurd - j. inconsistent with reason or logic or common sense
 */
 /* query_in_words.xpl
 axiom lexicon (word, definition) : resource;
-template in_words (word ? "^in[^ ]+", string definition);
-query<axiom> query_in_words(lexicon : in_words); 
+
+template in_words (regex word == "^in[^ ]+", definition);
+
+query<axiom> query_in_words(lexicon : in_words);
+
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
@@ -80,7 +83,7 @@ query<axiom> query_in_words(lexicon : in_words);
 	/*
      * Expected 54 results can be found in /src/test/resources/in_words.lst. 
      * Here is the first result: </br>
-     * in_words(Word = inadequate, Definition = j. not sufficient to meet a need)</br>
+     * in_words(word=inadequate, definition=j. not sufficient to meet a need)</br>
 	 */
     public static void main(String[] args)
     {

@@ -49,8 +49,8 @@ public class LexiconSource implements AxiomSource
 	{
 		axiomName = "Lexicon";
 		axiomTermNameList = new ArrayList<String>(2);
-		axiomTermNameList.add("Word");
-		axiomTermNameList.add("Definition");
+		axiomTermNameList.add("word");
+		axiomTermNameList.add("definition");
 	}
 
 	public LexiconSource(String axiomName, List<String> axiomTermNameList) 

@@ -1,5 +1,5 @@
 // Use an external axiom source (class LexiconSource)
-axiom lexicon (Word, Definition) : "lexicon";
+axiom lexicon (word, definition) : "lexicon";
 
 string wordRegex = "^in[^ ]+";
 string defRegex = "^(.)\. (.*+)";
@@ -13,10 +13,10 @@ axiom expand =
    j = "adj." 
 };
    
-calc in_words 
+template in_words 
 (
-. word ? regex wordRegex, 
-. definition ? regex defRegex { part, def },
+  regex word == wordRegex, 
+  regex definition == defRegex { . part, . def },
   string in_word = word + ", " + expand[part] + "- " + def
 );
 

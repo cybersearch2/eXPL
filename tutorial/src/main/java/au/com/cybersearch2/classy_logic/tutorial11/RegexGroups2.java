@@ -18,7 +18,7 @@ package au.com.cybersearch2.classy_logic.tutorial11;
 import java.io.File;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
+import au.com.cybersearch2.classy_logic.DictionaryAxiomProvider;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
@@ -28,32 +28,20 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * RegexGroups
- * Shows regular expression grouping. The application selects from a list, words starting with "in".
- * Each word has a second term consisting of part of speech (n, v, a or j) and a word definition.
- * A regular expression splits this term which using groups. Both group terms are made private
- * using a dot operator as a single text string is exported by the query.
+ * RegexGroups2
+ * Like first RegexGroups application, shows regular expression grouping. However there are differences.
+ * The source now supplies each entire line from definitions.txt file and this is split into 3 groups
+ * by a single regular expression. Two of the group terms are exported. The part of speech term is
+ * made private and is converted to an expanded version. The regex entry value is also made private
+ * using the dot operator.
  * @author Andrew Bowley
- * 3 Mar 2015
+ * 11Jul.,2017
  */
-public class RegexGroups 
+public class RegexGroups2 
 {
-    /* definitions.txt - converted to axioms with terms "word" and "definition"
-    abbey - n. a monastery ruled by an abbot
-    abide - v. dwell; inhabit or live in
-    abound - v. be abundant or plentiful; exist in large quantities
-    absence - n. the state of being absent
-    absorb - v. assimilate or take in
-    abstinence - n. practice of refraining from indulging an appetite especially alcohol
-    absurd - j. inconsistent with reason or logic or common sense
-    ...
-    */
 /* regex-groups.xpl
-// Use an external axiom source (class LexiconSource)
-axiom lexicon (word, definition) : "lexicon";
-
-string wordRegex = "^in[^ ]+";
-string defRegex = "^(.)\. (.*+)";
+// Use an external axiom source (class DictionarySource)
+axiom dictionary (entry) : "dictionary";
 
 // Convert single letter part of speech to word
 axiom expand =
@@ -63,15 +51,14 @@ axiom expand =
    a = "adv.",
    j = "adj." 
 };
-   
-template in_words 
-(
-  regex word == wordRegex, 
-  regex definition == defRegex { . part, . def },
-  string in_word = word + ", " + expand[part] + "- " + def
+
+template in_words
+( 
+. regex entry == "(^in[^ ]+) - (.)\. (.*+)" { word, . pos, definition },
+  part = expand[pos]
 );
 
-query<axiom> in_words(lexicon : in_words);
+query<axiom> in_words(dictionary : in_words);
 
 */
     protected QueryProgramParser queryProgramParser;
@@ -80,26 +67,27 @@ query<axiom> in_words(lexicon : in_words);
 	/**
 	 * Construct RegexGroups object
 	 */
-	public RegexGroups()
+	public RegexGroups2()
 	{
+        //Archetype.CASE_INSENSITIVE_NAME_MATCH = true;
         File resourcePath = new File("src/main/resources/tutorial11");
         // Use an external axiom source which is bound in TestAxiomProvider dependency class
-        // to AxiomSource class LexiconSource
-        queryProgramParser = new QueryProgramParser(resourcePath, new LexiconAxiomProvider());
+        // to AxiomSource class DictionarySource
+        queryProgramParser = new QueryProgramParser(resourcePath, new DictionaryAxiomProvider());
 	}
 	
     /**
-     * Compiles the LEXICAL_SEARCH script and runs the "query_in_words" query, displaying the solution on the console.<br/>
+     * Compiles the dictionary-regex-groups.xpl script and runs the "in_words" query, displaying the solution on the console.<br/>
      * The first 3 lines of the expected result:<br/>
-        inadequate, adj.- not sufficient to meet a need<br/>
-        incentive, noun- a positive motivational influence<br/>
-        incidence, noun- the relative frequency of occurrence of something<br/>
+        in_words(word=inadequate, definition=not sufficient to meet a need, part=adj.)<br/>
+        in_words(word=incentive, definition=a positive motivational influence, part=noun)<br/>
+        in_words(word=incidence, definition=the relative frequency of occurrence of something, part=noun)<br/>
      * @return Axiom iterator containing the final "in" words solution
      */
 	public Iterator<Axiom> getRegexGroups()
 	{
 		// Expected 54 results 
-        QueryProgram queryProgram = queryProgramParser.loadScript("regex-groups.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("dictionary-regex-groups.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("in_words");
 		return result.getIterator("in_words");
@@ -118,10 +106,10 @@ query<axiom> in_words(lexicon : in_words);
 	{
 		try 
 		{
-	        RegexGroups regexGroups = new RegexGroups();
+	        RegexGroups2 regexGroups = new RegexGroups2();
 	        Iterator<Axiom> iterator = regexGroups.getRegexGroups();
 	        while(iterator.hasNext())
-	            System.out.println(iterator.next().getTermByName("in_word").toString().substring(8));
+	            System.out.println(iterator.next().toString());
 		} 
         catch (ExpressionException e) 
         { // Display nested ParseException

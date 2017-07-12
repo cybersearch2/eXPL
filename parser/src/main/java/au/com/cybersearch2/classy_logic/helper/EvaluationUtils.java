@@ -114,7 +114,9 @@ public class EvaluationUtils
         if ((operatorEnum == OperatorEnum.INCR) || 
             (operatorEnum == OperatorEnum.DECR) ||
             (operatorEnum == OperatorEnum.SC_AND) ||
-            (operatorEnum == OperatorEnum.SC_OR))
+            (operatorEnum == OperatorEnum.SC_OR) ||
+            (operatorEnum == OperatorEnum.COMMA) || 
+            (operatorEnum == OperatorEnum.HOOK) )
             return false;
         return true;
     }

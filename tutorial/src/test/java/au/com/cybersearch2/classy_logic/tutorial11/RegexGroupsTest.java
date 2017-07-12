@@ -78,7 +78,7 @@ public class RegexGroupsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon(Word,Definition):\"lexicon\" (2,1) (2,44)");
+        assertThat(sourceItem.toString()).isEqualTo("lexicon(word,definition):\"lexicon\" (2,1) (2,44)");
         //System.out.println(sourceMarker.toString());
        assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
@@ -91,15 +91,15 @@ public class RegexGroupsTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc in_words (16,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template in_words (16,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\?word (18,3) (18,24)");
+        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\?word (18,9) (18,25)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("definition \\^(.)\\. (.*+)\\?definition (19,3) (19,43)");
+        assertThat(sourceItem.toString()).isEqualTo("definition \\^(.)\\. (.*+)\\?definition (19,9) (19,48)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

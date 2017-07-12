@@ -170,9 +170,9 @@ public class QueryParserTest
 	static final String GREEK_BUSINESS = "include \"greek_business.xpl\";";
     static final String GREEK_BUSINESS2 = "include \"greek_business2.xpl\";";
 	static final String NAMED_GREEK_BUSINESS = "include \"named_greek_business.xpl\";";
-	static final String LEXICAL_SEARCH = "template in_words (Word ? regex \"^in[^ ]+\", string Definition);";
-	static final String NOUN_LEXICAL_SEARCH = "template in_words (Word ? regex \"^in[^ ]+\", Definition ? regex \"^n\");";
-	static final String REGEX_GROUPS = "template dictionary (Word, Definition ? regex \"^(.)\\. (.*+)\" { part, text });";
+	static final String LEXICAL_SEARCH = "template in_words (regex Word == \"^in[^ ]+\", string Definition);";
+	static final String NOUN_LEXICAL_SEARCH = "template in_words (regex Word == \"^in[^ ]+\", regex Definition == \"^n\");";
+	static final String REGEX_GROUPS = "template dictionary (word, regex definition == \"^(.)\\. (.*+)\" { part, text });";
 
 	static final String AGRICULTURAL_LAND = 
 		"include \"agriculture-land.xpl\";" +
@@ -411,13 +411,13 @@ public class QueryParserTest
     		"  : i < 1, \n" +
     		"  integer j = i - 1, \n" +
     		"  integer altitude = city_list[i].altitude, \n" +
-    		"  . temp = city_list[i],\n" +
+    		". temp = city_list[i],\n" +
     		"  {\n" +
     		"    ? altitude < city_list[j].altitude,\n" +
        		"    city_list[j + 1] = city_list[j],\n" +
     		"    ? --j >= 0\n" +
     		"  },\n" +
-     		"  . city_list[j + 1] = temp,\n" +
+     		"  .  city_list[j + 1] = temp,\n" +
     		"  . ++i\n" +
      		");"
 			;
@@ -1262,12 +1262,12 @@ public class QueryParserTest
 		if (dictionaryQuery.execute())
 		{
 			++count;
-			assertThat(dictionaryQuery.toString()).isEqualTo("dictionary(Word=abbey, part=n, text=a monastery ruled by an abbot, Definition=n. a monastery ruled by an abbot)");
+			assertThat(dictionaryQuery.toString()).isEqualTo("dictionary(word=abbey, part=n, text=a monastery ruled by an abbot, definition=n. a monastery ruled by an abbot)");
 			//System.out.println(dictionaryQuery.toString());
 			if (dictionaryQuery.execute())
 			{
 				++count;
-				assertThat(dictionaryQuery.toString()).isEqualTo("dictionary(Word=abide, part=v, text=dwell; inhabit or live in, Definition=v. dwell; inhabit or live in)");
+				assertThat(dictionaryQuery.toString()).isEqualTo("dictionary(word=abide, part=v, text=dwell; inhabit or live in, definition=v. dwell; inhabit or live in)");
 				//System.out.println(dictionaryQuery.toString());
 				while(dictionaryQuery.execute())
 				{

@@ -18,7 +18,7 @@ axiom transacton_amount
 
 calc stamp_duty_payable(
 . currency amount,
-. <- bracket(amount) -> (bracket, threshold, base, percent),
+  <- bracket(amount) -> (bracket, threshold, base, percent),
 . currency duty = base + (amount - threshold) * (percent / 100),
   bracket,
   string property_value = amount.format,

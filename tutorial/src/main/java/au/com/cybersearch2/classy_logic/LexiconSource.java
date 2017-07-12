@@ -27,7 +27,6 @@ import java.util.List;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
@@ -50,8 +49,8 @@ public class LexiconSource implements AxiomSource
 	{
 		axiomName = "Lexicon";
 		axiomTermNameList = new ArrayList<String>(2);
-		axiomTermNameList.add("Word");
-		axiomTermNameList.add("Definition");
+		axiomTermNameList.add("word");
+		axiomTermNameList.add("definition");
 	}
 
 	public LexiconSource(String axiomName, List<String> axiomTermNameList) 

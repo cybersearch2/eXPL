@@ -530,7 +530,7 @@ public class CallOperandTest
             "  }\n" +
             ");\n" +
             "calc match(\n" +
-            ". <- people_by_starsign(\"gemini\") -> (candidates),\n" +
+            "  <- people_by_starsign(\"gemini\") -> (candidates),\n" +
             " candidate_list = match.people_by_starsign,\n" +
             ". integer i = 0,\n" +
             "axiom geminis = {}," +

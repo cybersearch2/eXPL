@@ -73,11 +73,11 @@ public class InWordsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\?word (3,20) (3,42)");
+        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\?word (3,26) (3,43)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string definition (3,45) (3,61)");
+        assertThat(sourceItem.toString()).isEqualTo("definition (3,46) (3,55)");
     }
     
     protected void checkSolution(BufferedReader reader, String word)
