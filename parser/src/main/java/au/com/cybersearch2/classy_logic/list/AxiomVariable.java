@@ -194,4 +194,26 @@ public class AxiomVariable implements ListItemDelegate
             return term != null ? term.getValue() : new Null();
         }
     }
+
+    @Override
+    public void append(Object value)
+    {
+        int appendIndex = itemList.getLength();
+        if (axiomListSpec.getItemIndex() == -1)
+        {
+            // Assign value to item list
+            ((AxiomList)itemList).assignItem(appendIndex, (AxiomTermList)value);
+            axiomListSpec.setAxiomIndex(appendIndex);
+        }
+        else
+        {   
+            // An AxiomList containing a single item is unwrapped
+            AxiomTermList axiomTermList = axiomListSpec.getAxiomTermList();
+            // Update term in axiom referenced by list
+            Term term = axiomTermList.getItem(appendIndex);
+            term.setValue(value);
+            axiomListSpec.setItemIndex(appendIndex);
+        }
+    }
+
 }

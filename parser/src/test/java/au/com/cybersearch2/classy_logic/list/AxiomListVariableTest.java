@@ -132,6 +132,11 @@ public class AxiomListVariableTest
             return false;
         }
 
+        @Override
+        public void setItemIndex(int appendIndex)
+        {
+        }
+
     }
     
 	private static final String NAME = "AxiomListName";

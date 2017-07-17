@@ -25,7 +25,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * Pets
+ * PetNames
  * Demonstrates regular expression case-insensitive flag. Also shows how to build
  * the regular expresion from segments using concatenation.
  * Note that expression "pets_info[i++]" cannot be used as the regex input and must

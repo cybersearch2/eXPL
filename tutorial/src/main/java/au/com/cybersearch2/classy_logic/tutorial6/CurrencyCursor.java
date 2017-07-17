@@ -13,71 +13,53 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial16;
+package au.com.cybersearch2.classy_logic.tutorial6;
 
 import java.io.File;
-import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * PetNames
- * Demonstrates library function call
+ * CurrencyCursor
+ * Demonstrates 
  * @author Andrew Bowley
  * 14 Sep 2015
  */
-public class SchoolMarks
+public class CurrencyCursor
 {
-/* school-marks.xpl
-axiom grades 
-  (student, english, math, history)
-  {"Amy",    14, 16, 6}
-  {"George", 15, 13, 16}
-  {"Sarah",  12, 17, 14};
-  
-template score(student, integer total = math.add(english, math, history));
-
-query<axiom> marks(grades : score); 
- 
+/* currency-cursor.xpl
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public SchoolMarks()
+    public CurrencyCursor()
     {
-        File resourcePath = new File("src/main/resources/tutorial16");
-        queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
+        File resourcePath = new File("src/main/resources/tutorial6");
+        queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
     /**
-     * Compiles the school-marks.xpl script and runs the "marks" query.<br/>
+     * Compiles the currency-cursor.xpl script and runs the "print_all_amounts" query.<br/>
      * The expected results:<br/>
-        score(student = Amy, total = 36)<br/>
-        score(student = George, total = 44)<br/>
-        score(student = Sarah, total = 43)<br/>
      * @return Axiom iterator
      */
-    public Iterator<Axiom>  generateReport()
+    public void  amounts()
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("school-marks.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("currency-cursor.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("marks");
-        return result.getIterator("marks");
-    }
-
-    FunctionManager provideFunctionManager()
-    {
-        FunctionManager functionManager = new FunctionManager();
-        MathFunctionProvider mathFunctionProvider = new MathFunctionProvider();
-        functionManager.putFunctionProvider(mathFunctionProvider.getName(), mathFunctionProvider);
-        return functionManager;
+        Result result = queryProgram.executeQuery("parse_amounts");
+        Axiom axiom = result.getAxiom(new QualifiedName(QualifiedName.EMPTY, "all_amounts", "amount_list"));
+        for (int i = 0; i < axiom.getTermCount(); ++i)
+            System.out.println(axiom.getTermByIndex(i).toString());
+        axiom = result.getAxiom("parse_amounts");
+        System.out.println(axiom.getTermByIndex(0).toString());
     }
 
     public ParserContext getParserContext()
@@ -93,12 +75,8 @@ query<axiom> marks(grades : score);
     {
         try 
         {
-            SchoolMarks schoolMarks = new SchoolMarks();
-            Iterator<Axiom> iterator = schoolMarks.generateReport();
-            while(iterator.hasNext())
-            {
-                System.out.println(iterator.next().toString());
-            }
+            CurrencyCursor currencyCursor = new CurrencyCursor();
+            currencyCursor.amounts();
         } 
         catch (ExpressionException e) 
         { 

@@ -43,6 +43,10 @@ public class ArrayItemList<T> implements ItemList<T>
     protected QualifiedName qname;
     /** Operand type */
     protected OperandType operandType;
+    /** Preset size */
+    protected int size;
+    /** Offset when list does not start at index of zero */
+    protected int offset;
 
     /**
      * Construct a ArrayItemList object
@@ -54,8 +58,37 @@ public class ArrayItemList<T> implements ItemList<T>
 	    this.operandType = operandType;
 		this.qname = qname;
 		valueList = new ArrayList<T>();
+		// Preset size of -1 means none
+		size = Integer.MIN_VALUE;
 	}
 
+	/**
+	 * Preset size
+	 * @param size Max permitted number of items in this list
+	 */
+	public void setSize(int size)
+	{
+	    this.size = size;
+	}
+
+    /**
+     * Set start index
+     * @param offset Start index
+     */
+    public void setOffset(int offset)
+    {
+        this.offset = offset;
+    }
+    
+	/**
+	 * Returns start index
+	 * @return int
+	 */
+	public int getOffset()
+	{
+	    return offset;
+	}
+	
 	/**
 	 * Returns number of items in array
 	 * @return int
@@ -103,9 +136,13 @@ public class ArrayItemList<T> implements ItemList<T>
 	@Override
 	public void assignItem(int index, T value) 
 	{
-		if (index < valueList.size())
+	    int listSize =  valueList.size();
+	    if ((listSize == 0) && (index > 0) && (offset == 0))
+	        offset = index;
+	    index -= offset;
+		if (index < listSize)
 			valueList.set(index, value);
-		else
+		else if ((listSize == index) || (index < size))
 		{
 			valueList.ensureCapacity(index + 1);
 			for (int i = valueList.size(); i < index; i++)
@@ -113,7 +150,11 @@ public class ArrayItemList<T> implements ItemList<T>
 			valueList.add(index, value);
 	        if (sourceItem != null)
 	            sourceItem.setInformation(toString());
+	        if (valueList.size() > size)
+	            size = valueList.size();
 		}
+		else
+		    throw new ExpressionException("Index " + (index + offset) + " out of range for list \"" + getName() + "\"");
 	}
 
 	/**
@@ -123,9 +164,10 @@ public class ArrayItemList<T> implements ItemList<T>
 	@Override
 	public T getItem(int index) 
 	{
+        index  -= offset;
 		T item = (T) valueList.get(index);
 		if (item == null)
-			throw new ExpressionException(getName() + " item " + index + " not found");
+			throw new ExpressionException(getName() + " item " + (index + offset) + " not found");
 		return item;
 	}
 
@@ -136,6 +178,7 @@ public class ArrayItemList<T> implements ItemList<T>
 	@Override
 	public boolean hasItem(int index) 
 	{
+	    index  -= offset;
 		if (index < 0)
 			return false;
 		return index < valueList.size() ? valueList.get(index) != null : false;

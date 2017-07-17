@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import java.io.File;
 import java.util.Iterator;
@@ -45,7 +45,7 @@ public class CalculateSquareMiles
     list surface_area(km2_to_mi2);
     // Chained query with calculator performing conversion:
     query surface_area_mi2(surface_area : surface_area)
-      #> (km2_to_mi2);
+      -> (km2_to_mi2);
       
 */
     protected QueryProgramParser queryProgramParser;
@@ -57,7 +57,7 @@ public class CalculateSquareMiles
 	}
 	
     /**
-     * Compiles the COUNTRY_SURFACE_AREA script and runs the "surface_area_mi2" query, displaying the solution on the console.<br/>
+     * Compiles the calculate-square-miles.xpl script and runs the "surface_area_mi2" query, displaying the solution on the console.<br/>
      * The expected first 3 results:<br/>
         km2_to_mi2(country = Afghanistan, surface_area_mi2 = 251826.003)<br/>
         km2_to_mi2(country = Albania, surface_area_mi2 = 11100.375)<br/>
@@ -65,7 +65,7 @@ public class CalculateSquareMiles
      */
 	public Iterator<Axiom> getSurfaceAreas()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial9/calculate-square-miles.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial8/calculate-square-miles.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("surface_area_mi2", new SolutionHandler(){
 

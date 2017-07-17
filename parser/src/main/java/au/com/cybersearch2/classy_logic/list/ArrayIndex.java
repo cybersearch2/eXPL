@@ -29,18 +29,27 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
  */
 public class ArrayIndex implements ListItemSpec
 {
+    /** Name to identify item - deduced from operand components if not specified */
     protected String suffix;
+    /** Selection value */
     protected int index;
+    /** Index operand - literal if not empty, may be null */
     protected Operand indexExpression;
+    /** Qualified name of list */
     protected QualifiedName qname;
 
+    /**
+     * Construct ArrayIndex object using supplied index operand
+     * @param qname Qualified name of list
+     * @param indexExpression Index evaluation operand
+     */
     public ArrayIndex(QualifiedName qname, Operand indexExpression)
     {
         this.qname = qname;
         this.indexExpression = indexExpression;
         OperandType operandType = indexExpression.getOperator().getTrait().getOperandType();
         if (!indexExpression.isEmpty())
-        {
+        {   // Set index according to literal type, either integer or string
             if (operandType == OperandType.INTEGER)
                 setIntIndex();
             else if (operandType == OperandType.STRING)
@@ -52,7 +61,7 @@ public class ArrayIndex implements ListItemSpec
         else
             index = -1;
         if (suffix == null)
-        {
+        {   // Deduce suffix from first non-empty name navigating left operand branch
             suffix = indexExpression.getName();
             if (suffix.isEmpty())
             {
@@ -72,7 +81,13 @@ public class ArrayIndex implements ListItemSpec
             }
         }
     }
-    
+ 
+    /**
+     * Construct ArrayIndex object using supplied index operand and suffix
+     * @param qname Qualified name of list
+     * @param indexExpression Index evaluation operand
+     * @param suffix Name to identify item
+     */
     public ArrayIndex(QualifiedName qname, Operand indexExpression, String suffix)
     {
         this.qname = qname;
@@ -81,6 +96,12 @@ public class ArrayIndex implements ListItemSpec
         this.suffix = suffix;
     }
 
+    /**
+     * Construct ArrayIndex object using supplied index and suffix
+     * @param qname Qualified name of list
+     * @param index Index value to select item
+     * @param suffix Name to identify item
+     */
     public ArrayIndex(QualifiedName qname, int index, String suffix)
     {
         this.qname = qname;
@@ -88,11 +109,29 @@ public class ArrayIndex implements ListItemSpec
         this.suffix = suffix;
     }
 
+    /**
+     * setItemIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#setItemIndex(int)
+     */
+    @Override
+    public void setItemIndex(int index)
+    {
+        this.index = index;
+    }
+
+    /**
+     * assemble
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#assemble(au.com.cybersearch2.classy_logic.interfaces.ItemList)
+     */
     @Override
     public void assemble(ItemList<?> itemList)
     {
     }
-    
+ 
+    /**
+     * evaluate
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#evaluate(au.com.cybersearch2.classy_logic.interfaces.ItemList, int)
+     */
     @Override
     public boolean evaluate(ItemList<?> itemList, int id)
     {
@@ -114,42 +153,70 @@ public class ArrayIndex implements ListItemSpec
         return false;
     }
 
+    /**
+     * getListName
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getListName()
+     */
     @Override
     public String getListName()
     {
         return qname.getName();
     }
 
+    /**
+     * getQualifiedListName
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getQualifiedListName()
+     */
     @Override
     public QualifiedName getQualifiedListName()
     {
         return qname; 
     }
 
+    /**
+     * getItemIndex
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getItemIndex()
+     */
     @Override
     public int getItemIndex()
     {
         return index;
     }
 
+    /**
+     * getItemExpression
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getItemExpression()
+     */
     @Override
     public Operand getItemExpression()
     {
         return indexExpression;
     }
 
+    /**
+     * setSuffix
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#setSuffix(java.lang.String)
+     */
     @Override
     public void setSuffix(String suffix)
     {
         this.suffix = suffix;
     }
-    
+
+    /**
+     * getSuffix
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getSuffix()
+     */
     @Override
     public String getSuffix()
     {
         return suffix;
     }
-    
+
+    /**
+     * getVariableName
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getVariableName()
+     */
     @Override
     public QualifiedName getVariableName()
     {
@@ -167,6 +234,9 @@ public class ArrayIndex implements ListItemSpec
         return listName + "_" + suffix;
     }
 
+    /**
+     * Set index from index expression, converting from long to int at same time
+     */
     protected void setIntIndex()
     {
         index = ((Long)indexExpression.getValue()).intValue();
@@ -176,6 +246,10 @@ public class ArrayIndex implements ListItemSpec
             suffix = indexExpression.getName();
     }
 
+    /**
+     * Default setStringIndex implementation does nothing in this base class
+     * @param itemList Target list
+     */
     protected void setStringIndex(ItemList<?> itemList)
     {
         // Default index to 0 

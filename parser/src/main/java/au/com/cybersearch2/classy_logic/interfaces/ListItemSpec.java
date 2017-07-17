@@ -24,6 +24,12 @@ public interface ListItemSpec
     QualifiedName getVariableName();
 
     /**
+     * Set item index 
+     * @param appendIndex Index to set
+     */
+    void setItemIndex(int appendIndex);
+    
+    /**
      * Returns term selection index
      * @return Valid index or -1 if not used
      */

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial2;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -29,70 +29,67 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.tutorial2.GreekConstruction3;
 
 /**
- * StudentScores2Test
+ * GreekConstruction3Test
  * @author Andrew Bowley
- * 10Apr.,2017
+ * 11Apr.,2017
  */
-public class StudentScores2Test
+public class GreekConstruction3Test
 {
     @Test
-    public void testStudentScores() throws Exception
+    public void testGreekConstruction() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial6", "student-scores2.txt");
+        File testFile = new File("src/main/resources/tutorial2", "greek-construction3.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        StudentScores2 scores = new StudentScores2();
-        Iterator<Axiom> scoreIterator = scores.displayLists();
-        while (scoreIterator.hasNext())
-            checkSolution(reader, scoreIterator.next().toString());
-        Iterator<SourceMarker> iterator = scores.getParserContext().getSourceMarkerSet().iterator();
+        GreekConstruction3 greekConstruction = new GreekConstruction3();
+        greekConstruction.displayCustomerCharges(new SolutionHandler(){
+            @Override
+            public boolean onSolution(Solution solution) {
+                checkSolution(reader, solution.getAxiom("account").toString(), solution.getAxiom("delivery").toString());
+                return true;
+            }});
+        reader.close();
+        Iterator<SourceMarker> iterator = greekConstruction.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom alpha_marks (5,2)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom customer (1,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom grades (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom fee (7,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list mark (15,2)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom freight (13,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query marks (17,2)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template score (16,2)");
-        assertThat(iterator.hasNext()).isFalse();
+        assertThat(sourceMarker.toString()).isEqualTo("query greek_business (22,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("student (16,17) (16,23)");
+        assertThat(sourceItem.toString()).isEqualTo("customer:customer (22,22) (22,38)");
         sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("English=mark.english (16,26) (16,48)");
+        assertThat(sourceItem.toString()).isEqualTo("fee:account (23,3) (23,17)");
         sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("Maths=mark.maths (16,51) (16,69)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("History=mark.history (16,72) (16,94)");
-   }
+        assertThat(sourceItem.toString()).isEqualTo("freight:delivery (23,20) (23,39)");
+    }
 
-    protected void checkSolution(BufferedReader reader, String shade)
+    protected void checkSolution(BufferedReader reader, String account, String delivery)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(shade).isEqualTo(line);
+            assertThat(account).isEqualTo(line);
+            line = reader.readLine();
+            assertThat(delivery).isEqualTo(line);
         }
         catch (IOException e)
         {

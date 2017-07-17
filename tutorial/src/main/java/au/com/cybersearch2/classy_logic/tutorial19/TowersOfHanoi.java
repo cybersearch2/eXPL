@@ -25,7 +25,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * Pets
+ * PetNames
  * Demonstrates library function call
  * @author Andrew Bowley
  * 14 Sep 2015

@@ -80,7 +80,7 @@ public class IncreasedAgricultureTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("Data:agri_10y (8,31) (8,45)");
+        assertThat(sourceItem.toString()).isEqualTo("Data:agri_20y (8,31) (8,45)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -98,7 +98,7 @@ public class IncreasedAgricultureTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template agri_10y (4,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template agri_20y (4,1)");
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();

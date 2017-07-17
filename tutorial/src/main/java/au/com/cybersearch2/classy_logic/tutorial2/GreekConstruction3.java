@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial8;
+package au.com.cybersearch2.classy_logic.tutorial2;
 
 import java.io.File;
 
@@ -26,14 +26,15 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * GreekConstruction2
+ * GreekConstruction3
+ * Shows query with 2 logic chains. Uses -> operator.
  * @author Andrew Bowley
  * 22 Feb 2015
  */
 public class GreekConstruction3 
 {
 
-/* greek-construction.xpl
+/* greek-construction3.xpl
 axiom customer()
   {"Marathon Marble", "Sparta"}
   {"Acropolis Construction", "Athens"}
@@ -56,7 +57,7 @@ template account(name ? name == customer.name, fee);
 template delivery(city ? city == customer.city, freight);
         
 query greek_business(customer:customer) 
-  #> (fee:account) #> (freight:delivery);
+  -> (fee:account) -> (freight:delivery);
   
 */
 
@@ -65,12 +66,12 @@ query greek_business(customer:customer)
 
     public GreekConstruction3()
     {
-        File resourcePath = new File("src/main/resources/tutorial8");
+        File resourcePath = new File("src/main/resources/tutorial2");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
     
     /**
-	 * Compiles the GREEK_CONSTRUCTION script and runs the "customer_charge" query, displaying the solution on the console.<br/>
+	 * Compiles the greek-construction3.xpl script and runs the "customer_charge" query, displaying the solution on the console.<br/>
 	 * The query has 2 unification steps. The first unifies "charge" axiom with "freight" template.<br/>
 	 * The second unifies "customer" axiom with "customer_freight" template.
 	 * The expected result:<br/>
@@ -85,7 +86,7 @@ query greek_business(customer:customer)
 	 */
 	public void displayCustomerCharges(SolutionHandler solutionHandler)
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("greek-construction.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("greek-construction3.xpl");
         parserContext = queryProgramParser.getContext();
  		queryProgram.executeQuery("greek_business", solutionHandler);
 	}

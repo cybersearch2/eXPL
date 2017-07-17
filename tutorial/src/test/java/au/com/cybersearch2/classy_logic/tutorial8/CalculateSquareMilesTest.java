@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -31,6 +31,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.tutorial8.CalculateSquareMiles;
 
 /**
  * CalculateSquareMilesTest
@@ -42,7 +43,7 @@ public class CalculateSquareMilesTest
     @Test
     public void testSquareMiles() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial9", "calculate-square-miles.txt");
+        File testFile = new File("src/main/resources/tutorial8", "calculate-square-miles.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         CalculateSquareMiles squareMiles = new CalculateSquareMiles();
         Iterator<Axiom> countryIterator = squareMiles.getSurfaceAreas();

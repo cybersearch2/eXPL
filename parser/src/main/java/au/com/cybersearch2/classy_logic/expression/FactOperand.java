@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.expression;
 
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.EvaluationUtils;
+import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
@@ -57,6 +58,8 @@ public class FactOperand extends BooleanOperand
                 setValue(axiom.isFact() && (axiom.getTermCount() > 0));
             }
             else if ((object instanceof Number) && object.toString().equals(EvaluationUtils.NAN))
+                setValue(false);
+            else if (object instanceof Null)
                 setValue(false);
             else
                 setValue(expression.getValueClass() != Unknown.class);

@@ -39,7 +39,7 @@ public class Colors
     {"aqua", 0, 255, 255}
     {"black", 0, 0, 0}
     {"blue", 0, 0, 255};
-    template shade(name, color^red, color^green, color^blue);
+    template shade(name, color->red, color->green, color->blue);
     query<axiom> colors(swatch : shade);
 
     */
@@ -54,7 +54,7 @@ public class Colors
     }
     
 	/**
-	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
+	 * Compiles the colors.xpl script and runs the "colors" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
         shade(name=aqua, red=0, green=255, blue=255)<br/>
         shade(name=black, red=0, green=0, blue=0)<br/>

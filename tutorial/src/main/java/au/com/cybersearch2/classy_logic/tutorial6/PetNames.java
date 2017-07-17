@@ -13,70 +13,89 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial16;
+package au.com.cybersearch2.classy_logic.tutorial6;
 
 import java.io.File;
-import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
-import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * PetNames
- * Demonstrates library function call
+ * Demonstrates regular expression case-insensitive flag. Also shows how to build
+ * the regular expresion from segments using concatenation.
+ * Note that expression "pets_info[i++]" cannot be used as the regex input and must
+ * be assigned to a simple term first.
  * @author Andrew Bowley
  * 14 Sep 2015
  */
-public class SchoolMarks
+public class PetNames
 {
-/* school-marks.xpl
-axiom grades 
-  (student, english, math, history)
-  {"Amy",    14, 16, 6}
-  {"George", 15, 13, 16}
-  {"Sarah",  12, 17, 14};
-  
-template score(student, integer total = math.add(english, math, history));
+/* pets.xpl
+list<string> pets_info = 
+{
+  "<pet><species>dog</species><name>Lassie</name><color>blonde</color></pet>",
+  "<pet><species>cat</species><name>Cuddles</name><color>tortoise</color></pet>",
+  "<pet><species>Dog</species><name>Bruiser</name><color>brindle</color></pet>",
+  "<pet><species>Dog</species><name>Rex</name><color>black and tan</color></pet>",
+  "<pet><species>Cat</species><name>Pixie</name><color>black</color></pet>",
+  "<pet><species>dog</species><name>Axel</name><color>white</color></pet>",
+  "<pet><species>Cat</species><name>Amiele</name><color>ginger</color></pet>",
+  "<pet><species>dog</species><name>Fido</name><color>brown</color></pet>"
+};
 
-query<axiom> marks(grades : score); 
- 
+string nameRegex = "<name>([a-zA-z']*)[^a-zA-z']";
+
+calc dogs
+(
+  integer i = 0,
+  string petRegex = 
+    "^.*" + nameRegex +".*", 
+  {
+    ? i < pets_info.length,
+    string pet = pets_info[i++],
+    regex() pet == petRegex { name }, 
+    system.print(name)
+  }
+);
+
+query pet_query (dogs);
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public SchoolMarks()
+    public PetNames()
     {
-        File resourcePath = new File("src/main/resources/tutorial16");
+        File resourcePath = new File("src/main/resources/tutorial6");
         queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
     }
 
     /**
-     * Compiles the school-marks.xpl script and runs the "marks" query.<br/>
+     * Compiles the pets.xpl script and runs the "pet_query" query.<br/>
      * The expected results:<br/>
-        score(student = Amy, total = 36)<br/>
-        score(student = George, total = 44)<br/>
-        score(student = Sarah, total = 43)<br/>
+        Lassie is a blonde dog.<br/>
+        Bruiser is a brindle dog.<br/>
+        Rex is a black and tan dog.<br/>
+        Axel is a white dog.<br/>
+        Fido is a brown dog.<br/>    
      * @return Axiom iterator
      */
-    public Iterator<Axiom>  generateReport()
+    public void  dogs()
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("school-marks.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("pet-names.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("marks");
-        return result.getIterator("marks");
+        queryProgram.executeQuery("pet_query");
     }
 
     FunctionManager provideFunctionManager()
     {
         FunctionManager functionManager = new FunctionManager();
-        MathFunctionProvider mathFunctionProvider = new MathFunctionProvider();
-        functionManager.putFunctionProvider(mathFunctionProvider.getName(), mathFunctionProvider);
+        SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
+        functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
         return functionManager;
     }
 
@@ -93,12 +112,8 @@ query<axiom> marks(grades : score);
     {
         try 
         {
-            SchoolMarks schoolMarks = new SchoolMarks();
-            Iterator<Axiom> iterator = schoolMarks.generateReport();
-            while(iterator.hasNext())
-            {
-                System.out.println(iterator.next().toString());
-            }
+            PetNames petNames = new PetNames();
+            petNames.dogs();
         } 
         catch (ExpressionException e) 
         { 

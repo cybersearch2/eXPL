@@ -29,7 +29,6 @@ import au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
-import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.TermOperator;
@@ -47,7 +46,7 @@ import au.com.cybersearch2.classy_logic.operator.DelegateType;
  * @author Andrew Bowley
  * 28May,2017
  */
-public class ListItemVariable extends Variable implements RightOperand,  ParserRunner, SourceInfo
+public class ListItemVariable extends Variable implements ParserRunner, SourceInfo
 {
     /** Index information for value selection  */
     protected ListItemSpec indexData;
@@ -55,8 +54,6 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
     protected ListItemSpec arrayData;
     /** Variable implementation for accessing AxiomLists and AxiomTermLists */
     protected ListItemDelegate delegate;
-    /** Optional operand for specialization eg. Currency */
-    protected Operand rightOperand;
     /** Source item to be updated in parser task when more information available to form description of operand */
     protected SourceItem sourceItem;
 
@@ -313,16 +310,6 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
     }
 
     /**
-     * setRightOperand
-     * @see au.com.cybersearch2.classy_logic.interfaces.RightOperand#setRightOperand(au.com.cybersearch2.classy_logic.interfaces.Operand)
-     */
-    @Override
-    public void setRightOperand(Operand rightOperand)
-    {
-        this.rightOperand = rightOperand;
-    }
-    
-    /**
      * toString
      * @see au.com.cybersearch2.classy_logic.terms.Parameter#toString()
      */
@@ -353,6 +340,11 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
         setTermValue(delegate.getValue(newIndex));
     }
 
+    protected void append(Object value)
+    {
+        delegate.append(value);
+    }
+    
     /**
      * Returns TermVariable operand to unwrap single item of calculator query return list
      * @param axiomTermList The return list
@@ -460,6 +452,11 @@ public class ListItemVariable extends Variable implements RightOperand,  ParserR
             public Object getValue(int selection)
             {
                 return value;
+            }
+
+            @Override
+            public void append(Object value)
+            {
             }};
     }
 

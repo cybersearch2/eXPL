@@ -20,6 +20,7 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
@@ -31,7 +32,7 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  * @author Andrew Bowley
  * 28Apr.,2017
  */
-public class StringOperator extends ExpressionOperator implements LocaleListener
+public class StringOperator implements Operator, LocaleListener
 {
     /** Localization and specialization */
     protected DefaultTrait trait;

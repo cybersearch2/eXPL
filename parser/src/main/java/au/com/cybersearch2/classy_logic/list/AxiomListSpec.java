@@ -119,6 +119,15 @@ public class AxiomListSpec implements ListItemSpec
             return getEmptyAxiomTermList();
         return (axiomTermList != null) ? axiomTermList :  ((AxiomList)itemList).getItem(axiomIndex);
     }
+
+    /**
+     * Set axiom index
+     * @param appendIndex
+     */
+    public void setAxiomIndex(int axiomIndex)
+    {
+        this.axiomIndex = axiomIndex;
+    }
     
     /**
      * Returns axiom selection index
@@ -129,7 +138,13 @@ public class AxiomListSpec implements ListItemSpec
         return axiomIndex;
     }
 
-    /**
+    @Override
+    public void setItemIndex(int itemIndex)
+    {
+        termIndex = itemIndex;
+    }
+
+   /**
      * getItemIndex
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getItemIndex()
      */

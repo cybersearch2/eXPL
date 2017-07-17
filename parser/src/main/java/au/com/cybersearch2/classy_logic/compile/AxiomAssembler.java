@@ -69,8 +69,10 @@ public class AxiomAssembler
         {   // No axiom currently under construction, so create one.
             AxiomArchetype axiomArchetype = axiomArchetypeMap.get(qualifiedAxiomName);
             if (axiomArchetype == null)
+            {
                 axiomArchetype = new AxiomArchetype(qualifiedAxiomName);
-            axiomArchetypeMap.put(qualifiedAxiomName, axiomArchetype);
+                axiomArchetypeMap.put(qualifiedAxiomName, axiomArchetype);
+            }
             axiom = axiomArchetype.itemInstance();
             axiomMap.put(qualifiedAxiomName, axiom);
         }
@@ -148,7 +150,13 @@ public class AxiomAssembler
     
     protected AxiomSource createAxiomSource(QualifiedName qualifiedAxiomName, List<Axiom> axiomList)
     {
-        List<String> terminalNameList = axiomArchetypeMap.get(qualifiedAxiomName).getTermNameList();
+        AxiomArchetype axiomArchetype = axiomArchetypeMap.get(qualifiedAxiomName);
+        if (axiomArchetype == null)
+        {
+            axiomArchetype = new AxiomArchetype(qualifiedAxiomName);
+            axiomArchetypeMap.put(qualifiedAxiomName, axiomArchetype);
+        }
+        List<String> terminalNameList = axiomArchetype.getTermNameList();
         AxiomListSource axiomListSource = new AxiomListSource(axiomList);
         axiomListSource.setAxiomTermNameList(terminalNameList);
         return axiomListSource;

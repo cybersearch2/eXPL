@@ -355,6 +355,12 @@ public class Evaluator extends TreeEvaluator
             Number post = left.getOperator().numberEvaluation(operatorEnum, left);
             left.setValue(post);
         }
+        else if (left.getOperator().getTrait().getOperandType() == OperandType.CURSOR)
+        {
+            int modificationId = left.getId();
+            left.backup(modificationId);
+            left.evaluate(modificationId);
+        }
         return result;
     }
 

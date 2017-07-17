@@ -1,3 +1,3 @@
-shade(name=aqua, red=255, green=0, blue=0, r=255, g=0, b=0)
-shade(name=black, red=255, green=255, blue=255, r=255, g=255, b=255)
-shade(name=blue, red=255, green=255, blue=0, r=255, g=255, b=0)
+shade(before=blank, name=red, red=255, green=0, blue=0)
+shade(before=red, name=white, red=255, green=255, blue=255)
+shade(before=white, name=yellow, red=255, green=255, blue=0)

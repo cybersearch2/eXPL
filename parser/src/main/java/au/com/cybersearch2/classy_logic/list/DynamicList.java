@@ -84,10 +84,10 @@ public class DynamicList<T> implements ItemList<T>
      * Evaluate Terms of this Template
      * @return EvaluationStatus
      */
-    public EvaluationStatus evaluate(ExecutionContext executionContext)
-    {
-        return template.evaluate(executionContext);
-    }
+     public EvaluationStatus evaluate(ExecutionContext executionContext)
+     {
+         return template.evaluate(executionContext);
+     }
  
     /**
      * Backup from last unification.
@@ -174,7 +174,7 @@ public class DynamicList<T> implements ItemList<T>
     @Override
     public boolean hasItem(int index)
     {
-        return (!(index < 0) || (index >= getLength()));
+        return (index >= 0) && (index < getLength());
     }
 
     @Override

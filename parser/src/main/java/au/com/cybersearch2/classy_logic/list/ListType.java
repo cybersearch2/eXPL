@@ -23,5 +23,6 @@ package au.com.cybersearch2.classy_logic.list;
 public enum ListType
 {
     term,
-    axiom_item
+    axiom_item,
+    basic
 }

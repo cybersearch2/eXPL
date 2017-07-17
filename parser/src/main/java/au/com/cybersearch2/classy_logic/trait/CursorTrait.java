@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2017  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,28 +13,24 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.compile;
+package au.com.cybersearch2.classy_logic.trait;
+
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 
 /**
- * OperandType
- * eXPL types used for variables and lists.
- * Note there is no LOCAL variable, only a LOCAL list.
+ * CursorTrait
  * @author Andrew Bowley
- * 10 Mar 2015
+ * 16Jul.,2017
  */
-public enum OperandType 
+public class CursorTrait extends IntegerTrait
 {
-    INTEGER,
-    BOOLEAN,
-    DOUBLE,
-    STRING,
-    DECIMAL,
-    TERM,   // AxiomParameterOperand or AxiomTermList created and passed to registerAxiomList()
-    AXIOM,  // AxiomOperand or  AxiomList
-    LOCAL,  // AxiomTermList created and passed to registerLocalList()
-    CURRENCY,
-    LIST,   // AxiomOperand with ParameterList<AxiomList> to populate it
-    UNKNOWN,
-    CURSOR,
-    APPENDER
+
+    /**
+     * 
+     */
+    public CursorTrait()
+    {
+        super(OperandType.CURSOR);
+    }
+
 }

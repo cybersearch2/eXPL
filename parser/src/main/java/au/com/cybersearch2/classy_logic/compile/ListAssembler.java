@@ -98,6 +98,8 @@ public class ListAssembler
             return axiomListMap.containsKey(qualifiedName);
         case term:
             return axiomTermListMap.containsKey(qualifiedName);
+        case basic:
+            return listMap.containsKey(qualifiedName);
         default:
             return false;
         }
@@ -411,7 +413,11 @@ public class ListAssembler
             for (Axiom axiom: axiomItems)
                axiomListener.onNextAxiom(axiomKey, axiom);
         else
+        {
+            if (!axiomItems.isEmpty())
+                axiomListener.onNextAxiom(axiomKey, axiomItems.get(0));
             add(axiomKey, axiomListener);
+        }
     }
 
     /**

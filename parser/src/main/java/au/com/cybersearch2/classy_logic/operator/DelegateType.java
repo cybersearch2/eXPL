@@ -34,7 +34,8 @@ public enum DelegateType
     BOOLEAN,
     AXIOM, 
     NULL,
-    ASSIGN_ONLY;
+    ASSIGN_ONLY,
+    CURSOR;
  
     /** Creates an Operator instance specific to one DelegateType */
     private OperatorFactory operatorFactory;
@@ -119,6 +120,15 @@ public enum DelegateType
             public Operator delegate()
             {
                 return new NullOperator();
+            }
+        };
+
+        CURSOR.operatorFactory = new OperatorFactory()
+        {
+            @Override
+            public Operator delegate()
+            {
+                return new CursorOperator();
             }
         };
     }

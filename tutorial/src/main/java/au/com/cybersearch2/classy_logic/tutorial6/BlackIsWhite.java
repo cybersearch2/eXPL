@@ -27,31 +27,53 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * Colors
+ * BlackIsWhite
+ * Demonstrates term list used to change axiom terms. In this case, an axiom named
+ * "patch" defines a color by it's rgb values and is modified by inverting these
+ * values. The color name is also updated. There are 2 term lists which access
+ * patch axiom, one writes to it and the other reads from it to ensure the
+ * axiom has been updated, not just the writer term list. A third term list
+ * maps color names to their inverse names, eg. "aqua" to "red". All term lists
+ * are attached to the template that uses them, which means they share the 
+ * template name space. Note that the term lists reference axioms using 2
+ * part names as this is a requirement for attachments.
  * @author Andrew Bowley
  * 27 Feb 2015
  */
 public class BlackIsWhite 
 {
-/* colors.xpl
-list<term> color(swatch);
-list<term> rgb(swatch);
+/* black-is-white.xpl
+axiom patch (name, red, green, blue)
+           {"blank", 0,     0,    0};
+
 axiom swatch (name, red, green, blue)
             {"aqua",  0, 255,   255}
             {"black", 0,   0,     0}
             {"blue",  0,   0,   255};
+
+axiom inverse (aqua, black, blue)  
+            {"red", "white",  "yellow"};
+                      
+            
 template shade
++ list<term> color1(global.patch);
++ list<term> color2(global.patch);
++ list<term> inverse_name(global.inverse);
 (
-  name, 
+  before = color2->name,
+  // Change name
+. color1->name = inverse_name[name], 
   // Invert colors
-  color^red ^= 255, 
-  color^green ^= 255, 
-  color^blue ^= 255, 
+. color1->red = red ^ 255, 
+. color1->green = green ^ 255, 
+. color1->blue = blue ^ 255, 
   // Check colors have expected values
-  integer r = rgb^red, 
-  integer g = rgb^green, 
-  integer b = rgb^blue
+  color2->name,
+  color2->red, 
+  color2->green, 
+  color2->blue
 );
+
 query<axiom> colors(swatch : shade);
 
 */
@@ -65,13 +87,14 @@ query<axiom> colors(swatch : shade);
     }
     
 	/**
-	 * Compiles the AXIOM_COLORS script and runs the "colors" query, displaying the solution on the console.<br/>
-	 * Here each color is reversed by xor with 255, which turns black into white etc.
+	 * Compiles the black-is-white.xpl script and runs the "colors" query, displaying the solution on the console.
+	 * Each color color solution starts with a "before" term to show the patch color name before it is reversed.
+	 * This turns black into white etc.
 	 * A separate Axiom Term list for the same axiom proves the swatch terms have been modified, not just the color list variables.
 	 * The expected result:<br/>
-        shade(name=aqua, red=255, green=0, blue=0, r=255, g=0, b=0)<br/>
-        shade(name=black, red=255, green=255, blue=255, r=255, g=255, b=255)<br/>
-        shade(name=blue, red=255, green=255, blue=0, r=255, g=255, b=0)<br/>	
+        shade(before=blank, name=red, red=255, green=0, blue=0)<br/>
+        shade(before=red, name=white, red=255, green=255, blue=255)<br/>
+        shade(before=white, name=yellow, red=255, green=255, blue=0)<br/>   
      */
 	public Iterator<Axiom> displayShades()
 	{

@@ -19,6 +19,7 @@ import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.trait.IntegerTrait;
@@ -30,7 +31,7 @@ import au.com.cybersearch2.classy_logic.trait.IntegerTrait;
  * @author Andrew Bowley
  * 28Apr.,2017
  */
-public class IntegerOperator extends ExpressionOperator implements LocaleListener
+public class IntegerOperator implements Operator, LocaleListener
 {
     /** Behaviours for localization and specialization of Integer operands */
     private IntegerTrait integerTrait;
@@ -150,6 +151,17 @@ public class IntegerOperator extends ExpressionOperator implements LocaleListene
                 OperatorEnum.RUNSIGNEDSHIFTASSIGN // ">>>="
         };
     }
+
+    /**
+     * Returns OperatorEnum values for which this Term is a valid String operand
+     * @return OperatorEnum[]
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getConcatenateOps()
+     */
+     @Override
+     public OperatorEnum[] getConcatenateOps()
+     {
+         return EMPTY_OPERAND_OPS;
+     }
 
     /**
      * Unary numberEvaluation - unary

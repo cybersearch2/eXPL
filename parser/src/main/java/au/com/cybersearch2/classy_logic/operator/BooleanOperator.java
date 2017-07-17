@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
@@ -31,7 +32,7 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  * @author Andrew Bowley
  * 28Apr.,2017
  */
-public class BooleanOperator extends ExpressionOperator
+public class BooleanOperator implements Operator
 {
     /** Localization and specialization */
     protected DefaultTrait trait;
@@ -90,6 +91,17 @@ public class BooleanOperator extends ExpressionOperator
             OperatorEnum.STAR // * true == 1.0, false = 0.0
         };
     }
+
+    /**
+     * Returns OperatorEnum values for which this Term is a valid String operand
+     * @return OperatorEnum[]
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getConcatenateOps()
+     */
+     @Override
+     public OperatorEnum[] getConcatenateOps()
+     {
+         return EMPTY_OPERAND_OPS;
+     }
 
     /**
      * numberEvaluation - unary

@@ -22,6 +22,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.trait.BigDecimalTrait;
@@ -33,7 +34,7 @@ import au.com.cybersearch2.classy_logic.trait.BigDecimalTrait;
  * @author Andrew Bowley
  * 28Apr.,2017
  */
-public class BigDecimalOperator extends ExpressionOperator implements LocaleListener
+public class BigDecimalOperator implements Operator, LocaleListener
 {
     /** Behaviours for localization and specialization of Decimal operands */
     protected BigDecimalTrait bigDecimalTrait;
@@ -123,6 +124,17 @@ public class BigDecimalOperator extends ExpressionOperator implements LocaleList
     }
 
     /**
+     * Returns OperatorEnum values for which this Term is a valid String operand
+     * @return OperatorEnum[]
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getConcatenateOps()
+     */
+     @Override
+     public OperatorEnum[] getConcatenateOps()
+     {
+         return EMPTY_OPERAND_OPS;
+     }
+
+     /**
      * numberEvaluation - unary
      * @see au.com.cybersearch2.classy_logic.interfaces.Operator#numberEvaluation(OperatorEnum, Term)
      */

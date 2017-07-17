@@ -128,7 +128,7 @@ public class ParameterOperandTest
         for (String param: params)
         {
             Object item = iterator.next();
-            assertThat(item.toString()).isEqualTo("list<term> test.all_types()=" + param);
+            assertThat(item.toString()).isEqualTo("list<term> test.all_types(){6}");
         }
         assertThat(iterator.hasNext()).isFalse();
         //System.out.println(result.getItem(0).getAxiom().getArchetype().getAxiomTermNameList());

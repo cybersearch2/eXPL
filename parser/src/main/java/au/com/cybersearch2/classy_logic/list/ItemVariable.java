@@ -36,6 +36,8 @@ public class ItemVariable<T> implements ListItemDelegate
     protected ItemList<T> itemList;
     /** Index information for value selection  */
     protected ListItemSpec indexData;
+    /** Flag set true if item list needs evaluation */
+    protected boolean isDynamicList;
 
     /**
      * @param itemList The list to reference 
@@ -44,6 +46,7 @@ public class ItemVariable<T> implements ListItemDelegate
     {
         this.itemList = itemList;
         this.indexData = indexData;
+        isDynamicList = itemList instanceof DynamicList;
     }
 
     /**
@@ -66,9 +69,13 @@ public class ItemVariable<T> implements ListItemDelegate
      * evaluate
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate#evaluate(int)
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public int evaluate(int id)
-    {   // Resolve parameters for array list
+    {   
+        if (isDynamicList)
+            ((DynamicList)itemList).evaluate(null);
+        // Resolve parameters for array list
         indexData.assemble(itemList);
         indexData.evaluate(itemList, id);
         return indexData.getItemIndex();
@@ -78,9 +85,12 @@ public class ItemVariable<T> implements ListItemDelegate
      * backup
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate#backup(int)
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean backup(int id)
     {
+        if (isDynamicList)
+            ((DynamicList)itemList).backup(true);
         Operand indexExpression = indexData.getItemExpression();
         if (indexExpression != null)
             return indexExpression.backup(id);
@@ -142,6 +152,18 @@ public class ItemVariable<T> implements ListItemDelegate
         if (item instanceof Term)
             return((Term)item).getValue();
         return item;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void append(Object value)
+    {
+        int appendIndex = itemList.getLength();
+        if (itemList.getOperandType() == OperandType.TERM)
+            itemList.assignItem(appendIndex, (T) new Parameter(Term.ANONYMOUS, value));
+        else
+            itemList.assignItem(appendIndex, (T)value);
+        indexData.setItemIndex(appendIndex);
     }
 
 }

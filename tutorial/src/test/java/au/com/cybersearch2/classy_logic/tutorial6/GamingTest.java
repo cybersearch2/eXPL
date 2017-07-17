@@ -47,7 +47,7 @@ public class GamingTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> combo(fruit) (3,1) (3,23)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> combo(fruit){4} (3,1) (3,23)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

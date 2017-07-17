@@ -32,11 +32,11 @@ import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * StudentScoresTest
+ * AssignMarksTest
  * @author Andrew Bowley
- * 10Apr.,2017
+ * 10Apr,2017
  */
-public class StudentScoresTest
+public class AssignMarksTest
 {
     static String[] marks =
     {
@@ -46,9 +46,9 @@ public class StudentScoresTest
     @Test
     public void testStudentScores() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial6", "student-scores.txt");
+        File testFile = new File("src/main/resources/tutorial6", "assign-marks.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        StudentScores scores = new StudentScores();
+        AssignMarks scores = new AssignMarks();
         Iterator<Axiom> scoreIterator = scores.displayLists();
         while (scoreIterator.hasNext())
             checkSolution(reader, scoreIterator.next().toString());
@@ -60,71 +60,30 @@ public class StudentScoresTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list mark (5,2)");
+        assertThat(sourceMarker.toString()).isEqualTo("list mark (6,1)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        assertThat(sourceMarker.toString()).isEqualTo("query marks (28,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        /*
-        assertThat(sourceMarker.toString()).isEqualTo("variable mark_var0 (6,2)");
+        assertThat(sourceMarker.toString()).isEqualTo("template score (26,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mark=mark.1=f- (6,2) (6,16)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("variable mark_var1 (7,2)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("mark=mark.2=f (7,2) (7,15)");
-        for (int index = 10; index < marks.length; ++index)
-        {
-            assertThat(iterator.hasNext()).isTrue();
-            sourceMarker = iterator.next();
-            //System.out.println(sourceMarker.toString());
-            assertThat(sourceMarker.toString()).isEqualTo("variable mark_var" + (index) + " (" + (index + 6) + ",2)");
-            sourceItem = sourceMarker.getHeadSourceItem();
-            assertThat(sourceItem).isNotNull();
-            //System.out.println(sourceItem.toString());
-            assertThat(sourceItem.toString()).isEqualTo("mark" + "=mark." + (index + 1) + "=" + marks[index] + " (" + (index + 6) + ",2) (" + (index + 6) + "," + (14 + marks[index].length()) + ")");
-        }
-        for (int index = 2; index < 10; ++index)
-        {
-            assertThat(iterator.hasNext()).isTrue();
-            sourceMarker = iterator.next();
-            //System.out.println(sourceMarker.toString());
-            assertThat(sourceMarker.toString()).isEqualTo("variable mark_var" + (index) + " (" + (index + 6) + ",2)");
-            sourceItem = sourceMarker.getHeadSourceItem();
-            assertThat(sourceItem).isNotNull();
-            //System.out.println(sourceItem.toString());
-            assertThat(sourceItem.toString()).isEqualTo("mark" + "=mark." + (index + 1) + "=" + marks[index] + " (" + (index + 6) + ",2) (" + (index + 6) + "," + (14 + marks[index].length()) + ")");
-        }
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-         */
-        assertThat(sourceMarker.toString()).isEqualTo("query marks (25,2)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template score (24,2)");
-        SourceItem sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("student (24,17) (24,23)");
+        assertThat(sourceItem.toString()).isEqualTo("student (26,16) (26,22)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("english (24,26) (24,38)");
+        assertThat(sourceItem.toString()).isEqualTo("english (26,25) (26,37)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("maths (24,41) (24,51)");
+        assertThat(sourceItem.toString()).isEqualTo("maths (26,40) (26,50)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("history (24,54) (24,66)");
+        assertThat(sourceItem.toString()).isEqualTo("history (26,53) (26,65)");
         assertThat(iterator.hasNext()).isFalse();
      }
 

@@ -32,18 +32,18 @@ import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * StudentScores2Test
+ * AxiomMarksTest
  * @author Andrew Bowley
  * 10Apr.,2017
  */
-public class StudentScores3Test
+public class DeclareMarksTest
 {
     @Test
     public void testStudentScores() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial6", "student-scores3.txt");
+        File testFile = new File("src/main/resources/tutorial6", "declare-marks.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        StudentScores3 scores = new StudentScores3();
+        DeclareMarks scores = new DeclareMarks();
         Iterator<Axiom> scoreIterator = scores.displayLists();
         while (scoreIterator.hasNext())
             checkSolution(reader, scoreIterator.next().toString());
@@ -55,32 +55,32 @@ public class StudentScores3Test
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list mark (5,2)");
+        assertThat(sourceMarker.toString()).isEqualTo("list mark (6,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query marks (12,2)");
+        assertThat(sourceMarker.toString()).isEqualTo("query marks (15,1)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template score (11,2)");
+        assertThat(sourceMarker.toString()).isEqualTo("template score (13,1)");
         assertThat(iterator.hasNext()).isFalse();
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("student (11,17) (11,23)");
+        assertThat(sourceItem.toString()).isEqualTo("student (13,16) (13,22)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("english (11,26) (11,38)");
+        assertThat(sourceItem.toString()).isEqualTo("english (13,25) (13,37)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("maths (11,41) (11,51)");
+        assertThat(sourceItem.toString()).isEqualTo("maths (13,40) (13,50)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("history (11,54) (11,66)");
+        assertThat(sourceItem.toString()).isEqualTo("history (13,53) (13,65)");
    }
 
     protected void checkSolution(BufferedReader reader, String shade)

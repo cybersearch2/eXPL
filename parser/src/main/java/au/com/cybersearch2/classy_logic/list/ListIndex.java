@@ -25,29 +25,49 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
  * ListIndex
+ * Extends ArrayIndex to provide support for string indexes
  * @author Andrew Bowley
  * 23May,2017
  */
 public class ListIndex extends ArrayIndex
 {
+    /** Selection string */
     protected String selection;
-    
+
+    /**
+     * Construct ListIndex with specified selection value
+     * @param qname Qualified list name
+     * @param selection Selection value
+     */
     public ListIndex(QualifiedName qname, String selection)
     {
         super(qname, null, selection);
         this.selection = selection;
     }
-    
+
+    /**
+     * Construct ListIndex with specified index operand
+     * @param qname Qualified list name
+     * @param indexExpression Index evaluation operand
+     */
     public ListIndex(QualifiedName qname, Operand indexExpression)
     {
         super(qname, indexExpression);
     }
  
+    /**
+     * Returns selection string
+     * @return String
+     */
     public String getSelection()
     {
         return selection;
     }
-    
+ 
+    /**
+     * assemble
+     * @see au.com.cybersearch2.classy_logic.list.ArrayIndex#assemble(au.com.cybersearch2.classy_logic.interfaces.ItemList)
+     */
     @Override
     public void assemble(ItemList<?> itemList)
     {
@@ -56,6 +76,10 @@ public class ListIndex extends ArrayIndex
         super.assemble(itemList);
     }
     
+    /**
+     * getVariableName
+     * @see au.com.cybersearch2.classy_logic.list.ArrayIndex#getVariableName()
+     */
     @Override
     public QualifiedName getVariableName()
     {
@@ -72,6 +96,11 @@ public class ListIndex extends ArrayIndex
         return listName + "_" + suffix;
     }
 
+    /**
+     * setIntIndex
+     * @see au.com.cybersearch2.classy_logic.list.ArrayIndex#setIntIndex()
+     */
+    @Override
     protected void setIntIndex()
     {
         Object object = indexExpression.getValue();
@@ -82,6 +111,10 @@ public class ListIndex extends ArrayIndex
             suffix = indexExpression.getName();
     }
 
+    /**
+     * setStringIndex
+     * @see au.com.cybersearch2.classy_logic.list.ArrayIndex#setStringIndex(au.com.cybersearch2.classy_logic.interfaces.ItemList)
+     */
     @Override
     protected void setStringIndex(ItemList<?> itemList)
     {
@@ -91,7 +124,11 @@ public class ListIndex extends ArrayIndex
             setAxiomTermListIndex((AxiomTermList)itemList);
         }
     }
-    
+
+    /**
+     * Set axiom term names
+     * @param axiomContainer Axiom list or axiom term list
+     */
     protected void setAxiomTermListIndex(AxiomContainer axiomContainer)
     {
         List<String> axiomTermNameList = axiomContainer.getAxiomTermNameList();

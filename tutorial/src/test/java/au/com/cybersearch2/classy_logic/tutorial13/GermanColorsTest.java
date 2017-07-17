@@ -57,7 +57,7 @@ public class GermanColorsTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> colors(lexicon)=lexicon(aqua=Wasser, black=schwarz, blue=blau, white=weiß) (14,1) (14,21)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> colors(lexicon){4} (14,1) (14,21)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

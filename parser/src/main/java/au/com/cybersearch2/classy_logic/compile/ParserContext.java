@@ -325,6 +325,10 @@ public class ParserContext
         return parserAssembler;
     }
 
+    /**
+     * Returns current operand map
+     * @return OperandMap object
+     */
     public OperandMap getOperandMap()
     {
         return operandMap;
@@ -338,7 +342,11 @@ public class ParserContext
     {
         return parserAssembler.getQualifiedContextname();
     }
-    
+
+    /**
+     * Set current context name
+     * @param qualifiedName
+     */
     public void setContextName(QualifiedName qualifiedName)
     {
         parserAssembler.setQualifiedContextname(qualifiedName);
@@ -409,13 +417,34 @@ public class ParserContext
     }
 
     /**
+     * Sets template qualified name to associate with self as identifier
+     * @param template Template with enclosing name space
+     * @param name Name to use with identifier
+     * @return QualifiedName object
+     */
+    public QualifiedName setQualifiedName(String template, String name)
+    {
+        QualifiedName qname = new QualifiedName(QualifiedName.EMPTY, template , name);
+        qnameMap.put(qname, qname);
+        return qname;
+    }
+    
+    /**
      * Returns qualified name stored in context for given identifier
      * @param name Identifier in text format
      * @return QualifiedName object
      */
     public QualifiedName getQualifiedName(String name)  
     {
-        QualifiedName qname = QualifiedName.parseName(name);
+        QualifiedName qname = null;
+        QualifiedName contextListName = parserAssembler.getContextName(name);
+        if (!contextListName.getTemplate().isEmpty())
+        {
+            qname = new QualifiedName(QualifiedName.EMPTY, contextListName.getTemplate() , name);
+            if (qnameMap.containsKey(qname))
+                return (qnameMap.get(qname));
+        }
+        qname = QualifiedName.parseName(name);
         if (qnameMap.containsKey(qname))
             return (qnameMap.get(qname));
         if (qname.getScope().isEmpty() && qname.getTemplate().isEmpty() && (!scope.getAlias().isEmpty()))
@@ -426,6 +455,12 @@ public class ParserContext
         return qname;
     }
 
+    /**
+     * Add source item for calculator query
+     * @param qname
+     * @param parameterTemplate
+     * @return
+     */
     public SourceItem addCalcQuery(QualifiedName qname, Template parameterTemplate)
     {
         StringBuilder builder = new StringBuilder("<- ");

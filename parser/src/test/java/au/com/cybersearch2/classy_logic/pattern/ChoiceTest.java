@@ -46,9 +46,9 @@ public class ChoiceTest
 
     static final String[] CHOICE_COLORS_LIST =
     {
-        "rgb=list<axiom> shader.rgb: list<term> shader.rgb()=rgb(red=0, green=255, blue=255)",
-        "rgb=list<axiom> shader.rgb: list<term> shader.rgb()=rgb(red=0, green=0, blue=255)",
-        "rgb=list<axiom> shader.rgb: list<term> shader.rgb()=rgb(red=null, green=null, blue=null)"
+        "rgb=list<axiom> shader.rgb: list<term> shader.rgb(){3}",
+        "rgb=list<axiom> shader.rgb: list<term> shader.rgb(){3}",
+        "rgb=list<axiom> shader.rgb: list<term> shader.rgb(){3}"
     };
 
     static final long[] CHOICE_SELECTION_LIST = { 0, 2, -1 };

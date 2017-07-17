@@ -66,7 +66,7 @@ public class GermanScopeTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> translate(lexicon)=lexicon(Total=Gesamtkosten) (15,1) (15,24)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> translate(lexicon){1} (15,1) (15,24)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

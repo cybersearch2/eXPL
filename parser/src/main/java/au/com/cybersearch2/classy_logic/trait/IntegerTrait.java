@@ -41,6 +41,15 @@ public class IntegerTrait extends NumberTrait<Long>
      }
 
     /**
+     * Construct IntegerTrait object with specified operand type
+     * @param operandType Operand type
+     */
+    protected IntegerTrait(OperandType operandType)
+    {
+        super(operandType);
+    }
+
+    /**
      * parseValue
      * @see au.com.cybersearch2.classy_logic.trait.NumberTrait#parseValue(java.lang.String)
      */

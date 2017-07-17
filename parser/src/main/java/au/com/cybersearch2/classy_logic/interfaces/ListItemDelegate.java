@@ -47,6 +47,12 @@ public interface ListItemDelegate
     boolean backup(int id);
 
     /**
+     * Append to list
+     * @param value
+     */
+    void append(Object value);
+    
+    /**
      * Set item value
      * @param value
      */

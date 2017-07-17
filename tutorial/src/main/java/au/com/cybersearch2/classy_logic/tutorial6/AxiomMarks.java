@@ -22,43 +22,48 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * Lists
+ * AxiomMarks
+ * Shows axiom term list set using anonymous-term axiom. 
+ * The marks array to starts at index 1 by inserting a blank term at the first position.
  * @author Andrew Bowley
  * 27 Feb 2015
  */
-public class StudentScores3 
+public class AxiomMarks 
 {
-/* student-scores3.xpl
+/* axiom-marks.xpl
 axiom grades (student, english, maths, history)
- {"George", 15, 13, 16}
- {"Sarah", 12, 17, 15}
- {"Amy", 14, 16, 6};
- list<string> mark =
- {
-   "", // Index = 0 is out of range
-   "f-", "f", "f+", "e-", "e", "e+", "d-", "d", "d+", 
-   "c-", "c", "c+", "b-", "b", "b+", "a-", "a", "a+"
- };
- template score(student, mark[english], mark[maths], mark[history]);
- query<axiom> marks(grades : score);
+  {"George", 15, 13, 16}
+  {"Sarah", 12, 17, 15}
+  {"Amy", 14, 16, 6};
+  
+axiom alpha_marks()
+{
+ "", // Start at index 1
+ "f-", "f", "f+",
+ "e-", "e", "e+",
+ "d-", "d", "d+",
+ "c-", "c", "c+",
+ "b-", "b", "b+",
+ "a-", "a", "a+"
 };
- list<term> mark(alpha_marks);
- template score(student, english = mark[(english)], maths = mark[(maths)], history = mark[(history)]);
- query<axiom> marks(grades : score);
+list<term> mark(alpha_marks);
+
+template score(student, english = mark[(english)], maths = mark[(maths)], history = mark[(history)]);
+
+query<axiom> marks(grades : score);
 
 */
 
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public StudentScores3()
+    public AxiomMarks()
     {
         File resourcePath = new File("src/main/resources/tutorial6");
         queryProgramParser = new QueryProgramParser(resourcePath);
@@ -66,7 +71,7 @@ axiom grades (student, english, maths, history)
     }
     
 	/**
-	 * Compiles the LISTS script and runs the "marks" query, displaying the solution on the console.<br/>
+	 * Compiles the axiom-marks.xpl script and runs the "marks" query, displaying the solution on the console.<br/>
 	 * This sample demonstrates using an Axiom Term list as a value list.
 	 * The expected result:<br/>
         score(student=George, English=b+, Maths=b-, History=a-)<br/>
@@ -75,8 +80,7 @@ axiom grades (student, english, maths, history)
      */
     public Iterator<Axiom> displayLists()
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("student-scores3.xpl");
-       // queryProgram.setExecutionContext(new ExecutionContext());
+        QueryProgram queryProgram = queryProgramParser.loadScript("axiom-marks.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("marks");
         return result.getIterator("marks");
@@ -91,7 +95,7 @@ axiom grades (student, english, maths, history)
 	{
 		try 
 		{
-	        StudentScores3 listsDemo = new StudentScores3();
+	        AxiomMarks listsDemo = new AxiomMarks();
             Iterator<Axiom> iterator = listsDemo.displayLists();
             while (iterator.hasNext())
                 System.out.println(iterator.next().toString());

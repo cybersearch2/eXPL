@@ -117,6 +117,11 @@ public class ArrayItemListTest
             return false;
         }
 
+        @Override
+        public void setItemIndex(int appendIndex)
+        {
+        }
+
     }
     
 

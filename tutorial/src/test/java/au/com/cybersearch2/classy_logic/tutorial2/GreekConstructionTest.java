@@ -34,7 +34,7 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * GreekConstructionTest
+ * GreekConstruction3Test
  * @author Andrew Bowley
  * 5Feb.,2017
  */

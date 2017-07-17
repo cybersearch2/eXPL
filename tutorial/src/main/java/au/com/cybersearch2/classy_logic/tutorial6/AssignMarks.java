@@ -15,69 +15,79 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial6;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.pattern.Archetype;
+import au.com.cybersearch2.classy_logic.parser.ParseException;
+import au.com.cybersearch2.classy_logic.parser.QueryParser;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * Lists
+ * AssignMarks
+ * Shows basic type list set using array assignment to list. 
+ * This allows the array to start at index 1 instead of 0.
  * @author Andrew Bowley
  * 27 Feb 2015
  */
-public class StudentScores2 
+public class AssignMarks 
 {
-/* student-scores2.xpl
+/* assign-marks.xpl
 axiom grades (student, english, maths, history)
  {"George", 15, 13, 16}
  {"Sarah", 12, 17, 15}
  {"Amy", 14, 16, 6};
- axiom alpha_marks()
-{
- "", // Start at index 1
- "f-", "f", "f+",
- "e-", "e", "e+",
- "d-", "d", "d+",
- "c-", "c", "c+",
- "b-", "b", "b+",
- "a-", "a", "a+"
-};
- list<term> mark(alpha_marks);
- template score(student, english = mark[(english)], maths = mark[(maths)], history = mark[(history)]);
+ list<string> mark;
+ mark[1]  = "f-";
+ mark[2]  = "f";
+ mark[3]  = "f+";
+ mark[4]  = "e-";
+ mark[5]  = "e";
+ mark[6]  = "e+";
+ mark[7]  = "d-";
+ mark[8]  = "d";
+ mark[9]  = "d+";
+ mark[10] = "c-";
+ mark[11] = "c";
+ mark[12] = "c+";
+ mark[13] = "b-";
+ mark[14] = "b";
+ mark[15] = "b+";
+ mark[16] = "a-";
+ mark[17] = "a";
+ mark[18] = "a+";
+ template score(student, mark[english], mark[maths], mark[history]);
  query<axiom> marks(grades : score);
 
 */
-
+    
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public StudentScores2()
+    public AssignMarks()
     {
         File resourcePath = new File("src/main/resources/tutorial6");
         queryProgramParser = new QueryProgramParser(resourcePath);
-        Archetype.CASE_INSENSITIVE_NAME_MATCH = false;
     }
     
 	/**
-	 * Compiles the LISTS script and runs the "marks" query, displaying the solution on the console.<br/>
-	 * This sample demonstrates using an Axiom Term list as a value list.
+	 * Compiles the assign-marks.xpl script and runs the "marks" query, displaying the solution on the console.<br/>
+	 * Demonstrates a values list. See AxiomMarks for perhaps a better alternative to using a values list.
 	 * The expected result:<br/>
-        score(student=George, English=b+, Maths=b-, History=a-)<br/>
-        score(student=Sarah, English=c+, Maths=a, History=b+)<br/>
-        score(student=Amy, English=b, Maths=a-, History=e+)<br/>	 
-     */
-    public Iterator<Axiom> displayLists()
-    {
-        QueryProgram queryProgram = queryProgramParser.loadScript("student-scores2.xpl");
-       // queryProgram.setExecutionContext(new ExecutionContext());
+        score(student=George, mark_english=b+, mark_maths=b-, mark_history=a-)<br/>
+        score(student=Sarah, mark_english=c+, mark_maths=a, mark_history=b+)<br/>
+        score(student=Amy, mark_english=b, mark_maths=a-, mark_history = e+)<br/>
+	 */
+	public Iterator<Axiom> displayLists()
+	{
+        QueryProgram queryProgram = queryProgramParser.loadScript("assign-marks.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("marks");
         return result.getIterator("marks");
@@ -88,14 +98,24 @@ axiom grades (student, english, maths, history)
         return parserContext;
     }
     
+	protected QueryProgram compileScript(String script) throws ParseException
+	{
+		InputStream stream = new ByteArrayInputStream(script.getBytes());
+		QueryParser queryParser = new QueryParser(stream);
+		QueryProgram queryProgram = new QueryProgram();
+	    ParserContext context = new ParserContext(queryProgram);
+		queryParser.input(context);
+		return queryProgram;
+	}
+	
 	public static void main(String[] args)
 	{
 		try 
 		{
-	        StudentScores2 listsDemo = new StudentScores2();
-            Iterator<Axiom> iterator = listsDemo.displayLists();
-            while (iterator.hasNext())
-                System.out.println(iterator.next().toString());
+	        AssignMarks listsDemo = new AssignMarks();
+			Iterator<Axiom> iterator = listsDemo.displayLists();
+			while (iterator.hasNext())
+	            System.out.println(iterator.next().toString());
 		} 
 		catch (ExpressionException e) 
 		{

@@ -27,6 +27,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.list.Appender;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
@@ -110,6 +111,14 @@ abstract class TreeEvaluator extends DelegateOperand
             left == null ? EvaluationStatus.COMPLETE : evaluateLeft(left, right, id);
         if (evaluationStatus == EvaluationStatus.COMPLETE) 
         {
+            if (((operatorEnum == OperatorEnum.INCR) || 
+                    (operatorEnum == OperatorEnum.DECR)) &&
+                   (left.getOperator().getTrait().getOperandType() == OperandType.CURSOR))
+            {
+                leftIsNaN = true;
+                left.getOperator().numberEvaluation(operatorEnum, left);
+                return evaluationStatus;
+            }
             // Remember if left is not a number
             leftIsNaN = utils.isNaN(left, operatorEnum);
             if (right != null)
@@ -117,7 +126,8 @@ abstract class TreeEvaluator extends DelegateOperand
                 evaluationStatus = evaluateRight(left, right, id);
                 if (evaluationStatus == EvaluationStatus.COMPLETE)
                 {
-                    if ((operatorEnum == OperatorEnum.HOOK) || (operatorEnum == OperatorEnum.COLON))
+                    if ((operatorEnum == OperatorEnum.HOOK) ||
+                        (operatorEnum == OperatorEnum.COLON))
                         return EvaluationStatus.SKIP;
                 }
             }

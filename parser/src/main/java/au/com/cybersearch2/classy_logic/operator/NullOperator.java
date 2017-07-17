@@ -19,6 +19,7 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.NullOperand;
 import au.com.cybersearch2.classy_logic.helper.Null;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
@@ -30,7 +31,7 @@ import au.com.cybersearch2.classy_logic.trait.DefaultTrait;
  * @author Andrew Bowley
  * 28Apr.,2017
  */
-public class NullOperator extends ExpressionOperator
+public class NullOperator implements Operator
 {
     /** Localization and specialization */
     protected DefaultTrait trait;
@@ -83,6 +84,17 @@ public class NullOperator extends ExpressionOperator
                 OperatorEnum.NE // "!="
         };
     }
+
+    /**
+     * Returns OperatorEnum values for which this Term is a valid String operand
+     * @return OperatorEnum[]
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getConcatenateOps()
+     */
+     @Override
+     public OperatorEnum[] getConcatenateOps()
+     {
+         return EMPTY_OPERAND_OPS;
+     }
 
     /**
      * Unary numberEvaluation - invalid

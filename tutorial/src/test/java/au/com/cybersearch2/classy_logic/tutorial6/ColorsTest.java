@@ -55,7 +55,7 @@ public class ColorsTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> color(swatch) (1,1) (1,24)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> color(swatch){4} (1,1) (1,24)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

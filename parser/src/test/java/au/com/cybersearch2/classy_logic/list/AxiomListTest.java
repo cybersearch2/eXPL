@@ -119,6 +119,11 @@ public class AxiomListTest
             this.suffix = suffix;
         }
 
+        @Override
+        public void setItemIndex(int appendIndex)
+        {
+        }
+
      }
     
 	private static final String NAME = "ListOperandName";
@@ -177,10 +182,10 @@ public class AxiomListTest
 		Axiom axiom1 = new Axiom("one");
 		axiomListener.onNextAxiom(Q_KEY, axiom1);
 		AxiomTermList axiomOperandList1 = axiomList.getItem(0);
-		assertThat(axiomOperandList1.toString()).isEqualTo("list<term> ListOperandName(AxiomKey)=one()");
+		assertThat(axiomOperandList1.toString()).isEqualTo("list<term> ListOperandName(AxiomKey){0}");
 		Axiom axiom2 = new Axiom("two");
 		axiomListener.onNextAxiom(Q_KEY, axiom2);
 		AxiomTermList axiomOperandList2 = axiomList.getItem(1);
-		assertThat(axiomOperandList2.toString()).isEqualTo("list<term> ListOperandName(AxiomKey)=two()");
+		assertThat(axiomOperandList2.toString()).isEqualTo("list<term> ListOperandName(AxiomKey){0}");
 	}
 }

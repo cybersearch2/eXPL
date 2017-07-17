@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -31,10 +32,12 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  * @author Andrew Bowley
  * 11 Dec 2014
  */
-public class Variable extends DelegateOperand
+public class Variable extends DelegateOperand implements RightOperand
 {
 	/** Optional Parameter which evaluates value */
 	protected Operand expression;
+    /** Optional operand for specialization eg. Currency */
+    protected Operand rightOperand;
 
 	/**
 	 * Construct a Variable object
@@ -73,6 +76,18 @@ public class Variable extends DelegateOperand
         return operator.getDelegateType();
     }
 
+    /**
+     * Set delegate type
+     * @param delegateType Delegate type
+     */
+    public void setDelegateType(DelegateType delegateType)
+    {
+        operator.setDelegateType(delegateType);
+        // Fix cursor type delegate permanently for special types
+        if (delegateType == DelegateType.CURSOR)
+            operator.setProxy(operator.getProxy());
+    }
+    
     /**
      * Assign a value to this Operand derived from a parameter 
      * @param parameter Parameter containing non-null value
@@ -139,6 +154,16 @@ public class Variable extends DelegateOperand
 		return expression;
 	}
 
+    /**
+     * setRightOperand
+     * @see au.com.cybersearch2.classy_logic.interfaces.RightOperand#setRightOperand(au.com.cybersearch2.classy_logic.interfaces.Operand)
+     */
+    @Override
+    public void setRightOperand(Operand rightOperand)
+    {
+        this.rightOperand = rightOperand;
+    }
+    
 	/**
 	 * Returns null		
 	 * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperand()
@@ -146,7 +171,7 @@ public class Variable extends DelegateOperand
 	@Override
 	public Operand getRightOperand() 
 	{
-		return null;
+		return rightOperand;
 	}
 
     /**
@@ -165,5 +190,6 @@ public class Variable extends DelegateOperand
         String valueText = ( value == null ? "null" : value.toString());
         return (!name.isEmpty() ? name + "=" : "") + valueText;
     }
+
 
 }
