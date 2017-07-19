@@ -1,4 +1,3 @@
-list<string> fruit = { "apple", "pear", "orange" };
 list<integer> dice = { 2, 5, 1 };
 list<double> dimensions = { 12.54, 6.98, 9.12 };
 
@@ -10,14 +9,13 @@ list<boolean> flags = { 1 == 1, 1 == 0 };
 axiom bright_stars ( a, b, c )
   { "Sirius" ,"Canopus", "Rigil Kentaurus" };
   
-list<term> stars(bright_stars);
-
 axiom greatest = 
     { "The Godfather" }
     { "The Shawshank Redemption" }
     { "Schindler's List" };
 
 template fruit
++ list<string> fruit = { "apple", "pear", "orange" };
 ( 
   fruit[0], fruit[1], fruit[2], size = fruit.length
 );
@@ -43,6 +41,7 @@ template flags
 );
 
 template stars
++ list<term> stars(global.bright_stars);
 ( 
   stars[0], stars[1], stars[2], size = stars.length
 );

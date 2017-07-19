@@ -69,12 +69,35 @@ public class Result
 		this.axiomMap = axiomMap;
 	}
 
+    /**
+     * Returns iterator for result list specified by global namespace key
+     * @param name Name of list
+     * @return Axiom Iterator
+     */
+    public Iterator<Axiom> axiomIterator(String name)
+    {
+        return getList(QualifiedName.parseGlobalName(name)).iterator();
+    }
+
+    /**
+     * Returns iterator for result list specified by global namespace key
+     * @param name Name of list
+     * @return Axiom Iterator
+     */
+    public Iterator<Axiom> axiomIterator(String scope, String name)
+    {
+        Iterable<Axiom> axiomListIterable = listMap.get(new QualifiedName(scope, name));
+        if (axiomListIterable == null)
+            axiomListIterable = getList(new QualifiedTemplateName(scope, name));
+        return axiomListIterable != null ? axiomListIterable.iterator() : EMPTY_ITERATOR;
+    }
+
 	/**
 	 * Returns iterator for result list specified by key
 	 * @param qname Qualified name of list
 	 * @return Iterator of generic type Axiom
 	 */
-    public Iterator<Axiom> getIterator(QualifiedName qname)
+    public Iterator<Axiom> axiomIterator(QualifiedName qname)
 	{
 	    return getList(qname).iterator();
 	}
@@ -91,19 +114,6 @@ public class Result
     }
 
     /**
-     * Returns iterator for result list specified by global namespace key
-     * @param name Name of list
-     * @return Axiom Iterator
-     */
-    public Iterator<Axiom> getIterator(String scope, String name)
-    {
-        Iterable<Axiom> axiomListIterable = listMap.get(new QualifiedName(scope, name));
-        if (axiomListIterable == null)
-            axiomListIterable = getList(new QualifiedTemplateName(scope, name));
-        return axiomListIterable != null ? axiomListIterable.iterator() : EMPTY_ITERATOR;
-    }
-
-    /**
      * Returns axiom result specified by global namespace key
      * @param name Name of axiom
      * @return Axiom object
@@ -114,16 +124,6 @@ public class Result
         if (axiom == null)
             axiom  = axiomMap.get(new QualifiedTemplateName(scope, name));
         return axiom != null ? axiom : new Axiom(name);
-    }
-
-    /**
-     * Returns iterator for result list specified by global namespace key
-     * @param name Name of list
-     * @return Axiom Iterator
-     */
-    public Iterator<Axiom> getIterator(String name)
-    {
-        return getList(QualifiedName.parseGlobalName(name)).iterator();
     }
 
     /**

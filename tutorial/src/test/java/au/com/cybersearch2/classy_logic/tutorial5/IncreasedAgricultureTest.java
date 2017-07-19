@@ -107,7 +107,7 @@ public class IncreasedAgricultureTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc surface_area_increase (5,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template surface_area_increase (5,1)");
         assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();

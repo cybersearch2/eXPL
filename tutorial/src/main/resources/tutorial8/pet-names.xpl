@@ -12,9 +12,9 @@ list<string> pets_info =
 
 string nameRegex = "<name>([a-zA-z']*)[^a-zA-z']";
 
-calc dogs
+calc pets
++ cursor pet_cursor(pets_info);
 (
-  pet_cursor = pets_info.cursor,
   string petRegex = 
     "^.*" + nameRegex +".*", 
   {
@@ -25,4 +25,4 @@ calc dogs
   }
 );
 
-query pet_query (dogs);
+query pet_names(pets);

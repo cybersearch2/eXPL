@@ -25,8 +25,8 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * PetNames
- * Demonstrates library function call
+ * TowersOfHanoi
+ * Demonstrates recusrion
  * @author Andrew Bowley
  * 14 Sep 2015
  */

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import java.io.File;
 
@@ -50,45 +50,49 @@ list<string> pets_info =
 
 string nameRegex = "<name>([a-zA-z']*)[^a-zA-z']";
 
-calc dogs
+calc pets
++ cursor pet_cursor(pets_info);
 (
-  integer i = 0,
   string petRegex = 
     "^.*" + nameRegex +".*", 
   {
-    ? i < pets_info.length,
-    string pet = pets_info[i++],
-    regex() pet == petRegex { name }, 
+    ? pet_cursor.fact,
+    pet = pet_cursor++,
+    regex pet == petRegex { name }, 
     system.print(name)
   }
 );
 
-query pet_query (dogs);
+query pet_names(pets);
+
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
     public PetNames()
     {
-        File resourcePath = new File("src/main/resources/tutorial6");
+        File resourcePath = new File("src/main/resources/tutorial8");
         queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
     }
 
     /**
-     * Compiles the pets.xpl script and runs the "pet_query" query.<br/>
+     * Compiles the pets.xpl script and runs the "pet_names" query.<br/>
      * The expected results:<br/>
-        Lassie is a blonde dog.<br/>
-        Bruiser is a brindle dog.<br/>
-        Rex is a black and tan dog.<br/>
-        Axel is a white dog.<br/>
-        Fido is a brown dog.<br/>    
+        Lassie<br/>
+        Cuddles<br/>
+        Bruiser<br/>
+        Rex<br/>
+        Pixie<br/>
+        Axel<br/>
+        Amiele<br/>
+        Fido<br/>
      * @return Axiom iterator
      */
-    public void  dogs()
+    public void  petNames()
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("pet-names.xpl");
         parserContext = queryProgramParser.getContext();
-        queryProgram.executeQuery("pet_query");
+        queryProgram.executeQuery("pet_names");
     }
 
     FunctionManager provideFunctionManager()
@@ -113,7 +117,7 @@ query pet_query (dogs);
         try 
         {
             PetNames petNames = new PetNames();
-            petNames.dogs();
+            petNames.petNames();
         } 
         catch (ExpressionException e) 
         { 

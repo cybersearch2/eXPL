@@ -80,7 +80,7 @@ query high_cities (city : high_city);
         QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-listed.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("high_cities"); 
-		return result.getIterator("city_list");
+		return result.axiomIterator("city_list");
 	}
 
 	public ParserContext getParserContext()

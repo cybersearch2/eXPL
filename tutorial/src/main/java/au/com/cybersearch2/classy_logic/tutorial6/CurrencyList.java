@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.tutorial6;
 
 import java.io.File;
+import java.math.BigDecimal;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
@@ -27,39 +28,61 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * CurrencyCursor
- * Demonstrates 
+ * CurrencyList
+ * Demonstrates converting a string list containing formatted amount string literals to a
+ * and currency list holding decimal amounts. The list is included in the query result by
+ * using the "export" modifier.
  * @author Andrew Bowley
  * 14 Sep 2015
  */
-public class CurrencyCursor
+public class CurrencyList
 {
-/* currency-cursor.xpl
+/* currency-list.xpl
+list<string> euro_amounts = 
+{
+  "14.567,89",
+  "14 197,52",
+  "590,00"
+};
+
+template all_amounts
++ export list<currency> amount_list;
+(
+. amount_list[0] = euro_amount[0],
+. amount_list[1] = euro_amount[1],
+. amount_list[2] = euro_amount[2],
+);
+
+query parse_amounts(all_amounts);
+
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public CurrencyCursor()
+    public CurrencyList()
     {
         File resourcePath = new File("src/main/resources/tutorial6");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
     /**
-     * Compiles the currency-cursor.xpl script and runs the "print_all_amounts" query.<br/>
+     * Compiles the currency-listr.xpl script and runs the "parse_amounts" query.<br/>
      * The expected results:<br/>
+        14567.89<br/>
+        14197.52<br/>
+        590<br/>
+        total=29355.41<br/>
      * @return Axiom iterator
      */
     public void  amounts()
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("currency-cursor.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("currency-list.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("parse_amounts");
-        Axiom axiom = result.getAxiom(new QualifiedName(QualifiedName.EMPTY, "all_amounts", "amount_list"));
-        for (int i = 0; i < axiom.getTermCount(); ++i)
-            System.out.println(axiom.getTermByIndex(i).toString());
-        axiom = result.getAxiom("parse_amounts");
-        System.out.println(axiom.getTermByIndex(0).toString());
+        Axiom axiom = result.getAxiom(new QualifiedName("global", "decimal_amounts", "amount_list"));
+        BigDecimal[] amounts = (BigDecimal[])axiom.getTermByIndex(0).getValue();
+        for (int i = 0; i < amounts.length; ++i)
+            System.out.println(amounts[i].toString());
     }
 
     public ParserContext getParserContext()
@@ -75,8 +98,8 @@ public class CurrencyCursor
     {
         try 
         {
-            CurrencyCursor currencyCursor = new CurrencyCursor();
-            currencyCursor.amounts();
+            CurrencyList currencyList = new CurrencyList();
+            currencyList.amounts();
         } 
         catch (ExpressionException e) 
         { 

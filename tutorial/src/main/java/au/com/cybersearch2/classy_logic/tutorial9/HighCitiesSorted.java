@@ -101,7 +101,7 @@ query high_cities (city : high_city) -> (insert_sort);
         QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-sorted.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("high_cities");
-		return result.getIterator("high_cities");
+		return result.axiomIterator("high_cities");
 	}
 
     public ParserContext getParserContext()

@@ -65,7 +65,7 @@ public class Colors
         QueryProgram queryProgram = queryProgramParser.loadScript("colors.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("colors");
-        return result.getIterator("colors");
+        return result.axiomIterator("colors");
     }
 
     public ParserContext getParserContext()

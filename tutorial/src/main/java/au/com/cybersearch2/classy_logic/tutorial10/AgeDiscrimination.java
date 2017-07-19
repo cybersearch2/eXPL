@@ -83,7 +83,7 @@ public class AgeDiscrimination
         QueryProgram queryProgram = queryProgramParser.loadScript("age-discrimination.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("rate_age");
-        return result.getIterator("rate_age");
+        return result.axiomIterator("rate_age");
     }
 
     public ParserContext getParserContext()

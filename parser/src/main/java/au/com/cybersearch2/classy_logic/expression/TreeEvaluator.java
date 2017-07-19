@@ -111,14 +111,6 @@ abstract class TreeEvaluator extends DelegateOperand
             left == null ? EvaluationStatus.COMPLETE : evaluateLeft(left, right, id);
         if (evaluationStatus == EvaluationStatus.COMPLETE) 
         {
-            if (((operatorEnum == OperatorEnum.INCR) || 
-                    (operatorEnum == OperatorEnum.DECR)) &&
-                   (left.getOperator().getTrait().getOperandType() == OperandType.CURSOR))
-            {
-                leftIsNaN = true;
-                left.getOperator().numberEvaluation(operatorEnum, left);
-                return evaluationStatus;
-            }
             // Remember if left is not a number
             leftIsNaN = utils.isNaN(left, operatorEnum);
             if (right != null)
@@ -131,6 +123,15 @@ abstract class TreeEvaluator extends DelegateOperand
                         return EvaluationStatus.SKIP;
                 }
             }
+            else if ((left != null) &&
+                     ((operatorEnum == OperatorEnum.INCR) || 
+                        (operatorEnum == OperatorEnum.DECR)) &&
+                       (left.getOperator().getTrait().getOperandType() == OperandType.CURSOR))
+                {
+                    leftIsNaN = true;
+                    left.getOperator().numberEvaluation(operatorEnum, left);
+                    return evaluationStatus;
+                }
         }
         return evaluationStatus;
     }

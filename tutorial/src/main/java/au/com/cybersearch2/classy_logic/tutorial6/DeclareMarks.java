@@ -78,7 +78,7 @@ query<axiom> marks(grades : score);
         QueryProgram queryProgram = queryProgramParser.loadScript("declare-marks.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("marks");
-        return result.getIterator("marks");
+        return result.axiomIterator("marks");
 	}
 
     public ParserContext getParserContext()

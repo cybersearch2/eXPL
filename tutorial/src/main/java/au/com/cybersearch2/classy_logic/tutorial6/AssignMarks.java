@@ -90,7 +90,7 @@ axiom grades (student, english, maths, history)
         QueryProgram queryProgram = queryProgramParser.loadScript("assign-marks.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("marks");
-        return result.getIterator("marks");
+        return result.axiomIterator("marks");
 	}
 
     public ParserContext getParserContext()

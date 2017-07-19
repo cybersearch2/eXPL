@@ -98,7 +98,7 @@ calc row
       {
          puzzle[i+j] = flags & ~mask
       },
-       ? ++j < 4
+      ? ++j < 4
     },
     : (i += 4) == 16
   }

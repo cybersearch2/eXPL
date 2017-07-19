@@ -13,10 +13,9 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial16;
+package au.com.cybersearch2.classy_logic.tutorial19;
 
 import java.io.File;
-import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -24,59 +23,43 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * PetNames
- * Demonstrates library function call
+ * Sudoku
+ * Demonstrates multi stage solution to well-known puzzle
  * @author Andrew Bowley
  * 14 Sep 2015
  */
-public class SchoolMarks
+public class Sudoku
 {
-/* school-marks.xpl
-axiom grades 
-  (student, english, math, history)
-  {"Amy",    14, 16, 6}
-  {"George", 15, 13, 16}
-  {"Sarah",  12, 17, 14};
-  
-template score(student, integer total = math.add(english, math, history));
-
-query<axiom> marks(grades : score); 
- 
-*/
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public SchoolMarks()
+    public Sudoku()
     {
-        File resourcePath = new File("src/main/resources/tutorial16");
+        File resourcePath = new File("src/main/resources/tutorial19");
         queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
     }
 
     /**
-     * Compiles the school-marks.xpl script and runs the "marks" query.<br/>
+     * Compiles the towers-of-hanoi.xpl script and runs the "" queries.<br/>
      * The expected results:<br/>
-        score(student = Amy, total = 36)<br/>
-        score(student = George, total = 44)<br/>
-        score(student = Sarah, total = 43)<br/>
      * @return Axiom iterator
      */
-    public Iterator<Axiom>  generateReport()
+    public void  calculateSudoku()
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("school-marks.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("sudoku.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("marks");
-        return result.axiomIterator("marks");
+        Result result = queryProgram.executeQuery("sudoku");
+        System.out.println(result.getAxiom("puzzle").toString());
     }
 
     FunctionManager provideFunctionManager()
     {
         FunctionManager functionManager = new FunctionManager();
-        MathFunctionProvider mathFunctionProvider = new MathFunctionProvider();
-        functionManager.putFunctionProvider(mathFunctionProvider.getName(), mathFunctionProvider);
+        SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
+        functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
         return functionManager;
     }
 
@@ -93,12 +76,8 @@ query<axiom> marks(grades : score);
     {
         try 
         {
-            SchoolMarks schoolMarks = new SchoolMarks();
-            Iterator<Axiom> iterator = schoolMarks.generateReport();
-            while(iterator.hasNext())
-            {
-                System.out.println(iterator.next().toString());
-            }
+            Sudoku sudoku = new Sudoku();
+            sudoku.calculateSudoku();
         } 
         catch (ExpressionException e) 
         { 

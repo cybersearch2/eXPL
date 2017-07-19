@@ -73,7 +73,7 @@ public class QualifiedName implements Comparable<QualifiedName>, Serializable
      */
     public QualifiedName(String scope, String name)
     {
-        this(QueryProgram.GLOBAL_SCOPE.equals(scope) ? EMPTY : scope, EMPTY, name);
+        this(scope, EMPTY, name);
     }
 
     /**
@@ -84,7 +84,7 @@ public class QualifiedName implements Comparable<QualifiedName>, Serializable
      */
     public QualifiedName(String scope, String template, String name)
     {
-        this.scope = scope;
+        this.scope = QueryProgram.GLOBAL_SCOPE.equals(scope) ? EMPTY : scope;
         this.template = template == null ? EMPTY : template;
         this.name = name;
     }

@@ -90,4 +90,21 @@ public interface ItemList<T> extends Iterable<T>, SourceInfo
 	 */
 	void clear();
 
+	/**
+     * @return public flag
+     */
+    boolean isPublic();
+
+    /**
+     * @param isPublic Public flag
+     */
+    void setPublic(boolean isPublic);
+
+    /**
+     * Returns an array containing all of the elements in this list in
+     * proper sequence (from first to last element); the runtime type of
+     * the returned array is that of the specified array. 
+     * @return an array containing the elements of this list
+     */
+    T[] toArray();
 }

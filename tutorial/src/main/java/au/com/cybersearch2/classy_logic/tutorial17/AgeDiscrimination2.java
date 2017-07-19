@@ -93,7 +93,7 @@ query<axiom> star_people(person : perfect_match);
         QueryProgram queryProgram = queryProgramParser.loadScript("age-discrimination2.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("star_people");
-        return result.getIterator("star_people");
+        return result.axiomIterator("star_people");
     }
 
     public ParserContext getParserContext()

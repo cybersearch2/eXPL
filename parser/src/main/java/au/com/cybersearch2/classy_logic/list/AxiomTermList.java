@@ -54,6 +54,8 @@ public class AxiomTermList implements ItemList<Term>, AxiomContainer
     protected SourceItem sourceItem;
     /** Archetype identity used to detect axiom specification changes */
     protected String archetypeName;
+    /** Flag set true if list is exported */
+    protected boolean isPublic;
 
 	/** Empty Axiom constant */
 	static Axiom EMPTY_AXIOM;
@@ -326,6 +328,24 @@ public class AxiomTermList implements ItemList<Term>, AxiomContainer
 	}
 
     /**
+     * @return public flag
+     */
+    @Override
+    public boolean isPublic()
+    {
+        return isPublic;
+    }
+
+    /**
+     * @param isPublic Public flag
+     */
+    @Override
+    public void setPublic(boolean isPublic)
+    {
+        this.isPublic = isPublic;
+    }
+
+    /**
      * setSourceItem
      * @see au.com.cybersearch2.classy_logic.interfaces.SourceInfo#setSourceItem(au.com.cybersearch2.classy_logic.compile.SourceItem)
      */
@@ -358,4 +378,12 @@ public class AxiomTermList implements ItemList<Term>, AxiomContainer
         return OperandType.TERM;
     }
 
+    @Override
+    public Term[] toArray()
+    {
+        Term[] array = new Term[axiom.getTermCount()];
+        for (int i = 0; i < axiom.getTermCount(); ++i)
+            array[i] = axiom.getTermByIndex(i);
+        return array;
+    }
 }

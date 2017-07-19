@@ -94,7 +94,7 @@ query<axiom> euro_megacities (mega_city : euro_megacities);
         QueryProgram queryProgram = queryProgramParser.loadScript("euro_megacities.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("euro_megacities");
-        return result.getIterator("euro_megacities");
+        return result.axiomIterator("euro_megacities");
     }
 
     public ParserContext getParserContext()

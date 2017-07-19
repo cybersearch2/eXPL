@@ -1,6 +1,7 @@
 axiom unsorted() {12, 3, 1, 5, 8};
-list<term> sorted(unsorted);
+
 calc insert_sort 
++ export list<term> sorted(global.unsorted);
 (
   integer i = 1, 
   {
@@ -15,4 +16,5 @@ calc insert_sort
     ? ++i < sorted.length
   }
 );
+
 query sort_axiom (insert_sort);

@@ -77,7 +77,7 @@ query sort_axiom (insert_sort);
         QueryProgram queryProgram = queryProgramParser.loadScript("nested-loops.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("sort_axiom");
-		return result.getAxiom("sorted");
+		return result.getAxiom("insert_sort.sorted");
 	}
 
     public ParserContext getParserContext()

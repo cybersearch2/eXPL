@@ -85,7 +85,7 @@ query<axiom> price_query(price : total) -> (format_total);
 		// Use this query to see the total amount before it is formatted
 		// Note adjustment of decimal places to suite currency.
 		Result result = queryProgram.executeQuery("price_query");
-		return result.getIterator("price_query");
+		return result.axiomIterator("price_query");
 	}
 	
     public ParserContext getParserContext()

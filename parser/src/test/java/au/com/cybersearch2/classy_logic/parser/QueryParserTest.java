@@ -569,7 +569,7 @@ public class QueryParserTest
         //queryProgram.setExecutionContext(new ExecutionContext());
         //queryProgram.executeQuery("towers_of_hanoi");
         Result result = queryProgram.executeQuery("towers_of_hanoi");
-        Iterator<Axiom> iterator = result.getIterator("moves");
+        Iterator<Axiom> iterator = result.axiomIterator("moves");
         File towersList = new File("src/test/resources", "towers-of-hanoi.lst");
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(towersList), "UTF-8"));
         while (iterator.hasNext())
@@ -594,7 +594,7 @@ public class QueryParserTest
        //       return true;
        //   }});
         Result result = queryProgram.executeQuery("group_query");
-        Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("city_group_list"));
+        Iterator<Axiom> iterator = result.axiomIterator(QualifiedName.parseGlobalName("city_group_list"));
         File worldCurrencyList = new File("src/test/resources", "cities-group.lst");
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(worldCurrencyList), "UTF-8"));
         while(iterator.hasNext())
@@ -756,7 +756,7 @@ public class QueryParserTest
 		//		return true;
 		//	}});
 		Result result = queryProgram.executeQuery("price_query");
-		Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("world_list"));
+		Iterator<Axiom> iterator = result.axiomIterator(QualifiedName.parseGlobalName("world_list"));
     	File worldCurrencyList = new File("src/test/resources", "world_currency.lst");
      	BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(worldCurrencyList), "UTF-8"));
         while(iterator.hasNext())

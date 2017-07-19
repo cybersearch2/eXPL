@@ -76,7 +76,7 @@ public class CalculateSquareMiles
                 //System.out.println(solution.getAxiom("km2_to_mi2"));
                 return true;
             }});
-		return  result.getIterator("surface_area");
+		return  result.axiomIterator("surface_area");
 	}
 
     public ParserContext getParserContext()

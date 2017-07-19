@@ -65,7 +65,7 @@ query<axiom> more_agriculture(Data : agri_20y, surface_area : surface_area_incre
         QueryProgram queryProgram = queryProgramParser.loadScript("tutorial5/more_agriculture.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("more_agriculture");
-        return result.getIterator("more_agriculture");
+        return result.axiomIterator("more_agriculture");
     }
 
     public ParserContext getParserContext()

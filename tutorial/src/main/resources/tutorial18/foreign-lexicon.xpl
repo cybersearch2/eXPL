@@ -1,5 +1,5 @@
-list<term> german_list(german.colors : resource);
-list<term> french_list(french.colors : resource);
+export list<term> german_list(german.colors : resource);
+export list<term> french_list(french.colors : resource);
 
 scope french (language="fr", region="FR"){}
 scope german (language="de", region="DE"){}

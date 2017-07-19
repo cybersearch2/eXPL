@@ -72,7 +72,7 @@ query<axiom> query_in_words(lexicon : in_words);
         QueryProgram queryProgram = queryProgramParser.loadScript("query_in_words.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("query_in_words");
-        return result.getIterator("query_in_words");
+        return result.axiomIterator("query_in_words");
     }
 
     public ParserContext getParserContext()

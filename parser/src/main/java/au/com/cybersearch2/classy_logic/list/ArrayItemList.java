@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -23,6 +24,7 @@ import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 
 /**
@@ -47,6 +49,8 @@ public class ArrayItemList<T> implements ItemList<T>
     protected int size;
     /** Offset when list does not start at index of zero */
     protected int offset;
+    /** Flag set true if list is exported */
+    protected boolean isPublic;
 
     /**
      * Construct a ArrayItemList object
@@ -62,7 +66,7 @@ public class ArrayItemList<T> implements ItemList<T>
 		size = Integer.MIN_VALUE;
 	}
 
-	/**
+    /**
 	 * Preset size
 	 * @param size Max permitted number of items in this list
 	 */
@@ -234,6 +238,24 @@ public class ArrayItemList<T> implements ItemList<T>
             sourceItem.setInformation(toString());
 	}
 
+    /**
+     * @return public flag
+     */
+    @Override
+    public boolean isPublic()
+    {
+        return isPublic;
+    }
+
+    /**
+     * @param isPublic Public flag
+     */
+    @Override
+    public void setPublic(boolean isPublic)
+    {
+        this.isPublic = isPublic;
+    }
+
     @Override
     public void setSourceItem(SourceItem sourceItem)
     {
@@ -266,5 +288,34 @@ public class ArrayItemList<T> implements ItemList<T>
     public void assignObject(int index, Object value)
     {
         assignItem(index, (T)value);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    @Override
+    public T[] toArray()
+    {
+        int size = valueList.size();
+        T[] array = null;
+        switch(operandType)
+        {
+        case INTEGER:
+            array = (T[]) new Long[size]; break;
+        case BOOLEAN:
+            array = (T[]) new Boolean[size]; break;
+        case DOUBLE:
+            array = (T[]) new Double[size]; break;
+        case STRING:
+            array = (T[]) new String[size]; break;
+        case DECIMAL:
+        case CURRENCY:
+            array = (T[]) new BigDecimal[size]; break;
+        case TERM:
+            array = (T[]) new Term[size]; break;
+        case AXIOM:
+            array = (T[]) new Axiom[size]; break;
+        default :
+            return null;
+        }
+        return (T[])valueList.toArray(array);
     }
 }

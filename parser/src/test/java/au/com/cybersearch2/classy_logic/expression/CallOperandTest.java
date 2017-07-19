@@ -636,7 +636,7 @@ public class CallOperandTest
         //queryProgram.setExecutionContext(new ExecutionContext());
         Result result = queryProgram.executeQuery("match");
         QualifiedName qname = QualifiedName.parseGlobalName("match");
-        Axiom matchAxiom = result.getIterator(qname).next();
+        Axiom matchAxiom = result.axiomIterator(qname).next();
         AxiomList axiomList = (AxiomList) matchAxiom.getTermByName("geminis").getValue();
         Iterator<AxiomTermList> listIterator = axiomList.getIterable().iterator();
         int index = 0;
@@ -645,7 +645,7 @@ public class CallOperandTest
             assertThat(listIterator.next().getAxiom().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
         assertThat(index).isEqualTo(4);
         qname = QualifiedName.parseGlobalName("match");
-        Iterator<Axiom> iterator = result.getIterator(qname);
+        Iterator<Axiom> iterator = result.axiomIterator(qname);
         Axiom axiom = iterator.next();
         //System.out.println(axiom); //iterator.next().toString()); 
         axiomList = (AxiomList) (axiom.getTermByName("candidate_list").getValue());
@@ -661,7 +661,7 @@ public class CallOperandTest
         queryProgram.parseScript(FACTUAL_MATCH);
         Result result = queryProgram.executeQuery("match");
         QualifiedName qname = QualifiedName.parseGlobalName("match.eligible");
-        Iterator<Axiom> iterator = result.getIterator(qname);
+        Iterator<Axiom> iterator = result.axiomIterator(qname);
         int index = 0;
         while(iterator.hasNext())
             //System.out.println(iterator.next().toString());
@@ -675,7 +675,7 @@ public class CallOperandTest
         queryProgram.parseScript(SORTED_CITIES);
         //queryProgram.setExecutionContext(new ExecutionContext());
         Result result = queryProgram.executeQuery("sort_cities");
-        Iterator<Axiom> iterator = result.getIterator(QualifiedName.parseGlobalName("city_list"));
+        Iterator<Axiom> iterator = result.axiomIterator(QualifiedName.parseGlobalName("city_list"));
         int index = 0;
         while(iterator.hasNext())
             //System.out.println(iterator.next().toString());
@@ -781,7 +781,7 @@ public class CallOperandTest
     public void test_school_report_in_scope()
     {
         Result result = test_school_report(SCHOOL_REPORT_IN_SCOPE);
-        Iterator<Axiom> iterator = result.getIterator("marks");
+        Iterator<Axiom> iterator = result.axiomIterator("marks");
         int index = 0;
         while (iterator.hasNext())
         {

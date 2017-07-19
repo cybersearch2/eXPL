@@ -71,7 +71,7 @@ query<axiom> high_cities (city : high_city);
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
         Result result = queryProgram.executeQuery("high_cities");
-        return result.getIterator("high_cities");
+        return result.axiomIterator("high_cities");
     }
 
 	/**

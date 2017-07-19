@@ -110,7 +110,7 @@ public class BlackIsWhiteTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> shade.color1(global.patch){4} (14,3) (14,33)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> shade.color1(patch){4} (14,3) (14,33)");
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("list shade.color2 (15,3)");
@@ -118,7 +118,7 @@ public class BlackIsWhiteTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> shade.color2(global.patch){4} (15,3) (15,33)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> shade.color2(patch){4} (15,3) (15,33)");
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("list shade.inverse_name (16,3)");
@@ -126,7 +126,7 @@ public class BlackIsWhiteTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> shade.inverse_name(global.inverse){3} (16,3) (16,41)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> shade.inverse_name(inverse){3} (16,3) (16,41)");
         assertThat(iterator.hasNext()).isFalse();
     }
 

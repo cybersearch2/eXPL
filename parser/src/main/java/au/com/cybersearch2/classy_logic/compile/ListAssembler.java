@@ -426,27 +426,26 @@ public class ListAssembler
      */
     protected Axiom copyAxiom(Entry<QualifiedName, ItemList<?>> entry, Map<QualifiedName, Axiom> axiomMap)
     {
+        if (!entry.getValue().isPublic())
+            return null;
         ItemList<?> itemList = entry.getValue();
         // Create deep copy in case item list is cleared
-        Axiom axiom = null;
-        if (itemList.getOperandType().equals(OperandType.TERM))
-        {   // AxiomTermList contains backing axiom
-            AxiomTermList axiomTermList = (AxiomTermList)itemList;
-            axiom = new Axiom(entry.getKey().getName());
-            Axiom source = axiomTermList.getAxiom();
-            for (int i = 0; i < source.getTermCount(); i++)
-                axiom.addTerm(source.getTermByIndex(i));
-        }
-        else if (!itemList.getOperandType().equals(OperandType.AXIOM))
-        {   // Regular ItemList contains objects which are packed into axiom to return
-            axiom = new Axiom(entry.getKey().getName());
-            Iterator<?> iterator = itemList.getIterable().iterator();
-            while (iterator.hasNext())
-                axiom.addTerm(new Parameter(Term.ANONYMOUS, iterator.next()));
-        }
-        if (axiom != null)
-            // Use fully qualified key to avoid name collisions
+        if (!itemList.getOperandType().equals(OperandType.AXIOM))
+        {
+            Axiom axiom = new Axiom(entry.getKey().getName());
+            if (itemList.getOperandType().equals(OperandType.TERM))
+            {
+                Axiom targetAxiom = ((AxiomTermList)itemList).getAxiom();
+                for (int i = 0; i < targetAxiom.getTermCount(); ++i)
+                    axiom.addTerm(targetAxiom.getTermByIndex(i));
+            }
+            else
+            {
+                axiom.addTerm(new Parameter(Term.ANONYMOUS, itemList.toArray()));
+            }
             axiomMap.put(itemList.getQualifiedName(), axiom);
-        return axiom;
-    }
+            return axiom;
+        }
+        return null;
+     }
 }

@@ -103,7 +103,7 @@ query<axiom> asia_top_ten (mega_city : asia_top_ten);
         QueryProgram queryProgram = queryProgramParser.loadScript("asia_top_ten.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("asia_top_ten");
-        return result.getIterator("asia_top_ten");
+        return result.axiomIterator("asia_top_ten");
     }
 
     public ParserContext getParserContext()

@@ -66,6 +66,8 @@ public class DynamicList<T> implements ItemList<T>
     protected OperandType operandType;
     /** Source item to be updated in parser task */
     protected SourceItem sourceItem;
+    /** Flag set true if list is exported */
+    protected boolean isPublic;
     
     /**
      * Construct a DynamicList object
@@ -191,6 +193,24 @@ public class DynamicList<T> implements ItemList<T>
     }
 
     /**
+     * @return public flag
+     */
+    @Override
+    public boolean isPublic()
+    {
+        return isPublic;
+    }
+
+    /**
+     * @param isPublic Public flag
+     */
+    @Override
+    public void setPublic(boolean isPublic)
+    {
+        this.isPublic = isPublic;
+    }
+
+    /**
      * toString
      * @see java.lang.Object#toString()
      */
@@ -200,4 +220,13 @@ public class DynamicList<T> implements ItemList<T>
         return "List <" + operandType.toString().toLowerCase() + ">[" + getLength() + "]";
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public T[] toArray()
+    {
+        T[] array = (T[])new Object[template.getTermCount()];
+        for (int i = 0; i < template.getTermCount(); ++i)
+            array[i] = (T)template.getTermByIndex(i).getValue();
+        return array;
+    }
 }

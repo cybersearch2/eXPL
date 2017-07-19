@@ -71,7 +71,7 @@ query<axiom> high_cities (city_altitude : high_city);
         QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("high_cities");
-        return result.getIterator("high_cities");
+        return result.axiomIterator("high_cities");
     }
 
     public ParserContext getParserContext()

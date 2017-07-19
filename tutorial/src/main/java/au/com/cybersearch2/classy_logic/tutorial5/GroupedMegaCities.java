@@ -110,7 +110,7 @@ query<axiom> mega_cities_by_continent (continents : continent, mega_city : conti
         QueryProgram queryProgram = queryProgramParser.loadScript("grouping.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("mega_cities_by_continent");
-        return result.getIterator("mega_cities_by_continent");
+        return result.axiomIterator("mega_cities_by_continent");
     }
 
     public ParserContext getParserContext()

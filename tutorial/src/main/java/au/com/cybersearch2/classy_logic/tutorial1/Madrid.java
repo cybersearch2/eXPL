@@ -69,7 +69,7 @@ query<axiom> madrid (city_altitude : madrid);
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("madrid.xpl");
         Result result = queryProgram.executeQuery("madrid");
-        return result.getIterator("madrid");
+        return result.axiomIterator("madrid");
     }
 
 	/**

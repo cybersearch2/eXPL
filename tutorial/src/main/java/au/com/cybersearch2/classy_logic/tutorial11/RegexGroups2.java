@@ -90,7 +90,7 @@ query<axiom> in_words(dictionary : in_words);
         QueryProgram queryProgram = queryProgramParser.loadScript("dictionary-regex-groups.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("in_words");
-		return result.getIterator("in_words");
+		return result.axiomIterator("in_words");
  	}
 	
     public ParserContext getParserContext()

@@ -81,7 +81,7 @@ query high_cities (city : high_city);
         QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-axioms.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("high_cities"); 
-		return result.getIterator("high_cities");
+		return result.axiomIterator("high_cities");
 	}
 
     public ParserContext getParserContext()

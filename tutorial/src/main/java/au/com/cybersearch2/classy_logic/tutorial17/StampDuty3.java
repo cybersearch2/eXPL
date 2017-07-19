@@ -89,7 +89,7 @@ query<axiom> stamp_duty(transacton_amount : stamp_duty_payable);
         QueryProgram queryProgram = queryProgramParser.loadScript("stamp-duty3.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("stamp_duty");
-        return result.getIterator("stamp_duty");
+        return result.axiomIterator("stamp_duty");
 	}
 	
     public ParserContext getParserContext()

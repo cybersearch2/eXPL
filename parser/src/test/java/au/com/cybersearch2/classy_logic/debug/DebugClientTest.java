@@ -88,7 +88,7 @@ public class DebugClientTest
         Result result = queryProgram.executeQuery("rate_age");
         SourceMarker sourceMarker = context.getSourceMarker();
         assertThat(sourceMarker).isNotNull();
-        return result.getIterator(QualifiedName.parseGlobalName("rated"));
+        return result.axiomIterator(QualifiedName.parseGlobalName("rated"));
     }
 
     @Ignore

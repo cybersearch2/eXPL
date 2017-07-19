@@ -140,6 +140,8 @@ public class ArrayItemListTest
 	public void test_assign()
 	{
 		ArrayItemList<Long> listOperand = new ArrayItemList<Long>(OperandType.INTEGER, QNAME);
+		listOperand.setOffset(0);
+		listOperand.setSize(4);
 		listOperand.assignItem(0, Long.valueOf(17));
 		assertThat(listOperand.getItem(0)).isEqualTo(17);
 		listOperand.assignItem(0, Long.valueOf(21));
