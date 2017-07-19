@@ -15,7 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.helper;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 
 /**
  * NameParser
@@ -23,10 +30,90 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
  * @author Andrew Bowley
  * 7 Jun 2015
  */
-public class NameParser
+public class NameParser 
 {
     final static char DOT = '.';
+    final static String IDENTIFIER = "[a-zA-Z0-9][a-zA-Z_0-9]*";
+    final static String NAME_REGEX = "^(" + IDENTIFIER + ")(\\.)?(" + IDENTIFIER + ")?$" ;
     final static String NULL_KEY_MESSAGE = "Null key passed to name parser";
+
+    /** Pre-compiled pattern */
+    protected Pattern pattern;
+
+    public QualifiedName parse(String name)
+    {
+        if (name.isEmpty())
+            return QualifiedName.ANONYMOUS;
+        String[] fragments = name.split("@");
+        if ((fragments.length > 2) || ((fragments.length == 2) && name.endsWith("@")))
+            throw new ExpressionException("Name \"" + name + "\" with more than one \"@\" is invalid");
+        if (fragments.length < 2)
+            return QualifiedName.parseGlobalName(fragments[0]);
+        try
+        {
+            pattern = Pattern.compile(NAME_REGEX, 0);
+        }
+        catch(PatternSyntaxException e)
+        {
+            throw new ExpressionException("Error in regular expression", e);
+        }
+        String[] groupValues1 = new String[0];
+        Matcher matcher = pattern.matcher(fragments[0]);
+        if (matcher.find())
+            groupValues1 = getGroups(matcher);
+        if (groupValues1.length == 0)
+            throw new ExpressionException("Name \"" + name + "\" is invalid");
+        String[] groupValues2 = new String[0];
+        if (fragments.length == 2)
+        {
+            matcher = pattern.matcher(fragments[1]);
+            if (matcher.find())
+                groupValues2 = getGroups(matcher);
+            if (groupValues2.length == 0)
+                throw new ExpressionException("Name \"" + name + "\" is invalid after \"@\"");
+        }
+        if ((groupValues1.length == 4) && (groupValues2.length == 4))
+            throw new ExpressionException("Name \"" + name + "\" with more than 3 parts is invalid");
+        String templatePart = null;
+        String scopePart = null;
+        // With @, so name comes first
+        String namePart = groupValues1[1];
+        if (groupValues1.length == 4)
+        {
+            templatePart = groupValues1[3];
+            if (groupValues2.length > 1)
+                scopePart = groupValues2[1];
+        }
+        else if (groupValues2.length == 4)
+        {
+            templatePart = groupValues2[1];
+            scopePart = groupValues2[3];
+        }
+        else
+            scopePart = groupValues2[1];
+        if (templatePart == null)
+            templatePart = QualifiedName.EMPTY;
+        if (scopePart == null)
+            scopePart = QualifiedName.EMPTY;
+        return new QualifiedName(scopePart, templatePart, namePart);
+    }
+    
+    /**
+     * Returns values for group 0 and above as array
+     * @param matcher Matcher object in matched state
+     * @return String array
+     */
+    protected static String[] getGroups(Matcher matcher)
+    {
+        List<String> groupList = new ArrayList<String>(matcher.groupCount() + 1);
+        for (int i = 0; i < matcher.groupCount() + 1; i++)
+        {
+            String group = matcher.group(i);
+            if (group != null)
+                groupList.add(group);
+        }
+        return groupList.toArray(new String[groupList.size()]);
+    }
 
     /**
      * Returns name part of key

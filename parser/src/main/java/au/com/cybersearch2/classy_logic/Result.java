@@ -15,10 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -76,7 +78,8 @@ public class Result
      */
     public Iterator<Axiom> axiomIterator(String name)
     {
-        return getList(QualifiedName.parseGlobalName(name)).iterator();
+        NameParser nameParser = new NameParser();
+        return getList(nameParser.parse(name)).iterator();
     }
 
     /**
@@ -137,6 +140,36 @@ public class Result
         return axiom != null ? axiom : new Axiom(qname.getName());
     }
 
+    public Iterator<Long> integerIterator(String name)
+    {
+        return basicIterator(name);
+    }
+    
+    public Iterator<Double> doubleIterator(String name)
+    {
+        return basicIterator(name);
+    }
+    
+    public Iterator<BigDecimal> decimalIterator(String name)
+    {
+        return basicIterator(name);
+    }
+    
+    public Iterator<BigDecimal> currencyIterator(String name)
+    {
+        return basicIterator(name);
+    }
+    
+    public Iterator<String> stringIterator(String name)
+    {
+        return basicIterator(name);
+    }
+    
+    public Iterator<Boolean> booleanIterator(String name)
+    {
+        return basicIterator(name);
+    }
+    
     /**
      * Returns the result list for specified key
      * @param qname Qualiied name of list
@@ -148,5 +181,26 @@ public class Result
         if (list == null)
             return Collections.emptyList();
         return list;
+    }
+    
+    protected <T> Iterator<T> basicIterator(String name)
+    {
+        NameParser nameParser = new NameParser();
+        Axiom axiom = getAxiom(nameParser.parse(name));
+        @SuppressWarnings("unchecked")
+        final T[] arrayValue = (T[])axiom.getTermByIndex(0).getValue();
+        return new Iterator<T>(){
+            int index = 0;
+            @Override
+            public boolean hasNext()
+            {
+                return index < arrayValue.length;
+            }
+
+            @Override
+            public T next()
+            {
+                return arrayValue[index++];
+            }};
     }
 }

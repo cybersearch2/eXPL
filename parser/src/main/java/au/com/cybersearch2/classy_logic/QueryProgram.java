@@ -28,7 +28,6 @@ import au.com.cybersearch2.classy_logic.compile.ParserTask;
 import au.com.cybersearch2.classy_logic.compile.TemplateAssembler;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.NameParser;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -83,6 +82,9 @@ public class QueryProgram extends QueryLauncher
      * and normalizes the value to lowercase letters.  
      * */
 	static public final String VARIANT = "variant";
+	
+    static final char DOT = '.';
+    static final String NULL_KEY_MESSAGE = "Null key passed to name parser";
 	
 	/** Named scopes */
 	protected Map<String, Scope> scopes;
@@ -306,7 +308,7 @@ public class QueryProgram extends QueryLauncher
 	 */
 	public Result executeQuery(String queryName, SolutionHandler solutionHandler) 
 	{
-		return executeQuery(NameParser.getScopePart(queryName), NameParser.getNamePart(queryName), solutionHandler);
+		return executeQuery(getScopePart(queryName), getNamePart(queryName), solutionHandler);
 	}
 
 	/**
@@ -389,4 +391,33 @@ public class QueryProgram extends QueryLauncher
             parserAssembler.setFunctionManager(functionManager);
     }
     
+    /**
+     * Returns name part of key
+     * @param key
+     * @return String
+     */
+    public static String getNamePart(String key)
+    {
+        if (key == null)
+            throw new IllegalArgumentException(NULL_KEY_MESSAGE);
+        int dot = key.lastIndexOf(DOT);
+        if (dot != -1)
+            return key.substring(dot + 1);
+        return key;
+    }
+
+    /**
+     * Returns scope part of key or name of Global Scope if not in key
+     * @param key
+     * @return String
+     */
+    public static String getScopePart(String key)
+    {
+        if (key == null)
+            throw new IllegalArgumentException(NULL_KEY_MESSAGE);
+        int dot = key.indexOf(DOT);
+        if (dot != -1)
+            return key.substring(0, dot);
+        return QueryProgram.GLOBAL_SCOPE;
+    }
 }

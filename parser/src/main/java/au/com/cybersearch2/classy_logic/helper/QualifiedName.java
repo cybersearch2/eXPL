@@ -242,6 +242,8 @@ public class QualifiedName implements Comparable<QualifiedName>, Serializable
      */
     public static QualifiedName parseGlobalName(String text)
     {
+        if (text.startsWith(".") || text.endsWith("."))
+            throw new ExpressionException("Qualified name \"" + text + "\" missing part");
         String[] parts = text.split("\\.");
         if (parts.length == 0)
         {

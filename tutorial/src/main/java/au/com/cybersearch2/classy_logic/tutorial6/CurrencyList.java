@@ -17,14 +17,13 @@ package au.com.cybersearch2.classy_logic.tutorial6;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
@@ -71,7 +70,6 @@ query parse_amounts(all_amounts);
         14567.89<br/>
         14197.52<br/>
         590<br/>
-        total=29355.41<br/>
      * @return Axiom iterator
      */
     public void  amounts()
@@ -79,10 +77,9 @@ query parse_amounts(all_amounts);
         QueryProgram queryProgram = queryProgramParser.loadScript("currency-list.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("parse_amounts");
-        Axiom axiom = result.getAxiom(new QualifiedName("global", "decimal_amounts", "amount_list"));
-        BigDecimal[] amounts = (BigDecimal[])axiom.getTermByIndex(0).getValue();
-        for (int i = 0; i < amounts.length; ++i)
-            System.out.println(amounts[i].toString());
+        Iterator<BigDecimal> iterator = result.currencyIterator("amount_list@decimal_amounts.global");
+        while (iterator.hasNext())
+            System.out.println(iterator.next());
     }
 
     public ParserContext getParserContext()
