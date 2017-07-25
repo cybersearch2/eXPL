@@ -46,7 +46,7 @@ absurd - j. inconsistent with reason or logic or common sense
 ...
 */
 /* query_in_words.xpl
-axiom lexicon (word, definition) : resource;
+resource lexicon axiom(word, definition);
 
 template in_words (regex word == "^in[^ ]+", definition);
 
@@ -65,7 +65,9 @@ query<axiom> query_in_words(lexicon : in_words);
 	}
 	
     /**
-     * Compiles the query_in_words.xpl script and runs the "query_in_words" query
+     * Compiles the query_in_words.xpl script and runs the "query_in_words" query.
+     * The Lexicon resource provides both axiom source and export to console.
+     * @return Axiom iterator (for testing only)
      */
     public Iterator<Axiom> findInWords() 
     {
@@ -90,9 +92,7 @@ query<axiom> query_in_words(lexicon : in_words);
         try 
         {
             InWords inWords = new InWords();
-            Iterator<Axiom> iterator = inWords.findInWords();
-            while(iterator.hasNext()) 
-                System.out.println(iterator.next().toString());
+            inWords.findInWords();
         } 
         catch (ExpressionException e) 
         {

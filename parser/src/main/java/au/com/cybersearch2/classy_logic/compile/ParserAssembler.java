@@ -315,6 +315,14 @@ public class ParserAssembler implements LocaleListener
            	List<Axiom> axiomList = listAssembler.getAxiomItems(qualifiedAxiomName);
         	if (axiomList != null)
         		return axiomAssembler.createAxiomSource(qualifiedAxiomName, axiomList);
+        	// Look for dynamic axiom list
+        	Operand operand = operandMap.getOperand(qualifiedAxiomName);
+        	if (operand != null)
+        	{
+        	    AxiomSource axiomSource = templateAssembler.createAxiomSource(operand);
+        	    if (axiomSource != null)
+        	        return axiomSource;
+        	}
         }
         QualifiedName resourceName = axiomResourceMap.get(qualifiedAxiomName);
     	if (resourceName == null)
@@ -462,29 +470,56 @@ public class ParserAssembler implements LocaleListener
         // Axiom key identifies the listener target and may point to an axiom source, choice or a query solution.
         QualifiedName qualifiedAxiomName = null;
         QualifiedName qualifiedTemplateName = null;
+        List<Axiom> internalAxiomList = null;
+        Scope targetScope = null;
         boolean isTemplateKey = !axiomKey.getTemplate().isEmpty();
+        if (isTemplateKey && 
+            !axiomKey.getName().isEmpty() && 
+            axiomKey.getScope().equals(scope.getAlias()))
+        {   // This is an attached list
+            qualifiedAxiomName = new QualifiedName(scope.getAlias(), axiomKey.getName());
+            internalAxiomList = 
+                        getListAssembler().getAxiomItems(qualifiedAxiomName);
+            if (internalAxiomList != null)
+            {
+                AxiomArchetype archetype = axiomAssembler.getAxiomArchetype(qualifiedAxiomName);
+                if (archetype != null)
+                    axiomContainer.setAxiomTermNameList(archetype.getTermNameList());
+                listAssembler.setAxiomContainer(axiomContainer, internalAxiomList);
+                return;
+            }
+            targetScope = scope;
+            qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), axiomKey.getName());
+        }
         if (isTemplateKey)
-            qualifiedAxiomName = new QualifiedName(axiomKey.getScope(), axiomKey.getTemplate());
+        {
+            if (qualifiedAxiomName == null)
+                qualifiedAxiomName = new QualifiedName(axiomKey.getScope(), axiomKey.getTemplate());
+        }
         else
             qualifiedAxiomName = new QualifiedName(axiomKey.getScope(), axiomKey.getName());
         // A key in axiom form may point to a choice or query solution, so analysis required.
-        // Where there is ambiguity, precedence is given to match on an axiom source  
-        Scope targetScope = findSourceScope(qualifiedAxiomName);
-        if (targetScope != null)
+        // Where there is ambiguity, precedence is given to match on an axiom source 
+        if (targetScope == null)
         {
-            qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
-            isTemplateKey = false;
+            targetScope = findSourceScope(qualifiedAxiomName);
+            if (targetScope != null)
+            {
+                qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
+                isTemplateKey = false;
+            }
+            else if (isTemplateKey)
+                qualifiedTemplateName = axiomKey;
+            else
+                qualifiedTemplateName = new QualifiedTemplateName(axiomKey.getScope(), axiomKey.getName());
         }
-        else if (isTemplateKey)
-            qualifiedTemplateName = axiomKey;
-        else
-            qualifiedTemplateName = new QualifiedTemplateName(axiomKey.getScope(), axiomKey.getName());
         if (targetScope == null)
         {
             // Scope may need to change to Global scope if that is where axiom source with same name found
             targetScope= templateAssembler.findTemplateScope(qualifiedTemplateName);
             if (targetScope == null)
                 throw new ExpressionException("Template \"" + qualifiedTemplateName.toString() + "\" not found");
+                //throw new ExpressionException("List binding failed for target \"" + axiomKey.toString());
             isTemplateKey = true;
         }
         Template template = null;
@@ -502,7 +537,7 @@ public class ParserAssembler implements LocaleListener
             AxiomArchetype archetype = axiomAssembler.getAxiomArchetype(qualifiedAxiomName);
             if (archetype != null)
                 axiomContainer.setAxiomTermNameList(archetype.getTermNameList());
-            List<Axiom> internalAxiomList = 
+            internalAxiomList = 
                 targetScope.getParserAssembler()
                     .getListAssembler()
                     .getAxiomItems(qualifiedAxiomName);
@@ -603,7 +638,9 @@ public class ParserAssembler implements LocaleListener
         String library = qname.getTemplate();
         String name = qname.getName();
         if (library.isEmpty())
-            throw new ExpressionException("Call name \"" + qname.toString() + "\" is invalid");
+            library = qname.getScope();
+        if (library.isEmpty())
+           throw new ExpressionException("Call name \"" + qname.toString() + "\" is invalid");
         String callName = library + "." + name;
         if (externalFunctionProvider == null)
         {

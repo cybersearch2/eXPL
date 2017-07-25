@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial7;
 
 import java.io.File;
 import java.util.Iterator;
@@ -82,7 +82,7 @@ query<axiom> colors(swatch : shade);
 
     public BlackIsWhite()
     {
-        File resourcePath = new File("src/main/resources/tutorial6");
+        File resourcePath = new File("src/main/resources/tutorial7");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
     

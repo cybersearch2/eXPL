@@ -47,7 +47,7 @@ public class NameParser
         String[] fragments = name.split("@");
         if ((fragments.length > 2) || ((fragments.length == 2) && name.endsWith("@")))
             throw new ExpressionException("Name \"" + name + "\" with more than one \"@\" is invalid");
-        if (fragments.length < 2)
+        if ((fragments.length < 2) && !name.endsWith("@"))
             return QualifiedName.parseGlobalName(fragments[0]);
         try
         {
@@ -89,7 +89,7 @@ public class NameParser
             templatePart = groupValues2[1];
             scopePart = groupValues2[3];
         }
-        else
+        else if (groupValues2.length > 0)
             scopePart = groupValues2[1];
         if (templatePart == null)
             templatePart = QualifiedName.EMPTY;

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial7;
 
 import java.io.File;
 import java.util.Iterator;
@@ -28,28 +28,33 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * Colors
+ * Demonstrates axiom term list selection using -> operator for selection by term name
  * @author Andrew Bowley
  * 27 Feb 2015
  */
 public class Colors 
 {
-    /* colors.xpl
-    list<term> color(swatch);
-    axiom swatch (name, red, green, blue)
-    {"aqua", 0, 255, 255}
-    {"black", 0, 0, 0}
-    {"blue", 0, 0, 255};
-    template shade(name, color->red, color->green, color->blue);
-    query<axiom> colors(swatch : shade);
+/* colors.xpl
+axiom swatch 
+(name,  red, green, blue)
+{"aqua",  0,   255, 255}
+{"black", 0,     0,   0}
+{"blue",  0,     0, 255};
 
-    */
+template shade
++ list<term> color(swatch);
+(name, color->red, color->green, color->blue);
+
+query<axiom> colors(swatch : shade);
+
+*/
 
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
     public Colors()
     {
-        File resourcePath = new File("src/main/resources/tutorial6");
+        File resourcePath = new File("src/main/resources/tutorial7");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
     
@@ -64,8 +69,8 @@ public class Colors
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("colors.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("colors");
-        return result.axiomIterator("colors");
+        Result result = queryProgram.executeQuery("inverse_colors");
+        return result.axiomIterator("inverse_colors");
     }
 
     public ParserContext getParserContext()

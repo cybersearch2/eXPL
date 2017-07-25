@@ -29,71 +29,50 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 /**
  * HighCities
  * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
+ * This example features using an Axiom variable to grow the result list by concatenation.
  * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
- * The terms are anonymous, so unification term pairing is performed by position.
+ * A template cannot perform Axiom variable operations, so a calculator is used for this example.
  * @author Andrew Bowley
  * 20 Feb 2015
  */
-public class HighCitiesListed 
+public class Birds
 {
-/* high-cities-listed
-axiom city() 
-    {"bilene", 1718}
-    {"addis ababa", 8000}
-    {"denver", 5280}
-    {"flagstaff", 6970}
-    {"jacksonville", 8}
-    {"leadville", 10200}
-    {"madrid", 1305}
-    {"richmond",19}
-    {"spokane", 1909}
-    {"wichita", 1305};
-    
-// Template for name and altitude of a high city
-template high_city(name ? altitude > 5000, altitude);
+/* birds.xpl
 
-// Solution is a list named 'city_list' which receives 'high_city' axioms
-list city_list(high_city);
-
-query high_cities (city : high_city);
 */
     
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public HighCitiesListed()
+    public Birds()
     {
         File resourcePath = new File("src/main/resources/tutorial7");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
 	/**
-	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
+	 * Compiles the birds.xplS script and runs the "birds" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
-     * high_city(name = addis ababa, altitude = 8000)<br/>
-     * high_city(name = denver, altitude = 5280)<br/>
-     * high_city(name = flagstaff, altitude = 6970)<br/>
-     * high_city(name = leadville, altitude = 10200)<br/>
 	 */
-	public Iterator<Axiom> getHighCities()
+	public Iterator<Axiom> getBirds()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-listed.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("birds.xpl");
         parserContext = queryProgramParser.getContext();
-		Result result = queryProgram.executeQuery("high_cities"); 
-		return result.axiomIterator("high_city.city_list");
+		Result result = queryProgram.executeQuery("birds"); 
+		return result.axiomIterator("birds");
 	}
 
-	public ParserContext getParserContext()
-	{
-	    return parserContext;
-	}
-	
-	public static void main(String[] args)
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+
+    public static void main(String[] args)
 	{
 		try 
 		{
-	        HighCitiesListed highCities = new HighCitiesListed();
-	        Iterator<Axiom> iterator = highCities.getHighCities();
+		    Birds birds = new Birds();
+	        Iterator<Axiom> iterator = birds.getBirds();
 	        while(iterator.hasNext())
 	            System.out.println(iterator.next().toString());
         }

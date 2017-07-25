@@ -41,6 +41,9 @@ public class AxiomListEvaluator
     protected QualifiedName axiomKey;
     /** List of templates, each defining the terms of an axiom to add to the list */
     protected List<Template> initializeList;
+    /** Template to initialize list of templates */
+    protected Template initializeTemplate;
+    /** Empty status */
     protected boolean empty;
     
     /**
@@ -48,12 +51,14 @@ public class AxiomListEvaluator
      * @param qname Qualified name of list to be created
      * @param axiomKey Qualified name of axioms in the list
      * @param initializeList List of templates, each defining the terms of an axiom to add to the list
+     * @param initializeTemplate Template to initialize list of templates
       */
-    public AxiomListEvaluator(QualifiedName qname, QualifiedName axiomKey, List<Template> initializeList)
+    public AxiomListEvaluator(QualifiedName qname, QualifiedName axiomKey, List<Template> initializeList, Template initializeTemplate)
     {
         this.qname = qname;
         this.axiomKey = axiomKey;
         this.initializeList = initializeList == null ? EMPTY_TEMPLATE_LIST : initializeList;
+        this.initializeTemplate = initializeTemplate;
         empty = true;
     }
     
@@ -93,8 +98,17 @@ public class AxiomListEvaluator
         AxiomList axiomList = new AxiomList(qname, axiomKey);
         AxiomArchetype archetype = new AxiomArchetype(axiomKey);
         int index = 0;
+        Axiom axiom = null;
+        if (initializeTemplate != null)
+        {
+            initializeTemplate.backup(true);
+            initializeTemplate.evaluate(null);
+            axiom = initializeTemplate.toAxiom();
+        }
         for (Template template: initializeList)
         {
+            if (axiom != null)
+                template.unify(axiom, null);
             template.evaluate(null);
             List<Term> termList =  template.toArray();
             // Do not add empty axioms to list

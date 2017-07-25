@@ -34,34 +34,15 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 20 Feb 2015
  */
-public class HighCitiesListed 
+public class DynamicCities 
 {
-/* high-cities-listed
-axiom city() 
-    {"bilene", 1718}
-    {"addis ababa", 8000}
-    {"denver", 5280}
-    {"flagstaff", 6970}
-    {"jacksonville", 8}
-    {"leadville", 10200}
-    {"madrid", 1305}
-    {"richmond",19}
-    {"spokane", 1909}
-    {"wichita", 1305};
-    
-// Template for name and altitude of a high city
-template high_city(name ? altitude > 5000, altitude);
-
-// Solution is a list named 'city_list' which receives 'high_city' axioms
-list city_list(high_city);
-
-query high_cities (city : high_city);
+/* dynamic-cities.xpl
 */
     
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public HighCitiesListed()
+    public DynamicCities()
     {
         File resourcePath = new File("src/main/resources/tutorial7");
         queryProgramParser = new QueryProgramParser(resourcePath);
@@ -77,10 +58,10 @@ query high_cities (city : high_city);
 	 */
 	public Iterator<Axiom> getHighCities()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-listed.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("dynamic-cities.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("high_cities"); 
-		return result.axiomIterator("high_city.city_list");
+		return result.axiomIterator("high_cities");
 	}
 
 	public ParserContext getParserContext()
@@ -92,7 +73,7 @@ query high_cities (city : high_city);
 	{
 		try 
 		{
-	        HighCitiesListed highCities = new HighCitiesListed();
+	        DynamicCities highCities = new DynamicCities();
 	        Iterator<Axiom> iterator = highCities.getHighCities();
 	        while(iterator.hasNext())
 	            System.out.println(iterator.next().toString());

@@ -75,6 +75,7 @@ public class CalculateChainQuery extends ChainQuery
 	@Override
 	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain, ExecutionContext context)
 	{
+	    solution.remove(template.getQualifiedName().toString());
 	    if (scopeNotifier != null)
 	        scopeNotifier.run();
 		Calculator calculator = new Calculator();
@@ -130,6 +131,12 @@ public class CalculateChainQuery extends ChainQuery
 	{
 		template.backup(false);
 	}
+
+    @Override
+    protected void backup()
+    {
+        template.backup(false);
+    } 
 
 	/**
 	 * Force reset to initial state

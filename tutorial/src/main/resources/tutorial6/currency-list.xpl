@@ -5,7 +5,7 @@ axiom euro_amounts()
   "590,00"
 };
 
-template decimal_amounts
+template all_amounts
 + export list<currency> amount_list;
 (
   currency $ "DE" amount1,
@@ -16,4 +16,4 @@ template decimal_amounts
   amount_list[2] = amount3
 );
 
-query parse_amounts(euro_amounts:decimal_amounts);
+query parse_amounts(euro_amounts:all_amounts);

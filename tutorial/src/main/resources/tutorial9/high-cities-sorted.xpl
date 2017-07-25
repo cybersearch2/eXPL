@@ -11,7 +11,7 @@ axiom city (name, altitude)
     {"wichita", 1305};
     
 // Solution is a list named 'high_cities'
-axiom high_cities = {};
+list<axiom> high_cities {};
 
 // Template to filter high cities
 template high_city

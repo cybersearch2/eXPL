@@ -77,7 +77,10 @@ query parse_amounts(all_amounts);
         QueryProgram queryProgram = queryProgramParser.loadScript("currency-list.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("parse_amounts");
-        Iterator<BigDecimal> iterator = result.currencyIterator("amount_list@decimal_amounts.global");
+        // Because the all_amounts template is in the global scope, there are 3 variants for the list name
+        //Iterator<BigDecimal> iterator = result.currencyIterator("amount_list@all_amounts.global");
+        Iterator<BigDecimal> iterator = result.currencyIterator("amount_list.all_amounts@");
+        //Iterator<BigDecimal> iterator = result.currencyIterator("all_amounts.amount_list");
         while (iterator.hasNext())
             System.out.println(iterator.next());
     }

@@ -15,18 +15,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.compile;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.list.AxiomList;
+import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.ArchiveIndexHelper;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 
@@ -208,6 +216,55 @@ public class TemplateAssembler
                 // The archetype is mutable until this is completed
                 template.getArchetype().clearMutable();
             }
+    }
+    
+    /**
+     * Create dynamic axiom list source
+     * @param operand AxiomOperand object
+     * @return AxiomSource object
+     */
+    public AxiomSource createAxiomSource(Operand operand)
+    {
+        QualifiedName qname = operand.getQualifiedName();
+        QualifiedName templateName = new QualifiedTemplateName(qname.getScope(), qname.getName());
+        final Template template = templateMap.get(templateName);
+        if (template == null)
+            return null;
+        return new AxiomSource(){
+            AxiomList axiomList;
+            
+            @Override
+            public Iterator<Axiom> iterator()
+            {
+                template.backup(true);
+                Axiom axiom = template.initialize();
+                if ((axiom != null) && (axiom.getTermCount() > 0))
+                    template.unify(axiom, null);
+                if (template.evaluate(null) == EvaluationStatus.COMPLETE)
+                    axiomList = (AxiomList) template.getTermByIndex(0).getValue();
+                else
+                    return new ArrayList<Axiom>().iterator();
+                return new Iterator<Axiom>(){
+                    Iterator<AxiomTermList> listIterator = axiomList.getIterable().iterator();
+                    @Override
+                    public boolean hasNext()
+                    {
+                        return listIterator.hasNext();
+                    }
+
+                    @Override
+                    public Axiom next()
+                    {
+                        return listIterator.next().getAxiom();
+                    }};
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public List<String> getAxiomTermNameList()
+            {
+                return (List<String>) (axiomList != null ? axiomList.getAxiomTermNameList() : Collections.emptyList());
+            }};
     }
 
 }

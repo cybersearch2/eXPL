@@ -476,7 +476,7 @@ public class CallOperandTest
             "  // Insert saved axiom in correct position\n" +
             "  sort_list[j + 1] = temp\n" +
             ");\n" +
-            "axiom city_list = {};\n" +
+            "list<axiom> city_list {};\n" +
             "calc sort_cities(\n" +
             "  axiom sort_city = { name, altitude },\n" +
             "  city_list += sort_city,\n" +

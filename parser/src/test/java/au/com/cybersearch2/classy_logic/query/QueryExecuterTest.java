@@ -558,7 +558,7 @@ public class QueryExecuterTest
         assertThat(query.execute()).isTrue();
         assertThat(query.getSolution().getAxiom("account").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[2]);
         assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[3]);
-        assertThat(query.execute()).isFalse();
+        assertThat(query.execute()).isTrue();
     }
 
     @Test
@@ -800,7 +800,7 @@ public class QueryExecuterTest
         assertThat(query.execute()).isTrue();
         assertThat(query.getSolution().getAxiom("account").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[2]);
         assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[3]);
-        assertThat(query.execute()).isFalse();
+        assertThat(query.execute()).isTrue();
     }
 
     protected static QualifiedName parseTemplateName(String name)

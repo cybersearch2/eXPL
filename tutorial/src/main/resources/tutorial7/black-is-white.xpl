@@ -6,14 +6,13 @@ axiom swatch (name, red, green, blue)
             {"black", 0,   0,     0}
             {"blue",  0,   0,   255};
 
-axiom inverse (aqua, black, blue)  
-            {"red", "white",  "yellow"};
-                      
+axiom inverse (aqua,   black,     blue)  
+             {"red", "white",  "yellow"};
             
 template shade
-+ list<term> color1(global.patch);
-+ list<term> color2(global.patch);
-+ list<term> inverse_name(global.inverse);
++ list<term> color1(patch);
++ list<term> color2(patch);
++ list<term> inverse_name(inverse);
 (
   before = color2->name,
   // Change name

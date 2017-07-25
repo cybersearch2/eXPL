@@ -1,4 +1,4 @@
-axiom city (name, altitude) 
+axiom city() 
     {"bilene", 1718}
     {"addis ababa", 8000}
     {"denver", 5280}
@@ -12,9 +12,8 @@ axiom city (name, altitude)
     
 // Template for name and altitude of a high city
 template high_city
-(
-  name ? altitude > 5000,
-  altitude
-);
+// Solution is an exported to a list named 'city_list'
++ list city_list(high_city);
+(name ? altitude > 5000, altitude);
 
-query<axiom> high_cities (city : high_city);
+query high_cities (city : high_city); 

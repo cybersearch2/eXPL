@@ -69,7 +69,7 @@ public class QueryExecuter extends ChainQueryExecuter
     		if (nextQuery.iterate(solution, nextTemplate, context))
     			return true;
     		// Backup when query further down the chain fails to find a solution
-			backupToStart(index);
+			//backupToStart(index);
 			return false;
 		}
 	}
@@ -119,6 +119,10 @@ public class QueryExecuter extends ChainQueryExecuter
 			switch (logicQuery.getQueryStatus())
 			{
 			case in_progress:
+			    if (executeNext())
+			        return true;
+			    break;
+ 			    /*
 				if ((headSolutionHandler != null) &&
 				    headSolutionHandler.onSolution(solution))
 				{
@@ -129,6 +133,7 @@ public class QueryExecuter extends ChainQueryExecuter
 				}
 				else
 	                backupToStart(0);
+	            */
 				// Deliberately fall through to next case
 			case start:
 				if (axiomListenerMap != null)
@@ -146,7 +151,7 @@ public class QueryExecuter extends ChainQueryExecuter
 		return false;
     }
 
-	/**
+    /**
 	 * Force reset to initial state
 	 */
 	@Override
@@ -169,6 +174,32 @@ public class QueryExecuter extends ChainQueryExecuter
 	{
 		return toString(templateList);
 	}
+
+	/**
+	 * Execute next iteration of current query
+	 * @return flag set true if solution found
+	 */
+	protected boolean executeNext()
+    {
+        int next = logicQueryList.size() - 1;
+        LogicQuery nextQuery = null;
+        Template nextTemplate = null;
+        while (next >= 0)
+        {
+            nextQuery = logicQueryList.get(next);
+            if (nextQuery.getQueryStatus() == QueryStatus.in_progress)
+            {
+                nextTemplate = templateList.get(next);
+                nextTemplate.backup(true);
+                solution.remove(nextTemplate.getQualifiedName().toString());
+                if (nextQuery.iterate(solution, nextTemplate, context))
+                    return super.execute();
+                backupToStart(next);
+            }
+            --next;
+        }
+        return false;
+    }
 
 	/**
 	 * Initialize the LogicQuery object list. All but the last object requires a solution handler.

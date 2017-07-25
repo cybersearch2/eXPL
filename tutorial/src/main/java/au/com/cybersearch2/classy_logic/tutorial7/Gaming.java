@@ -13,10 +13,12 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial7;
 
 import java.io.File;
+import java.util.Iterator;
 
+import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
@@ -51,8 +53,8 @@ query<term> spin(spin : play);
 
     public Gaming()
     {
-        File resourcePath = new File("src/main/resources/tutorial6");
-        queryProgramParser = new QueryProgramParser(resourcePath);
+        File resourcePath = new File("src/main/resources/tutorial7");
+        queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
     }
 
     /**
@@ -60,13 +62,21 @@ query<term> spin(spin : play);
 	 * The expected result:<br/>
 	 * play(r1=lemon, r2=banana, r3=apple, r4=orange)<br/>
 	 */
-	public Axiom displayFruit()
+	public Iterator<Axiom> displayFruit()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("gaming.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("spin");
-        return result.getAxiom("spin");
+        Result result = queryProgram.executeQuery("gamble");
+        return result.axiomIterator("gamble");
 	}
+
+    FunctionManager provideFunctionManager()
+    {
+        FunctionManager functionManager = new FunctionManager();
+        SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
+        functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
+        return functionManager;
+    }
 
     public ParserContext getParserContext()
     {
@@ -78,8 +88,15 @@ query<term> spin(spin : play);
 		try 
 		{
 	        Gaming gaming = new Gaming();
-			Axiom axiom = gaming.displayFruit();
-	        System.out.println(axiom.toString());
+	        Iterator<Axiom> iterator = gaming.displayFruit();
+	        while (iterator.hasNext())
+	        {
+	            Axiom axiom = iterator.next();
+	            System.out.print(axiom.getTermByIndex(0).getValue().toString() + ", ");
+                System.out.print(axiom.getTermByIndex(1).getValue().toString() + ", ");
+                System.out.print(axiom.getTermByIndex(2).getValue().toString() + ", ");
+                System.out.println(axiom.getTermByIndex(3).getValue().toString());
+	        }
 		} 
 		catch (ExpressionException e) 
 		{

@@ -1,7 +1,18 @@
-list<term> color(swatch);
-axiom swatch (name, red, green, blue)
-{"aqua", 0, 255, 255}
-{"black", 0, 0, 0}
-{"blue", 0, 0, 255};
-template shade(name, color->red, color->green, color->blue);
-query<axiom> colors(swatch : shade);
+axiom swatch 
+  ( name )
+  { "aqua" }
+  { "black" }
+  { "blue" };
+
+axiom color_map 
+  (   aqua  ,  black ,  blue    )  
+  { | "red" | "white"|"yellow"| };
+
+template shade
++ list<term> inverse_color(color_map);
+( 
+  inverse_of = name,
+  inverse_color[name]
+);
+
+query<axiom> inverse_colors(swatch : shade);

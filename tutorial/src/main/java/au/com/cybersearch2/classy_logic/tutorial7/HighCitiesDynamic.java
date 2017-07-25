@@ -29,15 +29,16 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 /**
  * HighCities
  * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
+ * This example features using an Axiom variable to grow the result list by concatenation.
  * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
- * The terms are anonymous, so unification term pairing is performed by position.
+ * A template cannot perform Axiom variable operations, so a calculator is used for this example.
  * @author Andrew Bowley
  * 20 Feb 2015
  */
-public class HighCitiesListed 
+public class HighCitiesDynamic
 {
-/* high-cities-listed
-axiom city() 
+/* high-cities-listed.xpl
+axiom city (name, altitude) 
     {"bilene", 1718}
     {"addis ababa", 8000}
     {"denver", 5280}
@@ -48,20 +49,20 @@ axiom city()
     {"richmond",19}
     {"spokane", 1909}
     {"wichita", 1305};
-    
+axiom high_cities = {};
 // Template for name and altitude of a high city
-template high_city(name ? altitude > 5000, altitude);
-
-// Solution is a list named 'city_list' which receives 'high_city' axioms
-list city_list(high_city);
-
+template high_city(
+  altitude ? altitude > 5000,
+  high_cities += axiom { name , altitude }
+);
 query high_cities (city : high_city);
+
 */
     
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public HighCitiesListed()
+    public HighCitiesDynamic()
     {
         File resourcePath = new File("src/main/resources/tutorial7");
         queryProgramParser = new QueryProgramParser(resourcePath);
@@ -72,27 +73,27 @@ query high_cities (city : high_city);
 	 * The expected result:<br/>
      * high_city(name = addis ababa, altitude = 8000)<br/>
      * high_city(name = denver, altitude = 5280)<br/>
-     * high_city(name = flagstaff, altitude = 6970)<br/>
-     * high_city(name = leadville, altitude = 10200)<br/>
+	 * high_city(name = flagstaff, altitude = 6970)<br/>
+	 * high_city(name = leadville, altitude = 10200)<br/>
 	 */
 	public Iterator<Axiom> getHighCities()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-listed.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-axioms.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("high_cities"); 
-		return result.axiomIterator("high_city.city_list");
+		return result.axiomIterator("high_city.high_cities");
 	}
 
-	public ParserContext getParserContext()
-	{
-	    return parserContext;
-	}
-	
-	public static void main(String[] args)
+    public ParserContext getParserContext()
+    {
+        return parserContext;
+    }
+
+    public static void main(String[] args)
 	{
 		try 
 		{
-	        HighCitiesListed highCities = new HighCitiesListed();
+		    HighCitiesDynamic highCities = new HighCitiesDynamic();
 	        Iterator<Axiom> iterator = highCities.getHighCities();
 	        while(iterator.hasNext())
 	            System.out.println(iterator.next().toString());

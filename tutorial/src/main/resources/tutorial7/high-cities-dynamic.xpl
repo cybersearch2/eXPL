@@ -12,9 +12,10 @@ axiom city (name, altitude)
     
 // Template for name and altitude of a high city
 template high_city
++ list<axiom> high_cities {};
 (
-  name ? altitude > 5000,
-  altitude
+  altitude ? altitude > 5000,
+  high_cities += axiom high_city { name , altitude }
 );
 
-query<axiom> high_cities (city : high_city);
+query high_cities (city : high_city);

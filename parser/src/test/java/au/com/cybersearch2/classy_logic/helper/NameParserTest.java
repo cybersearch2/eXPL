@@ -72,7 +72,7 @@ public class NameParserTest
     public void test2_partNameAt()
     {
         NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse(TEST_NAME2_AT)).isEqualTo(QualifiedName.parseGlobalName(TEST_NAME2));
+        assertThat(nameParser.parse(TEST_NAME2_AT)).isEqualTo(QualifiedName.parseGlobalName("part2.part1"));
     }
 
     @Test

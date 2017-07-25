@@ -1,4 +1,4 @@
-axiom moves = {};
+list<axiom> moves {};
 
 calc tower_of_hanoi
 (

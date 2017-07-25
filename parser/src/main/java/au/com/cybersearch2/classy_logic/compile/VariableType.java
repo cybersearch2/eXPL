@@ -171,7 +171,10 @@ public class VariableType
             axiomListListener = parserAssembler.getListAssembler().axiomListListenerInstance();
         }
         if (operandType == OperandType.LIST)
+        {
             initializeList = (List<Template>)getProperty(PARAMS);
+            initializeTemplate = (Template)getProperty(TEMPLATE);
+        }
         else if (operandType == OperandType.TERM)
             initializeTemplate = (Template)getProperty(PARAMS);
 	    
@@ -199,7 +202,7 @@ public class VariableType
             operand = new AxiomOperand(qname, axiomKey, axiomListListener);
             break;
         case LIST:
-            operand = new AxiomOperand(new AxiomListEvaluator(qname, axiomKey, initializeList), axiomListListener);
+            operand = new AxiomOperand(new AxiomListEvaluator(qname, axiomKey, initializeList, initializeTemplate), axiomListListener);
             break;
         case CURRENCY:
         {

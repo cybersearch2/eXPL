@@ -58,12 +58,13 @@ public class LexiconAxiomProvider implements AxiomProvider
 
 	@Override
 	public AxiomListener getAxiomListener(String name) 
-	{   // Do-nothing listener for read-only provider
+	{   // Listener writes to console
 		return new AxiomListener()
 		{
 			@Override
 			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
+			    System.out.println(axiom.toString());
 			}
 		};
 	}
