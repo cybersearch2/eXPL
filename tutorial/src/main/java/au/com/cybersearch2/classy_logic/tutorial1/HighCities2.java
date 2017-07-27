@@ -51,8 +51,12 @@ public class HighCities2
     {1305, "wichita"};
  */
 /* high_cities.xpl
-template high_city(name ? altitude > 5000, altitude);
-query<axiom> high_cities (city_altitude : high_city); 
+resource city_altitude axiom();
+
+template high_city(city ? altitude > 5000, altitude);
+
+query<axiom> high_cities (city_altitude : high_city);
+
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;

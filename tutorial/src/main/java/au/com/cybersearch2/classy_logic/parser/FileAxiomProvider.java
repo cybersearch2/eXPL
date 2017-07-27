@@ -21,9 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * FileAxiomProvider
@@ -35,11 +37,17 @@ public class FileAxiomProvider implements AxiomProvider
     String resourceName;
     File resourceBase;
     List<Runnable> onCloseHandlerList;
+    AxiomListener axiomListener;
 
     public FileAxiomProvider(String resourceName, File resourceBase)
     {
         this.resourceName = resourceName;
         this.resourceBase = resourceBase;
+    }
+ 
+    public void chainListener(AxiomListener axiomListener)
+    {
+        this.axiomListener = axiomListener;
     }
     
     @Override
@@ -79,8 +87,19 @@ public class FileAxiomProvider implements AxiomProvider
         if (onCloseHandlerList == null)
             onCloseHandlerList = new ArrayList<Runnable>();
         File axiomFile = new File(resourceBase, name);
-        FileAxiomListener fileAxiomListener =  new FileAxiomListener(name, axiomFile);
+        final FileAxiomListener fileAxiomListener =  new FileAxiomListener(name, axiomFile);
         onCloseHandlerList.add(fileAxiomListener.getOnCloseHandler());
+        if (axiomListener != null)
+        {
+            return new AxiomListener(){
+
+                @Override
+                public void onNextAxiom(QualifiedName qname, Axiom axiom)
+                {
+                    fileAxiomListener.onNextAxiom(qname, axiom);
+                    axiomListener.onNextAxiom(qname, axiom);
+                }};
+        }
         return fileAxiomListener;
     }
 

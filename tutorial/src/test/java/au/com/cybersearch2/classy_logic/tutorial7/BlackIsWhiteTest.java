@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial7;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -43,12 +43,14 @@ public class BlackIsWhiteTest
     @Test
     public void testBlackIsWhite() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial6", "black-is-white.txt");
+        File testFile = new File("src/main/resources/tutorial7", "black-is-white.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         BlackIsWhite blackIsWhite = new BlackIsWhite();
         Iterator<Axiom> colorIterator = blackIsWhite.displayShades();
         while (colorIterator.hasNext())
             checkSolution(reader, colorIterator.next().toString());
+        reader.close();
+        /*
         Iterator<SourceMarker> iterator = blackIsWhite.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
@@ -129,6 +131,7 @@ public class BlackIsWhiteTest
         //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("list<term> shade.inverse_name(inverse){3} (16,3) (16,41)");
         assertThat(iterator.hasNext()).isFalse();
+        */
     }
 
     protected void checkSolution(BufferedReader reader, String shade)

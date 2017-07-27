@@ -192,8 +192,11 @@ public class QueryExecuter extends ChainQueryExecuter
                 nextTemplate = templateList.get(next);
                 nextTemplate.backup(true);
                 solution.remove(nextTemplate.getQualifiedName().toString());
+                super.backupToStart();
                 if (nextQuery.iterate(solution, nextTemplate, context))
+                {
                     return super.execute();
+                }
                 backupToStart(next);
             }
             --next;
@@ -256,9 +259,6 @@ public class QueryExecuter extends ChainQueryExecuter
 			Template template = templateList.get(i);
 			template.backup(false);
 		}
-        super.backupToStart();
-		// Start a new solution
-		solution.reset();
 	}
 
 	/**

@@ -19,7 +19,6 @@ import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -27,6 +26,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * GreekConstruction
+ * Demonstrates query cascading and unification by position.
  * @author Andrew Bowley
  * 22 Feb 2015
  */
@@ -46,12 +46,14 @@ axiom customer()
   {"Spiros Theodolites", "Milos"};
 */
 /* customer_charge.xpl
-axiom charge() : "greek_construction";
-axiom customer() : "greek_construction"; 
+resource charge axiom() = "greek_construction";
+resource customer axiom() = "greek_construction"; 
+
 template freight(city, charge);
-template customer_freight(name, city ? city == freight.city, charge = freight.charge);
+template customer_freight(name, city ? city == freight.city, charge);
         
-query customer_charge(charge:freight, customer:customer_freight);
+query customer_charge(charge:freight, customer:customer_freight);        
+
 */
     protected QueryProgramParser queryProgramParser;
     
@@ -67,7 +69,6 @@ query customer_charge(charge:freight, customer:customer_freight);
     public ParserContext findCustomerCharges(SolutionHandler solutionHandler) 
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("customer_charge.xpl");
-        //queryProgram.setExecutionContext(new ExecutionContext());
         // The first unification fills in variables "city" and "charge".
         // Both templates here share variables "city" and "charge", so only the "name" term
         // empty in the second unification.

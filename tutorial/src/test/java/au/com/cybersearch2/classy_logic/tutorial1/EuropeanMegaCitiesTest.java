@@ -48,6 +48,7 @@ public class EuropeanMegaCitiesTest
         while (cityIterator.hasNext())
             checkSolution(reader, cityIterator.next().toString());
         reader.close();
+        /*
         Iterator<SourceMarker> iterator = europeanMegaCities.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
@@ -83,6 +84,7 @@ public class EuropeanMegaCitiesTest
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("Continent {Europe} (2,46) (2,68)");
+        */
      }
     
     protected void checkSolution(BufferedReader reader, String city)

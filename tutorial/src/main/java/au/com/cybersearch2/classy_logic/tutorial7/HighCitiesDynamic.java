@@ -31,7 +31,6 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
  * This example features using an Axiom variable to grow the result list by concatenation.
  * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
- * A template cannot perform Axiom variable operations, so a calculator is used for this example.
  * @author Andrew Bowley
  * 20 Feb 2015
  */
@@ -78,9 +77,9 @@ query high_cities (city : high_city);
 	 */
 	public Iterator<Axiom> getHighCities()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-axioms.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-dynamic.xpl");
         parserContext = queryProgramParser.getContext();
-		Result result = queryProgram.executeQuery("high_cities"); 
+		Result result = queryProgram.executeQuery("cities"); 
 		return result.axiomIterator("high_city.high_cities");
 	}
 

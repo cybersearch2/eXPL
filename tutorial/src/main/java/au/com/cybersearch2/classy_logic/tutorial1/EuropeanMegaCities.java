@@ -28,6 +28,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * EuropeanMegaCities
+ * Demonstrates selection using set {} operator
  * @author Andrew Bowley
  * 24 Feb 2015
  */
@@ -72,9 +73,12 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 {35,"Hyderabad","India","Asia",10100000};
 */
 /* euro_megacities.xpl
-axiom mega_city (Rank,Megacity,Country,Continent,Population) : resource;
+rresource mega_city axiom(Rank,Megacity,Country,Continent,Population);
+
 template euro_megacities (Megacity, Country, Continent { "Europe" } );
+
 query<axiom> euro_megacities (mega_city : euro_megacities);
+
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;

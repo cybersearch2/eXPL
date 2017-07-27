@@ -319,14 +319,16 @@ public class CallOperandTest
     static final String SCHOOL_REPORT_OUT_SCOPE = GRADES + ALPHA_MARKS +
         "scope school\n" +
         "{\n" +
-        "  calc subjects(\n" +
+        "   calc subjects\n" +
+        "   + list<axiom> marks_list {};\n" +
+        "(\n" +
         "    integer english,\n" +
         "    integer math,\n" +
         "    integer history,\n" +
-        "    axiom marks_list =\n" +
-        "              { \"English\", mark[english] } \n" +
-        "              { \"Math\",    mark[math] }\n" +
-        "              { \"History\", mark[history] }\n" +
+        "    marks_list =\n" +
+        "       axiom { \"English\", mark[english] } \n" +
+        "             { \"Math\",    mark[math] }\n" +
+        "             { \"History\", mark[history] }\n" +
         "  );\n" +
         "  calc total_score(\n" +
         "    integer english,\n" +
@@ -337,21 +339,24 @@ public class CallOperandTest
         "  );\n" +
         "}\n"  +
         "calc score(\n" +
-        "    <- school.subjects(english, math, history) -> (marks_list),\n" +
-        "    <- school.total_score(english, math, history) -> (label, value),\n" +
-        "    axiom report={ marks_list,  total = label + \": \" + value }\n" +
+        "  <- school.subjects(english, math, history) -> (marks_list),\n" +
+        "  <- school.total_score(english, math, history) -> (label, value),\n" +
+        "  marks = marks_list,\n" +
+        "  string total = label + \": \" + value\n" +
         ");\n" +
         "query marks(grades : score);";
 
     static final String SCHOOL_REPORT_IN_SCOPE = GRADES + ALPHA_MARKS +
-            "  calc subjects(\n" +
+            "calc subjects\n" +
+            "+ list<axiom> marks_list {};\n" +
+            "(\n" +
             "    integer english,\n" +
             "    integer math,\n" +
             "    integer history,\n" +
-            "    axiom marks_list =\n" +
-            "                { \"English\", mark[english] } \n" +
-            "                { \"Math\",    mark[math] }\n" +
-            "                { \"History\", mark[history] }\n" +
+            "    marks_list =\n" +
+            "        axiom { \"English\", mark[english] } \n" +
+            "              { \"Math\",    mark[math] }\n" +
+            "              { \"History\", mark[history] }\n" +
             "  );\n" +
             "  calc total_score(\n" +
             "    integer english,\n" +
@@ -362,11 +367,12 @@ public class CallOperandTest
             "  );\n" +
             "\n" +
             "calc score(\n" +
-            "    <- subjects(english, math, history) -> (marks_list),\n" +
-            "    math_score = score.subjects[1],\n" +
-            "    <- total_score(english, math, history) -> (label, value),\n" +
-            "    marks_total = score.total_score->value,\n" +
-            "    axiom report = { marks_list, string total = label + \": \" + value }\n" +
+            "  <- subjects(english, math, history) -> (marks_list),\n" +
+            "  math_score = score.subjects[1],\n" +
+            "  <- total_score(english, math, history) -> (label, value),\n" +
+            "  marks_total = score.total_score->value,\n" +
+            "  marks = marks_list,\n" +
+            "  string total = label + \": \" + value\n" +
             ");\n" +
             "query<axiom> marks(grades : score);";
 
@@ -421,8 +427,8 @@ public class CallOperandTest
            ;
     static final String GERMAN_COLORS =
             "calc german_colors\n" +
+            "+ list<axiom> colors {};\n" +
             "(\n" +
-            "  axiom colors={},\n" +
             "  <- german.swatch(shade=\"Wasser\") -> (red, green, blue),\n" + 
             "  colors += axiom aqua { red, green, blue },\n" +
             "  <- german.swatch(shade=\"blau\") -> (red, green, blue),\n" + 
@@ -478,8 +484,7 @@ public class CallOperandTest
             ");\n" +
             "list<axiom> city_list {};\n" +
             "calc sort_cities(\n" +
-            "  axiom sort_city = { name, altitude },\n" +
-            "  city_list += sort_city,\n" +
+            "  city_list += axiom sort_city { name, altitude },\n" +
             "  <- list_sort(city_list, \"altitude\")\n" +
             ");\n" +
             "query sort_cities (city : sort_cities);\n"; 
@@ -516,10 +521,12 @@ public class CallOperandTest
             "              {\"Tom\", \"m\", 22, \"cancer\"}\n" + 
             "              {\"Bill\", \"m\", 19, \"virgo\"};\n" + 
             "list person_list(person);\n" +
-            "calc people_by_starsign(\n" +
+            "calc people_by_starsign\n" +
+            "+ list<axiom> candidates {};\n" +
+            "(\n" +
             "  string starsign,\n" +
-            "  axiom candidates = {},\n" +
             "  integer i = 0,\n" +
+            "  candidates,\n" +
             "  {\n" +
             "    ? i < person_list.length,\n" +
             "    ? person_list[i].starsign == starsign\n" +
@@ -529,17 +536,18 @@ public class CallOperandTest
             "    (++i)\n" +
             "  }\n" +
             ");\n" +
-            "calc match(\n" +
+            "calc match\n" +
+            "+ export list<axiom> geminis {};\n" +
+            "(\n" +
             "  <- people_by_starsign(\"gemini\") -> (candidates),\n" +
             " candidate_list = match.people_by_starsign,\n" +
             ". integer i = 0,\n" +
-            "axiom geminis = {}," +
             "  {\n" +
             "    ? i < candidates.length,\n" +
             "    geminis += candidates[i++]\n" +
             "  }\n" +
             " );\n" +
-            "query<axiom> match(match);";
+            "query<term> match(match);";
     
     static final String FACTUAL_MATCH = 
             " axiom person (name, sex, age, starsign)\n" +
@@ -559,10 +567,12 @@ public class CallOperandTest
             "              {\"Tom\", \"m\", 22, \"cancer\"}\n" + 
             "              {\"Bill\", \"m\", 19, \"virgo\"};\n" + 
             "list person_list(person);\n" +
-            "calc people_by_starsign(\n" +
+            "calc people_by_starsign\n" +
+            "+ list<axiom> candidates {};\n" +
+            "(\n" +
             "  string starsign,\n" +
-            "  axiom candidates = {},\n" +
             "  integer i = 0,\n" +
+            "  candidates,\n" +
             "  {\n" +
             "    ? i < person_list.length,\n" +
             "    ? person_list[i].starsign == starsign\n" +
@@ -570,20 +580,20 @@ public class CallOperandTest
             "       age = person_list[i].age,\n" +
             "       ? age < 18\n" +
             "       { age = unknown },\n" +
-            "       axiom person =\n" +
+            "       candidates += axiom person\n" +
             "       {\n" +
             "         string name = person_list[i].name,\n" +
             "         string sex = person_list[i].sex,\n" +
             "         age,\n" +
-            "         string starsign =  person_list[i].starsign\n" +
-            "       },\n" +
-            "       candidates += person\n" +
+            "         string starsign = person_list[i].starsign\n" +
+            "       }\n" +
             "    },\n" +
             "    ++i\n" +
             "  }\n" +
             ");\n" +
-            "calc match(\n" +
-            "  axiom eligible = {},\n" +
+            "calc match\n" +
+            "+ export list<axiom> eligible {};\n" +
+            "(\n" +
             "  <- people_by_starsign(\"gemini\") -> (candidates),\n" +
             "  integer i = 0,\n" +
             "  {\n" +
@@ -591,14 +601,13 @@ public class CallOperandTest
             "    gemini = candidates[i++],\n" +
             "    ? gemini.fact\n" +
             "    {\n" +
-            "      axiom person =\n" +
+            "      eligible += axiom person\n" +
             "      {\n" + 
             "       string name = gemini->name,\n" +
             "       string sex = gemini->sex,\n" +
             "       integer age = gemini->age,\n" +
             "       string starsign = gemini->starsign\n" +
-            "      },\n" +
-            "      eligible += person\n" +
+            "      }\n" +
             "    }\n" +
             "  }\n" +
             " );\n" +
@@ -635,20 +644,15 @@ public class CallOperandTest
         queryProgram.parseScript(PERFECT_MATCH);
         //queryProgram.setExecutionContext(new ExecutionContext());
         Result result = queryProgram.executeQuery("match");
-        QualifiedName qname = QualifiedName.parseGlobalName("match");
-        Axiom matchAxiom = result.axiomIterator(qname).next();
-        AxiomList axiomList = (AxiomList) matchAxiom.getTermByName("geminis").getValue();
-        Iterator<AxiomTermList> listIterator = axiomList.getIterable().iterator();
+        Iterator<Axiom> geminiIterator = result.axiomIterator("match.geminis");
         int index = 0;
-        while(listIterator.hasNext())
-            //System.out.println(iterator.next().toString());
-            assertThat(listIterator.next().getAxiom().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
+        while(geminiIterator.hasNext())
+            //System.out.println(geminiIterator.next().toString());
+            assertThat(geminiIterator.next().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
         assertThat(index).isEqualTo(4);
-        qname = QualifiedName.parseGlobalName("match");
-        Iterator<Axiom> iterator = result.axiomIterator(qname);
-        Axiom axiom = iterator.next();
+        Axiom match = result.getAxiom("match");
         //System.out.println(axiom); //iterator.next().toString()); 
-        axiomList = (AxiomList) (axiom.getTermByName("candidate_list").getValue());
+        AxiomList axiomList = (AxiomList) (match.getTermByName("candidate_list").getValue());
         for (index = 0; index < axiomList.getLength(); ++index)
             //System.out.println(axiomList.getItem(index).getAxiom().toString());
             assertThat(axiomList.getItem(index).getAxiom().toString()).isEqualTo(PERFECT_GEMINIS[index++]);
@@ -803,11 +807,8 @@ public class CallOperandTest
             public boolean onSolution(Solution solution)
             {
                 Axiom score = solution.getAxiom("score");
-                AxiomList report = (AxiomList) score.getTermByName("report").getValue();
                 assertThat(solution.getString("grades", "student")).isEqualTo(STUDENTS[index1++]);
-                Iterator<AxiomTermList> iterator = report.iterator();
-                AxiomTermList item = iterator.next();
-                AxiomList marksList = (AxiomList) item.getAxiom().getTermByName("marks_list").getValue();
+                AxiomList marksList = (AxiomList)score.getTermByName("marks").getValue();
                 Iterator<AxiomTermList> subjects = marksList.iterator();
                 while (subjects.hasNext())
                 {
@@ -816,7 +817,7 @@ public class CallOperandTest
                     assertThat(subject.getTermByIndex(0).getValue().toString() + " " + subject.getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
                 }
                 //System.out.println(item.getAxiom().getTermByIndex(1).getValue());
-                assertThat(item.getAxiom().getTermByIndex(1).getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
+                assertThat(score.getTermByName("total").getValue().toString()).isEqualTo(SCHOOL_REPORT[index2++]);
                 return true;
             }});
         return result;

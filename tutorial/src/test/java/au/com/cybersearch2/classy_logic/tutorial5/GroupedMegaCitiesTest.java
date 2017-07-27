@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial7;
+package au.com.cybersearch2.classy_logic.tutorial5;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -27,72 +27,72 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * HighCitiesAxiomsTest
+ * EuropeanMegaCitiesTest
  * @author Andrew Bowley
- * 11Apr.,2017
+ * 5Feb.,2017
  */
-public class HighCitiesAxiomsTest
+public class GroupedMegaCitiesTest
 {
     @Test
-    public void testHighCities() throws Exception
+    public void testGroupedMegaCities() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial7", "high-cities-listed.txt");
+        File testFile = new File("src/main/resources/tutorial5", "grouped_megacities.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        HighCitiesAxioms highCities = new HighCitiesAxioms();
-        Iterator<Axiom> cityIterator = highCities.getHighCities();
+        GroupedMegaCities groupedMegaCities = new GroupedMegaCities();
+        Iterator<Axiom> cityIterator =groupedMegaCities.findMegaCities();
         while (cityIterator.hasNext())
             checkSolution(reader, cityIterator.next().toString());
         reader.close();
         /*
-        ParserContext context = highCities.getParserContext();
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Iterator<SourceMarker> iterator = europeanMegaCities.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom city (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query euro_megacities (3,1)");
+        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city(name,altitude)[10] (1,1) (11,21)");
+        assertThat(sourceItem.toString()).isEqualTo("mega_city:euro_megacities (3,31) (3,57)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom high_cities (12,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom mega_city (1,1)");
+        assertThat(sourceMarker.getHeadSourceItem()).isNotNull();
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> high_cities[0] (12,1) (12,22)");
+        assertThat(sourceItem.toString()).isEqualTo("mega_city(Rank,Megacity,Country,Continent,Population):resource (1,1) (1,71)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query high_cities (18,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template high_city (14,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template euro_megacities (2,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("altitude>5000?altitude (15,3) (15,28)");
+        assertThat(sourceItem.toString()).isEqualTo("Megacity (2,27) (2,34)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("high_cities+=high_city (16,3) (17,0)");
+        assertThat(sourceItem.toString()).isEqualTo("Country (2,37) (2,43)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("Continent {Europe} (2,46) (2,68)");
         */
-    }
+     }
     
-    protected void checkSolution(BufferedReader reader, String shade)
+    protected void checkSolution(BufferedReader reader, String city)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(shade).isEqualTo(line);
+            assertThat(city).isEqualTo(line);
         }
         catch (IOException e)
         {

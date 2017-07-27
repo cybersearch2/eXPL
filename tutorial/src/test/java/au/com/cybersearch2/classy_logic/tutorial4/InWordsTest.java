@@ -47,6 +47,8 @@ public class InWordsTest
         Iterator<Axiom> axiomIterator = inWords.findInWords();
         while (axiomIterator.hasNext()) 
               checkSolution(reader, axiomIterator.next().toString());
+        reader.close();
+        /*
         Iterator<SourceMarker> iterator = inWords.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
@@ -78,6 +80,7 @@ public class InWordsTest
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("definition (3,46) (3,55)");
+        */
     }
     
     protected void checkSolution(BufferedReader reader, String word)

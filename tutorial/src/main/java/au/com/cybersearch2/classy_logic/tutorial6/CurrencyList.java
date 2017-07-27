@@ -72,7 +72,7 @@ query parse_amounts(all_amounts);
         590<br/>
      * @return Axiom iterator
      */
-    public void  amounts()
+    public Iterator<BigDecimal>  amounts()
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("currency-list.xpl");
         parserContext = queryProgramParser.getContext();
@@ -81,8 +81,7 @@ query parse_amounts(all_amounts);
         //Iterator<BigDecimal> iterator = result.currencyIterator("amount_list@all_amounts.global");
         Iterator<BigDecimal> iterator = result.currencyIterator("amount_list.all_amounts@");
         //Iterator<BigDecimal> iterator = result.currencyIterator("all_amounts.amount_list");
-        while (iterator.hasNext())
-            System.out.println(iterator.next());
+        return iterator;
     }
 
     public ParserContext getParserContext()
@@ -99,7 +98,9 @@ query parse_amounts(all_amounts);
         try 
         {
             CurrencyList currencyList = new CurrencyList();
-            currencyList.amounts();
+            Iterator<BigDecimal> iterator = currencyList.amounts();
+            while (iterator.hasNext())
+                System.out.println(iterator.next());
         } 
         catch (ExpressionException e) 
         { 

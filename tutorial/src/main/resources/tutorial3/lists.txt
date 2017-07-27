@@ -1,0 +1,33 @@
+fruit
+fruit.0=apple
+fruit.1=pear
+fruit.2=orange
+size=3
+dice
+dice.0=2
+dice.1=5
+dice.2=1
+size=3
+dimensions
+dimensions.0=12.54
+dimensions.1=6.98
+dimensions.2=9.12
+size=3
+huges
+huges.0=9223372036854775808
+huges.1=-9223372036854775808
+size=2
+flags
+flags.0=true
+flags.1=false
+size=2
+stars
+stars.0=Sirius
+stars.1=Canopus
+stars.2=Rigil Kentaurus
+size=3
+movies
+greatest.0=The Godfather
+greatest.0=The Shawshank Redemption
+greatest.0=Schindler's List
+size=3

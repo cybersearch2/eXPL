@@ -35,12 +35,12 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class ParameterOperandTest
 {
     static final String NO_ARG_CALC =
-        "calc test (axiom x = {} );\n" +
+        "calc test + list<axiom> x {}; ( x = axiom {} );\n" +
         "query no_arg_query (test);";
 
     static final String ALL_TYPES_ARG_CALC =
-            "calc test (\n" +
-            "axiom all_types = {\n" +
+            "calc test + list<axiom> all_types {}; (\n" +
+            "all_types = axiom {\n" +
             "boolean bool = true,\n" +       
             "integer int = 123,\n" +       
             "double real = 1.456,\n" +       
@@ -57,8 +57,8 @@ public class ParameterOperandTest
             "decimal dec = 5.00;\n" +       
             "currency $ \"AU\" amount = 19.76;\n" +       
             "string text = \"To be, or not to be\";\n" +       
-            "calc test (\n" +
-            "axiom all_types = {\n" +
+            "calc test + list<axiom> all_types {}; (\n" +
+            "all_types = axiom {\n" +
             "term a = bool,\n" +       
             "term b = int,\n" +       
             "term c = real,\n" +       

@@ -16,8 +16,8 @@ axiom freight (city, freight)
   {"Milos", 22};
 		
 template customer(name, city);
-template account(name ? name == customer.name, fee);
-template delivery(city ? city == customer.city, freight);
+template account(name ? name == customer.name, city = customer.city, fee);
+template delivery(name = account.name, city ? city == account.city, freight);
 		
-query greek_business(customer:customer) 
+query<axiom> greek_business(customer:customer) 
   -> (fee:account) -> (freight:delivery);

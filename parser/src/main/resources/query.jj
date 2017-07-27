@@ -270,16 +270,6 @@ public class QueryParser
     return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, true); 
   }
   
-  void createAxiomList(QualifiedName listName, ParserContext context) throws ParseException
-  {
-    ParserAssembler parserAssembler = context.getParserAssembler();
-    VariableType varType = new VariableType(OperandType.AXIOM);
-    varType.setProperty(VariableType.AXIOM_KEY, listName);
-    ItemList<?> itemList;    
-    itemList = varType.getItemListInstance(parserAssembler, listName.getName());
-    parserAssembler.getListAssembler().addItemList(itemList.getQualifiedName(), itemList);
-  }
-  
 }
 PARSER_END(QueryParser)
 
@@ -496,8 +486,8 @@ void ResourceDeclaration(ParserContext context) :
       )
       | 
       templateToken=<EXPORT> 
-     ( "=" resourceToken=<STRING_LITERAL> ) ? ( ":" InitialiserList(properties, context) )?
-   )
+    )
+    ( "=" resourceToken=<STRING_LITERAL> ) ? ( ":" InitialiserList(properties, context) )?
   )
   delimitToken=";"
   {
@@ -505,23 +495,21 @@ void ResourceDeclaration(ParserContext context) :
     if (resourceToken != null)
       resourceName = getText(resourceToken);
     else
-      resourceName = qualifiedName.getName();
+      resourceName = qualifiedName.toString();
     context.getQueryProgram().openResource(resourceName, properties);
     QualifiedName qualifiedBindingName = 
       axiomToken == null ?
       new QualifiedTemplateName(qualifiedName.getScope(), qualifiedName.getName()) :
       qualifiedName;
-    AxiomProvider axiomProvider = (resourceToken != null) ?
-      parserAssembler.bindResource(QualifiedName.parseName(resourceName, qualifiedBindingName)) :
+    if (resourceToken != null) 
+      parserAssembler.bindResource(resourceName, qualifiedBindingName);
+    else
       parserAssembler.bindResource(qualifiedBindingName);
-    if (axiomToken != null)
-      createAxiomList(qualifiedBindingName, context);
     if ((axiomToken == null) || (templateToken == null))
       return;   
     QualifiedName templateBindingName = 
       new QualifiedTemplateName(qualifiedTemplateName.getScope(), qualifiedTemplateName.getName());
-    parserAssembler.bindResource(QualifiedName.parseName(axiomProvider.getName(), qualifiedBindingName), templateBindingName);
-    createAxiomList(templateBindingName, context);
+    parserAssembler.bindResource(resourceName, templateBindingName);
   }
 }
 
@@ -746,7 +734,7 @@ String AxiomSpecification(QualifiedName qualifiedAxiomName, ParserContext contex
 String TermHeader(QualifiedName qualifiedAxiomName, ParserContext context) :
 {
   String termName;
-  StringBuilder builder = new StringBuilder(qualifiedAxiomName.getName());
+  StringBuilder builder = new StringBuilder();
   ParserAssembler parserAssembler = context.getParserAssembler();
   parserAssembler.getListAssembler().createAxiomItemList(qualifiedAxiomName);
 }
@@ -945,7 +933,7 @@ void CalculatorTemplate(ParserContext context) :
         context.setQualifiedName(template.getName(), listName);
       }
       |
-      operand=CursorDeclaration(context)
+      operand=CursorDeclaration(context) ";"
       {
         template.addTerm(operand);
       }
@@ -1136,7 +1124,7 @@ Operand TemplateExpression(Template template, ParserContext context) :
       operandMap.addOperand(var);
     if ((assignToken != null) && !isList)
       var = parserAssembler.createReflexiveEvaluator(var, assignToken.image, assignExpression);
-    if ((equalsToken != null) && (listIndexData !=null))
+    if ((equalsToken != null) && ((listIndexData !=null) || (axiomList != null)))
       var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
     else if (hasOperand && (equalsToken != null))
       var = new Evaluator(parserAssembler.getContextName(var.getName() + var.getQualifiedName().incrementReferenceCount()), var, "=", expression);
@@ -1238,19 +1226,6 @@ Operand CalculatorExpression2(Template template, QualifiedName outerTemplateName
       {
         template.addTerm(expression);
         context.onTokenIntercept(delimitToken);
-      }
-      |
-      literalToken=<AXIOM> 
-      {
-        context.onTokenIntercept(literalToken);
-      }
-      qualifiedAxiomName=Axiom(context) "=" axiomList=AxiomList(qualifiedAxiomName, context) 
-      {
-        VariableType varType = new VariableType(OperandType.LIST);
-        varType.setProperty(VariableType.PARAMS, axiomList);
-        expression = varType.getInstance(parserAssembler, qualifiedAxiomName);
-        parserAssembler.getOperandMap().addOperand(expression);
-        template.addTerm(expression);
       }
       |
       (

@@ -51,9 +51,12 @@ axiom city()
     {"wichita", 1305};  
 */   
 /* high_cities.xpl
-axiom city_altitude() : resource;
-template high_city(name ? altitude > 5000, altitude);
-query<axiom> high_cities (city : high_city); 
+resource city_altitude axiom();
+
+template high_city(city ? altitude > 5000, altitude);
+
+query<axiom> high_cities (city_altitude : high_city);
+
 */
 
     protected QueryProgramParser queryProgramParser;

@@ -138,7 +138,7 @@ public class AxiomOperand extends ExpressionOperand<AxiomList>
     public void assign(Parameter parameter)
     {
         super.assign(parameter);
-        AxiomList axiomList = (AxiomList)parameter.getValue();
+        axiomList = (AxiomList)parameter.getValue();
         if (axiomListListener != null)
             axiomListListener.addAxiomList(qname, axiomList);
     }

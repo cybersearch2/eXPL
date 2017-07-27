@@ -90,11 +90,8 @@ public class ChainQueryExecuter implements DebugTarget
 		if (axiomListenerMap != null)
 			bindAxiomListeners(scope);
 		if (headChainQuery != null)
-		{
 		    // Query chain will add to solution or trigger short circuit
-		    headChainQuery.backup();
 		    return (headChainQuery.executeQuery(solution, templateChain, context) == EvaluationStatus.COMPLETE);
-		}
 		return true;
     }
 

@@ -27,9 +27,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * HighCities
- * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
- * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
- * The terms are anonymous, so unification term pairing is performed by position.
+ * Demonstrates set {} operator to select Madrid from a list of cities.
  * @author Andrew Bowley
  * 20 Feb 2015
  */
@@ -49,9 +47,12 @@ axiom city_altitude()
     {"wichita", 1305};  
 */   
 /* madrid.xpl
-axiom city_altitude() : resource;
-template high_city(city { "madrid" }, altitude);
-query<axiom> madrid (city_altitude : madrid); 
+resource city_altitude axiom();
+
+template madrid(city {"madrid"}, altitude);
+
+query<axiom> madrid (city_altitude : madrid);
+
 */
 
     protected QueryProgramParser queryProgramParser;

@@ -10,12 +10,13 @@ axiom city (name, altitude)
     {"spokane", 1909}
     {"wichita", 1305};
     
-// Template for name and altitude of a high city
+// Template to export a high city list
 template high_city
-+ list<axiom> high_cities {};
++ export list<axiom> high_cities {};
 (
-  altitude ? altitude > 5000,
-  high_cities += axiom high_city { name , altitude }
+  high_cities += 
+    axiom high_city { name , altitude } 
+      ? altitude > 5000
 );
 
-query high_cities (city : high_city);
+query cities(city : high_city);

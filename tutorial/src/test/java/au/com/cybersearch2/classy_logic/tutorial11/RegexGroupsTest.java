@@ -47,6 +47,8 @@ public class RegexGroupsTest
         Iterator<Axiom> axiomIterator = regexGroups.getRegexGroups();
         while (axiomIterator.hasNext()) 
               checkSolution(reader, axiomIterator.next().getTermByName("in_word").toString().substring(8));
+        reader.close();
+        /*
         Iterator<SourceMarker> iterator = regexGroups.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
@@ -104,6 +106,7 @@ public class RegexGroupsTest
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("string in_word=word+, +expand.part+- +def (20,3) (21,0)");
+        */
    }
 
     protected void checkSolution(BufferedReader reader, String word)

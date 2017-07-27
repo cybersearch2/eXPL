@@ -1,11 +1,12 @@
 axiom order (order, nostrils, live, bill, feet, eats)
-  {"tubenose", "external tubular", "at sea", "hooked", "", ""}
+  {"tubenose", "external tubular", "at sea", "hooked", "webbed", ""}
   {"waterfowl", "", "", "flat", "webbed", ""}
   {"falconiforms", "", "", "sharp hooked", "curved talons", "meat"}
   {"passerformes", "", "", "", "one long backward toe", ""};
 
 axiom family (family, order, size, wings, neck, color, flight, feed, head, tail, bill, eats)
   {"albatross", "tubenose", "large", "long narrow", "", "", "", "", "", "", "", ""}
+  {"procellariidae", "tubenose", "", "long narrow", "", "", "", "", "", "", "", ""}
   {"swan", "waterfowl", "", "", "long", "white", "ponderous", "", "", "", "", ""}
   {"goose", "waterfowl", "plump", "", "", "", "powerful", "", "", "", "", ""}
   {"duck", "waterfowl", "", "", "", "", "agile", "on water surface", "", "", "", ""} 
@@ -17,10 +18,10 @@ axiom family (family, order, size, wings, neck, color, flight, feed, head, tail,
 axiom bird (bird, family, color, size, flight, throat, voice, eats, tail)
   {"laysan_albatross", "albatross", "white", "", "", "", "", "", ""}
   {"black footed albatross",  "albatross", "dark", "", "", "", "", "", ""}
-  {"fulmar", "tubenose", "", "medium", "flap glide", "", "", "", ""}
+  {"fulmar", "procellariidae", "", "medium", "flap glide", "", "", "", ""}
   {"whistling swan", "swan", "", "", "", "", "muffled musical whistle", "", ""}
   {"trumpeter swan", "swan", "", "", "", "", "loud trumpeting", "", ""}
-  {"snow goose", "goose", "white", "", "", "", "", "", ""}
+  {"snow goose", "goose", "white", "", "", "", "honks", "", ""}
   {"pintail", "duck", "", "", "", "", "short whistle", "", ""}
   {"turkey vulture", "vulture", "", "", "v shaped", "", "", "", ""}
   {"california condor", "vulture", "", "", "flat", "", "", "", ""}
@@ -39,14 +40,14 @@ template order
 
 template family
 (
-  family, order ? order == order.order, size, wings, neck, color, flight, feed, head, tail, bill, eats
+  family, order ? order == order.order, size, wings, neck, color, flight, feed, head, feet = order.feet, tail, bill, eats
 );
 
 template species
++ export list<axiom> waterfowl {};
 (
-  bird,
   family ? family == family.family,
-  order = family.order 
+  waterfowl += axiom waterfowl { bird , voice, feet = order.feet } ? family.order == "waterfowl"
 );
 
-query<axiom> birds (order:order, family:family, bird:species);  
+query birds (order:order, family:family, bird:species);  

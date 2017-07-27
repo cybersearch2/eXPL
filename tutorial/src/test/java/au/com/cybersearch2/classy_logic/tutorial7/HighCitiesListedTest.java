@@ -48,6 +48,8 @@ public class HighCitiesListedTest
         Iterator<Axiom> cityIterator = highCities.getHighCities();
         while (cityIterator.hasNext())
             checkSolution(reader, cityIterator.next().toString());
+        reader.close();
+        /*
         ParserContext context = highCities.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
@@ -66,6 +68,7 @@ public class HighCitiesListedTest
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("list<axiom> city_list(high_city) (17,1) (17,25)");
+        */
     }
     
     protected void checkSolution(BufferedReader reader, String city)

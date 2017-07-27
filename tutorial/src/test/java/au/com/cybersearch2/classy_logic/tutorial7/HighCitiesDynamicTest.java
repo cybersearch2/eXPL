@@ -33,18 +33,18 @@ import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * HighCitiesAxiomsTest
+ * HighCitiesListedTest
  * @author Andrew Bowley
  * 11Apr.,2017
  */
-public class HighCitiesAxiomsTest
+public class HighCitiesDynamicTest
 {
     @Test
     public void testHighCities() throws Exception
     {
         File testFile = new File("src/main/resources/tutorial7", "high-cities-listed.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        HighCitiesAxioms highCities = new HighCitiesAxioms();
+        HighCitiesDynamic highCities = new HighCitiesDynamic();
         Iterator<Axiom> cityIterator = highCities.getHighCities();
         while (cityIterator.hasNext())
             checkSolution(reader, cityIterator.next().toString());
@@ -59,40 +59,24 @@ public class HighCitiesAxiomsTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city(name,altitude)[10] (1,1) (11,21)");
+        assertThat(sourceItem.toString()).isEqualTo("city()[10] (1,1) (11,21)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom high_cities (12,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("list city_list (17,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> high_cities[0] (12,1) (12,22)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query high_cities (18,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template high_city (14,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("altitude>5000?altitude (15,3) (15,28)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("high_cities+=high_city (16,3) (17,0)");
+        assertThat(sourceItem.toString()).isEqualTo("list<axiom> city_list(high_city) (17,1) (17,25)");
         */
     }
     
-    protected void checkSolution(BufferedReader reader, String shade)
+    protected void checkSolution(BufferedReader reader, String city)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(shade).isEqualTo(line);
+            assertThat(city).isEqualTo(line);
         }
         catch (IOException e)
         {
@@ -100,4 +84,5 @@ public class HighCitiesAxiomsTest
         }
 
     }
+
 }

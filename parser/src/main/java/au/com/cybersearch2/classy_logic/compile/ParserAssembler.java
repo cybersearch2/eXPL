@@ -250,6 +250,17 @@ public class ParserAssembler implements LocaleListener
     
     /**
      * Bind resource to axiom provider for given qualified axiom name and remove internal reference
+     * @param resourceName Resource system name
+     * @param qualifiedBindingName Qulified name of axiom or template
+     * @throws ExpressionException if axiom provider not found
+     */
+    public AxiomProvider bindResource(String resourceName, QualifiedName qualifiedBindingName)
+    {
+        return bindResource(QualifiedName.parseName(resourceName), qualifiedBindingName);
+    }
+    
+    /**
+     * Bind resource to axiom provider for given qualified axiom name and remove internal reference
      * @param resourceName Resource qualified name
      * @param qualifiedBindingName Qulified name of axiom or template
      * @throws ExpressionException if axiom provider not found

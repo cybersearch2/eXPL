@@ -1,11 +1,11 @@
 // Use an external axiom source (class LexiconSource)
-axiom lexicon (word, definition) : "lexicon";
+resource lexicon axiom(word, definition);
 
 string wordRegex = "^in[^ ]+";
 string defRegex = "^(.)\. (.*+)";
 
 // Convert single letter part of speech to word
-axiom expand =
+list<axiom> expand
 { 
    n = "noun",
    v = "verb",

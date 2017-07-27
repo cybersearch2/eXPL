@@ -208,7 +208,7 @@ public class LogicQuery implements SolutionFinder
 				if ((solutionHandler == null) ||
 				     solutionHandler.onSolution(solution))
 					return true;
-				solution.remove(solutionKey);
+//				solution.remove(solutionKey);
 			}
 		}
 		catch (ExpressionException e)

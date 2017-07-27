@@ -250,16 +250,6 @@ public class QueryParser implements QueryParserConstants
     return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, true);
   }
 
-  void createAxiomList(QualifiedName listName, ParserContext context) throws ParseException
-  {
-    ParserAssembler parserAssembler = context.getParserAssembler();
-    VariableType varType = new VariableType(OperandType.AXIOM);
-    varType.setProperty(VariableType.AXIOM_KEY, listName);
-    ItemList<?> itemList;
-    itemList = varType.getItemListInstance(parserAssembler, listName.getName());
-    parserAssembler.getListAssembler().addItemList(itemList.getQualifiedName(), itemList);
-  }
-
 /** Root production. */
   final public void input(ParserContext context) throws ParseException
   {
@@ -382,54 +372,52 @@ public class QueryParser implements QueryParserConstants
       break;
     case EXPORT:
       templateToken = jj_consume_token(EXPORT);
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case ASSIGN:
-        jj_consume_token(ASSIGN);
-        resourceToken = jj_consume_token(STRING_LITERAL);
-        break;
-      default:
-        jj_la1[5] = jj_gen;
-        ;
-      }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
-      {
-      case COLON:
-        jj_consume_token(COLON);
-        InitialiserList(properties, context);
-        break;
-      default:
-        jj_la1[6] = jj_gen;
-        ;
-      }
+      break;
+    default:
+      jj_la1[5] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case ASSIGN:
+      jj_consume_token(ASSIGN);
+      resourceToken = jj_consume_token(STRING_LITERAL);
+      break;
+    default:
+      jj_la1[6] = jj_gen;
+      ;
+    }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
+    {
+    case COLON:
+      jj_consume_token(COLON);
+      InitialiserList(properties, context);
       break;
     default:
       jj_la1[7] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
+      ;
     }
     delimitToken = jj_consume_token(SEMICOLON);
     String resourceName;
     if (resourceToken != null)
       resourceName = getText(resourceToken);
     else
-      resourceName = qualifiedName.getName();
+      resourceName = qualifiedName.toString();
     context.getQueryProgram().openResource(resourceName, properties);
     QualifiedName qualifiedBindingName =
       axiomToken == null ?
       new QualifiedTemplateName(qualifiedName.getScope(), qualifiedName.getName()) :
       qualifiedName;
-    AxiomProvider axiomProvider = (resourceToken != null) ?
-      parserAssembler.bindResource(QualifiedName.parseName(resourceName, qualifiedBindingName)) :
+    if (resourceToken != null)
+      parserAssembler.bindResource(resourceName, qualifiedBindingName);
+    else
       parserAssembler.bindResource(qualifiedBindingName);
-    if (axiomToken != null)
-      createAxiomList(qualifiedBindingName, context);
     if ((axiomToken == null) || (templateToken == null))
       {if (true) return;}
     QualifiedName templateBindingName =
       new QualifiedTemplateName(qualifiedTemplateName.getScope(), qualifiedTemplateName.getName());
-    parserAssembler.bindResource(QualifiedName.parseName(axiomProvider.getName(), qualifiedBindingName), templateBindingName);
-    createAxiomList(templateBindingName, context);
+    parserAssembler.bindResource(resourceName, templateBindingName);
   }
 
   final public void ScopeDeclaration(ParserContext context) throws ParseException
@@ -781,7 +769,7 @@ public class QueryParser implements QueryParserConstants
   final public String TermHeader(QualifiedName qualifiedAxiomName, ParserContext context) throws ParseException
   {
   String termName;
-  StringBuilder builder = new StringBuilder(qualifiedAxiomName.getName());
+  StringBuilder builder = new StringBuilder();
   ParserAssembler parserAssembler = context.getParserAssembler();
   parserAssembler.getListAssembler().createAxiomItemList(qualifiedAxiomName);
     jj_consume_token(LPAREN);
@@ -1136,6 +1124,7 @@ public class QueryParser implements QueryParserConstants
         break;
       case CURSOR:
         operand = CursorDeclaration(context);
+        jj_consume_token(SEMICOLON);
         template.addTerm(operand);
         break;
       default:
@@ -1154,7 +1143,6 @@ public class QueryParser implements QueryParserConstants
     case DECIMAL:
     case BOOLEAN:
     case STRING:
-    case AXIOM:
     case REGEX:
     case SCOPE:
     case TERM:
@@ -1211,7 +1199,6 @@ public class QueryParser implements QueryParserConstants
       case DECIMAL:
       case BOOLEAN:
       case STRING:
-      case AXIOM:
       case REGEX:
       case SCOPE:
       case TERM:
@@ -1581,7 +1568,7 @@ public class QueryParser implements QueryParserConstants
       operandMap.addOperand(var);
     if ((assignToken != null) && !isList)
       var = parserAssembler.createReflexiveEvaluator(var, assignToken.image, assignExpression);
-    if ((equalsToken != null) && (listIndexData !=null))
+    if ((equalsToken != null) && ((listIndexData !=null) || (axiomList != null)))
       var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
     else if (hasOperand && (equalsToken != null))
       var = new Evaluator(parserAssembler.getContextName(var.getName() + var.getQualifiedName().incrementReferenceCount()), var, "=", expression);
@@ -1649,7 +1636,6 @@ public class QueryParser implements QueryParserConstants
     case DECIMAL:
     case BOOLEAN:
     case STRING:
-    case AXIOM:
     case REGEX:
     case SCOPE:
     case TERM:
@@ -1778,18 +1764,6 @@ public class QueryParser implements QueryParserConstants
           context.popSourceMarker();
         template.addTerm(expression);
         context.onTokenIntercept(delimitToken);
-      break;
-    case AXIOM:
-      literalToken = jj_consume_token(AXIOM);
-        context.onTokenIntercept(literalToken);
-      qualifiedAxiomName = Axiom(context);
-      jj_consume_token(ASSIGN);
-      axiomList = AxiomList(qualifiedAxiomName, context);
-        VariableType varType = new VariableType(OperandType.LIST);
-        varType.setProperty(VariableType.PARAMS, axiomList);
-        expression = varType.getInstance(parserAssembler, qualifiedAxiomName);
-        parserAssembler.getOperandMap().addOperand(expression);
-        template.addTerm(expression);
       break;
     case CHOICE:
       literalToken = jj_consume_token(CHOICE);
@@ -2066,7 +2040,6 @@ public class QueryParser implements QueryParserConstants
     case DECIMAL:
     case BOOLEAN:
     case STRING:
-    case AXIOM:
     case REGEX:
     case SCOPE:
     case TERM:
@@ -2123,7 +2096,6 @@ public class QueryParser implements QueryParserConstants
       case DECIMAL:
       case BOOLEAN:
       case STRING:
-      case AXIOM:
       case REGEX:
       case SCOPE:
       case TERM:
@@ -4104,6 +4076,70 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(6, xla); }
   }
 
+  private boolean jj_3R_124() {
+    if (jj_3R_77()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_105() {
+    if (jj_scan_token(MINUS)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_123() {
+    if (jj_3R_76()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_104() {
+    if (jj_scan_token(PLUS)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_83() {
+    if (jj_3R_93()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_99() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_100()) {
+    jj_scanpos = xsp;
+    if (jj_3R_101()) {
+    jj_scanpos = xsp;
+    if (jj_3R_102()) {
+    jj_scanpos = xsp;
+    if (jj_3R_103()) return true;
+    }
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_100() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_104()) {
+    jj_scanpos = xsp;
+    if (jj_3R_105()) {
+    jj_scanpos = xsp;
+    if (jj_3R_106()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_122() {
+    if (jj_scan_token(STRING_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_121() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
   private boolean jj_3R_63() {
     if (jj_3R_74()) return true;
     return false;
@@ -4410,6 +4446,17 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3_1() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(57)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(79)) return true;
+    }
+    if (jj_3R_37()) return true;
+    return false;
+  }
+
   private boolean jj_3R_96() {
     if (jj_3R_97()) return true;
     return false;
@@ -4427,6 +4474,11 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_111() {
     if (jj_3R_112()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_53() {
+    if (jj_3R_61()) return true;
     return false;
   }
 
@@ -4471,24 +4523,8 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3_1() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(57)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(79)) return true;
-    }
-    if (jj_3R_37()) return true;
-    return false;
-  }
-
   private boolean jj_3R_66() {
     if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_53() {
-    if (jj_3R_61()) return true;
     return false;
   }
 
@@ -4536,6 +4572,11 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3R_44() {
+    if (jj_scan_token(NAN)) return true;
+    return false;
+  }
+
   private boolean jj_3R_90() {
     if (jj_scan_token(DECIMAL)) return true;
     return false;
@@ -4543,6 +4584,31 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_107() {
     if (jj_scan_token(INCR)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_52() {
+    if (jj_3R_60()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_37() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_43()) {
+    jj_scanpos = xsp;
+    if (jj_3R_44()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_43() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_52()) {
+    jj_scanpos = xsp;
+    if (jj_3R_53()) return true;
+    }
     return false;
   }
 
@@ -4571,16 +4637,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_44() {
-    if (jj_scan_token(NAN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_52() {
-    if (jj_3R_60()) return true;
-    return false;
-  }
-
   private boolean jj_3R_102() {
     if (jj_3R_108()) return true;
     return false;
@@ -4588,26 +4644,6 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_87() {
     if (jj_scan_token(BOOLEAN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_37() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_43()) {
-    jj_scanpos = xsp;
-    if (jj_3R_44()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_43() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_52()) {
-    jj_scanpos = xsp;
-    if (jj_3R_53()) return true;
-    }
     return false;
   }
 
@@ -4683,70 +4719,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_124() {
-    if (jj_3R_77()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_105() {
-    if (jj_scan_token(MINUS)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_123() {
-    if (jj_3R_76()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_104() {
-    if (jj_scan_token(PLUS)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_83() {
-    if (jj_3R_93()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_99() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_100()) {
-    jj_scanpos = xsp;
-    if (jj_3R_101()) {
-    jj_scanpos = xsp;
-    if (jj_3R_102()) {
-    jj_scanpos = xsp;
-    if (jj_3R_103()) return true;
-    }
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_100() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_104()) {
-    jj_scanpos = xsp;
-    if (jj_3R_105()) {
-    jj_scanpos = xsp;
-    if (jj_3R_106()) return true;
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_122() {
-    if (jj_scan_token(STRING_LITERAL)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_121() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
-    return false;
-  }
-
   /** Generated Token Manager. */
   public QueryParserTokenManager token_source;
   SimpleCharStream jj_input_stream;
@@ -4775,15 +4747,15 @@ public class QueryParser implements QueryParserConstants
   }
   private static void jj_la1_init_0() 
   {
-    jj_la1_0 = new int[] { 0x800000,0x2d47dfc0,0x2d47dfc0,0x0,0x0,0x0,0x0,0x20001000,0x0,0x2d475fc0,0x2d475fc0,0x401000,0x0,0x0,0x0,0x0,0x0,0x2d465fc0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x14007c0,0x14007c0,0x0,0x14007c0,0x0,0x0,0x0,0x0,0x0,0x0,0x24140000,0x940b7c0,0x0,0x940b7c0,0x0,0x14007c0,0x0,0x0,0x0,0x9000,0x0,0x0,0x14007c0,0x0,0x0,0x0,0x0,0x14027c0,0x0,0x0,0x0,0x940b7c0,0x140a7c0,0x940b7c0,0x0,0x0,0x0,0xc0000000,0xc0000000,0x14007c0,0x0,0x0,0x940b7c0,0x0,0x940b7c0,0x0,0x0,0x0,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x14007c0,0x0,0x0,0x20000000,0x24040000,0x14017c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000,0x0,0x0,0x0,0x0,0x0,0x14007c0,0x14007c0,0x2280000,0x0,0x0,0x14007c0,0x0,0x0,0x0,0x0,0x14007c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000,0x8000,0x0,0x0, };
+    jj_la1_0 = new int[] { 0x800000,0x2d47dfc0,0x2d47dfc0,0x0,0x0,0x20001000,0x0,0x0,0x0,0x2d475fc0,0x2d475fc0,0x401000,0x0,0x0,0x0,0x0,0x0,0x2d465fc0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x14007c0,0x14007c0,0x0,0x14007c0,0x0,0x0,0x0,0x0,0x0,0x0,0x24140000,0x940a7c0,0x0,0x940a7c0,0x0,0x14007c0,0x0,0x0,0x0,0x9000,0x0,0x0,0x14007c0,0x0,0x0,0x0,0x0,0x14027c0,0x0,0x0,0x0,0x940a7c0,0x140a7c0,0x940a7c0,0x0,0x0,0x0,0xc0000000,0xc0000000,0x14007c0,0x0,0x0,0x940a7c0,0x0,0x940a7c0,0x0,0x0,0x0,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x14007c0,0x0,0x0,0x20000000,0x24040000,0x14017c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000,0x0,0x0,0x0,0x0,0x0,0x14007c0,0x14007c0,0x2280000,0x0,0x0,0x14007c0,0x0,0x0,0x0,0x0,0x14007c0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000,0x8000,0x0,0x0, };
   }
   private static void jj_la1_init_1() 
   {
-    jj_la1_1 = new int[] { 0x0,0x20000,0x20000,0x2000000,0x40000,0x20000000,0x0,0x0,0x40000,0x20000,0x20000,0x0,0x40000000,0x8000000,0x2000000,0x40000,0x0,0x20000,0x100000,0x100000,0x100000,0x2000000,0x20000,0x0,0x2000000,0x0,0x2f480,0x3f480,0x100000,0x2f480,0x0,0x4000000,0x2000000,0x4000000,0x40000000,0x0,0x0,0x9416f480,0x2000000,0x9416f480,0x40000,0x0,0x8400000,0x20000000,0x20000,0x8006f480,0x0,0x80000000,0x2f480,0xa0140000,0xa0140000,0x0,0x0,0x20000,0x0,0x100000,0x4000000,0x8416f480,0x8006f480,0x8016f480,0x40000,0x21000,0x100000,0x7f,0x7f,0x2f480,0x8000000,0x2000000,0x9416f480,0x2000000,0x9416f480,0x2000000,0x100000,0x2000000,0x8006f480,0x2000000,0x2000000,0x20000,0x2000000,0x4000000,0x2000000,0x0,0x8400000,0x20000000,0x0,0x0,0x0,0x40000000,0x20080,0x40000,0x20140000,0x20140000,0x40000000,0x2000000,0x20000000,0x20000000,0x6f480,0x8400000,0x4400000,0xf480,0x21000,0x0,0x0,0x2f480,0x0,0xc440000,0x2000000,0x0,0x8400000,0x2f480,0x20000000,0xf480,0x20000,0x40000,0x6000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40000000,0x40000000,0x0,0x0,0x0,0x0,0x0,0x0,0x8006f480,0x8006f480,0x0,0x0, };
+    jj_la1_1 = new int[] { 0x0,0x20000,0x20000,0x2000000,0x40000,0x0,0x20000000,0x0,0x40000,0x20000,0x20000,0x0,0x40000000,0x8000000,0x2000000,0x40000,0x0,0x20000,0x100000,0x100000,0x100000,0x2000000,0x20000,0x0,0x2000000,0x0,0x2f480,0x3f480,0x100000,0x2f480,0x0,0x4000000,0x2000000,0x4000000,0x40000000,0x0,0x0,0x9416f480,0x2000000,0x9416f480,0x40000,0x0,0x8400000,0x20000000,0x20000,0x8006f480,0x0,0x80000000,0x2f480,0xa0140000,0xa0140000,0x0,0x0,0x20000,0x0,0x100000,0x4000000,0x8416f480,0x8006f480,0x8016f480,0x40000,0x21000,0x100000,0x7f,0x7f,0x2f480,0x8000000,0x2000000,0x9416f480,0x2000000,0x9416f480,0x2000000,0x100000,0x2000000,0x8006f480,0x2000000,0x2000000,0x20000,0x2000000,0x4000000,0x2000000,0x0,0x8400000,0x20000000,0x0,0x0,0x0,0x40000000,0x20080,0x40000,0x20140000,0x20140000,0x40000000,0x2000000,0x20000000,0x20000000,0x6f480,0x8400000,0x4400000,0xf480,0x21000,0x0,0x0,0x2f480,0x0,0xc440000,0x2000000,0x0,0x8400000,0x2f480,0x20000000,0xf480,0x20000,0x40000,0x6000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40000000,0x40000000,0x0,0x0,0x0,0x0,0x0,0x0,0x8006f480,0x8006f480,0x0,0x0, };
   }
   private static void jj_la1_init_2() 
   {
-    jj_la1_2 = new int[] { 0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x1,0x1,0x0,0x0,0x8000,0x8000,0x8000,0x0,0x0,0x0,0x0,0x400,0x0,0x0,0x0,0x0,0x400,0x0,0xf03,0x0,0xf03,0x0,0x0,0x0,0x80000,0x0,0xf00,0x3ff00000,0x0,0x0,0x3ff80000,0x3ff80000,0x3,0x3,0x0,0x3,0x0,0x0,0xf03,0xf00,0xf00,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf03,0x0,0xf03,0x0,0x0,0x0,0xf00,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3ff80000,0x3ff80000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40,0x80,0x8000,0x10000,0x4000,0x24,0x24,0x18,0x18,0x40000,0xc00,0xc00,0x23000,0x23000,0xc00,0xf00,0x0,0x300,0x300, };
+    jj_la1_2 = new int[] { 0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x1,0x1,0x0,0x0,0x8000,0x8000,0x8000,0x0,0x0,0x0,0x0,0x400,0x0,0x0,0x0,0x0,0x400,0x0,0xf03,0x0,0xf03,0x0,0x0,0x0,0x80000,0x0,0xf00,0x3ff00000,0x0,0x0,0x3ff80000,0x3ff80000,0x3,0x3,0x0,0x3,0x0,0x0,0xf03,0xf00,0xf00,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf03,0x0,0xf03,0x0,0x0,0x0,0xf00,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3ff80000,0x3ff80000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40,0x80,0x8000,0x10000,0x4000,0x24,0x24,0x18,0x18,0x40000,0xc00,0xc00,0x23000,0x23000,0xc00,0xf00,0x0,0x300,0x300, };
   }
   private static void jj_la1_init_3() 
   {

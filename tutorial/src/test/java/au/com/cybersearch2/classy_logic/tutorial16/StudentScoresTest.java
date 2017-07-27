@@ -13,78 +13,88 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial6;
+package au.com.cybersearch2.classy_logic.tutorial16;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.tutorial7.Gaming;
 
 /**
- * GamingTest
+ * SchoolMarksTest
  * @author Andrew Bowley
- * 10Apr.,2017
+ * 17Apr,2017
  */
-public class GamingTest
+public class StudentScoresTest
 {
     @Test
-    public void testGaming() throws Exception
+    public void testStudentScores() throws Exception
     {
-        Gaming gaming = new Gaming();
-        //Axiom axiom = gaming.displayFruit();
-        //String spin = axiom.toString();
-        //assertThat(spin).isEqualTo("spin(r1=lemon, r2=banana, r3=apple, r4=orange)");
-        Iterator<SourceMarker> iterator = gaming.getParserContext().getSourceMarkerSet().iterator();
+        File testFile = new File("src/main/resources/tutorial16", "student-scores.txt");
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
+        StudentScores studentScores = new StudentScores();
+        Iterator<Axiom> scoreIterator = studentScores.generateReport();
+        while(scoreIterator.hasNext())
+            checkSolution(reader, scoreIterator.next().toString());
+        reader.close();
+        /*
+        ParserContext context = schoolMarks.getParserContext();
+        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list combo (5,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom grades (1,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> combo(fruit){4} (5,1) (5,23)");
+        assertThat(sourceItem.toString()).isEqualTo("grades(student,english,math,history)[3] (1,1) (5,24)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom fruit (3,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query marks (9,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("fruit()[1] (3,1) (3,52)");
+        assertThat(sourceItem.toString()).isEqualTo("grades:score (9,20) (9,33)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom spin (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template score (7,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("spin(r1,r2,r3,r4)[1] (1,1) (1,37)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query spin (8,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template play (6,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("r1 (6,15) (6,23)");
+        assertThat(sourceItem.toString()).isEqualTo("student (7,16) (7,22)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("r2 (6,26) (6,34)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("r3 (6,37) (6,45)");
+        assertThat(sourceItem.toString()).isEqualTo("integer total=math.add(english ... history) (7,25) (7,72)");
         assertThat(iterator.hasNext()).isFalse();
-   }
+        */
+    } 
+
+    protected void checkSolution(BufferedReader reader, String score)
+    {
+        try
+        {
+            String line = reader.readLine();
+            assertThat(score).isEqualTo(line);
+        }
+        catch (IOException e)
+        {
+            fail(e.getMessage());
+        }
+
+    }
 }

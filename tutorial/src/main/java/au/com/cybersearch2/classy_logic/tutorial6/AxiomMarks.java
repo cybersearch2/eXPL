@@ -52,11 +52,10 @@ axiom alpha_marks()
  "b-", "b", "b+",
  "a-", "a", "a+"
 };
+
 list<term> mark(alpha_marks);
 
-template score(student, english = mark[(english)], maths = mark[(maths)], history = mark[(history)]);
-
-query<axiom> marks(grades : score);
+template score(student, English = mark[english], Maths = mark[maths], History = mark[history]);
 
 */
 

@@ -1,5 +1,5 @@
-axiom german.colors (aqua, black, blue, white) : resource;
-axiom french.colors (aqua, black, blue, white) : resource;
+resource german.colors axiom(aqua, black, blue, white);
+resource french.colors axiom(aqua, black, blue, white);
 
 local select(colors);
 

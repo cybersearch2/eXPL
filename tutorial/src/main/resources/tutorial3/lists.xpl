@@ -9,7 +9,7 @@ list<boolean> flags = { 1 == 1, 1 == 0 };
 axiom bright_stars ( a, b, c )
   { "Sirius" ,"Canopus", "Rigil Kentaurus" };
   
-axiom greatest = 
+list<axiom> greatest 
     { "The Godfather" }
     { "The Shawshank Redemption" }
     { "Schindler's List" };

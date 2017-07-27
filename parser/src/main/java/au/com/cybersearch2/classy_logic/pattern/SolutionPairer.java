@@ -91,7 +91,7 @@ public class SolutionPairer implements OperandVisitor
 	    }
 	    for (String key: keys)
 	    {
-	        if (key == null)
+	        if ((key == null) || key.isEmpty())
 	            break;
     	    Axiom axiom = solution.getAxiom(key);
     		if (axiom != null)

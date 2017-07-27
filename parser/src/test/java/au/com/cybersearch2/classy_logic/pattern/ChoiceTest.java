@@ -37,10 +37,12 @@ public class ChoiceTest
         "  { \"black\", 0,   0,     0   }\n" +
         "  { \"blue\",  0,   0,     255 }\n" +
         "  { \"white\", 255, 255,   255 };\n" +
-        "calc shader(\n" +
+        "calc shader\n" +
+        "+ list<axiom> rgb {};\n" +
+        "(\n" +
         "  color = name,\n" +        
         "  choice swatch,\n" +
-        "  axiom rgb = { red, green, blue }\n" +
+        "  rgb = axiom { red, green, blue }\n" +
         ");\n" +
         "query color_query (shades : shader);\n";
 

@@ -16,14 +16,15 @@
 package au.com.cybersearch2.classy_logic.tutorial2;
 
 import java.io.File;
+import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
-import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * GreekConstruction3
@@ -53,10 +54,10 @@ axiom freight (city, freight)
   {"Milos", 22};
         
 template customer(name, city);
-template account(name ? name == customer.name, fee);
-template delivery(city ? city == customer.city, freight);
+template account(name ? name == customer.name, city = customer.city, fee);
+template delivery(name = account.name, city ? city == account.city, freight);
         
-query greek_business(customer:customer) 
+query<axiom> greek_business(customer:customer) 
   -> (fee:account) -> (freight:delivery);
   
 */
@@ -71,24 +72,19 @@ query greek_business(customer:customer)
     }
     
     /**
-	 * Compiles the greek-construction3.xpl script and runs the "customer_charge" query, displaying the solution on the console.<br/>
-	 * The query has 2 unification steps. The first unifies "charge" axiom with "freight" template.<br/>
-	 * The second unifies "customer" axiom with "customer_freight" template.
+	 * Compiles the greek-construction3.xpl script and runs the "customer_charge" query, displaying the solution on the console.
 	 * The expected result:<br/>
-		account(name = Marathon Marble, fee = 61)<br/>
-		delivery(city = Sparta, freight = 16)<br/>
-		account(name = Acropolis Construction, fee = 47)<br/>
-		delivery(city = Athens, freight = 5)<br/>
-		account(name = Agora Imports, fee = 49)<br/>
-		delivery(city = Sparta, freight = 16)<br/>
-		account(name = Spiros Theodolites, fee = 57)<br/>
-		delivery(city = Milos, freight = 22)<br/>	 
+        delivery(name=Marathon Marble, city=Sparta, freight=16)
+        delivery(name=Acropolis Construction, city=Athens, freight=5)
+        delivery(name=Agora Imports, city=Sparta, freight=16)
+        delivery(name=Spiros Theodolites, city=Milos, freight=22)
 	 */
-	public void displayCustomerCharges(SolutionHandler solutionHandler)
+	public Iterator<Axiom> displayCustomerCharges()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("greek-construction3.xpl");
         parserContext = queryProgramParser.getContext();
- 		queryProgram.executeQuery("greek_business", solutionHandler);
+ 		Result result = queryProgram.executeQuery("greek_business");
+ 		return result.axiomIterator("greek_business");
 	}
 
     public ParserContext getParserContext()
@@ -101,13 +97,9 @@ query greek_business(customer:customer)
 		try 
 		{
 	        GreekConstruction3 greekConstruction = new GreekConstruction3();
-			greekConstruction.displayCustomerCharges(new SolutionHandler(){
-	            @Override
-	            public boolean onSolution(Solution solution) {
-	                System.out.println(solution.getAxiom("account").toString());
-	                System.out.println(solution.getAxiom("delivery").toString());
-	                return true;
-	            }});
+	        Iterator<Axiom> iterator = greekConstruction.displayCustomerCharges();
+	        while (iterator.hasNext())
+	            System.out.println(iterator.next().toString());
 		} 
 		catch (ExpressionException e) 
 		{

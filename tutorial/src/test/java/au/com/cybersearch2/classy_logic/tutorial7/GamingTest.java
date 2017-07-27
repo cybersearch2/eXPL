@@ -16,88 +16,77 @@
 package au.com.cybersearch2.classy_logic.tutorial7;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.tutorial7.Gaming;
 
 /**
- * HighCitiesAxiomsTest
+ * GamingTest
  * @author Andrew Bowley
- * 11Apr.,2017
+ * 10Apr.,2017
  */
-public class HighCitiesAxiomsTest
+public class GamingTest
 {
     @Test
-    public void testHighCities() throws Exception
+    public void testGaming() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial7", "high-cities-listed.txt");
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        HighCitiesAxioms highCities = new HighCitiesAxioms();
-        Iterator<Axiom> cityIterator = highCities.getHighCities();
-        while (cityIterator.hasNext())
-            checkSolution(reader, cityIterator.next().toString());
-        reader.close();
+        Gaming gaming = new Gaming();
+        //Axiom axiom = gaming.displayFruit();
+        //String spin = axiom.toString();
+        //assertThat(spin).isEqualTo("spin(r1=lemon, r2=banana, r3=apple, r4=orange)");
         /*
-        ParserContext context = highCities.getParserContext();
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        Iterator<SourceMarker> iterator = gaming.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom city (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("list combo (5,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city(name,altitude)[10] (1,1) (11,21)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> combo(fruit){4} (5,1) (5,23)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom high_cities (12,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom fruit (3,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> high_cities[0] (12,1) (12,22)");
+        assertThat(sourceItem.toString()).isEqualTo("fruit()[1] (3,1) (3,52)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query high_cities (18,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template high_city (14,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom spin (1,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("altitude>5000?altitude (15,3) (15,28)");
+        assertThat(sourceItem.toString()).isEqualTo("spin(r1,r2,r3,r4)[1] (1,1) (1,37)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("query spin (8,1)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("template play (6,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("r1 (6,15) (6,23)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("high_cities+=high_city (16,3) (17,0)");
+        assertThat(sourceItem.toString()).isEqualTo("r2 (6,26) (6,34)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("r3 (6,37) (6,45)");
+        assertThat(iterator.hasNext()).isFalse();
         */
-    }
-    
-    protected void checkSolution(BufferedReader reader, String shade)
-    {
-        try
-        {
-            String line = reader.readLine();
-            assertThat(shade).isEqualTo(line);
-        }
-        catch (IOException e)
-        {
-            fail(e.getMessage());
-        }
-
-    }
+   }
 }

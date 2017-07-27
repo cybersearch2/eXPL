@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.tutorial2;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -26,6 +25,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
  * GreekConstruction
+ * Demonstrates query cascading and unification by name.
  * @author Andrew Bowley
  * 22 Feb 2015
  */
@@ -33,8 +33,8 @@ public class NamedGreekConstruction implements SolutionHandler
 {
 
 /* customer_charge2.xpl
-axiom charge() : "greek_construction";
-axiom customer() : "greek_construction"; 
+resource charge axiom() = "greek_construction";
+resource customer axiom() = "greek_construction"; 
 
 template freight(charge, city);
 template customer_freight(name, city ? city == freight.city, charge = freight.charge);
@@ -53,7 +53,7 @@ query customer_charge(charge:freight, customer:customer_freight);
      }
 
 	/**
-	 * Compiles the GREEK_CONSTRUCTION script and runs the "customer_charge" query, displaying the solution on the console.<br/>
+	 * Compiles the customer_charge2.xpl script and runs the "customer_charge" query, displaying the solution on the console.<br/>
 	 * The query has 2 unification steps. The first unifies "charge" axiom with "freight" template.<br/>
 	 * The second unifies "customer" axiom with "customer_freight" template.
 	 * Unlike the first version, this sample declares the names of the axiom terms so they can be matched to template terms by name.

@@ -1,5 +1,5 @@
 // Use an external axiom source (class DictionarySource)
-axiom dictionary (entry) : "dictionary";
+resource dictionary axiom(entry);
 
 // Convert single letter part of speech to word
 axiom expand =

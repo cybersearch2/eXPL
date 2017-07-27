@@ -1,4 +1,4 @@
-axiom mega_city (Rank,Megacity,Country,Continent,Population): resource;
+resource mega_city axiom(Rank,Megacity,Country,Continent,Population);
 
 axiom continents(continent)
   { "Asia" }
@@ -14,7 +14,15 @@ template continent
 
 template continent_group 
 (
-  continent ? continent == Continent, city = Megacity, country = Country, rank = Rank, population = Population.format
+  continent ? continent == Continent, 
+  city = Megacity, 
+  country = Country, 
+  rank = Rank, 
+  population = Population.format
 ); 
 
-query<axiom> mega_cities_by_continent (continents : continent, mega_city : continent_group); 
+query<axiom> mega_cities_by_continent 
+(
+  continents : continent, 
+  mega_city : continent_group
+); 

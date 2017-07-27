@@ -1,4 +1,4 @@
-axiom mega_city (Rank,Megacity,Country,Continent,Population): resource;
+resource mega_city axiom(Rank,Megacity,Country,Continent,Population);
 
 integer count = 0;
 

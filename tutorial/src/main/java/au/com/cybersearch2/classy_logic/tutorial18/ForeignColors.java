@@ -28,6 +28,8 @@ import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.parser.FileAxiomProvider;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -68,6 +70,7 @@ scope german (language="de", region="DE")
 }
 
 */
+    
     protected QueryProgramParser queryProgramParser;
     protected static FileAxiomProvider[] fileAxiomProviders;
     ParserContext parserContext;
@@ -86,19 +89,28 @@ scope german (language="de", region="DE")
 
     public List<Axiom> createForeignLexicon()
     {
+        final List<Axiom> axiomList = new ArrayList<Axiom>();
+        AxiomListener axiomListener = new AxiomListener(){
+
+            @Override
+            public void onNextAxiom(QualifiedName qname, Axiom axiom)
+            {
+                axiomList.add(axiom);
+            }};
+        fileAxiomProviders[0].chainListener(axiomListener);
+        fileAxiomProviders[1].chainListener(axiomListener);
         QueryProgram queryProgram = queryProgramParser.loadScript("foreign-lexicon.xpl");
         //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
         try
         {
-            Result result = queryProgram.executeQuery("color_query"); 
-            List<Axiom> axiomList = new ArrayList<Axiom>();
-            axiomList.add(result.getAxiom("german_list"));
-            axiomList.add(result.getAxiom("french_list"));
+            queryProgram.executeQuery("color_query"); 
             return axiomList;
         }
         finally
         {
+            fileAxiomProviders[0].chainListener(null);
+            fileAxiomProviders[1].chainListener(null);
             fileAxiomProviders[0].close();
             fileAxiomProviders[1].close();
         }
