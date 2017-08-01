@@ -69,6 +69,7 @@ public class QueryParamsTest
 		QualifiedName emptyAxiomName = new QualifiedName("");
 		when(keyname.getAxiomKey()).thenReturn(emptyAxiomName);
 	    when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
+	    when(template.getQualifiedName()).thenReturn(Q_TEMPLATE_NAME);
 		when(scope.getTemplate(Q_TEMPLATE_NAME)).thenReturn(template);
 		querySpec.addKeyName(keyname);
 		QueryParams queryParams = new QueryParams(scope, querySpec);

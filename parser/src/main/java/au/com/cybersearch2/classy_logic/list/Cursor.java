@@ -35,6 +35,8 @@ public class Cursor extends ListItemVariable
     protected ItemList<?> itemList;
     /** Operand containing a list value */
     protected Operand itemListOperand;
+    /** Flag set false when fact status changes to negative */
+    boolean isFact;
 	
 	/**
 	 * Construct a Cursor object
@@ -46,6 +48,7 @@ public class Cursor extends ListItemVariable
 	{
 		super(qname, arrayIndex);
 		this.listName = listName;
+		isFact = true;
 	}
 
     public int getIndex()
@@ -55,9 +58,54 @@ public class Cursor extends ListItemVariable
 
     public void setIndex(int index)
     {
+        // Flag set false when fact status changes to negative
+        isFact = !empty;
+        int size = delegate.getItemList().getLength();
+        if (size == 0) // Cannot set index of empty array
+        {
+            isFact = false;
+            return;
+        }
+        if (index >= size)
+        {
+            index = 0;
+            isFact = false;
+        }
+        else if (index < 0)
+        {
+            index = size - 1;
+            isFact = false;
+        }
         ((ArrayIndex)indexData).setItemIndex(index);
     }
 
+    public long forward()
+    {
+        int size = delegate.getItemList().getLength();
+        if (size == 0) // Cannot set index of empty array
+        {
+            isFact = false;
+            return -1;
+        }
+        isFact = true;
+        ((ArrayIndex)indexData).setItemIndex(0);
+        return 0;
+    }
+
+    public long reverse()
+    {
+        int size = delegate.getItemList().getLength();
+        if (size == 0) // Cannot set index of empty array
+        {
+            isFact = false;
+            return -1;
+        }
+        isFact = true;
+        int index = delegate.getItemList().getLength() -1;
+        ((ArrayIndex)indexData).setItemIndex(index);
+        return index;
+    }
+    
 	/**
 	 * Evaluate list item. 
 	 * @param id Identity of caller, which must be provided for backup()
@@ -68,7 +116,13 @@ public class Cursor extends ListItemVariable
 	{
 	    EvaluationStatus status = super.evaluate(id);
 	    if (value instanceof Null)
+	    {
 	        backup(id);
+	        isFact = false;
+	    }
+	    if (!isFact)
+            empty = true;
 	    return status;
 	}
+
 }

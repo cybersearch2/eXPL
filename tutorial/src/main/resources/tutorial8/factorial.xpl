@@ -2,7 +2,7 @@ calc factorial
 (
   integer n,
 . integer i = 1,
-  decimal factorial = 1,
+  integer factorial = 1,
   {
     factorial *= i,
     ? i++ < n

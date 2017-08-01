@@ -759,7 +759,7 @@ public class EvaluatorTest
 	{
 		BinaryTestData[] testData = new BinaryTestData[]
 		{                      
-			new BinaryTestData("15", new TestIntegerOperand("mask", 7), "^", EVALUATION_FAIL + "15^7"),
+//			new BinaryTestData("15", new TestIntegerOperand("mask", 7), "^", EVALUATION_FAIL + "15^7"),
 			new BinaryTestData(15, new TestBigDecimalOperand("mask", new BigDecimal("7")), "^", EVALUATION_FAIL + "15^7"),
 			new BinaryTestData(2, new TestIntegerOperand("height", 102), "||", EVALUATION_FAIL + "2||102"),
 			new BinaryTestData(new TestIntegerOperand("height", 102), "+", "Left term is empty"),

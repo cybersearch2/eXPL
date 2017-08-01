@@ -27,7 +27,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.StringCloneable;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
-import au.com.cybersearch2.classy_logic.list.Appender;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
@@ -153,13 +152,16 @@ abstract class TreeEvaluator extends DelegateOperand
             // If left hand term is empty, then cannot proceed. Maybe unification failed for this term.
             //throw new ExpressionException("Left term is empty");
             return EvaluationStatus.FAIL;
-        if (!utils.isValidLeftOperand(left, right, operatorEnum) || utils.isInvalidLeftUnaryOp(right, operatorEnum))
+        if (!isValidLeftOperation(left, right) || utils.isInvalidLeftUnaryOp(right, operatorEnum))
         {   // TreeEvaluator not permited for type of Term value
             // NaN has precedence if operation has Numeric result
             if (!utils.isNaN(left, operatorEnum) && ((right == null) || !utils.isNaN(right, operatorEnum)))
                 //throw new ExpressionException("Cannot evaluate " + (right == null ? unaryLeftToString() : binaryToString()));
                 return EvaluationStatus.FAIL;
         }
+        // Read back terms in case conversion occurred
+        left = getLeftOperand();
+        right = getRightOperand();
         // Short circuit logic applies only to left term
         if (shortCircuitOnFalse) // Operator &&
         {
@@ -201,6 +203,14 @@ abstract class TreeEvaluator extends DelegateOperand
         return EvaluationStatus.COMPLETE;
     }
 
+    protected boolean isValidLeftOperation(Operand left, Operand right)
+    {
+        if (utils.isValidLeftOperand(left, right, operatorEnum))
+            return true;
+        return (orientation == Orientation.binary) && 
+                performOnFlyConversion(left, right);
+    }
+    
     /**
      * Evaluate right term
      * @param left Left term
@@ -327,10 +337,11 @@ abstract class TreeEvaluator extends DelegateOperand
      * Also convert decimal to currency for binary currency operation.
      * Note that left or right operand in super class may be replaced by conversion.
      */
-    protected void performOnFlyConversion(Operand left, Operand right)
+    protected boolean performOnFlyConversion(Operand left, Operand right)
     {
         if (!performStringConversion(left, right))
-            performDecimalConversion(left, right);
+            return performDecimalConversion(left, right);
+        return true;
     }
 
     /**

@@ -34,7 +34,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 14 Sep 2015
  */
-public class PetNames
+public class ReversePetNames
 {
 /* pets.xpl
 list<string> pets_info = 
@@ -70,14 +70,14 @@ query pet_names(pets);
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public PetNames()
+    public ReversePetNames()
     {
         File resourcePath = new File("src/main/resources/tutorial8");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
     /**
-     * Compiles the pets.xpl script and runs the "pet_names" query.<br/>
+     * Compiles the pets.xpl script and runs the "reverse_pet_names" query.<br/>
      * The expected results:<br/>
         Lassie<br/>
         Cuddles<br/>
@@ -93,8 +93,8 @@ query pet_names(pets);
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("pet-names.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("pet_names");
-        return result.stringIterator("pet_names.pets@");
+        Result result = queryProgram.executeQuery("reverse_pet_names");
+        return result.stringIterator("pet_names.reverse_pets@");
     }
 
     public ParserContext getParserContext()
@@ -110,7 +110,7 @@ query pet_names(pets);
     {
         try 
         {
-            PetNames petNames = new PetNames();
+            ReversePetNames petNames = new ReversePetNames();
             Iterator<String> iterator = petNames.petNames();
             while (iterator.hasNext())
                 System.out.println(iterator.next());

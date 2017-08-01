@@ -62,7 +62,12 @@ public class CursorOperator implements Operator
     @Override
     public OperatorEnum[] getRightOperandOps() 
     {
-        return EMPTY_OPERAND_OPS;
+        //return EMPTY_OPERAND_OPS;
+        return  new OperatorEnum[]
+        { 
+                OperatorEnum.PLUS,
+                OperatorEnum.MINUS,
+        };
     }
 
     /**
@@ -105,6 +110,8 @@ public class CursorOperator implements Operator
         {
         case INCR: calc = ++right; break;
         case DECR: calc = --right; break;
+        case PLUS: return new Long(cursor.forward());
+        case MINUS: return new Long(cursor.reverse());
         default:
         }
         cursor.setIndex(right);

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import java.io.File;
 
@@ -55,11 +55,11 @@ query<term> factorial5 (factorial)(n = 5);
 
     public Factorial()
     {
-        queryProgramParser = new QueryProgramParser(new File("src/main/resources/tutorial9"));
+        queryProgramParser = new QueryProgramParser(new File("src/main/resources/tutorial8"));
     }
     
     /**
-	 * Compiles the FACTORIAL_CALCULATE script and runs the "factorial" query, displaying the solution on the console.<br/>
+	 * Compiles the factorial.xpl script and runs the "factorial" query, displaying the solution on the console.<br/>
 	 * Also shows use of query parameter to set a variable.<br/>
 	 * The expected result:<br/>
 	 * factorial(n = 4, i = 5, factorial = 24)<br/>

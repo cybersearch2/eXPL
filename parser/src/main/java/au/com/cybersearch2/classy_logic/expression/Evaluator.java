@@ -385,7 +385,16 @@ public class Evaluator extends TreeEvaluator
         }
         else if ((operatorEnum == OperatorEnum.TILDE) || (operatorEnum == OperatorEnum.PLUS) || (operatorEnum == OperatorEnum.MINUS))
             // ~ is unary so left is ignored
-            return right.getOperator().numberEvaluation(operatorEnum, right);
+        {
+            Number unary = right.getOperator().numberEvaluation(operatorEnum, right);
+            if (right.getOperator().getTrait().getOperandType() == OperandType.CURSOR)
+            {
+                int modificationId = right.getId();
+                right.backup(modificationId);
+                right.evaluate(modificationId);
+            }
+            return unary;
+        }
         return null;
     }
 

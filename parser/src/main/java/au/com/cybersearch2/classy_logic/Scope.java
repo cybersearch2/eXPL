@@ -167,48 +167,17 @@ public class Scope implements DebugTarget
     {
            QualifiedName templateName = firstKeyname.getTemplateName();
            Template firstTemplate = getTemplate(templateName);
-           if (!firstTemplate.isCalculator())
-               // If the head query is not a calculator, then the build is complete
-               return querySpec;
-           // Now deal with the specifics of a calculator query
-           // Query type
-           querySpec.setQueryType(QueryType.calculator);
-           // Query parameters specified as properties
-           if (termList.size() > 0)
-              querySpec.putProperties(firstKeyname, termList);
-           String axiomName = firstKeyname.getAxiomKey().getName();
-           // Check if logic query needs to be inserted in front of head calculator
-           if (!querySpec.isHeadQuery() || axiomName.isEmpty())
-              return querySpec;
-           // Create new head logic query where axiom and template key names are same
-           // The original query specification will be discarded
-           QuerySpec headQuerySpec = new QuerySpec(querySpec.getName());   
-           headQuerySpec.addKeyName(new KeyName(axiomName, axiomName));
-           // Append new calculator query spec to head query spec.
-           QuerySpec chainQuerySpec = headQuerySpec.chain();
-           // Create new keyname with empty axiom key to indicate get axiom from solution
-           KeyName calculateKeyname = new KeyName(firstKeyname.getTemplateName());
-           chainQuerySpec.addKeyName(calculateKeyname);
-           chainQuerySpec.setQueryType(QueryType.calculator);
-           if (termList.size() > 0)
-              chainQuerySpec.putProperties(calculateKeyname, termList);
-           firstTemplate.setKey(axiomName);
-           // Check for logic query template already exists. Not expected to exist.
-           // The template name is taken from the axiom key
-           QualifiedName qualifiedTemplateName = new QualifiedTemplateName(getAlias(), axiomName);
-           Template logicTemplate = findTemplate(qualifiedTemplateName);
-           if ((logicTemplate == null) && !getAlias().isEmpty())
-               // Use global scope template if scope specified
-               logicTemplate = getGlobalTemplateAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, axiomName));
-           if (logicTemplate != null)
-               return headQuerySpec;
-           // Create new logic query template which will populated with terms to match axiom terms at start of query
-           logicTemplate = 
-               parserAssembler.getTemplateAssembler()
-                   .createTemplate(qualifiedTemplateName, false);
-           logicTemplate.setKey(axiomName);
-           return headQuerySpec;
-        }
+           if (firstTemplate.isCalculator())
+           {
+               // Now deal with the specifics of a calculator query
+               // Query type
+               querySpec.setQueryType(QueryType.calculator);
+               // Query parameters specified as properties
+               if (termList.size() > 0)
+                  querySpec.putProperties(firstKeyname, termList);
+           }
+           return querySpec;
+    }
     
     /**
      * Add specification of query Axiom(s) and Template(s) names

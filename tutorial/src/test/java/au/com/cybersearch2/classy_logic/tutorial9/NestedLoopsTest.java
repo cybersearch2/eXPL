@@ -75,7 +75,7 @@ public class NestedLoopsTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<term> insert_sort.sorted(unsorted){5} (4,10) (4,43)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> insert_sort.sorted(insert_sort.unsorted){5} (4,10) (4,36)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());

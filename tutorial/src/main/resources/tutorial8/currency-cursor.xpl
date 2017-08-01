@@ -7,9 +7,9 @@ list<string> euro_amounts =
 
 calc all_amounts
 + export list<currency> amount_list;
-+ cursor<currency $ "DE"> euro_amount(euro_amounts);
 (
   currency total = 0,
+  cursor<currency $ "DE"> euro_amount(euro_amounts),
   {
     ? euro_amount.fact,
     amount_list += euro_amount++,

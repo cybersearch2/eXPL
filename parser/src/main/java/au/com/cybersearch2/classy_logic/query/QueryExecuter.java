@@ -61,16 +61,13 @@ public class QueryExecuter extends ChainQueryExecuter
 			// Execute the next query in the chain
     		LogicQuery nextQuery = logicQueryList.get(index+1);
     		Template nextTemplate = templateList.get(index + 1);
-    		if (nextQuery.getQueryStatus() == QueryStatus.in_progress)
+    		if (nextQuery.getQueryStatus() == QueryStatus.complete)
+    		    return false;
     		{
     		    nextTemplate.backup(true);
     		    solution.remove(nextTemplate.getQualifiedName().toString());
     		}
-    		if (nextQuery.iterate(solution, nextTemplate, context))
-    			return true;
-    		// Backup when query further down the chain fails to find a solution
-			//backupToStart(index);
-			return false;
+    		return nextQuery.iterate(solution, nextTemplate, context);
 		}
 	}
 
@@ -122,19 +119,6 @@ public class QueryExecuter extends ChainQueryExecuter
 			    if (executeNext())
 			        return true;
 			    break;
- 			    /*
-				if ((headSolutionHandler != null) &&
-				    headSolutionHandler.onSolution(solution))
-				{
-					if (super.execute())
-						return true;
-					else
-		                backupToStart(0);
-				}
-				else
-	                backupToStart(0);
-	            */
-				// Deliberately fall through to next case
 			case start:
 				if (axiomListenerMap != null)
 					bindAxiomListeners(scope);
@@ -213,6 +197,7 @@ public class QueryExecuter extends ChainQueryExecuter
 		{   // Use the template key to reference the corresponding axiom source
 			Template template = templateList.get(i);
 			String key = template.getKey();
+			//System.out.println("Name = " + template.getName() + ", key = " + template.getKey());
             QualifiedName qname = QualifiedName.parseGlobalName(key);
 			LogicQuery logicQuery = null;
 			if (i < templateList.size() - 1)

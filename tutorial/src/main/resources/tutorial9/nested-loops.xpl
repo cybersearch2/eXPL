@@ -1,7 +1,7 @@
 axiom unsorted() {12, 3, 1, 5, 8};
 
 calc insert_sort 
-+ export list<term> sorted(global.unsorted);
++ export list<term> sorted(unsorted);
 (
   integer i = 1, 
   {

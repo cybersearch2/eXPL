@@ -120,18 +120,11 @@ query<axiom> mega_cities_by_continent (continents : continent, mega_city : conti
     
 	/**
 	 * Displays the asia_top_ten solution on the console.<br/>
-	 * The expected result:<br/>
-        asia_top_ten(rank=1, city=Tokyo, country=Japan, population=37,900,000)<br/>
-        asia_top_ten(rank=2, city=Delhi, country=India, population=26,580,000)<br/>
-        asia_top_ten(rank=3, city=Seoul, country=South,Korea, population=26,100,000)<br/>
-        asia_top_ten(rank=4, city=Shanghai, country=China, population=25,400,000)<br/>
-        asia_top_ten(rank=5, city=Mumbai, country=India, population=23,920,000)<br/>
-        asia_top_ten(rank=6, city=Beijing, country=China, population=21,650,000)<br/>
-        asia_top_ten(rank=7, city=Jakarta, country=Indonesia, population=20,500,000)<br/>
-        asia_top_ten(rank=8, city=Karachi, country=Pakistan, population=20,290,000)<br/>
-        asia_top_ten(rank=9, city=Osaka, country=Japan, population=20,260,000)<br/>
-        asia_top_ten(rank=10, city=Manila, country=Philippines, population=20,040,000)<br/>
-	 */
+	 * The first 3 expected result:<br/>
+        continent_group(continent=Asia, city=Tokyo, country=Japan, rank=1, population=37,900,000)<br/>
+        continent_group(continent=Asia, city=Delhi, country=India, rank=2, population=26,580,000)<br/>
+        continent_group(continent=Asia, city=Seoul, country=South,Korea, rank=3, population=26,100,000)<br/>	 
+     */
     public static void main(String[] args)
     {
         try 
@@ -140,13 +133,6 @@ query<axiom> mega_cities_by_continent (continents : continent, mega_city : conti
             Iterator<Axiom> iterator = megaCities.findMegaCities();
             while (iterator.hasNext())
                 System.out.println(iterator.next().toString());
-            /* Uncomment to run query a second time to check the count variable 
-             * is reset back to initial value of 0
-            iterator = megaCities.findMegaCities();
-            while (iterator.hasNext())
-                System.out.println(iterator.next().toString());
-
-             */
         } 
         catch (ExpressionException e) 
         {

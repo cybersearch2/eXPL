@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -30,6 +30,7 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.tutorial8.Factorial;
 
 /**
  * FactorialTest
@@ -41,7 +42,7 @@ public class FactorialTest
     @Test
     public void testFactorial() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial9", "factorial.txt");
+        File testFile = new File("src/main/resources/tutorial8", "factorial.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         Factorial factorial = new Factorial();
         Axiom[] factorials = factorial.displayFactorial4and5();
@@ -87,7 +88,7 @@ public class FactorialTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("decimal factorial=1 (5,3) (5,23)");
+        assertThat(sourceItem.toString()).isEqualTo("integer factorial=1 (5,3) (5,23)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
