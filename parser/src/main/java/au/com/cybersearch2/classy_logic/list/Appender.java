@@ -15,11 +15,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.list;
 
-import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
-import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
 /**
  * Cursor
@@ -33,8 +30,6 @@ public class Appender extends ListItemVariable
 	protected QualifiedName listName;
 	/** The list object */
     protected ItemList<?> itemList;
-    /** Operand containing a list value */
-    protected Operand itemListOperand;
 	
 	/**
 	 * Construct an Appender object
@@ -46,20 +41,6 @@ public class Appender extends ListItemVariable
 	{
 		super(qname, arrayIndex);
 		this.listName = listName;
-	}
-
-	/**
-	 * Evaluate list item. 
-	 * @param id Identity of caller, which must be provided for backup()
-	 * @return Flag set true if evaluation is to continue
-	 */
-	@Override
-	public EvaluationStatus evaluate(int id) 
-	{
-	    EvaluationStatus status = super.evaluate(id);
-	    //if (value instanceof Null)
-	    //    backup(id);
-	    return EvaluationStatus.COMPLETE;
 	}
 
     public void append(Object value)

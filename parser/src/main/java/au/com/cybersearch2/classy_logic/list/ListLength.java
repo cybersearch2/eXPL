@@ -77,7 +77,10 @@ public class ListLength extends Variable implements ParserRunner
         itemList = listAssembler.findItemList(listName);
         if (itemList == null)
         {
-            itemListOperand = parserAssembler.findOperandByName(listName.getName());
+            QualifiedName targetName = listAssembler.getAxiomListMapping(listName);
+            itemListOperand = parserAssembler.getOperandMap().getOperand(targetName);
+            if (itemListOperand == null)
+                itemListOperand = parserAssembler.findOperandByName(targetName.getName());
             if (itemListOperand == null)
             {
                 if (!listName.getScope().isEmpty())

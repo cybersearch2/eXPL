@@ -15,7 +15,7 @@ axiom city (name, altitude)
 // Template to filter high cities
 template high_city
 // Solution is a list named 'high_cities'
-+ list<axiom> high_cities {};
++ export list<axiom> high_cities {};
 (
   altitude ? altitude > 5000,
   high_cities += axiom high_city { name, altitude }
@@ -23,8 +23,8 @@ template high_city
 
 // Calculator to perform insert sort on high_cities
 calc insert_sort 
++ list<axiom> high_cities = high_city.high_cities;
 (
-  list<axiom> high_cities = high_city.high_cities,
   // i is index to last item appended to the list
   integer i = high_cities.length - 1,
   // Skip first time when only one item in list

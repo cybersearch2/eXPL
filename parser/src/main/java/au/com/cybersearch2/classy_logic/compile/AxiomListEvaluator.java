@@ -28,6 +28,7 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
 
 /**
  * AxiomListEvaluator
+ * Evaluates to create an AxiomList from an initialization list
  * @author Andrew Bowley
  * 7Jun.,2017
  */
@@ -45,9 +46,11 @@ public class AxiomListEvaluator
     protected Template initializeTemplate;
     /** Empty status */
     protected boolean empty;
+    /** Flag set true to export list */
+    protected boolean isPublic;
     
     /**
-     * Evaluates to create an AxiomList from an initialization list
+     * Construct AxiomListEvaluator object
      * @param qname Qualified name of list to be created
      * @param axiomKey Qualified name of axioms in the list
      * @param initializeList List of templates, each defining the terms of an axiom to add to the list
@@ -96,6 +99,8 @@ public class AxiomListEvaluator
     public AxiomList evaluate(int id)
     {
         AxiomList axiomList = new AxiomList(qname, axiomKey);
+        if (isPublic)
+            axiomList.setPublic(true);
         AxiomArchetype archetype = new AxiomArchetype(axiomKey);
         int index = 0;
         Axiom axiom = null;
@@ -132,10 +137,18 @@ public class AxiomListEvaluator
     public void backup(int id)
     {
         for (Template template: initializeList)
-            template.backup(id != 0);
+        {
+            template.backup(id);
+            if (template.getId() != id)
+                template.backup(id != 0);
+        }
         empty = true;
     }
 
+    /**
+     * Returns flag set true if evaluator is in empty state
+     * @return
+     */
     public boolean isEmpty()
     {
         return empty;
@@ -150,5 +163,14 @@ public class AxiomListEvaluator
         if (initializeList.size() == 1)
             return initializeList.get(0).getTermCount() == 0 ? 0 : 1;
         return initializeList.size();
+    }
+
+    /**
+     * Set flag for export list
+     * @param isPublic
+     */
+    public void setPublic(boolean isPublic)
+    {
+        this.isPublic = isPublic;
     }
 }

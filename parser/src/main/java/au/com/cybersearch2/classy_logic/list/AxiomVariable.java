@@ -195,25 +195,23 @@ public class AxiomVariable implements ListItemDelegate
         }
     }
 
+    /**
+     * append
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate#append(java.lang.Object)
+     */
     @Override
     public void append(Object value)
     {
-        int appendIndex = itemList.getLength();
-        if (axiomListSpec.getItemIndex() == -1)
-        {
-            // Assign value to item list
-            ((AxiomList)itemList).assignItem(appendIndex, (AxiomTermList)value);
-            axiomListSpec.setAxiomIndex(appendIndex);
-        }
+        if (value instanceof AxiomTermList)
+            axiomListSpec.appendAxiomTermList((AxiomTermList)value);
         else
-        {   
-            // An AxiomList containing a single item is unwrapped
-            AxiomTermList axiomTermList = axiomListSpec.getAxiomTermList();
-            // Update term in axiom referenced by list
-            Term term = axiomTermList.getItem(appendIndex);
-            term.setValue(value);
+            axiomListSpec.appendAxiomList((AxiomList)value);
+        itemList = axiomListSpec.getItemList();
+        int appendIndex = itemList.getLength() - 1;
+        if (axiomListSpec.getItemIndex() == -1)
+            axiomListSpec.setAxiomIndex(appendIndex);
+        else
             axiomListSpec.setItemIndex(appendIndex);
-        }
     }
 
 }

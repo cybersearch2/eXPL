@@ -20,22 +20,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.expression.AppenderVariable;
 import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.CountryOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
+import au.com.cybersearch2.classy_logic.expression.MacroOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.TermOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
-import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.Appender;
@@ -46,7 +46,6 @@ import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.Cursor;
 import au.com.cybersearch2.classy_logic.list.DynamicList;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
-import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -80,6 +79,8 @@ public class VariableType
     public final static String LITERAL = "Literal";
     /** Key value for list initialization template */
     public final static String TEMPLATE = "Template";
+    /** Key value for exporting a list */
+    public final static String EXPORT = "Export";
 	
 	/**
 	 * Construct VariableType object
@@ -202,8 +203,13 @@ public class VariableType
             operand = new AxiomOperand(qname, axiomKey, axiomListListener);
             break;
         case LIST:
-            operand = new AxiomOperand(new AxiomListEvaluator(qname, axiomKey, initializeList, initializeTemplate), axiomListListener);
+        {
+            AxiomListEvaluator axiomListEvaluator = new AxiomListEvaluator(qname, axiomKey, initializeList, initializeTemplate);
+            if (getProperty(EXPORT) != null)
+                axiomListEvaluator.setPublic(true);
+            operand = new AxiomOperand(axiomListEvaluator, axiomListListener);
             break;
+        }
         case CURRENCY:
         {
             BigDecimalOperand currencyOperand = !hasExpression ? new BigDecimalOperand(qname) : new BigDecimalOperand(qname, expression);
@@ -268,38 +274,7 @@ public class VariableType
     {
         Operand operand = null;
         final QualifiedName qname = QualifiedName.ANONYMOUS;
-        Operand expression = new Operand(Term.ANONYMOUS, literal.getValue()){
-
-            @Override
-            public QualifiedName getQualifiedName()
-            {
-                return qname;
-            }
-
-            @Override
-            public void assign(Parameter parameter)
-            {
-            }
-
-            @Override
-            public Operand getLeftOperand()
-            {
-                return null;
-            }
-
-            @Override
-            public Operand getRightOperand()
-            {
-                return null;
-            }
-
-            @Override
-            public Operator getOperator()
-            {
-                DelegateOperator operator = new DelegateOperator();
-                operator.setDelegate(literal.getValueClass());
-                return operator;
-            }};
+        Operand expression = new MacroOperand(literal.getValue());
         switch (operandType)
         {
         case INTEGER:
@@ -495,16 +470,7 @@ public class VariableType
         QualifiedName appenderName = new QualifiedName(qname.getName() + "_appender", qname);
         Appender appender = new Appender(appenderName, qname, arrayIndex);
         Operand operand = new Variable(operandName, expression);
-        Variable var = new Variable(qname, operand)
-        {
-            public EvaluationStatus evaluate(int id)
-            {
-                EvaluationStatus status = super.evaluate(id);
-                if (status == EvaluationStatus.COMPLETE)
-                    ((Appender)rightOperand).append(value);
-                return status;
-            }
-        };
+        Variable var = new AppenderVariable(qname, operand);
         var.setRightOperand(appender);
         ParserTask parserTask = parserAssembler.addPending(appender);
         parserTask.setPriority(ParserTask.Priority.variable.ordinal());

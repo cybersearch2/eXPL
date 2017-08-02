@@ -385,6 +385,34 @@ public class Template extends TermList<Operand>
         return Choice.NO_MATCH;
 	}
 
+	   /**
+     * Evaluate Terms of this Template until status COMPLETE is returned 
+     * @param selectionTerm Term containing selection value
+     * @param executionContext Execution context - may be null
+     * @return Position of first term selected or Choice.NO_MATCH if evaluation does not return status COMPLETE
+     */
+    public EvaluationStatus chainShortCircuit(ExecutionContext executionContext)
+    {
+        EvaluationStatus evaluationStatus = EvaluationStatus.COMPLETE;
+        if (!termList.isEmpty())
+        {
+            if ((executionContext != null) && (debugTargets != null))
+                for (DebugTarget debugTarget: debugTargets)
+                    debugTarget.setExecutionContext(executionContext);
+            for (Operand term: termList)
+            {
+                if (!term.isEmpty() && (term.getId() != id))
+                    continue;
+                if (executionContext != null)
+                    executionContext.beforeEvaluate(term);
+                evaluationStatus = term.evaluate(id);
+                if (evaluationStatus == EvaluationStatus.COMPLETE)
+                    break;
+            }
+        }
+        return evaluationStatus;
+    }
+    
 	/**
 	 * Backup from last unification.
 	 * @param partial Flag to indicate backup to before previous unification or backup to start
@@ -402,6 +430,24 @@ public class Template extends TermList<Operand>
 			}
 		return isMutable;
 	}
+
+    /**
+     * Backup from last unification.
+     * @param modificationId Modification id
+     * @return Flag to indicate if this Structure is ready to continue unification
+     */
+    public boolean backup(int modificationId)
+    {
+        boolean isMutable = false;
+        if (!termList.isEmpty())
+            for (Operand term: termList)
+            {
+                boolean backupPerformed = term.backup(modificationId);
+                if (backupPerformed)
+                    isMutable = true;
+            }
+        return isMutable;
+    }
 
     /**
      * Add Operand term. 

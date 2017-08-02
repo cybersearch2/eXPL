@@ -482,7 +482,7 @@ public class CallOperandTest
             "  // Insert saved axiom in correct position\n" +
             "  sort_list[j + 1] = temp\n" +
             ");\n" +
-            "list<axiom> city_list {};\n" +
+            "export list<axiom> city_list {};\n" +
             "calc sort_cities(\n" +
             "  city_list += axiom sort_city { name, altitude },\n" +
             "  <- list_sort(city_list, \"altitude\")\n" +

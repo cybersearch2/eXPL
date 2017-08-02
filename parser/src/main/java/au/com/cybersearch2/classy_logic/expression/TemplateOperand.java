@@ -21,6 +21,7 @@ import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.query.Calculator;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -42,6 +43,8 @@ public class TemplateOperand extends BooleanOperand implements DebugTarget
 	protected Template template;
 	/** Flag whether run once or loop */
 	protected boolean runOnce;
+	/** Flag set true if template makes selection */
+	protected boolean isSelect;
 	/** Execution context for debugging */
 	protected ExecutionContext context;
 
@@ -54,12 +57,40 @@ public class TemplateOperand extends BooleanOperand implements DebugTarget
 		this(template, false);
 	}
 
+    /**
+     * Construct a TemplateOperand object with specified qualified name. 
+     * Sets this operand to make a selection.
+     * @param template Container for the Operand sequence to be evaluated
+     */
+    public TemplateOperand(QualifiedName qname, Template template) 
+    {
+        super(qname);
+        this.template = template;
+        this.runOnce = true; 
+        isSelect = true;
+   }
+
 	public TemplateOperand(Template template, boolean runOnce) 
 	{
 		super(new QualifiedName((template.getQualifiedName().getTemplate()) + (runOnce ? "_run_once" : "_loop"), template.getQualifiedName()));
 		this.template = template;
 		this.runOnce = runOnce; 
 	}
+
+	/**
+	 * Returns value of first non-empty term of template
+	 * @return Object
+	 */
+    public Object getSelection()
+    {
+        for (int i = 0; i < template.getTermCount(); ++i)
+        {
+            Operand operand = template.getTermByIndex(i);
+            if (!operand.isEmpty())
+                return operand.getValue();
+        }
+        return null;
+    }
 
 	/**
 	 * Evaluate loop
@@ -70,6 +101,11 @@ public class TemplateOperand extends BooleanOperand implements DebugTarget
 	public EvaluationStatus evaluate(int id)
 	{
 	    this.id = id;
+	    if (isSelect)
+	    {
+	        EvaluationStatus status = template.chainShortCircuit(context);
+            return status;
+	    }
 		long start = new Date().getTime();
 		long timeoutMsecs = Calculator.CALCULATION_TIMEOUT_SECS * 1000;
 		int count = 0;
@@ -106,6 +142,8 @@ public class TemplateOperand extends BooleanOperand implements DebugTarget
 	{   
 		super.backup(id);
 		// Changes managed locally
+		if (id != template.getId())
+		    template.backup(id);
 		return template.backup(true);
 	}
 
@@ -150,4 +188,5 @@ public class TemplateOperand extends BooleanOperand implements DebugTarget
     {
         this.context = context;
     }
+
 }

@@ -77,10 +77,9 @@ public class ChoiceOperand extends IntegerOperand implements DebugTarget
         super.backup(id);
         choice.backup(id);
         // Changes managed locally
-        for (int i = 0; i < template.getTermCount(); i++)
-        {
-            template.getTermByIndex(i).backup(id);
-        }
+        template.backup(id);
+        if (template.getId() != id)
+            template.backup(id != 0);
         return true;
     }
 

@@ -34,7 +34,7 @@ public class AxiomListSpec implements ListItemSpec
     /** Name of axiom list */
     protected QualifiedName qualifiedListName;
     /** The list to be accessed. if a list operand is provided, then setting this field is delayed until evaluation. */
-    protected ItemList<?> itemList;
+    protected AxiomList axiomList;
     /** Index information for value selection  */
     protected ListItemSpec indexData;
     /** Index information for 2 dimension case - select axiom, then select term in axiom */
@@ -53,7 +53,7 @@ public class AxiomListSpec implements ListItemSpec
      */
     public AxiomListSpec(AxiomList axiomList, ListItemSpec[] indexDataArray)
     {
-        this.itemList = axiomList;
+        this.axiomList = axiomList;
         indexData = indexDataArray.length == 1 ? indexDataArray[0] : indexDataArray[1];
         if (indexDataArray.length > 1)
             arrayData = indexDataArray[0];
@@ -79,7 +79,23 @@ public class AxiomListSpec implements ListItemSpec
     {
         this((AxiomList)null, indexDataArray);
     }
- 
+
+    /*
+     * Append AxiomList
+     */
+    public void appendAxiomList(AxiomList value)
+    {
+        axiomList.concatenate(value);
+    }
+    
+    /*
+     * Append AxiomTermList
+     */
+    public void appendAxiomTermList(AxiomTermList value)
+    {
+        axiomList.concatenate(value);
+    }
+    
     /**
      * getListName
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getListName()
@@ -101,12 +117,12 @@ public class AxiomListSpec implements ListItemSpec
     }
 
    /**
-     * Returns axiom list, if one supplied, otherwise, axiom list or axiom term list depending on outcome of most recent evaluation
+     * Returns axiom list
      * @return ItemList object or possibly null if using list operand and waiting for evaluation
      */
     public ItemList<?> getItemList()
     {
-        return itemList;
+        return axiomList;
     }
 
     /**
@@ -115,9 +131,9 @@ public class AxiomListSpec implements ListItemSpec
      */
     public AxiomTermList getAxiomTermList()
     {
-        if (itemList == null)
+        if (axiomList == null)
             return getEmptyAxiomTermList();
-        return (axiomTermList != null) ? axiomTermList :  ((AxiomList)itemList).getItem(axiomIndex);
+        return (axiomTermList != null) ? axiomTermList :  axiomList.getItem(axiomIndex);
     }
 
     /**
@@ -127,6 +143,7 @@ public class AxiomListSpec implements ListItemSpec
     public void setAxiomIndex(int axiomIndex)
     {
         this.axiomIndex = axiomIndex;
+        axiomTermList = null;
     }
     
     /**
@@ -142,6 +159,7 @@ public class AxiomListSpec implements ListItemSpec
     public void setItemIndex(int itemIndex)
     {
         termIndex = itemIndex;
+        axiomTermList = null;
     }
 
    /**
@@ -218,8 +236,18 @@ public class AxiomListSpec implements ListItemSpec
     public boolean evaluate(ItemList<?> itemList, int id)
     {
         // The itemList object may be AxiomList or AxiomTermList depending on usage
-        this.itemList = itemList;
-        axiomTermList = (itemList instanceof AxiomTermList) ? (AxiomTermList)itemList: null;
+        if (itemList instanceof AxiomTermList)
+        {
+            axiomTermList = (AxiomTermList)itemList;
+            axiomList = new AxiomList(axiomTermList.getQualifiedName(), axiomTermList.getKey());
+            axiomList.setAxiomTermNameList(axiomTermList.getAxiomTermNameList());
+            axiomList.assignItem(0, axiomTermList);
+        }
+        else
+        {
+            axiomTermList = null;
+            axiomList = (AxiomList)itemList;
+        }
         boolean isAxiomList = false;
         if (arrayData != null)
         {   // 2 - dimensional if AxiomList passed, otherwise invalidate axiom index
@@ -227,7 +255,7 @@ public class AxiomListSpec implements ListItemSpec
             {
                 arrayData.evaluate(itemList, id);
                 axiomIndex = arrayData.getItemIndex();
-                axiomTermList = ((AxiomList)itemList).getItem(axiomIndex);
+                axiomTermList = axiomList.getItem(axiomIndex);
             }
             else
                 axiomIndex = -1;
@@ -238,7 +266,6 @@ public class AxiomListSpec implements ListItemSpec
             // 
             if (axiomTermList == null)
             {   // indexData selects AxiomTermList item 
-                AxiomList axiomList = ((AxiomList)itemList);
                 isAxiomList = axiomList.getLength() > 1;
                 if (isAxiomList)
                     termIndex = -1;

@@ -136,6 +136,13 @@ public class LogicQuery implements SolutionFinder
 		return false;
 	}
 
+	/**
+	 * Unify template with axiom and solution
+	 * @param axiom The axiom to pair with
+	 * @param template Template to pair with
+	 * @param solution The solution to pair with
+	 * @return flag set true if unification succeeds
+	 */
 	boolean unify(Axiom axiom, Template template, Solution solution)
     {   // Unify enclosed templates which will participate in ensuing evaluation
 	    boolean success = template.unify(axiom, solution);
@@ -179,16 +186,35 @@ public class LogicQuery implements SolutionFinder
     {
 		if (solution.size() > 0)
 		{
-			OperandWalker walker = template.getOperandWalker();
-			if (pairer == null)
-                pairer = template.getSolutionPairer(solution);
-			else
-				pairer.setSolution(solution);
-			return walker.visitAllNodes(pairer);
+	        boolean success = unify(template, solution);
+	        Template chainTemplate = template.getNext();
+	        while (chainTemplate != null)
+	        {
+	            if (!unify(chainTemplate , solution))
+	                success = false;
+	            chainTemplate = chainTemplate.getNext();
+	        }
+	        return success;
 		}
 		return false;
     }
 
+	/**
+	 * Unify chain template with solution
+	 * @param template The template to pair with
+	 * @param solution The solution to pair with
+     * @return flag set true if unification succeeds
+	 */
+	protected boolean unify(Template template, Solution solution)
+	{
+        OperandWalker walker = template.getOperandWalker();
+        if (pairer == null)
+            pairer = template.getSolutionPairer(solution);
+        else
+            pairer.setSolution(solution);
+        return walker.visitAllNodes(pairer);
+	}
+	
 	/**
 	 * Complete finding solution following successful unification
 	 * @param solution Container to aggregate results  
@@ -208,7 +234,6 @@ public class LogicQuery implements SolutionFinder
 				if ((solutionHandler == null) ||
 				     solutionHandler.onSolution(solution))
 					return true;
-//				solution.remove(solutionKey);
 			}
 		}
 		catch (ExpressionException e)

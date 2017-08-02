@@ -54,6 +54,8 @@ public class ListAssembler
     protected Map<QualifiedName, AxiomTermList> axiomTermListMap;
     /** The axiom listeners, all belonging to list variables */
     protected Map<QualifiedName, List<AxiomListener>> axiomListenerMap;
+    /** The axiom list listeners */
+    protected Map<QualifiedName, QualifiedName> axiomListAliases;
     /** Item lists */
     protected Map<QualifiedName, ItemList<?>> listMap;
     /** Scope */
@@ -69,6 +71,7 @@ public class ListAssembler
         axiomListMap = new HashMap<QualifiedName, List<Axiom>>();
         axiomTermListMap = new HashMap<QualifiedName, AxiomTermList>();
         axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
+        axiomListAliases = new HashMap<QualifiedName, QualifiedName>();
         listMap = new TreeMap<QualifiedName, ItemList<?>>();
     }
     
@@ -81,6 +84,7 @@ public class ListAssembler
         axiomListMap.putAll(listAssembler.axiomListMap);
         axiomTermListMap.putAll(listAssembler.axiomTermListMap);
         axiomListenerMap.putAll(Collections.unmodifiableMap(listAssembler.axiomListenerMap));
+        axiomListAliases.putAll(Collections.unmodifiableMap(listAssembler.axiomListAliases));
         listMap.putAll(listAssembler.listMap);
     }
 
@@ -96,6 +100,8 @@ public class ListAssembler
         {
         case axiom_item:
             return axiomListMap.containsKey(qualifiedName);
+        case axiom_dynamic:
+            return axiomListAliases.containsKey(qualifiedName);
         case term:
             return axiomTermListMap.containsKey(qualifiedName);
         case basic:
@@ -275,7 +281,7 @@ public class ListAssembler
         for (Entry<QualifiedName, ItemList<?>> entry: listMap.entrySet())
         {
             ItemList<?> itemList = entry.getValue();
-            if (itemList instanceof TermListIterable)
+            if ((itemList.isPublic()) && (itemList instanceof TermListIterable))
                 axiomIterableMap.put(entry.getKey(), getAxiomIterable((TermListIterable)itemList, itemList.getLength()));
         }
         if (!scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
@@ -371,13 +377,12 @@ public class ListAssembler
     }
 
     /**
-     * Returns axiom list listener which adds the list to a given operand container
-     * @param operandMap OperandMap object
+     * Returns axiom list listener
      * @return AxiomListListener object
      */
     protected AxiomListListener axiomListListenerInstance()
     {
-        return new AxiomListListener(){
+        AxiomListListener axiomListListener = new AxiomListListener(){
 
             @Override
             public void addAxiomList(QualifiedName qname, AxiomList axiomList)
@@ -386,8 +391,30 @@ public class ListAssembler
                     listMap.put(qname, axiomList);
             }
         };
+        return axiomListListener;
     }
- 
+
+    /**
+     * Adds axiom list name alias
+     * @param aliasName Alias name used to access list from other namespace
+     * @param listName Actual list name
+     */
+    public void mapAxiomList(QualifiedName aliasName, QualifiedName listName)
+    {
+        axiomListAliases.put(aliasName, listName);
+    }
+
+    /**
+     * Returns actual axiom list name for alias name
+    * @param aliasName Alias name used to access list from other namespace
+     * @return QualifiedName - may be alias if no mapping found
+     */
+    public QualifiedName getAxiomListMapping(QualifiedName aliasName)
+    {
+        QualifiedName listName = axiomListAliases.get(aliasName);
+        return listName != null ? listName : aliasName;
+    }
+    
     /**
      * Removes axiom item list specified by name
      * @param qualifiedName

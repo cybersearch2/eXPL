@@ -16,7 +16,7 @@ axiom transaction_amount
     {55876.33}
   {1245890.00};
   
-calc stamp_duty_payable(
+template stamp_duty_payable(
   currency amount,
   choice bracket,
   currency duty = base + (amount - threshold) * (percent / 100),
