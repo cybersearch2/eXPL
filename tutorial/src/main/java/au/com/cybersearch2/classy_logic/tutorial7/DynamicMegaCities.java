@@ -30,6 +30,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * EuropeanMegaCities
+ * Demonstrates dynamic axiom list declared in one template accessed by another
  * @author Andrew Bowley
  * 24 Feb 2015
  */

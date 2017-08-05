@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.expression;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.EvaluationUtils;
 import au.com.cybersearch2.classy_logic.helper.Null;
@@ -22,6 +23,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.list.Cursor;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -45,7 +47,9 @@ public class FactOperand extends BooleanOperand
      */
     public EvaluationStatus evaluate(int id)
     {
-        if ((expression == null) || expression.isEmpty())
+        if (expression.getOperator().getTrait().getOperandType() == OperandType.CURSOR)
+            setValue(((Cursor)expression).isFact());
+        else if ((expression == null) || expression.isEmpty())
             setValue(false);
         else
         {

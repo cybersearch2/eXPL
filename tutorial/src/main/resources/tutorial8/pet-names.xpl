@@ -14,28 +14,27 @@ string nameRegex = "<name>([a-zA-z']*)[^a-zA-z']";
 
 calc pets
 + export list<string> pet_names;
++ cursor pet(pets_info);
 (
   string petRegex = 
     "^.*" + nameRegex +".*", 
-  cursor pet_cursor(pets_info),
   {
-    ? pet_cursor.fact,
-    pet = pet_cursor++,
+    ? pet.fact,
     regex pet == petRegex { name }, 
-    pet_names += name
+    pet_names += name,
+    pet += 1
   }
 );
 
 calc reverse_pets
 + export list<string> pet_names;
++ cursor pet(pets_info);
 (
   string petRegex = 
     "^.*" + nameRegex +".*", 
-  cursor pet_cursor(pets_info),
-  -pet_cursor,
   {
-    ? pet_cursor.fact,
-    pet = pet_cursor--,
+    pet += -1,
+    ? pet.fact,
     regex pet == petRegex { name }, 
     pet_names += name
   }

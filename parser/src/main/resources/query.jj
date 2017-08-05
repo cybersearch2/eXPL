@@ -881,10 +881,14 @@ void TemplateDeclaration(ParserContext context) :
   templateToken=<TEMPLATE> ( "<" (typeToken=<TERM>|typeToken=<AXIOM>) ">" )? template=Template(context, false) 
   ( 
     "+" 
-    listName=ListDeclaration(context) 
-    {
-      context.setQualifiedName(template.getName(), listName);
-    }
+    (
+      listName=ListDeclaration(context) 
+      {
+        context.setQualifiedName(template.getName(), listName);
+      }
+      |
+      CursorDeclaration(context)
+    )
   )*
   "(" 
   {
@@ -968,7 +972,9 @@ void CalculatorTemplate(ParserContext context) :
       {
         context.setQualifiedName(template.getName(), listName);
       }
-   )
+      |
+      CursorDeclaration(context)
+    )
   )*
   "(" 
   {
@@ -980,12 +986,6 @@ void CalculatorTemplate(ParserContext context) :
     |
     operand = CalculatorQuery(template, context)
     {
-      operand.setPrivate(true);
-    }
-    |
-    operand=CursorDeclaration(context) 
-    {
-      template.addTerm(operand);
       operand.setPrivate(true);
     }
   )
@@ -1002,12 +1002,6 @@ void CalculatorTemplate(ParserContext context) :
       |
       operand = CalculatorQuery(template, context)
       {
-        operand.setPrivate(true);
-      }
-      |
-      operand=CursorDeclaration(context) 
-      {
-        template.addTerm(operand);
         operand.setPrivate(true);
       }
     )
@@ -1954,7 +1948,7 @@ String ListDeclaration(ParserContext context) :
 }
 
 
-Operand CursorDeclaration(ParserContext context) :
+void CursorDeclaration(ParserContext context) :
 {
   Token keywordToken;
   Token nameToken;
@@ -1972,30 +1966,19 @@ Operand CursorDeclaration(ParserContext context) :
     cursorName = nameToken.image;
     context.setSourceMarker(keywordToken, cursorName);
     context.setSourceItemPending(false);
-    delimitToken = new Token(QueryParserConstants.SEMICOLON, ";");
-    delimitToken.beginColumn = nameToken.endColumn;
-    delimitToken.endColumn = nameToken.endColumn;
-    delimitToken.beginLine = nameToken.beginLine;
-    delimitToken.endLine = nameToken.endLine;
   }
-  "(" listToken=<IDENTIFIER> delimitToken=")" 
+  "(" listToken=<IDENTIFIER> ")" 
+  delimitToken=";"
   {
-    if (varType == null)
-      varType = new VariableType(OperandType.UNKNOWN);
     QualifiedName listName = context.getQualifiedName(listToken.image);
-    QualifiedName qname = new QualifiedName(listName.getName() + "_cursor", listName);
+    QualifiedName qname = parserAssembler.getContextName(cursorName);
     ArrayIndex arrayIndex = new ArrayIndex(listName, 0, "cursor");
     Cursor cursor = new Cursor(qname, listName, arrayIndex);
     ParserTask parserTask = parserAssembler.addPending(cursor);
     parserTask.setPriority(ParserTask.Priority.variable.ordinal());
-    varType.setProperty(VariableType.EXPRESSION, cursor);
-    Operand var = varType.getInstance(parserAssembler, cursorName);
-    parserAssembler.getOperandMap().addOperand(var);
-    delimitToken.beginColumn += 1;
-    delimitToken.endColumn += 1;
-    context.addSourceItem(var).setEnd(delimitToken);
-    return var;
-  }
+    parserAssembler.registerCursor(cursorName, varType, cursor);
+    context.addSourceItem(cursor.toString()).setEnd(delimitToken);
+   }
 }
 
 Template ListParameters(String listName, VariableType varType, ParserContext context) :
@@ -2315,6 +2298,7 @@ String Name(ParserContext context) :
 Operand NamedExpression(String name, ParserContext context) :
 {
   ListItemSpec[] indexData;
+  QualifiedName qname;
   QualifiedName listName;
   ParserTask parserTask;
   Template parametersTemplate = null;
@@ -2330,7 +2314,7 @@ Operand NamedExpression(String name, ParserContext context) :
   |
   "(" ( parametersTemplate = Parameters(name, context, true) )? ")"
   {
-    QualifiedName qname = parserAssembler.getContextName(name);
+    qname = parserAssembler.getContextName(name);
     return parserAssembler.getCallOperand(qname, parametersTemplate);
   }
   |
@@ -2360,8 +2344,6 @@ Operand NamedExpression(String name, ParserContext context) :
     <FACT>
     {
       Operand target = parserAssembler.addOperand(name);
-      if (target.getOperator().getTrait().getOperandType().equals(OperandType.CURSOR))
-        target = target.getRightOperand();
       return new FactOperand(target);
     }
   )

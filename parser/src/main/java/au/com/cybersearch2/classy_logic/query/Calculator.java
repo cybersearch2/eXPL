@@ -41,8 +41,6 @@ public class Calculator implements SolutionFinder
 	protected Axiom axiom;
     /** Axiom listener is notified of axiom sourced each iteration */
     protected AxiomListener axiomListener;
-    /** Pairs axiom terms in a Solution object with terms in a template */
-    protected SolutionPairer pairer;
     /** Choice set if template.isChoice() returns true */
     protected Choice choice;
 
@@ -206,16 +204,13 @@ public class Calculator implements SolutionFinder
     {
 		if (solution.size() > 0)
 		{
-			if (pairer == null)
-				pairer = template.getSolutionPairer(solution);
-			else
-				pairer.setSolution(solution);
 			Template chainTemplate = template;
 			while (chainTemplate != null)
 			{
-				OperandWalker walker = template.getOperandWalker();
-				if (walker.visitAllNodes(pairer))
-					return true;
+				OperandWalker walker = chainTemplate.getOperandWalker();
+	            SolutionPairer pairer = template.getSolutionPairer(solution);
+				if (!walker.visitAllNodes(pairer))
+					return false;
 				chainTemplate = chainTemplate.getNext();
 			}
 		}

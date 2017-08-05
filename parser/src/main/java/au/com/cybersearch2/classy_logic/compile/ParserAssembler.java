@@ -35,7 +35,9 @@ import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.list.Cursor;
 import au.com.cybersearch2.classy_logic.list.ListType;
+import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -828,6 +830,27 @@ public class ParserAssembler implements LocaleListener
         }
         return operand;
 
+    }
+
+    /**
+     * Register cursor
+     * @param cursorName Name of cursor variable
+     * @param variableType Optional variable type
+     * @param cursor Cursor object to register
+     * @throws ParseException
+     */
+    public void registerCursor(String cursorName, VariableType variableType,
+            Cursor cursor) throws ParseException
+    {
+        // Create normal variable to receive list item and possibly perform type conversion
+        QualifiedName qname = cursor.getQualifiedName();
+        if (variableType != null)
+        {
+            Operand operand = variableType.getInstance(this, new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname));
+            // Create cursor variable to impose cursor operations
+            cursor.setRightOperand(operand);
+        }
+        operandMap.addOperand(cursor);
     }
 
 }

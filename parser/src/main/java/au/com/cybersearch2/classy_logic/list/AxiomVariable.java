@@ -62,6 +62,17 @@ public class AxiomVariable implements ListItemDelegate
     }
  
     /**
+     * Construct AxiomVariable object using suppled AxiomTermList and index data
+     * @param axiomTermList Axiom term list
+     * @param indexDataArray Index data - 1 or 2 dimensional
+     */
+    public AxiomVariable(AxiomTermList axiomTermList, ListItemSpec[] indexDataArray)
+    {
+        itemList = axiomTermList;
+        axiomListSpec = new AxiomListSpec(axiomTermList, indexDataArray);
+    }
+ 
+   /**
      * getItemList
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate#getItemList()
      */

@@ -43,10 +43,8 @@ import au.com.cybersearch2.classy_logic.list.ArrayIndex;
 import au.com.cybersearch2.classy_logic.list.ArrayItemList;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.list.Cursor;
 import au.com.cybersearch2.classy_logic.list.DynamicList;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
-import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -157,8 +155,6 @@ public class VariableType
     public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname, Operand expression) throws ParseException
     {
         boolean hasExpression = expression != null;
-        if (hasExpression && expression instanceof Cursor)
-            return cursorInstance(parserAssembler, qname, expression);
 		Operand operand = null;
         QualifiedName axiomKey = null;
         List<Template> initializeList = null;
@@ -474,55 +470,6 @@ public class VariableType
         var.setRightOperand(appender);
         ParserTask parserTask = parserAssembler.addPending(appender);
         parserTask.setPriority(ParserTask.Priority.variable.ordinal());
-        return var;
-    }
-
-	/**
-	 * Returns cursor for navigating a basic type list
-     * @param parserAssembler ParserAssembler object
-     * @param qname Qualified name of new variable
-     * @param cursor Cursor object
-     * @return Operand object
-     * @throws ParseException 
-	 */
-	protected Operand cursorInstance(ParserAssembler parserAssembler,
-            QualifiedName qname, Operand cursor) throws ParseException
-    {
-        Operand operand;
-        QualifiedName operandName = new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname);
-        switch (operandType)
-        {
-        case INTEGER:
-            operand = new IntegerOperand(operandName, cursor);
-            break;
-        case DOUBLE:
-            operand = new DoubleOperand(operandName, cursor);
-            break;
-        case BOOLEAN:
-            operand = new BooleanOperand(operandName, cursor);
-            break;
-        case STRING:
-            operand = new StringOperand(operandName, cursor);
-            break;
-        case DECIMAL:
-            operand = new BigDecimalOperand(operandName, cursor);
-            break;
-        case CURRENCY:
-        {
-            BigDecimalOperand currencyOperand = new BigDecimalOperand(operandName, cursor);
-            currencyOperand.setOperator(getCurrencyOperator(currencyOperand));
-            operand = currencyOperand;
-            break;
-        }
-        case UNKNOWN:   
-            operand = new Variable(operandName, cursor);
-            break;
-        default:
-            throw new ParseException("Invalid cursor type");
-        }
-        Variable var = new Variable(qname, operand);
-        var.setDelegateType(DelegateType.CURSOR);
-        var.setRightOperand(cursor);
         return var;
     }
 

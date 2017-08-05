@@ -29,7 +29,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * Gaming
- * Demonstrates term list arrow notation to reterence term by name.
+ * Demonstrates dyanamic axiom list initialization with parameters
  * Class AxiomMarks provides another example of parentheses.<\br>
  * @author Andrew Bowley
  * 27 Feb 2015
@@ -38,14 +38,23 @@ public class Gaming
 {
 
 /* gaming.xpl
-axiom spin (r1, r2, r3, r4) {3,2,0,1};
+list<axiom> spin  
+  { c1=3^r1, c2=2^r1, c3=0^r1, c4=1^r1 }
+  { c1=0^r2, c2=1^r2, c3=2^r2, c4=3^r2 }
+  { c1=2^r3, c2=1^r3, c3=3^r3, c4=0^r3 }
+  (
+    integer r1 = system.random(4),
+    integer r2 = system.random(4),
+    integer r3 = system.random(4)
+  );
 
-axiom fruit() {"apple", "orange", "banana", "lemon"};
+axiom fruit() {"apple ", "orange", "banana", "lemon "};
 
-list<term> combo(fruit);
-template play(combo[r1], combo[r2], combo[r3], combo[r4]);
+template play
++ list<term> combo(fruit);
+(combo[c1], combo[c2], combo[c3], combo[c4]);
 
-query<term> spin(spin : play);
+query<axiom> gamble(spin : play);
 
 */
     protected QueryProgramParser queryProgramParser;
@@ -59,8 +68,7 @@ query<term> spin(spin : play);
 
     /**
 	 * Compiles the gaming.xpl script and runs the "spin" query, displaying the solution on the console.<br/>
-	 * The expected result:<br/>
-	 * play(r1=lemon, r2=banana, r3=apple, r4=orange)<br/>
+	 * The result will be an unpredicable three rows and four columns containing lemon, banana, apple and orange:<br/>
 	 */
 	public Iterator<Axiom> displayFruit()
 	{

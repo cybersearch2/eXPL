@@ -70,7 +70,7 @@ public class CalculatorTest
         Calculator calculator = new Calculator();
 		Solution solution = mock(Solution.class);
         SolutionPairer pairer = mock(SolutionPairer.class);
-        calculator.pairer = pairer;
+        //calculator.pairer = pairer;
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(1);
 		OperandWalker walker = mock(OperandWalker.class);
@@ -194,7 +194,7 @@ public class CalculatorTest
 		QualifiedName qualifiedTemplateName = QualifiedName.parseTemplateName(TEMPLATE_NAME);
 		Template template = mock(Template.class);
         SolutionPairer pairer = new SolutionPairer(solution, 1, qualifiedTemplateName);
-        calculator.pairer = pairer;
+        //calculator.pairer = pairer;
 		Operand term1 = mock(Operand.class);
 		Term term2 = mock(Term.class);
 		when(term1.unifyTerm(term2, 1)).thenReturn(1);

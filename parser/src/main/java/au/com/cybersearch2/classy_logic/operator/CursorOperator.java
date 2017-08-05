@@ -16,7 +16,6 @@
 package au.com.cybersearch2.classy_logic.operator;
 
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
-import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -66,7 +65,7 @@ public class CursorOperator implements Operator
         return  new OperatorEnum[]
         { 
                 OperatorEnum.PLUS,
-                OperatorEnum.MINUS,
+                OperatorEnum.MINUS
         };
     }
 
@@ -81,6 +80,7 @@ public class CursorOperator implements Operator
         { 
                 OperatorEnum.INCR,
                 OperatorEnum.DECR,
+                OperatorEnum.SC_AND  // "&&"
         };
     }
 
@@ -92,7 +92,10 @@ public class CursorOperator implements Operator
      @Override
      public OperatorEnum[] getConcatenateOps()
      {
-         return EMPTY_OPERAND_OPS;
+         return  new OperatorEnum[]
+         { 
+              OperatorEnum.PLUSASSIGN
+         };
      }
 
     /**
@@ -102,8 +105,7 @@ public class CursorOperator implements Operator
     @Override
     public Number numberEvaluation(OperatorEnum operatorEnum2, Term cursorTerm) 
     {
-        Variable cursorOperand = (Variable)cursorTerm;
-        Cursor cursor = (Cursor)cursorOperand.getRightOperand();
+        Cursor cursor = (Cursor)cursorTerm;
         int right = cursor.getIndex();
         long calc = 0;
         switch (operatorEnum2)
@@ -142,37 +144,4 @@ public class CursorOperator implements Operator
         return false;
     }
 
-    /**
-     * Convert value to long, if not already of this type
-     * @param object Value to convert
-     * @param clazz Value class
-     * @return long
-     */
-    public long convertObject(Object object, Class<?> clazz)
-    {
-        if (clazz == Long.class)
-            return (Long)object;
-        else if (clazz == String.class)
-            return cursorTrait.parseValue(object.toString());
-        else if (Number.class.isAssignableFrom(clazz))
-            return ((Number)object).longValue();
-        else return 0L;
-    }
-
-    /**
-     * Convert value of integer type to long, if not already of this type
-     * @param object Value to convert
-     * @param clazz Value class
-     * @return long
-     */
-    protected int convertIntObject(Object object, Class<?> clazz)
-    {
-        if (clazz == Long.class)
-            return ((Long)object).intValue();
-        else if (clazz == String.class)
-            return cursorTrait.parseValue(object.toString()).intValue();
-        else if (Number.class.isAssignableFrom(clazz))
-            return ((Number)object).intValue();
-        else return 0;
-    }
 }

@@ -54,21 +54,18 @@ public class AxiomListSpec implements ListItemSpec
     public AxiomListSpec(AxiomList axiomList, ListItemSpec[] indexDataArray)
     {
         this.axiomList = axiomList;
-        indexData = indexDataArray.length == 1 ? indexDataArray[0] : indexDataArray[1];
-        if (indexDataArray.length > 1)
-            arrayData = indexDataArray[0];
-        this.qualifiedListName = 
-            (axiomList != null) ? 
-            axiomList.getQualifiedName() : 
-            indexData.getQualifiedListName();
-        // Initialize index fields. Determines what type of selection has been evaluated:
-        // Both indexes valid = 2-dimensional selection
-        // Only axiomIndex valid - axiom selected from AxiomList
-        // Only termIndex valid = term selected from AxiomTermList
-        // Both indexes invalid = no value available.
-        axiomIndex = arrayData != null ? arrayData.getItemIndex() : indexData.getItemIndex();
-        termIndex = arrayData != null ? indexData.getItemIndex() : -1;
-     }
+        init(indexDataArray);
+    }
+    
+    public AxiomListSpec(AxiomTermList axiomTermList,
+            ListItemSpec[] indexDataArray)
+    {
+        axiomList = new AxiomList(axiomTermList.getQualifiedName(), axiomTermList.getKey());
+        axiomList.setAxiomTermNameList(axiomTermList.getAxiomTermNameList());
+        axiomList.assignItem(0, axiomTermList);
+        init(indexDataArray);
+    }
+
 
     /**
      * Construct AxiomListSpec object using suppled list operand and index data.
@@ -340,5 +337,23 @@ public class AxiomListSpec implements ListItemSpec
         QualifiedName qname = new QualifiedName(getListName() + "_item", qualifiedListName);
         return new AxiomTermList(qname, qname);
     }
+
+    private void init(ListItemSpec[] indexDataArray)
+    {
+        indexData = indexDataArray.length == 1 ? indexDataArray[0] : indexDataArray[1];
+        if (indexDataArray.length > 1)
+            arrayData = indexDataArray[0];
+        this.qualifiedListName = 
+            (axiomList != null) ? 
+            axiomList.getQualifiedName() : 
+            indexData.getQualifiedListName();
+        // Initialize index fields. Determines what type of selection has been evaluated:
+        // Both indexes valid = 2-dimensional selection
+        // Only axiomIndex valid - axiom selected from AxiomList
+        // Only termIndex valid = term selected from AxiomTermList
+        // Both indexes invalid = no value available.
+        axiomIndex = arrayData != null ? arrayData.getItemIndex() : indexData.getItemIndex();
+        termIndex = arrayData != null ? indexData.getItemIndex() : -1;
+     }
 
 }

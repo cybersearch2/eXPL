@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial7;
+package au.com.cybersearch2.classy_logic.tutorial9;
 
 import java.io.File;
 import java.util.Iterator;
@@ -27,15 +27,17 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * HighCitiesDynamic
- * Demonstrates using axiom list attached to a template to send a solution to the result
+ * HighCities
+ * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
+ * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
+ * The terms are anonymous, so unification term pairing is performed by position.
  * @author Andrew Bowley
  * 20 Feb 2015
  */
-public class HighCitiesDynamic
+public class HighCitiesSorted2 
 {
-/* high-cities-dynamic.xpl
-axiom city (name, altitude) 
+/* high-cities-sorted.xpl
+ * axiom city (name, altitude)
     {"bilene", 1718}
     {"addis ababa", 8000}
     {"denver", 5280}
@@ -46,59 +48,76 @@ axiom city (name, altitude)
     {"richmond",19}
     {"spokane", 1909}
     {"wichita", 1305};
-    
-// Template to export a high city list
-template high_city
-+ export list<axiom> high_cities {};
-(
-  high_cities += 
-    axiom high_city { name , altitude } 
-      ? altitude > 5000
+// Solution is a list named 'high_cities'
+list<axiom> high_cities {};
+// Template to filter high cities
+template high_city(
+  altitude ? altitude > 5000,
+  high_cities += axiom { name, altitude }
 );
-
-query cities(city : high_city);
+// Calculator to perform insert sort on high_cities
+calc insert_sort (
+// i is index to last item appended to the list
+integer i = high_cities.length - 1,
+// Skip first time when only one item in list
+: i < 1,
+// j is the swap index
+integer j = i - 1,
+// Get last altitude for sort comparison
+integer altitude = high_cities[i]^altitude,
+// Save axiom to swap
+temp = high_cities[i],
+// Shuffle list until sort order restored
+{
+  ? altitude < high_cities[j]^altitude,
+  high_cities[j + 1] = high_cities[j],
+  ? --j >= 0
+},
+// Insert saved axiom in correct position
+high_cities[j + 1] = temp);
+query high_cities (city : high_city) -> (insert_sort); 
 
 */
-    
+
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public HighCitiesDynamic()
+    public HighCitiesSorted2()
     {
-        File resourcePath = new File("src/main/resources/tutorial7");
+        File resourcePath = new File("src/main/resources/tutorial9");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
 	/**
-	 * Compiles the high-cities-dynamic.xpl script and runs the "high_city" query, displaying the solution on the console.<br/>
+	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
-     * high_city(name = addis ababa, altitude = 8000)<br/>
-     * high_city(name = denver, altitude = 5280)<br/>
+	 * high_city(name = denver, altitude = 5280)<br/>
 	 * high_city(name = flagstaff, altitude = 6970)<br/>
+	 * high_city(name = addis ababa, altitude = 8000)<br/>
 	 * high_city(name = leadville, altitude = 10200)<br/>
 	 */
-	public Iterator<Axiom> getHighCities()
+	public Iterator<Axiom> displayHighCities()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-dynamic.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-sorted2.xpl");
         parserContext = queryProgramParser.getContext();
-		Result result = queryProgram.executeQuery("cities"); 
-		return result.axiomIterator("high_city.high_cities");
+		Result result = queryProgram.executeQuery("high_cities");
+		return result.axiomIterator("high_cities");
 	}
 
     public ParserContext getParserContext()
     {
         return parserContext;
     }
-
-    public static void main(String[] args)
+    
+	public static void main(String[] args)
 	{
+		HighCitiesSorted2 highCities = new HighCitiesSorted2();
 		try 
 		{
-		    HighCitiesDynamic highCities = new HighCitiesDynamic();
-	        Iterator<Axiom> iterator = highCities.getHighCities();
+	        Iterator<Axiom> iterator = highCities.displayHighCities();
 	        while(iterator.hasNext())
 	            System.out.println(iterator.next().toString());
-        }
+		} 
 		catch (ExpressionException e) 
 		{
 			e.printStackTrace();

@@ -353,13 +353,8 @@ public class Evaluator extends TreeEvaluator
         if (!leftIsNaN)
         {
             Number post = left.getOperator().numberEvaluation(operatorEnum, left);
-            left.setValue(post);
-        }
-        else if (left.getOperator().getTrait().getOperandType() == OperandType.CURSOR)
-        {
-            int modificationId = left.getId();
-            left.backup(modificationId);
-            left.evaluate(modificationId);
+            if (left.getOperator().getTrait().getOperandType() != OperandType.CURSOR)
+                left.setValue(post);
         }
         return result;
     }
@@ -389,9 +384,7 @@ public class Evaluator extends TreeEvaluator
             Number unary = right.getOperator().numberEvaluation(operatorEnum, right);
             if (right.getOperator().getTrait().getOperandType() == OperandType.CURSOR)
             {
-                int modificationId = right.getId();
-                right.backup(modificationId);
-                right.evaluate(modificationId);
+                return right.getValue();
             }
             return unary;
         }

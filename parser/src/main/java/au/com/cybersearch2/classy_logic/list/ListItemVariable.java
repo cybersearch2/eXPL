@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.list;
 import java.math.BigDecimal;
 
 import au.com.cybersearch2.classy_logic.compile.ListAssembler;
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
@@ -106,6 +107,16 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         if (indexDataArray.length > 1)
             arrayData = indexDataArray[0];
     }
+
+    /**
+     * Returns operand type of list
+     * @return OperandType - may be UNKNOWN if list not available
+     */
+    public OperandType getListOperandType()
+    {
+        ItemList<?> itemList =  delegate != null ? delegate.getItemList() : null;
+        return itemList != null ? itemList.getOperandType() : OperandType.UNKNOWN;
+    }
     
     /**
      * Run parser task after creation of all lists so they can be found by name
@@ -175,7 +186,12 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             indexData.assemble(itemList);
         if ((arrayData != null) && (delegate == null))
             // Two dimension case requires AxiomList helper
-            delegate = new AxiomVariable((AxiomList)itemList, new ListItemSpec[] { arrayData, indexData });
+        {
+            if (itemList instanceof AxiomList)
+                delegate = new AxiomVariable((AxiomList)itemList, new ListItemSpec[] { arrayData, indexData });
+            else
+                delegate = new AxiomVariable((AxiomTermList)itemList, new ListItemSpec[] { arrayData, indexData });
+        }
         if (delegate == null)
             delegate = itemVariableInstance(itemList);
         // Set term name of this variable now at last opportunity. Append the suffix of the index used to select the value.
@@ -245,7 +261,8 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         // However, this variable will be in a "empty" state, so getValue() should not be invoked.
         if (rightOperand != null)
             rightOperand.backup(id);
-        delegate.backup(id);
+        if (delegate != null)
+            delegate.backup(id);
         return super.backup(id);
     }
 

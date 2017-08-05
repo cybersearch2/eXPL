@@ -27,16 +27,15 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * HighCities
- * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
- * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
- * The terms are anonymous, so unification term pairing is performed by position.
+ * HighCitiesListed
+ * Demonstrates using axiom list attached to template to send solution to result. 
+ * In this case, the list name matches the template name, so the list is automatically exported.
  * @author Andrew Bowley
  * 20 Feb 2015
  */
 public class HighCitiesListed 
 {
-/* high-cities-listed
+/* high-cities-listed.xpl
 axiom city() 
     {"bilene", 1718}
     {"addis ababa", 8000}
@@ -50,12 +49,13 @@ axiom city()
     {"wichita", 1305};
     
 // Template for name and altitude of a high city
-template high_city(name ? altitude > 5000, altitude);
-
-// Solution is a list named 'city_list' which receives 'high_city' axioms
-list city_list(high_city);
+template high_city
+// Solution is an exported to a list named 'city_list'
++ list city_list(high_city);
+(name ? altitude > 5000, altitude);
 
 query high_cities (city : high_city);
+
 */
     
     protected QueryProgramParser queryProgramParser;
@@ -68,7 +68,7 @@ query high_cities (city : high_city);
     }
 
 	/**
-	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
+	 * Compiles the high-cities-listed script and runs the "high_city" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
      * high_city(name = addis ababa, altitude = 8000)<br/>
      * high_city(name = denver, altitude = 5280)<br/>

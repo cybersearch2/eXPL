@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
-import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.TemplateAssembler;
@@ -56,7 +55,7 @@ public class Lists
     public List<Axiom> checkTypes() 
     {
         List<Axiom> result = new ArrayList<Axiom>();
-        QueryProgram queryProgram = queryProgramParser.loadScript("lists.xpl");
+        queryProgramParser.loadScript("lists.xpl");
         parserContext = queryProgramParser.getContext();
         TemplateAssembler templateAssembler = parserContext.getParserAssembler().getTemplateAssembler();
         Template template = templateAssembler.getTemplate("fruit");

@@ -29,6 +29,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.list.Cursor;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.trait.NumberTrait;
@@ -122,15 +123,6 @@ abstract class TreeEvaluator extends DelegateOperand
                         return EvaluationStatus.SKIP;
                 }
             }
-            else if ((left != null) &&
-                     ((operatorEnum == OperatorEnum.INCR) || 
-                        (operatorEnum == OperatorEnum.DECR)) &&
-                       (left.getOperator().getTrait().getOperandType() == OperandType.CURSOR))
-                {
-                    leftIsNaN = true;
-                    left.getOperator().numberEvaluation(operatorEnum, left);
-                    return evaluationStatus;
-                }
         }
         return evaluationStatus;
     }
@@ -287,6 +279,14 @@ abstract class TreeEvaluator extends DelegateOperand
                         return axiomList.concatenate((AxiomList)rightTerm.getValue());
                     if (rightOperandType == OperandType.TERM)
                         return axiomList.concatenate((AxiomTermList)rightTerm.getValue());
+                }
+                else if (leftOperandType == OperandType.CURSOR)
+                {
+                    Cursor cursor = (Cursor)leftTerm;
+                    int index = cursor.getIndex();
+                    index += ((Long)rightTerm.getValue()).intValue();
+                    cursor.setIndex(index);
+                    return leftTerm.getValue();
                 }
                 throw new ExpressionException("Cannot concatenate " + leftTerm.toString() + " to " + rightTerm.toString());
             }

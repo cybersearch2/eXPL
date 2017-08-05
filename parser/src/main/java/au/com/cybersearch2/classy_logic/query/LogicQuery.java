@@ -146,13 +146,19 @@ public class LogicQuery implements SolutionFinder
 	boolean unify(Axiom axiom, Template template, Solution solution)
     {   // Unify enclosed templates which will participate in ensuing evaluation
 	    boolean success = template.unify(axiom, solution);
-        Template chainTemplate = template.getNext();
-        while (chainTemplate != null)
-        {
-            if (!chainTemplate.unify(axiom , solution))
-                success = false;
-            chainTemplate = chainTemplate.getNext();
-        }
+	    if (success)
+	    {
+            Template chainTemplate = template.getNext();
+            while (chainTemplate != null)
+            {
+                if (!chainTemplate.unify(axiom , solution))
+                {
+                    success = false;
+                    break;
+                }
+                chainTemplate = chainTemplate.getNext();
+            }
+	    }
         return success;
     }
 

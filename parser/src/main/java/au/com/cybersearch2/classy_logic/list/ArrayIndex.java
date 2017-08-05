@@ -142,6 +142,8 @@ public class ArrayIndex implements ListItemSpec
                 throw new ExpressionException("Index for list \"" + getListName() + "\" is empty" );
             index = -1;
             OperandType operandType = indexExpression.getOperator().getTrait().getOperandType();
+            if (operandType == OperandType.CURSOR)
+                operandType = ((Cursor)indexExpression).getListOperandType();
             if (operandType == OperandType.STRING)
                 setStringIndex(itemList);
             if (operandType == OperandType.INTEGER)
