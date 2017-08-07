@@ -64,7 +64,8 @@ public class CursorOperator implements Operator
         return  new OperatorEnum[]
         { 
             OperatorEnum.PLUS,
-            OperatorEnum.MINUS
+            OperatorEnum.MINUS,
+            OperatorEnum.ASSIGN
         };
     }
 

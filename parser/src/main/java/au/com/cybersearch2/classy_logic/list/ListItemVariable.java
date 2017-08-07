@@ -424,7 +424,8 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
     protected void setTermValue(Object value)
     {
         // Preset operator if value type is AxiomTermList, or wrong operator will be set
-        if ((getDelegateType() == DelegateType.ASSIGN_ONLY) && (value instanceof AxiomTermList))
+        DelegateType delegateType = getDelegateType();
+        if (!operator.isProxyAssigned() && (delegateType == DelegateType.ASSIGN_ONLY) && (value instanceof AxiomTermList))
             operator.setProxy(new TermOperator());
         super.setValue(value);
     }

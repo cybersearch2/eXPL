@@ -208,7 +208,7 @@ public class Calculator implements SolutionFinder
 			while (chainTemplate != null)
 			{
 				OperandWalker walker = chainTemplate.getOperandWalker();
-	            SolutionPairer pairer = chainTemplate.getSolutionPairer(solution);
+	            SolutionPairer pairer = template.getSolutionPairer(solution);
 				if (!walker.visitAllNodes(pairer))
 					return false;
 				chainTemplate = chainTemplate.getNext();

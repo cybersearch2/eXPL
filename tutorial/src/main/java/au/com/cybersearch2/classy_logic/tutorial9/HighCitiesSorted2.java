@@ -28,16 +28,14 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * HighCities
- * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
- * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
- * The terms are anonymous, so unification term pairing is performed by position.
+ * Demonstrates template export by assigning an axiom type to the template
  * @author Andrew Bowley
  * 20 Feb 2015
  */
 public class HighCitiesSorted2 
 {
-/* high-cities-sorted.xpl
- * axiom city (name, altitude)
+/* high-cities-sorted2.xpl
+axiom city (name, altitude)
     {"bilene", 1718}
     {"addis ababa", 8000}
     {"denver", 5280}
@@ -48,34 +46,39 @@ public class HighCitiesSorted2
     {"richmond",19}
     {"spokane", 1909}
     {"wichita", 1305};
-// Solution is a list named 'high_cities'
-list<axiom> high_cities {};
+    
+
+
 // Template to filter high cities
-template high_city(
-  altitude ? altitude > 5000,
-  high_cities += axiom { name, altitude }
+// Solution is a list named 'high_cities'
+template<axiom> high_cities
+(
+  name,
+  altitude ? altitude > 5000
 );
+
 // Calculator to perform insert sort on high_cities
-calc insert_sort (
-// i is index to last item appended to the list
-integer i = high_cities.length - 1,
-// Skip first time when only one item in list
-: i < 1,
-// j is the swap index
-integer j = i - 1,
-// Get last altitude for sort comparison
-integer altitude = high_cities[i]^altitude,
-// Save axiom to swap
-temp = high_cities[i],
-// Shuffle list until sort order restored
-{
-  ? altitude < high_cities[j]^altitude,
-  high_cities[j + 1] = high_cities[j],
-  ? --j >= 0
-},
-// Insert saved axiom in correct position
-high_cities[j + 1] = temp);
-query high_cities (city : high_city) -> (insert_sort); 
+calc insert_sort 
+(
+  // i is index to last item appended to the list
+  integer i = high_cities.length - 1,
+  // Skip first time when only one item in list
+  : i < 1,
+  // j is the swap index
+  integer j = i - 1,
+  // Save axiom to swap
+  temp = high_cities[i],
+  // Shuffle list until sort order restored
+  {
+    ? altitude < high_cities[j].altitude,
+    high_cities[j + 1] = high_cities[j],
+    ? --j >= 0
+  },
+  // Insert saved axiom in correct position
+  high_cities[j + 1] = temp
+);
+
+query high_cities (city : high_cities) -> (insert_sort); 
 
 */
 
@@ -89,7 +92,7 @@ query high_cities (city : high_city) -> (insert_sort);
     }
 
 	/**
-	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
+	 * Compiles the high-cities-sorted2.xpl script and runs the "high_city" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
 	 * high_city(name = denver, altitude = 5280)<br/>
 	 * high_city(name = flagstaff, altitude = 6970)<br/>

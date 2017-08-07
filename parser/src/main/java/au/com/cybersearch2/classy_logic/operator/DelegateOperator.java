@@ -99,6 +99,14 @@ public class DelegateOperator implements Operator
     }
     
     /**
+     * @return the isProxyAssigned
+     */
+    public boolean isProxyAssigned()
+    {
+        return isProxyAssigned;
+    }
+
+    /**
      * @return the delegateType
      */
     public DelegateType getDelegateType()

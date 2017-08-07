@@ -28,15 +28,13 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * HighCities
- * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
- * The cities are defined as an axiom source with each axiom containing a name term and an evelation term.
- * The terms are anonymous, so unification term pairing is performed by position.
+ * Demonstrates cursor used with 2-dimension dereferencing
  * @author Andrew Bowley
  * 20 Feb 2015
  */
-public class HighCitiesSorted 
+public class HighCitiesSorted3 
 {
-/* high-cities-sorted.xpl
+/* high-cities-sorted3.xpl
 axiom city (name, altitude)
     {"bilene", 1718}
     {"addis ababa", 8000}
@@ -52,52 +50,53 @@ axiom city (name, altitude)
 
 
 // Template to filter high cities
-template high_city
 // Solution is a list named 'high_cities'
-+ export list<axiom> high_cities {};
+template<axiom> high_cities
 (
-  altitude ? altitude > 5000,
-  high_cities += axiom high_city { name, altitude }
+  name,
+  altitude ? altitude > 5000
 );
 
 // Calculator to perform insert sort on high_cities
-calc insert_sort 
-+ list<axiom> high_cities = high_city.high_cities;
+calc insert_sort
++ cursor sorter(high_cities); 
 (
   // i is index to last item appended to the list
   integer i = high_cities.length - 1,
   // Skip first time when only one item in list
   : i < 1,
-  // j is the swap index
-  integer j = i - 1,
   // Save axiom to swap
   temp = high_cities[i],
+  // j is the swap index
+  integer j = (sorter = i - 1),
   // Shuffle list until sort order restored
   {
-    ? altitude < high_cities[j].altitude,
-    high_cities[j + 1] = high_cities[j],
+    ? altitude < sorter[0].altitude,
+    sorter[1] = sorter--,
     ? --j >= 0
   },
-  // Insert saved axiom in correct position
-  high_cities[j + 1] = temp
+  : j == i - 1
+  {
+    // Insert saved axiom in correct position
+    high_cities[j + 1] = temp
+  }
 );
 
-query high_cities (city : high_city) -> (insert_sort);
-
+query high_cities (city : high_cities) -> (insert_sort); 
 
 */
 
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public HighCitiesSorted()
+    public HighCitiesSorted3()
     {
         File resourcePath = new File("src/main/resources/tutorial9");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
 	/**
-	 * Compiles the high-cities-sorted.xpl script and runs the "high_city" query, displaying the solution on the console.<br/>
+	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
 	 * high_city(name = denver, altitude = 5280)<br/>
 	 * high_city(name = flagstaff, altitude = 6970)<br/>
@@ -106,10 +105,10 @@ query high_cities (city : high_city) -> (insert_sort);
 	 */
 	public Iterator<Axiom> displayHighCities()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-sorted.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("high-cities-sorted3.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("high_cities");
-		return result.axiomIterator("high_city.high_cities");
+		return result.axiomIterator("high_cities");
 	}
 
     public ParserContext getParserContext()
@@ -119,7 +118,7 @@ query high_cities (city : high_city) -> (insert_sort);
     
 	public static void main(String[] args)
 	{
-		HighCitiesSorted highCities = new HighCitiesSorted();
+		HighCitiesSorted3 highCities = new HighCitiesSorted3();
 		try 
 		{
 	        Iterator<Axiom> iterator = highCities.displayHighCities();
