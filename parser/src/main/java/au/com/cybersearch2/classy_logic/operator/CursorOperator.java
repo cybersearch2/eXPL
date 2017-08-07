@@ -16,7 +16,6 @@
 package au.com.cybersearch2.classy_logic.operator;
 
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
-import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
@@ -26,13 +25,13 @@ import au.com.cybersearch2.classy_logic.trait.CursorTrait;
 /**
  * CursorrOperator
  * @see DelegateType.CURSOR
- * @see IntegerOperand
+ * @see Cursor
  * @author Andrew Bowley
  * 28Apr.,2017
  */
 public class CursorOperator implements Operator
 {
-    /** Behaviours for localization and specialization of Integer operands */
+    /** Behaviours for localization and specialization of Cursor operands */
     private CursorTrait cursorTrait;
     
     /**
@@ -64,8 +63,8 @@ public class CursorOperator implements Operator
         //return EMPTY_OPERAND_OPS;
         return  new OperatorEnum[]
         { 
-                OperatorEnum.PLUS,
-                OperatorEnum.MINUS
+            OperatorEnum.PLUS,
+            OperatorEnum.MINUS
         };
     }
 
@@ -78,9 +77,10 @@ public class CursorOperator implements Operator
     {
         return  new OperatorEnum[]
         { 
-                OperatorEnum.INCR,
-                OperatorEnum.DECR,
-                OperatorEnum.SC_AND  // "&&"
+            OperatorEnum.ASSIGN,
+            OperatorEnum.INCR,
+            OperatorEnum.DECR,
+            OperatorEnum.SC_AND  // "&&"
         };
     }
 
@@ -127,6 +127,14 @@ public class CursorOperator implements Operator
     @Override
     public Number numberEvaluation(Term leftTerm, OperatorEnum operatorEnum2, Term rightTerm) 
     {
+        if (operatorEnum2 == OperatorEnum.PLUSASSIGN)
+        {
+            Cursor cursor = (Cursor)leftTerm;
+            int index = cursor.getIndex();
+            index += ((Long)rightTerm.getValue()).intValue();
+            cursor.setIndex(index);
+            return Long.valueOf(index);
+        }
         return Long.valueOf(0L);
     }
 
@@ -144,4 +152,5 @@ public class CursorOperator implements Operator
         return false;
     }
 
+    
 }

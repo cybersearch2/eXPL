@@ -33,10 +33,14 @@ public class ArrayIndex implements ListItemSpec
     protected String suffix;
     /** Selection value */
     protected int index;
+    /** Optional offset */
+    protected int offset;
     /** Index operand - literal if not empty, may be null */
     protected Operand indexExpression;
     /** Qualified name of list */
     protected QualifiedName qname;
+    /** Cursor, if set, provides offset */
+    protected Cursor cursor;
 
     /**
      * Construct ArrayIndex object using supplied index operand
@@ -47,6 +51,7 @@ public class ArrayIndex implements ListItemSpec
     {
         this.qname = qname;
         this.indexExpression = indexExpression;
+        offset = getOffset();
         OperandType operandType = indexExpression.getOperator().getTrait().getOperandType();
         if (!indexExpression.isEmpty())
         {   // Set index according to literal type, either integer or string
@@ -92,6 +97,7 @@ public class ArrayIndex implements ListItemSpec
     {
         this.qname = qname;
         this.indexExpression = indexExpression;
+        offset = getOffset();
         index = -1;
         this.suffix = suffix;
     }
@@ -107,6 +113,15 @@ public class ArrayIndex implements ListItemSpec
         this.qname = qname;
         this.index = index;
         this.suffix = suffix;
+        offset = getOffset();
+    }
+
+    /**
+     * @param cursor the cursor to set
+     */
+    public void setCursor(Cursor cursor)
+    {
+        this.cursor = cursor;
     }
 
     /**
@@ -135,6 +150,7 @@ public class ArrayIndex implements ListItemSpec
     @Override
     public boolean evaluate(ItemList<?> itemList, int id)
     {
+        offset = getOffset();
         if (indexExpression != null)
         {   // Evaluate index. The resulting value must be a sub class of Number to be usable as an index.
             indexExpression.evaluate(id);
@@ -182,7 +198,7 @@ public class ArrayIndex implements ListItemSpec
     @Override
     public int getItemIndex()
     {
-        return index;
+        return index + offset;
     }
 
     /**
@@ -259,4 +275,8 @@ public class ArrayIndex implements ListItemSpec
         index = 0;
     }
 
+    protected int getOffset()
+    {
+        return cursor == null ? 0 : cursor.getPosition();
+    }
 }

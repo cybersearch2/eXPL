@@ -32,10 +32,11 @@ calc reverse_pets
 (
   string petRegex = 
     "^.*" + nameRegex +".*", 
+  -pet,  
   {
-    pet += -1,
     ? pet.fact,
-    regex pet == petRegex { name }, 
+    pet_info = pet--,
+    regex pet_info == petRegex { name }, 
     pet_names += name
   }
 );

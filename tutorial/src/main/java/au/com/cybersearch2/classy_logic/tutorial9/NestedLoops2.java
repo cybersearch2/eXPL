@@ -32,7 +32,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 5 Mar 2015
  */
-public class NestedLoops 
+public class NestedLoops2 
 {
 /* nested-loops.xpl
 axiom unsorted() {12, 3, 1, 5, 8};
@@ -59,14 +59,14 @@ query sort_axiom (insert_sort);
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public NestedLoops()
+    public NestedLoops2()
     {
         File resourcePath = new File("src/main/resources/tutorial9");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
 /**
-	 * Compiles the nested-loops.xpl script and runs the "sort_axiom" query, displaying the solution on the console.<br/>
+	 * Compiles the nested-loops2.xpl script and runs the "sort_axiom" query, displaying the solution on the console.<br/>
 	 * Demonstrates one loop nested inside another. The inner loop does an insert sort 
 	 * while the outer loop advances to the next axiom term to be sorted.
 	 * The expected result:<br/>
@@ -74,7 +74,7 @@ query sort_axiom (insert_sort);
 	 */
 	public Axiom displayAxiomSort()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("nested-loops.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("nested-loops2.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("sort_axiom");
 		return result.getAxiom("insert_sort.sorted");
@@ -87,7 +87,7 @@ query sort_axiom (insert_sort);
     
 	public static void main(String[] args)
 	{
-		NestedLoops nestedLoops = new NestedLoops();
+		NestedLoops2 nestedLoops = new NestedLoops2();
 		try 
 		{
 			Axiom axiom = nestedLoops.displayAxiomSort();

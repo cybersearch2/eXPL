@@ -124,6 +124,11 @@ public class AxiomListTest
         {
         }
 
+        @Override
+        public void setCursor(Cursor cursor)
+        {
+        }
+
      }
     
 	private static final String NAME = "ListOperandName";

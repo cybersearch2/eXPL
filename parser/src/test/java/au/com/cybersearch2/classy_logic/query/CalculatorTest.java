@@ -76,9 +76,10 @@ public class CalculatorTest
 		OperandWalker walker = mock(OperandWalker.class);
 		when(walker.visitAllNodes(pairer)).thenReturn(true);
 		when(template.getOperandWalker()).thenReturn(walker);
+		when(template.getSolutionPairer(solution)).thenReturn(pairer);
+		when(walker.visitAllNodes(pairer)).thenReturn(true);
 		when(solution.size()).thenReturn(2);
 		assertThat(calculator.unifySolution(solution, template)).isTrue();
-		verify(pairer).setSolution(solution);
         Template template2 = mock(Template.class);
         when(template2.getId()).thenReturn(1);
 		OperandWalker walker2 = mock(OperandWalker.class);

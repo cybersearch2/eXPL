@@ -130,6 +130,11 @@ public class AxiomTermListTest
         {
         }
 
+        @Override
+        public void setCursor(Cursor cursor)
+        {
+        }
+
     }
     
 	private static final String NAME = "ListOperandName";

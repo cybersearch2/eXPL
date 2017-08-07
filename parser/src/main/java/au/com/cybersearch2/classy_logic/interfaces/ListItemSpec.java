@@ -1,6 +1,7 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.list.Cursor;
 
 public interface ListItemSpec
 {
@@ -28,6 +29,12 @@ public interface ListItemSpec
      * @param appendIndex Index to set
      */
     void setItemIndex(int appendIndex);
+ 
+    /**
+     * Set cursor to provide offset
+     * @param cursor Ccursor object
+     */
+    void setCursor(Cursor cursor);
     
     /**
      * Returns term selection index

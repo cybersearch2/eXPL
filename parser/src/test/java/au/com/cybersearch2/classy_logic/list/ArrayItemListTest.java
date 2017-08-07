@@ -122,6 +122,11 @@ public class ArrayItemListTest
         {
         }
 
+        @Override
+        public void setCursor(Cursor cursor)
+        {
+        }
+
     }
     
 

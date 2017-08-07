@@ -208,13 +208,13 @@ public class Calculator implements SolutionFinder
 			while (chainTemplate != null)
 			{
 				OperandWalker walker = chainTemplate.getOperandWalker();
-	            SolutionPairer pairer = template.getSolutionPairer(solution);
+	            SolutionPairer pairer = chainTemplate.getSolutionPairer(solution);
 				if (!walker.visitAllNodes(pairer))
 					return false;
 				chainTemplate = chainTemplate.getNext();
 			}
 		}
-		return false;
+		return true;
     }
 
 

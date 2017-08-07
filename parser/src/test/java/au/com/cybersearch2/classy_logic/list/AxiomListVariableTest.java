@@ -137,6 +137,11 @@ public class AxiomListVariableTest
         {
         }
 
+        @Override
+        public void setCursor(Cursor cursor)
+        {
+        }
+
     }
     
 	private static final String NAME = "AxiomListName";

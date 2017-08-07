@@ -127,6 +127,18 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
     {
         ListAssembler listAssembler = parserAssembler.getListAssembler();
         QualifiedName listName = indexData.getQualifiedListName();
+        // Check if list name is for cursor
+        Operand operand = parserAssembler.getOperandMap().getOperand(parserAssembler.getContextName(listName.getName()));
+        Cursor cursor = null;
+        if ((operand != null) && (operand instanceof Cursor))
+        {
+            cursor = (Cursor) operand;
+            listName = cursor.getListName();
+            if (arrayData == null)
+                indexData.setCursor(cursor);
+            else
+                arrayData.setCursor(cursor);
+        }
         ItemList<?> itemList = null;
         // Check if the list name mathches one for a calculator query - 
         // template name used in place of scope name
@@ -149,22 +161,19 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             }
         }
         else
-        {   // Look up list by name from item lists
-            itemList = listAssembler.findItemList(listName); 
-            String contexScopeName = parserAssembler.getQualifiedContextname().getScope();
-            if ((itemList == null) && !contexScopeName.equals(parserAssembler.getScope().getName()))
-            {   // Search for item list using context scope
-                QualifiedName qualifiedListName = new QualifiedName(contexScopeName, indexData.getListName());
-                itemList = listAssembler.findItemList(qualifiedListName);
-            }
-        }
+            itemList = findItemListByName(listName, parserAssembler);
         if (itemList == null)
-        {   // Search for an operand in the current scope with same name as the list name
-            // If found, the operand will be an AxiomList operand, which creates a list upon evaluation.
-            QualifiedName targetName = listAssembler.getAxiomListMapping(listName);
-            Operand listOperand = parserAssembler.getOperandMap().getOperand(targetName);
-            if (listOperand == null)
-                listOperand = parserAssembler.findOperandByName(targetName.getName());
+        {   
+            Operand listOperand = operand;
+            if (operand == null)
+            {
+              // Search for an operand in the current scope with same name as the list name
+              // If found, the operand will be an AxiomList operand, which creates a list upon evaluation.
+              QualifiedName targetName = listAssembler.getAxiomListMapping(listName);
+              listOperand = parserAssembler.getOperandMap().getOperand(targetName);
+              if (listOperand == null)
+                  listOperand = parserAssembler.findOperandByName(targetName.getName());
+            }
             if (listOperand != null) // TODO - || parserAssembler.isParameter(listName))
             {   // Use a helper to evaluate the list operand and resolve list parameters
                 ListItemSpec[] indexDataArray = 
@@ -200,6 +209,20 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             setName(indexData.getSuffix());
         if (sourceItem != null)
             sourceItem.setInformation(toString());
+    }
+
+    private ItemList<?> findItemListByName(QualifiedName listName, ParserAssembler parserAssembler)
+    {
+        ListAssembler listAssembler = parserAssembler.getListAssembler();
+        // Look up list by name from item lists
+        ItemList<?> itemList = listAssembler.findItemList(listName); 
+        String contexScopeName = parserAssembler.getQualifiedContextname().getScope();
+        if ((itemList == null) && !contexScopeName.equals(parserAssembler.getScope().getName()))
+        {   // Search for item list using context scope
+            QualifiedName qualifiedListName = new QualifiedName(contexScopeName, indexData.getListName());
+            itemList = listAssembler.findItemList(qualifiedListName);
+        }
+        return itemList;
     }
 
     /**

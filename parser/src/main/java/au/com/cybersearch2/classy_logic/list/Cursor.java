@@ -18,9 +18,8 @@ package au.com.cybersearch2.classy_logic.list;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * Cursor
@@ -32,13 +31,11 @@ public class Cursor extends ListItemVariable
 {
 	/** List name */
 	protected QualifiedName listName;
-	/** The list object */
-    protected ItemList<?> itemList;
-    /** Operand containing a list value */
-    protected Operand itemListOperand;
+	/** Increment index - 1 less than actual index */
     protected int cursorIndex;
     /** Flag set false when fact status changes to negative */
     protected boolean isFact;
+    /** Direction flag determines wrap around behaviour */
     protected boolean isForward;
 	
 	/**
@@ -57,34 +54,52 @@ public class Cursor extends ListItemVariable
         setDelegateType(DelegateType.CURSOR);
 	}
 
+    /**
+     * @return the listName
+     */
+    public QualifiedName getListName()
+    {
+        return listName;
+    }
+
+    /**
+     * Returns fact status flag
+     * @return boolean
+     */
     public boolean isFact()
     {
         return isFact;
     }
 
+    /**
+     * Returns current list index
+     * @return int
+     */
+    public int getPosition()
+    {
+        return indexData.getItemIndex();
+    }
+
+    /**
+     * Returns cursor index
+     * @return int
+     */
     public int getIndex()
     {
         return cursorIndex;
     }
 
-    public Object setIndex(int index)
+    /**
+     * Sets index 
+     * @param index Next cursor index (1 less than actual index)
+     */
+    public void setIndex(int index)
     {
         if (!isFact)
-            return null;
+            return;
         int size = delegate.getItemList().getLength();
         int diff = index - cursorIndex;
-        if (isForward && (diff == -1))
-        {
-            reverse();
-            return getItemValue();
-        }
-        else if (!isForward && (diff == 1))
-        {
-            forward();
-            return getItemValue();
-        }
-        else
-            cursorIndex = index;
+        cursorIndex = index;
         index = indexData.getItemIndex() + diff;
         isForward = diff >=0;
         // Flag set false when fact status changes to negative
@@ -92,7 +107,7 @@ public class Cursor extends ListItemVariable
         if (size == 0) // Cannot set index of empty array
         {
             isFact = false;
-            return null;
+            return;
         }
         if (index >= size) 
         {
@@ -106,11 +121,13 @@ public class Cursor extends ListItemVariable
             index = size - 1;
             isFact = false;
         }
-        Object value = getItemValue();
         ((ArrayIndex)indexData).setItemIndex(index);
-        return value;
     }
 
+    /**
+     * Reset cursor to navigate forward from start of list
+     * @return previous cursor position
+     */
     public long forward()
     {
         isForward = true;
@@ -120,12 +137,17 @@ public class Cursor extends ListItemVariable
             isFact = false;
             return -1;
         }
+        int position = getPosition();
         cursorIndex = -1;
         ((ArrayIndex)indexData).setItemIndex(0);
         isFact = true;
-        return 0;
+        return position;
     }
 
+    /**
+     * Reset cursor to navigate in reverse from end of list
+     * @return previous cursor position
+     */
     public long reverse()
     {
         isForward = false;
@@ -135,10 +157,11 @@ public class Cursor extends ListItemVariable
             isFact = false;
             return -1;
         }
+        int position = getPosition();
         cursorIndex = size;
         ((ArrayIndex)indexData).setItemIndex(size - 1);
         isFact = true;
-        return size -1;
+        return position;
     }
     
 	/**
@@ -150,6 +173,7 @@ public class Cursor extends ListItemVariable
 	public EvaluationStatus evaluate(int id) 
 	{
 	    EvaluationStatus status = super.evaluate(id);
+	    // Update id so backup does not trigger reset
 	    if (status == EvaluationStatus.COMPLETE)
 	        setId(id);
 	    return status;
@@ -163,7 +187,7 @@ public class Cursor extends ListItemVariable
     public boolean backup(int id) 
     {  
         if (!isFact)
-        {
+        {   // Reset if modification is different from evaluation id
             if ((id != this.id))
             {
                 if (isForward)
@@ -177,6 +201,24 @@ public class Cursor extends ListItemVariable
     }
     
     /**
+     * @see au.com.cybersearch2.classy_logic.list.ListItemVariable#assign(au.com.cybersearch2.classy_logic.terms.Parameter)
+     */
+    @Override
+    public void assign(Parameter parameter)
+    {
+        int index = ((Long)parameter.getValue()).intValue();
+        forward();
+        if (index < 0)
+        {
+            isForward = false;
+            index = -index;
+        }
+        else
+            isForward = true;
+        setIndex(index - 1);
+    }
+
+    /**
      * @see au.com.cybersearch2.classy_logic.list.ListItemVariable#toString()
      */
     @Override
@@ -187,9 +229,13 @@ public class Cursor extends ListItemVariable
         return super.toString();
     }
 
+    /**
+     * getValue
+     * @see au.com.cybersearch2.classy_logic.list.ListItemVariable#getValue()
+     */
     @Override
     public Object getValue()
-    {
+    {   // Pass value through type conversion variable, if present
         Object cursorValue = super.getValue();
         if ((rightOperand != null) && (cursorValue.getClass() != Null.class))
         {

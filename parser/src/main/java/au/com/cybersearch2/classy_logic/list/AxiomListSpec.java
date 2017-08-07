@@ -356,4 +356,9 @@ public class AxiomListSpec implements ListItemSpec
         termIndex = arrayData != null ? indexData.getItemIndex() : -1;
      }
 
+    @Override
+    public void setCursor(Cursor cursor)
+    {
+    }
+
 }

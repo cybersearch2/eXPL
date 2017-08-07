@@ -224,9 +224,9 @@ public class Evaluator extends TreeEvaluator
     	case binary:
     	    result = evaluateBinary(id); break;
     	case unary_prefix:
-    	    result = evaluatePreFix(); break;
+    	    result = evaluatePreFix(id); break;
     	case unary_postfix:
-    	    result = evaluatePostFix(); break;
+    	    result = evaluatePostFix(id); break;
     	}
 	   	return setResult(result, id);
 	}
@@ -330,14 +330,14 @@ public class Evaluator extends TreeEvaluator
 	 * Evaluate prefix unary operation
      * @return result object
 	 */
-    protected Object evaluatePreFix()
+    protected Object evaluatePreFix(int modificationId)
     {
         Object result = null;
         // Prefix unary operation.
         if (rightIsNaN)
             result = right.getValue();
         else
-            result = doPrefixUnary();
+            result = doPrefixUnary(modificationId);
         return result;
     }
     
@@ -345,7 +345,7 @@ public class Evaluator extends TreeEvaluator
      * Evaluate postfix unary operation
      * @return result object
      */
-    protected Object evaluatePostFix()
+    protected Object evaluatePostFix(int modificationId)
     {
         // Postfix unary operation.
         // Result will automatically be NaN if left Term value is NaN
@@ -355,6 +355,8 @@ public class Evaluator extends TreeEvaluator
             Number post = left.getOperator().numberEvaluation(operatorEnum, left);
             if (left.getOperator().getTrait().getOperandType() != OperandType.CURSOR)
                 left.setValue(post);
+            else
+                left.setId(modificationId);
         }
         return result;
     }
@@ -363,7 +365,7 @@ public class Evaluator extends TreeEvaluator
      * Perform prefix unary operation with right term: ++, --, !,  ~, + or -
      * @return Object Result
      */
-    protected Object doPrefixUnary() 
+    protected Object doPrefixUnary(int modificationId) 
     {
         if ((operatorEnum == OperatorEnum.INCR) || (operatorEnum == OperatorEnum.DECR))
         {   // ++ or --
@@ -384,6 +386,7 @@ public class Evaluator extends TreeEvaluator
             Number unary = right.getOperator().numberEvaluation(operatorEnum, right);
             if (right.getOperator().getTrait().getOperandType() == OperandType.CURSOR)
             {
+                right.setId(modificationId);
                 return right.getValue();
             }
             return unary;

@@ -29,7 +29,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Trait;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
-import au.com.cybersearch2.classy_logic.list.Cursor;
 import au.com.cybersearch2.classy_logic.operator.CurrencyOperator;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.trait.NumberTrait;
@@ -282,10 +281,7 @@ abstract class TreeEvaluator extends DelegateOperand
                 }
                 else if (leftOperandType == OperandType.CURSOR)
                 {
-                    Cursor cursor = (Cursor)leftTerm;
-                    int index = cursor.getIndex();
-                    index += ((Long)rightTerm.getValue()).intValue();
-                    cursor.setIndex(index);
+                    leftTerm.getOperator().numberEvaluation(leftTerm, operatorEnum, rightTerm);
                     return leftTerm.getValue();
                 }
                 throw new ExpressionException("Cannot concatenate " + leftTerm.toString() + " to " + rightTerm.toString());
