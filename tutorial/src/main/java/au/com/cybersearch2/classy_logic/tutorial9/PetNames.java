@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial8;
+package au.com.cybersearch2.classy_logic.tutorial9;
 
 import java.io.File;
 import java.util.Iterator;
@@ -34,7 +34,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 14 Sep 2015
  */
-public class ReversePetNames
+public class PetNames
 {
 /* pets.xpl
 list<string> pets_info = 
@@ -52,15 +52,16 @@ list<string> pets_info =
 string nameRegex = "<name>([a-zA-z']*)[^a-zA-z']";
 
 calc pets
-+ cursor pet_cursor(pets_info);
++ export list<string> pet_names;
++ cursor pet(pets_info);
 (
   string petRegex = 
     "^.*" + nameRegex +".*", 
   {
-    ? pet_cursor.fact,
-    pet = pet_cursor++,
-    regex pet == petRegex { name }, 
-    system.print(name)
+    ? pet.fact,
+    pet_info = pet++,
+    regex pet_info == petRegex { name }, 
+    pet_names += name
   }
 );
 
@@ -70,14 +71,14 @@ query pet_names(pets);
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public ReversePetNames()
+    public PetNames()
     {
-        File resourcePath = new File("src/main/resources/tutorial8");
+        File resourcePath = new File("src/main/resources/tutorial9");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
     /**
-     * Compiles the pets.xpl script and runs the "reverse_pet_names" query.<br/>
+     * Compiles the pets.xpl script and runs the "pet_names" query.<br/>
      * The expected results:<br/>
         Lassie<br/>
         Cuddles<br/>
@@ -93,8 +94,8 @@ query pet_names(pets);
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("pet-names.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("reverse_pet_names");
-        return result.stringIterator("pet_names.reverse_pets@");
+        Result result = queryProgram.executeQuery("pet_names");
+        return result.stringIterator("pet_names.pets@");
     }
 
     public ParserContext getParserContext()
@@ -110,7 +111,7 @@ query pet_names(pets);
     {
         try 
         {
-            ReversePetNames petNames = new ReversePetNames();
+            PetNames petNames = new PetNames();
             Iterator<String> iterator = petNames.petNames();
             while (iterator.hasNext())
                 System.out.println(iterator.next());

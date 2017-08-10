@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import java.io.File;
 
@@ -39,10 +39,10 @@ axiom unsorted() {12, 3, 1, 5, 8};
 list<term> sorted(unsorted);
 calc insert_sort 
 (
-  integer i = 1, 
+  i = 1, 
   {
-    integer j = i - 1, 
-    integer temp = sorted[i], 
+    j = i - 1, 
+    temp = sorted[i], 
     {
       ? temp < sorted[j],
          sorted[j + 1] = sorted[j],
@@ -61,7 +61,7 @@ query sort_axiom (insert_sort);
 
     public NestedLoops()
     {
-        File resourcePath = new File("src/main/resources/tutorial9");
+        File resourcePath = new File("src/main/resources/tutorial8");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 

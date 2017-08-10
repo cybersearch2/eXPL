@@ -14,20 +14,20 @@ string speciesRegex = "<species>dog";
 string nameRegex = "<name>([a-zA-z']*)[^a-zA-z']";
 string colorRegex = "<color>([a-zA-z' ]*)[^a-zA-z' ]";
 
-calc dogs
+calc dogs_only
++ export list<string> dogs;
++ cursor pet(pets_info);
 (
-  integer i = 0,
   string petRegex = 
     "^.*" + speciesRegex + 
     ".*" + nameRegex + 
     ".*" + colorRegex +".*", 
   {
-    ? i < pets_info.length,
-    string pet = pets_info[i++],
-    regex(case_insensitive) pet == petRegex { name, color }, 
-    //system.print(pet)
-    system.print(name, " is a ", color, " dog.")
+    ? pet.fact,
+    pet_info = pet++,
+    regex(case_insensitive) pet_info == petRegex { name, color }, 
+    dogs += name + " is a " + color + " dog." 
   }
 );
 
-query pet_query (dogs);
+query pet_query (dogs_only);

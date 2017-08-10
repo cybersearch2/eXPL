@@ -48,14 +48,18 @@ public class Choice
     protected List<String> termNameList;
     /** Choice selection is row index or -1 for no match */
     protected int selection;
+    /** Optional template to evaluate call parameters */
+    protected Template parameterTemplate;
 
 	/**
 	 * Construct Choice object
 	 * @param name Qualified name identification
 	 * @param scope Scope
+     * @param parameterTemplate Optional template to evaluate call parameters
 	 */
-	public Choice(QualifiedName name, Scope scope) 
+	public Choice(QualifiedName name, Scope scope, Template parameterTemplate) 
 	{
+	    this.parameterTemplate = parameterTemplate;
 	    // Get axiom source for this Choice and determine it's scope
 	    AxiomSource choiceAxiomSource = scope.findAxiomSource(name); 
 	    ParserAssembler parserAssembler = scope.getParserAssembler();
@@ -152,7 +156,8 @@ public class Choice
 		    {
 	            operand = variableList.get(index);
 	            operand.backup(0);
-		        term.unifyTerm(operand, template.getId());
+		        //term.unifyTerm(operand, template.getId());
+	            operand.assign((Parameter) choiceAxiom.getTermByIndex(index));
 		        solutionAxiom.addTerm(term);
 		    }
             ++index;
@@ -173,21 +178,49 @@ public class Choice
     {
         int index = 0;
         // Get selection operand
-        Operand operand = variableList.get(index++);
+        Term selectTerm = variableList.get(index++);
         QualifiedName templateName = template.getQualifiedName();
         AxiomArchetype archetype = new AxiomArchetype(new QualifiedName(templateName.getScope(), templateName.getTemplate()));
         Axiom axiom = new Axiom(archetype);
-        axiom.addTerm(operand);
+        if (parameterTemplate != null)
+        {
+            parameterTemplate.backup(true);
+            List<Term> termList;
+            String selectTermName  = termNameList.get(0);
+            parameterTemplate.evaluate(null);
+            termList = parameterTemplate.toArray();
+            int item = 0;
+            for (Term term: termList)
+            {
+                if (term.getName().isEmpty())
+                {
+                    if (item >= termNameList.size())
+                        break;
+                    term.setName(termNameList.get(item));
+                }
+                axiom.addTerm(term);
+                // Parameters override variables
+                if (term.getName().equals(selectTermName))
+                {
+                    selectTerm = null;
+                    variableList.get(0).setValue(term.getValue());
+                }
+                ++item;
+             }
+        }
+        if (selectTerm != null)
+            axiom.addTerm(selectTerm);
         template.unify(axiom, null);
-        selection = template.select(operand, context);
+        selection = template.select(selectTerm, context);
         if (selection == NO_MATCH)
             return false;
         // Get selected axiom, default being last one in choice axiom list
         Axiom choiceAxiom = choiceAxiomList.get(selection);
         while (index < choiceAxiom.getTermCount())
         {
-            operand = variableList.get(index);
-            operand.unifyTerm(choiceAxiom.getTermByIndex(index), id);
+            Operand operand = variableList.get(index);
+            //operand.unifyTerm(choiceAxiom.getTermByIndex(index), id);
+            operand.assign((Parameter) choiceAxiom.getTermByIndex(index));
             ++index;
         }
         return true;

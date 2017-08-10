@@ -37,7 +37,7 @@ public class StampDuty
 {
 /* stamp-duty.xpl
 choice bracket
-  (amount,       threshold,  base,    percent)
+  (amount,       threshold,  base,    percent, id)
   {amount <  12000,      0,     0.00, 1.00}
   {amount <  30000,  12000,   120.00, 2.00}
   {amount <  50000,  30000,   480.00, 3.00}
@@ -48,11 +48,11 @@ choice bracket
   {amount < 500000, 300000, 11330.00, 5.00}
   {amount > 500000, 500000, 21330.00, 5.50};
 
-axiom transacton_amount (amount) : parameter;
+axiom transaction_amount (id, amount) : parameter;
 
-calc payable(duty = base + (amount - threshold) * (percent / 100));
+calc payable(id, duty = base + (amount - threshold) * (percent / 100));
 
-query<term> stamp_duty(transaction_amount : bracket) #> (payable);
+query<term> stamp_duty(transaction_amount : bracket) -> (payable);
 
 */
 
@@ -68,7 +68,7 @@ query<term> stamp_duty(transaction_amount : bracket) #> (payable);
 	/**
 	 * Compiles the STAMP_DUTY script and runs the "stamp_duty_query" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
-	 * stamp_duty(duty = 3768.32)<br/>
+	 * stamp_duty(id=100078, duty=3768.32)<br/>
 	 */
 	public String getStampDuty()
 	{
@@ -78,7 +78,11 @@ query<term> stamp_duty(transaction_amount : bracket) #> (payable);
 		QueryParams queryParams = queryProgram.getQueryParams(QueryProgram.GLOBAL_SCOPE, "stamp_duty");
 		// Add a transacton_amount Axiom with a single 123,458 term
         Solution initialSolution = queryParams.getInitialSolution();
-        initialSolution.put("transaction_amount", new Axiom("transaction_amount", new Parameter("amount", 123458))); 
+        Axiom transactionAmount = 
+            new Axiom("transaction_amount",
+                new Parameter("id", 100078),
+                new Parameter("amount", 123458));
+        initialSolution.put("transaction_amount", transactionAmount); 
 		Result result = queryProgram.executeQuery(queryParams);
         return result.getAxiom("stamp_duty").toString();
 	}

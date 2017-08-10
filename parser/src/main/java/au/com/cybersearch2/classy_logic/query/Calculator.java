@@ -154,7 +154,7 @@ public class Calculator implements SolutionFinder
 		            template.backup(true);
 			    return true;
 			}
-            template.backup(true);
+            //template.backup(true);
 		}
 		// Short circuit when solution not available
 		return false;

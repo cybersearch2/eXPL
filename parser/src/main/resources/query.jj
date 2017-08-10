@@ -88,7 +88,6 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 
 
-
 /** 
  * QueryParser
  * JavaCC generated Expression Pattern Language Compiler 
@@ -273,7 +272,7 @@ public class QueryParser
     return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, true); 
   }
 
-  Operand createChoiceOperand(QualifiedName qualifiedAxiomName, Template template, ParserContext context)
+  Operand createChoiceOperand(QualifiedName qualifiedAxiomName, Template template, Template parameterTemplate, ParserContext context)
   {
     ParserAssembler parserAssembler = context.getParserAssembler();
     QualifiedTemplateName qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
@@ -284,8 +283,10 @@ public class QueryParser
       operandMap.addOperand(termName, null, parserAssembler.getQualifiedContextname());
     QualifiedName contextName = context.getContextName();
     QualifiedName qname = QualifiedName.parseName(qualifiedAxiomName.getName(), contextName); 
-   	Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope());
-    return new ChoiceOperand(qname, choiceTemplate, choice);
+   	Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope(), parameterTemplate);
+    Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
+    operandMap.addOperand(choiceOperand);
+    return choiceOperand;
   }  
   
   String createAxiomList(QualifiedName listName, boolean isPublic, ParserAssembler parserAssembler) throws ParseException
@@ -1043,6 +1044,7 @@ Operand TemplateExpression(Template template, ParserContext context) :
   Token nameToken = null;
   Token delimitToken = null;
   QualifiedName qname = null;
+  Template parameterTemplate = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
@@ -1066,6 +1068,11 @@ Operand TemplateExpression(Template template, ParserContext context) :
     }
     nameToken=<IDENTIFIER>
     (
+      "(" ( parameterTemplate = Parameters(nameToken.image, context, false) )? delimitToken=")"
+      {
+      }
+      |
+      (
       "{"
       {
         context.pushSourceMarker();
@@ -1110,9 +1117,10 @@ Operand TemplateExpression(Template template, ParserContext context) :
         context.popSourceMarker();
         return selectionOperand;
       }
+      )
     )?
     {
-      return createChoiceOperand(QualifiedName.parseName(nameToken.image), template, context);
+      return createChoiceOperand(QualifiedName.parseName(nameToken.image), template, parameterTemplate, context);
     }
   )
   |

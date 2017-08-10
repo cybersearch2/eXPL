@@ -126,7 +126,7 @@ query<axiom> stamp_duty_query (transaction_amount : stamp_duty_payable);
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc stamp_duty_payable (19,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template stamp_duty_payable (19,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

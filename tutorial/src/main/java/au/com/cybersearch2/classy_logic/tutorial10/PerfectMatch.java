@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial17;
+package au.com.cybersearch2.classy_logic.tutorial10;
 
 import java.io.File;
 import java.util.Iterator;
@@ -32,7 +32,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 11 Sep 2015
  */
-public class AgeDiscrimination3
+public class PerfectMatch
 {
     /*
 axiom person (name, sex, age, starsign)
@@ -43,39 +43,40 @@ axiom person (name, sex, age, starsign)
              {"Andrew", "m", 26, "virgo"} 
              {"Alice", "f", 20, "pices"} 
              {"Ingrid", "f", 23, "cancer"} 
-             {"Jack", "m", 32, "pices"} 
+             {"Jack", "m", 32, "pisces"} 
              {"Sonia", "f", 33, "gemini"} 
              {"Alex", "m", 22, "aquarius"} 
              {"Jill", "f", 33, "cancer"} 
              {"Fiona", "f", 29, "gemini"} 
-             {"melissa", "f", 30, "virgo"} 
+             {"Melissa", "f", 30, "virgo"} 
              {"Tom", "m", 22, "cancer"} 
              {"Bill", "m", 19, "virgo"};
               
 choice age_rating
-  (age     , age_weight)
-  {age > 29, 0.3}
-  {age > 25, 0.6}
-  {age > 20, 1.0}
-  {age < 21, NaN};
+  (age,       age_weight)
+  {age >  29, 0.3}
+  {age >  25, 0.6}
+  {age >= 20, 1.0}
+  {age <= 19, NaN};
 
 calc perfect_match
 (
-. rating = unknown,
-. <- age_rating(age) -> (age_weight),
-  ? age_weight.fact {rating = age_weight},
-  name, sex, starsign, age_rating = rating
+  Name = name, 
+  Age = age,
+  Starsign = starsign, 
+. choice age_rating,
+  Rating = age_weight.format
 );
 
 query<axiom> star_people(person : perfect_match);
 
-     */
+*/
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public AgeDiscrimination3()
+    public PerfectMatch()
     {
-        File resourcePath = new File("src/main/resources/tutorial17");
+        File resourcePath = new File("src/main/resources/tutorial10");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
@@ -83,26 +84,26 @@ query<axiom> star_people(person : perfect_match);
      * Compiles the STAR_PERSON script and runs the "star_people" query which gives each person 
      * over the age of 20 an age rating and those not rated have an unknown value.<br/>
      * The expected result:<br/>
-        (name=John, sex=m, starsign=gemini, age_rating=1.0)<br/>
-        (name=Sue, sex=f, starsign=cancer, age_rating=unknown)<br/>
-        (name=Sam, sex=m, starsign=scorpio, age_rating=0.3)<br/>
-        (name=Jenny, sex=f, starsign=gemini, age_rating=0.6)<br/>
-        (name=Andrew, sex=m, starsign=virgo, age_rating=0.6)<br/>
-        (name=Alice, sex=f, starsign=pices, age_rating=unknown)<br/>
-        (name=Ingrid, sex=f, starsign=cancer, age_rating=1.0)<br/>
-        (name=Jack, sex=m, starsign=pices, age_rating=0.3)<br/>
-        (name=Sonia, sex=f, starsign=gemini, age_rating=0.3)<br/>
-        (name=Alex, sex=m, starsign=aquarius, age_rating=1.0)<br/>
-        (name=Jill, sex=f, starsign=cancer, age_rating=0.3)<br/>
-        (name=Fiona, sex=f, starsign=gemini, age_rating=0.6)<br/>
-        (name=melissa, sex=f, starsign=virgo, age_rating=0.3)<br/>
-        (name=Tom, sex=m, starsign=cancer, age_rating=1.0)<br/>
-        (name=Bill, sex=m, starsign=virgo, age_rating=unknown)<br/>     
+        (Name=John, Starsign=gemini, Rating=1)<br/>
+        (Name=Sue, Starsign=cancer, Rating=unknown)<br/>
+        (Name=Sam, Starsign=scorpio, Rating=0.3)<br/>
+        (Name=Jenny, Starsign=gemini, Rating=0.6)<br/>
+        (Name=Andrew, Starsign=virgo, Rating=0.6)<br/>
+        (Name=Alice, Starsign=pices, Rating=1)<br/>
+        (Name=Ingrid, Starsign=cancer, Rating=1)<br/>
+        (Name=Jack, Starsign=pisces, Rating=0.3)<br/>
+        (Name=Sonia, Starsign=gemini, Rating=0.3)<br/>
+        (Name=Alex, Starsign=aquarius, Rating=1)<br/>
+        (Name=Jill, Starsign=cancer, Rating=0.3)<br/>
+        (Name=Fiona, Starsign=gemini, Rating=0.6)<br/>
+        (Name=Melissa, Starsign=virgo, Rating=0.3)<br/>
+        (Name=Tom, Starsign=cancer, Rating=1)<br/>
+        (Name=Bill, Starsign=virgo, Rating=unknown)<br/>     
      * @return Axiom iterator
      */
     public Iterator<Axiom> getAgeRating()
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("age-discrimination3.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("perfect-match.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("star_people");
         return result.axiomIterator("star_people");
@@ -121,8 +122,8 @@ query<axiom> star_people(person : perfect_match);
     {
         try 
         {
-            AgeDiscrimination3 ageDiscrimination3 = new AgeDiscrimination3();
-            Iterator<Axiom> iterator = ageDiscrimination3.getAgeRating();
+            PerfectMatch perfectMatch = new PerfectMatch();
+            Iterator<Axiom> iterator = perfectMatch.getAgeRating();
             while(iterator.hasNext())
             {
                 System.out.println(iterator.next().toString().substring(13));

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial8;
+package au.com.cybersearch2.classy_logic.tutorial9;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -66,12 +66,18 @@ calc all_amounts
 query<term> parse_amounts(all_amounts);
 
 */
+    static class Amounts
+    {
+        public BigDecimal[] items;
+        public String total;
+    }
+    
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
     public CurrencyCursor()
     {
-        File resourcePath = new File("src/main/resources/tutorial8");
+        File resourcePath = new File("src/main/resources/tutorial9");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
@@ -82,19 +88,19 @@ query<term> parse_amounts(all_amounts);
         14197.52<br/>
         590<br/>
         total=29355.41<br/>
-     * @return Axiom iterator
+     * @return Amounts object
      */
-    public void  amounts()
+    public Amounts  amounts()
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("currency-cursor.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("parse_amounts");
         Axiom axiom = result.getAxiom(new QualifiedName("global", "all_amounts", "amount_list"));
-        BigDecimal[] amounts = (BigDecimal[])axiom.getTermByIndex(0).getValue();
-        for (int i = 0; i < amounts.length; ++i)
-            System.out.println(amounts[i].toString());
+        Amounts amounts = new Amounts();
+        amounts.items = (BigDecimal[])axiom.getTermByIndex(0).getValue();
         axiom = result.getAxiom("parse_amounts");
-        System.out.println(axiom.getTermByIndex(0).toString());
+        amounts.total = axiom.getTermByIndex(0).toString();
+        return amounts;
     }
 
     public ParserContext getParserContext()
@@ -111,7 +117,10 @@ query<term> parse_amounts(all_amounts);
         try 
         {
             CurrencyCursor currencyCursor = new CurrencyCursor();
-            currencyCursor.amounts();
+            Amounts amounts = currencyCursor.amounts();
+            for (int i = 0; i < amounts.items.length; ++i)
+                System.out.println(amounts.items[i].toString());
+            System.out.println(amounts.total);
         } 
         catch (ExpressionException e) 
         { 

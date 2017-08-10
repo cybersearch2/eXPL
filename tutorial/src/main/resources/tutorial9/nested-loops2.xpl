@@ -4,9 +4,9 @@ calc insert_sort
 + export list<term> sorted(unsorted);
 + cursor sorter(sorted);
 (
-  integer i = 1, 
+  i = 1, 
   {
-    integer temp = sorted[i], 
+    temp = sorted[i], 
     j = (sorter = i - 1),
     {
       ? temp < sorter[0],

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import java.io.File;
 import java.util.Iterator;
@@ -39,20 +39,21 @@ public class CalculateSquareMiles2
     
 /* calculate-square-miles.xpl
 include "surface-land.xpl";
+
 calc filter_area 
 (
   country { "United States" , "Australia" },
-  double surface_area = surface_area_Km2,
+  double surface_area_Km2,
   string units = "km2",
   // Use imperial measurements if country is USA
-  ? country == "United States"
+  ? { "United States" }
   {
-    surface_area *= 0.3861,
+    surface_area_Km2 *= 0.3861,
     units = "mi2"
   }
 );
-list surface_area_by_country(filter_area);
-query surface_area_query(surface_area : filter_area);
+
+query<axiom> surface_area_query(surface_area : filter_area);
 
 */
     protected QueryProgramParser queryProgramParser;
@@ -66,15 +67,15 @@ query surface_area_query(surface_area : filter_area);
 	/**
 	 * Display surface areas of Australia and United States in locale-specific units
 	 * The expected results:</br>
-       filter_area(country = Australia, surface_area = 7741220, units = km2, false)</br>
-       filter_area(country = United States, surface_area = 3795946.011, units = mi2, true)</br>
+        filter_area(country=Australia, surface_area=7,741,220, units=km2)</br>
+        filter_area(country=United States, surface_area=3,795,946.011, units=mi2)</br>
 	 */
 	public Iterator<Axiom> displaySurfaceArea()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial9/calculate-square-miles2.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial8/calculate-square-miles2.xpl");
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("surface_area_query");
-		return result.axiomIterator("surface_area_by_country");
+		return result.axiomIterator("surface_area_query");
 	}
 
     public ParserContext getParserContext()

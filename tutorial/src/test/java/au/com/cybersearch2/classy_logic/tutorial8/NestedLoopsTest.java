@@ -13,120 +13,111 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Iterator;
+//import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.compile.SourceItem;
-import au.com.cybersearch2.classy_logic.compile.SourceMarker;
+//import au.com.cybersearch2.classy_logic.compile.SourceItem;
+//import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * CalculateSquareMiles2Test
+ * NestedLoopsTest
  * @author Andrew Bowley
- * 11Apr.,2017
+ * 13Apr.,2017
  */
-public class CalculateSquareMiles2Test
+public class NestedLoopsTest
 {
 
     @Test
-    public void testSquareMiles() throws Exception
+    public void testNestedLoops() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial9", "calculate-square-miles2.txt");
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        CalculateSquareMiles2 squareMiles = new CalculateSquareMiles2();
-        Iterator<Axiom> countryIterator = squareMiles.displaySurfaceArea();
-        while (countryIterator.hasNext())
-            checkSolution(reader, countryIterator.next().toString());
-        reader.close();
-        ParserContext context =  squareMiles.getParserContext();  
-        Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
+        NestedLoops nestedLoops = new NestedLoops();
+        Axiom axiom = nestedLoops.displayAxiomSort();
+        assertThat(axiom.toString()).isEqualTo("sorted(1, 3, 5, 8, 12)");
+        /*
+        Iterator<SourceMarker> iterator = nestedLoops.getParserContext().getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom surface_area (1,1)");
-        assertThat(sourceMarker.getSourceDocumentId()).isEqualTo(1);
+        assertThat(sourceMarker.toString()).isEqualTo("query sort_axiom (20,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area(country,surface_area_Km2)[213] (1,1) (215,29)");
+        assertThat(sourceItem.toString()).isEqualTo("insert_sort (20,19) (20,29)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list surface_area_by_country (14,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom unsorted (1,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> surface_area_by_country(filter_area) (14,1) (14,41)");
+        assertThat(sourceItem.toString()).isEqualTo("unsorted()[1] (1,1) (1,33)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query surface_area_query (15,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("calc insert_sort (3,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area:filter_area (15,26) (15,51)");
+        assertThat(sourceItem.toString()).isEqualTo("integer i=1 (6,3) (6,15)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("insert_sort1(j=i-1 ... ?++i<sorted_length) (7,3) (18,0)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc filter_area (2,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("list insert_sort.sorted (4,10)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("country {United States,Australia} (4,3) (4,43)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double surface_area_Km2 (5,3) (5,25)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string units=km2 (6,3) (6,22)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?country==United States (8,3) (9,2)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("country==United States&&filter_area1_run_once (9,3) (13,0)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> insert_sort.sorted(insert_sort.unsorted){5} (4,10) (4,36)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc filter_area1 (9,3)");
+        assertThat(sourceMarker.toString()).isEqualTo("calc insert_sort1 (7,3)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area_Km2*=0.3861 (10,5) (10,30)");
+        assertThat(sourceItem.toString()).isEqualTo("integer j=i-1 (8,5) (8,21)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("units=mi2 (11,5) (12,2)");
-        assertThat(iterator.hasNext()).isFalse();
-  }
-    
-    protected void checkSolution(BufferedReader reader, String country)
-    {
-        try
-        {
-            String line = reader.readLine();
-            assertThat(country).isEqualTo(line);
-        }
-        catch (IOException e)
-        {
-            fail(e.getMessage());
-        }
+        assertThat(sourceItem.toString()).isEqualTo("integer temp=sorted.i (9,5) (9,28)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("insert_sort2(?temp<sorted.j ... ?--j>=0) (10,5) (14,5)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("sorted.j=temp (15,5) (15,24)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("?++i<sorted_length (16,5) (17,2)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("calc insert_sort2 (10,5)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("?temp<sorted.j (11,7) (11,24)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("sorted.j=sorted.j (12,7) (12,31)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("?--j>=0 (13,7) (14,4)");
+        */
+   }
 
-    }
 }

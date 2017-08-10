@@ -1,3 +1,0 @@
-stamp_duty_payable(bracket=4, property_value=AUD123,458.00, payable=AUD3,768.32)
-stamp_duty_payable(bracket=3, property_value=AUD55,876.33, payable=AUD1,285.67)
-stamp_duty_payable(bracket=8, property_value=AUD1,245,890.00, payable=AUD62,353.95)

@@ -80,7 +80,7 @@ public class ArchiveIndexHelper implements OperandVisitor
                 }
             }
         }
-        index = template.getTermCount();
+        index = pass == 1 ? template.getTermCount() : archetype.getTermCount();
         for (Operand operand: operandList)
         {
             OperandWalker operandWalker = new OperandWalker(operand);

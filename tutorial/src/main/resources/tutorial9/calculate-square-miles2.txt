@@ -1,2 +1,0 @@
-filter_area(country=Australia, surface_area_Km2=7741220.0, units=km2)
-filter_area(country=United States, surface_area_Km2=3795946.011, units=mi2)

@@ -16,12 +16,14 @@
 package au.com.cybersearch2.classy_logic.tutorial11;
 
 import java.io.File;
+import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
+import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
@@ -53,6 +55,8 @@ string nameRegex = "<name>([a-zA-z']*)[^a-zA-z']";
 string colorRegex = "<color>([a-zA-z' ]*)[^a-zA-z' ]";
 
 calc dogs
++ export list<string> dogs;
++ cursor pet(pets_info);
 (
   integer i = 0,
   string petRegex = 
@@ -60,10 +64,10 @@ calc dogs
     ".*" + nameRegex + 
     ".*" + colorRegex +".*", 
   {
-    ? i < pets_info.length,
-    string pet = pets_info[i++],
+    ? pet.fact,
     regex(case_insensitive) pet == petRegex { name, color }, 
-    system.print(name, " is a ", color, " dog.")
+    dogs += name + " is a " + color + " dog." 
+    pet += 1
   }
 );
 
@@ -76,7 +80,7 @@ query pet_query (dogs);
     public Pets()
     {
         File resourcePath = new File("src/main/resources/tutorial11");
-        queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
+        queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
     /**
@@ -89,19 +93,12 @@ query pet_query (dogs);
         Fido is a brown dog.<br/>    
      * @return Axiom iterator
      */
-    public void  dogs()
+    public Iterator<String>  dogs()
     {
         QueryProgram queryProgram = queryProgramParser.loadScript("pets.xpl");
         parserContext = queryProgramParser.getContext();
-        queryProgram.executeQuery("pet_query");
-    }
-
-    FunctionManager provideFunctionManager()
-    {
-        FunctionManager functionManager = new FunctionManager();
-        SystemFunctionProvider systemFunctionProvider = new SystemFunctionProvider();
-        functionManager.putFunctionProvider(systemFunctionProvider.getName(), systemFunctionProvider);
-        return functionManager;
+        Result result = queryProgram.executeQuery("pet_query");
+        return result.stringIterator("dogs.dogs_only@");
     }
 
     public ParserContext getParserContext()
@@ -118,7 +115,9 @@ query pet_query (dogs);
         try 
         {
             Pets pets = new Pets();
-            pets.dogs();
+            Iterator<String> iterator = pets.dogs();
+            while (iterator.hasNext())
+                System.out.println(iterator.next());
         } 
         catch (ExpressionException e) 
         { 

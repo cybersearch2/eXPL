@@ -21,8 +21,8 @@ local translate(lexicon);
 calc charge_plus_gst
 (
   currency amount,
-  <- tax_rate(country = scope->region) -> (percent /= 100),
-  currency total = amount * (1.0 + percent)
+  choice tax_rate(country = scope->region),
+  currency total = amount * (1.0 + percent/100)
 );
 
 calc format_total

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial8;
 
 import java.io.File;
 import java.util.Iterator;
@@ -92,7 +92,7 @@ query high_cities (city : high_city) -> (insert_sort);
 
     public HighCitiesSorted()
     {
-        File resourcePath = new File("src/main/resources/tutorial9");
+        File resourcePath = new File("src/main/resources/tutorial8");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 

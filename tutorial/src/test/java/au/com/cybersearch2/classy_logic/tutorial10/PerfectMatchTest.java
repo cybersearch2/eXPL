@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial9;
+package au.com.cybersearch2.classy_logic.tutorial10;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -31,119 +31,117 @@ import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.tutorial10.PerfectMatch;
 
 /**
- * HighCitiesSortedTest
+ * PerfectMatchTest
  * @author Andrew Bowley
- * 12Apr.,2017
+ * 18Apr.,2017
  */
-public class HighCitiesSortedTest
+public class PerfectMatchTest
 {
-
     @Test
-    public void testHighCities() throws Exception
+    public void testAgeDiscrimination3() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial9", "high-cities-sorted.txt");
+        File testFile = new File("src/main/resources/tutorial10", "perfect-match.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        HighCitiesSorted highCities = new HighCitiesSorted();
-        Iterator<Axiom> cityIterator = highCities.displayHighCities();
-        while (cityIterator.hasNext())
-            checkSolution(reader, cityIterator.next().toString());
+        PerfectMatch perfectMatch = new PerfectMatch();
+        Iterator<Axiom> personIterator = perfectMatch.getAgeRating();
+        while (personIterator.hasNext())
+            checkSolution(reader, personIterator.next().toString().substring(13));
         reader.close();
         /*
-        ParserContext context = highCities.getParserContext();
+        ParserContext context = perfectMatch.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom city (1,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("choice age_rating (18,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("city(name,altitude)[10] (1,1) (11,21)");
+        assertThat(sourceItem.toString()).isEqualTo("choice age_rating(age,age_weight) (18,1) (19,23)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{age>29,0.3} (20,4) (20,16)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{age>25,0.6} (21,4) (21,16)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{age>20,1.0} (22,4) (22,16)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{age<21,NaN} (23,4) (23,16)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("list high_cities (14,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom person (1,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> high_cities[0] (14,1) (14,22)");
+        assertThat(sourceItem.toString()).isEqualTo("person(name,sex,age,starsign)[15] (1,1) (16,39)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query high_cities (46,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template high_city (17,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("query star_people (33,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("altitude>5000?altitude (19,3) (19,28)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("high_cities+=high_city (20,3) (21,0)");
-        assertThat(iterator.hasNext()).isTrue();
+        assertThat(sourceItem.toString()).isEqualTo("person:perfect_match (33,26) (33,47)");
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc insert_sort (24,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("calc perfect_match (25,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer i=high_cities_length-1 (27,3) (27,36)");
+        assertThat(sourceItem.toString()).isEqualTo("rating=unknown (27,3) (27,18)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo(":i<1 (29,3) (29,9)");
+        assertThat(sourceItem.toString()).isEqualTo("choice age_rating (28,3) (28,19)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer j=i-1 (31,3) (31,19)");
+        assertThat(sourceItem.toString()).isEqualTo("?is_age_weight_fact=age_weight (29,3) (29,20)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("integer altitude=high_cities.i.altitude (33,3) (33,44)");
+        assertThat(sourceItem.toString()).isEqualTo("is_age_weight_fact&&perfect_match2_run_once (29,21) (29,41)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("temp=high_cities.i (35,3) (35,23)");
+        assertThat(sourceItem.toString()).isEqualTo("name (30,3) (30,6)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("insert_sort1(?altitude<high_cities.j.altitude ... ?--j>=0) (37,3) (41,3)");
+        assertThat(sourceItem.toString()).isEqualTo("sex (30,9) (30,11)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("high_cities.j=temp (43,3) (44,0)");
+        assertThat(sourceItem.toString()).isEqualTo("starsign (30,14) (30,21)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc insert_sort1 (37,3)");
+        assertThat(sourceMarker.toString()).isEqualTo("calc perfect_match2 (29,21)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?altitude<high_cities.j.altitude (38,5) (38,40)");
+        assertThat(sourceItem.toString()).isEqualTo("rating=age_weight (29,22) (29,40)");
         sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("high_cities.j=high_cities.j (39,5) (39,39)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?--j>=0 (40,5) (41,2)");
-        sourceItem = sourceItem.getNext();
-        assertThat(iterator.hasNext()).isFalse();
         */
-   }
-
-    protected void checkSolution(BufferedReader reader, String city)
+    }
+    
+    protected void checkSolution(BufferedReader reader, String person)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(city).isEqualTo(line);
+            assertThat(person).isEqualTo(line);
         }
         catch (IOException e)
         {

@@ -19,7 +19,9 @@ import java.util.Locale;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 
@@ -55,7 +57,21 @@ public class FormatterOperand extends StringOperand implements LocaleListener
 	    EvaluationStatus status = super.evaluate(id);
 	    if (status != EvaluationStatus.COMPLETE)
 	        return status;
-		String formatValue = expression.getOperator().getTrait().formatValue(expression.getValue());
+	    Object expressionValue = expression.getValue();
+	    String formatValue;
+	    if ((expressionValue instanceof Unknown) || 
+	        (expressionValue instanceof Null) ||
+	        (expressionValue instanceof Double && ((Double)expressionValue).isNaN()))
+            formatValue = Unknown.UNKNOWN;
+        else
+            try
+    	    {
+                 formatValue= expression.getOperator().getTrait().formatValue(expressionValue);
+    	    }
+    	    catch(IllegalArgumentException e)
+    	    {
+                formatValue = Unknown.UNKNOWN;
+    	    }
 		setValue(formatValue);
 		this.id = id;
 		return EvaluationStatus.COMPLETE;

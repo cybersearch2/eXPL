@@ -141,7 +141,7 @@ public class ChainQueryExecuter implements DebugTarget
 		    Scope choiceScope = qname.getScope().isEmpty() ?
 		                        scope.getGlobalScope() : 
 		                        scope.findScope(qname.getScope());
-			Choice choice = new Choice(new QualifiedName(choiceScope.getName(), template.getName()), choiceScope);
+			Choice choice = new Choice(new QualifiedName(choiceScope.getName(), template.getName()), choiceScope, null);
 			chainQuery.setChoice(choice);
 		}
 		if (axiomListenerMap != null)

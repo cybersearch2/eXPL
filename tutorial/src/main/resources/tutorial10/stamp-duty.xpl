@@ -1,5 +1,5 @@
 choice bracket
-  (amount,       threshold,  base,    percent)
+  (amount,       threshold,  base,    percent, id)
   {amount <  12000,      0,     0.00, 1.00}
   {amount <  30000,  12000,   120.00, 2.00}
   {amount <  50000,  30000,   480.00, 3.00}
@@ -10,8 +10,8 @@ choice bracket
   {amount < 500000, 300000, 11330.00, 5.00}
   {amount > 500000, 500000, 21330.00, 5.50};
 
-axiom transaction_amount (amount) : parameter;
+axiom transaction_amount (id, amount) : parameter;
 
-calc payable(duty = base + (amount - threshold) * (percent / 100));
+calc payable(id, duty = base + (amount - threshold) * (percent / 100));
 
 query<term> stamp_duty(transaction_amount : bracket) -> (payable);

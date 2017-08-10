@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2015  www.cybersearch2.com.au
+    Copyright (C) 2017  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,44 +16,46 @@
 package au.com.cybersearch2.classy_logic.helper;
 
 /**
- * Unknown
- * Class to represent no information available
+ * RegexGroup
+ * Group name and private flag
  * @author Andrew Bowley
- * 1 Sep 2015
+ * 11Aug.,2017
  */
-public class Unknown implements Comparable<Unknown>
+public class RegexGroup
 {
-    public static final String UNKNOWN = "unknown";
+    private String name;
+    private boolean isPrivate;
+    
     /**
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     * Construct RegexGroup object
      */
-    @Override
-    public int compareTo(Unknown o)
+    public RegexGroup(String name)
     {
-        // All empty objects are equal
-        return 0;
+        this.name = name;
     }
 
     /**
-     * @see java.lang.Object#equals(java.lang.Object)
+     * @return the name
      */
-    @Override
-    public boolean equals(Object other)
+    public String getName()
     {
-        if (other == null)
-            return true;
-        if (other instanceof Unknown)
-            return true;
-        return false;
+        return name;
     }
 
     /**
-     * @see java.lang.Object#toString()
+     * @return the isPrivate
      */
-    @Override
-    public String toString() 
+    public boolean isPrivate()
     {
-        return UNKNOWN;
+        return isPrivate;
+    }
+
+    /**
+     * @param isPrivate the isPrivate to set
+     */
+    public void setPrivate(boolean isPrivate)
+    {
+        this.isPrivate = isPrivate;
     }
 
 }

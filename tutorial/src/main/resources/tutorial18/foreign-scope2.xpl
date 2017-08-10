@@ -27,8 +27,8 @@ local translate(lexicon);
 calc charge_plus_gst
 (
   currency amount = item_list[catalog_no],
-  <- tax_rate(country) -> (percent /= 100),
-  currency total = amount * (1.0 + percent)
+  choice tax_rate(country),
+  currency total = amount * (1.0 + percent/100)
 );
 
 calc format_total

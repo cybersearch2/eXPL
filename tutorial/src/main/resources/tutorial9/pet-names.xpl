@@ -20,9 +20,9 @@ calc pets
     "^.*" + nameRegex +".*", 
   {
     ? pet.fact,
-    regex pet == petRegex { name }, 
-    pet_names += name,
-    pet += 1
+    pet_info = pet++,
+    regex pet_info == petRegex { name }, 
+    pet_names += name
   }
 );
 
