@@ -187,8 +187,9 @@ public class Cursor extends ListItemVariable
     public boolean backup(int id) 
     {  
         if (!isFact)
-        {   // Reset if modification is different from evaluation id
-            if ((id != this.id))
+        {   // Reset if modification is partial from
+            // Higher level or id == 0 for full backup
+            if (id == 0)
             {
                 if (isForward)
                     forward();

@@ -2,7 +2,7 @@
 resource lexicon axiom(word, definition);
 
 string wordRegex = "^in[^ ]+";
-string defRegex = "^(.)\. (.*+)";
+string defRegex = "^(.)\\. (.*+)";
 
 // Convert single letter part of speech to word
 list<axiom> expand
@@ -16,8 +16,9 @@ list<axiom> expand
 template in_words 
 (
   regex word == wordRegex, 
-  regex definition == defRegex { . part, . def },
-  string in_word = word + ", " + expand[part] + "- " + def
+. regex definition == defRegex { part, def },
+  expand[part],
+  def
 );
 
 query<axiom> in_words(lexicon : in_words);

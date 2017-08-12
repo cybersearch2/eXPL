@@ -50,13 +50,13 @@ public class RegexGroups
     */
 /* regex-groups.xpl
 // Use an external axiom source (class LexiconSource)
-axiom lexicon (word, definition) : "lexicon";
+resource lexicon axiom(word, definition);
 
 string wordRegex = "^in[^ ]+";
-string defRegex = "^(.)\. (.*+)";
+string defRegex = "^(.)\\. (.*+)";
 
 // Convert single letter part of speech to word
-axiom expand =
+list<axiom> expand
 { 
    n = "noun",
    v = "verb",
@@ -67,8 +67,9 @@ axiom expand =
 template in_words 
 (
   regex word == wordRegex, 
-  regex definition == defRegex { . part, . def },
-  string in_word = word + ", " + expand[part] + "- " + def
+. regex definition == defRegex { part, def },
+  expand[part],
+  def
 );
 
 query<axiom> in_words(lexicon : in_words);
@@ -91,9 +92,9 @@ query<axiom> in_words(lexicon : in_words);
     /**
      * Compiles the LEXICAL_SEARCH script and runs the "query_in_words" query, displaying the solution on the console.<br/>
      * The first 3 lines of the expected result:<br/>
-        inadequate, adj.- not sufficient to meet a need<br/>
-        incentive, noun- a positive motivational influence<br/>
-        incidence, noun- the relative frequency of occurrence of something<br/>
+        inadequate (adj.) not sufficient to meet a need<br/>
+        incentive (noun) a positive motivational influence<br/>
+        incidence (noun) the relative frequency of occurrence of something<br/>
      * @return Axiom iterator containing the final "in" words solution
      */
 	public Iterator<Axiom> getRegexGroups()
@@ -109,6 +110,11 @@ query<axiom> in_words(lexicon : in_words);
     {
         return parserContext;
     }
+ 
+    protected static String get(Axiom axiom, String key)
+    {
+        return axiom.getTermByName(key).getValue().toString();
+    }
     
     /**
      * Run tutorial
@@ -121,7 +127,13 @@ query<axiom> in_words(lexicon : in_words);
 	        RegexGroups regexGroups = new RegexGroups();
 	        Iterator<Axiom> iterator = regexGroups.getRegexGroups();
 	        while(iterator.hasNext())
-	            System.out.println(iterator.next().getTermByName("in_word").toString().substring(8));
+	        {
+	            Axiom axiom = iterator.next();
+	            String word = get(axiom, "word");
+                String part = get(axiom, "part");
+                String def = get(axiom, "def");
+	            System.out.println(word + " (" + part + ") " + def);
+	        }
 		} 
         catch (ExpressionException e) 
         { // Display nested ParseException

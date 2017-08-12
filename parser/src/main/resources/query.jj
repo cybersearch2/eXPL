@@ -1125,7 +1125,7 @@ Operand TemplateExpression(Template template, ParserContext context) :
   )
   |
   ( 
-    regexOp = RegularExpression(template, context) 
+    regexOp = RegularExpression(context) 
     {
       return new Evaluator(regexOp.getLeftOperand().getQualifiedName(), regexOp, "?", regexOp.getLeftOperand());
     }
@@ -1273,19 +1273,33 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
   Token scToken = null;
   Operand expression = null;
   Operand innerLoop = null;
+  Operand regexOp = null;
+  String operator = "&&";
 }
 {
   (
-    ( scToken=":" | scToken="?" ) 
-    {
-      context.onTokenIntercept(scToken);
-    }  
-    expression=Expression(context)
+    (
+      (
+        ( scToken=":" { operator = "||"; } | scToken="?" ) 
+        {
+          context.onTokenIntercept(scToken);
+        }  
+        expression=Expression(context)
+      )
+      | 
+      regexOp = RegularExpression(context) 
+      {
+        expression = regexOp;
+      }
+    )
     ( 
       delimitToken="{"
       {
         Template innerTemplate = context.getParserAssembler().getTemplateAssembler().chainTemplate(outerTemplateName);
-        context.addSourceItem(scToken.image+expression.toString()).setEnd(delimitToken);
+        if (regexOp != null)
+          innerTemplate.addTerm(new Evaluator(regexOp, operator, Orientation.unary_postfix));
+        String shortCut = (scToken != null) ? scToken.image+expression.toString() : regexOp.toString();
+        context.addSourceItem(shortCut).setEnd(delimitToken);
         context.pushSourceMarker();
         Token token = Token.newToken(QueryParserConstants.CALC);
         token.beginLine = delimitToken.beginLine;
@@ -1299,8 +1313,10 @@ Operand CalculatorExpression(Template template, QualifiedName outerTemplateName,
       }
     )?  
     {
-      String operator = scToken.image == "?" ? "&&" : "||";
-      expression = innerLoop == null ? new Evaluator(expression, operator, Orientation.unary_postfix) : new Evaluator(expression, operator, innerLoop);
+      if ((regexOp == null) || (innerLoop == null))
+        expression = innerLoop == null ? new Evaluator(expression, operator, Orientation.unary_postfix) : new Evaluator(expression, operator, innerLoop);
+      else 
+        expression = innerLoop;
       expression.setPrivate(true);
       template.addTerm(expression);
       return expression;
@@ -1363,10 +1379,11 @@ Operand CalculatorExpression2(Template template, QualifiedName outerTemplateName
   }
 }
 
-Operand RegularExpression(Template template, ParserContext context) :
+Operand RegularExpression(ParserContext context) :
 {
-  String inputName;
-  QualifiedName qname;
+  String inputName = null;
+  QualifiedName qname = null;
+  Operand inputOp = null;
   Token regexLit = null;
   Token regexId = null;
   Group group = null;
@@ -1374,21 +1391,29 @@ Operand RegularExpression(Template template, ParserContext context) :
   ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
-  <REGEX> ( flags=RegexFlags() )? 
-  inputName=Name(context)
-  {
-    qname = parserAssembler.getContextName(inputName);
-   }
+  <REGEX> ( LOOKAHEAD(2) flags=RegexFlags() )? 
+  (
+    ( "(" inputOp=Expression(context) ")" )
+    {
+      qname = inputOp.getQualifiedName();
+    }
+    |
+    inputName=Name(context)
+    {
+      qname = parserAssembler.getContextName(inputName);
+    }
+  )    
   "==" 
-  ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( group=GroupDeclaration(qname.getName(), template, parserAssembler) )? 
+  ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( LOOKAHEAD(2) group=GroupDeclaration(qname.getName(), parserAssembler) )? 
   {
     Operand regexOp = null;
     if (regexLit != null)
       regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
     else 
       regexOp = parserAssembler.getOperandMap().addOperand(regexId.image, null, parserAssembler.getQualifiedContextname());
-    Operand inputOp = null;
-    inputOp = parserAssembler.getOperandMap().addOperand(inputName, null, parserAssembler.getQualifiedContextname());
+    //Operand inputOp = null;
+    if (inputName != null)
+      inputOp = parserAssembler.getOperandMap().addOperand(inputName, null, parserAssembler.getQualifiedContextname());
     Operand var = new RegExOperand(qname, regexOp, inputOp, flags, group);
     return var;
   }
@@ -1740,31 +1765,27 @@ String TermDeclaration(List<Term> termList, ParserContext context) :
   }
 }
 
-Group GroupDeclaration(String name, Template template, ParserAssembler parserAssembler) :
+Group GroupDeclaration(String name, ParserAssembler parserAssembler) :
 {
   Group group = new Group(name);
 }
 {
-  "{" Group(group, template, parserAssembler) ("," Group(group, template, parserAssembler) )* "}"
+  "{" Group(group, parserAssembler) ("," Group(group, parserAssembler) )* "}"
   {
     return group;
   }
 }
 
  
-void Group(Group group, Template template, ParserAssembler parserAssembler) :
+void Group(Group group, ParserAssembler parserAssembler) :
 {
   Token groupToken;
-  Token dotToken = null;
 }
 {
-  ( dotToken="." )? groupToken=<IDENTIFIER> 
+  groupToken=<IDENTIFIER> 
   {
     Operand var = parserAssembler.getOperandMap().addOperand(groupToken.image, null, parserAssembler.getQualifiedContextname());   
-    template.addTerm(var);
     group.addGroup(var);
-    if (dotToken != null)
-    	var.setPrivate(true);
   }
 }
 
@@ -2633,7 +2654,7 @@ Operand EqualityExpression(ParserContext context) :
   Operand[] params = new Operand[2];
   Token op;
 }
-{
+{ 
   params[0]=RelationalExpression(context)
   ( 
     ( 

@@ -20,8 +20,7 @@ calc pets
     "^.*" + nameRegex +".*", 
   {
     ? pet.fact,
-    pet_info = pet++,
-    regex pet_info == petRegex { name }, 
+    regex (pet++) == petRegex { name }, 
     pet_names += name
   }
 );
@@ -35,9 +34,8 @@ calc reverse_pets
   -pet,  
   {
     ? pet.fact,
-    pet_info = pet--,
-    regex pet_info == petRegex { name }, 
-    pet_names += name
+     regex (pet--) == petRegex { name }, 
+     pet_names += name
   }
 );
 

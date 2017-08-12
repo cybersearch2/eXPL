@@ -65,7 +65,7 @@ public class RegExOperand extends BooleanOperand
 	public RegExOperand(QualifiedName qname, String regex, Operand inputOp, int flags, Group group) 
 	{
 		this(qname, (Operand)null, inputOp, flags, group);
-		this.regex = regex;
+		this.regex = regex.replace("\\\\", "\\");
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class RegExOperand extends BooleanOperand
 		{
 			if (regexOp.isEmpty())
 				regexOp.evaluate(id);
-			regex = regexOp.getValue().toString();
+			regex = regexOp.getValue().toString().replace("\\\\", "\\");
 		}
 		// Note id not required as this object id is set during unification
         boolean isMatch = false;
@@ -145,9 +145,13 @@ public class RegExOperand extends BooleanOperand
 				String[] groupValues = getGroups(matcher);
 				if (groupValues.length > 0)
 				{
-					int index = 0;
+					int index = -1;
 					for (String group: groupValues)
-					{   // Group(0) is assigned to this object, so may be a subset of the original text
+					{   
+                        ++index;
+					    if (group == null)
+					        continue;
+					    // Group(0) is assigned to this object, so may be a subset of the original text
 						if (index == 0)
 							setValue(groupValues[0]);
 						else 
@@ -158,7 +162,6 @@ public class RegExOperand extends BooleanOperand
 							param.setId(id);
 							groupList.get(index - 1).assign(param);
 						}
-						++index;
 					}
 				}
 			}

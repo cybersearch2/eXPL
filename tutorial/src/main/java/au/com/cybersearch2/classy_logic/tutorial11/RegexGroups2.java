@@ -41,10 +41,11 @@ public class RegexGroups2
 {
 /* regex-groups.xpl
 // Use an external axiom source (class DictionarySource)
-axiom dictionary (entry) : "dictionary";
+// Use an external axiom source (class DictionarySource)
+resource dictionary axiom(entry);
 
 // Convert single letter part of speech to word
-axiom expand =
+list<axiom> expand 
 { 
    n = "noun",
    v = "verb",
@@ -54,8 +55,10 @@ axiom expand =
 
 template in_words
 ( 
-. regex entry == "(^in[^ ]+) - (.)\. (.*+)" { word, . pos, definition },
-  part = expand[pos]
+. regex entry == "(^in[^ ]+) - (.)\\. (.*+)" { word, pos, definition },
+  word,
+  part = expand[pos],
+  definition
 );
 
 query<axiom> in_words(dictionary : in_words);
@@ -98,6 +101,11 @@ query<axiom> in_words(dictionary : in_words);
         return parserContext;
     }
     
+    protected static String get(Axiom axiom, String key)
+    {
+        return axiom.getTermByName(key).getValue().toString();
+    }
+
     /**
      * Run tutorial
      * @param args
@@ -109,7 +117,13 @@ query<axiom> in_words(dictionary : in_words);
 	        RegexGroups2 regexGroups = new RegexGroups2();
 	        Iterator<Axiom> iterator = regexGroups.getRegexGroups();
 	        while(iterator.hasNext())
-	            System.out.println(iterator.next().toString());
+            {
+                Axiom axiom = iterator.next();
+                String word = get(axiom, "word");
+                String part = get(axiom, "part");
+                String def = get(axiom, "definition");
+                System.out.println(word + " (" + part + ") " + def);
+            }
 		} 
         catch (ExpressionException e) 
         { // Display nested ParseException

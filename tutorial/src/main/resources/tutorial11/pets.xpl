@@ -24,9 +24,8 @@ calc dogs_only
     ".*" + colorRegex +".*", 
   {
     ? pet.fact,
-    pet_info = pet++,
-    regex(case_insensitive) pet_info == petRegex { name, color }, 
-    dogs += name + " is a " + color + " dog." 
+    regex(case_insensitive) (pet++) == petRegex { name, color }
+      { dogs += name + " is a " + color + " dog." }
   }
 );
 
