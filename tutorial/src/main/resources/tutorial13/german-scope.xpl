@@ -10,9 +10,14 @@ calc total
   amount *= 1.1
 );
 
-calc format_total(string total_text = translate->Total + " + gst: " + total.amount.format);
-
-local translate(lexicon);
+calc format_total
++ list<term> lexicon@scope;
+(
+  string total_text = 
+    lexicon->Total + 
+    " + gst: " + 
+    total.amount.format
+);
 
 scope german (language="de", region="DE")
 {

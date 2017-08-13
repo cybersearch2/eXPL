@@ -50,9 +50,14 @@ calc total
   amount *= 1.1
 );
 
-calc format_total(string total_text = translate->Total + " + gst: " + total.amount.format);
-
-local translate(lexicon);
+calc format_total
++ list<term> lexicon@scope;
+(
+  string total_text = 
+    lexicon->Total + 
+    " + gst: " + 
+    total.amount.format
+);
 
 scope german (language="de", region="DE")
 {
@@ -71,7 +76,7 @@ scope german (language="de", region="DE")
 
 
 	/**
-	 * Compiles the GERMAN_SCOPE script and runs the "item_query" query, displaying the solution on the console.<br/>
+	 * Compiles the german-scope.xpl script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
     public Axiom getFormatedTotalAmount()

@@ -38,29 +38,24 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
 public class GermanColors 
 {
 /* german-colors.xpl
-// Define lexicon term names
-axiom lexicon (aqua, black, blue, white);
-
 axiom german.lexicon 
   (    aqua,    black,    blue,  white)
   {"Wasser", "schwarz", "blau", "weiß"};
  
 choice swatch 
++ list<term> lexicon@scope;
   (   name,      red, green, blue)
-  {colors[aqua],    0, 255, 255}
-  {colors[black],   0,   0,   0}
-  {colors[blue],    0  , 0, 255}
-  {colors[white], 255, 255, 255};
+  {lexicon->aqua,    0, 255, 255}
+  {lexicon->black,   0,   0,   0}
+  {lexicon->blue,    0  , 0, 255}
+  {lexicon->white, 255, 255, 255};
   
 axiom shade (name) : parameter;
-
-local colors(lexicon);
 
 scope german (language="de", region="DE")
 {
   query<term> color_query (shade : swatch);
-}
-  
+    
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
@@ -72,7 +67,7 @@ scope german (language="de", region="DE")
     }
 
 	/**
-	 * Compiles the GERMAN_COLORS script and runs the "color_query" query, displaying the solution on the console.
+	 * Compiles the german-colors.xpl script and runs the "color_query" query, displaying the solution on the console.
 	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
     public String getColorSwatch(String name)

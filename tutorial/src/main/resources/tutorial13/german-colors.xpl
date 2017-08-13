@@ -3,15 +3,14 @@ axiom german.lexicon
   {"Wasser", "schwarz", "blau", "weiß"};
  
 choice swatch 
++ list<term> lexicon@scope;
   (   name,      red, green, blue)
-  {colors->aqua,    0, 255, 255}
-  {colors->black,   0,   0,   0}
-  {colors->blue,    0  , 0, 255}
-  {colors->white, 255, 255, 255};
+  {lexicon->aqua,    0, 255, 255}
+  {lexicon->black,   0,   0,   0}
+  {lexicon->blue,    0  , 0, 255}
+  {lexicon->white, 255, 255, 255};
   
 axiom shade (name) : parameter;
-
-local colors(lexicon);
 
 scope german (language="de", region="DE")
 {

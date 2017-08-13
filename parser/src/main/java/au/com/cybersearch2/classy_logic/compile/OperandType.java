@@ -31,7 +31,6 @@ public enum OperandType
     DECIMAL,
     TERM,   // AxiomParameterOperand or AxiomTermList created and passed to registerAxiomList()
     AXIOM,  // AxiomOperand or  AxiomList
-    LOCAL,  // AxiomTermList created and passed to registerLocalList()
     CURRENCY,
     LIST,   // AxiomOperand with ParameterList<AxiomList> to populate it
     UNKNOWN,

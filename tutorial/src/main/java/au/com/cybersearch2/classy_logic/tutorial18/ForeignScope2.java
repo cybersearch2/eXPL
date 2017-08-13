@@ -42,7 +42,7 @@ public class ForeignScope2
 /* foreign-scope2.xpl
 axiom catalog_no (catalog_no) : parameter;
 
-string country = scope^region;
+string country = scope->region;
 list<currency $ country> item_list =
 {
   "12.345,67 €",
@@ -64,20 +64,19 @@ axiom belgium_fr.lexicon (Total, tax)
 axiom belgium_nl.lexicon (Total, tax)
   {"totale kosten","belasting"};
   
-local translate(lexicon);
-
 calc charge_plus_gst
 (
   currency amount = item_list[catalog_no],
-  <- tax_rate(country) -> (percent /= 100),
-  currency total = amount * (1.0 + percent)
+  choice tax_rate(country),
+  currency total = amount * (1.0 + percent/100)
 );
 
 calc format_total
++ list<term> lexicon@scope; 
 (
   catalog_no,
   country,
-  string text = " " + translate^Total + " " + translate^tax + ": " + 
+  string text = " " + lexicon->Total + " " + lexicon->tax + ": " + 
     charge_plus_gst.total.format
 );
 
@@ -103,7 +102,7 @@ query item_query(catalog_no : german.charge_plus_gst) -> (catalog_no : german.fo
     }
 
 	/**
-	 * Compiles the FOREIGN_SCOPE script and runs the "item_query" query, displaying the solution on the console.<br/>
+	 * Compiles the foreign-scope2 script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
     public List<Axiom> getFormatedTotalAmount()

@@ -846,7 +846,7 @@ public class ParserAssembler implements LocaleListener
         QualifiedName qname = cursor.getQualifiedName();
         if (variableType != null)
         {
-            Operand operand = variableType.getInstance(this, new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname));
+            Operand operand = variableType.getInstance(new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname));
             // Create cursor variable to impose cursor operations
             cursor.setRightOperand(operand);
         }

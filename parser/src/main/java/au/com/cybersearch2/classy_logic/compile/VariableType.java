@@ -57,36 +57,39 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class VariableType 
 {
-    /** Type of variable */
-	protected OperandType operandType;
-	/** Type qualifier properties eg. Currency country */
-	protected Map<String, Object> properties;
-	
-	/** Key value for axiom key property, which allows an axiom list to 
-	 *  contain axioms with a different name to that of the list */
-	public final static String AXIOM_KEY = "AxiomKey";
+    /** Key value for axiom key property, which allows an axiom list to 
+     *  contain axioms with a different name to that of the list */
+    public final static String AXIOM_KEY = "AxiomKey";
     /** Key value for operand expression property. The expression sets the intial value of the operand. */
-	public final static String EXPRESSION = "Expression";
+    public final static String EXPRESSION = "Expression";
     /** Key value for parameter initialization property */
     public final static String PARAMS = "Params";
     /** Key value for Currency country property */
-	public final static String QUALIFIER_STRING = "QualifierString";
+    public final static String QUALIFIER_STRING = "QualifierString";
     /** Key value for Currency country evaluation operand property */
-	public final static String QUALIFIER_OPERAND = "QualifierOperand";
+    public final static String QUALIFIER_OPERAND = "QualifierOperand";
     /** Key value for literal operand property - evaluation not required */
     public final static String LITERAL = "Literal";
     /** Key value for list initialization template */
     public final static String TEMPLATE = "Template";
     /** Key value for exporting a list */
     public final static String EXPORT = "Export";
+    
+    /** Type of variable */
+	protected OperandType operandType;
+	/** Type qualifier properties eg. Currency country */
+	protected Map<String, Object> properties;
+	/** Parser assembler of current scope */
+	protected ParserAssembler parserAssembler;
 	
 	/**
 	 * Construct VariableType object
 	 * @param operandType Logic programming type enumeration
 	 */
-	public VariableType(OperandType operandType) 
+	public VariableType(OperandType operandType, ParserAssembler parserAssembler) 
 	{
 		this.operandType = operandType;
+		this.parserAssembler = parserAssembler;
 	}
 
 	/**
@@ -122,37 +125,34 @@ public class VariableType
 
 	/**
 	 * Return new Operand instance of this type
-	 * @param parserAssembler ParserAssembler object
      * @param name Name of new variable
 	 * @return Operand object
 	 * @throws ParseException 
 	 */
-	public Operand getInstance(ParserAssembler parserAssembler, String name) throws ParseException
+	public Operand getInstance(String name) throws ParseException
 	{
-	    return getInstance(parserAssembler, parserAssembler.getContextName(name));
+	    return getInstance(parserAssembler.getContextName(name));
 	}
 
     /**
      * Return new Operand instance of this type
-     * @param parserAssembler ParserAssembler object
      * @param qname Qualified name of new variable
      * @return Operand object
      * @throws ParseException 
      */
-    public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname) throws ParseException
+    public Operand getInstance(QualifiedName qname) throws ParseException
     {
-        return getInstance(parserAssembler, qname, (Operand)getProperty(EXPRESSION));
+        return getInstance(qname, (Operand)getProperty(EXPRESSION));
     }
     
     /**
      * Return new Operand instance of this type
-     * @param parserAssembler ParserAssembler object
      * @param qname Qualified name of new variable
      * @return Operand object
      * @throws ParseException 
      */
     @SuppressWarnings("unchecked")
-    public Operand getInstance(ParserAssembler parserAssembler, QualifiedName qname, Operand expression) throws ParseException
+    public Operand getInstance(QualifiedName qname, Operand expression) throws ParseException
     {
         boolean hasExpression = expression != null;
 		Operand operand = null;
@@ -217,7 +217,7 @@ public class VariableType
         {
             if (!hasExpression)
                 throw new ParseException("List reference " + qname.getName() + " missing [] operator to select item");
-            return createAppender(parserAssembler, qname, expression);
+            return createAppender(qname, expression);
         }
         case UNKNOWN: 	
         default:
@@ -234,30 +234,43 @@ public class VariableType
     /**
 	 * Returns ItemList object for this type in current scope. 
 	 * NOTE: AxiomKey proptery must be set for Term, Axiom or Local type
-     * @param parserAssembler ParserAssembler object
      * @param listName Name of new variable
 	 * @return ItemList object
 	 * @throws ParseException
 	 */
-  	public ItemList<?> getItemListInstance(ParserAssembler parserAssembler, String listName) throws ParseException
+  	public ItemList<?> getItemListInstance(String listName) throws ParseException
 	{
         QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getQualifiedContextname());
-  	    return getItemListInstance(parserAssembler, qualifiedListName);
+  	    return getItemListInstance(qualifiedListName);
 	}
   	
     /**
+     * Returns ItemList object for this type in current scope. 
+     * NOTE: AxiomKey proptery must be set for Term, Axiom or Local type
+     * @param listName Name of new variable
+     * @return ItemList object
+     * @throws ParseException
+     */
+    public ItemList<?> getContextListInstance(String listName, QualifiedName axiomKey) throws ParseException
+    {
+        QualifiedName qname = QualifiedName.parseName(listName, parserAssembler.getQualifiedContextname());
+        AxiomTermList localList = new AxiomTermList(qname, axiomKey);
+        parserAssembler.registerLocalList(localList);
+        return localList;
+    }
+    
+    /**
      * Returns Dynamic ItemList object for this type in current scope. 
      * NOTE: AxiomKey property must be set for Term, Axiom or Local type
-     * @param parserAssembler ParserAssembler object
      * @param listName Name of new variable
      * @param template Initialization template
      * @return ItemList object
      * @throws ParseException
      */
-    public ItemList<?> getDynamicListInstance(ParserAssembler parserAssembler, String listName, Template template) throws ParseException
+    public ItemList<?> getDynamicListInstance(String listName, Template template) throws ParseException
     {
         QualifiedName qualifiedListName = QualifiedName.parseName(listName, parserAssembler.getQualifiedContextname());
-        return getDynamicListInstance(parserAssembler, qualifiedListName, template);
+        return getDynamicListInstance(qualifiedListName, template);
     }
 
     /**
@@ -306,26 +319,16 @@ public class VariableType
   	 /**
      * Returns ItemList object for this type. 
      * NOTE: AxiomKey property must be set for Term, Axiom or Local type
-     * @param parserAssembler ParserAssembler object
      * @param qname Qualified name of new variable
      * @return ItemList object
      * @throws ParseException
      */
-    protected ItemList<?> getItemListInstance(final ParserAssembler parserAssembler, QualifiedName qname) throws ParseException
+    protected ItemList<?> getItemListInstance(QualifiedName qname) throws ParseException
     {
-		QualifiedName axiomKey = (QualifiedName)getProperty(AXIOM_KEY);
+		QualifiedName axiomKey = null;
 		if ((operandType == OperandType.TERM) || 
-			(operandType == OperandType.AXIOM) || 
-			(operandType == OperandType.LOCAL))
-		{
-			if (axiomKey == null)
-	            throw new ParseException("List " + qname.toString() + " missing axiom key");
-		}
-		else
-		{
-	        if (axiomKey != null)
-	           throw new ParseException("List " + qname.toString() + " axiom key (" + axiomKey + ") is not valid for this type of list");
-		}
+			(operandType == OperandType.AXIOM))
+			axiomKey = getAxiomKey(qname.toString());
 		ArrayItemList<?> arrayItemList = null;
 	    switch (operandType)
 	    {
@@ -351,11 +354,7 @@ public class VariableType
             final AxiomTermList itemList = new AxiomTermList(qname, axiomKey);
             parserAssembler.registerAxiomTermList(itemList);
             return itemList;
-        case LOCAL:
-        	AxiomTermList localList = new AxiomTermList(qname, axiomKey);
-        	parserAssembler.registerLocalList(localList);
-        	return localList;
-        case AXIOM:
+         case AXIOM:
             final AxiomList axiomList = new AxiomList(qname, axiomKey);
             parserAssembler.registerAxiomList(axiomList);
             return axiomList;
@@ -368,13 +367,12 @@ public class VariableType
   	
     /**
      * Returns Dynamic ItemList object for this type. 
-     * @param parserAssembler ParserAssembler object
      * @param qname Qualified name of new variable
      * @param template Initialization template
      * @return ItemList object
      * @throws ParseException
      */
-    protected ItemList<?> getDynamicListInstance(final ParserAssembler parserAssembler, QualifiedName qname, Template template) throws ParseException
+    protected ItemList<?> getDynamicListInstance(QualifiedName qname, Template template) throws ParseException
     {
         DynamicList<?> dynamicListList = null;
         switch (operandType)
@@ -453,13 +451,12 @@ public class VariableType
 
 	/**
 	 * Create basic list appender variable. The expression evaluates a value which is appended to a list.
-     * @param parserAssembler ParserAssembler object
      * @param qname Qualified name of new variable
      * @param expression Operand object to provide value to be appended
      * @return Operand object
      * @throws ParseException 
 	 */
-	protected Operand createAppender(ParserAssembler parserAssembler, QualifiedName qname, Operand expression)
+	protected Operand createAppender(QualifiedName qname, Operand expression)
     {
         QualifiedName operandName = new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname);
         ArrayIndex arrayIndex = new ArrayIndex(qname, 0, "appender");
@@ -473,4 +470,11 @@ public class VariableType
         return var;
     }
 
+	protected QualifiedName getAxiomKey(String listName) throws ParseException
+	{
+        QualifiedName axiomKey = (QualifiedName)getProperty(AXIOM_KEY);
+        if (axiomKey == null)
+            throw new ParseException("List " + listName + " missing axiom key");
+        return axiomKey;
+	}
 }

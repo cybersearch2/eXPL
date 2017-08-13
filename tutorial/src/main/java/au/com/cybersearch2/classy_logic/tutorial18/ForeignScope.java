@@ -58,19 +58,18 @@ axiom belgium_fr.lexicon (Total, tax)
 axiom belgium_nl.lexicon (Total, tax)
   {"totale kosten","belasting"};
   
-local translate(lexicon);
-
 calc charge_plus_gst
 (
   currency amount,
-  <- tax_rate(scope^region) -> (percent /= 100),
-  currency total = amount * (1.0 + percent)
+  choice tax_rate(country = scope->region),
+  currency total = amount * (1.0 + percent/100)
 );
 
 calc format_total
++ list<term> lexicon@scope; 
 (
   string country = scope->region,
-  string text = " " + translate^Total + " " + translate^tax + ": " + 
+  string text = " " + lexicon->Total + " " + lexicon->tax + ": " + 
     charge_plus_gst.total.format
 );
 
@@ -83,7 +82,7 @@ query item_query(item : german.charge_plus_gst) -> (german.format_total) ->
    (item : french.charge_plus_gst) -> (french.format_total) ->
    (item : belgium_fr.charge_plus_gst) -> (belgium_fr.format_total) ->
    (item : belgium_nl.charge_plus_gst) -> (belgium_nl.format_total);
-
+   
 */
     
     protected QueryProgramParser queryProgramParser;
@@ -96,7 +95,7 @@ query item_query(item : german.charge_plus_gst) -> (german.format_total) ->
     }
 
 	/**
-	 * Compiles the FOREIGN_SCOPE script and runs the "item_query" query, displaying the solution on the console.<br/>
+	 * Compiles the foreign-scope.xpl script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
     public List<Axiom> getFormatedTotalAmount()

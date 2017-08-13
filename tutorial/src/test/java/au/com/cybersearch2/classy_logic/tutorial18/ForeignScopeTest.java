@@ -52,8 +52,8 @@ public class ForeignScopeTest
     {
         File testFile = new File("src/main/resources/tutorial18", "foreign-scope2.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        ForeignScope2 foreignScope2 = new ForeignScope2();
-        List<Axiom> solutionList = foreignScope2.getFormatedTotalAmount();
+        ForeignScope foreignScope = new ForeignScope();
+        List<Axiom> solutionList = foreignScope.getFormatedTotalAmount();
         for (Axiom formatedTotal: solutionList)
             checkSolution(reader, formatedTotal.toString());
     }

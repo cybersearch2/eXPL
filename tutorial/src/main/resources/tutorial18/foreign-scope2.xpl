@@ -22,8 +22,6 @@ axiom belgium_fr.lexicon (Total, tax)
 axiom belgium_nl.lexicon (Total, tax)
   {"totale kosten","belasting"};
   
-local translate(lexicon);
-
 calc charge_plus_gst
 (
   currency amount = item_list[catalog_no],
@@ -32,10 +30,11 @@ calc charge_plus_gst
 );
 
 calc format_total
++ list<term> lexicon@scope; 
 (
   catalog_no,
   country,
-  string text = " " + translate->Total + " " + translate->tax + ": " + 
+  string text = " " + lexicon->Total + " " + lexicon->tax + ": " + 
     charge_plus_gst.total.format
 );
 
