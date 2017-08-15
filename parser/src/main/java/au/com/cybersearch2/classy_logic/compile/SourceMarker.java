@@ -115,9 +115,6 @@ public class SourceMarker implements Comparable<SourceMarker>
         case QueryParserConstants.LIST:
             literal = XplLiteral.list; 
             break;
-        case QueryParserConstants.LOCAL:
-            literal = XplLiteral.local; 
-            break;
         case QueryParserConstants.PARAMETER:
             literal = XplLiteral.parameter; 
             break;

@@ -25,5 +25,6 @@ public enum ListType
     term,
     axiom_dynamic,
     axiom_item,
-    basic
+    basic,
+    context
 }

@@ -90,6 +90,9 @@ public class ListAssembler
 
     /**
      * Returns flag set true if list specified by type and name exists
+     * Both axiom dynamic and context list use the axiomListAliases map and
+     * type is distinguished by the name of the alias scope - "scope" being
+     * reserved for context lists.
      * @param listType List type
      * @param qualifiedName List name
      * @return boolean
@@ -101,11 +104,19 @@ public class ListAssembler
         case axiom_item:
             return axiomListMap.containsKey(qualifiedName);
         case axiom_dynamic:
-            return axiomListAliases.containsKey(qualifiedName);
+        {
+            QualifiedName listName = axiomListAliases.get(qualifiedName);
+            return (listName != null) && (!listName.getScope().equals("scope"));
+        }
         case term:
             return axiomTermListMap.containsKey(qualifiedName);
         case basic:
             return listMap.containsKey(qualifiedName);
+        case context:
+        {
+            QualifiedName listName = axiomListAliases.get(qualifiedName);
+            return (listName != null) && (listName.getScope().equals("scope"));
+        }
         default:
             return false;
         }
@@ -360,6 +371,59 @@ public class ListAssembler
     }
 
     /**
+     * Adds axiom list name alias
+     * @param aliasName Alias name used to access list from other namespace
+     * @param listName Actual list name
+     */
+    public void mapAxiomList(QualifiedName aliasName, QualifiedName listName)
+    {
+        axiomListAliases.put(aliasName, listName);
+    }
+
+    /**
+     * Returns actual axiom list name for alias name
+    * @param aliasName Alias name used to access list from other namespace
+     * @return QualifiedName - may be alias if no mapping found
+     */
+    public QualifiedName getAxiomListMapping(QualifiedName aliasName)
+    {
+        QualifiedName listName = axiomListAliases.get(aliasName);
+        return listName != null ? listName : aliasName;
+    }
+    
+    /**
+     * Set axiom container from supplied axiom(s). 
+     * @param axiomContainer AxiomList object or AxiomTermList object
+     * @param axiomItems A single axiom if setting an AxiomTermList, otherwise an axiom collection
+     */
+    public void setAxiomContainer(AxiomContainer axiomContainer, List<Axiom> axiomItems)
+    {
+        AxiomListener axiomListener = axiomContainer.getAxiomListener();
+        QualifiedName axiomKey = axiomContainer.getKey();
+        if (axiomContainer.getOperandType() == OperandType.AXIOM)
+            // Populate axiom list if already created by the script being compiled
+            // No listener required
+            for (Axiom axiom: axiomItems)
+               axiomListener.onNextAxiom(axiomKey, axiom);
+        else
+        {
+            if (!axiomItems.isEmpty())
+                axiomListener.onNextAxiom(axiomKey, axiomItems.get(0));
+            add(axiomKey, axiomListener);
+        }
+    }
+
+    /**
+     * Removes axiom item list specified by name
+     * @param qualifiedName
+     * @return list removed from container or null if list not found
+     */
+    protected List<Axiom> removeAxiomItems(QualifiedName qualifiedName)
+    {
+        return axiomListMap.remove(qualifiedName);
+    }
+
+    /**
      * Returns index of item identified by name
      * @param listName Name of list - used only for error reporting
      * @param item Item name
@@ -395,60 +459,8 @@ public class ListAssembler
     }
 
     /**
-     * Adds axiom list name alias
-     * @param aliasName Alias name used to access list from other namespace
-     * @param listName Actual list name
-     */
-    public void mapAxiomList(QualifiedName aliasName, QualifiedName listName)
-    {
-        axiomListAliases.put(aliasName, listName);
-    }
-
-    /**
-     * Returns actual axiom list name for alias name
-    * @param aliasName Alias name used to access list from other namespace
-     * @return QualifiedName - may be alias if no mapping found
-     */
-    public QualifiedName getAxiomListMapping(QualifiedName aliasName)
-    {
-        QualifiedName listName = axiomListAliases.get(aliasName);
-        return listName != null ? listName : aliasName;
-    }
-    
-    /**
-     * Removes axiom item list specified by name
-     * @param qualifiedName
-     * @return list removed from container or null if list not found
-     */
-    protected List<Axiom> removeAxiomItems(QualifiedName qualifiedName)
-    {
-        return axiomListMap.remove(qualifiedName);
-    }
-
-    /**
-     * Set axiom container from supplied axiom(s). 
-     * @param axiomContainer AxiomList object or AxiomTermList object
-     * @param axiomItems A single axiom if setting an AxiomTermList, otherwise an axiom collection
-     */
-    protected void setAxiomContainer(AxiomContainer axiomContainer, List<Axiom> axiomItems)
-    {
-        AxiomListener axiomListener = axiomContainer.getAxiomListener();
-        QualifiedName axiomKey = axiomContainer.getKey();
-        if (axiomContainer.getOperandType() == OperandType.AXIOM)
-            // Populate axiom list if already created by the script being compiled
-            // No listener required
-            for (Axiom axiom: axiomItems)
-               axiomListener.onNextAxiom(axiomKey, axiom);
-        else
-        {
-            if (!axiomItems.isEmpty())
-                axiomListener.onNextAxiom(axiomKey, axiomItems.get(0));
-            add(axiomKey, axiomListener);
-        }
-    }
-
-    /**
      * Copy result axioms to supplied container
+     * @param entry List and qualified name pair
      * @param axiomMap Container to receive axioms
      */
     protected Axiom copyAxiom(Entry<QualifiedName, ItemList<?>> entry, Map<QualifiedName, Axiom> axiomMap)

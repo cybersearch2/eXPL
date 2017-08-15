@@ -331,7 +331,6 @@ TOKEN :
 | < RESOURCE: "resource" >
 | < CURRENCY: "currency" >
 | < FORMAT: "format" >
-| < LOCAL: "local" >
 | < CHOICE: "choice" >
 | < PARAMETER: "parameter" >
 | < EXPORT: "export" >
@@ -1026,8 +1025,10 @@ Operand TemplateExpression(Template template, ParserContext context) :
   Token selectToken = null;
   Token nameToken = null;
   Token delimitToken = null;
+  Token scopeToken = null;
   QualifiedName qname = null;
   Template parameterTemplate = null;
+  ListItemSpec[] listIndexData = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
@@ -1113,6 +1114,16 @@ Operand TemplateExpression(Template template, ParserContext context) :
       return new Evaluator(regexOp.getLeftOperand().getQualifiedName(), regexOp, "?", regexOp.getLeftOperand());
     }
   )
+  |
+  scopeToken=<SCOPE> listIndexData=IndexExpression(context.getQualifiedName("scope"), context)
+  {
+    if (listIndexData.length > 1)
+         throw new ParseException("Scope cannot be accessed using axiom list variable");
+    var = listItemOperand(context, listIndexData[0]);
+    context.onTokenIntercept(scopeToken);
+    return var;
+  }
+  
 }
 
 Operand TemplateTerm(Template template, ParserContext context) :
@@ -1152,6 +1163,8 @@ Operand TemplateTerm(Template template, ParserContext context) :
     listIndexData=IndexExpression(context.getQualifiedName(name), context)
     {
       isList = false;
+      if (listAssembler.existsKey(ListType.context, qname))
+        listIndexData[0].getQualifiedListName().toContextName();
     } 
   )? 
   ( 
@@ -1673,18 +1686,17 @@ Operand ChoiceExpression(QualifiedName qname, Template template, ParserContext c
 String ChoiceListDeclaration(ParserContext context) :
 {
   Token nameToken;
+  Token scopeToken;
   String listName;
   QualifiedName qualifiedAxiomName = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
   ListAssembler listAssembler = parserAssembler.getListAssembler();
 }
 {
-  <LIST> "<" <TERM> ">" nameToken=<IDENTIFIER> "@" <SCOPE> ";"
+  <LIST> "<" <TERM> ">" nameToken=<IDENTIFIER> "@" scopeToken=<SCOPE> ";"
   {
     listName = nameToken.image;
-    VariableType varType = new VariableType(OperandType.TERM, parserAssembler);
-    ItemList<?> itemList = varType.getContextListInstance(listName, context.getQualifiedName(listName));
-    listAssembler.addItemList(itemList.getQualifiedName(), itemList);
+    listAssembler.mapAxiomList(parserAssembler.getContextName(listName), new QualifiedName(scopeToken.image, QualifiedName.EMPTY, listName));
     return listName;
   }
 }
@@ -1862,7 +1874,7 @@ Operand VariableDeclaration(ParserContext context) :
   ( listIndexData=IndexExpression(context.getQualifiedName(nameToken.image), context) )? 
   ( "=" expression=Expression(context) )?
   {
-      if ((listIndexData !=null) && (listIndexData.length > 1))
+     if ((listIndexData !=null) && (listIndexData.length > 1))
        throw new ParseException("Axiom list variable \"" + name + "\" cannot be declared here");
      if (listIndexData !=null)
        return initList(context, listIndexData[0], expression);
@@ -1904,14 +1916,14 @@ String ListDeclaration(ParserContext context) :
   nameToken=<IDENTIFIER> ( "@" scopeToken=<SCOPE> )? 
   {
     listName = nameToken.image;
-    if (axiomToken != null)
+    if (scopeToken != null)
+      qualifiedAxiomName = new QualifiedName(scopeToken.image, QualifiedName.EMPTY, listName);
+    else if (axiomToken != null)
       contextName = context.getContextName();
     if (contextName != null)
       template = createDynamicAxiomTemplate(listName, context);
     if (template != null)
       qualifiedAxiomName = parserAssembler.getContextName(listName);
-    if (scopeToken != null)
-      qualifiedAxiomName = context.getQualifiedName(listName);
     context.setSourceMarker(keywordToken, listName);
     context.setSourceItemPending(false);
   }
@@ -1958,9 +1970,11 @@ String ListDeclaration(ParserContext context) :
       context.setContextName(contextName);
     if (sourceItem != null)
       sourceItem.setEnd(delimitToken);
-    if (target != null)
+    if (scopeToken != null)
+      listAssembler.mapAxiomList(parserAssembler.getContextName(listName), qualifiedAxiomName);
+    else if (target != null)
       listAssembler.mapAxiomList(qualifiedAxiomName, parserAssembler.getContextName(target));
-    if ((axiomToken != null) || (target != null))
+    if ((axiomToken != null) || (target != null) || (scopeToken != null))
       return listName;
     if ((varType == null) && (qualifiedAxiomName == null))
       throw new ParseException("Invalid declaration for list \"" + listName + "\". Missing type or axiom name.");
@@ -1971,8 +1985,6 @@ String ListDeclaration(ParserContext context) :
     ItemList<?> itemList;    
     if (template != null)
       itemList = varType.getDynamicListInstance(listName, template);
-    else if (scopeToken != null)
-      itemList = varType.getContextListInstance(listName, qualifiedAxiomName);
     else
       itemList = varType.getItemListInstance(listName);
     if (exportToken !=null)
@@ -2339,14 +2351,16 @@ Operand NamedExpression(String name, ParserContext context) :
 {
   ListItemSpec[] indexData;
   QualifiedName qname;
-  QualifiedName listName;
   ParserTask parserTask;
   Template parametersTemplate = null;
+  QualifiedName listName = context.getQualifiedName(name);
   ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
-  indexData=IndexExpression(context.getQualifiedName(name), context) 
+  indexData=IndexExpression(listName, context) 
   {
+    if (parserAssembler.getListAssembler().existsKey(ListType.context, parserAssembler.getContextName(name)))
+      indexData[0].getQualifiedListName().toContextName();
     return indexData.length == 1 ? 
     listItemOperand(context, indexData[0]) :  
     axiomContainerOperand(parserAssembler, indexData);
@@ -2362,7 +2376,6 @@ Operand NamedExpression(String name, ParserContext context) :
   (
     <LENGTH>
     {
-      listName = context.getQualifiedName(name);
       qname = new QualifiedName(listName.getName() + "_length", listName);
       ListLength listLength = new ListLength(qname, listName);
       parserTask = context.getParserAssembler().addPending(listLength);

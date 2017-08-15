@@ -46,7 +46,13 @@ public class RegexGroupsTest
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         Iterator<Axiom> axiomIterator = regexGroups.getRegexGroups();
         while (axiomIterator.hasNext()) 
-              checkSolution(reader, axiomIterator.next().getTermByName("in_word").toString().substring(8));
+        {
+            Axiom axiom = axiomIterator.next();
+            String word = RegexGroups.get(axiom, "word");
+            String part = RegexGroups.get(axiom, "part");
+            String def = RegexGroups.get(axiom, "def");
+            checkSolution(reader, word + " (" + part + ") " + def);
+        }
         reader.close();
         /*
         Iterator<SourceMarker> iterator = regexGroups.getParserContext().getSourceMarkerSet().iterator();

@@ -437,12 +437,13 @@ public class CallOperandTest
             ");\n" +
             "axiom german.lexicon (aqua, black, blue, white)\n" +
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
-            "local colors(lexicon);" +
-            "choice swatch (shade, red, green, blue)\n" +
-            "{colors->aqua, 0, 255, 255}\n" +
-            "{colors->black, 0, 0, 0}\n" +
-            "{colors->blue, 0, 0, 255}\n" +
-            "{colors->white, 255, 255, 255};\n" +
+            "choice swatch\n" +
+            "+ list<term> lexicon@scope;\n" +
+            "(shade, red, green, blue)\n" +
+            "{lexicon->aqua, 0, 255, 255}\n" +
+            "{lexicon->black, 0, 0, 0}\n" +
+            "{lexicon->blue, 0, 0, 255}\n" +
+            "{lexicon->white, 255, 255, 255};\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +
             "}\n" +

@@ -252,13 +252,13 @@ public class ScopeQueryParserTest
 		    ;
  
 	static final String GERMAN_CURRENCY_XPL =
-			"axiom lexicon (Total);\n" +
 		    "axiom german.lexicon (Total)\n" +
 	        "  {\"Gesamtkosten\"};\n" +
-	        "local translate(lexicon);" +
 			"template charge(currency amount);\n" +
 			"calc charge_plus_gst(currency total = charge.amount * 1.1);\n" +
-			"calc format_total(string total_text = translate->Total + \" + gst: \" + charge_plus_gst.total.format);\n" +
+			"calc format_total\n" +
+			"+ list<term> lexicon@scope;\n" +
+			"(string total_text = lexicon->Total + \" + gst: \" + charge_plus_gst.total.format);\n" +
 			"scope german (language=\"de\", region=\"DE\")\n" +
 			"{\n" +
 			"  axiom item() {\"12.345,67 €\"};\n" +
@@ -266,15 +266,15 @@ public class ScopeQueryParserTest
 	        "}";
 
     static final String GERMAN_COLORS =
-            "axiom lexicon (aqua, black, blue, white);\n" +
             "axiom german.lexicon (aqua, black, blue, white)\n" +
             "  {\"Wasser\", \"schwarz\", \"blau\", \"weiß\"};\n" +
-            "local colors(lexicon);" +
-            "choice swatch (name, red, green, blue)\n" +
-            "{colors->aqua, 0, 255, 255}\n" +
-            "{colors->black, 0, 0, 0}\n" +
-            "{colors->blue, 0, 0, 255}\n" +
-            "{colors->white, 255, 255, 255};\n" +
+            "choice swatch\n" +
+            "+ list<term> lexicon@scope;\n" +
+            "(name, red, green, blue)\n" +
+            "{lexicon->aqua, 0, 255, 255}\n" +
+            "{lexicon->black, 0, 0, 0}\n" +
+            "{lexicon->blue, 0, 0, 255}\n" +
+            "{lexicon->white, 255, 255, 255};\n" +
             "axiom shade (name) : parameter;\n" +
             "scope german (language=\"de\", region=\"DE\")\n" +
             "{\n" +

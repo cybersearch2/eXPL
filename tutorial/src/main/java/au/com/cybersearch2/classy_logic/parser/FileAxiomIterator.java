@@ -90,7 +90,7 @@ public class FileAxiomIterator implements Iterator<Axiom>
     @Override
     public boolean hasNext()
     {
-        return current != null && (count >= 0);
+        return current != null;
     }
 
     /**
@@ -107,6 +107,8 @@ public class FileAxiomIterator implements Iterator<Axiom>
         Axiom nextAxiom = current;
         if (count > 0)
             doIterate();
+        else
+            current = null;
         return nextAxiom;
     }
 

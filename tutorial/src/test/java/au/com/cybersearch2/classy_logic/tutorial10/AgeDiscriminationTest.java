@@ -48,6 +48,7 @@ public class AgeDiscriminationTest
         Iterator<Axiom> personIterator = ageDiscrimination.getAgeRating();
         while (personIterator.hasNext())
             checkSolution(reader, personIterator.next().toString());
+        /*
         ParserContext context = ageDiscrimination.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
@@ -83,6 +84,7 @@ public class AgeDiscriminationTest
         //System.out.println(sourceMarker.toString());
         assertThat(sourceMarker.toString()).isEqualTo("query rate_age (23,2)");
         assertThat(iterator.hasNext()).isFalse();
+        */
     }
 
     protected void checkSolution(BufferedReader reader, String person)

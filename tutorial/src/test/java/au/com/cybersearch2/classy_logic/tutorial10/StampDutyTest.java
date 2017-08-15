@@ -57,7 +57,7 @@ public class StampDutyTest
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("choice bracket(amount,threshold,base,percent) (1,1) (2,45)");
+        assertThat(sourceItem.toString()).isEqualTo("choice bracket(amount,threshold,base,percent,id) (1,1) (2,49)");
         for (int i = 0; i < choices.length; ++i)
         {
             sourceItem = sourceItem.getNext();

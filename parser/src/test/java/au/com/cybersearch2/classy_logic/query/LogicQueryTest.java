@@ -496,7 +496,7 @@ public class LogicQueryTest
 		when(template.unify(axiom, solution)).thenReturn(true);
 		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
-		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isFalse();
+		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isTrue();
         Axiom blankAxiom = solution.getAxiom(NAME);
 		assertThat(blankAxiom.getTermCount()).isEqualTo(0);
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);

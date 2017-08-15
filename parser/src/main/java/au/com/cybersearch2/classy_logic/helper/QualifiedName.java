@@ -180,6 +180,15 @@ public class QualifiedName implements Comparable<QualifiedName>, Serializable
     }
 
     /**
+     * Switch scope and template to convert this name to context name
+     */
+    public void toContextName()
+    {
+        template = EMPTY;
+        scope = "scope";
+    }
+    
+    /**
      * Returns template
      * @return String
      */

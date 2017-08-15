@@ -1,3 +1,4 @@
-stamp_duty_payable(amount=123458.0, bracket=4, duty=3768.320, display=%s3,768.32)
-stamp_duty_payable(amount=55876.33, bracket=3, duty=1285.67155, display=%s1,285.67)
-stamp_duty_payable(amount=1245890.0, bracket=8, duty=62353.9500, display=%s62,353.95)
+stamp_duty_payable(id=100077, Amount=USD3,789.00, Duty=USD20.00, Bracket=-1)
+stamp_duty_payable(id=100078, Amount=USD123,458.00, Duty=USD3,768.32, Bracket=4)
+stamp_duty_payable(id=100079, Amount=USD55,876.33, Duty=USD1,285.67, Bracket=5)
+stamp_duty_payable(id=100080, Amount=USD1,245,890.00, Duty=USD62,353.95, Bracket=0)

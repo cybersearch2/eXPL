@@ -16,7 +16,14 @@
 package au.com.cybersearch2.classy_logic.list;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.QueryProgram;
+import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ListAssembler;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
@@ -25,14 +32,19 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
+import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.TermOperator;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 
@@ -47,7 +59,7 @@ import au.com.cybersearch2.classy_logic.operator.DelegateType;
  * @author Andrew Bowley
  * 28May,2017
  */
-public class ListItemVariable extends Variable implements ParserRunner, SourceInfo
+public class ListItemVariable extends Variable implements ParserRunner, SourceInfo, LocaleListener
 {
     /** Index information for value selection  */
     protected ListItemSpec indexData;
@@ -57,6 +69,8 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
     protected ListItemDelegate delegate;
     /** Source item to be updated in parser task when more information available to form description of operand */
     protected SourceItem sourceItem;
+    /** Maps list name for particular scope to list */
+    protected Map<QualifiedName, ItemList<?>> contextMap;
 
     /**
      * Create ListItemVariable object which uses a single index to select values
@@ -125,8 +139,19 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
     @Override
     public void run(ParserAssembler parserAssembler)
     {
-        ListAssembler listAssembler = parserAssembler.getListAssembler();
         QualifiedName listName = indexData.getQualifiedListName();
+        if (listName.getScope().equals("scope"))
+        {   // Context list only supported in global scope
+            String scopeName = parserAssembler.getScope().getName();
+            if (scopeName.equals(QueryProgram.GLOBAL_SCOPE))
+            {
+                assembleContextVariable(listName.getName(), parserAssembler);
+                return;
+            }
+            // Assign scope permanently when not in global scope
+            listName = new QualifiedName(scopeName, QualifiedName.EMPTY, listName.getName());
+        }
+        ListAssembler listAssembler = parserAssembler.getListAssembler();
         // Check if list name is for cursor
         Operand operand = parserAssembler.getOperandMap().getOperand(parserAssembler.getContextName(listName.getName()));
         Cursor cursor = null;
@@ -189,40 +214,13 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         if ((itemList == null) && (delegate == null))
             throw new ExpressionException("List \"" + indexData.getListName() + "\" cannot be found");
         if (itemList != null)
-            // Assemble index data to ensure if a name index is provided, it is valid.
-            // This operation is repeated at evaluation in case the list is modified from now 
-            // eg. local axiom, where term location may change with scope.
-            indexData.assemble(itemList);
-        if ((arrayData != null) && (delegate == null))
-            // Two dimension case requires AxiomList helper
-        {
-            if (itemList instanceof AxiomList)
-                delegate = new AxiomVariable((AxiomList)itemList, new ListItemSpec[] { arrayData, indexData });
-            else
-                delegate = new AxiomVariable((AxiomTermList)itemList, new ListItemSpec[] { arrayData, indexData });
-        }
-        if (delegate == null)
-            delegate = itemVariableInstance(itemList);
+            setDelegate(itemList);
         // Set term name of this variable now at last opportunity. Append the suffix of the index used to select the value.
         // The suffix is formed using available data, and may be a name required by an index operand to achieve unification
         if (name.isEmpty())
             setName(indexData.getSuffix());
         if (sourceItem != null)
             sourceItem.setInformation(toString());
-    }
-
-    private ItemList<?> findItemListByName(QualifiedName listName, ParserAssembler parserAssembler)
-    {
-        ListAssembler listAssembler = parserAssembler.getListAssembler();
-        // Look up list by name from item lists
-        ItemList<?> itemList = listAssembler.findItemList(listName); 
-        String contexScopeName = parserAssembler.getQualifiedContextname().getScope();
-        if ((itemList == null) && !contexScopeName.equals(parserAssembler.getScope().getName()))
-        {   // Search for item list using context scope
-            QualifiedName qualifiedListName = new QualifiedName(contexScopeName, indexData.getListName());
-            itemList = listAssembler.findItemList(qualifiedListName);
-        }
-        return itemList;
     }
 
     /**
@@ -342,6 +340,31 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         return getItemValue();
     }
 
+    /**  
+     * Handle notification of change of scope
+     * @param scope The new scope which will assigned a particular locale
+     */
+    @Override
+    public void onScopeChange(Scope scope)
+    {
+        super.onScopeChange(scope);
+        if (contextMap != null)
+        {
+            QualifiedName listName = new QualifiedName(scope.getName(), indexData.getQualifiedListName().getName());
+            ItemList<?> itemList = contextMap.get(listName);
+            if (itemList != null)
+            {
+                setDelegate(itemList);
+                // Set term name of this variable now at last opportunity. Append the suffix of the index used to select the value.
+                // The suffix is formed using available data, and may be a name required by an index operand to achieve unification
+                if (name.isEmpty())
+                    setName(indexData.getSuffix());
+                if (sourceItem != null)
+                    sourceItem.setInformation(toString());
+            }
+        }
+    }
+    
     /**
      * getRightOperand
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperand()
@@ -443,6 +466,109 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         if (!listName.getScope().isEmpty())
              qualifiedListName.clearScope();
         return listAssembler.findItemList(qualifiedListName);
+    }
+
+    /**
+     * Set delegate to handle evaluate events
+     * @param itemList Item list to be accessed by this variable
+     */
+    private void setDelegate(ItemList<?> itemList)
+    {
+        // Assemble index data to ensure if a name index is provided, it is valid.
+        // This operation is repeated at evaluation in case the list is modified from now 
+        // eg. local axiom, where term location may change with scope.
+        indexData.assemble(itemList);
+        if ((arrayData != null) && (delegate == null))
+            // Two dimension case requires AxiomList helper
+        {
+            if (itemList instanceof AxiomList)
+                delegate = new AxiomVariable((AxiomList)itemList, new ListItemSpec[] { arrayData, indexData });
+            else
+                delegate = new AxiomVariable((AxiomTermList)itemList, new ListItemSpec[] { arrayData, indexData });
+        }
+        if (delegate == null)
+            delegate = itemVariableInstance(itemList);
+    }
+    
+    /**
+     * Assemble context lists
+     * @param contextListName Name of list
+     * @param parserAssembler ParserAssembler for current scope
+     */
+    private void assembleContextVariable(String contextListName, ParserAssembler parserAssembler)
+    {
+        Scope scope = parserAssembler.getScope();
+        // Context lists are all declared in the global scope
+        Scope globalScope = scope.getGlobalScope();
+        ParserAssembler globalParserAssembler = globalScope.getParserAssembler();
+        ListAssembler listAssembler = globalParserAssembler.getListAssembler();
+        // Find all context lists and map by name in contextMap
+        for (String scopeName: globalScope.getScopeNames())
+        {
+            QualifiedName key = new QualifiedName(scopeName, contextListName);
+            List<Axiom> axiomList = listAssembler.getAxiomItems(key);
+            if (axiomList == null)
+            {
+                AxiomSource axiomSource = globalScope.getScope(scopeName).getParserAssembler().getAxiomSource(key);
+                if (axiomSource == null)
+                    axiomSource = globalParserAssembler.getAxiomSource(key);
+                if (axiomSource == null)
+                    // No context list in this scope
+                    continue;
+                axiomList = new ArrayList<Axiom>();
+                Iterator<Axiom> iterator = axiomSource.iterator();
+                while (iterator.hasNext())
+                    axiomList.add(iterator.next());
+            }
+            ItemList<?> itemList = listAssembler.findItemList(key);
+            if (itemList == null) 
+                // Create axiom list to access context list
+                itemList = createAxiomList(globalScope, key, axiomList);
+            if (contextMap == null)
+                contextMap = new HashMap<QualifiedName, ItemList<?>>();
+            contextMap.put(key, itemList);
+        }
+        if (contextMap == null)
+            throw new ExpressionException("Context list \"" + contextListName + "\"  is not found in any scope");
+        // Register this object as a locale listener to handle change of scope
+        parserAssembler.registerLocaleListener(this);
+    }
+
+    /**
+     * Create axiom list to access context list
+     * @param globalScope Global scope
+     * @param key List name used as key to map item list
+     * @param axiomList Context list
+     * @return ItemList object
+     */
+    private ItemList<?> createAxiomList(Scope globalScope, QualifiedName key, List<Axiom> axiomList)
+    {
+        AxiomArchetype archetype = globalScope.getGlobalAxiomAssembler().getAxiomArchetype(key);
+        AxiomContainer axiomContainer = (arrayData != null) ? new AxiomList(key, key) : new AxiomTermList(key, key);
+        if (archetype != null)
+            axiomContainer.setAxiomTermNameList(archetype.getTermNameList());
+        globalScope.getGlobalListAssembler().setAxiomContainer(axiomContainer, axiomList);
+        return (ItemList<?>) axiomContainer;
+    }
+
+    /**
+     * Find item list by name
+     * @param listName Name of list
+     * @param parserAssembler ParserAssembler for current scope
+     * @return ItemList object
+     */
+    private ItemList<?> findItemListByName(QualifiedName listName, ParserAssembler parserAssembler)
+    {
+        ListAssembler listAssembler = parserAssembler.getListAssembler();
+        // Look up list by name from item lists
+        ItemList<?> itemList = listAssembler.findItemList(listName); 
+        String contexScopeName = parserAssembler.getQualifiedContextname().getScope();
+        if ((itemList == null) && !contexScopeName.equals(parserAssembler.getScope().getName()))
+        {   // Search for item list using context scope
+            QualifiedName qualifiedListName = new QualifiedName(contexScopeName, indexData.getListName());
+            itemList = listAssembler.findItemList(qualifiedListName);
+        }
+        return itemList;
     }
 
     /**

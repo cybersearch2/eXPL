@@ -157,7 +157,7 @@ public class Choice
 	            operand = variableList.get(index);
 	            operand.backup(0);
 		        //term.unifyTerm(operand, template.getId());
-	            operand.assign((Parameter) choiceAxiom.getTermByIndex(index));
+	            operand.assign((Parameter) term);
 		        solutionAxiom.addTerm(term);
 		    }
             ++index;

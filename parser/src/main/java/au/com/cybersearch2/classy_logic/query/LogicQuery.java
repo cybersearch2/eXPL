@@ -103,7 +103,9 @@ public class LogicQuery implements SolutionFinder
     				emptyTemplate = (template.getTermCount() == 0);
     			}
 		    }
-			if (queryStatus == QueryStatus.start)
+		    else
+		        queryStatus =  QueryStatus.complete;
+			if ((queryStatus == QueryStatus.start) || (queryStatus ==  QueryStatus.complete))
 			   // When AxiomSource is absent or empty, allow unification solely with solution
 				return unifySolution(solution, template) &&
 					    completeSolution(solution, template, context);
@@ -202,7 +204,7 @@ public class LogicQuery implements SolutionFinder
 	        }
 	        return success;
 		}
-		return false;
+		return true;
     }
 
 	/**
