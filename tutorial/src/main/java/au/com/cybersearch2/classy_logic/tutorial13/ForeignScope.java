@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial18;
+package au.com.cybersearch2.classy_logic.tutorial13;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ query item_query(item : german.charge_plus_gst) -> (german.format_total) ->
 
     public ForeignScope()
     {
-        File resourcePath = new File("src/main/resources/tutorial18");
+        File resourcePath = new File("src/main/resources/tutorial13");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 

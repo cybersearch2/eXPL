@@ -36,17 +36,37 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 public class SingleCurrency 
 {
 /* single-currency.xpl
-axiom item() {"$1234.56"};
-
-template charge(currency $ "AU" amount);
-
-calc charge_plus_gst
+template charge_plus_gst
 (
-  currency $ "AU" total = amount * 1.1,
+  currency total = amount * 1.1,
   string total_text = "Total + gst: " + total.format
 );
 
-query<term> item_query(item : charge) -> (charge_plus_gst);
+template french_charge_plus_gst
+(
+  currency total = french.item->amount * 1.33,
+  string total_text = "le total + gst: " + total.format
+);
+
+scope french (language="fr", region="FR")
+{
+  axiom item( amount ) { currency ("500,00 €") };
+  
+  template charge_plus_gst
+  (
+    currency total = amount * 1.33,
+    string total_text = "le total + gst: " + total.format
+  );
+}
+
+scope german (language="de", region="DE")
+{
+  axiom item( amount ) { currency ("12.345,67 €") };
+  query<term> french_item_query(item : french.charge_plus_gst);
+}
+
+query<term> item_query(german.item : german.charge_plus_gst);
+query<term> french_item_query(french_charge_plus_gst);
 
 */
 
@@ -61,7 +81,7 @@ query<term> item_query(item : charge) -> (charge_plus_gst);
 	/**
 	 * Compiles the CURRENCY script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
-	 * Total + gst: AUD1,358.02<br/>
+	 * Total + gst: 13.580,24 EUR<br/>
 	 */
 	public String getFormatedTotalAmount()
 	{

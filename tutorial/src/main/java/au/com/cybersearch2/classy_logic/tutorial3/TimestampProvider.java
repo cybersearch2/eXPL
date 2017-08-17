@@ -23,13 +23,15 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * TimestampProvider
  * @author Andrew Bowley
  * 22Jun.,2017
  */
-public class TimestampProvider implements FunctionProvider<Object>
+public class TimestampProvider implements FunctionProvider
 {
     @Override
     public String getName()
@@ -38,10 +40,10 @@ public class TimestampProvider implements FunctionProvider<Object>
     }
 
     @Override
-    public CallEvaluator<Object> getCallEvaluator(String identifier)
+    public CallEvaluator<Axiom> getCallEvaluator(String identifier)
     {
         if (identifier.equals("timestamp"))
-            return new CallEvaluator<Object>(){
+            return new CallEvaluator<Axiom>(){
 
                 @Override
                 public String getName()
@@ -50,9 +52,11 @@ public class TimestampProvider implements FunctionProvider<Object>
                 }
 
                 @Override
-                public Object evaluate(List<Term> argumentList)
+                public Axiom evaluate(List<Term> argumentList)
                 {
-                    return new Date();
+                    Axiom axiom = new Axiom("Date");
+                    axiom.addTerm(new Parameter(Term.ANONYMOUS, new Date()));
+                    return axiom;
                 }
 
                 @Override

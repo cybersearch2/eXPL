@@ -15,23 +15,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.interfaces;
 
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+
 /**
  * FunctionProvider
  * Sources functions from external libraries
  * @author Andrew Bowley
  * 30 Jul 2015
  */
-public interface FunctionProvider<R>
+public interface FunctionProvider
 {
     /**
      * Name of function provider - must be unique
      * @return String
      */
     String getName();
+    
     /**
      * Returns function object specified by name
      * @param identifier Name of function
      * @return Function object implementing CallEvaluator interface
      */
-    CallEvaluator<R> getCallEvaluator(String identifier);
+    CallEvaluator<Axiom> getCallEvaluator(String identifier);
 }

@@ -22,13 +22,14 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * TimestampProvider
  * @author Andrew Bowley
  * 22Jun.,2017
  */
-public class SystemFunctionProvider implements FunctionProvider<Void>
+public class SystemFunctionProvider implements FunctionProvider
 {
     @Override
     public String getName()
@@ -37,10 +38,10 @@ public class SystemFunctionProvider implements FunctionProvider<Void>
     }
 
     @Override
-    public CallEvaluator<Void> getCallEvaluator(String identifier)
+    public CallEvaluator<Axiom> getCallEvaluator(String identifier)
     {
         if (identifier.equals("print"))
-            return new CallEvaluator<Void>(){
+            return new CallEvaluator<Axiom>(){
 
                 @Override
                 public String getName()
@@ -49,7 +50,7 @@ public class SystemFunctionProvider implements FunctionProvider<Void>
                 }
 
                 @Override
-                public Void evaluate(List<Term> argumentList)
+                public Axiom evaluate(List<Term> argumentList)
                 {
                     for (Term term: argumentList)
                         System.out.print(term.getValue().toString());

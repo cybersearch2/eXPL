@@ -33,7 +33,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 11 Mar 2015
  */
-public class SingleCurrency2 
+public class SingleCurrency3 
 {
 /* single-currency.xpl
 template charge_plus_gst
@@ -73,7 +73,7 @@ query<term> french_item_query(french_charge_plus_gst);
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public SingleCurrency2()
+    public SingleCurrency3()
     {
         queryProgramParser = new QueryProgramParser(new File("src/main/resources/tutorial13"));
     }
@@ -81,14 +81,14 @@ query<term> french_item_query(french_charge_plus_gst);
 	/**
 	 * Compiles the single-currency.xpl script and runs the "item_query" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
-	 * le total + gst: 16 419,74 EUR<br/>
+	 * le total + gst: AUD665.00R<br/>
 	 */
 	public String getFormatedTotalAmount()
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("single-currency.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("german", "french_item_query");
-	    return result.getAxiom("german", "french_item_query").getTermByName("total_text").getValue().toString();
+        Result result = queryProgram.executeQuery("french_item_query");
+	    return result.getAxiom("french_item_query").getTermByName("total_text").getValue().toString();
 	}
 	
     public ParserContext getParserContext()
@@ -104,7 +104,7 @@ query<term> french_item_query(french_charge_plus_gst);
 	{
 		try 
 		{
-	        SingleCurrency2 singleCurrency = new SingleCurrency2();
+	        SingleCurrency3 singleCurrency = new SingleCurrency3();
             System.out.println(singleCurrency.getFormatedTotalAmount());
 
 		} 

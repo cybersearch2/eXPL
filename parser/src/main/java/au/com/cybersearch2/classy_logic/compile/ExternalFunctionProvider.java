@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.compile;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 
 /**
@@ -34,8 +35,24 @@ public class ExternalFunctionProvider
         this.functionManager = functionManager;
     }
 
-    public FunctionProvider<?> getFunctionProvider(String name)
+    /**
+     * Returns function object specified by name
+     * @param identifier Name of function
+     * @return Function object implementing CallEvaluator interface
+     * @throws ExpressionException if provider not found
+    */
+    public FunctionProvider getFunctionProvider(String name)
     {
         return functionManager.getFunctionProvider(name);
+    }
+
+    /**
+     * Returns function library specified by name
+     * @param name The library name
+     * @return FunctionProvider implementation or null if not found
+     */
+    public FunctionProvider findFunctionProvider(String name)
+    {
+        return functionManager.findFunctionProvider(name);
     }
 }

@@ -27,6 +27,7 @@ import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
+import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
@@ -36,6 +37,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * CallOperandTest
@@ -44,7 +46,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class CallOperandTest
 {
-    static class SystemFunctionProvider implements FunctionProvider<Void>
+    static class SystemFunctionProvider implements FunctionProvider
     {
         @Override
         public String getName()
@@ -53,10 +55,10 @@ public class CallOperandTest
         }
 
         @Override
-        public CallEvaluator<Void> getCallEvaluator(String identifier)
+        public CallEvaluator<Axiom> getCallEvaluator(String identifier)
         {
             if (identifier.equals("print"))
-                return new CallEvaluator<Void>(){
+                return new CallEvaluator<Axiom>(){
     
                     @Override
                     public String getName()
@@ -65,11 +67,13 @@ public class CallOperandTest
                     }
     
                     @Override
-                    public Void evaluate(List<Term> argumentList)
+                    public Axiom evaluate(List<Term> argumentList)
                     {
                         //for (Term term: argumentList)
                         //    System.out.print(term.getValue().toString());
                         //System.out.println();
+                        Axiom axiom = new Axiom(getName());
+                        axiom.addTerm(new Parameter(Term.ANONYMOUS, new Null()));
                         return null;
                     }
 
@@ -83,7 +87,7 @@ public class CallOperandTest
         }
     }
     
-    static class MathFunctionProvider implements FunctionProvider<Number>
+    static class MathFunctionProvider implements FunctionProvider
     {
 
         @Override
@@ -93,10 +97,10 @@ public class CallOperandTest
         }
 
         @Override
-        public CallEvaluator<Number> getCallEvaluator(String identifier)
+        public CallEvaluator<Axiom> getCallEvaluator(String identifier)
         {
             if (identifier.equals("add"))
-                return new CallEvaluator<Number>(){
+                return new CallEvaluator<Axiom>(){
     
                     @Override
                     public String getName()
@@ -105,17 +109,23 @@ public class CallOperandTest
                     }
     
                     @Override
-                    public Number evaluate(List<Term> argumentList)
+                    public Axiom evaluate(List<Term> argumentList)
                     {
                         if ((argumentList == null) || argumentList.isEmpty())
-                            return Double.NaN;
+                        {
+                            Axiom axiom = new Axiom("NaN");
+                            axiom.addTerm(new Parameter(Term.ANONYMOUS, Double.NaN));
+                            return axiom;
+                        }
                         long addendum = 0;
                         for (int i = 0; i < argumentList.size(); i++)
                         {
                             Long param = (Long)argumentList.get(i).getValue();
                             addendum += param.longValue();
                         }
-                        return Long.valueOf(addendum);
+                        Axiom axiom = new Axiom(Long.toString(addendum));
+                        axiom.addTerm(new Parameter(Term.ANONYMOUS, addendum));
+                        return axiom;
                     }
 
                     @Override
@@ -124,7 +134,7 @@ public class CallOperandTest
                     }
                 };
             if (identifier.equals("avg"))
-                return new CallEvaluator<Number>(){
+                return new CallEvaluator<Axiom>(){
 
                     @Override
                     public String getName()
@@ -133,18 +143,25 @@ public class CallOperandTest
                     }
 
                     @Override
-                    public Number evaluate(List<Term> argumentList)
+                    public Axiom evaluate(List<Term> argumentList)
                     {
                         if ((argumentList == null) || argumentList.isEmpty())
-                            return Double.NaN;
-                        long avaerage = 0;
+                        {
+                            Axiom axiom = new Axiom("NaN");
+                            axiom.addTerm(new Parameter(Term.ANONYMOUS, Double.NaN));
+                            return axiom;
+                        }
+                        long average = 0;
                         for (int i = 0; i < argumentList.size(); i++)
                         {
                             Long param = (Long)argumentList.get(i).getValue();
-                            avaerage += param.longValue();
+                            average += param.longValue();
                         }
-                        return Long.valueOf(avaerage / argumentList.size());
-                    }
+                        average /= argumentList.size();
+                        Axiom axiom = new Axiom(Long.toString(average));
+                        axiom.addTerm(new Parameter(Term.ANONYMOUS, average));
+                        return axiom;
+                   }
 
                     @Override
                     public void setExecutionContext(ExecutionContext context)
@@ -154,7 +171,7 @@ public class CallOperandTest
         }
     }
 
-    static class EduFunctionProvider implements FunctionProvider<Long>
+    static class EduFunctionProvider implements FunctionProvider
     {
 
         @Override
@@ -164,9 +181,9 @@ public class CallOperandTest
         }
 
         @Override
-        public CallEvaluator<Long> getCallEvaluator(String identifier)
+        public CallEvaluator<Axiom> getCallEvaluator(String identifier)
         {
-            return new CallEvaluator<Long>(){
+            return new CallEvaluator<Axiom>(){
 
                 @Override
                 public String getName()
@@ -175,7 +192,7 @@ public class CallOperandTest
                 }
 
                 @Override
-                public Long evaluate(List<Term> argumentList)
+                public Axiom evaluate(List<Term> argumentList)
                 {
                     long total = 0;
                     for (Object letterGrade: argumentList)
@@ -200,7 +217,9 @@ public class CallOperandTest
                             total += adjust == '+' ? 1 : -1;
                         }
                     }
-                    return Long.valueOf(total);
+                    Axiom axiom = new Axiom(Long.toString(total));
+                    axiom.addTerm(new Parameter(Term.ANONYMOUS, total));
+                    return axiom;
                 }
 
                 @Override
@@ -233,9 +252,9 @@ public class CallOperandTest
 
     static final String[] GRADES_RESULTS = 
     {
-        "score(student=Amy, total=36)",
-        "score(student=George, total=44)",
-        "score(student=Sarah, total=44)"
+        "score(student=Amy, total=36(36))",
+        "score(student=George, total=44(44))",
+        "score(student=Sarah, total=44(44))"
     };
 
     static final String[] STUDENTS =
@@ -697,7 +716,8 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                assertThat((Long)(solution.getValue("test", "x"))).isEqualTo(3);
+                Axiom axiom = (Axiom)solution.getValue("test", "x");
+                assertThat((Long)axiom.getTermByIndex(0).getValue()).isEqualTo(3);
                 return false;
             }});
     }
@@ -711,7 +731,8 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                assertThat((Long)(solution.getValue("test", "x"))).isEqualTo(6);
+                Axiom axiom = (Axiom)solution.getValue("test", "x");
+                assertThat((Long)axiom.getTermByIndex(0).getValue()).isEqualTo(6);
                 return false;
             }});
     }
@@ -725,7 +746,8 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                assertThat((Long)(solution.getValue("test", "x"))).isEqualTo(12+42+93+55);
+                Axiom axiom = (Axiom) solution.getValue("test", "x");
+                assertThat((Long)axiom.getTermByIndex(0).getValue()).isEqualTo(12+42+93+55);
                 return false;
             }});
     }
@@ -769,9 +791,9 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                System.out.println(solution.getString("score", "total_text"));
-                //assertThat(solution.getString("grades", "student")).isEqualTo(STUDENTS[index]);
-                //assertThat(solution.getString("score", "total_text")).isEqualTo(MARKS_GRADES_RESULTS[index++]);
+                //System.out.println(solution.getString("score", "total_text"));
+                assertThat(solution.getString("grades", "student")).isEqualTo(STUDENTS[index]);
+                assertThat(solution.getString("score", "total_text")).isEqualTo(MARKS_GRADES_RESULTS[index++]);
                 return true;
             }});
     }
@@ -834,7 +856,8 @@ public class CallOperandTest
             {
                 //System.out.println(solution.getAxiom("average").toString());
                 long averageHeight = (1718+8000+5280+6970+8+10200+1305+19+1909+1305)/10;
-                assertThat((Long)(solution.getValue("average", "average_height"))).isEqualTo(averageHeight);
+                Axiom axiom = (Axiom)solution.getValue("average", "average_height");
+                assertThat((Long)axiom.getTermByIndex(0).getValue()).isEqualTo(averageHeight);
                 return true;
             }});
     }

@@ -645,7 +645,6 @@ public class ParserAssembler implements LocaleListener
      * @param parametersTemplate Operand arguments packaged in an inner template or null for no arguments
      * @return CallOperand object
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public Operand getCallOperand(QualifiedName qname, Template parametersTemplate)
     {
         String library = qname.getTemplate();
@@ -655,29 +654,22 @@ public class ParserAssembler implements LocaleListener
         if (library.isEmpty())
            throw new ExpressionException("Call name \"" + qname.toString() + "\" is invalid");
         String callName = library + "." + name;
-        if (externalFunctionProvider == null)
-        {
-            if (functionManager == null)
-                functionManager = new FunctionManager(){};
-            externalFunctionProvider = new ExternalFunctionProvider(functionManager);
-        }
-        FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
-        CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
+        FunctionProvider functionProvider = getFunctionProvider(library);
+        CallEvaluator<Axiom>callEvaluator = functionProvider.getCallEvaluator(name);
         if (callEvaluator == null)
             throw new ExpressionException("Function \"" + name + "\" not supported");
-        CallOperand callOperand = new CallOperand(QualifiedName.parseName(callName, qname), parametersTemplate, callEvaluator);
+        CallOperand<Axiom> callOperand = new CallOperand<Axiom>(QualifiedName.parseName(callName, qname), parametersTemplate, callEvaluator);
         scope.addDebugTarget(callOperand);
         return callOperand;
     }
 
     /**
-     * Macro to invoke function and return value in anonymous parameter
-     * @param library Function library
-     * @param name Function name
-     * @param termList List of call parameters, may be empty
-     * @return Parameter object
-     */
-    public Parameter callFunction(String library, String name,  List<Term> termList)
+     * Returns function object specified by name
+     * @param identifier Name of function
+     * @return Function object implementing CallEvaluator interface
+     * @throws ExpressionException if provider not found
+    */
+    public FunctionProvider getFunctionProvider(String library)
     {
         if (externalFunctionProvider == null)
         {
@@ -685,12 +677,45 @@ public class ParserAssembler implements LocaleListener
                 functionManager = new FunctionManager(){};
             externalFunctionProvider = new ExternalFunctionProvider(functionManager);
         }
-        FunctionProvider<?> functionProvider = externalFunctionProvider.getFunctionProvider(library);
-        CallEvaluator<?>callEvaluator = functionProvider.getCallEvaluator(name);
+        return externalFunctionProvider.getFunctionProvider(library);
+    }
+    
+    /**
+     * Returns function library specified by name
+     * @param name The library name
+     * @return FunctionProvider implementation or null if not found
+     */
+    public FunctionProvider findFunctionProvider(String library)
+    {
+        if (externalFunctionProvider == null)
+        {
+            if (functionManager == null)
+                functionManager = new FunctionManager(){};
+            externalFunctionProvider = new ExternalFunctionProvider(functionManager);
+        }
+        return externalFunctionProvider.findFunctionProvider(library);
+    }
+    
+    /**
+     * Macro to invoke function and return value in axiom
+     * @param library Function library
+     * @param name Function name
+     * @param termList List of call parameters, may be empty
+     * @return Parameter object
+     */
+    public Axiom callFunction(String library, String name,  List<Term> termList)
+    {
+        if (externalFunctionProvider == null)
+        {
+            if (functionManager == null)
+                functionManager = new FunctionManager(){};
+            externalFunctionProvider = new ExternalFunctionProvider(functionManager);
+        }
+        FunctionProvider functionProvider = externalFunctionProvider.getFunctionProvider(library);
+        CallEvaluator<Axiom>callEvaluator = functionProvider.getCallEvaluator(name);
         if (callEvaluator == null)
             throw new ExpressionException("Function \"" + name + "\" not supported");
-        Object object = callEvaluator.evaluate(termList);
-        return new Parameter(Term.ANONYMOUS, object);
+        return callEvaluator.evaluate(termList);
     }
 
     /**

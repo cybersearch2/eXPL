@@ -22,13 +22,15 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * TimestampProvider
  * @author Andrew Bowley
  * 22Jun.,2017
  */
-public class SystemFunctionProvider implements FunctionProvider<Long>
+public class SystemFunctionProvider implements FunctionProvider
 {
     @Override
     public String getName()
@@ -37,10 +39,10 @@ public class SystemFunctionProvider implements FunctionProvider<Long>
     }
 
     @Override
-    public CallEvaluator<Long> getCallEvaluator(String identifier)
+    public CallEvaluator<Axiom> getCallEvaluator(String identifier)
     {
         if (identifier.equals("random"))
-            return new CallEvaluator<Long>(){
+            return new CallEvaluator<Axiom>(){
 
                 @Override
                 public void setExecutionContext(ExecutionContext context)
@@ -54,15 +56,18 @@ public class SystemFunctionProvider implements FunctionProvider<Long>
                 }
 
                 @Override
-                public Long evaluate(List<Term> argumentList)
+                public Axiom evaluate(List<Term> argumentList)
                 {
+                    Axiom axiom = new Axiom("Random");
                     Random random = new Random();
                     if (argumentList.size() > 0)
                     {
                         Long bound = (Long) argumentList.get(0).getValue();
-                        return (long)random.nextInt(bound.intValue());
+                        axiom.addTerm(new Parameter(Term.ANONYMOUS, (long)random.nextInt(bound.intValue())));
+                        return axiom;
                     }
-                    return random.nextLong();
+                    axiom.addTerm(new Parameter(Term.ANONYMOUS, random.nextLong()));
+                    return axiom;
                 }
         };
 

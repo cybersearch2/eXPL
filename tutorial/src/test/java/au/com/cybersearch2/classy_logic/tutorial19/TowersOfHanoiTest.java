@@ -35,6 +35,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
  * TowersOfHanoiTest
@@ -43,7 +44,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  */
 public class TowersOfHanoiTest
 {
-    static class SystemFunctionProvider implements FunctionProvider<Void>
+    static class SystemFunctionProvider implements FunctionProvider
     {
         private BufferedReader reader;
         
@@ -66,10 +67,10 @@ public class TowersOfHanoiTest
         }
 
         @Override
-        public CallEvaluator<Void> getCallEvaluator(String identifier)
+        public CallEvaluator<Axiom> getCallEvaluator(String identifier)
         {
             if (identifier.equals("print"))
-                return new CallEvaluator<Void>(){
+                return new CallEvaluator<Axiom>(){
     
                     @Override
                     public String getName()
@@ -78,7 +79,7 @@ public class TowersOfHanoiTest
                     }
     
                     @Override
-                    public Void evaluate(List<Term> argumentList)
+                    public Axiom evaluate(List<Term> argumentList)
                     {
                         StringBuilder builder = new StringBuilder();
                         for (Term term: argumentList)

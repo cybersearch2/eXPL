@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial18;
+package au.com.cybersearch2.classy_logic.tutorial13;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -80,7 +80,7 @@ scope german (language="de", region="DE")
         File testPath = new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION);
         if (!testPath.exists())
             testPath.mkdir();
-        File resourcePath = new File("src/main/resources/tutorial18");
+        File resourcePath = new File("src/main/resources/tutorial13");
         fileAxiomProviders = new FileAxiomProvider[2];
         fileAxiomProviders[0] = new FileAxiomProvider("german.colors", testPath);
         fileAxiomProviders[1] = new FileAxiomProvider("french.colors", testPath);

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
@@ -3814,7 +3815,8 @@ public class QueryParser implements QueryParserConstants
       ;
     }
     jj_consume_token(RPAREN);
-     {if (true) return context.getParserAssembler().callFunction(library.image, name.image, termList);}
+     Axiom axiom = context.getParserAssembler().callFunction(library.image, name.image, termList);
+     {if (true) return (Parameter)axiom.getTermByIndex(0);}
     throw new Error("Missing return statement in function");
   }
 
@@ -4458,13 +4460,13 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_91() {
-    if (jj_scan_token(IDENTIFIER)) return true;
+  private boolean jj_3R_116() {
+    if (jj_scan_token(98)) return true;
     return false;
   }
 
-  private boolean jj_3R_116() {
-    if (jj_scan_token(98)) return true;
+  private boolean jj_3R_91() {
+    if (jj_scan_token(IDENTIFIER)) return true;
     return false;
   }
 
@@ -4549,13 +4551,13 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_73() {
-    if (jj_3R_84()) return true;
+  private boolean jj_3R_85() {
+    if (jj_3R_93()) return true;
     return false;
   }
 
-  private boolean jj_3R_85() {
-    if (jj_3R_93()) return true;
+  private boolean jj_3R_73() {
+    if (jj_3R_84()) return true;
     return false;
   }
 
@@ -4808,12 +4810,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_41() {
-    if (jj_scan_token(LBRACE)) return true;
-    if (jj_3R_47()) return true;
-    return false;
-  }
-
   private boolean jj_3R_86() {
     Token xsp;
     xsp = jj_scanpos;
@@ -4826,6 +4822,12 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_94() {
     if (jj_scan_token(TRUE)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_41() {
+    if (jj_scan_token(LBRACE)) return true;
+    if (jj_3R_47()) return true;
     return false;
   }
 
@@ -4963,13 +4965,28 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3R_121() {
+    if (jj_3R_122()) return true;
+    return false;
+  }
+
   private boolean jj_3R_125() {
     if (jj_3R_129()) return true;
     return false;
   }
 
-  private boolean jj_3R_121() {
-    if (jj_3R_122()) return true;
+  private boolean jj_3R_120() {
+    if (jj_scan_token(BANG)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_119() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_120()) {
+    jj_scanpos = xsp;
+    if (jj_3R_121()) return true;
+    }
     return false;
   }
 
@@ -4994,21 +5011,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_120() {
-    if (jj_scan_token(BANG)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_119() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_120()) {
-    jj_scanpos = xsp;
-    if (jj_3R_121()) return true;
-    }
-    return false;
-  }
-
   private boolean jj_3R_77() {
     if (jj_scan_token(STRING_LITERAL)) return true;
     return false;
@@ -5019,13 +5021,13 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_102() {
-    if (jj_scan_token(CURRENCY)) return true;
+  private boolean jj_3R_118() {
+    if (jj_scan_token(DECR)) return true;
     return false;
   }
 
-  private boolean jj_3R_118() {
-    if (jj_scan_token(DECR)) return true;
+  private boolean jj_3R_102() {
+    if (jj_scan_token(CURRENCY)) return true;
     return false;
   }
 

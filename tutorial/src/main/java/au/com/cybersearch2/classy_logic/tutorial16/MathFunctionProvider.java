@@ -22,6 +22,8 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * MathFunctionProvider
@@ -29,7 +31,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
  * @author Andrew Bowley
  * 14 Sep 2015
  */
-public class MathFunctionProvider implements FunctionProvider<Number>
+public class MathFunctionProvider implements FunctionProvider
 {
 
     @Override
@@ -39,10 +41,10 @@ public class MathFunctionProvider implements FunctionProvider<Number>
     }
 
     @Override
-    public CallEvaluator<Number> getCallEvaluator(String identifier)
+    public CallEvaluator<Axiom> getCallEvaluator(String identifier)
     {
         if (identifier.equals("add"))
-            return new CallEvaluator<Number>(){
+            return new CallEvaluator<Axiom>(){
 
             /**
              * Returns function name
@@ -59,12 +61,16 @@ public class MathFunctionProvider implements FunctionProvider<Number>
                  * @see au.com.cybersearch2.classy_logic.interfaces.CallEvaluator#evaluate(java.util.List)
                  */
                 @Override
-                public Number evaluate(List<Term> argumentList)
+                public Axiom evaluate(List<Term> argumentList)
                 {
                     // Return not-a-number value if argument list is invalid
                     // Note return value type, if specified must be number type - integer, double or decimal
                     if ((argumentList == null) || argumentList.isEmpty())
-                        return Double.NaN;
+                    {
+                        Axiom axiom = new Axiom("NaN");
+                        axiom.addTerm(new Parameter(Term.ANONYMOUS, Double.NaN));
+                        return axiom;
+                    }
                     long addendum = 0;
                     // Sum values assuming all are of type integer
                     for (int i = 0; i < argumentList.size(); i++)
@@ -79,7 +85,9 @@ public class MathFunctionProvider implements FunctionProvider<Number>
                         else
                             throw new ExpressionException("math.add passed invalid value: " + term.getValue().toString());
                     }
-                    return Long.valueOf(addendum);
+                    Axiom axiom = new Axiom(Long.toString(addendum));
+                    axiom.addTerm(new Parameter(Term.ANONYMOUS, addendum));
+                    return axiom;
                 }
 
                 @Override

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;

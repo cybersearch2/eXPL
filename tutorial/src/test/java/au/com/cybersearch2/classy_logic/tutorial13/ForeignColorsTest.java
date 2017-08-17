@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial18;
+package au.com.cybersearch2.classy_logic.tutorial13;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -28,6 +28,7 @@ import java.util.Iterator;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.tutorial13.ForeignColors;
 
 /**
  * ForeignColorsTest
@@ -39,7 +40,7 @@ public class ForeignColorsTest
     @Test
     public void testForeignColors() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial18", "foreign-colors.txt");
+        File testFile = new File("src/main/resources/tutorial13", "foreign-colors.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         ForeignColors foreignColors = new ForeignColors();
         Iterator<Axiom> colors = foreignColors.createForeignLexicon().iterator();

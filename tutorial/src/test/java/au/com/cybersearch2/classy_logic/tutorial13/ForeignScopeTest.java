@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial18;
+package au.com.cybersearch2.classy_logic.tutorial13;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -28,6 +28,8 @@ import java.util.List;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.tutorial13.ForeignScope;
+import au.com.cybersearch2.classy_logic.tutorial13.ForeignScope2;
 
 /**
  * ForeignScopeTest
@@ -39,7 +41,7 @@ public class ForeignScopeTest
     @Test
     public void testForeignScope() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial18", "foreign-scope.txt");
+        File testFile = new File("src/main/resources/tutorial13", "foreign-scope.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         ForeignScope foreignScope = new ForeignScope();
         List<Axiom> solutionList = foreignScope.getFormatedTotalAmount();
@@ -50,7 +52,7 @@ public class ForeignScopeTest
     @Test
     public void testForeignScope2() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial18", "foreign-scope2.txt");
+        File testFile = new File("src/main/resources/tutorial13", "foreign-scope2.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         ForeignScope2 foreignScope2 = new ForeignScope2();
         List<Axiom> solutionList = foreignScope2.getFormatedTotalAmount();

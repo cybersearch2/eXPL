@@ -151,9 +151,19 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             // Assign scope permanently when not in global scope
             listName = new QualifiedName(scopeName, QualifiedName.EMPTY, listName.getName());
         }
+        String listScopeName = listName.getScope();
+        Scope listScope = null;
         ListAssembler listAssembler = parserAssembler.getListAssembler();
+        if (!listScopeName.isEmpty() && !parserAssembler.getScope().getAlias().equals(listScopeName))
+        {
+            listScope = parserAssembler.getScope().findScope(listScopeName);
+            if (listScope != null)
+                listAssembler = listScope.getParserAssembler().getListAssembler();
+        }
         // Check if list name is for cursor
-        Operand operand = parserAssembler.getOperandMap().getOperand(parserAssembler.getContextName(listName.getName()));
+        Operand operand = null;
+        if (listScope == null)
+            operand = parserAssembler.getOperandMap().getOperand(parserAssembler.getContextName(listName.getName()));
         Cursor cursor = null;
         if ((operand != null) && (operand instanceof Cursor))
         {
@@ -186,7 +196,7 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             }
         }
         else
-            itemList = findItemListByName(listName, parserAssembler);
+            itemList = findItemListByName(listName, listAssembler, parserAssembler);
         if (itemList == null)
         {   
             Operand listOperand = operand;
@@ -503,6 +513,7 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         ParserAssembler globalParserAssembler = globalScope.getParserAssembler();
         ListAssembler listAssembler = globalParserAssembler.getListAssembler();
         // Find all context lists and map by name in contextMap
+        boolean globalListExists = false;
         for (String scopeName: globalScope.getScopeNames())
         {
             QualifiedName key = new QualifiedName(scopeName, contextListName);
@@ -527,11 +538,16 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             if (contextMap == null)
                 contextMap = new HashMap<QualifiedName, ItemList<?>>();
             contextMap.put(key, itemList);
+            if (key.getScope().isEmpty())
+                globalListExists = true;
         }
         if (contextMap == null)
             throw new ExpressionException("Context list \"" + contextListName + "\"  is not found in any scope");
         // Register this object as a locale listener to handle change of scope
         parserAssembler.registerLocaleListener(this);
+        // Default to global scope if global list defined
+        if (globalListExists)
+            onScopeChange(globalScope);
     }
 
     /**
@@ -557,16 +573,22 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
      * @param parserAssembler ParserAssembler for current scope
      * @return ItemList object
      */
-    private ItemList<?> findItemListByName(QualifiedName listName, ParserAssembler parserAssembler)
+    private ItemList<?> findItemListByName(QualifiedName listName, ListAssembler listAssembler, ParserAssembler parserAssembler)
     {
-        ListAssembler listAssembler = parserAssembler.getListAssembler();
         // Look up list by name from item lists
         ItemList<?> itemList = listAssembler.findItemList(listName); 
-        String contexScopeName = parserAssembler.getQualifiedContextname().getScope();
-        if ((itemList == null) && !contexScopeName.equals(parserAssembler.getScope().getName()))
+        String contextScopeName = parserAssembler.getQualifiedContextname().getScope();
+        if ((itemList == null) && !contextScopeName.equals(parserAssembler.getScope().getName()))
         {   // Search for item list using context scope
-            QualifiedName qualifiedListName = new QualifiedName(contexScopeName, indexData.getListName());
+            QualifiedName qualifiedListName = new QualifiedName(contextScopeName, indexData.getListName());
             itemList = listAssembler.findItemList(qualifiedListName);
+        }
+        if (itemList == null)
+        {
+            List<Axiom> axiomList = listAssembler.getAxiomItems(listName);
+            if (axiomList != null)
+                // Create axiom list to access context list
+                itemList = createAxiomList(parserAssembler.getScope().getGlobalScope(), listName, axiomList);
         }
         return itemList;
     }

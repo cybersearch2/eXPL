@@ -95,7 +95,7 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class QueryParserTest 
 {
-    static class SystemFunctionProvider implements FunctionProvider<Void>
+    static class SystemFunctionProvider implements FunctionProvider
     {
         @Override
         public String getName()
@@ -104,10 +104,10 @@ public class QueryParserTest
         }
 
         @Override
-        public CallEvaluator<Void> getCallEvaluator(String identifier)
+        public CallEvaluator<Axiom> getCallEvaluator(String identifier)
         {
             if (identifier.equals("print"))
-                return new CallEvaluator<Void>(){
+                return new CallEvaluator<Axiom>(){
     
                     @Override
                     public String getName()
@@ -116,7 +116,7 @@ public class QueryParserTest
                     }
     
                     @Override
-                    public Void evaluate(List<Term> argumentList)
+                    public Axiom evaluate(List<Term> argumentList)
                     {
                         for (Term term: argumentList)
                             System.out.print(term.getValue().toString());

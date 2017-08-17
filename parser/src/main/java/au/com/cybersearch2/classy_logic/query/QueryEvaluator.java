@@ -32,11 +32,13 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
+import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -75,6 +77,10 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
     protected Operand innerTerm;
     /** Axiom listeners for results */
     protected List<AxiomListener> axiomListenerList;
+    /** Evaluator for function call alternative to query */
+    protected CallEvaluator<Axiom> callEvaluator;
+    /** Modification id to use when function call evaluates */
+    protected int functionId;
 
     /**
      * Construct a QueryEvaluator object for a query specified by query parameters
@@ -101,20 +107,35 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
         Library library = getLibrary(parserAssembler);
         String callName = library.name + "." + qualifiedCallName.getName();
         if (library.functionScope == null)
-            throw new ExpressionException("Scope \"" + queryName + "\" not found");
-        QuerySpec querySpec = library.functionScope.getQuerySpec(qualifiedCallName.getName());
-        if (querySpec == null)
         {
-            QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library.name, qualifiedCallName.getName());
-            if ((library.functionScope == callerScope) && 
-                (parserAssembler.getTemplateAssembler().getTemplate(qualifiedTemplateName) == null))
-                throw new ExpressionException("Query \"" + qualifiedCallName.getName() + "\" not found in scope \"" + library + "\"");
-            querySpec = new QuerySpec(callName, false);
-            querySpec.addKeyName(new KeyName(QualifiedName.ANONYMOUS, qualifiedTemplateName));
-            querySpec.setQueryType(QueryType.calculator);
+            FunctionProvider functionProvider = parserAssembler.findFunctionProvider(library.name);
+            if (functionProvider != null)
+                callEvaluator = functionProvider.getCallEvaluator(qualifiedCallName.getName());
+            if (callEvaluator != null)
+            {
+                isCallInScope = true;
+                // Non-zero modification id
+                functionId = qualifiedQueryName.incrementReferenceCount() + 1;
+            }
+            else
+                throw new ExpressionException("Scope \"" + queryName + "\" not found");
         }
-        queryParams = new QueryParams(library.functionScope, querySpec);
-        isCallInScope = queryParams.getScope() == callerScope;
+        else
+        {
+            QuerySpec querySpec = library.functionScope.getQuerySpec(qualifiedCallName.getName());
+            if (querySpec == null)
+            {
+                QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library.name, qualifiedCallName.getName());
+                if ((library.functionScope == callerScope) && 
+                    (parserAssembler.getTemplateAssembler().getTemplate(qualifiedTemplateName) == null))
+                    throw new ExpressionException("Query \"" + qualifiedCallName.getName() + "\" not found in scope \"" + library + "\"");
+                querySpec = new QuerySpec(callName, false);
+                querySpec.addKeyName(new KeyName(QualifiedName.ANONYMOUS, qualifiedTemplateName));
+                querySpec.setQueryType(QueryType.calculator);
+            }
+            queryParams = new QueryParams(library.functionScope, querySpec);
+            isCallInScope = queryParams.getScope() == callerScope;
+        }
         OperandMap callerOperandMap = callerScope.getParserAssembler().getOperandMap();
         if (innerTemplate != null)
         {   // Get term belonging to inner template 
@@ -164,6 +185,32 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
     @Override
     public AxiomTermList evaluate(List<Term> argumentList)
     {
+        if (queryParams != null)
+            launchCalculatorQuery(argumentList);
+        else
+        {
+            Axiom axiom = callEvaluator.evaluate(argumentList);
+            if (innerTemplate != null)
+            {   // Use SolutionHander to collect results
+                EvaluatorHandler handler = new EvaluatorHandler(innerTemplate, callEvaluator.getName(), axiomTermListInstance(functionId));
+                Solution solution = new Solution();
+                solution.put(callEvaluator.getName(), axiom);
+                handler.onSolution(solution);
+            }
+        }
+        AxiomTermList axiomTermList = (AxiomTermList) innerTerm.getValue();
+        if (axiomListenerList != null)
+            for (AxiomListener listener: axiomListenerList)
+                listener.onNextAxiom(qualifiedQueryName, axiomTermList.getAxiom());
+        return axiomTermList; 
+    }
+
+    /**
+     * Launch calculator query
+     * @param argumentList Call arguments consisting of List of terms
+     */
+    protected void launchCalculatorQuery(List<Term> argumentList)
+    {
         QuerySpec querySpec = queryParams.getQuerySpec();
         QualifiedName templateName = getCalculatorKeyName(querySpec).getTemplateName();
         Scope scope = queryParams.getScope();
@@ -199,11 +246,6 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
             else
                 template.pop();
         }
-        AxiomTermList axiomTermList = (AxiomTermList) innerTerm.getValue();
-        if (axiomListenerList != null)
-            for (AxiomListener listener: axiomListenerList)
-                listener.onNextAxiom(qualifiedQueryName, axiomTermList.getAxiom());
-        return axiomTermList; 
     }
 
     /**

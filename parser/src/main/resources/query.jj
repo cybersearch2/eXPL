@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
@@ -2545,7 +2546,8 @@ Parameter Function(ParserContext context) :
 {
    library=<IDENTIFIER> "." name=<IDENTIFIER> "(" ( TermList(termList, context) )? ")"
    {
-     return context.getParserAssembler().callFunction(library.image, name.image, termList);
+     Axiom axiom = context.getParserAssembler().callFunction(library.image, name.image, termList);
+     return (Parameter)axiom.getTermByIndex(0);
    }
 }
 
