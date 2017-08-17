@@ -280,12 +280,19 @@ public class Scope implements DebugTarget
     public AxiomSource findAxiomSource(QualifiedName axiomKey)
     {
         String scopeName = axiomKey.getScope();
-        if (!scopeName.isEmpty() && (scopeMap.get(scopeName) == null))
-        {
-            if (!isTemplateName(scopeName))
-                throw new ExpressionException("Scope \"" + scopeName + "\"  in axiom key \"" + axiomKey.toString() + "\" is not found");
-        }
-        AxiomSource axiomSource = parserAssembler.getAxiomSource(axiomKey);
+        boolean isTemplateName = false;
+        if (scopeName.isEmpty())
+            scopeName = QueryProgram.GLOBAL_SCOPE;
+        else
+            isTemplateName = isTemplateName(scopeName);
+        Scope axiomScope = scopeMap.get(scopeName);
+        if ((axiomScope == null) && !isTemplateName)
+            throw new ExpressionException("Scope \"" + scopeName + "\"  in axiom key \"" + axiomKey.toString() + "\" is not found");
+        AxiomSource axiomSource = null;
+        if (axiomScope != null)
+            axiomSource = axiomScope.getParserAssembler().getAxiomSource(axiomKey);
+        if ((axiomSource == null) && (!scopeName.equals(name) || isTemplateName))
+            axiomSource = parserAssembler.getAxiomSource(axiomKey);
         if (axiomSource != null)
             return axiomSource;
         QualifiedName qname = QualifiedName.parseName(axiomKey.getName(), parserAssembler.getQualifiedContextname());
@@ -340,10 +347,20 @@ public class Scope implements DebugTarget
      */
     public Template getTemplate(QualifiedName templateName)
     {
-        Template template = findTemplate(templateName);
-        if ((template == null) && !templateName.getScope().isEmpty())
-            // Use global scope template if scope specified
-            template = getGlobalTemplateAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, templateName.getTemplate()));
+        String scopeName = templateName.getScope();
+        if (scopeName.isEmpty())
+            scopeName = QueryProgram.GLOBAL_SCOPE;
+        Scope templateScope = getScope(scopeName);
+        Template template = null;
+        if (templateScope != null)
+        {
+            template = templateScope.findTemplate(templateName);
+            if ((template == null) && !scopeName.isEmpty() && !scopeName.equals(name))
+                template = findTemplate(templateName);
+            if ((template == null) && !scopeName.isEmpty())
+               // Use global scope template if scope specified
+               template = getGlobalTemplateAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, templateName.getTemplate()));
+        }
         if (template == null)
             throw new IllegalArgumentException("Template \"" + templateName.toString() + "\" does not exist");
         return template;

@@ -27,13 +27,13 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TermList;
 
 /**
- * QueryExecuter
+ * LogicQueryExecuter
  * Performs logic operations according to configuration of axiom sequences and templates.
  * Performs chained queries which add to solutions provided by main query.
  * @author Andrew Bowley
  * 30 Dec 2014
  */
-public class QueryExecuter extends ChainQueryExecuter
+public class LogicQueryExecuter extends ChainQueryExecuter
 {
 
     /**
@@ -81,10 +81,10 @@ public class QueryExecuter extends ChainQueryExecuter
 	protected SolutionHandler headSolutionHandler;
 
 	/**
-	 * Construct a QueryExecuter object 
+	 * Construct a LogicQueryExecuter object 
 	 * @param queryParams The query parameters
 	 */
-	public QueryExecuter(QueryParams queryParams) 
+	public LogicQueryExecuter(QueryParams queryParams) 
 	{
 		super(queryParams);
 		if (queryParams.hasInitialSolution())
@@ -120,8 +120,11 @@ public class QueryExecuter extends ChainQueryExecuter
 			        return true;
 			    break;
 			case start:
-				if (axiomListenerMap != null)
-					bindAxiomListeners(scope);
+	            ScopeNotifier scopeNotifier = logicQuery.getScopeNotifier();
+	            if (scopeNotifier != null)
+	                scopeNotifier.notifyScopes();
+	            else if (axiomListenerMap != null)
+					bindAxiomListeners(queryScope);
 				if (logicQuery.iterate(solution, templateList.get(0), context))
 				{
 					if (super.execute())
@@ -177,6 +180,11 @@ public class QueryExecuter extends ChainQueryExecuter
                 nextTemplate.backup(true);
                 solution.remove(nextTemplate.getQualifiedName().toString());
                 super.backupToStart();
+                ScopeNotifier scopeNotifier = nextQuery.getScopeNotifier();
+                if (scopeNotifier != null)
+                    scopeNotifier.notifyScopes();
+                //else if (axiomListenerMap != null)
+                //    bindAxiomListeners(queryScope);
                 if (nextQuery.iterate(solution, nextTemplate, context))
                 {
                     return super.execute();
@@ -209,6 +217,14 @@ public class QueryExecuter extends ChainQueryExecuter
 			}
 			else
 				logicQuery = new LogicQuery(axiomCollection.getAxiomSource(key));
+
+	        String scopeName = template.getQualifiedName().getScope();
+	        if (!scopeName.isEmpty()) 
+	        {
+	            ScopeNotifier scopeNotifier = QueryLauncher.getScopeNotification(this, queryScope, queryScope.findScope(scopeName));
+	            logicQuery.setScopeNotifier(scopeNotifier);
+	        }
+			
 			logicQueryList.add(logicQuery);
 			if (axiomListenerMap != null)
 			{

@@ -277,7 +277,7 @@ public class QueryExecuterTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, Collections.singletonList(cities));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter query = new QueryExecuter(queryParams);
+        LogicQueryExecuter query = new LogicQueryExecuter(queryParams);
         assertThat(query.toString()).isEqualTo("city(name, altitude)");
         int index = 0;
         while (query.execute())
@@ -321,7 +321,7 @@ public class QueryExecuterTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter query = new QueryExecuter(queryParams);
+        LogicQueryExecuter query = new LogicQueryExecuter(queryParams);
         //System.out.println(query.toString());
         //assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city?city==city)");
         int index = 0;
@@ -370,7 +370,7 @@ public class QueryExecuterTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter query = new QueryExecuter(queryParams);
+        LogicQueryExecuter query = new LogicQueryExecuter(queryParams);
         //while (query.execute())
         //   System.out.println(query.toString());
         TemplateArchetype accountArchetype = new TemplateArchetype(parseTemplateName("account"));
@@ -381,7 +381,7 @@ public class QueryExecuterTest
         Template account = new Template(accountArchetype, nameMatch, fee);
         account.getParserTask().run();
         account.setKey("fee");
-        query.chain(ensemble, Collections.singletonList(account));
+        query.chain(ensemble, account, null);
         //System.out.println(query.toString());
         //assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city?city==city)");
         int index = 0;
@@ -391,7 +391,7 @@ public class QueryExecuterTest
             assertThat(query.getSolution().getAxiom("account").toString()).isEqualTo(GREEK_FEE[index++]);
        }
     }
-/*  Test returns more results after QueryExecuter bug fix  
+/*  Test returns more results after LogicQueryExecuter bug fix  
     @Test
     public void test_two_ChainQuery() throws Exception
     {
@@ -426,7 +426,7 @@ public class QueryExecuterTest
         querySpec.addKeyName(keyName2);
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
-        QueryExecuter query = new QueryExecuter(queryParams);
+        LogicQueryExecuter query = new LogicQueryExecuter(queryParams);
         //while (query.execute())
         //    System.out.println(query.toString());
         TemplateArchetype accountArchetype = new TemplateArchetype(parseTemplateName("account"));
@@ -471,7 +471,7 @@ public class QueryExecuterTest
             //assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(FEE_AND_FREIGHT[index++]);
         }
     }
- */   
+   
     @Test
     public void test_two_ChainQuery_multi_Test() throws Exception
     {
@@ -515,7 +515,7 @@ public class QueryExecuterTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter query = new QueryExecuter(queryParams);
+        LogicQueryExecuter query = new LogicQueryExecuter(queryParams);
         QualifiedName accountTemplateName = parseTemplateName("account");
         Evaluator expression = new Evaluator(new StringOperand(QualifiedName.parseName("name", accountTemplateName)), "==", name);
         Evaluator nameMatch = new Evaluator(QualifiedName.parseName("name", accountTemplateName), expression, "&&", Orientation.unary_postfix);
@@ -535,7 +535,7 @@ public class QueryExecuterTest
         List<Template> chainTemplateList = new ArrayList<Template>(2);
         chainTemplateList.add(account);
         chainTemplateList.add(delivery);
-        query.chain(ensemble, chainTemplateList);
+        query.chain(ensemble, chainTemplateList.get(0), null);
         QualifiedName spartaOnlyName = QualifiedName.parseTemplateName("sparta_only");
         QualifiedName spartaLitListName = new QualifiedName("city", spartaOnlyName);
         Operand spartaLiteral = new LiteralListOperand(spartaLitListName, Collections.singletonList(new Parameter(Term.ANONYMOUS, "Sparta")), false);
@@ -543,7 +543,7 @@ public class QueryExecuterTest
         Template spartaOnly = new Template(spartaOnlyArchetype, spartaLiteral);
         spartaOnly.getParserTask().run();
         spartaOnly.setKey("spartaOnly");
-        query.chain(ensemble, Collections.singletonList(spartaOnly));
+        query.chain(ensemble, spartaOnly, null);
         //System.out.println(query.toString());
         assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
         Iterator<ChainQuery> it = query.chainQueryIterator();
@@ -561,7 +561,7 @@ public class QueryExecuterTest
         assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[3]);
         assertThat(query.execute()).isTrue();
     }
-
+*/
     @Test
     public void test_chainQuery_short_circuit() throws Exception
     {
@@ -602,7 +602,7 @@ public class QueryExecuterTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter query = new QueryExecuter(queryParams);
+        LogicQueryExecuter query = new LogicQueryExecuter(queryParams);
         TemplateArchetype accountArchetype = new TemplateArchetype(parseTemplateName("account"));
         Evaluator expression2 = new Evaluator(new TestBooleanOperand("True", Boolean.TRUE), "==", new TestBooleanOperand("True2", Boolean.TRUE));
         Evaluator invoice = new Evaluator(new QualifiedName("name", accountArchetype.getQualifiedName()), expression2, "||", Orientation.unary_postfix);
@@ -610,7 +610,7 @@ public class QueryExecuterTest
         Template account = new Template(accountArchetype, invoice, fee);
         account.getParserTask().run();
         account.setKey("fee");
-        query.chain(ensemble, Collections.singletonList(account));
+        query.chain(ensemble, account, null);
         assertThat(query.execute()).isFalse();
         List<LogicQuery> logicQueryList = query.logicQueryList;
         assertThat(logicQueryList.get(0).getQueryStatus()).isEqualTo(QueryStatus.complete);
@@ -641,21 +641,22 @@ public class QueryExecuterTest
         when(scope.getParserAssembler()).thenReturn(parserAssembler);
         when(listAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
         axiomListenerMap.put(QualifiedName.parseName("city"), Collections.singletonList(axiomListener));
-        QuerySpec querySpec = new QuerySpec("Test");
+        QuerySpec querySpec = new QuerySpec("Test", true);
         KeyName keyName1 = new KeyName("city", "city");
         when(scope.findAxiomSource(keyName1.getAxiomKey())).thenReturn(new AxiomListSource(cityList));
         when(scope.getTemplate(keyName1.getTemplateName())).thenReturn(cities);
         querySpec.addKeyName(keyName1);
         QueryParams queryParams = new QueryParams(scope, querySpec);
         queryParams.initialize();
-        QueryExecuter query = new QueryExecuter(queryParams);
+        LogicQueryExecuter query = new LogicQueryExecuter(queryParams);
         assertThat(query.toString()).isEqualTo("city(name, altitude)");
         int index = 0;
         while (query.execute())
             assertThat(query.toString()).isEqualTo(CITY_NAME_HEIGHT[index++]);
         assertThat(query.execute()).isFalse();
     }
-     
+
+    /* Test no longer valid as only one part now allowed in chain
     @Test
     public void test_two_ChainQuery_multi_axiom_listener_Test() throws Exception
     {
@@ -750,12 +751,12 @@ public class QueryExecuterTest
         ListAssembler listAssembler = mock(ListAssembler.class);
         when(parserAssembler.getListAssembler()).thenReturn(listAssembler);
         when(listAssembler.getAxiomListenerMap()).thenReturn(axiomListenerMap);
-        QuerySpec querySpec = new QuerySpec("Test");
+        QuerySpec querySpec = new QuerySpec("Test", true);
         querySpec.addKeyName(keyName1);
         querySpec.addKeyName(keyName2);
         QueryParams queryParams = new QueryParams(scope, querySpec);
         queryParams.initialize();
-        QueryExecuter query = new QueryExecuter(queryParams);
+        LogicQueryExecuter query = new LogicQueryExecuter(queryParams);
         QualifiedName accountTemplateName = parseTemplateName("account");
         Evaluator expression = new Evaluator(new StringOperand(QualifiedName.parseName("name", accountTemplateName)), "==", name);
         Evaluator nameMatch = new Evaluator(QualifiedName.parseName("name", accountTemplateName), expression, "&&", Orientation.unary_postfix);
@@ -779,7 +780,7 @@ public class QueryExecuterTest
         List<Template> chainTemplateList = new ArrayList<Template>(2);
         chainTemplateList.add(account);
         chainTemplateList.add(delivery);
-        query.chain(ensemble, chainTemplateList);
+        query.chain(ensemble, chainTemplateList.get(0), null);
         QualifiedName spartaOnlyName = QualifiedName.parseTemplateName("sparta_only");
         QualifiedName spartaLitListName = new QualifiedName("city", spartaOnlyName);
         Operand spartaLiteral = new LiteralListOperand(spartaLitListName, Collections.singletonList(new Parameter(Term.ANONYMOUS, "Sparta")), false);
@@ -787,7 +788,7 @@ public class QueryExecuterTest
         Template spartaOnly = new Template(spartaOnlyArchetype, spartaLiteral);
         spartaOnly.getParserTask().run();
         spartaOnly.setKey("spartaOnly");
-        query.chain(ensemble, Collections.singletonList(spartaOnly));
+        query.chain(ensemble, spartaOnly, null);
         //System.out.println(query.toString());
         assertThat(query.toString()).isEqualTo("charge(city, charge), customer(name, city)");
         Iterator<ChainQuery> it = query.chainQueryIterator();
@@ -803,7 +804,7 @@ public class QueryExecuterTest
         assertThat(query.getSolution().getAxiom("delivery").toString()).isEqualTo(SPARTA_FEE_AND_FREIGHT[3]);
         assertThat(query.execute()).isTrue();
     }
-
+*/
     protected static QualifiedName parseTemplateName(String name)
     {
         return new QualifiedTemplateName(QualifiedName.EMPTY, name);

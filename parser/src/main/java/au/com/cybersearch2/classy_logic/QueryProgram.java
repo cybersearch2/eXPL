@@ -243,6 +243,15 @@ public class QueryProgram extends QueryLauncher
 	}
 
     /**
+     * Returns QueryParams object for name in global scope 
+     * @param queryName Name of query in scope
+     */
+    public QueryParams getQueryParams(String queryName)
+    {
+        return getQueryParams(GLOBAL_SCOPE, queryName);
+    }
+
+    /**
      * Returns QueryParams object for specified by scope and name
      * @param scopeName The scope the query applies to
      * @param queryName Name of query in scope
@@ -420,4 +429,5 @@ public class QueryProgram extends QueryLauncher
             return key.substring(0, dot);
         return QueryProgram.GLOBAL_SCOPE;
     }
+
 }

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial13;
+package au.com.cybersearch2.classy_logic.tutorial12;
 
 import java.io.File;
 
@@ -29,20 +29,24 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
- * GermanScope
+ * ForeignScope
  * Demonstrates handling an amount espressed in Euros within a German scope and 
- * translating a term using a local axiom. 
+ * translating a term using a context list. 
  * @author Andrew Bowley
  * 17 Mar 2015
  */
-public class GermanScope 
+public class ForeignScope 
 {
-/* german-scope.xpl
+/* foreign-scope.xpl
 axiom item (amount) : parameter;
 
 axiom german.lexicon 
   ( Total)
   {"Gesamtkosten"};
+  
+axiom french.lexicon 
+  ( Total)
+  {"le total"};
   
 calc total
 (
@@ -64,24 +68,32 @@ scope german (language="de", region="DE")
   query<term> item_query(item : total) -> (format_total);
 }
 
+scope french (language="fr", region="FR")
+{
+}
+
+query<term> french_item_query(item : french.total) -> (french.format_total);
+
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public GermanScope()
+    public ForeignScope()
     {
-        File resourcePath = new File("src/main/resources/tutorial13");
+        File resourcePath = new File("src/main/resources/tutorial12");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
 
 	/**
-	 * Compiles the german-scope.xpl script and runs the "item_query" query, displaying the solution on the console.<br/>
+	 * Compiles the foreign-scope.xpl script and runs the "german" scope "item_query" query, displaying the solution on the console.<br/>
+     * The expected result:<br/>
+     * item_query(total_text=Gesamtkosten + gst: 13.580,24 EUR)<br/>
 	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
-    public Axiom getFormatedTotalAmount()
+    public Axiom getGermanTotalAmount()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("german-scope.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("foreign-scope.xpl");
         parserContext = queryProgramParser.getContext();
 		// Create QueryParams object for scope "german" and query "item_query"
 		QueryParams queryParams = queryProgram.getQueryParams("german", "item_query");
@@ -93,23 +105,21 @@ scope german (language="de", region="DE")
         return result.getAxiom("german", "item_query");
 	}
 	
-    public ParserContext getParserContext()
+   public ParserContext getParserContext()
     {
         return parserContext;
     }
     
     /**
      * Run tutorial
-     * The expected result:<br/>
-     * format_total(total_text = Gesamtkosten + gst: 13.580,24 EUR)<br/>
      * @param args
      */
 	public static void main(String[] args)
 	{
 		try 
 		{
-	        GermanScope germanScope = new GermanScope();
-            System.out.println(germanScope.getFormatedTotalAmount().toString());
+            ForeignScope foreignScope = new ForeignScope();
+            System.out.println(foreignScope.getGermanTotalAmount().toString());
 		} 
 		catch (ExpressionException e) 
 		{ 

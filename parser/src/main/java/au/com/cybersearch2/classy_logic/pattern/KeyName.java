@@ -36,6 +36,7 @@ public class KeyName
 	{
 	    EMPTY_QNAME = new QualifiedName("");
 	}
+	
 	/**
 	 * Construct KeyName object
 	 * @param axiomKey Axiom key
@@ -47,13 +48,24 @@ public class KeyName
 		this.templateName = QualifiedName.parseTemplateName(templateName);
 	}
 
-	   /**
+   /**
      * Construct KeyName object with empty axiom key
      * @param templateName Qualified name of template
      */
     public KeyName(QualifiedName templateName) 
     {
         this.axiomKey = EMPTY_QNAME;
+        this.templateName = templateName;
+    }
+
+    /**
+     * Construct KeyName object
+     * @param axiomKey Axiom key qualified name
+     * @param templateName Template qualified name
+     */
+    public KeyName(QualifiedName axiomKey, QualifiedName templateName) 
+    {
+        this.axiomKey = axiomKey;
         this.templateName = templateName;
     }
 

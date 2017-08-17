@@ -117,7 +117,7 @@ scope german (language="de", region="DE")
     }
     
     /**
-	 * Compiles the GERMAN_COLORS script and runs the "color_query" query, displaying the solution on the console.
+	 * Compiles the foreign-colors.xpl script and runs the "color_query" query, displaying the solution on the console.
 	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
     public String getColorSwatch(String language, String name)

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial18;
+package au.com.cybersearch2.classy_logic.tutorial12;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -83,7 +83,7 @@ query<axiom> surface_area_query(surface_area : country_area);
 	public List<Axiom> displaySurfaceArea()
 	{
 	    List<Axiom> resultList = new ArrayList<Axiom>(4);
-        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial18/calc-square-miles3.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial12/calc-square-miles3.xpl");
         //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
 		Result result = queryProgram.executeQuery("surface_area_query");

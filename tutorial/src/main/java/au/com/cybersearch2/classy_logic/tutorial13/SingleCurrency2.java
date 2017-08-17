@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial12;
+package au.com.cybersearch2.classy_logic.tutorial13;
 
 import java.io.File;
 
@@ -33,7 +33,7 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 11 Mar 2015
  */
-public class SingleCurrency 
+public class SingleCurrency2 
 {
 /* single-currency.xpl
 axiom item() {"$1234.56"};
@@ -53,9 +53,9 @@ query<term> item_query(item : charge) -> (charge_plus_gst);
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public SingleCurrency()
+    public SingleCurrency2()
     {
-        queryProgramParser = new QueryProgramParser(new File("src/main/resources/tutorial12"));
+        queryProgramParser = new QueryProgramParser(new File("src/main/resources/tutorial13"));
     }
     
 	/**
@@ -67,8 +67,8 @@ query<term> item_query(item : charge) -> (charge_plus_gst);
 	{
         QueryProgram queryProgram = queryProgramParser.loadScript("single-currency.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("item_query");
-	    return result.getAxiom("item_query").getTermByName("total_text").getValue().toString();
+        Result result = queryProgram.executeQuery("german", "french_item_query");
+	    return result.getAxiom("german", "french_item_query").getTermByName("total_text").getValue().toString();
 	}
 	
     public ParserContext getParserContext()
@@ -84,7 +84,7 @@ query<term> item_query(item : charge) -> (charge_plus_gst);
 	{
 		try 
 		{
-	        SingleCurrency singleCurrency = new SingleCurrency();
+	        SingleCurrency2 singleCurrency = new SingleCurrency2();
             System.out.println(singleCurrency.getFormatedTotalAmount());
 
 		} 

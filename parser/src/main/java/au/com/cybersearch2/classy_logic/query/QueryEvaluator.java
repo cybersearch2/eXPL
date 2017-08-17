@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.QueryParams;
+import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.ScopeContext;
 import au.com.cybersearch2.classy_logic.compile.ListAssembler;
@@ -104,12 +105,12 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
         QuerySpec querySpec = library.functionScope.getQuerySpec(qualifiedCallName.getName());
         if (querySpec == null)
         {
-            QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library.name, queryName);
+            QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library.name, qualifiedCallName.getName());
             if ((library.functionScope == callerScope) && 
                 (parserAssembler.getTemplateAssembler().getTemplate(qualifiedTemplateName) == null))
                 throw new ExpressionException("Query \"" + qualifiedCallName.getName() + "\" not found in scope \"" + library + "\"");
-            querySpec = new QuerySpec(callName);
-            querySpec.addKeyName(new KeyName("", qualifiedCallName.getName()));
+            querySpec = new QuerySpec(callName, false);
+            querySpec.addKeyName(new KeyName(QualifiedName.ANONYMOUS, qualifiedTemplateName));
             querySpec.setQueryType(QueryType.calculator);
         }
         queryParams = new QueryParams(library.functionScope, querySpec);
@@ -167,6 +168,13 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
         QualifiedName templateName = getCalculatorKeyName(querySpec).getTemplateName();
         Scope scope = queryParams.getScope();
         Template template = scope.findTemplate(templateName);
+        if ((template == null) && !templateName.getScope().isEmpty())
+        {
+            QualifiedName globalTemplateName = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, templateName.getTemplate());
+            template = scope.getGlobalScope().findTemplate(globalTemplateName);
+        }
+        if (template == null)
+            throw new ExpressionException("Template \"" + templateName.toString() + "\" not found");
         final String solutionName =  template.getQualifiedName().toString();
         // Set SolutionHander to collect results
         SolutionHandler solutionHandler = getSolutionHandler(solutionName, template.getId());

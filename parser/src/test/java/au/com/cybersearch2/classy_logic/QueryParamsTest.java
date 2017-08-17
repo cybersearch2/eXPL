@@ -46,7 +46,7 @@ public class QueryParamsTest
 		Scope scope = mock(Scope.class);
 		AxiomSource axiomSource = mock(AxiomSource.class);
 		Template template = mock(Template.class);
-		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
+		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME, true);
 		KeyName keyname = mock(KeyName.class);
 		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_KEY);
 		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
@@ -64,7 +64,7 @@ public class QueryParamsTest
 	{
 		Scope scope = mock(Scope.class);
 		Template template = mock(Template.class);
-		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
+		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME, true);
 		KeyName keyname = mock(KeyName.class);
 		QualifiedName emptyAxiomName = new QualifiedName("");
 		when(keyname.getAxiomKey()).thenReturn(emptyAxiomName);

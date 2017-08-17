@@ -50,7 +50,7 @@ public class QueryExecuterAdapter
 	{
 		queryProgram = new QueryProgram();
 		scope = queryProgram.getGlobalScope();
-		querySpec = new QuerySpec(QUERY_NAME);
+		querySpec = new QuerySpec(QUERY_NAME, true);
 		ParserAssembler parserAssembler = scope.getParserAssembler();
 		List<String> keyList = new ArrayList<String>();
 		for (Template template: templateList)

@@ -43,17 +43,16 @@ public class CalculateChainQuery extends ChainQuery
     protected List<AxiomListener> axiomListenerList;
     /** Choice set if template.isChoice() returns true */
     protected Choice choice;
-    protected Runnable scopeNotifier;
 
 	/**
 	 * Create a CalculateChainQuery object
 	 * @param template Template to unify and evaluate
 	 */
-	public CalculateChainQuery(Axiom axiom, Template template, Runnable scopeNotifier) 
+	public CalculateChainQuery(Axiom axiom, Template template, ScopeNotifier scopeNotifier) 
 	{
+	    super(scopeNotifier);
 		this.axiom = axiom;
 		this.template = template;
-		this.scopeNotifier = scopeNotifier;
 	}
 
 	/**
@@ -65,7 +64,7 @@ public class CalculateChainQuery extends ChainQuery
 		this.choice = choice;
 	}
 
-	/**
+    /**
  	 * Execute query and if not tail, chain to next.
  	 * Sub classes override this method and call it upon completion to handle the chaining
  	 * @param solution The object which stores the query results
@@ -76,8 +75,6 @@ public class CalculateChainQuery extends ChainQuery
 	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain, ExecutionContext context)
 	{
 	    solution.remove(template.getQualifiedName().toString());
-	    if (scopeNotifier != null)
-	        scopeNotifier.run();
 		Calculator calculator = new Calculator();
 		if (axiomListenerList != null)
 			for (AxiomListener axiomListener: axiomListenerList)

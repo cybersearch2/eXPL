@@ -7,6 +7,7 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.axiom.AxiomMapCollection;
 import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
@@ -120,9 +121,23 @@ public class QueryParams
         				template.setKey(axiomKey.getName());
         			else // Reset template key in case it was set in a previous query
         			    template.setKey(template.getQualifiedName().getTemplate());
-        			templateList.add(template);
+                    boolean isReplicate = false;
+                    String scopeName = keyname.getTemplateName().getScope();
+                    if (!scopeName.isEmpty()) 
+                        isReplicate = !scopeName.equals(scope.getName());
+                    if (!isReplicate)
+        			    templateList.add(template);
+                    else
+                        templateList.add(new Template(template, keyname.getTemplateName()));
+
         	    }
     		}
+        for (Template template: templateList)
+        {
+            List<Term> properties = querySpec.getProperties(template.getName()); 
+            if (properties != null)
+                template.setInitData(properties);
+        }
 	}
 
     /**
@@ -234,19 +249,19 @@ public class QueryParams
     protected void postProcessCalculatorType()
     {
         KeyName firstKeyname = querySpec.getKeyNameList().get(0);
-        String axiomName = firstKeyname.getAxiomKey().getName();
-        if (!querySpec.isHeadQuery() || axiomName.isEmpty())
+        QualifiedName axiomName = firstKeyname.getAxiomKey();
+        if (axiomName.getName().isEmpty())
             return;
         // Create new head logic query where axiom and template key names are same
-        createTemplate(axiomName);
+        Template template = createTemplate(axiomName);
         QualifiedName templateName = firstKeyname.getTemplateName();
         Template firstTemplate = scope.getTemplate(templateName);
-        firstTemplate.setKey(axiomName);
+        firstTemplate.setKey(axiomName.getName());
         querySpec.getKeyNameList().clear();
-        querySpec.getKeyNameList().add(new KeyName(axiomName, axiomName));
+        querySpec.getKeyNameList().add(new KeyName(axiomName, template.getQualifiedName()));
         querySpec.setQueryType(QueryType.logic);
         // Append new calculator query spec to head query spec.
-        QuerySpec chainQuerySpec = querySpec.chain();
+        QuerySpec chainQuerySpec = querySpec.prependChain();
         // Create new keyname with empty axiom key to indicate get axiom from solution
         KeyName calculateKeyname = new KeyName(firstKeyname.getTemplateName());
         chainQuerySpec.addKeyName(calculateKeyname);
@@ -261,22 +276,36 @@ public class QueryParams
      * @param axiomName Name of axiom to pair with
      * @return Template object
      */
-    protected Template createTemplate(String axiomName)
+    protected Template createTemplate(QualifiedName axiomName)
     {
         // Check for logic query template already exists. Not expected to exist.
         // The template name is taken from the axiom key
-        QualifiedName qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), axiomName);
+        String scopeName = axiomName.getScope();
+        if (scopeName.isEmpty())
+            scopeName = QueryProgram.GLOBAL_SCOPE; 
+        QualifiedName qualifiedTemplateName = new QualifiedTemplateName(scopeName, axiomName.getName());
+        Scope axiomScope = scope.getScope(scopeName);
+        if (axiomScope == null)
+            throw new ExpressionException("Scope \"" + scopeName + "\" not found");
         Template logicTemplate = scope.findTemplate(qualifiedTemplateName);
-        if ((logicTemplate == null) && !scope.getAlias().isEmpty())
-            // Use global scope template if scope specified
-            logicTemplate = scope.getGlobalTemplateAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, axiomName));
+        if (logicTemplate == null) 
+        {
+            if (QueryProgram.GLOBAL_SCOPE.equals(scopeName))
+            {
+                if (!scope.getName().equals(scopeName))
+                   logicTemplate = scope.getGlobalTemplateAssembler().getTemplate(new QualifiedTemplateName(scope.getName(), axiomName.getName()));
+            }
+            else
+                // Use global scope template if scope specified
+                logicTemplate = scope.getGlobalTemplateAssembler().getTemplate(new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, axiomName.getName()));
+        }
         if (logicTemplate == null)
         {
             // Create new logic query template which will populated with terms to match axiom terms at start of query
             logicTemplate = 
-                scope.getParserAssembler().getTemplateAssembler()
+                axiomScope.getParserAssembler().getTemplateAssembler()
                 .createTemplate(qualifiedTemplateName, false);
-            logicTemplate.setKey(axiomName);
+            logicTemplate.setKey(axiomName.getName());
         }
         return logicTemplate;
     }

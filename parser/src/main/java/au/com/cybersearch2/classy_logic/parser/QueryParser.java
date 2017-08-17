@@ -591,7 +591,7 @@ public class QueryParser implements QueryParserConstants
   {
    Token queryToken;
     queryToken = jj_consume_token(IDENTIFIER);
-    {if (true) return new QuerySpec(queryToken.image);}
+    {if (true) return new QuerySpec(queryToken.image, true);}
     throw new Error("Missing return statement in function");
   }
 
@@ -3781,7 +3781,7 @@ public class QueryParser implements QueryParserConstants
       jj_consume_token(LPAREN);
       literal = LiteralTerm(context);
       jj_consume_token(RPAREN);
-    {if (true) return varType.getParameter(literal);}
+    {if (true) return varType.getParameter(literal, context.getScope());}
       break;
     case IDENTIFIER:
       literal = Function(context);

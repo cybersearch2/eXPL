@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial13;
+package au.com.cybersearch2.classy_logic.tutorial12;
 
 import java.io.File;
 
@@ -29,18 +29,21 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
- * GermanColors
+ * ForeignColors
  * Demonstrates Choice selection terms consisting of local axiom terms for locale-sensitive matching of values.
  * The Choice selects a color swatch by name in the language of the locale.
  * @author Andrew Bowley
  * 17 Mar 2015
  */
-public class GermanColors 
+public class ForeignColors 
 {
-/* german-colors.xpl
+/* foreign-colors.xpl
 axiom german.lexicon 
   (    aqua,    black,    blue,  white)
   {"Wasser", "schwarz", "blau", "weiß"};
+
+axiom french.colors (aqua, black, blue, white)
+  {"bleu vert", "noir", "bleu", "blanc"};
  
 choice swatch 
 + list<term> lexicon@scope;
@@ -55,34 +58,49 @@ axiom shade (name) : parameter;
 scope german (language="de", region="DE")
 {
   query<term> color_query (shade : swatch);
+}
+
+scope french (language="fr", region="FR")
+{
+  query<term> color_query (shade : swatch);
+}
     
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public GermanColors()
+    public ForeignColors()
     {
-        File resourcePath = new File("src/main/resources/tutorial13");
+        File resourcePath = new File("src/main/resources/tutorial12");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
 	/**
-	 * Compiles the german-colors.xpl script and runs the "color_query" query, displaying the solution on the console.
+	 * Compiles the foreign-colors.xpl script and runs the "color_query" query, displaying the solution on the console.
+     * The expected result:<br/>
+        color_query(name=Wasser, red=0, green=255, blue=255, swatch=0)<br/>
+        color_query(name=schwarz, red=0, green=0, blue=0, swatch=1)<br/>
+        color_query(name=weiß, red=255, green=255, blue=255, swatch=3)<br/>
+        color_query(name=blau, red=0, green=0, blue=255, swatch=2)<br/>
+        color_query(name=bleu vert, red=0, green=255, blue=255, swatch=0)<br/>
+        color_query(name=noir, red=0, green=0, blue=0, swatch=1)<br/>
+        color_query(name=blanc, red=255, green=255, blue=255, swatch=3)<br/>
+        color_query(name=bleu, red=0, green=0, blue=255, swatch=2)<br/>
 	 * @return AxiomTermList iterator containing the final Calculator solution
 	 */
-    public String getColorSwatch(String name)
+    public String getColorSwatch(String language, String name)
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("german-colors.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("foreign-colors.xpl");
         parserContext = queryProgramParser.getContext();
          
         // Create QueryParams object for Global scope and query "stamp_duty_query"
-        QueryParams queryParams = queryProgram.getQueryParams("german", "color_query");
+        QueryParams queryParams = queryProgram.getQueryParams(language, "color_query");
         // Add a shade Axiom with a single "aqua" term
         // This axiom goes into the Global scope and is removed at the start of the next query.
         Solution initialSolution = queryParams.getInitialSolution();
         initialSolution.put("shade", new Axiom("shade", new Parameter("name", name)));
         Result result = queryProgram.executeQuery(queryParams);
-        return result.getAxiom("german", "color_query").toString();
+        return result.getAxiom(language, "color_query").toString();
 	}
 	
     public ParserContext getParserContext()
@@ -92,22 +110,21 @@ scope german (language="de", region="DE")
     
     /**
      * Run tutorial
-     * The expected result:<br/>
-        color_query(name=Wasser, red=0, green=255, blue=255, swatch=0)<br/>
-        color_query(name=schwarz, red=0, green=0, blue=0, swatch=1)<br/>
-        color_query(name=weiß, red=255, green=255, blue=255, swatch=3)<br/>
-        color_query(name=blau, red=0, green=0, blue=255, swatch=2)<br/>
      * @param args
      */
 	public static void main(String[] args)
 	{
 		try 
 		{
-	        GermanColors germanColors = new GermanColors();
-            System.out.println(germanColors.getColorSwatch("Wasser"));
-            System.out.println(germanColors.getColorSwatch("schwarz"));
-            System.out.println(germanColors.getColorSwatch("weiß"));
-            System.out.println(germanColors.getColorSwatch("blau"));
+	        ForeignColors foreignColors = new ForeignColors();
+            System.out.println(foreignColors.getColorSwatch("german", "Wasser"));
+            System.out.println(foreignColors.getColorSwatch("german", "schwarz"));
+            System.out.println(foreignColors.getColorSwatch("german", "weiß"));
+            System.out.println(foreignColors.getColorSwatch("german", "blau"));
+            System.out.println(foreignColors.getColorSwatch("french", "bleu vert"));
+            System.out.println(foreignColors.getColorSwatch("french", "noir"));
+            System.out.println(foreignColors.getColorSwatch("french", "blanc"));
+            System.out.println(foreignColors.getColorSwatch("french", "bleu"));
 		} 
 		catch (ExpressionException e) 
 		{ 

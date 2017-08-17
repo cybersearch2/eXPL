@@ -48,9 +48,7 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
 public class ChainQueryExecuter implements DebugTarget
 {
     /**  Query scope */
-	protected Scope scope;
-	/**  Calculator scope tracker while building query chain */
-    protected Scope calcScope;
+	protected Scope queryScope;
     /** Head of optional query chain */
 	protected ChainQuery headChainQuery;
 	/** Tail of optional query chain */
@@ -72,12 +70,11 @@ public class ChainQueryExecuter implements DebugTarget
 	public ChainQueryExecuter(QueryParams queryParams) 
 	{   
 	    templateChain = new ArrayDeque<Template>();
-		this.scope = queryParams.getScope();
-		calcScope = scope;
-        if ((scope != null) && (scope.getAxiomListenerMap() != null))
+		this.queryScope = queryParams.getScope();
+        if ((queryScope != null) && (queryScope.getAxiomListenerMap() != null))
         {   // Create a copy of the axiom listener map and remove entries as axiom listeners are bound to processors
             axiomListenerMap = new HashMap<QualifiedName, List<AxiomListener>>();
-            axiomListenerMap.putAll(scope.getAxiomListenerMap());
+            axiomListenerMap.putAll(queryScope.getAxiomListenerMap());
         }
     }
 
@@ -88,36 +85,40 @@ public class ChainQueryExecuter implements DebugTarget
 	public boolean execute()
     {
 		if (axiomListenerMap != null)
-			bindAxiomListeners(scope);
+			bindAxiomListeners(queryScope);
 		if (headChainQuery != null)
+		{
+            ScopeNotifier scopeNotifier = headChainQuery.getScopeNotifier();
+            if (scopeNotifier != null)
+                scopeNotifier.notifyScopes();
 		    // Query chain will add to solution or trigger short circuit
 		    return (headChainQuery.executeQuery(solution, templateChain, context) == EvaluationStatus.COMPLETE);
+		}
 		return true;
     }
 
 	/**
 	 * Add chain query
 	 * @param axiomCollection A collection of axiom sources which are referenced by name
-	 * @param templateList The template sequence. Chain resolved first time all templates solved.
+	 * @param template Template 
 	 */
-	public void chain(AxiomCollection axiomCollection, List<Template> templateList)
+	public void chain(AxiomCollection axiomCollection, Template template, ScopeNotifier scopeNotifier)
 	{
-	    LogicChainQuery chainQuery = new LogicChainQuery(axiomCollection, templateList);
+	    LogicChainQuery chainQuery = new LogicChainQuery(axiomCollection, template, scopeNotifier);
 		if (axiomListenerMap != null)
 			// Bind each axiom listener to a query or the solution depending 
 			// on the referenced axiom being available in the axiom collection
-			for (Template template: templateList)
-			    bindAxiomListener(template, chainQuery);
+			bindAxiomListener(template, chainQuery);
 		addChainQuery(chainQuery);
 	}
 
 	/**
 	 * Add a calculate chain query
-	 * @param templateScope Scope specified by first of 2-part name, or query scope
 	 * @param axiom Optional axiom to initialize Calculator
 	 * @param template Template to unify and evaluate
+     * @param scopeNotifier Object to notify of scope change, null if not required
 	 */
-	public void chainCalculator(Scope templateScope, Axiom axiom, Template template) 
+	public void chainCalculator(Axiom axiom, Template template, ScopeNotifier scopeNotifier) 
 	{
 		if (axiom == null)
 		{
@@ -126,21 +127,13 @@ public class ChainQueryExecuter implements DebugTarget
 		}
 		else
 			template.setKey(axiom.getName());
-		// Allow a global scope query to engage multiple scopes using 
-        // first part of 2-part names to identify scope
-		Runnable scopeNotifier = null;
-		if (!templateScope.getName().equals(calcScope.getName()))
-		{   // Create object to pre-execute scope localisation
-		    scopeNotifier = new ScopeNotifier(this, templateScope);
-            calcScope = templateScope;
-		}
 		CalculateChainQuery chainQuery = new CalculateChainQuery(axiom, template, scopeNotifier);
         QualifiedName qname = template.getQualifiedName();
 		if (template.isChoice())
 		{   // Pass scope identified by choice name to Choice constructor
 		    Scope choiceScope = qname.getScope().isEmpty() ?
-		                        scope.getGlobalScope() : 
-		                        scope.findScope(qname.getScope());
+		        queryScope.getGlobalScope() : 
+		        queryScope.findScope(qname.getScope());
 			Choice choice = new Choice(new QualifiedName(choiceScope.getName(), template.getName()), choiceScope, null);
 			chainQuery.setChoice(choice);
 		}
@@ -275,7 +268,7 @@ public class ChainQueryExecuter implements DebugTarget
                 continue;  // Templates are output
             AxiomSource axiomSource = localScope.findAxiomSource(key);
             if ((axiomSource == null) && !localScope.getName().equals(QueryProgram.GLOBAL_SCOPE))
-                axiomSource = scope.getGlobalScope().findAxiomSource(key);
+                axiomSource = queryScope.getGlobalScope().findAxiomSource(key);
             // TODO - Log warning if axiom source not found
             if (axiomSource != null)
                 bindAxiomSource(axiomSource, key);
@@ -383,6 +376,6 @@ public class ChainQueryExecuter implements DebugTarget
      */
     protected void onScopeChange(Scope templateScope) 
     {
-        scope.getParserAssembler().onScopeChange(templateScope);
+        queryScope.getParserAssembler().onScopeChange(templateScope);
     }
 }

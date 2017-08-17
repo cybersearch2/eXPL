@@ -74,7 +74,7 @@ public class Calculator implements SolutionFinder
 	 * Find a solution for specified template and initializer axiom.
 	 * Return false when choice fails to match any of the alternatives.
 	 * @param axiom Initializer axiom
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Resolution of current query managed by LogicQueryExecuter up to this point  
 	 * @param template Template used on each iteration
      * @return Flag to indicate whether or not the query is resolved
 	 */

@@ -22,7 +22,7 @@ import au.com.cybersearch2.classy_logic.QueryParams;
  * @author Andrew Bowley
  * 13Jan.,2017
  */
-public class TestQueryExecuter extends QueryExecuter
+public class TestQueryExecuter extends LogicQueryExecuter
 {
 
     public TestQueryExecuter(QueryParams queryParams)

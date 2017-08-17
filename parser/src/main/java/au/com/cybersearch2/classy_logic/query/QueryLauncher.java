@@ -25,7 +25,6 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -53,7 +52,7 @@ public class QueryLauncher implements DebugTarget
         queryParams.initialize();
         boolean isCalculation = querySpec.getQueryType() == QueryType.calculator;
         if (!isCalculation)
-            headQuery = new QueryExecuter(queryParams);
+            headQuery = new LogicQueryExecuter(queryParams);
         else
         {   // QueryParams need to be initialized to set up parameter axioms
             headQuery = new ChainQueryExecuter(queryParams);
@@ -71,9 +70,18 @@ public class QueryLauncher implements DebugTarget
                     chainCalculator(queryParams, chainQuerySpec, headQuery);
                 else
                 {
+                    int keynameCount = chainQuerySpec.getKeyNameList().size();
+                    if (keynameCount != 1)
+                        throw new IllegalArgumentException("Logic chain query with " + keynameCount + " parts not allowed");
                     QueryParams chainQueryParams = new QueryParams(scope, chainQuerySpec);
                     chainQueryParams.initialize();
-                    headQuery.chain(chainQueryParams.getAxiomCollection(), chainQueryParams.getTemplateList());
+                    Template template = chainQueryParams.getTemplateList().get(0);
+                    String scopeName = template.getQualifiedName().getScope();
+                    Scope templateScope = queryParams.getScope();
+                    if (!scopeName.isEmpty()) 
+                        templateScope = queryParams.getScope().findScope(scopeName);
+                    ScopeNotifier scopeNotifier = getScopeNotification(headQuery, queryParams.getScope(), templateScope);
+                    headQuery.chain(chainQueryParams.getAxiomCollection(), template, scopeNotifier);
                 }
             }
         Solution solution = headQuery.getSolution();
@@ -126,28 +134,15 @@ public class QueryLauncher implements DebugTarget
             isReplicate = !scopeName.equals(templateScope.getName());
             templateScope = queryParams.getScope().findScope(scopeName);
         }
-        Template calculatorTemplate = getCalculatorTemplate(templateScope, chainQuerySpec);
+        Template calculatorTemplate = 
+            templateScope.getTemplate(getCalculatorKeyName(chainQuerySpec).getTemplateName());
         if (isReplicate)
             calculatorTemplate = new Template(calculatorTemplate, keyName.getTemplateName());
         Axiom calculatorAxiom = queryParams.getParameter(calculatorTemplate.getQualifiedName());
         if (calculatorAxiom == null)
             calculatorAxiom = getCalculatorAxiom(queryParams.getScope(), chainQuerySpec);
-        headQuery.chainCalculator(templateScope, calculatorAxiom, calculatorTemplate);
-    }
-
-    /**
-     * Returns the single template for a Calculator query referenced as the first template in the supplied specification
-     * @param scope Current scope
-     * @param querySpec Calculator type query specification
-     * @return Template object which is initialized with properties, if any, in the query specification  
-     */
-    protected Template getCalculatorTemplate(Scope scope, QuerySpec querySpec)
-    {   // Calculator uses a single template
-        Template template = scope.getTemplate(getCalculatorKeyName(querySpec).getTemplateName());
-        List<Term> properties = querySpec.getProperties(template.getName()); 
-        if (properties != null)
-            template.setInitData(properties);
-        return template;
+        ScopeNotifier scopeNotifier = getScopeNotification(headQuery, queryParams.getScope(), templateScope);
+        headQuery.chainCalculator(calculatorAxiom, calculatorTemplate, scopeNotifier);
     }
 
     /**
@@ -171,6 +166,23 @@ public class QueryLauncher implements DebugTarget
             return axiom;  
         }
         return null;
+    }
+
+    /**
+     * 
+     * @param templateScope
+     * @param template
+     * @return
+     */
+    static protected ScopeNotifier getScopeNotification(ChainQueryExecuter headQuery, Scope queryScope, Scope templateScope)
+    {
+        // Allow a global scope query to engage multiple scopes using 
+        // first part of 2-part names to identify scope
+        ScopeNotifier scopeNotifier = null;
+        if (!templateScope.getName().equals(queryScope.getName()))
+            // Create object to pre-execute scope localisation
+            scopeNotifier = new ScopeNotifier(headQuery, templateScope);
+        return scopeNotifier;
     }
 
 }

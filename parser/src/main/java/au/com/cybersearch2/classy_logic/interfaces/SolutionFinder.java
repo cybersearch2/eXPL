@@ -28,7 +28,7 @@ public interface SolutionFinder
 {
 	/**
 	 * Find a solution for specified template
-	 * @param solution Resolution of current query managed by QueryExecuter up to this point  
+	 * @param solution Resolution of current query managed by LogicQueryExecuter up to this point  
 	 * @param template Template used on each iteration
 	 * @return Flag to indicate if another solution may be available
 	 */

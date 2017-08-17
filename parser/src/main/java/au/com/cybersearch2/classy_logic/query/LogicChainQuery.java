@@ -16,6 +16,7 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -38,8 +39,8 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
  */
 public class LogicChainQuery extends ChainQuery
 {
-	/** List of templates to unify and evaluate */
-	protected List<Template> templateList;
+	/** Template to unify and evaluate */
+	protected Template template;
 	/** A set of AxiomSource objects referenced by name */
  	protected AxiomCollection axiomCollection;
 	/** Optional axiom listener to receive each solution as it is produced */
@@ -48,11 +49,12 @@ public class LogicChainQuery extends ChainQuery
 	/**
 	 * Create LogicChainQuery object
 	 * @param axiomCollection A set of AxiomSource objects referenced by name
-	 * @param templateList List of templates to unify and evaluate
+	 * @param template Ttemplate to unify and evaluate
 	 */
- 	public LogicChainQuery(AxiomCollection axiomCollection,	 List<Template> templateList) 
+ 	public LogicChainQuery(AxiomCollection axiomCollection,	 Template template, ScopeNotifier scopeNotifier) 
     {
-		this.templateList = templateList;
+ 	    super(scopeNotifier);
+		this.template = template;
 		this.axiomCollection = axiomCollection;
 	}
 
@@ -76,19 +78,16 @@ public class LogicChainQuery extends ChainQuery
 	@Override
 	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain, ExecutionContext context)
 	{
-		for (Template template: templateList)
-		{
-			String key = template.getKey();
-			AxiomSource axiomSource = axiomCollection.getAxiomSource(key);
-			if  (axiomSource == null)
-				axiomSource = new EmptyAxiomSource();
-			LogicQuery query = new LogicQuery(axiomSource);
-			if ((axiomListenerMap != null) && axiomListenerMap.containsKey(template.getKey()))
-				for (AxiomListener axiomListener: axiomListenerMap.get(template.getKey()))
-					query.setAxiomListener(axiomListener);
-			if (!query.iterate(solution, template, context))
-				return EvaluationStatus.SHORT_CIRCUIT;
-		}
+		String key = template.getKey();
+		AxiomSource axiomSource = axiomCollection.getAxiomSource(key);
+		if  (axiomSource == null)
+			axiomSource = new EmptyAxiomSource();
+		LogicQuery query = new LogicQuery(axiomSource);
+		if ((axiomListenerMap != null) && axiomListenerMap.containsKey(template.getKey()))
+			for (AxiomListener axiomListener: axiomListenerMap.get(template.getKey()))
+				query.setAxiomListener(axiomListener);
+		if (!query.iterate(solution, template, context))
+			return EvaluationStatus.SHORT_CIRCUIT;
 		return super.executeQuery(solution, templateChain, context);
  	}
 
@@ -99,7 +98,7 @@ public class LogicChainQuery extends ChainQuery
 	@Override
 	public String toString()
 	{
-		return QueryExecuter.toString(templateList);
+		return LogicQueryExecuter.toString(Collections.singletonList(template));
 	}
 
     /**
@@ -108,8 +107,7 @@ public class LogicChainQuery extends ChainQuery
     @Override
     protected void backup() 
     {
-        for (Template template: templateList)
-            template.backup(true);
+        template.backup(true);
     }
 
  	/**
@@ -118,8 +116,7 @@ public class LogicChainQuery extends ChainQuery
 	@Override
 	protected void backupToStart() 
 	{
-		for (Template template: templateList)
-			template.backup(false);
+	    template.backup(false);
 	}
 
 	/**
@@ -128,8 +125,7 @@ public class LogicChainQuery extends ChainQuery
 	@Override
 	protected void reset() 
 	{
-		for (Template template: templateList)
-			template.reset();
+		template.reset();
 	}
 
 	/**

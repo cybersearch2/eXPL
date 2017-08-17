@@ -22,7 +22,7 @@ import au.com.cybersearch2.classy_logic.Scope;
  * @author Andrew Bowley
  * 30May,2017
  */
-public class ScopeNotifier implements Runnable
+public class ScopeNotifier
 {
     protected Scope templateScope;
     protected ChainQueryExecuter executer;
@@ -33,22 +33,16 @@ public class ScopeNotifier implements Runnable
         this.executer = executer;
     }
     
-    @Override
-    public void run()
-    {
-        notifyScopes();
-        executer.bindAxiomListeners(templateScope);
-    }
-
     /**
      * Update scope listeners with locale details and
      * copy all axiom listeners in scope to this executer
-     * @param scopeName Scope name
+     * @param executer Head query executer
      */
-    private void notifyScopes()
+    public void notifyScopes()
     {
         executer.setAxiomListeners(templateScope); 
         executer.onScopeChange(templateScope);
+        executer.bindAxiomListeners(templateScope);
     }
 
 }

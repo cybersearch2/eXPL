@@ -79,7 +79,7 @@ import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 import au.com.cybersearch2.classy_logic.query.Calculator;
-import au.com.cybersearch2.classy_logic.query.QueryExecuter;
+import au.com.cybersearch2.classy_logic.query.LogicQueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.QuerySpec;
@@ -790,15 +790,15 @@ public class QueryParserTest
 		QueryProgram queryProgram = new QueryProgram();
 		queryProgram.parseScript(CITY_EVELATIONS_SORTED);
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
-		QuerySpec querySpec = new QuerySpec("Test");
+		QuerySpec querySpec = new QuerySpec("Test", true);
 		KeyName keyName1 = new KeyName("city", "high_city");
 		querySpec.addKeyName(keyName1);
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("insert_sort");
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
-        QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
+        LogicQueryExecuter highCitiesQuery = new LogicQueryExecuter(queryParams);
         //highCitiesQuery.setExecutionContext(new ExecutionContext());
-	    highCitiesQuery.chainCalculator(queryProgram.getGlobalScope(), null, calcTemplate);
+	    highCitiesQuery.chainCalculator(null, calcTemplate, null);
 	    //System.out.println(highCitiesQuery.toString());
     	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude>5000?altitude)");
  	    while (highCitiesQuery.execute())
@@ -822,9 +822,9 @@ public class QueryParserTest
 		QueryProgram queryProgram = new QueryProgram();
 		queryProgram.parseScript(INSERT_SORT_XPL);
 		ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
-		TestChainQueryExecuter queryExecuter = new TestChainQueryExecuter(new QueryParams(queryProgram.getGlobalScope(), new QuerySpec("test")));
+		TestChainQueryExecuter queryExecuter = new TestChainQueryExecuter(new QueryParams(queryProgram.getGlobalScope(), new QuerySpec("test", true)));
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("insert_sort");
-		queryExecuter.chainCalculator(queryProgram.getGlobalScope(), null, calcTemplate);
+		queryExecuter.chainCalculator( null, calcTemplate, null);
 		queryExecuter.setSolution(new Solution());
 		queryExecuter.execute();
 		Axiom unsortedAxiom = parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("unsorted")).iterator().next();
@@ -1012,12 +1012,12 @@ public class QueryParserTest
 	    ParserAssembler parserAssembler = queryProgram.getGlobalScope().getParserAssembler();
 	    Template highCities = parserAssembler.getTemplateAssembler().getTemplate("high_city");
 	    highCities.setKey("city");
-        QuerySpec querySpec = new QuerySpec("TEST");
+        QuerySpec querySpec = new QuerySpec("TEST", true);
 		KeyName keyName = new KeyName("city", "high_city");
 		querySpec.addKeyName(keyName);
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
         queryParams.initialize();
-        QueryExecuter highCitiesQuery = new QueryExecuter(queryParams);
+        LogicQueryExecuter highCitiesQuery = new LogicQueryExecuter(queryParams);
     	assertThat(highCitiesQuery.toString()).isEqualTo("high_city(name, altitude, is_high=altitude>5000)");
     	int index = 0;
  	    while (highCitiesQuery.execute())
@@ -1029,7 +1029,7 @@ public class QueryParserTest
 	{
 		QueryProgram queryProgram = new QueryProgram();
 		queryProgram.parseScript(AXIOM_WRAPPER_XPL);
-		QuerySpec querySpec = new QuerySpec("test");
+		QuerySpec querySpec = new QuerySpec("test", true);
 		KeyName keyName = new KeyName("colors", "color_convert");
 		querySpec.addKeyName(keyName);
         QueryParams queryParams = new QueryParams(queryProgram.getGlobalScope(), querySpec);
@@ -1068,7 +1068,7 @@ public class QueryParserTest
 				return false;
 			}};
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
-	    QueryExecuter greekChargeCustomerQuery = new QueryExecuter(adapter.getQueryParams());
+	    LogicQueryExecuter greekChargeCustomerQuery = new LogicQueryExecuter(adapter.getQueryParams());
 	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city==city?city, fee)");
     	int index = 0;
  	    while (greekChargeCustomerQuery.execute())
@@ -1104,7 +1104,7 @@ public class QueryParserTest
                 return false;
             }};
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
-        QueryExecuter greekChargeCustomerQuery = new QueryExecuter(adapter.getQueryParams());
+        LogicQueryExecuter greekChargeCustomerQuery = new LogicQueryExecuter(adapter.getQueryParams());
         assertThat(greekChargeCustomerQuery.toString()).isEqualTo("charge(city, fee), customer(name, city==city?city)");
         int index = 0;
         while (greekChargeCustomerQuery.execute())
@@ -1140,7 +1140,7 @@ public class QueryParserTest
 				return false;
 			}};
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(ensemble, templateList);
-	    QueryExecuter greekChargeCustomerQuery = new QueryExecuter(adapter.getQueryParams());
+	    LogicQueryExecuter greekChargeCustomerQuery = new LogicQueryExecuter(adapter.getQueryParams());
 	    assertThat(greekChargeCustomerQuery.toString()).isEqualTo("customer(name, city), charge(city==city?city, fee)");
     	int index = 0;
  	    while (greekChargeCustomerQuery.execute())
@@ -1194,7 +1194,7 @@ public class QueryParserTest
 	    more_agriculture_y1990_y2010.backup(false);
 	    Template surface_area = parserAssembler.getTemplateAssembler().getTemplate("surface_area_increase");
 	    surface_area.setKey("surface_area");
-	    agriculturalQuery.chain(QueryExecuterAdapter.ensembleFromSource(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("surface_area"))), Collections.singletonList(surface_area));
+	    agriculturalQuery.chain(QueryExecuterAdapter.ensembleFromSource(parserAssembler.getAxiomSource(QualifiedName.parseGlobalName("surface_area"))), surface_area, null);
 		while (agriculturalQuery.execute())
 		{
 			if (!solutionHandler.onSolution(agriculturalQuery.getSolution()))
@@ -1235,7 +1235,7 @@ public class QueryParserTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter inWordsQuery = new QueryExecuter(queryParams);
+        LogicQueryExecuter inWordsQuery = new LogicQueryExecuter(queryParams);
     	File inWordList = new File("src/test/resources", "in_words.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(inWordList));
 		while (inWordsQuery.execute())
@@ -1257,7 +1257,7 @@ public class QueryParserTest
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(dictionaryTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter dictionaryQuery = new QueryExecuter(queryParams);
+        LogicQueryExecuter dictionaryQuery = new LogicQueryExecuter(queryParams);
 		int count = 0;
 		if (dictionaryQuery.execute())
 		{
@@ -1288,7 +1288,7 @@ public class QueryParserTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(megacitySource, Collections.singletonList(asia_top_ten));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter asiaTopTenQuery = new QueryExecuter(queryParams);
+        LogicQueryExecuter asiaTopTenQuery = new LogicQueryExecuter(queryParams);
     	File megaCityList = new File("src/test/resources", "mega_city1.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(megaCityList));
 		while (asiaTopTenQuery.execute())
@@ -1305,7 +1305,7 @@ public class QueryParserTest
         QueryExecuterAdapter adapter2 = new QueryExecuterAdapter(megacitySource, Collections.singletonList(american_megacities));
         QueryParams queryParams2 = new QueryParams(adapter2.getScope(), adapter2.getQuerySpec());
         queryParams2.initialize();
-		QueryExecuter americanMegacitiesQuery = new QueryExecuter(queryParams2);
+		LogicQueryExecuter americanMegacitiesQuery = new LogicQueryExecuter(queryParams2);
     	File americanCityList = new File("src/test/resources", "mega_city2.lst");
      	reader = new LineNumberReader(new FileReader(americanCityList));
 		while (americanMegacitiesQuery.execute())
@@ -1327,7 +1327,7 @@ public class QueryParserTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter inWordsQuery = new QueryExecuter(queryParams);
+        LogicQueryExecuter inWordsQuery = new LogicQueryExecuter(queryParams);
 		while (inWordsQuery.execute())
 		{
 			assertThat(inWordsTemplate.getTermByName("Word").getValue().toString().startsWith("in")).isTrue();

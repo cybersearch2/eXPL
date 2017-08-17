@@ -38,7 +38,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
-import au.com.cybersearch2.classy_logic.query.QueryExecuter;
+import au.com.cybersearch2.classy_logic.query.LogicQueryExecuter;
 import au.com.cybersearch2.classy_logic.query.QueryExecuterAdapter;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -71,7 +71,7 @@ public class RegExTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter inWordsQuery = new QueryExecuter(queryParams);
+        LogicQueryExecuter inWordsQuery = new LogicQueryExecuter(queryParams);
     	File inWordList = new File("src/test/resources", "in_words.lst");
      	LineNumberReader reader = new LineNumberReader(new FileReader(inWordList));
 		while (inWordsQuery.execute())
@@ -101,7 +101,7 @@ public class RegExTest
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(dictionaryTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
-        QueryExecuter dictionaryQuery = new QueryExecuter(queryParams);
+        LogicQueryExecuter dictionaryQuery = new LogicQueryExecuter(queryParams);
 		//while(dictionaryQuery.execute())
         //    System.out.println(dictionaryQuery.toString());
 		if (dictionaryQuery.execute())

@@ -704,7 +704,7 @@ public class ScopeQueryParserTest
 				 queryParams = new QueryParams(scope, chainQuerySpec);
 				 //if (term2 == null)
 				 //	 term2 = (Parameter) queryParams.getTemplateList().get(0).getTermByName("name");
-				 headQuery.chain(queryParams.getAxiomCollection(), queryParams.getTemplateList());
+				 headQuery.chain(queryParams.getAxiomCollection(), queryParams.getTemplateList().get(0), null);
 			}
 		while (headQuery.execute())
 		{

@@ -131,7 +131,7 @@ public class QueryProgramTest
 		QueryProgram queryProgram = new QueryProgram();
         Scope scope = queryProgram.scopeInstance(SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler parserAssembler = scope.getParserAssembler();
-		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
+		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME, true);
 		KeyName keyname = mock(KeyName.class);
 		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
 		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
@@ -166,7 +166,7 @@ public class QueryProgramTest
 		QueryProgram queryProgram = new QueryProgram();
         Scope scope = queryProgram.scopeInstance(SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler parserAssembler = scope.getParserAssembler();
-		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
+		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME, true);
 		KeyName keyname = mock(KeyName.class);
 		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
 		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
@@ -211,7 +211,7 @@ public class QueryProgramTest
 		QueryProgram queryProgram = new QueryProgram();
 		Scope scope = queryProgram.scopeInstance(SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler parserAssembler = scope.getParserAssembler();
-		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
+		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME, true);
 		KeyName keyname = mock(KeyName.class);
 		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
 		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
@@ -256,7 +256,7 @@ public class QueryProgramTest
 		QueryProgram queryProgram = new QueryProgram();
         Scope scope = queryProgram.scopeInstance(SCOPE_NAME, Scope.EMPTY_PROPERTIES);
 		ParserAssembler parserAssembler = scope.getParserAssembler();
-		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME);
+		QuerySpec querySpec = new QuerySpec(QUERY_SPEC_NAME, true);
 		KeyName keyname = mock(KeyName.class);
 		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
 		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);

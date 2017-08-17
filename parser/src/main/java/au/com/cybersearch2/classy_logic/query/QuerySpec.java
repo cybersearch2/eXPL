@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
@@ -42,14 +43,17 @@ public class QuerySpec
 	protected List<QuerySpec> queryChainList;
 	/** Properties for calculations referenced by template name */
 	protected Map<String, List<Term>> propertiesMap;
+	/** Flag set true if head query specification */
+    protected boolean isHeadQuery;
 
 	/**
 	 * Construct a QuerySpec object 
 	 * @param name
 	 */
-	public QuerySpec(String name) 
+	public QuerySpec(String name, boolean isHeadQuery) 
 	{
 		this.name = name;
+		this.isHeadQuery = isHeadQuery;
 		queryType = QueryType.logic;
 		keyNameList = new ArrayList<KeyName>();
 		propertiesMap = new HashMap<String, List<Term>>();
@@ -61,6 +65,8 @@ public class QuerySpec
 	 */
 	public void addKeyName(KeyName keyName)
 	{
+	    if ((!isHeadQuery) && (keyNameList.size() >= 1))
+	        throw new ExpressionException("Limit of 1 part for query chain exceeded for " + keyNameList.get(0).toString());
         keyNameList.add(keyName);
 	}
 
@@ -157,12 +163,15 @@ public class QuerySpec
 		return propertiesMap.get(tempateName);
 	}
 
-	public boolean isHeadQuery()
-	{
-	    return queryChainList == null;
-	}
-	
 	/**
+     * @return the isHeadQuery
+     */
+    public boolean isHeadQuery()
+    {
+        return isHeadQuery;
+    }
+
+    /**
 	 * Returns new QuerySpec object chained to this query specification
 	 * @return QuerySpec object
 	 */
@@ -171,8 +180,20 @@ public class QuerySpec
 		if (queryChainList == null)
 			queryChainList = new ArrayList<QuerySpec>();
 
-		QuerySpec queryChain = new QuerySpec(name + queryChainList.size());
+		QuerySpec queryChain = new QuerySpec(name + queryChainList.size(), false);
 		queryChainList.add(queryChain);
 		return queryChain;
 	}
+    /**
+     * Returns new QuerySpec object chained to this query specification
+     * @return QuerySpec object
+     */
+    public QuerySpec prependChain() 
+    {
+        if (queryChainList == null)
+            queryChainList = new ArrayList<QuerySpec>();
+        QuerySpec queryChain = new QuerySpec(name + queryChainList.size(), false);
+        queryChainList.add(0, queryChain);
+        return queryChain;
+    }
 }

@@ -38,10 +38,10 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
 /**
  * LogicQuery
  * Performs logic operation of unification between a sequence of axioms and a template.
- * Each solution is aggregated with the overall solution being prepared by the QueryExecuter.
+ * Each solution is aggregated with the overall solution being prepared by the LogicQueryExecuter.
  * @author Andrew Bowley
  * 30 Dec 2014
- * @see QueryExecuter
+ * @see LogicQueryExecuter
  */
 public class LogicQuery implements SolutionFinder
 {
@@ -57,6 +57,8 @@ public class LogicQuery implements SolutionFinder
     protected List<AxiomListener> axiomListenerList;
     /** Pairs axiom terms in a Solution object with terms in a template */
     protected SolutionPairer pairer;
+    /** Object to notify of scope change, null if not required */
+    protected ScopeNotifier scopeNotifier;
  
     /**
      * Construct QueryLogic object
@@ -80,6 +82,22 @@ public class LogicQuery implements SolutionFinder
 	}
 
 	/**
+     * @return the scopeNotifier
+     */
+    public ScopeNotifier getScopeNotifier()
+    {
+        return scopeNotifier;
+    }
+
+    /**
+     * @param scopeNotifier the scopeNotifier to set
+     */
+    public void setScopeNotifier(ScopeNotifier scopeNotifier)
+    {
+        this.scopeNotifier = scopeNotifier;
+    }
+
+    /**
 	 * Find a solution for specified template
 	 * @param solution Container to aggregate results  
 	 * @param template Structure to pair with axiom sequence

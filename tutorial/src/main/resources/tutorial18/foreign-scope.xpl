@@ -6,7 +6,6 @@ choice tax_rate
      {"FR",15.0}
      {"BE",11.0};
      
-axiom lexicon (Total, tax);
 axiom german.lexicon (Total, tax)
   {"Gesamtkosten","Steuer"};
 axiom french.lexicon (Total, tax)

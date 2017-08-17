@@ -34,8 +34,20 @@ public abstract class ChainQuery
 {
 	/** Next query or null if tail of chain */
  	protected ChainQuery next;
+ 	/** Object to notify of scope change, null if not required */
+    protected ScopeNotifier scopeNotifier;
 
- 	/**
+    
+    protected ChainQuery()
+    {
+    }
+    
+    protected ChainQuery(ScopeNotifier scopeNotifier)
+    {
+        this.scopeNotifier = scopeNotifier;
+    }
+
+    /**
  	 * Execute query and if not tail, chain to next.
  	 * Sub classes override this method and call it upon completion to handle the chaining
  	 * @param solution The object which stores the query results
@@ -44,8 +56,24 @@ public abstract class ChainQuery
  	 */
 	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain, ExecutionContext context)
 	{
-		return next == null ? EvaluationStatus.COMPLETE : next.executeQuery(solution, templateChain, context);
+	    EvaluationStatus status = EvaluationStatus.COMPLETE;
+	    if (next != null)
+	    {
+	        ScopeNotifier scopeNotifier = next.getScopeNotifier();
+	        if (scopeNotifier != null)
+	            scopeNotifier.notifyScopes();
+	        status =  next.executeQuery(solution, templateChain, context);
+	    }
+		return status;
  	}
+
+    /**
+     * @return the scopeNotifier
+     */
+    public ScopeNotifier getScopeNotifier()
+    {
+        return scopeNotifier;
+    }
 
 	/**
 	 * Set next query in the chain

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial18;
+package au.com.cybersearch2.classy_logic.tutorial12;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -30,110 +30,101 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.tutorial12.ForeignColors;
 
 /**
- * CalculateSquareMiles3Test
+ * ForeignColorsTest
  * @author Andrew Bowley
- * 25Apr.,2017
+ * 17Apr.,2017
  */
-public class CalculateSquareMiles3Test
+public class ForeignColorsTest
 {
     @Test
-    public void testCalculateSquareMiles3() throws Exception
+    public void testForeignColors() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial18", "calc-square-miles3.txt");
+        File testFile = new File("src/main/resources/tutorial12", "foreign-colors.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        CalculateSquareMiles3 calculateSquareMiles = new CalculateSquareMiles3();
-        Iterator<Axiom> axiomterator = calculateSquareMiles.displaySurfaceArea().iterator();
-        while(axiomterator.hasNext())
-            checkSolution(reader, axiomterator.next().toString());
-        ParserContext context = calculateSquareMiles.getParserContext();
+        ForeignColors foreignColors = new ForeignColors();
+        checkSolution(reader, foreignColors.getColorSwatch("german", "Wasser"));
+        checkSolution(reader,foreignColors.getColorSwatch("german", "schwarz"));
+        checkSolution(reader,foreignColors.getColorSwatch("german", "weiß"));
+        checkSolution(reader,foreignColors.getColorSwatch("german", "blau"));
+        checkSolution(reader, foreignColors.getColorSwatch("french", "bleu vert"));
+        checkSolution(reader, foreignColors.getColorSwatch("french", "noir"));
+        checkSolution(reader, foreignColors.getColorSwatch("french", "blanc"));
+        checkSolution(reader, foreignColors.getColorSwatch("french", "bleu"));
+        /*
+        ParserContext context = germanColors.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
         SourceMarker sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query au_surface_area_query (19,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("local colors (14,1)");
         SourceItem sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area:australia.country_area (19,36) (19,72)");
+        assertThat(sourceItem.toString()).isEqualTo("list<term> colors(lexicon){4} (14,1) (14,21)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("scope australia (5,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("scope german (16,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("location=Australia (5,18) (5,39)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("scope global (3,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("location=United States (3,15) (3,40)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom surface_area (1,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area(country,surface_area_Km2)[213] (1,1) (215,29)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query surface_area_query (20,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area:country_area (20,33) (20,59)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc country_area (7,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("country {United States,Australia} (9,3) (9,43)");
+        assertThat(sourceItem.toString()).isEqualTo("language=de (16,15) (16,27)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("double surface_area_Km2 (10,3) (10,25)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string units=km2 (11,3) (11,22)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("?scope.location==United States (12,3) (13,2)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("scope.location==United States&&country_area1_run_once (13,3) (17,0)");
+        assertThat(sourceItem.toString()).isEqualTo("region=DE (16,30) (16,40)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc country_area1 (13,3)");
+        assertThat(sourceMarker.toString()).isEqualTo("axiom shade (12,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area_Km2*=0.3861 (14,5) (14,30)");
+        assertThat(sourceItem.toString()).isEqualTo("shade(name):parameter (12,1) (12,30)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        //System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("choice swatch (5,1)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("choice swatch(name,red,green,blue) (5,1) (6,33)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("units=mi2 (15,5) (16,2)");
-    }
+        assertThat(sourceItem.toString()).isEqualTo("{colors.aqua,0,255,255} (7,4) (7,31)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{colors.black,0,0,0} (8,4) (8,31)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{colors.blue,0,0,255} (9,4) (9,31)");
+        sourceItem = sourceItem.getNext();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("{colors.white,255,255,255} (10,4) (10,31)");
+        assertThat(iterator.hasNext()).isTrue();
+        sourceMarker = iterator.next();
+        ///System.out.println(sourceMarker.toString());
+        assertThat(sourceMarker.toString()).isEqualTo("query german.color_query (18,3)");
+        sourceItem = sourceMarker.getHeadSourceItem();
+        assertThat(sourceItem).isNotNull();
+        //System.out.println(sourceItem.toString());
+        assertThat(sourceItem.toString()).isEqualTo("shade:swatch (18,28) (18,41)");
+        */
+   }
 
-    protected void checkSolution(BufferedReader reader, String axiom)
+    protected void checkSolution(BufferedReader reader, String color)
     {
         try
         {
             String line = reader.readLine();
-            assertThat(axiom).isEqualTo(line);
+            assertThat(color).isEqualTo(line);
         }
         catch (IOException e)
         {

@@ -589,7 +589,7 @@ QuerySpec Query(ParserContext context) :
 {
   queryToken=<IDENTIFIER> 
   {
-    return new QuerySpec(queryToken.image);
+    return new QuerySpec(queryToken.image, true);
   }    
 }
 
@@ -2527,7 +2527,7 @@ Parameter MacroLiteralTerm(ParserContext context) :
 {
   varType=Type(context) "(" literal=LiteralTerm(context) ")"
   {
-    return varType.getParameter(literal);
+    return varType.getParameter(literal, context.getScope());
   }
   |
   literal=Function(context)

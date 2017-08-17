@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.expression.AppenderVariable;
 import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
@@ -276,10 +277,11 @@ public class VariableType
     /**
      * Macro to convert a literal value and return the result in a parameter
      * @param literal Literal value contained in an anonymous parameter
+     * @param scope The scope context
      * @return Parameter object
      * @throws ParseException if type not supported
      */
-    public Parameter getParameter(final Parameter literal) throws ParseException
+    public Parameter getParameter(final Parameter literal, Scope scope) throws ParseException
     {
         Operand operand = null;
         final QualifiedName qname = QualifiedName.ANONYMOUS;
@@ -311,6 +313,8 @@ public class VariableType
         default:
             throw new ParseException(operandType.toString() + " is not a literal type");
         }
+        if ((operandType != OperandType.CURRENCY) || (getPropertyString(QUALIFIER_STRING) == null))
+            ((LocaleListener)operand).onScopeChange(scope);
         operand.evaluate(0);
         return operand;
     }
