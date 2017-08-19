@@ -297,7 +297,16 @@ public class QueryParser
       itemList.setPublic(true);
     return listName.getName();
   }
-  
+ 
+  void  setBuiltinList(QualifiedName qname, ListItemSpec[] listIndexData, ParserContext context)
+  {
+    ParserAssembler parserAssembler = context.getParserAssembler();
+    ListAssembler listAssembler = parserAssembler.getListAssembler();
+    QualifiedName listName = listAssembler.getAxiomListMapping(qname);
+    listIndexData[0].setQualifiedListName(listName);
+    if (listIndexData.length > 1)
+      listIndexData[1].setQualifiedListName(listName);
+  }
 }
 PARSER_END(QueryParser)
 
@@ -1166,6 +1175,8 @@ Operand TemplateTerm(Template template, ParserContext context) :
       isList = false;
       if (listAssembler.existsKey(ListType.context, qname))
         listIndexData[0].getQualifiedListName().toContextName();
+      else if (listAssembler.existsKey(ListType.builtin, qname))
+        setBuiltinList(qname, listIndexData, context);
     } 
   )? 
   ( 
@@ -1900,6 +1911,7 @@ String ListDeclaration(ParserContext context) :
   VariableType varType = null;
   QualifiedName qualifiedAxiomName = null;
   QualifiedName contextName = null;
+  QualifiedName qualifiedTargetName = null;
   Template template = null;
   Template initializeTemplate = null;
   Token beginToken = null;
@@ -1943,6 +1955,16 @@ String ListDeclaration(ParserContext context) :
         ( <LBRACE> template=ListParameters(listName, varType, context) <RBRACE> )
         | 
         target=Name(context)
+        {
+          if (qualifiedAxiomName == null)
+            qualifiedAxiomName = parserAssembler.getContextName(listName);
+          QualifiedName qname = QualifiedName.parseName(target);
+          if (!qname.getScope().isEmpty() && qname.getScope().equals(context.getContextName().getTemplate()))  
+            qualifiedTargetName = qname;
+          else
+            qualifiedTargetName = parserAssembler.getContextName(target);
+          listAssembler.mapAxiomList(qualifiedAxiomName, qualifiedTargetName);
+        }
       )
     )  
     |
@@ -1973,8 +1995,6 @@ String ListDeclaration(ParserContext context) :
       sourceItem.setEnd(delimitToken);
     if (scopeToken != null)
       listAssembler.mapAxiomList(parserAssembler.getContextName(listName), qualifiedAxiomName);
-    else if (target != null)
-      listAssembler.mapAxiomList(qualifiedAxiomName, parserAssembler.getContextName(target));
     if ((axiomToken != null) || (target != null) || (scopeToken != null))
       return listName;
     if ((varType == null) && (qualifiedAxiomName == null))
@@ -2356,12 +2376,15 @@ Operand NamedExpression(String name, ParserContext context) :
   Template parametersTemplate = null;
   QualifiedName listName = context.getQualifiedName(name);
   ParserAssembler parserAssembler = context.getParserAssembler();
+  ListAssembler listAssembler = parserAssembler.getListAssembler();
 }
 {
   indexData=IndexExpression(listName, context) 
   {
     if (parserAssembler.getListAssembler().existsKey(ListType.context, parserAssembler.getContextName(name)))
       indexData[0].getQualifiedListName().toContextName();
+    else if (listAssembler.existsKey(ListType.builtin, listName))
+      setBuiltinList(listName, indexData, context);
     return indexData.length == 1 ? 
     listItemOperand(context, indexData[0]) :  
     axiomContainerOperand(parserAssembler, indexData);

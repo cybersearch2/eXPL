@@ -175,7 +175,7 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
                 arrayData.setCursor(cursor);
         }
         ItemList<?> itemList = null;
-        // Check if the list name mathches one for a calculator query - 
+        // Check if the list name mathches one for a query call - 
         // template name used in place of scope name
         if (!listName.getScope().isEmpty() && 
              (parserAssembler.getScope().findScope(listName.getScope()) == null))
@@ -184,15 +184,13 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             itemList = axiomTermList;
             // Check for special case of a list with a single item
             if ((axiomTermList != null) && (axiomTermList.getAxiomTermNameList().size() == 1))
-            {   // Unwrap axiom term list to select single term result
-                // The value is evaluated as an expression, bypassing the item list altogether
-                expression = assembleQueryTerm(axiomTermList);
-                if (name.isEmpty())
-                    setName(indexData.getSuffix());
-                if (sourceItem != null)
-                    sourceItem.setInformation(expression.toString());
-                setNonDelegate(listName);
-                return;
+            {   // The value is evaluated from the list returned by the call 
+                ListItemSpec[] indexDataArray = 
+                    arrayData == null ?
+                    new ListItemSpec[] { indexData } :
+                    new ListItemSpec[] { arrayData, indexData };
+                delegate = new AxiomVariable(assembleCallReturn(axiomTermList), indexDataArray);
+                // Note itemList will remain null until evaluation occurs
             }
         }
         else
@@ -267,10 +265,6 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         if (rightOperand != null)
             // Specialization
             rightOperand.evaluate(id);
-        // If TermVariable set as expression, it will evaluate and set the value 
-        super.evaluate(id);
-        if (!empty)
-            return EvaluationStatus.COMPLETE;
         int newIndex = delegate.evaluate(id);
         if (empty && (newIndex != -1))
         {   // Update current index and update value too if index in range
@@ -416,27 +410,26 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         setTermValue(delegate.getValue(newIndex));
     }
 
+    /**
+     * Append given value to list
+     * @param value Object to append
+     */
     protected void append(Object value)
     {
         delegate.append(value);
     }
     
     /**
-     * Returns TermVariable operand to unwrap single item of calculator query return list
+     * Returns CallReturnVariable operand to unwrap single item of query call return list
      * @param axiomTermList The return list
      * @return TermVariable object
      */
-    protected TermVariable assembleQueryTerm(AxiomTermList axiomTermList)
+    protected CallReturnVariable assembleCallReturn(AxiomTermList axiomTermList)
     {   // This is a list to return the result of a query call
-        indexData.assemble(axiomTermList);
-        {   // Set operand name to name of single term indicated by index expression name
-            Operand indexExpression = indexData.getItemExpression();
-            setName(indexExpression.getName());
             // Dereference single term of returned axiom
-            QualifiedName listName = axiomTermList.getQualifiedName();
-            QualifiedName termVarQName = new QualifiedName(listName.getName() + listName.incrementReferenceCount(), listName);
-            return new TermVariable(termVarQName, axiomTermList, indexExpression);
-        }
+        QualifiedName listName = axiomTermList.getQualifiedName();
+        QualifiedName termVarQName = new QualifiedName(listName.getName() + listName.incrementReferenceCount(), listName);
+        return new CallReturnVariable(termVarQName, axiomTermList);
     } 
 
     /**
@@ -454,10 +447,15 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         return itemValue;
     }
 
+    /**
+     * Set value with possible operator change for axiom term list assignment
+     * @param value
+     */
     protected void setTermValue(Object value)
     {
         // Preset operator if value type is AxiomTermList, or wrong operator will be set
         DelegateType delegateType = getDelegateType();
+        // Change of operator for axiom term list is blocked if permanent delegate in place (ie. is cursor)
         if (!operator.isProxyAssigned() && (delegateType == DelegateType.ASSIGN_ONLY) && (value instanceof AxiomTermList))
             operator.setProxy(new TermOperator());
         super.setValue(value);
@@ -591,65 +589,6 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
                 itemList = createAxiomList(parserAssembler.getScope().getGlobalScope(), listName, axiomList);
         }
         return itemList;
-    }
-
-    /**
-     * Create empty delegate when expression evaluates the value
-     */
-    private void setNonDelegate(final QualifiedName qname)
-    {
-        delegate = new ListItemDelegate(){
-
-            @Override
-            public ItemList<?> getItemList()
-            {
-                ArrayItemList<Term> itemList = new ArrayItemList<Term>(operator.getTrait().getOperandType(), qname);
-                itemList.assignObject(0, value);
-                return itemList;
-            }
-
-            @Override
-            public Operand getOperand()
-            {
-                return null;
-            }
-
-            @Override
-            public int evaluate(int id)
-            {
-                return 0;
-            }
-
-            @Override
-            public boolean backup(int id)
-            {
-                return false;
-            }
-
-            @Override
-            public void setItemValue(Object value)
-            {
-                
-                ListItemVariable.this.value = value;
-                empty = false;
-            }
-
-            @Override
-            public Object getValue()
-            {
-                return value;
-            }
-
-            @Override
-            public Object getValue(int selection)
-            {
-                return value;
-            }
-
-            @Override
-            public void append(Object value)
-            {
-            }};
     }
 
     @SuppressWarnings("unchecked")

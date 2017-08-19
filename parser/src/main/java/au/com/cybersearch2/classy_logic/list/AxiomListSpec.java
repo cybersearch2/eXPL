@@ -113,6 +113,16 @@ public class AxiomListSpec implements ListItemSpec
         return qualifiedListName;
     }
 
+    /**
+     * setQualifiedListName
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#setQualifiedListName(au.com.cybersearch2.classy_logic.helper.QualifiedName)
+     */
+    @Override
+    public void setQualifiedListName(QualifiedName qualifiedListName)
+    {
+        this.qualifiedListName = qualifiedListName;
+    }
+    
    /**
      * Returns axiom list
      * @return ItemList object or possibly null if using list operand and waiting for evaluation

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial16;
+package au.com.cybersearch2.classy_logic.tutorial14;
 
 import java.io.File;
 import java.util.Iterator;
@@ -52,7 +52,7 @@ query<axiom> marks(grades : score);
 
     public SchoolMarks()
     {
-        File resourcePath = new File("src/main/resources/tutorial16");
+        File resourcePath = new File("src/main/resources/tutorial14");
         queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
     }
 

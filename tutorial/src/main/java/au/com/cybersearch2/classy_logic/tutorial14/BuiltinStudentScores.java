@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial16;
+package au.com.cybersearch2.classy_logic.tutorial14;
 
 import java.io.File;
 import java.util.Iterator;
@@ -29,17 +29,39 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * PetNames
- * Demonstrates library function call
+ * Demonstrates query call and accessing a single return value as a variable.
  * @author Andrew Bowley
  * 14 Sep 2015
  */
-public class FunctionStudentScores
+public class BuiltinStudentScores
 {
-/* function-student-scores.xpl
+/* builtin-student-scores.xpl
 axiom grades (student, english, maths, history)
   {"George", 15, 13, 16}
   {"Sarah", 12, 17, 15}
   {"Amy", 14, 16, 6};
+ 
+list<string> mark =
+{
+   "", // Index = 0 is out of range
+   "f-", "f", "f+", "e-", "e", "e+", "d-", "d", "d+", 
+   "c-", "c", "c+", "b-", "b", "b+", "a-", "a", "a+"
+};
+
+scope school
+{
+   calc subjects
+   + list<axiom> marks_list {};
+  (
+    integer english,
+    integer maths,
+    integer history,
+    marks_list =
+       axiom { "English", mark[english] }
+             { "Math",    mark[maths] }
+             { "History", mark[history] }
+  );
+}
 
 calc score
 (
@@ -50,40 +72,32 @@ calc score
     marks_list[2][0] + ":" + marks_list[2][1] 
 );
 
-query<axiom> marks(grades : score); 
+query<axiom> marks(grades : score);
  
 */
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public FunctionStudentScores()
+    public BuiltinStudentScores()
     {
-        File resourcePath = new File("src/main/resources/tutorial16");
-        queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
+        File resourcePath = new File("src/main/resources/tutorial14");
+        queryProgramParser = new QueryProgramParser(resourcePath);
     }
 
     /**
-     * Compiles the function-student-score script and runs the "marks" query.<br/>
+     * Compiles the builtin-student-scores.xpl script and runs the "marks" query.<br/>
      * The expected results:<br/>
-        score(student = Amy, total = 36)<br/>
-        score(student = George, total = 44)<br/>
-        score(student = Sarah, total = 43)<br/>
+        score(report=George: English:b+, Math:b-, History:a- )<br/>
+        score(report=Sarah: English:c+, Math:a, History:b+ )<br/>
+        score(report=Amy: English:b, Math:a-, History:e+ )<br/>
      * @return Axiom iterator
      */
     public Iterator<Axiom>  generateReport()
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("function-student-scores.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("builtin-student-scores.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("marks");
         return result.axiomIterator("marks");
-    }
-
-    FunctionManager provideFunctionManager()
-    {
-        FunctionManager functionManager = new FunctionManager();
-        SchoolFunctionProvider schoolFunctionProvider = new SchoolFunctionProvider();
-        functionManager.putFunctionProvider(schoolFunctionProvider.getName(), schoolFunctionProvider);
-        return functionManager;
     }
 
     public ParserContext getParserContext()
@@ -99,7 +113,7 @@ query<axiom> marks(grades : score);
     {
         try 
         {
-            FunctionStudentScores schoolMarks = new FunctionStudentScores();
+            BuiltinStudentScores schoolMarks = new BuiltinStudentScores();
             Iterator<Axiom> iterator = schoolMarks.generateReport();
             while(iterator.hasNext())
             {

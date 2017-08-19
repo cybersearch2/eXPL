@@ -127,6 +127,11 @@ public class ArrayItemListTest
         {
         }
 
+        @Override
+        public void setQualifiedListName(QualifiedName qualifiedListName)
+        {
+        }
+
     }
     
 

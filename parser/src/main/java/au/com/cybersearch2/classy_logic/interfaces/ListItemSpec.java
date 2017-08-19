@@ -17,6 +17,11 @@ public interface ListItemSpec
      * @return String
      */
     QualifiedName getQualifiedListName();
+    
+    /**
+     * Sets name of axiom list
+     */
+    void setQualifiedListName(QualifiedName qualifiedListName);
 
     /**
      * Returns unique name for variable to reference axiom list

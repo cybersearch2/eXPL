@@ -142,6 +142,11 @@ public class AxiomListVariableTest
         {
         }
 
+        @Override
+        public void setQualifiedListName(QualifiedName qualifiedListName)
+        {
+        }
+
     }
     
 	private static final String NAME = "AxiomListName";

@@ -148,6 +148,11 @@ public class ListVariableTest
         {
         }
 
+        @Override
+        public void setQualifiedListName(QualifiedName qualifiedListName)
+        {
+        }
+
     }
     
 	private static final String NAME = "ListOperandName";

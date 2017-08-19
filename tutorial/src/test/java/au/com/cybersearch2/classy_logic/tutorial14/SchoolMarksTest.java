@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial16;
+package au.com.cybersearch2.classy_logic.tutorial14;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -31,6 +31,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.tutorial14.SchoolMarks;
 
 /**
  * SchoolMarksTest
@@ -42,7 +43,7 @@ public class SchoolMarksTest
     @Test
     public void testSchoolMarks() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial16", "school-marks.txt");
+        File testFile = new File("src/main/resources/tutorial14", "school-marks.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         SchoolMarks schoolMarks = new SchoolMarks();
         Iterator<Axiom> scoreIterator = schoolMarks.generateReport();

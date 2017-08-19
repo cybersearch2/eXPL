@@ -106,7 +106,9 @@ public class ListAssembler
         case axiom_dynamic:
         {
             QualifiedName listName = axiomListAliases.get(qualifiedName);
-            return (listName != null) && (!listName.getScope().equals("scope"));
+            return (listName != null) && 
+                    (!listName.getScope().equals("scope") && 
+                     !listName.getScope().equals(scope.getParserAssembler().getQualifiedContextname().getTemplate()));
         }
         case term:
             return axiomTermListMap.containsKey(qualifiedName);
@@ -116,6 +118,12 @@ public class ListAssembler
         {
             QualifiedName listName = axiomListAliases.get(qualifiedName);
             return (listName != null) && (listName.getScope().equals("scope"));
+        }
+        case builtin:
+        {
+            QualifiedName listName = axiomListAliases.get(qualifiedName);
+            return (listName != null) && 
+                    listName.getScope().equals(scope.getParserAssembler().getQualifiedContextname().getTemplate());
         }
         default:
             return false;

@@ -126,9 +126,15 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
             if (querySpec == null)
             {
                 QualifiedName qualifiedTemplateName = new QualifiedTemplateName(library.name, qualifiedCallName.getName());
-                if ((library.functionScope == callerScope) && 
-                    (parserAssembler.getTemplateAssembler().getTemplate(qualifiedTemplateName) == null))
-                    throw new ExpressionException("Query \"" + qualifiedCallName.getName() + "\" not found in scope \"" + library + "\"");
+                if (library.functionScope == callerScope)
+                {
+                    if (parserAssembler.getTemplateAssembler().getTemplate(qualifiedTemplateName) == null)
+                    {
+                        qualifiedTemplateName = new QualifiedTemplateName(QualifiedName.EMPTY, qualifiedCallName.getName());
+                        if (parserAssembler.getScope().getGlobalTemplateAssembler().getTemplate(qualifiedTemplateName) == null)
+                            throw new ExpressionException("Query \"" + qualifiedCallName.getName() + "\" not found in scope \"" + library.name + "\"");
+                    }
+                }
                 querySpec = new QuerySpec(callName, false);
                 querySpec.addKeyName(new KeyName(QualifiedName.ANONYMOUS, qualifiedTemplateName));
                 querySpec.setQueryType(QueryType.calculator);
@@ -213,8 +219,19 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
     {
         QuerySpec querySpec = queryParams.getQuerySpec();
         QualifiedName templateName = getCalculatorKeyName(querySpec).getTemplateName();
+        String templateScopeName = templateName.getScope();
         Scope scope = queryParams.getScope();
-        Template template = scope.findTemplate(templateName);
+        Template template = null;
+        if (!templateScopeName.isEmpty())
+        {
+            Scope templateScope = scope.findScope(templateScopeName);
+            if (templateScope == null)
+                throw new ExpressionException("Template \"" + templateName.toString() + "\" not found");
+            if (isCallInScope)
+                isCallInScope = scope.getName().equals(templateScope.getName());
+            scope = templateScope;
+        }
+        template = scope.findTemplate(templateName);
         if ((template == null) && !templateName.getScope().isEmpty())
         {
             QualifiedName globalTemplateName = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, templateName.getTemplate());

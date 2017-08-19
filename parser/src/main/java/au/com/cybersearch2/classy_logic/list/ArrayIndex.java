@@ -192,6 +192,16 @@ public class ArrayIndex implements ListItemSpec
     }
 
     /**
+     * setQualifiedListName
+     * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#setQualifiedListName(au.com.cybersearch2.classy_logic.helper.QualifiedName)
+     */
+    @Override
+    public void setQualifiedListName(QualifiedName qualifiedListName)
+    {
+        qname = new QualifiedName(qualifiedListName.getScope(), qualifiedListName.getTemplate(), qualifiedListName.getName());
+    }
+    
+    /**
      * getItemIndex
      * @see au.com.cybersearch2.classy_logic.interfaces.ListItemSpec#getItemIndex()
      */
@@ -279,4 +289,5 @@ public class ArrayIndex implements ListItemSpec
     {
         return cursor == null ? 0 : cursor.getPosition();
     }
+
 }

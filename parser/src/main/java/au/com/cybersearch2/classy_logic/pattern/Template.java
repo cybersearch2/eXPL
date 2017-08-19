@@ -128,7 +128,21 @@ public class Template extends TermList<Operand>
         for (Operand operand: master.termList)
             termList.add(operand);
         termCount = termList.size();
-        initData =  new List[]{EMPTY_TERM_LIST,EMPTY_TERM_LIST};
+        initData =  new List[2];
+        if (master.initData[0].size() == 0)
+            initData[0] = EMPTY_TERM_LIST;
+        else
+        {
+            initData[0] = new ArrayList<Term>();
+            initData[0].addAll(master.initData[0]);
+        }
+        if (master.initData[1].size() == 0)
+            initData[1] = EMPTY_TERM_LIST;
+        else
+        {
+            initData[1] = new ArrayList<Term>();
+            initData[1].addAll(master.initData[1]);
+        }
     }
 
     /**
