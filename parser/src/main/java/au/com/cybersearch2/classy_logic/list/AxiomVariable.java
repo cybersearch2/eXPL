@@ -22,6 +22,8 @@ import au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 
 /**
  * AxiomVariable
@@ -105,7 +107,10 @@ public class AxiomVariable implements ListItemDelegate
                 listOperand.evaluate(id);
             if (listOperand.isEmpty())
                 throw new ExpressionException("List \"" + axiomListSpec.getListName() + "\" evaluation failed");
-            itemList = (ItemList<?>) listOperand.getValue();
+            if (listOperand.getValueClass() == Axiom.class)
+                itemList = wrapAxiom((Axiom)listOperand.getValue());
+            else
+                itemList = (ItemList<?>) listOperand.getValue();
         }
         axiomListSpec.evaluate(itemList, id);
         // Assume 2 dimensions or AxiomTermList with 1 dimension.
@@ -223,6 +228,17 @@ public class AxiomVariable implements ListItemDelegate
             axiomListSpec.setAxiomIndex(appendIndex);
         else
             axiomListSpec.setItemIndex(appendIndex);
+    }
+
+    private ItemList<?> wrapAxiom(Axiom axiom)
+    {
+        Term term = axiom.getTermByIndex(0);
+        if (ItemList.class.isAssignableFrom(term.getValueClass()))
+            return (ItemList<?>) term.getValue();
+        AxiomArchetype archetype = (AxiomArchetype) axiom.getArchetype();
+        AxiomTermList axiomTermList = new AxiomTermList(archetype.getQualifiedName(), archetype.getQualifiedName());
+        axiomTermList.getAxiomListener().onNextAxiom(archetype.getQualifiedName(), axiom);
+        return axiomTermList;
     }
 
 }

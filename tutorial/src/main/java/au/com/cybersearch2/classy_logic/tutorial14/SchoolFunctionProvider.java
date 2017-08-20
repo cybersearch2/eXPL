@@ -42,6 +42,9 @@ public class SchoolFunctionProvider implements FunctionProvider
         "f-", "f", "f+", "e-", "e", "e+", "d-", "d", "d+", 
         "c-", "c", "c+", "b-", "b", "b+", "a-", "a", "a+"
     };
+ 
+    static String SUBJECT = "subject";
+    static String MARK = "mark";
     
      /**
      * @see au.com.cybersearch2.classy_logic.interfaces.FunctionProvider#getName()
@@ -77,21 +80,21 @@ public class SchoolFunctionProvider implements FunctionProvider
                     AxiomArchetype archetype = (AxiomArchetype) axiom.getArchetype();
                     QualifiedName listName = QualifiedName.parseGlobalName("subjects");
                     AxiomList axiomList = new AxiomList(listName, archetype.getQualifiedName());
-                    axiom.addTerm(new Parameter(Term.ANONYMOUS, "English"));
-                    axiom.addTerm(new Parameter(Term.ANONYMOUS, MARKS[english - 1]));
+                    axiom.addTerm(new Parameter(SUBJECT, "English"));
+                    axiom.addTerm(new Parameter(MARK, MARKS[english - 1]));
                     archetype.clearMutable();
                     AxiomTermList termList = new AxiomTermList(listName, archetype.getQualifiedName());
                     termList.setAxiom(axiom);
                     axiomList.assignItem(0, termList);
                     axiom = new Axiom(archetype);
-                    axiom.addTerm(new Parameter(Term.ANONYMOUS, "Math"));
-                    axiom.addTerm(new Parameter(Term.ANONYMOUS, MARKS[maths - 1]));
+                    axiom.addTerm(new Parameter(SUBJECT, "Math"));
+                    axiom.addTerm(new Parameter(MARK, MARKS[maths - 1]));
                     termList = new AxiomTermList(listName, archetype.getQualifiedName());
                     termList.setAxiom(axiom);
                     axiomList.assignItem(1, termList);
                     axiom = new Axiom(archetype);
-                    axiom.addTerm(new Parameter(Term.ANONYMOUS, "History"));
-                    axiom.addTerm(new Parameter(Term.ANONYMOUS, MARKS[history - 1]));
+                    axiom.addTerm(new Parameter(SUBJECT, "History"));
+                    axiom.addTerm(new Parameter(MARK, MARKS[history - 1]));
                     termList = new AxiomTermList(listName, archetype.getQualifiedName());
                     termList.setAxiom(axiom);
                     axiomList.assignItem(2, termList);

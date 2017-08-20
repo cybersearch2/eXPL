@@ -1,12 +1,12 @@
 include "world_currency.xpl";
 
-calc total
+template total
 (
   currency $ country amount,
   amount *= 1.1
 );
 
-calc format_total
+template format_total
 (
   string total_text = total.country + " Total + gst: " + total.amount.format
 );

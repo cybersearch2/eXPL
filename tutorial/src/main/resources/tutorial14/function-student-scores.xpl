@@ -7,9 +7,9 @@ calc score
 (
   <- school.subjects(english, maths, history) -> (marks_list),
   string report = student + ": " + 
-    marks_list[0][0] + ":" + marks_list[0][1] + ", " + 
-    marks_list[1][0] + ":" + marks_list[1][1] + ", " + 
-    marks_list[2][0] + ":" + marks_list[2][1] 
+    marks_list[0].subject + ":" + marks_list[0].mark + ", " + 
+    marks_list[1].subject + ":" + marks_list[1].mark + ", " + 
+    marks_list[2].subject + ":" + marks_list[2].mark 
 );
 
 query<axiom> marks(grades : score);

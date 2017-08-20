@@ -19,9 +19,9 @@ scope school
     integer maths,
     integer history,
     marks_list =
-       axiom { "English", mark[english] }
-             { "Math",    mark[maths] }
-             { "History", mark[history] }
+       axiom { subject="English", mark=mark[english] }
+             { subject="Math",    mark=mark[maths] }
+             { subject="History", mark=mark[history] }
   );
   
   query report(subjects);
@@ -31,9 +31,9 @@ calc score
 (
   <- school.report(english, maths, history) -> (marks_list),
   string report = student + ": " + 
-    marks_list[0][0] + ":" + marks_list[0][1] + ", " + 
-    marks_list[1][0] + ":" + marks_list[1][1] + ", " + 
-    marks_list[2][0] + ":" + marks_list[2][1] 
+    marks_list[0].subject + ":" + marks_list[0].mark + ", " + 
+    marks_list[1].subject + ":" + marks_list[1].mark + ", " + 
+    marks_list[2].subject + ":" + marks_list[2].mark 
 );
 
 query<axiom> marks(grades : score);

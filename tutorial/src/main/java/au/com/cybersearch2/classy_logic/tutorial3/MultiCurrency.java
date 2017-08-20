@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial12;
+package au.com.cybersearch2.classy_logic.tutorial3;
 
 import java.io.File;
 import java.util.Iterator;
@@ -42,13 +42,13 @@ public class MultiCurrency
 /* multi-currency.xpl
 include "world_currency.xpl";
 
-calc total
+template total
 (
   currency $ country amount,
   amount *= 1.1
 );
 
-calc format_total
+template format_total
 (
   string total_text = total.country + " Total + gst: " + total.amount.format
 );
@@ -80,7 +80,7 @@ query<axiom> price_query(price : total) -> (format_total);
 	 */
 	public Iterator<Axiom> getFormatedAmounts()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial12/multi-currency.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial3/multi-currency.xpl");
         parserContext = queryProgramParser.getContext();
 		// Use this query to see the total amount before it is formatted
 		// Note adjustment of decimal places to suite currency.

@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial12;
+package au.com.cybersearch2.classy_logic.tutorial3;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -31,6 +31,7 @@ import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.tutorial3.MultiCurrency;
 
 /**
  * MultiCurrencyTest
@@ -42,7 +43,7 @@ public class MultiCurrencyTest
     @Test
     public void testMultiCurrency() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial12", "multi-currency.txt");
+        File testFile = new File("src/main/resources/tutorial3", "multi-currency.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         MultiCurrency multiCurrency = new MultiCurrency();
         Iterator<Axiom> priceIterator = multiCurrency.getFormatedAmounts();
@@ -69,7 +70,7 @@ public class MultiCurrencyTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc format_total (9,1)");
+        assertThat(sourceMarker.toString()).isEqualTo("template format_total (9,1)");
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
@@ -77,7 +78,7 @@ public class MultiCurrencyTest
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("calc total (3,1)"); 
+        assertThat(sourceMarker.toString()).isEqualTo("template total (3,1)"); 
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

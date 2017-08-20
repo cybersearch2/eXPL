@@ -221,7 +221,7 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         }
         if ((itemList == null) && (delegate == null))
             throw new ExpressionException("List \"" + indexData.getListName() + "\" cannot be found");
-        if (itemList != null)
+        if ((itemList != null) && (delegate == null))
             setDelegate(itemList);
         // Set term name of this variable now at last opportunity. Append the suffix of the index used to select the value.
         // The suffix is formed using available data, and may be a name required by an index operand to achieve unification

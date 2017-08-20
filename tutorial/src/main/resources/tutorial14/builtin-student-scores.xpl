@@ -17,9 +17,9 @@ calc subjects
   integer maths,
   integer history,
   marks_list =
-     axiom { "English", mark[english] }
-           { "Math",    mark[maths] }
-           { "History", mark[history] }
+       axiom { subject="English", mark=mark[english] }
+             { subject="Math",    mark=mark[maths] }
+             { subject="History", mark=mark[history] }
 );
 
 calc total_percent
@@ -39,9 +39,9 @@ calc score
   <- subjects(english, maths, history) -> (marks_list),
   <- total_percent(english, maths, history) -> (label, text_value),
   string report = student + ": " + 
-    marks[0][0] + ":" + marks[0][1] + ", " + 
-    marks[1][0] + ":" + marks[1][1] + ", " + 
-    marks[2][0] + ":" + marks[2][1],
+    marks[0].subject + ":" + marks[0].mark + ", " + 
+    marks[1].subject + ":" + marks[1].mark + ", " + 
+    marks[2].subject + ":" + marks[2].mark, 
 . report += ", " + summary->label + ": " + summary->text_value
 );
 

@@ -75,8 +75,8 @@ query<axiom> marks(grades : score);
     FunctionManager provideFunctionManager()
     {
         FunctionManager functionManager = new FunctionManager();
-        MathFunctionProvider mathFunctionProvider = new MathFunctionProvider();
-        functionManager.putFunctionProvider(mathFunctionProvider.getName(), mathFunctionProvider);
+        SchoolFunctionProvider schoolFunctionProvider = new SchoolFunctionProvider();
+        functionManager.putFunctionProvider(schoolFunctionProvider.getName(), schoolFunctionProvider);
         return functionManager;
     }
 
