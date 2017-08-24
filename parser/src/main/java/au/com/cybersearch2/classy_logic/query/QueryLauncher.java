@@ -25,6 +25,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -142,7 +143,10 @@ public class QueryLauncher implements DebugTarget
         if (calculatorAxiom == null)
             calculatorAxiom = getCalculatorAxiom(queryParams.getScope(), chainQuerySpec);
         ScopeNotifier scopeNotifier = getScopeNotification(headQuery, queryParams.getScope(), templateScope);
-        headQuery.chainCalculator(calculatorAxiom, calculatorTemplate, scopeNotifier);
+        CalculateChainQuery chainQuery = headQuery.chainCalculator(calculatorAxiom, calculatorTemplate, scopeNotifier);
+        List<Term> properties = chainQuerySpec.getProperties(keyName.getTemplateName().toString());
+        if (properties != null)
+            chainQuery.setProperties(properties);
     }
 
     /**

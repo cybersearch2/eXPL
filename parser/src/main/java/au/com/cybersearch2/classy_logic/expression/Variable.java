@@ -51,6 +51,7 @@ public class Variable extends DelegateOperand implements RightOperand
     /**
      * Construct a Variable object with specified term name
      * @param qname Qualified name
+     * @param termName Term name
      */
     public Variable(QualifiedName qname, String termName) 
     {
@@ -67,6 +68,18 @@ public class Variable extends DelegateOperand implements RightOperand
 		this(qname);
 		this.expression = expression;
 	}
+
+    /**
+     * Construct a Variable object which uses an Expression operand to evaluate it's value
+     * @param qname Qualified name of variable
+     * @param termName Term name
+     * @param expression Operand to initialize this Variable upon evaluation
+     */
+    public Variable(QualifiedName qname, String termName, Operand expression) 
+    {
+        this(qname, termName);
+        this.expression = expression;
+    }
 
     /**
      * @return the delegateType

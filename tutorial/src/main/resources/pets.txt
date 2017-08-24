@@ -1,1 +1,0 @@
-<pet><species>dog</species><name>lassie</name></pet>

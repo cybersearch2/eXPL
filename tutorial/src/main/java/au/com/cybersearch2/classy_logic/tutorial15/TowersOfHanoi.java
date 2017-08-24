@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial19;
+package au.com.cybersearch2.classy_logic.tutorial15;
 
 import java.io.File;
 
@@ -32,19 +32,38 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  */
 public class TowersOfHanoi
 {
+/*
+     * 
+     
+*/
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
     public TowersOfHanoi()
     {
-        File resourcePath = new File("src/main/resources/tutorial19");
+        File resourcePath = new File("src/main/resources/tutorial15");
         queryProgramParser = new QueryProgramParser(resourcePath, provideFunctionManager());
     }
 
     /**
      * Compiles the towers-of-hanoi.xpl script and runs the "" queries.<br/>
      * The expected results:<br/>
-     * @return Axiom iterator
+         n=1<br/>
+        Move disk 1 from rod A to rod C<br/>
+<br/>        
+         n=2<br/>
+        Move disk 1 from rod A to rod B<br/>
+        Move disk 2 from rod A to rod C<br/>
+        Move disk 1 from rod B to rod C<br/>
+<br/>        
+         n=3<br/>
+        Move disk 1 from rod A to rod C<br/>
+        Move disk 2 from rod A to rod B<br/>
+        Move disk 1 from rod C to rod B<br/>
+        Move disk 3 from rod A to rod C<br/>
+        Move disk 1 from rod B to rod A<br/>
+        Move disk 2 from rod B to rod C<br/>
+        Move disk 1 from rod A to rod C<br/>    
      */
     public void  calculateTowers()
     {

@@ -132,12 +132,6 @@ public class QueryParams
 
         	    }
     		}
-        for (Template template: templateList)
-        {
-            List<Term> properties = querySpec.getProperties(template.getName()); 
-            if (properties != null)
-                template.setInitData(properties);
-        }
 	}
 
     /**

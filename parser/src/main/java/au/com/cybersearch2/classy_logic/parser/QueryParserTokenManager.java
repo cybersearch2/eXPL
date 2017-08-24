@@ -66,6 +66,7 @@ import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
+import au.com.cybersearch2.classy_logic.helper.NameParser;
 
 /** Token Manager. */
 public class QueryParserTokenManager implements QueryParserConstants

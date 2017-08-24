@@ -86,6 +86,7 @@ import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
+import au.com.cybersearch2.classy_logic.helper.NameParser;
 
 
 /** 
@@ -1254,10 +1255,10 @@ Operand TemplateTerm(Template template, ParserContext context) :
       var = new LiteralListOperand(qname, literalList, isNot);
     else 
       var = operandMap.getOperand(qname);
-    if ((var != null) && isDeclaration)
+    if ((var != null) && isDeclaration && !isList)
        operandMap.duplicateOperandCheck(qname); 
-    if ((var == null) && !hasOperand)
-      var = varType.getInstance(name);
+    if ((var == null) && (!hasOperand || isList))
+      var =  isList ? varType.getInstance(context.getQualifiedName(name)) : varType.getInstance(name);
     if (var == null)
       var = operandMap.addOperand(name, expression, parserAssembler.getQualifiedContextname());
     if ((listIndexData == null) && (!hasOperand))
@@ -1958,8 +1959,13 @@ String ListDeclaration(ParserContext context) :
         {
           if (qualifiedAxiomName == null)
             qualifiedAxiomName = parserAssembler.getContextName(listName);
+          boolean isGlobalTarget = target.endsWith("@");
+          if (isGlobalTarget)
+            target = target.substring(0, target.length() - 1);
           QualifiedName qname = QualifiedName.parseName(target);
-          if (!qname.getScope().isEmpty() && qname.getScope().equals(context.getContextName().getTemplate()))  
+          if (isGlobalTarget)
+            qualifiedTargetName = QualifiedName.parseGlobalName(target);
+          else if (!qname.getScope().isEmpty() && qname.getScope().equals(context.getContextName().getTemplate()))  
             qualifiedTargetName = qname;
           else
             qualifiedTargetName = parserAssembler.getContextName(target);
@@ -2027,8 +2033,10 @@ void CursorDeclaration(ParserContext context) :
   Token listToken;
   Token delimitToken;
   String cursorName;
+  Token scopeToken = null;
   VariableType varType = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
+  ListAssembler listAssembler = parserAssembler.getListAssembler();
 }
 {
   keywordToken=<CURSOR> 
@@ -2039,10 +2047,16 @@ void CursorDeclaration(ParserContext context) :
     context.setSourceMarker(keywordToken, cursorName);
     context.setSourceItemPending(false);
   }
-  "(" listToken=<IDENTIFIER> ")" 
+  "(" listToken=<IDENTIFIER> ( "@" scopeToken=<SCOPE> )? ")" 
   delimitToken=";"
   {
-    QualifiedName listName = context.getQualifiedName(listToken.image);
+    QualifiedName listName = null;
+    if (scopeToken != null)
+      listName = new QualifiedName(scopeToken.image, QualifiedName.EMPTY, listToken.image);
+    else
+      listName = context.getQualifiedName(listToken.image);
+    if (scopeToken != null)
+      listAssembler.mapAxiomList(parserAssembler.getContextName(cursorName), listName);
     QualifiedName qname = parserAssembler.getContextName(cursorName);
     ArrayIndex arrayIndex = new ArrayIndex(listName, 0, "cursor");
     Cursor cursor = new Cursor(qname, listName, arrayIndex);
@@ -2346,26 +2360,42 @@ void ParameterDeclaration(QualifiedName qualifiedAxiomName, ParserAssembler pars
 
 String Name(ParserContext context) :
 {
-  String name;
   Token partToken;
+  StringBuilder builder = new StringBuilder();
 }
 {
   partToken=<IDENTIFIER> 
   {
-    name = partToken.image;
+    builder.append(partToken.image);
     context.onTokenIntercept(partToken);
   }
+  ( LOOKAHEAD(2) NamePart(builder) ( LOOKAHEAD(2) NamePart(builder) )? )?
+  {
+    String name = builder.toString();
+    //if (name.indexOf("@") == -1)
+      return name;
+    //NameParser nameParser = new NameParser();
+    //return nameParser.parse(name).toString();
+  }
+}
+
+void NamePart(StringBuilder builder) :
+{
+  Token partToken;
+}
+{
+  "@"
+  {
+    builder.append('@');
+  }
+  |
   (
-    LOOKAHEAD(2)
     "." 
     partToken=<IDENTIFIER>
     {
-      name += ("." + partToken.image);
+     builder.append('.').append(partToken.image);
     } 
-  )*
-  {
-    return name;
-  }
+  )
 }
 
 Operand NamedExpression(String name, ParserContext context) :
@@ -2440,7 +2470,7 @@ Template Parameters(String callName, ParserContext context, boolean nameRequired
     expression=ParameterExpression(context, nameRequired)
     { 
       template.addTerm(expression);
-     }
+    }
   )
   (
     "," 
@@ -2463,19 +2493,37 @@ Operand ParameterExpression(ParserContext context, boolean nameRequired) :
   Operand expression = null;
   VariableType varType = null;
   ListItemSpec[] listIndexData = null;
+  QualifiedName listName = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
   OperandMap operandMap = parserAssembler.getOperandMap();
 }
 {
-  (varType=Type(context))? 
   (
-    (identifier=<IDENTIFIER> ( listIndexData=IndexExpression(context.getQualifiedName(identifier.image), context) )?) 
-    | 
-    parameter=LiteralTerm(context)
-  )  
-  ( "=" expression=Expression(context))? 
+    ( varType=Type(context) )? 
+    (
+      identifier=<IDENTIFIER> 
+      {
+        listName = context.getQualifiedName(identifier.image);
+      }
+      ( 
+        listIndexData=IndexExpression(listName, context) 
+        {
+          ListAssembler listAssembler = parserAssembler.getListAssembler();
+          if (listAssembler.existsKey(ListType.context, parserAssembler.getContextName(listName.getName())))
+            listIndexData[0].getQualifiedListName().toContextName();
+          else if (listAssembler.existsKey(ListType.builtin, listName))
+            setBuiltinList(listName, listIndexData, context);
+        }
+      )? 
+    )
+    |
+    parameter=LiteralTerm(context) 
+  )
+  ( "=" expression=Expression(context) )? 
   {
      String name = (identifier == null) ? Term.ANONYMOUS : identifier.image;
+     if (listIndexData !=null)
+       return listIndexData.length == 1 ? listItemOperand(context, name, listIndexData[0]) : axiomContainerOperand(parserAssembler, name, listIndexData);
      QualifiedName qname = parserAssembler.getContextName(name);
      Operand var = null;
      if (parameter != null)
@@ -2489,9 +2537,7 @@ Operand ParameterExpression(ParserContext context, boolean nameRequired) :
      if (operandMap.hasOperand(name, parserAssembler.getQualifiedContextname()))
          var = operandMap.addOperand(name, expression, parserAssembler.getQualifiedContextname());
      if (var != null)
-       {if (true) return var;}
-     if (listIndexData !=null)
-       var = listIndexData.length == 1 ? listItemOperand(context, name, listIndexData[0]) : axiomContainerOperand(parserAssembler, name, listIndexData);
+       return var;
      if (var != null)
        return var;
      if (varType == null)

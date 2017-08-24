@@ -50,4 +50,5 @@ template species
   waterfowl += axiom waterfowl { bird , voice, feet = order.feet } ? family.order == "waterfowl"
 );
 
-query birds (order:order, family:family, bird:species);  
+query<axiom> birds (order:order, family:family, bird:species);
+  

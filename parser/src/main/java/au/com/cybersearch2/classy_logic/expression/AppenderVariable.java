@@ -32,11 +32,12 @@ public class AppenderVariable extends Variable
     /**
      * Construct AppenderVariable object
      * @param qname Qualified name of variable
+     * @param termName Term name
      * @param expression Concatenation expression
      */
-    public AppenderVariable(QualifiedName qname, Operand expression)
+    public AppenderVariable(QualifiedName qname, String termName, Operand expression)
     {
-        super(qname, expression);
+        super(qname, termName, expression);
 
     }
 

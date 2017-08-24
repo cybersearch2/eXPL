@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial19;
+package au.com.cybersearch2.classy_logic.tutorial15;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
@@ -50,7 +50,7 @@ public class TowersOfHanoiTest
         
         public SystemFunctionProvider() throws IOException
         {
-            File testFile = new File("src/main/resources/tutorial19", "towers-of-hanoi.txt");
+            File testFile = new File("src/main/resources/tutorial15", "towers-of-hanoi.txt");
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
          }
         
@@ -109,7 +109,7 @@ public class TowersOfHanoiTest
     @Test
     public void testTowersOfHanoi() throws Exception
     {
-        File resourcePath = new File("src/main/resources/tutorial19");
+        File resourcePath = new File("src/main/resources/tutorial15");
         FunctionManager functionManager = new FunctionManager();
         SystemFunctionProvider systemFunctionProvider = null;
         try

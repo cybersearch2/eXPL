@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.list;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
+import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -89,6 +90,11 @@ public class Cursor extends ListItemVariable
         return cursorIndex;
     }
 
+    public ItemList<?> getItemList()
+    {
+        return delegate.getItemList();
+    }
+    
     /**
      * Sets index 
      * @param index Next cursor index (1 less than actual index)
@@ -246,5 +252,6 @@ public class Cursor extends ListItemVariable
         }
         return cursorValue;
     }
+
 
 }

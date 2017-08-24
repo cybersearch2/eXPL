@@ -164,10 +164,9 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         Operand operand = null;
         if (listScope == null)
             operand = parserAssembler.getOperandMap().getOperand(parserAssembler.getContextName(listName.getName()));
-        Cursor cursor = null;
         if ((operand != null) && (operand instanceof Cursor))
         {
-            cursor = (Cursor) operand;
+            Cursor cursor = (Cursor) operand;
             listName = cursor.getListName();
             if (arrayData == null)
                 indexData.setCursor(cursor);
@@ -358,6 +357,7 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             ItemList<?> itemList = contextMap.get(listName);
             if (itemList != null)
             {
+                delegate = null;
                 setDelegate(itemList);
                 // Set term name of this variable now at last opportunity. Append the suffix of the index used to select the value.
                 // The suffix is formed using available data, and may be a name required by an index operand to achieve unification
@@ -512,6 +512,20 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         ListAssembler listAssembler = globalParserAssembler.getListAssembler();
         // Find all context lists and map by name in contextMap
         boolean globalListExists = false;
+        Operand operand = parserAssembler.getOperandMap().getOperand(parserAssembler.getContextName(contextListName));
+        if ((operand != null) && (operand instanceof Cursor))
+        {
+            Cursor cursor = (Cursor) operand;
+            contextListName = cursor.getListName().getName();
+            indexData.setQualifiedListName(cursor.getListName());
+            if (arrayData == null)
+                indexData.setCursor(cursor);
+            else
+            {
+                arrayData.setCursor(cursor);
+                arrayData.setQualifiedListName(cursor.getListName());
+            }
+        }
         for (String scopeName: globalScope.getScopeNames())
         {
             QualifiedName key = new QualifiedName(scopeName, contextListName);
@@ -558,7 +572,8 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
     private ItemList<?> createAxiomList(Scope globalScope, QualifiedName key, List<Axiom> axiomList)
     {
         AxiomArchetype archetype = globalScope.getGlobalAxiomAssembler().getAxiomArchetype(key);
-        AxiomContainer axiomContainer = (arrayData != null) ? new AxiomList(key, key) : new AxiomTermList(key, key);
+        //AxiomContainer axiomContainer = (arrayData != null) ? new AxiomList(key, key) : new AxiomTermList(key, key);
+        AxiomContainer axiomContainer = new AxiomList(key, key);
         if (archetype != null)
             axiomContainer.setAxiomTermNameList(archetype.getTermNameList());
         globalScope.getGlobalListAssembler().setAxiomContainer(axiomContainer, axiomList);
@@ -607,10 +622,14 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         case DECIMAL:
         case CURRENCY:
             return new ItemVariable<BigDecimal>((ItemList<BigDecimal>)itemList, indexData);
+        case AXIOM:
+            // Select axiom term list if one dimension and list has 1 item
+            if ((arrayData != null) || (itemList.getLength() != 1))
+                return new ItemVariable<AxiomTermList>((AxiomList)itemList, indexData);
+            else
+                return new ItemVariable<Term>(((AxiomList)itemList).getItem(0), indexData);
         case TERM:
             return new ItemVariable<Term>((AxiomTermList)itemList, indexData);
-        case AXIOM:
-            return new ItemVariable<AxiomTermList>((AxiomList)itemList, indexData);
         default:
        }
         // Not expected

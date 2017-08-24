@@ -59,9 +59,9 @@ query<axiom> marks(grades : score);
     /**
      * Compiles the school-marks.xpl script and runs the "marks" query.<br/>
      * The expected results:<br/>
-        score(student = Amy, total = 36)<br/>
-        score(student = George, total = 44)<br/>
-        score(student = Sarah, total = 43)<br/>
+        score(report=George: English:b+, Math:b-, History:a-)<br/>
+        score(report=Sarah: English:c+, Math:a, History:b+)<br/>
+        score(report=Amy: English:b, Math:a-, History:e+)<br/>     
      * @return Axiom iterator
      */
     public Iterator<Axiom>  generateReport()

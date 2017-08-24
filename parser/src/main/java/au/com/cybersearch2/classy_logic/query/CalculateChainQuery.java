@@ -16,13 +16,16 @@
 package au.com.cybersearch2.classy_logic.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -35,6 +38,13 @@ import au.com.cybersearch2.classy_logic.pattern.Template;
  */
 public class CalculateChainQuery extends ChainQuery 
 {
+    private static List<Term> EMPTY_PROPERTIES;
+    
+    static
+    {
+        EMPTY_PROPERTIES = Collections.emptyList();
+    }
+    
 	/** Optional axiom to initialize Calculator */
 	protected Axiom axiom;
 	/**Template to unify and evaluate */
@@ -43,6 +53,8 @@ public class CalculateChainQuery extends ChainQuery
     protected List<AxiomListener> axiomListenerList;
     /** Choice set if template.isChoice() returns true */
     protected Choice choice;
+    /** Calculator properties - may be empty */
+    protected List<Term> properties;
 
 	/**
 	 * Create a CalculateChainQuery object
@@ -53,6 +65,7 @@ public class CalculateChainQuery extends ChainQuery
 	    super(scopeNotifier);
 		this.axiom = axiom;
 		this.template = template;
+		this.properties = EMPTY_PROPERTIES;
 	}
 
 	/**
@@ -65,6 +78,22 @@ public class CalculateChainQuery extends ChainQuery
 	}
 
     /**
+     * @return the properties
+     */
+    public List<Term> getProperties()
+    {
+        return properties;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(List<Term> properties)
+    {
+        this.properties = properties;
+    }
+
+    /**
  	 * Execute query and if not tail, chain to next.
  	 * Sub classes override this method and call it upon completion to handle the chaining
  	 * @param solution The object which stores the query results
@@ -74,6 +103,19 @@ public class CalculateChainQuery extends ChainQuery
 	@Override
 	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain, ExecutionContext context)
 	{
+	    // Backup template if already in chain
+	    Iterator<Template> iterator = templateChain.iterator();
+	    while (iterator.hasNext())
+	    {
+	        if (iterator.next().getId() == template.getId())
+	        {
+	            template.backup(true);
+	            break;
+	        }
+	    }
+	    // Set properties attached to query
+	    if (!properties.isEmpty())
+	        template.setInitData(properties);
 	    solution.remove(template.getQualifiedName().toString());
 		Calculator calculator = new Calculator();
 		if (axiomListenerList != null)

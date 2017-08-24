@@ -467,7 +467,9 @@ public class VariableType
         QualifiedName appenderName = new QualifiedName(qname.getName() + "_appender", qname);
         Appender appender = new Appender(appenderName, qname, arrayIndex);
         Operand operand = new Variable(operandName, expression);
-        Variable var = new AppenderVariable(qname, operand);
+        String name = qname.getName();
+        qname = new QualifiedName(name + qname.incrementReferenceCount(), qname);
+        Variable var = new AppenderVariable(qname, name, operand);
         var.setRightOperand(appender);
         ParserTask parserTask = parserAssembler.addPending(appender);
         parserTask.setPriority(ParserTask.Priority.variable.ordinal());

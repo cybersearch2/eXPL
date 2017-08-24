@@ -35,6 +35,7 @@ import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -117,8 +118,9 @@ public class ChainQueryExecuter implements DebugTarget
 	 * @param axiom Optional axiom to initialize Calculator
 	 * @param template Template to unify and evaluate
      * @param scopeNotifier Object to notify of scope change, null if not required
+     * @return CalculateChainQuery object to execute calculator
 	 */
-	public void chainCalculator(Axiom axiom, Template template, ScopeNotifier scopeNotifier) 
+	public CalculateChainQuery chainCalculator(Axiom axiom, Template template, ScopeNotifier scopeNotifier) 
 	{
 		if (axiom == null)
 		{
@@ -140,6 +142,7 @@ public class ChainQueryExecuter implements DebugTarget
 		if (axiomListenerMap != null)
 		    bindCalculatorAxiomListener(template);
 		addChainQuery(chainQuery);
+		return chainQuery;
 	}
 
     /**

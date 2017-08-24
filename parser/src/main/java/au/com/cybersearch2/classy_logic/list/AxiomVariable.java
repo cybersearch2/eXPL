@@ -107,7 +107,9 @@ public class AxiomVariable implements ListItemDelegate
                 listOperand.evaluate(id);
             if (listOperand.isEmpty())
                 throw new ExpressionException("List \"" + axiomListSpec.getListName() + "\" evaluation failed");
-            if (listOperand.getValueClass() == Axiom.class)
+            if ((listOperand.getValueClass() == Null.class) && (listOperand instanceof Cursor))
+                itemList = ((Cursor)listOperand).getItemList();
+            else if (listOperand.getValueClass() == Axiom.class)
                 itemList = wrapAxiom((Axiom)listOperand.getValue());
             else
                 itemList = (ItemList<?>) listOperand.getValue();

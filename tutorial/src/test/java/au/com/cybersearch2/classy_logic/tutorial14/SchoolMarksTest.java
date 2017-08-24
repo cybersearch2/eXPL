@@ -51,6 +51,7 @@ public class SchoolMarksTest
         {
             checkSolution(reader, scoreIterator.next().toString());
         }
+        /*
         ParserContext context = schoolMarks.getParserContext();
         Iterator<SourceMarker> iterator = context.getSourceMarkerSet().iterator();
         assertThat(iterator.hasNext()).isTrue();
@@ -82,6 +83,7 @@ public class SchoolMarksTest
         //System.out.println(sourceItem.toString());
         assertThat(sourceItem.toString()).isEqualTo("integer total=math.add(english ... history) (7,25) (7,72)");
         assertThat(iterator.hasNext()).isFalse();
+        */
     } 
 
     protected void checkSolution(BufferedReader reader, String score)

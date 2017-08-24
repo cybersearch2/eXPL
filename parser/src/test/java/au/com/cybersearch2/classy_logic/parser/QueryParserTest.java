@@ -42,6 +42,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
@@ -542,7 +543,8 @@ public class QueryParserTest
         Result result = queryProgram.executeQuery("divide_query");
         System.out.println(result.getAxiom("divide_query").toString());
     }
-    
+
+    @Ignore // Under development
     @Test
     public void test_sudoku() throws IOException
     {
