@@ -26,7 +26,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 
 /**
  * NameParser
- * Utility class to extract name components
+ * Utility class to parse qualified name in text format
  * @author Andrew Bowley
  * 7 Jun 2015
  */
@@ -39,24 +39,42 @@ public class NameParser
 
     /** Pre-compiled pattern */
     protected Pattern pattern;
+    /** Scope part */
+    protected String scope;
+    /** Template part */
+    protected String template;
+    /** Name part */
+    protected String name;
 
-    public QualifiedName parse(String name)
+    /**
+     * Construct NameParser instance
+     * @param name Qualified name in text format
+     */
+    public NameParser(String name)
     {
+        this.scope = QualifiedName.EMPTY;
+        this.template = QualifiedName.EMPTY;
+        this.name = QualifiedName.EMPTY;
         if (name.isEmpty())
-            return QualifiedName.ANONYMOUS;
+            return;
         String[] fragments = name.split("@");
         if ((fragments.length > 2) || ((fragments.length == 2) && name.endsWith("@")))
             throw new ExpressionException("Name \"" + name + "\" with more than one \"@\" is invalid");
         if ((fragments.length < 2) && !name.endsWith("@"))
-            return QualifiedName.parseGlobalName(fragments[0]);
+        {   // Parse part name
+            parseGlobalName(fragments[0]);
+            return;
+        }
+        // Parse artifact name
         try
         {
             pattern = Pattern.compile(NAME_REGEX, 0);
         }
         catch(PatternSyntaxException e)
-        {
+        {   // This is not expected
             throw new ExpressionException("Error in regular expression", e);
         }
+        // Use pattern to decompose name fragments each side of "@" into parts
         String[] groupValues1 = new String[0];
         Matcher matcher = pattern.matcher(fragments[0]);
         if (matcher.find())
@@ -95,9 +113,91 @@ public class NameParser
             templatePart = QualifiedName.EMPTY;
         if (scopePart == null)
             scopePart = QualifiedName.EMPTY;
-        return new QualifiedName(scopePart, templatePart, namePart);
+        this.scope = scopePart;
+        this.template = templatePart;
+        this.name = namePart;
+    }
+
+    /**
+     * Returns Qualified name from parsed name
+     * @return QualifiedName object
+     */
+    public QualifiedName getQualifiedName()
+    {
+        return new QualifiedName(scope, template, name);
     }
     
+    /**
+     * @return the scope
+     */
+    public String getScope()
+    {
+        return scope;
+    }
+
+    /**
+     * @return the template
+     */
+    public String getTemplate()
+    {
+        return template;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName()
+    {
+        return name;
+    }
+
+    /**
+     * toString - Display qualified name with non-empty parts separated with dot character
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder(QualifiedName.EMPTY);
+        if (!scope.isEmpty())
+            builder.append(scope).append('.');
+        if (!template.isEmpty())
+        {
+            builder.append(template);
+            if (!getName().isEmpty())
+                builder.append('.');
+        }
+        builder.append(name);
+        return builder.toString();
+    }
+
+    /**
+     * Decompose part name, assuming 2-part name is template name in global scope
+     * @param text Formated text
+     */
+    private void parseGlobalName(String text)
+    {
+        if (text.startsWith(".") || text.endsWith("."))
+            throw new ExpressionException("Qualified name \"" + text + "\" missing part");
+        String[] parts = text.split("\\.");
+        if (parts.length == 0)
+        {
+            // Make parts valid
+            parts = new String[1];
+            parts[0] = text;
+        }
+        if (parts.length > 3)
+            throw new ExpressionException("Qualified name \"" + text + "\" is invalid");
+        this.name = parts[parts.length - 1];
+        if (parts.length == 3)
+        {
+            this.scope = parts[0];
+            this.template= parts[1];
+        }
+        else if (parts.length == 2)
+            this.template= parts[0];
+    }
+
     /**
      * Returns values for group 0 and above as array
      * @param matcher Matcher object in matched state

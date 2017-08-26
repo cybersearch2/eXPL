@@ -43,52 +43,51 @@ public class NameParserTest
     @Test
     public void testEmptyName()
     {
-        NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse("")).isEqualTo(QualifiedName.ANONYMOUS);
+        NameParser nameParser = new NameParser("");
+        assertThat(nameParser.getQualifiedName()).isEqualTo(QualifiedName.ANONYMOUS);
     }
 
     @Test
     public void test1_partName()
     {
-        NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse(TEST_NAME1)).isEqualTo(new QualifiedName(TEST_NAME1));
+        NameParser nameParser = new NameParser(TEST_NAME1);
+        assertThat(nameParser.getQualifiedName()).isEqualTo(new QualifiedName(TEST_NAME1));
     }
-
+    
     @Test
     public void test1_partNameAt()
     {
-        NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse(TEST_NAME_AT)).isEqualTo(new QualifiedName(TEST_NAME1));
+        NameParser nameParser = new NameParser(TEST_NAME_AT);
+        assertThat(nameParser.getQualifiedName()).isEqualTo(new QualifiedName(TEST_NAME1));
     }
-
+    
     @Test
     public void test2_partName()
     {
-        NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse(TEST_NAME2)).isEqualTo(QualifiedName.parseGlobalName(TEST_NAME2));
+        NameParser nameParser = new NameParser(TEST_NAME2);
+        assertThat(nameParser.getQualifiedName()).isEqualTo(QualifiedName.parseGlobalName(TEST_NAME2));
     }
-
+    
     @Test
     public void test2_partNameAt()
     {
-        NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse(TEST_NAME2_AT)).isEqualTo(QualifiedName.parseGlobalName("part2.part1"));
+        NameParser nameParser = new NameParser(TEST_NAME2_AT);
+        assertThat(nameParser.getQualifiedName()).isEqualTo(QualifiedName.parseGlobalName("part2.part1"));
     }
-
+    
     @Test
     public void test2_at_partName()
     {
-        NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse(TEST_AT_NAME2)).isEqualTo(QualifiedName.parseName(TEST_NAME2));
+        NameParser nameParser = new NameParser(TEST_AT_NAME2);
+        assertThat(nameParser.getQualifiedName()).isEqualTo(QualifiedName.parseName(TEST_NAME2));
     }
-
+    
     @Test
     public void test2_at_partName_at()
     {
-        NameParser nameParser = new NameParser();
         try
         {
-            nameParser.parse(TEST_AT_NAME2 + "@");
+            new NameParser(TEST_AT_NAME2 + "@");
             failBecauseExceptionWasNotThrown(ExpressionException.class);
         }
         catch(ExpressionException e)
@@ -96,35 +95,34 @@ public class NameParserTest
             assertThat(e.getMessage()).isEqualTo("Name \"" + TEST_AT_NAME2 + "@" + "\" with more than one \"@\" is invalid");
         }
     }
-    
+        
     @Test
     public void test3_partName()
     {
-        NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse(TEST_NAME3)).isEqualTo(QualifiedName.parseGlobalName(TEST_NAME3));
+        NameParser nameParser = new NameParser(TEST_NAME3);
+        assertThat(nameParser.getQualifiedName()).isEqualTo(QualifiedName.parseGlobalName(TEST_NAME3));
     }
 
     @Test
     public void test3_at_partName()
     {
-        NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse(TEST_AT_NAME3)).isEqualTo(QualifiedName.parseName(TEST_NAME3));
+        NameParser nameParser = new NameParser(TEST_AT_NAME3);
+        assertThat(nameParser.getQualifiedName()).isEqualTo(QualifiedName.parseName(TEST_NAME3));
     }
 
     @Test
     public void test2_at_name()
     {
-        NameParser nameParser = new NameParser();
-        assertThat(nameParser.parse(TEST_NAME2_AT_NAME)).isEqualTo(QualifiedName.parseName(TEST_NAME3));
+        NameParser nameParser = new NameParser(TEST_NAME2_AT_NAME);
+        assertThat(nameParser.getQualifiedName()).isEqualTo(QualifiedName.parseName(TEST_NAME3));
     }
-
+    
     @Test
     public void test_invalidName()
     {
-        NameParser nameParser = new NameParser();
         try
         {
-            nameParser.parse("." +TEST_AT_NAME2);
+            new NameParser("." +TEST_AT_NAME2);
             failBecauseExceptionWasNotThrown(ExpressionException.class);
         }
         catch(ExpressionException e)
@@ -136,10 +134,9 @@ public class NameParserTest
     @Test
     public void test_invalidNameAfterAt()
     {
-        NameParser nameParser = new NameParser();
         try
         {
-            nameParser.parse(TEST_AT_NAME3 + ".");
+            new NameParser(TEST_AT_NAME3 + ".");
             failBecauseExceptionWasNotThrown(ExpressionException.class);
         }
         catch(ExpressionException e)
@@ -151,10 +148,9 @@ public class NameParserTest
     @Test
     public void test_invalidName4()
     {
-        NameParser nameParser = new NameParser();
         try
         {
-            nameParser.parse(TEST_NAME4);
+            new NameParser(TEST_NAME4);
             failBecauseExceptionWasNotThrown(ExpressionException.class);
         }
         catch(ExpressionException e)

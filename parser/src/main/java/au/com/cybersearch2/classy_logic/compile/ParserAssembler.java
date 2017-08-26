@@ -273,7 +273,7 @@ public class ParserAssembler implements LocaleListener
         AxiomProvider axiomProvider = getAxiomProvider(resourceName);
         if (axiomProvider == null) 
             throw new ExpressionException("Axiom provider \"" + resourceName + "\" not found");
-        if (!qualifiedBindingName.getTemplate().isEmpty())
+        if (!qualifiedBindingName.isTemplateEmpty())
             registerAxiomListener(qualifiedBindingName, axiomProvider.getAxiomListener(qualifiedBindingName.toString()));
         else
             // Remove entry from axiomListMap so the axiom is not regarded as internal
@@ -355,10 +355,10 @@ public class ParserAssembler implements LocaleListener
      */
     public Template createResourceTemplate(QualifiedName templateName)
     {   // Create qualified axiom  name 
-        QualifiedName qualifiedAxiomName = new QualifiedName(templateName.getScope(),  templateName.getTemplate());
+        QualifiedName qualifiedAxiomName = QualifiedName.axiomFromTemplate(templateName);
         // Get axiom archetype
         AxiomArchetype axiomArchetype = axiomAssembler.getAxiomArchetype(qualifiedAxiomName);
-        if ((axiomArchetype == null) && !templateName.getScope().isEmpty())
+        if ((axiomArchetype == null) && !templateName.getScope().equals(QueryProgram.GLOBAL_SCOPE))
         {
             qualifiedAxiomName.clearScope();
             axiomArchetype = axiomAssembler.getAxiomArchetype(qualifiedAxiomName);
@@ -380,6 +380,14 @@ public class ParserAssembler implements LocaleListener
         return null;
     }
 
+    /**
+     * Create evaluator for operation which assigns result to self.
+     * Creates parser task to assign evaluator name.
+     * @param term Target of operation
+     * @param operator Reflexive operation
+     * @param assignExpression Expression on right hand side
+     * @return
+     */
     public Evaluator createReflexiveEvaluator(final Operand term, String operator, Operand assignExpression)
     {
         final Evaluator evaluator = new Evaluator(getContextName(term.getName()), term, operator, assignExpression);
@@ -485,12 +493,12 @@ public class ParserAssembler implements LocaleListener
         QualifiedName qualifiedTemplateName = null;
         List<Axiom> internalAxiomList = null;
         Scope targetScope = null;
-        boolean isTemplateKey = !axiomKey.getTemplate().isEmpty();
+        boolean isTemplateKey = !axiomKey.isTemplateEmpty();
         if (isTemplateKey && 
-            !axiomKey.getName().isEmpty() && 
+            !axiomKey.isNameEmpty() && 
             axiomKey.getScope().equals(scope.getAlias()))
         {   // This is an attached list
-            qualifiedAxiomName = new QualifiedName(scope.getAlias(), axiomKey.getName());
+            qualifiedAxiomName = QualifiedName.templateFromAxiom(axiomKey);
             internalAxiomList = 
                         getListAssembler().getAxiomItems(qualifiedAxiomName);
             if (internalAxiomList != null)
@@ -502,15 +510,16 @@ public class ParserAssembler implements LocaleListener
                 return;
             }
             targetScope = scope;
-            qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), axiomKey.getName());
+            qualifiedTemplateName = QualifiedTemplateName.templateFromAxiom(axiomKey);
         }
         if (isTemplateKey)
         {
             if (qualifiedAxiomName == null)
-                qualifiedAxiomName = new QualifiedName(axiomKey.getScope(), axiomKey.getTemplate());
+                qualifiedAxiomName = QualifiedName.axiomFromTemplate(axiomKey);
         }
         else
-            qualifiedAxiomName = new QualifiedName(axiomKey.getScope(), axiomKey.getName());
+            // Create copy of key to allow editing
+            qualifiedAxiomName = new QualifiedName(axiomKey);
         // A key in axiom form may point to a choice or query solution, so analysis required.
         // Where there is ambiguity, precedence is given to match on an axiom source 
         if (targetScope == null)
@@ -518,13 +527,13 @@ public class ParserAssembler implements LocaleListener
             targetScope = findSourceScope(qualifiedAxiomName);
             if (targetScope != null)
             {
-                qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
+                qualifiedTemplateName = QualifiedName.templateFromAxiom(qualifiedAxiomName);
                 isTemplateKey = false;
             }
             else if (isTemplateKey)
                 qualifiedTemplateName = axiomKey;
             else
-                qualifiedTemplateName = new QualifiedTemplateName(axiomKey.getScope(), axiomKey.getName());
+                qualifiedTemplateName = QualifiedName.templateFromAxiom(axiomKey);
         }
         if (targetScope == null)
         {
@@ -569,7 +578,7 @@ public class ParserAssembler implements LocaleListener
                 .getTemplate(qualifiedTemplateName);
             if ((template == null) && (targetScope.getName() != QueryProgram.GLOBAL_SCOPE))
             {
-                QualifiedName globalName = new QualifiedTemplateName(scope.getGlobalScope().getAlias(), qualifiedTemplateName.getTemplate());
+                QualifiedName globalName = new QualifiedTemplateName(QueryProgram.GLOBAL_SCOPE, qualifiedTemplateName.getTemplate());
                 template = 
                 scope.getGlobalTemplateAssembler()
                 .getTemplate(globalName);
@@ -587,12 +596,12 @@ public class ParserAssembler implements LocaleListener
 	 */
 	public Scope findSourceScope(QualifiedName qname)
     {
-        if (!qname.getTemplate().isEmpty())
+        if (!qname.isTemplateEmpty())
             // qname must be in axiom form
             return null;
         if (isQualifiedAxiomName(qname))
             return scope;
-        if (!qname.getScope().isEmpty())
+        if (!qname.isScopeEmpty())
             qname.clearScope();
         if (scope.getGlobalParserAssembler().isQualifiedAxiomName(qname))
             return scope.getGlobalScope();
@@ -623,18 +632,6 @@ public class ParserAssembler implements LocaleListener
 	public void registerAxiomListener(QualifiedName qname, AxiomListener axiomListener) 
 	{   // Note to listen for solution notifications, qname must be template name 
 	    listAssembler.add(qname, axiomListener);
-	}
-
-	/**
-	 * Returns the given name prepended with the scope name and a dot 
-	 * unless this ParserAssembler is enclosing the Global scope.
-	 * Required for axiomProvider which is possibly shared by more than one scope.
-	 * @param name Simple name
-	 * @return Qualified name
-	 */
-	protected String getQualifiedName(String name)
-	{
-		return QueryProgram.GLOBAL_SCOPE.equals(scope.getName()) ? name : (scope.getName() + "." + name);
 	}
 
     /**
@@ -781,12 +778,12 @@ public class ParserAssembler implements LocaleListener
     {
         QualifiedName qualifiedOperandName = QualifiedName.parseName(operandName, qualifiedContextname);
         Operand operand = operandMap.get(qualifiedOperandName);
-        if ((operand == null) && !qualifiedOperandName.getTemplate().isEmpty())
+        if ((operand == null) && !qualifiedOperandName.isTemplateEmpty())
         {
             qualifiedOperandName.clearTemplate();
             operand = operandMap.get(qualifiedOperandName);
         }
-        if ((operand == null) && !qualifiedOperandName.getScope().isEmpty())
+        if ((operand == null) && !qualifiedOperandName.isScopeEmpty())
         {
             qualifiedOperandName.clearScope();
             operand = operandMap.get(qualifiedOperandName);
@@ -829,7 +826,7 @@ public class ParserAssembler implements LocaleListener
     public Operand addOperand(String name)
     {
         final QualifiedName qualifiedName = QualifiedName.parseName(name);
-        if (!qualifiedName.getTemplate().isEmpty())
+        if (!qualifiedName.isTemplateEmpty())
             throw new ExpressionException("Variable name \"" + name + "\" is invalid");
         String part1 = qualifiedName.getScope();
         if (part1.isEmpty() || !qualifiedContextname.getTemplate().equals(part1))

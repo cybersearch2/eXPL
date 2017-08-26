@@ -78,8 +78,8 @@ public class Result
      */
     public Iterator<Axiom> axiomIterator(String name)
     {
-        NameParser nameParser = new NameParser();
-        return getList(nameParser.parse(name)).iterator();
+        NameParser nameParser = new NameParser(name);
+        return getList(nameParser.getQualifiedName()).iterator();
     }
 
     /**
@@ -185,8 +185,8 @@ public class Result
     
     protected <T> Iterator<T> basicIterator(String name)
     {
-        NameParser nameParser = new NameParser();
-        Axiom axiom = getAxiom(nameParser.parse(name));
+        NameParser nameParser = new NameParser(name);
+        Axiom axiom = getAxiom(nameParser.getQualifiedName());
         @SuppressWarnings("unchecked")
         final T[] arrayValue = (T[])axiom.getTermByIndex(0).getValue();
         return new Iterator<T>(){

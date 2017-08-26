@@ -647,15 +647,15 @@ QuerySpec QueryDeclaration(QuerySpec querySpec, ParserContext context) :
 
 KeyName KeyName(QuerySpec querySpec, ParserContext context) :
 {
-  String name1;
-  String name2 = null;
+  QualifiedName name1;
+  QualifiedName name2 = null;
 }
 {
-  name1=Name(context) (":" name2=Name(context) )?
+  name1=Name(context, false) (":" name2=Name(context, false) )?
   {
     boolean isBinary = name2 != null;
-    String axiomKey = isBinary  ? name1 : "";
-    String templateName = isBinary  ? name2 : name1;
+    QualifiedName axiomKey = isBinary  ? name1.toScopeName() : QualifiedName.ANONYMOUS;
+    QualifiedName templateName = isBinary  ? name2.toTemplateName() : name1.toTemplateName();
     KeyName keyname = new KeyName(axiomKey, templateName);
     querySpec.addKeyName(keyname);
     return keyname;
@@ -702,14 +702,14 @@ void AxiomDeclaration(ParserContext context) :
 
 QualifiedName Axiom(ParserContext context) :
 {
-  String axiomName;
+  QualifiedName axiomName;
 }
 {
-  axiomName=Name(context)
+  axiomName=Name(context, true)
   { 
-    return axiomName.indexOf(".") == -1 ? 
-        context.getParserAssembler().getContextName(axiomName) :
-        QualifiedName.parseName(axiomName); 
+    String source = axiomName.getSource();
+    return source.indexOf(".") == -1 ? 
+       axiomName : QualifiedName.parseName(source); 
   }
 }
 
@@ -1162,16 +1162,16 @@ Operand TemplateTerm(Template template, ParserContext context) :
   Template parameterTemplate = null;
 }
 {
-  ( varType=Type(context) )? name=Name(context) 
+  ( varType=Type(context) )? qname=Name(context, true) 
   {
-    qname = parserAssembler.getContextName(name);
+    name = qname.toString();
     axiomQname = qname;
     isList = (varType == null) && 
              (listAssembler.existsKey(ListType.basic, qname) || 
               listAssembler.existsKey(ListType.axiom_item, qname));
   }
   (  
-    listIndexData=IndexExpression(context.getQualifiedName(name), context)
+    listIndexData=IndexExpression(context.getQualifiedName(qname.getSource()), context)
     {
       isList = false;
       if (listAssembler.existsKey(ListType.context, qname))
@@ -1186,9 +1186,9 @@ Operand TemplateTerm(Template template, ParserContext context) :
         ( equalsToken="=" | assignToken=<PLUSASSIGN> )
         ( <AXIOM> 
           ( 
-            axiomName=Name(context) 
+            axiomQname=Name(context, false) 
             {
-              axiomQname = QualifiedName.parseName(axiomName);
+              axiomQname.toScopeName();
             }
           ) ? 
           axiomList=AxiomList(axiomQname, context) 
@@ -1390,7 +1390,6 @@ Operand CalculatorExpression2(Template template, QualifiedName outerTemplateName
 
 Operand RegularExpression(ParserContext context) :
 {
-  String inputName = null;
   QualifiedName qname = null;
   Operand inputOp = null;
   Token regexLit = null;
@@ -1407,10 +1406,7 @@ Operand RegularExpression(ParserContext context) :
       qname = inputOp.getQualifiedName();
     }
     |
-    inputName=Name(context)
-    {
-      qname = parserAssembler.getContextName(inputName);
-    }
+    qname=Name(context, true)
   )    
   "==" 
   ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( LOOKAHEAD(2) group=GroupDeclaration(qname.getName(), parserAssembler) )? 
@@ -1420,9 +1416,8 @@ Operand RegularExpression(ParserContext context) :
       regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
     else 
       regexOp = parserAssembler.getOperandMap().addOperand(regexId.image, null, parserAssembler.getQualifiedContextname());
-    //Operand inputOp = null;
-    if (inputName != null)
-      inputOp = parserAssembler.getOperandMap().addOperand(inputName, null, parserAssembler.getQualifiedContextname());
+    if (qname != null)
+      inputOp = parserAssembler.getOperandMap().addOperand(qname.getName(), null, parserAssembler.getQualifiedContextname());
     Operand var = new RegExOperand(qname, regexOp, inputOp, flags, group);
     return var;
   }
@@ -1470,8 +1465,9 @@ Operand CalculatorQuery(Template template, ParserContext context) :
     context.onTokenIntercept(queryToken);
     context.pushSourceMarker();
   }
-  queryName=Name(context)  
+  qname=Name(context, false)  
   {
+    queryName = qname.toString();
     qname = context.getQualifiedName(queryName);
     callName = qname.getName();
     Token token = Token.newToken(QueryParserConstants.QUERY);
@@ -1745,11 +1741,13 @@ void InitialiserList(Map<String, Object> properties, ParserContext context) :
 String InitialiserDeclaration(Map<String, Object> properties, ParserContext context) :
 {
   String name;
+  QualifiedName qname;
   Parameter param;
 }
 {
-  name=Name(context) "=" param=LiteralTerm(context)
+  qname=Name(context, false) "=" param=LiteralTerm(context)
   {
+     name = qname.toString();
      properties.put(name, param.getValue());
      return name + "=" + param.getValue().toString();
   }
@@ -1787,9 +1785,10 @@ String TermDeclaration(List<Term> termList, ParserContext context) :
 {
   Parameter param;
   String name = Term.ANONYMOUS;
+  QualifiedName qname = null;
 }
 {
-  ( name=Name(context) "=" )? param=LiteralTerm(context)
+  ( qname=Name(context, false) { name = qname.toString(); } "=" )? param=LiteralTerm(context)
   {
      termList.add(new Parameter(name, param.getValue()));
      if (name.isEmpty())
@@ -1918,7 +1917,7 @@ String ListDeclaration(ParserContext context) :
   Token beginToken = null;
   Token endToken = null;
   Operand operand = null;
-  String target = null;
+  QualifiedName target = null;
   SourceItem sourceItem = null;
   List<Template> axiomList;
   ParserAssembler parserAssembler = context.getParserAssembler();
@@ -1955,20 +1954,17 @@ String ListDeclaration(ParserContext context) :
       (
         ( <LBRACE> template=ListParameters(listName, varType, context) <RBRACE> )
         | 
-        target=Name(context)
+        target=Name(context, false)
         {
           if (qualifiedAxiomName == null)
             qualifiedAxiomName = parserAssembler.getContextName(listName);
-          boolean isGlobalTarget = target.endsWith("@");
-          if (isGlobalTarget)
-            target = target.substring(0, target.length() - 1);
-          QualifiedName qname = QualifiedName.parseName(target);
-          if (isGlobalTarget)
-            qualifiedTargetName = QualifiedName.parseGlobalName(target);
-          else if (!qname.getScope().isEmpty() && qname.getScope().equals(context.getContextName().getTemplate()))  
-            qualifiedTargetName = qname;
-          else
-            qualifiedTargetName = parserAssembler.getContextName(target);
+          QualifiedName qname = null;
+          if (target.isGlobalName())
+            qualifiedTargetName = target;
+          else if (!target.getTemplate().isEmpty() && target.getTemplate().equals(context.getContextName().getTemplate()))  
+            qualifiedTargetName = target.toScopeName();
+          else if (qualifiedTargetName == null)
+            qualifiedTargetName = parserAssembler.getContextName(target.toString());
           listAssembler.mapAxiomList(qualifiedAxiomName, qualifiedTargetName);
         }
       )
@@ -2159,10 +2155,10 @@ Operand PrimaryExpression(ParserContext context) :
     return param1;
   }
   |
-  name=Name(context) (LOOKAHEAD(2) param1=NamedExpression(name, context) )?
+  qname=Name(context, false) (LOOKAHEAD(2) param1=NamedExpression(qname.toString(), context) )?
   {
     if (param1 == null)
-        return parserAssembler.addOperand(name);
+        return parserAssembler.addOperand(qname.toString());
     return param1;
   }
   |
@@ -2293,7 +2289,7 @@ VariableType Type(ParserContext context) :
   Token literalToken;
   VariableType varType;
   Token qualifierLit = null;
-  String qualifierId = null;
+  QualifiedName qualifierId = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
 }
 {
@@ -2337,13 +2333,13 @@ VariableType Type(ParserContext context) :
     {
       context.onTokenIntercept(literalToken);
     }
-    ( "$" ( qualifierLit=<STRING_LITERAL> | qualifierId=Name(context) ))?
+    ( "$" ( qualifierLit=<STRING_LITERAL> | qualifierId=Name(context, false) ))?
     { 
       varType = new VariableType(OperandType.CURRENCY, parserAssembler);
       if (qualifierLit != null)
          varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
       else if (qualifierId != null)
-         varType.setProperty(VariableType.QUALIFIER_OPERAND, context.getOperandMap().addOperand(qualifierId, null, context.getParserAssembler().getQualifiedContextname()));
+         varType.setProperty(VariableType.QUALIFIER_OPERAND, context.getOperandMap().addOperand(qualifierId.toString(), null, context.getParserAssembler().getQualifiedContextname()));
        return varType; 
     }
 }
@@ -2358,7 +2354,7 @@ void ParameterDeclaration(QualifiedName qualifiedAxiomName, ParserAssembler pars
   }
 }
 
-String Name(ParserContext context) :
+QualifiedName Name(ParserContext context, boolean isContextName) :
 {
   Token partToken;
   StringBuilder builder = new StringBuilder();
@@ -2372,10 +2368,9 @@ String Name(ParserContext context) :
   ( LOOKAHEAD(2) NamePart(builder) ( LOOKAHEAD(2) NamePart(builder) )? )?
   {
     String name = builder.toString();
-    //if (name.indexOf("@") == -1)
-      return name;
-    //NameParser nameParser = new NameParser();
-    //return nameParser.parse(name).toString();
+    if (isContextName)
+      return new QualifiedName(name, context.getContextName());
+    return new NameParser(name).getQualifiedName();
   }
 }
 

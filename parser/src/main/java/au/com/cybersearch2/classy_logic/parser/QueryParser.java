@@ -653,22 +653,22 @@ public class QueryParser implements QueryParserConstants
 
   final public KeyName KeyName(QuerySpec querySpec, ParserContext context) throws ParseException
   {
-  String name1;
-  String name2 = null;
-    name1 = Name(context);
+  QualifiedName name1;
+  QualifiedName name2 = null;
+    name1 = Name(context, false);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case COLON:
       jj_consume_token(COLON);
-      name2 = Name(context);
+      name2 = Name(context, false);
       break;
     default:
       jj_la1[16] = jj_gen;
       ;
     }
     boolean isBinary = name2 != null;
-    String axiomKey = isBinary  ? name1 : "";
-    String templateName = isBinary  ? name2 : name1;
+    QualifiedName axiomKey = isBinary  ? name1.toScopeName() : QualifiedName.ANONYMOUS;
+    QualifiedName templateName = isBinary  ? name2.toTemplateName() : name1.toTemplateName();
     KeyName keyname = new KeyName(axiomKey, templateName);
     querySpec.addKeyName(keyname);
     {if (true) return keyname;}
@@ -739,11 +739,11 @@ public class QueryParser implements QueryParserConstants
 
   final public QualifiedName Axiom(ParserContext context) throws ParseException
   {
-  String axiomName;
-    axiomName = Name(context);
-    {if (true) return axiomName.indexOf(".") == -1 ?
-        context.getParserAssembler().getContextName(axiomName) :
-        QualifiedName.parseName(axiomName);}
+  QualifiedName axiomName;
+    axiomName = Name(context, true);
+    String source = axiomName.getSource();
+    {if (true) return source.indexOf(".") == -1 ?
+       axiomName : QualifiedName.parseName(source);}
     throw new Error("Missing return statement in function");
   }
 
@@ -1635,8 +1635,8 @@ public class QueryParser implements QueryParserConstants
       jj_la1[57] = jj_gen;
       ;
     }
-    name = Name(context);
-    qname = parserAssembler.getContextName(name);
+    qname = Name(context, true);
+    name = qname.toString();
     axiomQname = qname;
     isList = (varType == null) &&
              (listAssembler.existsKey(ListType.basic, qname) ||
@@ -1645,7 +1645,7 @@ public class QueryParser implements QueryParserConstants
     {
     case LBRACKET:
     case RARROW:
-      listIndexData = IndexExpression(context.getQualifiedName(name), context);
+      listIndexData = IndexExpression(context.getQualifiedName(qname.getSource()), context);
       isList = false;
       if (listAssembler.existsKey(ListType.context, qname))
         listIndexData[0].getQualifiedListName().toContextName();
@@ -1697,8 +1697,8 @@ public class QueryParser implements QueryParserConstants
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
           {
           case IDENTIFIER:
-            axiomName = Name(context);
-              axiomQname = QualifiedName.parseName(axiomName);
+            axiomQname = Name(context, false);
+              axiomQname.toScopeName();
             break;
           default:
             jj_la1[60] = jj_gen;
@@ -2100,7 +2100,6 @@ public class QueryParser implements QueryParserConstants
 
   final public Operand RegularExpression(ParserContext context) throws ParseException
   {
-  String inputName = null;
   QualifiedName qname = null;
   Operand inputOp = null;
   Token regexLit = null;
@@ -2125,8 +2124,7 @@ public class QueryParser implements QueryParserConstants
       qname = inputOp.getQualifiedName();
       break;
     case IDENTIFIER:
-      inputName = Name(context);
-      qname = parserAssembler.getContextName(inputName);
+      qname = Name(context, true);
       break;
     default:
       jj_la1[74] = jj_gen;
@@ -2159,9 +2157,8 @@ public class QueryParser implements QueryParserConstants
       regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
     else
       regexOp = parserAssembler.getOperandMap().addOperand(regexId.image, null, parserAssembler.getQualifiedContextname());
-    //Operand inputOp = null;
-    if (inputName != null)
-      inputOp = parserAssembler.getOperandMap().addOperand(inputName, null, parserAssembler.getQualifiedContextname());
+    if (qname != null)
+      inputOp = parserAssembler.getOperandMap().addOperand(qname.getName(), null, parserAssembler.getQualifiedContextname());
     Operand var = new RegExOperand(qname, regexOp, inputOp, flags, group);
     {if (true) return var;}
     throw new Error("Missing return statement in function");
@@ -2253,7 +2250,8 @@ public class QueryParser implements QueryParserConstants
     queryToken = jj_consume_token(LARROW);
     context.onTokenIntercept(queryToken);
     context.pushSourceMarker();
-    queryName = Name(context);
+    qname = Name(context, false);
+    queryName = qname.toString();
     qname = context.getQualifiedName(queryName);
     callName = qname.getName();
     Token token = Token.newToken(QueryParserConstants.QUERY);
@@ -2669,10 +2667,12 @@ public class QueryParser implements QueryParserConstants
   final public String InitialiserDeclaration(Map<String, Object> properties, ParserContext context) throws ParseException
   {
   String name;
+  QualifiedName qname;
   Parameter param;
-    name = Name(context);
+    qname = Name(context, false);
     jj_consume_token(ASSIGN);
     param = LiteralTerm(context);
+     name = qname.toString();
      properties.put(name, param.getValue());
      {if (true) return name + "=" + param.getValue().toString();}
     throw new Error("Missing return statement in function");
@@ -2711,10 +2711,12 @@ public class QueryParser implements QueryParserConstants
   {
   Parameter param;
   String name = Term.ANONYMOUS;
+  QualifiedName qname = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case IDENTIFIER:
-      name = Name(context);
+      qname = Name(context, false);
+                                 name = qname.toString();
       jj_consume_token(ASSIGN);
       break;
     default:
@@ -2883,7 +2885,7 @@ public class QueryParser implements QueryParserConstants
   Token beginToken = null;
   Token endToken = null;
   Operand operand = null;
-  String target = null;
+  QualifiedName target = null;
   SourceItem sourceItem = null;
   List<Template> axiomList;
   ParserAssembler parserAssembler = context.getParserAssembler();
@@ -2985,19 +2987,16 @@ public class QueryParser implements QueryParserConstants
           jj_consume_token(RBRACE);
           break;
         case IDENTIFIER:
-          target = Name(context);
+          target = Name(context, false);
           if (qualifiedAxiomName == null)
             qualifiedAxiomName = parserAssembler.getContextName(listName);
-          boolean isGlobalTarget = target.endsWith("@");
-          if (isGlobalTarget)
-            target = target.substring(0, target.length() - 1);
-          QualifiedName qname = QualifiedName.parseName(target);
-          if (isGlobalTarget)
-            qualifiedTargetName = QualifiedName.parseGlobalName(target);
-          else if (!qname.getScope().isEmpty() && qname.getScope().equals(context.getContextName().getTemplate()))
-            qualifiedTargetName = qname;
-          else
-            qualifiedTargetName = parserAssembler.getContextName(target);
+          QualifiedName qname = null;
+          if (target.isGlobalName())
+            qualifiedTargetName = target;
+          else if (!target.getTemplate().isEmpty() && target.getTemplate().equals(context.getContextName().getTemplate()))
+            qualifiedTargetName = target.toScopeName();
+          else if (qualifiedTargetName == null)
+            qualifiedTargetName = parserAssembler.getContextName(target.toString());
           listAssembler.mapAxiomList(qualifiedAxiomName, qualifiedTargetName);
           break;
         default:
@@ -3275,16 +3274,16 @@ public class QueryParser implements QueryParserConstants
     {if (true) return param1;}
       break;
     case IDENTIFIER:
-      name = Name(context);
+      qname = Name(context, false);
       if (jj_2_4(2)) 
       {
-        param1 = NamedExpression(name, context);
+        param1 = NamedExpression(qname.toString(), context);
       } else 
       {
         ;
       }
     if (param1 == null)
-        {if (true) return parserAssembler.addOperand(name);}
+        {if (true) return parserAssembler.addOperand(qname.toString());}
     {if (true) return param1;}
       break;
     case SCOPE:
@@ -3446,7 +3445,7 @@ public class QueryParser implements QueryParserConstants
   Token literalToken;
   VariableType varType;
   Token qualifierLit = null;
-  String qualifierId = null;
+  QualifiedName qualifierId = null;
   ParserAssembler parserAssembler = context.getParserAssembler();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
@@ -3499,7 +3498,7 @@ public class QueryParser implements QueryParserConstants
           qualifierLit = jj_consume_token(STRING_LITERAL);
           break;
         case IDENTIFIER:
-          qualifierId = Name(context);
+          qualifierId = Name(context, false);
           break;
         default:
           jj_la1[115] = jj_gen;
@@ -3515,7 +3514,7 @@ public class QueryParser implements QueryParserConstants
       if (qualifierLit != null)
          varType.setProperty(VariableType.QUALIFIER_STRING, getText(qualifierLit));
       else if (qualifierId != null)
-         varType.setProperty(VariableType.QUALIFIER_OPERAND, context.getOperandMap().addOperand(qualifierId, null, context.getParserAssembler().getQualifiedContextname()));
+         varType.setProperty(VariableType.QUALIFIER_OPERAND, context.getOperandMap().addOperand(qualifierId.toString(), null, context.getParserAssembler().getQualifiedContextname()));
        {if (true) return varType;}
       break;
     default:
@@ -3532,7 +3531,7 @@ public class QueryParser implements QueryParserConstants
     parserAssembler.setParameter(qualifiedAxiomName);
   }
 
-  final public String Name(ParserContext context) throws ParseException
+  final public QualifiedName Name(ParserContext context, boolean isContextName) throws ParseException
   {
   Token partToken;
   StringBuilder builder = new StringBuilder();
@@ -3554,11 +3553,9 @@ public class QueryParser implements QueryParserConstants
       ;
     }
     String name = builder.toString();
-    //if (name.indexOf("@") == -1)
-      {if (true) return name;}
-    //NameParser nameParser = new NameParser();
-    //return nameParser.parse(name).toString();
-
+    if (isContextName)
+      {if (true) return new QualifiedName(name, context.getContextName());}
+    {if (true) return new NameParser(name).getQualifiedName();}
     throw new Error("Missing return statement in function");
   }
 
@@ -4572,14 +4569,14 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_68() {
-    if (jj_scan_token(LENGTH)) return true;
-    return false;
-  }
-
   private boolean jj_3R_52() {
     if (jj_scan_token(DOT)) return true;
     if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_68() {
+    if (jj_scan_token(LENGTH)) return true;
     return false;
   }
 
@@ -4687,13 +4684,13 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_65() {
-    if (jj_scan_token(unicode_character_class)) return true;
+  private boolean jj_3_6() {
+    if (jj_3R_43()) return true;
     return false;
   }
 
-  private boolean jj_3_6() {
-    if (jj_3R_43()) return true;
+  private boolean jj_3R_65() {
+    if (jj_scan_token(unicode_character_class)) return true;
     return false;
   }
 
@@ -4788,6 +4785,11 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3R_47() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
   private boolean jj_3R_81() {
     if (jj_3R_89()) return true;
     return false;
@@ -4812,11 +4814,6 @@ public class QueryParser implements QueryParserConstants
       if (jj_3R_46()) { jj_scanpos = xsp; break; }
     }
     if (jj_scan_token(RPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_47() {
-    if (jj_scan_token(IDENTIFIER)) return true;
     return false;
   }
 
@@ -4865,8 +4862,14 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_79() {
-    if (jj_scan_token(STRING_LITERAL)) return true;
+  private boolean jj_3_1() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(56)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(80)) return true;
+    }
+    if (jj_3R_38()) return true;
     return false;
   }
 
@@ -4876,14 +4879,18 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3_1() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(56)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(80)) return true;
-    }
-    if (jj_3R_38()) return true;
+  private boolean jj_3R_79() {
+    if (jj_scan_token(STRING_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    if (jj_3R_41()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_56() {
+    if (jj_3R_73()) return true;
     return false;
   }
 
@@ -4905,13 +4912,8 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3_4() {
-    if (jj_3R_41()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_56() {
-    if (jj_3R_73()) return true;
+  private boolean jj_3_2() {
+    if (jj_3R_39()) return true;
     return false;
   }
 
@@ -4949,11 +4951,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3_2() {
-    if (jj_3R_39()) return true;
-    return false;
-  }
-
   private boolean jj_3R_131() {
     if (jj_scan_token(IDENTIFIER)) return true;
     return false;
@@ -4971,6 +4968,11 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_127() {
     if (jj_3R_131()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_45() {
+    if (jj_scan_token(NAN)) return true;
     return false;
   }
 
@@ -5005,16 +5007,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_45() {
-    if (jj_scan_token(NAN)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_114() {
-    if (jj_3R_120()) return true;
-    return false;
-  }
-
   private boolean jj_3R_55() {
     if (jj_3R_72()) return true;
     return false;
@@ -5037,6 +5029,11 @@ public class QueryParser implements QueryParserConstants
     jj_scanpos = xsp;
     if (jj_3R_56()) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3R_114() {
+    if (jj_3R_120()) return true;
     return false;
   }
 
@@ -5095,6 +5092,16 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3R_71() {
+    if (jj_3R_76()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_99() {
+    if (jj_scan_token(DOUBLE)) return true;
+    return false;
+  }
+
   private boolean jj_3R_112() {
     Token xsp;
     xsp = jj_scanpos;
@@ -5121,16 +5128,6 @@ public class QueryParser implements QueryParserConstants
     }
     }
     }
-    return false;
-  }
-
-  private boolean jj_3R_71() {
-    if (jj_3R_76()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_99() {
-    if (jj_scan_token(DOUBLE)) return true;
     return false;
   }
 

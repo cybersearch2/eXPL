@@ -437,18 +437,18 @@ public class ParserContext
     public QualifiedName getQualifiedName(String name)  
     {
         QualifiedName qname = null;
-        QualifiedName contextListName = parserAssembler.getContextName(name);
-        if (!contextListName.getTemplate().isEmpty())
+        QualifiedName contextName = getContextName();
+        if ((name.indexOf(".") == -1) && !contextName.getTemplate().isEmpty())
         {
-            qname = new QualifiedName(QualifiedName.EMPTY, contextListName.getTemplate() , name);
+            qname = new QualifiedName(QualifiedName.EMPTY, contextName.getTemplate() , name);
             if (qnameMap.containsKey(qname))
                 return (qnameMap.get(qname));
         }
         qname = QualifiedName.parseName(name);
         if (qnameMap.containsKey(qname))
             return (qnameMap.get(qname));
-        if (qname.getScope().isEmpty() && qname.getTemplate().isEmpty() && (!scope.getAlias().isEmpty()))
-            qname = new QualifiedName(scope.getAlias(), name);
+        if (qname.isGlobalName() && (!scope.getName().equals(QueryProgram.GLOBAL_SCOPE)))
+            qname.setScope(scope.getAlias());
         if (qnameMap.containsKey(qname))
             return (qnameMap.get(qname));
         qnameMap.put(qname, qname);
