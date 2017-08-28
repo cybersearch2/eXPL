@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.operator;
 
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -53,6 +54,14 @@ public class CursorOperator implements Operator
         return cursorTrait;
     }
 
+    @Override
+    public void setTrait(Trait trait)
+    {
+        if (!CursorTrait.class.isAssignableFrom(trait.getClass()))
+            throw new ExpressionException(trait.getClass().getSimpleName() + " is not a compatible Trait");
+        cursorTrait = (CursorTrait) trait;
+    }
+    
     /**
      * getRightOperandOps
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()

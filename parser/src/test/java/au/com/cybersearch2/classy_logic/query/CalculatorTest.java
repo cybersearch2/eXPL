@@ -43,6 +43,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
@@ -77,7 +78,7 @@ public class CalculatorTest
 		when(walker.visitAllNodes(pairer)).thenReturn(true);
 		when(template.getOperandWalker()).thenReturn(walker);
 		when(template.getSolutionPairer(solution)).thenReturn(pairer);
-		when(walker.visitAllNodes(pairer)).thenReturn(true);
+		when(walker.visitAllNodes(isA(OperandVisitor.class))).thenReturn(true);
 		when(solution.size()).thenReturn(2);
 		assertThat(calculator.unifySolution(solution, template)).isTrue();
         Template template2 = mock(Template.class);

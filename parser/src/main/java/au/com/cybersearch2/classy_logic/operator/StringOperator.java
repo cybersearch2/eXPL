@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.operator;
 
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
@@ -56,6 +57,14 @@ public class StringOperator implements Operator, LocaleListener
         return trait;
     }
 
+    @Override
+    public void setTrait(Trait trait)
+    {
+        if (trait.getOperandType() != OperandType.STRING)
+            throw new ExpressionException(trait.getOperandType().toString() + " is not a compatible operand type");
+        this.trait = (DefaultTrait) trait;
+    }
+    
     /**
      * onScopeChange
      * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(au.com.cybersearch2.classy_logic.Scope)

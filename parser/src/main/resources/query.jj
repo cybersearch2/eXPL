@@ -2155,10 +2155,10 @@ Operand PrimaryExpression(ParserContext context) :
     return param1;
   }
   |
-  qname=Name(context, false) (LOOKAHEAD(2) param1=NamedExpression(qname.toString(), context) )?
+  qname=Name(context, false) (LOOKAHEAD(2) param1=NamedExpression(qname, context) )?
   {
     if (param1 == null)
-        return parserAssembler.addOperand(qname.toString());
+        return parserAssembler.addOperand(qname);
     return param1;
   }
   |
@@ -2393,20 +2393,20 @@ void NamePart(StringBuilder builder) :
   )
 }
 
-Operand NamedExpression(String name, ParserContext context) :
+Operand NamedExpression(QualifiedName qualifiedName, ParserContext context) :
 {
   ListItemSpec[] indexData;
-  QualifiedName qname;
   ParserTask parserTask;
   Template parametersTemplate = null;
-  QualifiedName listName = context.getQualifiedName(name);
+  QualifiedName listName = context.getQualifiedName(qualifiedName.toString());
   ParserAssembler parserAssembler = context.getParserAssembler();
+  QualifiedName qname = parserAssembler.getContextName(qualifiedName.toString());
   ListAssembler listAssembler = parserAssembler.getListAssembler();
 }
 {
   indexData=IndexExpression(listName, context) 
   {
-    if (parserAssembler.getListAssembler().existsKey(ListType.context, parserAssembler.getContextName(name)))
+    if (parserAssembler.getListAssembler().existsKey(ListType.context, qname))
       indexData[0].getQualifiedListName().toContextName();
     else if (listAssembler.existsKey(ListType.builtin, listName))
       setBuiltinList(listName, indexData, context);
@@ -2415,9 +2415,8 @@ Operand NamedExpression(String name, ParserContext context) :
     axiomContainerOperand(parserAssembler, indexData);
   }
   |
-  "(" ( parametersTemplate = Parameters(name, context, true) )? ")"
+  "(" ( parametersTemplate = Parameters(qualifiedName.toString(), context, true) )? ")"
   {
-    qname = parserAssembler.getContextName(name);
     return parserAssembler.getCallOperand(qname, parametersTemplate);
   }
   |
@@ -2434,8 +2433,8 @@ Operand NamedExpression(String name, ParserContext context) :
     |
     <FORMAT>
     {
-      Operand operand = parserAssembler.addOperand(name);
-      qname = parserAssembler.getContextName(name + "_format");
+      Operand operand = parserAssembler.addOperand(qualifiedName);
+      qname = parserAssembler.getContextName(qualifiedName.toString() + "_format");
       Scope scope = parserAssembler.getScope();
       FormatterOperand formatter = new FormatterOperand(qname, operand, parserAssembler.getScopeLocale());
       if (scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
@@ -2445,7 +2444,7 @@ Operand NamedExpression(String name, ParserContext context) :
     |
     <FACT>
     {
-      Operand target = parserAssembler.addOperand(name);
+      Operand target = parserAssembler.addOperand(qualifiedName);
       return new FactOperand(target);
     }
   )

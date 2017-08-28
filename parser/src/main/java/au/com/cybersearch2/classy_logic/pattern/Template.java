@@ -33,6 +33,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.operator.OperatorTerm;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -502,7 +503,18 @@ public class Template extends TermList<Operand>
             new QualifiedName[] { qname, contextName };
        return new SolutionPairer(solution, id, contextNames);
     }
-    
+
+    /**
+     * Returns flag set true if given operand is in same namespace as this template
+     * @param operand Operand object
+     * @return boolean
+     */
+    public boolean isInSameSpace(Operand operand)
+    {
+        return qname.inSameSpace(operand.getQualifiedName()) ||
+                ((contextName != qname) && contextName.inSameSpace(operand.getQualifiedName()));
+
+    }
     /**
 	 * Returns an axiom containing the values of this template and 
 	 * having same key and name as this template's name.
@@ -516,11 +528,9 @@ public class Template extends TermList<Operand>
 		{
 		    Operand operand = (Operand)term;
             if (!operand.isEmpty() && !operand.isPrivate()  && 
-			    (isReplicate || 
-			     qname.inSameSpace(operand.getQualifiedName()) ||
-			     ((contextName != qname) && contextName.inSameSpace(operand.getQualifiedName()))))
+			    (isReplicate || isInSameSpace(operand)))
 			{
-				Parameter param = new Parameter(operand.getName(), operand.getValue());
+				OperatorTerm param = new OperatorTerm(operand.getName(), operand.getValue(), operand.getOperator());
 				axiom.addTerm(param);
 				if (operand.getOperator().getTrait().getOperandType() == OperandType.CURRENCY)
 				{   // Append country operand, if exists and not already in solution
@@ -528,7 +538,7 @@ public class Template extends TermList<Operand>
 				    {
 				        Operand countryOperand = operand.getRightOperand();
 				        {
-				            param = new Parameter(countryOperand.getName(), countryOperand.getValue());
+				            param = new OperatorTerm(countryOperand.getName(), countryOperand.getValue(), countryOperand.getOperator());
 				            if (qualifiers == null)
 				                qualifiers = new ArrayList<Parameter>();
 				            qualifiers.add(param);

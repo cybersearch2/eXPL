@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -55,6 +56,14 @@ public class BooleanOperator implements Operator
         return trait;
     }
 
+    @Override
+    public void setTrait(Trait trait)
+    {
+        if (trait.getOperandType() != OperandType.BOOLEAN)
+            throw new ExpressionException(trait.getOperandType().toString() + " is not a compatible operand type");
+        this.trait = (DefaultTrait) trait;
+    }
+    
     /**
      * getRightOperandOps
      * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getRightOperandOps()

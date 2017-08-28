@@ -17,8 +17,12 @@ package au.com.cybersearch2.classy_logic.pattern;
 
 import org.junit.Test;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.operator.OperatorTerm;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -46,8 +50,15 @@ public class SolutionPairerTest
 		// Pairing case
 		Axiom oneAxiom = mock(Axiom.class);
 		Operand templateOperand = mock(Operand.class);
-		Parameter solutionTerm = mock(Parameter.class);
+		OperatorTerm solutionTerm = mock(OperatorTerm.class);
+		Operator operator = mock(Operator.class);
+        Operator operator2 = mock(Operator.class);
+		when(solutionTerm.getOperator()).thenReturn(operator);
+		Trait trait = mock(Trait.class);
+		when(trait.getOperandType()).thenReturn(OperandType.INTEGER);
+		when(operator.getTrait()).thenReturn(trait);
 		when(templateOperand.isEmpty()).thenReturn(true);
+		when(templateOperand.getOperator()).thenReturn(operator2);
 		when(oneAxiom.getTermByName(TWO)).thenReturn(solutionTerm);
 		when(templateOperand.getQualifiedName()).thenReturn(TWO_QNAME);
 		when(solutionTerm.getName()).thenReturn(TWO);
@@ -59,6 +70,7 @@ public class SolutionPairerTest
 		SolutionPairer solutionPairer = new SolutionPairer(solution, 3, CONTEXT_NAME);
 		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
 		verify(templateOperand).unifyTerm(solutionTerm, 3);
+		verify(operator2).setTrait(trait);
 	}
     
 	@Test
@@ -66,7 +78,7 @@ public class SolutionPairerTest
 	{
 		Axiom oneAxiom = mock(Axiom.class);
 		Operand templateOperand = mock(Operand.class);
-		Parameter solutionTerm = mock(Parameter.class);
+		OperatorTerm solutionTerm = mock(OperatorTerm.class);
 		when(solutionTerm.isEmpty()).thenReturn(false);
 		when(oneAxiom.getTermByName(TWO)).thenReturn(solutionTerm);
 		when(templateOperand.getQualifiedName()).thenReturn(TWO_QNAME);
@@ -88,7 +100,7 @@ public class SolutionPairerTest
     {
         Axiom oneAxiom = mock(Axiom.class);
         Operand templateOperand = mock(Operand.class);
-        Parameter solutionTerm = mock(Parameter.class);
+        OperatorTerm solutionTerm = mock(OperatorTerm.class);
         when(solutionTerm.isEmpty()).thenReturn(false);
         when(oneAxiom.getTermByName(TWO)).thenReturn(solutionTerm);
         when(templateOperand.getQualifiedName()).thenReturn(TWO_QNAME);
@@ -120,13 +132,13 @@ public class SolutionPairerTest
 		//templateOperand = mock(Operand.class);
 		when(templateOperand.getQualifiedName()).thenReturn(QualifiedName.parseGlobalName("one.three"));
 		solutionPairer = new SolutionPairer(solution, 3, CONTEXT_NAME);
-		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
+		assertThat(solutionPairer.next(templateOperand, 1)).isFalse();
 		templateOperand = mock(Operand.class);
 		when(templateOperand.getQualifiedName()).thenReturn(QualifiedName.parseGlobalName("one"));
 		solutionPairer = new SolutionPairer(solution, 3, CONTEXT_NAME);
-		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
+		assertThat(solutionPairer.next(templateOperand, 1)).isFalse();
 		when(templateOperand.getQualifiedName()).thenReturn(QualifiedName.parseGlobalName("one.two"));
 		solutionPairer = new SolutionPairer(solution, 3, CONTEXT_NAME);
-		assertThat(solutionPairer.next(templateOperand, 1)).isTrue();
+		assertThat(solutionPairer.next(templateOperand, 1)).isFalse();
 	} 
 }

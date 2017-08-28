@@ -51,6 +51,14 @@ public class DoubleOperator implements Operator, LocaleListener
     }
     
     @Override
+    public void setTrait(Trait trait)
+    {
+        if (!DoubleTrait.class.isAssignableFrom(trait.getClass()))
+            return; //throw new ExpressionException(trait.getClass().getSimpleName() + " is not a compatible Trait");
+        doubleTrait = (DoubleTrait) trait;
+    }
+    
+    @Override
     public void onScopeChange(Scope scope)
     {
         doubleTrait.setLocale(scope.getLocale());

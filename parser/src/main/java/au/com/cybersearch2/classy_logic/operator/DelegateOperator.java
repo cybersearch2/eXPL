@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
@@ -142,6 +143,14 @@ public class DelegateOperator implements Operator
         return proxy.getTrait();
     }
 
+    @Override
+    public void setTrait(Trait trait)
+    { 
+        // Don't touch proxy if trait not for any particular operand type
+        if (trait.getOperandType() != OperandType.UNKNOWN)
+            proxy.setTrait(trait);
+    }
+    
     /**
      * getRightOperandOps
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()
@@ -209,7 +218,7 @@ public class DelegateOperator implements Operator
      * @param delegateType
      * @return Operator object
      */
-    protected Operator operatorInstance(DelegateType delegateType)
+    protected static Operator operatorInstance(DelegateType delegateType)
     {
         return delegateType.getOperatorFactory().delegate();
     }
@@ -222,6 +231,14 @@ public class DelegateOperator implements Operator
     public static boolean isDelegateClass(Class<?> clazz)
     {
         return delegateTypeMap.containsKey(clazz);
+    }
+
+    public static Operator getOperator(Class<?> clazz)
+    {
+        DelegateType newDelegateType = delegateTypeMap.get(clazz);
+        if (newDelegateType == null)
+            newDelegateType = DelegateType.ASSIGN_ONLY;
+        return operatorInstance(newDelegateType);
     }
 
 }

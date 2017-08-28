@@ -55,6 +55,14 @@ public class BigDecimalOperator implements Operator, LocaleListener
         return bigDecimalTrait;
     }
  
+    @Override
+    public void setTrait(Trait trait)
+    {
+        if (!BigDecimalTrait.class.isAssignableFrom(trait.getClass()))
+            return; //throw new ExpressionException(trait.getClass().getSimpleName() + " is not a compatible Trait");
+        bigDecimalTrait = (BigDecimalTrait) trait;
+    }
+    
     /**
      * onScopeChange
      * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(Scope)
@@ -246,6 +254,7 @@ public class BigDecimalOperator implements Operator, LocaleListener
     {
         return left.divide(right, BigDecimal.ROUND_FLOOR);
     }
+
 
 
 }

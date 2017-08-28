@@ -27,7 +27,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * EuropeanMegaCities
+ * EuropeanScopeMegaCities
  * Demonstrates selection using set {} operator
  * @author Andrew Bowley
  * 24 Feb 2015

@@ -117,6 +117,17 @@ public abstract class TermList <T extends Term> implements Serializable
     }
 
     /**
+     * Returns Term value referenced by name
+     * @param name String
+     * @return Object or null if term not found
+     */
+    public Object getValueByName(String name)
+    {
+       T term = getTermByName(name);
+       return term != null ? term.getValue() : null;
+    }
+    
+    /**
      * Returns Term referenced by index
      * @param index Valid index value
      * @return Term object or null if index out of range
@@ -126,6 +137,17 @@ public abstract class TermList <T extends Term> implements Serializable
         if (termList.isEmpty() || (index >= termList.size()) ||( index < 0))
             return null;
         return termList.get(index);
+    }
+
+    /**
+     * Returns Term value referenced by index
+     * @param index Valid index value
+     * @return Object or null if index out of range
+     */
+    public Object getValueByIndex(int index)
+    {
+        T term = getTermByIndex(index);
+        return term != null ? term.getValue() : null;
     }
     
     /**

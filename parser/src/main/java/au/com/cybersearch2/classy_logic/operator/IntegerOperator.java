@@ -55,7 +55,15 @@ public class IntegerOperator implements Operator, LocaleListener
         return integerTrait;
     }
 
-    /**
+    @Override
+    public void setTrait(Trait trait)
+    {
+        if (!IntegerTrait.class.isAssignableFrom(trait.getClass()))
+            return; //throw new ExpressionException(trait.getClass().getSimpleName() + " is not a compatible Trait");
+        integerTrait = (IntegerTrait) trait;
+    }
+    
+   /**
      * onScopeChange
      * @see au.com.cybersearch2.classy_logic.interfaces.LocaleListener#onScopeChange(au.com.cybersearch2.classy_logic.Scope)
      */

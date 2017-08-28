@@ -15,13 +15,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.query;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.operator.OperatorTerm;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.terms.LiteralParameter;
@@ -78,10 +81,13 @@ public class EvaluatorHandler implements SolutionHandler, DebugTarget
                     Axiom innerAxiom = new Axiom(innerTemplate.getKey());
                     for (int i = 0; i < (innerTemplate.getTermCount()); i++)
                     {
-                        String termName = innerTemplate.getTermByIndex(i).getName();
+                        Operand operand = innerTemplate.getTermByIndex(i);
+                        String termName = operand.getName();
                         Term term = axiom.getTermByName(termName);
                         if (term == null)
                             term = new Parameter(termName);
+                        else if (operand.getOperator().getTrait().getOperandType() != OperandType.UNKNOWN)
+                            term = new OperatorTerm(term.getName(), term.getValue(), operand.getOperator());
                         innerAxiom.addTerm(term);
                     }
                     innerAxiom.getArchetype().clearMutable();

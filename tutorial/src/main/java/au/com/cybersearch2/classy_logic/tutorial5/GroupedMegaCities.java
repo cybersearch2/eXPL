@@ -27,7 +27,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * EuropeanMegaCities
+ * EuropeanScopeMegaCities
  * @author Andrew Bowley
  * 24 Feb 2015
  */

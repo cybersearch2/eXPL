@@ -27,7 +27,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * EuropeanMegaCities
+ * EuropeanScopeMegaCities
  * Solves: European cities demonstrating negated set selector: !{ "Asia", "Africa", "South America", "North America" }
  * @author Andrew Bowley
  * 24 Feb 2015

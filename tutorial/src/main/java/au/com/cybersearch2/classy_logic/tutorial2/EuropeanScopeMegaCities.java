@@ -13,11 +13,9 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.tutorial7;
+package au.com.cybersearch2.classy_logic.tutorial2;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
@@ -30,11 +28,11 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * EuropeanScopeMegaCities
- * Demonstrates dynamic axiom list declared in one template accessed by another
+ * Demonstrates selection using set {} operator
  * @author Andrew Bowley
  * 24 Feb 2015
  */
-public class DynamicMegaCities 
+public class EuropeanScopeMegaCities 
 {
 /* mega_city.xpl
 axiom mega_city (Rank,Megacity,Country,Continent,Population)
@@ -73,63 +71,33 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 {33,"Paris","France","Europe",10770000}
 {34,"Chennai","India","Asia",10350000}
 {35,"Hyderabad","India","Asia",10100000};
- */
-/* grouping.xpl
-axiom mega_city (Rank,Megacity,Country,Continent,Population): resource;
+*/
+/* euro_megacities.xpl
+rresource mega_city axiom(Rank,Megacity,Country,Continent,Population);
 
-axiom continents(continent)
-  { "Asia" }
-  { "Africa"}
-  { "Europe" }
-  { "South America" }
-  { "North America" };
+template euro_megacities (Megacity, Country, Continent { "Europe" } );
 
-template continent 
-(
-  continent
-); 
+query<axiom> euro_megacities (mega_city : euro_megacities);
 
-template continent_group 
-(
-  continent ? continent == Continent, city = Megacity, country = Country, rank = Rank, population = Population.format
-); 
-
-query<axiom> mega_cities_by_continent (continents : continent, mega_city : continent_group); */
-    
+*/
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
-    
-    public DynamicMegaCities()
+	 
+    public EuropeanScopeMegaCities()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 7);
+        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 1);
         queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
      }
 
     /**
-     * Compiles the asia_top_ten.xpl script and runs the "asia_top_ten" query
+     * Compiles the euro_scope_megacities.xpl script and runs the "euro_megacities" query
      */
-    public Iterator<Axiom> findMegaCities() 
+    public Iterator<Axiom> findEuroMegaCities() 
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("dynamic-grouping.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("../tutorial2/euro_scope_megacities.xpl");
         parserContext = queryProgramParser.getContext();
-        Result result = queryProgram.executeQuery("mega_cities_by_continent");
-        List<Axiom> axiomList = new ArrayList<Axiom>();
-        Iterator<Axiom> iterator = result.axiomIterator("asia.city_info@");
-        while (iterator.hasNext())
-            axiomList.add(iterator.next());
-        iterator = result.axiomIterator("africa.city_info@");
-        while (iterator.hasNext())
-            axiomList.add(iterator.next());
-        iterator = result.axiomIterator("europe.city_infop@");
-        while (iterator.hasNext())
-            axiomList.add(iterator.next());
-        iterator = result.axiomIterator("south_america.city_info@");
-        while (iterator.hasNext())
-            axiomList.add(iterator.next());
-        iterator = result.axiomIterator("north_america.city_info@");
-        while (iterator.hasNext())
-            axiomList.add(iterator.next());
-        return axiomList.iterator();
+        Result result = queryProgram.executeQuery("euro_megacities");
+        return result.axiomIterator("euro_megacities");
     }
 
     public ParserContext getParserContext()
@@ -138,15 +106,20 @@ query<axiom> mega_cities_by_continent (continents : continent, mega_city : conti
     }
     
 	/**
-	 * Displays the asia_top_ten solution on the console.<br/>
+	 * Displays the euro_megacities solution on the console.<br/>
 	 * The expected result:<br/>
+		euro_megacities(Megacity = Moscow, Country = Russia, Continent = Europe)<br/>
+		euro_megacities(Megacity = London, Country = UK, Continent = Europe)<br/>
+		euro_megacities(Megacity = Istanbul, Country = Turkey, Continent = Europe)<br/>
+		euro_megacities(Megacity = Rhine-Ruhr, Country = Germany, Continent = Europe)<br/>
+		euro_megacities(Megacity = Paris, Country = France, Continent = Europe)<br/>
 	 */
     public static void main(String[] args)
     {
         try 
         {
-            DynamicMegaCities megaCities = new DynamicMegaCities();
-            Iterator<Axiom> iterator = megaCities.findMegaCities();
+            EuropeanScopeMegaCities europeanScopeMegaCities = new EuropeanScopeMegaCities();
+            Iterator<Axiom> iterator = europeanScopeMegaCities.findEuroMegaCities();
             while (iterator.hasNext())
                 System.out.println(iterator.next().toString());
         } 

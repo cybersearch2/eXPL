@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.operator;
 
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.NullOperand;
 import au.com.cybersearch2.classy_logic.helper.Null;
 import au.com.cybersearch2.classy_logic.interfaces.Operator;
@@ -55,6 +56,14 @@ public class NullOperator implements Operator
         return trait;
     }
 
+    @Override
+    public void setTrait(Trait trait)
+    {
+        if (trait.getOperandType() != OperandType.UNKNOWN)
+            throw new ExpressionException(trait.getOperandType().toString() + " is not a compatible operand type");
+        this.trait = (DefaultTrait) trait;
+    }
+    
     /**
      * getRightOperandOps
      * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getRightOperandOps()

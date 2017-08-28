@@ -79,4 +79,10 @@ public interface Operator
      * @return Trait object
      */
     Trait getTrait();
+
+    /**
+     * Set trait - incompatible traits may be ignored for number traits
+     * @param trait Trait object
+     */
+    void setTrait(Trait trait);
 }

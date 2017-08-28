@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic.expression;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Operator;
 import au.com.cybersearch2.classy_logic.interfaces.RightOperand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
@@ -110,6 +111,15 @@ public class Variable extends DelegateOperand implements RightOperand
 	{
 	    setValue(parameter.getValue());
 	}
+
+    /**
+     * Returns object which defines operations that an Operand performs with other operands
+     * @return Operator object
+     */
+    public Operator getOperator()
+    {
+        return operator.getProxy();
+    }
 
 	/**
 	 * Execute operation for expression

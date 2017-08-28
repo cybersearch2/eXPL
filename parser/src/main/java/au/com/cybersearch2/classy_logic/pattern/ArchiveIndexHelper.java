@@ -99,7 +99,7 @@ public class ArchiveIndexHelper implements OperandVisitor
     {
         String name = operand.getName();
         // Skip anonymous Evaluator operands
-        if ((depth > 1) && !name.isEmpty()) 
+        if ((depth > 1) && !name.isEmpty() && template.isInSameSpace(operand)) 
         {    
             // Set operand archive index or create fix up if a different value is already assigned
             getIndexMap();

@@ -390,7 +390,7 @@ public class ScopeQueryParserTest
 			public boolean onSolution(Solution solution) {
 				//System.out.println(solution.getAxiom("format_total").toString());
 				//System.out.println(solution.getAxiom("charge_plus_gst").toString());
-				assertThat(solution.getAxiom("charge_plus_gst").toString()).isEqualTo("charge_plus_gst(total=13580.24)");
+				assertThat(solution.getAxiom("charge_plus_gst").toString()).isEqualTo("charge_plus_gst(total=13580.237)");
 				assertThat(solution.getAxiom("format_total").toString()).isEqualTo("format_total(total_text=Gesamtkosten + gst: 13.580,24 EUR)");
 				return true;
 			}});

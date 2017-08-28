@@ -49,6 +49,12 @@ public class AxiomOperator implements Operator
         return AXIOM_TRAIT;
     }
     
+    @Override
+    public void setTrait(Trait trait)
+    {
+        // The trait for this class is static, so immutable
+    }
+    
     /**
      * getRightOperandOps
      * @see au.com.cybersearch2.classy_logic.interfaces.Operator#getRightOperandOps()

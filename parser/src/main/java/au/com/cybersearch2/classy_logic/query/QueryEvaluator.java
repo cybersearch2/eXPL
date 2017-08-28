@@ -38,6 +38,8 @@ import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.operator.DelegateOperator;
+import au.com.cybersearch2.classy_logic.operator.OperatorTerm;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
@@ -195,7 +197,7 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
             launchCalculatorQuery(argumentList);
         else
         {
-            Axiom axiom = callEvaluator.evaluate(argumentList);
+            Axiom axiom = createSolution(callEvaluator.evaluate(argumentList));
             if (innerTemplate != null)
             {   // Use SolutionHander to collect results
                 EvaluatorHandler handler = new EvaluatorHandler(innerTemplate, callEvaluator.getName(), axiomTermListInstance(functionId));
@@ -209,6 +211,23 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
             for (AxiomListener listener: axiomListenerList)
                 listener.onNextAxiom(qualifiedQueryName, axiomTermList.getAxiom());
         return axiomTermList; 
+    }
+
+    private Axiom createSolution(Axiom evaluateAxiom)
+    {
+        QualifiedName key = evaluateAxiom.getArchetype().getQualifiedName();
+        AxiomTermList termList = new AxiomTermList(key, key);
+        termList.setAxiom(evaluateAxiom);
+        for (int i = 0; i < evaluateAxiom.getTermCount(); ++i)
+        {
+            Term term = termList.getItem(i);
+            if (!(term instanceof OperatorTerm))
+            {
+                OperatorTerm opTerm = new OperatorTerm(term.getName(), term.getValue(), DelegateOperator.getOperator(term.getValueClass()));
+                termList.assignItem(i, opTerm);
+            }
+        }
+        return null;
     }
 
     /**

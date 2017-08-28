@@ -164,6 +164,25 @@ public class OperandMap
         nameSet.add(qname.getName());
     }
 
+   /**
+     * Add new Variable operand of specified name with specified key unless it already exists. 
+     * These variables are to receive solution terms and have keys with scope values consisting
+     * of format scope.template.
+     * @param operand Operand object
+     * @throws ExpressionException
+     */
+    public Operand addOperand(QualifiedName key, QualifiedName qname)
+    {
+        Operand operand = operandMap.get(key);
+        if (operand == null)
+        {
+            operand = new Variable(qname);
+            operandMap.put(key, operand);
+        }
+        return operand;
+    }
+
+
 	/**
 	 * Returns flag to indicate if this map contains operand with specified name
 	 * @param name

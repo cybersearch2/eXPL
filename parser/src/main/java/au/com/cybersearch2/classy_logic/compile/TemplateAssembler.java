@@ -149,6 +149,10 @@ public class TemplateAssembler
      */
     public Scope findTemplateScope(QualifiedName qname)
     {
+        String scopeName = qname.getScope();
+        if (!scopeName.isEmpty() && !scopeName.equals(scope.getName()))
+            return scope.findScope(scopeName);
+        
         if (qname.getTemplate().isEmpty())
             // qname must be in axiom form
             return null;

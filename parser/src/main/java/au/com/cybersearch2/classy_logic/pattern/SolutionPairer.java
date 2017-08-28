@@ -15,11 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.pattern;
 
+import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.interfaces.Trait;
+import au.com.cybersearch2.classy_logic.operator.OperatorTerm;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
@@ -69,7 +71,7 @@ public class SolutionPairer implements OperandVisitor
 	    // Solution pairing only applies to operands with two or three part names
 	    QualifiedName qname = operand.getQualifiedName();
 	    if (qname.getTemplate().isEmpty() || qname.getName().isEmpty())
-	        return true;
+	        return false;
 	    // Determine if operand in same name space as template context. Inner templates and replcates have 2 context names.
 	    boolean inSameSpace = inSameSpace(operand);
 	    // Prepare to hold up to 2 keys for solution axiom search
@@ -96,31 +98,37 @@ public class SolutionPairer implements OperandVisitor
     	    Axiom axiom = solution.getAxiom(key);
     		if (axiom != null)
     		{
-                Term otherTerm = axiom.getTermByName(qname.getName());
+                OperatorTerm otherTerm = (OperatorTerm) axiom.getTermByName(qname.getName());
                 if (otherTerm != null)
                     return processKey(operand, otherTerm, inSameSpace);
-                return true;
+                return false;
     		}
 	    }
-		return true;
+		return false;
 	}
 
 	/**
 	 * Process operand paired to solution term
 	 * @param operand The operand to unify
-	 * @param term The term to unify
+	 * @param term The solution term to unify, which unlike a normal parameter, has the operator too
 	 * @param inSameSpace Flag set true if operand belongs to same name space as template context
 	 * @return boolean
 	 */
-	private boolean processKey(Operand operand, Term term, boolean inSameSpace)
+	private boolean processKey(Operand operand, OperatorTerm term, boolean inSameSpace)
     {   
         if (operand.isEmpty())
+        {
             // Unify with Solution term
             operand.unifyTerm(term, id);
+            Trait trait = term.getOperator().getTrait();
+            if (trait.getOperandType() != OperandType.UNKNOWN)
+                operand.getOperator().setTrait(trait);
+            return true;
+        }
         else if (inSameSpace)
             // Terminate this iteration if operand and term have mis-matched values
             return operand.getValue().equals(term.getValue());
-        return true;
+        return false;
     }
 
 	/**

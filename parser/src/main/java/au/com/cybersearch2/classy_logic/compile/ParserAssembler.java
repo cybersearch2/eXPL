@@ -498,7 +498,7 @@ public class ParserAssembler implements LocaleListener
             !axiomKey.isNameEmpty() && 
             axiomKey.getScope().equals(scope.getAlias()))
         {   // This is an attached list
-            qualifiedAxiomName = QualifiedName.templateFromAxiom(axiomKey);
+            qualifiedAxiomName = new QualifiedName(scope.getAlias(), axiomKey.getName());
             internalAxiomList = 
                         getListAssembler().getAxiomItems(qualifiedAxiomName);
             if (internalAxiomList != null)
@@ -820,17 +820,28 @@ public class ParserAssembler implements LocaleListener
 
     /**
      * Add operand to operand map, handling special case for self template variable 
-     * @param name
+     * @param qualifiedName Qualified name - 2-part is template name
      * @return
      */
-    public Operand addOperand(String name)
+    public Operand addOperand(QualifiedName qualifiedName)
     {
-        final QualifiedName qualifiedName = QualifiedName.parseName(name);
-        if (!qualifiedName.isTemplateEmpty())
-            throw new ExpressionException("Variable name \"" + name + "\" is invalid");
-        String part1 = qualifiedName.getScope();
-        if (part1.isEmpty() || !qualifiedContextname.getTemplate().equals(part1))
-            return operandMap.addOperand(name, null, qualifiedContextname);
+        if (!qualifiedName.isScopeEmpty())
+            throw new ExpressionException("Variable name \"" + qualifiedName.toString() + "\" is invalid");
+        String templateName = qualifiedName.getTemplate();
+        if (!templateName.isEmpty() && qualifiedContextname.getTemplate().equals(templateName))
+            return callReturnOperand(qualifiedName.toScopeName());
+        if (templateName.isEmpty())
+        {
+            qualifiedName = QualifiedName.parseName(qualifiedName.getName(), qualifiedContextname);
+            return operandMap.addOperand(qualifiedName, (Operand)null); 
+        }
+        qualifiedName = new QualifiedName(qualifiedName.getScope(), templateName, qualifiedName.getName());
+        QualifiedName key = new QualifiedName(qualifiedName.getScope() + "." + qualifiedName.getTemplate(), templateName, qualifiedName.getName());
+        return operandMap.addOperand(key, qualifiedName); 
+     }
+
+    private Operand callReturnOperand(final QualifiedName qualifiedName)
+    {
         Operand operand = operandMap.getOperand(qualifiedName);
         if (operand == null)
         {
@@ -851,7 +862,6 @@ public class ParserAssembler implements LocaleListener
           operandMap.addOperand(operand);
         }
         return operand;
-
     }
 
     /**

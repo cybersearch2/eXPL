@@ -141,7 +141,7 @@ public class LogicQuery implements SolutionFinder
 	            {
 	                Term term = axiom.getTermByIndex(i);
 	                if (!term.getName().equals(Term.ANONYMOUS))
-	                    template.addTerm(new Variable(new QualifiedName(term.getName(), QualifiedName.ANONYMOUS)));
+	                    template.addTerm(new Variable(new QualifiedName(term.getName(), template.getQualifiedName())));
 	            }
                 ArchiveIndexHelper archiveIndexHelper = new ArchiveIndexHelper(template);
                 archiveIndexHelper.setOperandTree(1);

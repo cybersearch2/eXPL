@@ -98,6 +98,11 @@ public class Unifier implements OperandVisitor
                 index = operand.getArchetypeIndex();
             else
             {
+                if ((solutionPairer != null) &&
+                    // Operand in another template context and solution available for unification
+                    solutionPairer.next(operand, 0))
+                    return true;
+
                 TermListManager archetype = template.getArchetype();
                 index = archetype.getIndexForName(operand.getName());
             }
@@ -113,13 +118,13 @@ public class Unifier implements OperandVisitor
                     int id = ((modificationId != 0) || (operand instanceof Evaluator)) ?  template.getId() : 0;
                     return pairTerms(operand, axiom.getTermByIndex(pairIndex), id);
                 }
-                else if (solutionPairer != null)
+                else if ((operand.getArchetypeIndex() != -1) && (solutionPairer != null) && solutionPairer.next(operand, 0))
                     // Operand in another template context and solution available for unification
-                    return solutionPairer.next(operand, 0);
+                    return true;
             }
-            else if (solutionPairer != null)
+            else if ((operand.getArchetypeIndex() != -1) && (solutionPairer != null) && solutionPairer.next(operand, 0))
                 // Operand in another template context and solution available for unification
-                return solutionPairer.next(operand, 0);
+                return true;
         }
         return true;
     }

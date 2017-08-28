@@ -19,6 +19,8 @@ import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionFinder;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
@@ -208,8 +210,16 @@ public class Calculator implements SolutionFinder
 			while (chainTemplate != null)
 			{
 				OperandWalker walker = chainTemplate.getOperandWalker();
-	            SolutionPairer pairer = template.getSolutionPairer(solution);
-				if (!walker.visitAllNodes(pairer))
+	            final SolutionPairer pairer = template.getSolutionPairer(solution);
+	            OperandVisitor visitor = new OperandVisitor(){
+
+                    @Override
+                    public boolean next(Operand operand, int depth)
+                    {
+                        pairer.next(operand, depth);
+                        return true;
+                    }};
+				if (!walker.visitAllNodes(visitor))
 					return false;
 				chainTemplate = chainTemplate.getNext();
 			}

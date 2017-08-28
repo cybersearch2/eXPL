@@ -27,6 +27,8 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.operator.IntegerOperator;
+import au.com.cybersearch2.classy_logic.operator.OperatorTerm;
 import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
@@ -137,7 +139,7 @@ public class Choice
         Axiom choiceAxiom = choiceAxiomList.get(selection);
         // Set variables and create solution axiom
         Axiom solutionAxiom = new Axiom(template.getName());
-        solutionAxiom.addTerm(new Parameter(operand.getName(), operand.getValue()));
+        solutionAxiom.addTerm(new OperatorTerm(operand.getName(), operand.getValue(), operand.getOperator()));
 		// Constants
 		while (index < choiceAxiom.getTermCount())
 		{
@@ -145,7 +147,7 @@ public class Choice
             operand.backup(0);
             Term choiceTerm = choiceAxiom.getTermByIndex(index);
             choiceTerm.unifyTerm(operand, template.getId());
-			solutionAxiom.addTerm(choiceTerm);
+			solutionAxiom.addTerm(new OperatorTerm(choiceTerm.getName(), choiceTerm.getValue(), operand.getOperator()));
 			++index;
 		}
 		// Add pass-thru variables, if any, to solution
@@ -156,13 +158,12 @@ public class Choice
 		    {
 	            operand = variableList.get(index);
 	            operand.backup(0);
-		        //term.unifyTerm(operand, template.getId());
 	            operand.assign((Parameter) term);
-		        solutionAxiom.addTerm(term);
+		        solutionAxiom.addTerm(new OperatorTerm(term.getName(), term.getValue(), operand.getOperator()));
 		    }
             ++index;
 		}
-		Parameter selectionIndexTerm = new Parameter(template.getName(), (long)selection);
+		OperatorTerm selectionIndexTerm = new OperatorTerm(template.getName(), (long)selection, new IntegerOperator());
         solutionAxiom.addTerm(selectionIndexTerm);
         solutionAxiom.getArchetype().clearMutable();
 		solution.put(template.getQualifiedName().toString(), solutionAxiom);
