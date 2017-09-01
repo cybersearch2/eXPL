@@ -1,6 +1,6 @@
 axiom charge() 
-  {"Athens", 23 }
   {"Sparta", 13 }
+  {"Athens", 23 }
   {"Milos", 17};
 		
 axiom customer()

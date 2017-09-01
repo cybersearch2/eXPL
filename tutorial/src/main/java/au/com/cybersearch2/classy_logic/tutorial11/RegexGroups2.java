@@ -55,7 +55,7 @@ list<axiom> expand
 
 template in_words
 ( 
-. regex entry == "(^in[^ ]+) - (.)\\. (.*+)" { word, pos, definition },
+. regex entry ? "(^in[^ ]+) - (.)\\. (.*+)" { word, pos, definition },
   word,
   part = expand[pos],
   definition

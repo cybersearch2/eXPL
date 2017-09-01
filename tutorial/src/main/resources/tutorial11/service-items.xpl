@@ -26,7 +26,7 @@ calc scan_item
   {
     ? item.fact,
     amount = 0.0,
-    regex (item++) == itemRegex { service, amount }
+    regex line = item++ ? itemRegex { service, amount }
     {
       total += amount,
       charges += axiom {

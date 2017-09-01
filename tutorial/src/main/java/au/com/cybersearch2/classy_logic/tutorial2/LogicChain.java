@@ -27,15 +27,15 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * GreekConstruction3
+ * LogicChain
  * Shows query with 2 logic chains. Uses -> operator.
  * @author Andrew Bowley
  * 22 Feb 2015
  */
-public class GreekConstruction3 
+public class LogicChain 
 {
 
-/* greek-construction3.xpl
+/* logic-chain.xpl
 axiom customer()
   {"Marathon Marble", "Sparta"}
   {"Acropolis Construction", "Athens"}
@@ -65,14 +65,14 @@ query<axiom> greek_business(customer:customer)
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
 
-    public GreekConstruction3()
+    public LogicChain()
     {
         File resourcePath = new File("src/main/resources/tutorial2");
         queryProgramParser = new QueryProgramParser(resourcePath);
     }
     
     /**
-	 * Compiles the greek-construction3.xpl script and runs the "customer_charge" query, displaying the solution on the console.
+	 * Compiles the logic-chain.xpl script and runs the "customer_charge" query, displaying the solution on the console.
 	 * The expected result:<br/>
         delivery(name=Marathon Marble, city=Sparta, freight=16)
         delivery(name=Acropolis Construction, city=Athens, freight=5)
@@ -81,7 +81,7 @@ query<axiom> greek_business(customer:customer)
 	 */
 	public Iterator<Axiom> displayCustomerCharges()
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("greek-construction3.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("logic-chain.xpl");
         parserContext = queryProgramParser.getContext();
  		Result result = queryProgram.executeQuery("greek_business");
  		return result.axiomIterator("greek_business");
@@ -96,7 +96,7 @@ query<axiom> greek_business(customer:customer)
 	{
 		try 
 		{
-	        GreekConstruction3 greekConstruction = new GreekConstruction3();
+	        LogicChain greekConstruction = new LogicChain();
 	        Iterator<Axiom> iterator = greekConstruction.displayCustomerCharges();
 	        while (iterator.hasNext())
 	            System.out.println(iterator.next().toString());

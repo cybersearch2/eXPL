@@ -17,6 +17,7 @@ import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
+import au.com.cybersearch2.classy_logic.expression.AxiomCallOperand;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
 import au.com.cybersearch2.classy_logic.expression.TermOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
@@ -655,7 +656,8 @@ public class ParserAssembler implements LocaleListener
         CallEvaluator<Axiom>callEvaluator = functionProvider.getCallEvaluator(name);
         if (callEvaluator == null)
             throw new ExpressionException("Function \"" + name + "\" not supported");
-        CallOperand<Axiom> callOperand = new CallOperand<Axiom>(QualifiedName.parseName(callName, qname), parametersTemplate, callEvaluator);
+        // AxiomCallOperand unpacks return axiom containing only a single parameter
+        CallOperand<Axiom> callOperand = new AxiomCallOperand(QualifiedName.parseName(callName, qname), parametersTemplate, callEvaluator);
         scope.addDebugTarget(callOperand);
         return callOperand;
     }
@@ -825,18 +827,23 @@ public class ParserAssembler implements LocaleListener
      */
     public Operand addOperand(QualifiedName qualifiedName)
     {
-        if (!qualifiedName.isScopeEmpty())
-            throw new ExpressionException("Variable name \"" + qualifiedName.toString() + "\" is invalid");
+        // Logic depends on how many parts are in qualified name and wht they contain
+        String scopeName = qualifiedName.getScope();
         String templateName = qualifiedName.getTemplate();
-        if (!templateName.isEmpty() && qualifiedContextname.getTemplate().equals(templateName))
-            return callReturnOperand(qualifiedName.toScopeName());
-        if (templateName.isEmpty())
-        {
-            qualifiedName = QualifiedName.parseName(qualifiedName.getName(), qualifiedContextname);
-            return operandMap.addOperand(qualifiedName, (Operand)null); 
+        if (scopeName.isEmpty() || scopeName.equals(scope.getName()))
+        {   // Global scope or same scope
+            if (!templateName.isEmpty() && qualifiedContextname.getTemplate().equals(templateName))
+                // Same template
+                return callReturnOperand(qualifiedName.toScopeName());
+            if (templateName.isEmpty())
+            {   // A single name part is converted to a context name
+                qualifiedName = QualifiedName.parseName(qualifiedName.getName(), qualifiedContextname);
+                return operandMap.addOperand(qualifiedName, (Operand)null); 
+            }
         }
-        qualifiedName = new QualifiedName(qualifiedName.getScope(), templateName, qualifiedName.getName());
-        QualifiedName key = new QualifiedName(qualifiedName.getScope() + "." + qualifiedName.getTemplate(), templateName, qualifiedName.getName());
+        // Name in different namespace, so use distinct key in operand map as this variable is still in local namespace
+        qualifiedName = new QualifiedName(scopeName, templateName, qualifiedName.getName());
+        QualifiedName key = new QualifiedName(scopeName + "." + qualifiedName.getTemplate(), templateName, qualifiedName.getName());
         return operandMap.addOperand(key, qualifiedName); 
      }
 

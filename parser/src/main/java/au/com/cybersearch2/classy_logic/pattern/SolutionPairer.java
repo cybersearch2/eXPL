@@ -77,8 +77,13 @@ public class SolutionPairer implements OperandVisitor
 	    // Prepare to hold up to 2 keys for solution axiom search
 	    String[] keys = new String[2];
 	    if (inSameSpace) 
+	    {
 	        // An operand in the template context can be paired with a solution from the previous query step, obtained using the "current key" of the soution
 	        keys[0] = solution.getCurrentKey();
+	        // A 2-part key indicates the solution template is in a non-global scope, so namespace match is required
+	        if ((keys[0].indexOf(".") != -1) && !inSameSpace(keys[0]))
+	            return false;
+	    }
 	    else
 	    {   // An operand belonging to another template can pair by template name and scope, which can be the operand's scope or the context scope, if not global.
 	        String contextScope = contextNames[0].getScope();
@@ -144,4 +149,16 @@ public class SolutionPairer implements OperandVisitor
         return false;
     }
 
+    /**
+     * Returns flag set true if operand is in the same name space as template which contains it
+     * @param operand The operand to check
+     * @return boolean
+     */
+    private boolean inSameSpace(String key)
+    {
+        for (QualifiedName contextName: contextNames)
+            if (contextName.toString().equals(key)) 
+                return true;
+        return false;
+    }
 }

@@ -15,12 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial1;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -37,8 +37,8 @@ import au.com.cybersearch2.classy_logic.query.Solution;
  */
 public class HighCities implements SolutionHandler
 {
-/* cities.xpl
-axiom city() 
+/* high_cities.xpl
+axiom city_altitude() 
     {"bilene", 1718}
     {"addis ababa", 8000}
     {"denver", 5280}
@@ -49,9 +49,6 @@ axiom city()
     {"richmond",19}
     {"spokane", 1909}
     {"wichita", 1305};  
-*/   
-/* high_cities.xpl
-resource city_altitude axiom();
 
 template high_city(city ? altitude > 5000, altitude);
 
@@ -63,8 +60,8 @@ query<axiom> high_cities (city_altitude : high_city);
  
     public HighCities()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("city_altitude", "cities.xpl", 1);
-        queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
+        File resourcePath = new File("src/main/resources/tutorial1");
+        queryProgramParser = new QueryProgramParser(resourcePath);
      }
 
     /**

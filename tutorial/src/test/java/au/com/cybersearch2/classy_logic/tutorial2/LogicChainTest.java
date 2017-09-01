@@ -32,21 +32,21 @@ import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.Solution;
-import au.com.cybersearch2.classy_logic.tutorial2.GreekConstruction3;
+import au.com.cybersearch2.classy_logic.tutorial2.LogicChain;
 
 /**
- * GreekConstruction3Test
+ * LogicChainTest
  * @author Andrew Bowley
  * 11Apr.,2017
  */
-public class GreekConstruction3Test
+public class LogicChainTest
 {
     @Test
     public void testGreekConstruction() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial2", "greek-construction3.txt");
+        File testFile = new File("src/main/resources/tutorial2", "logic-chain.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        GreekConstruction3 greekConstruction = new GreekConstruction3();
+        LogicChain greekConstruction = new LogicChain();
         Iterator<Axiom> deliveryIterator = greekConstruction.displayCustomerCharges();
         while (deliveryIterator.hasNext())
             checkSolution(reader, deliveryIterator.next().toString());

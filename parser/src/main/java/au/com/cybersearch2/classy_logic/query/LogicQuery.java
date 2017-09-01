@@ -26,6 +26,8 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionFinder;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -55,8 +57,6 @@ public class LogicQuery implements SolutionFinder
     protected AxiomSource axiomSource;
     /** Axiom listener is notified of axiom sourced each iteration */
     protected List<AxiomListener> axiomListenerList;
-    /** Pairs axiom terms in a Solution object with terms in a template */
-    protected SolutionPairer pairer;
     /** Object to notify of scope change, null if not required */
     protected ScopeNotifier scopeNotifier;
  
@@ -95,6 +95,14 @@ public class LogicQuery implements SolutionFinder
     public void setScopeNotifier(ScopeNotifier scopeNotifier)
     {
         this.scopeNotifier = scopeNotifier;
+    }
+
+    /**
+     * @param queryStatus the queryStatus to set
+     */
+    public void setQueryStatus(QueryStatus queryStatus)
+    {
+        this.queryStatus = queryStatus;
     }
 
     /**
@@ -234,11 +242,16 @@ public class LogicQuery implements SolutionFinder
 	protected boolean unify(Template template, Solution solution)
 	{
         OperandWalker walker = template.getOperandWalker();
-        if (pairer == null)
-            pairer = template.getSolutionPairer(solution);
-        else
-            pairer.setSolution(solution);
-        return walker.visitAllNodes(pairer);
+        final SolutionPairer pairer = template.getSolutionPairer(solution);
+        OperandVisitor visitor = new OperandVisitor(){
+
+            @Override
+            public boolean next(Operand operand, int depth)
+            {
+                pairer.next(operand, depth);
+                return true;
+            }};
+        return walker.visitAllNodes(visitor);
 	}
 	
 	/**

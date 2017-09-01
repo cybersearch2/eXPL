@@ -46,6 +46,7 @@ import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserTask;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.VariableType;
+import au.com.cybersearch2.classy_logic.expression.AppenderVariable;
 import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.ProxyAxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
@@ -307,6 +308,14 @@ public class QueryParser
     listIndexData[0].setQualifiedListName(listName);
     if (listIndexData.length > 1)
       listIndexData[1].setQualifiedListName(listName);
+  }
+  
+  Operand createAppender(QualifiedName qname, Operand expression, ParserContext context) throws ParseException
+  {
+    ParserAssembler parserAssembler = context.getParserAssembler();
+    int id = context.getQualifiedName(qname.getName()).incrementReferenceCount();
+    Operand var = new VariableType(OperandType.APPENDER, parserAssembler).createAppender(qname, expression, id);
+    return var;
   }
 }
 PARSER_END(QueryParser)
@@ -1231,10 +1240,12 @@ Operand TemplateTerm(Template template, ParserContext context) :
     )?
   )
   {
+    if (interceptToken != null)
+      context.onTokenIntercept(interceptToken);
     if ((assignToken != null) && assignToken.image.equals("+=") && listAssembler.existsKey(ListType.axiom_dynamic, qname))
       isList = true;
     if (isList)
-      varType = new VariableType(OperandType.APPENDER, parserAssembler);
+      return createAppender(qname, expression, context);
     boolean isDeclaration = varType != null;
     boolean isNot = notToken != null;
     if (isNot)
@@ -1247,31 +1258,27 @@ Operand TemplateTerm(Template template, ParserContext context) :
       expression = null;
     if (expression != null)
       varType.setProperty(VariableType.EXPRESSION, expression);
-    if (isList)
-      varType.setProperty(VariableType.EXPRESSION, assignExpression);
     if (listIndexData !=null)
       var = listIndexData.length == 1 ? listItemOperand(context, listIndexData[0]) : axiomContainerOperand(parserAssembler, listIndexData);
     else if (literalList != null)
       var = new LiteralListOperand(qname, literalList, isNot);
-    else 
+    else if (var == null)
       var = operandMap.getOperand(qname);
-    if ((var != null) && isDeclaration && !isList)
+    if ((var != null) && isDeclaration)
        operandMap.duplicateOperandCheck(qname); 
-    if ((var == null) && (!hasOperand || isList))
-      var =  isList ? varType.getInstance(context.getQualifiedName(name)) : varType.getInstance(name);
+    if ((var == null) && !hasOperand)
+      var = varType.getInstance(name);
     if (var == null)
       var = operandMap.addOperand(name, expression, parserAssembler.getQualifiedContextname());
     if ((listIndexData == null) && (!hasOperand))
       operandMap.addOperand(var);
-    if ((assignToken != null) && !isList)
+    if (assignToken != null)
       var = parserAssembler.createReflexiveEvaluator(var, assignToken.image, assignExpression);
     if ((equalsToken != null) && ((listIndexData !=null) || (axiomList != null)))
       var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
     else if (hasOperand && (equalsToken != null))
       var = new Evaluator(parserAssembler.getContextName(var.getName() + var.getQualifiedName().incrementReferenceCount()), var, "=", expression);
-    if (interceptToken != null)
-      context.onTokenIntercept(interceptToken);
-      return var;
+    return var;
    }
 }
 
@@ -1397,27 +1404,23 @@ Operand RegularExpression(ParserContext context) :
   Group group = null;
   int flags = 0;
   ParserAssembler parserAssembler = context.getParserAssembler();
+  OperandMap operandMap = parserAssembler.getOperandMap();
 }
 {
   <REGEX> ( LOOKAHEAD(2) flags=RegexFlags() )? 
   (
-    ( "(" inputOp=Expression(context) ")" )
-    {
-      qname = inputOp.getQualifiedName();
-    }
-    |
-    qname=Name(context, true)
+    qname=Name(context, true) ( "=" inputOp=Expression(context) )?
   )    
-  "==" 
-  ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( LOOKAHEAD(2) group=GroupDeclaration(qname.getName(), parserAssembler) )? 
+  "?" 
+    ( regexLit=<STRING_LITERAL> | regexId=<IDENTIFIER> ) ( LOOKAHEAD(2) group=GroupDeclaration(qname.getName(), parserAssembler) )? 
   {
     Operand regexOp = null;
     if (regexLit != null)
       regexOp = new StringOperand(QualifiedName.ANONYMOUS, getText(regexLit));
     else 
-      regexOp = parserAssembler.getOperandMap().addOperand(regexId.image, null, parserAssembler.getQualifiedContextname());
-    if (qname != null)
-      inputOp = parserAssembler.getOperandMap().addOperand(qname.getName(), null, parserAssembler.getQualifiedContextname());
+      regexOp = operandMap.addOperand(regexId.image, null, parserAssembler.getQualifiedContextname());
+    if (inputOp == null)
+      inputOp = operandMap.addOperand(qname.getName(), null, parserAssembler.getQualifiedContextname());
     Operand var = new RegExOperand(qname, regexOp, inputOp, flags, group);
     return var;
   }
@@ -2113,6 +2116,7 @@ Operand Expression(ParserContext context) :
 {
   Operand param;
   Token assignToken = null;
+  AppenderVariable var = null;
   Operand assignOperand = null;
 }
 {
@@ -2134,7 +2138,12 @@ Operand Expression(ParserContext context) :
   {
     if (assignOperand == null)
       return param;
-    return new Evaluator(param, assignToken.image, assignOperand);
+    if (param instanceof AppenderVariable)
+      var = (AppenderVariable)param;
+    if (var == null)
+      return new Evaluator(param, assignToken.image, assignOperand);
+    var.setExpression(assignOperand);
+    return var;
   }
 }
 
@@ -2157,9 +2166,14 @@ Operand PrimaryExpression(ParserContext context) :
   |
   qname=Name(context, false) (LOOKAHEAD(2) param1=NamedExpression(qname, context) )?
   {
-    if (param1 == null)
-        return parserAssembler.addOperand(qname);
-    return param1;
+    if (param1 != null)
+      return param1;
+      ListAssembler listAssembler = parserAssembler.getListAssembler();
+      QualifiedName inContext = new QualifiedName(qname.toString(), context.getContextName());
+      if (listAssembler.existsKey(ListType.basic, inContext) || 
+          listAssembler.existsKey(ListType.axiom_item, inContext))
+        return createAppender(inContext, null, context);
+      return parserAssembler.addOperand(qname);
   }
   |
   literal=<SCOPE> listIndexData=IndexExpression(context.getQualifiedName("scope"), context)

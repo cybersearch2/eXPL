@@ -13,7 +13,7 @@ axiom city()
 // Template for name and altitude of a high city
 template high_city
 // Solution is an exported to a list named 'city_list'
-+ list city_list(high_city);
++ export list city_list(high_city);
 (name ? altitude > 5000, altitude);
 
 query high_cities (city : high_city); 

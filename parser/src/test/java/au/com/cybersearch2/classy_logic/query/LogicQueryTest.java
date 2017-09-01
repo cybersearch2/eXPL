@@ -84,7 +84,6 @@ public class LogicQueryTest
 		LogicQuery logicQuery = new LogicQuery(axiomSource);
 		Solution solution = mock(Solution.class);
 	    SolutionPairer pairer = mock(SolutionPairer.class);
-        logicQuery.pairer = pairer;
 		Operand term1 = mock(Operand.class);
 		Term term2 = mock(Term.class);
 		when(term1.unifyTerm(term2, 1)).thenReturn(1);
@@ -93,16 +92,16 @@ public class LogicQueryTest
 		when(term3.unifyTerm(term4, 1)).thenReturn(1);
         Template template = mock(Template.class);
         when(template.getId()).thenReturn(1);
+        when(template.getSolutionPairer(solution)).thenReturn(pairer);
 		OperandWalker walker = mock(OperandWalker.class);
-		when(walker.visitAllNodes(pairer)).thenReturn(true);
+		when(walker.visitAllNodes(isA(OperandVisitor.class))).thenReturn(true);
 		when(template.getOperandWalker()).thenReturn(walker);
 		when(solution.size()).thenReturn(2);
 		assertThat(logicQuery.unifySolution(solution, template)).isTrue();
-		verify(pairer).setSolution(solution);
         Template template2 = mock(Template.class);
         when(template2.getId()).thenReturn(1);
 		OperandWalker walker2 = mock(OperandWalker.class);
-		when(walker2.visitAllNodes(pairer)).thenReturn(false);
+		when(walker2.visitAllNodes(isA(OperandVisitor.class))).thenReturn(false);
 		when(template2.getOperandWalker()).thenReturn(walker2);
 		assertThat(logicQuery.unifySolution(solution, template2)).isFalse();
 	}
@@ -513,7 +512,7 @@ public class LogicQueryTest
 		OperandWalker operandWalker = mock(OperandWalker.class);
 		SolutionPairer pairer = mock(SolutionPairer.class);
         when(template.getSolutionPairer(solution)).thenReturn(pairer);
-		when(operandWalker.visitAllNodes(pairer)).thenReturn(true);
+		when(operandWalker.visitAllNodes(isA(OperandVisitor.class))).thenReturn(true);
         when(template.getQualifiedName()).thenReturn(QualifiedName.parseTemplateName(NAME));
 		when(template.getOperandWalker()).thenReturn(operandWalker);
 		when(template.getKey()).thenReturn(NAME);

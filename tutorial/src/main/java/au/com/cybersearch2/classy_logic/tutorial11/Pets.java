@@ -23,7 +23,6 @@ import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
@@ -54,24 +53,22 @@ string speciesRegex = "<species>dog";
 string nameRegex = "<name>([a-zA-z']*)[^a-zA-z']";
 string colorRegex = "<color>([a-zA-z' ]*)[^a-zA-z' ]";
 
-calc dogs
+calc dogs_only
 + export list<string> dogs;
 + cursor pet(pets_info);
 (
-  integer i = 0,
   string petRegex = 
     "^.*" + speciesRegex + 
     ".*" + nameRegex + 
     ".*" + colorRegex +".*", 
   {
     ? pet.fact,
-    regex(case_insensitive) pet == petRegex { name, color }, 
-    dogs += name + " is a " + color + " dog." 
-    pet += 1
+    regex(case_insensitive) dog = pet++ ? petRegex { name, color }
+      { dogs += name + " is a " + color + " dog." }
   }
 );
 
-query pet_query (dogs);
+query pet_query (dogs_only);
 
 */
     protected QueryProgramParser queryProgramParser;

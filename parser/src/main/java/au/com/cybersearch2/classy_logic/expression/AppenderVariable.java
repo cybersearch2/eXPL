@@ -42,6 +42,15 @@ public class AppenderVariable extends Variable
     }
 
     /**
+     * Set exression to evaluate value to append to list
+     * @param expression Operand object
+     */
+    public void setExpression(Operand expression)
+    {
+        this.expression = expression;
+    }
+    
+    /**
      * evaluate
      * @see au.com.cybersearch2.classy_logic.expression.Variable#evaluate(int)
      */
@@ -52,6 +61,11 @@ public class AppenderVariable extends Variable
         if (appender.isEmpty())
             appender.evaluate(id);
         EvaluationStatus status = super.evaluate(id);
+        if (expression == null)
+        {   // Not used in concatenation expression, so just return appender value
+            setValue(appender.getValue());
+            return EvaluationStatus.COMPLETE;
+        }
         if (status == EvaluationStatus.COMPLETE)
             appender.append(value);
         return status;

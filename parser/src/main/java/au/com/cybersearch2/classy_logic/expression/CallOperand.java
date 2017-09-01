@@ -68,11 +68,17 @@ public class CallOperand<R> extends Variable implements DebugTarget
         }
         else
             termList = EMPTY_TERM_LIST;
-        setValue(callEvaluator.evaluate(termList));
+        doCall(termList);
         this.id = id;
         return EvaluationStatus.COMPLETE;
     }
- 
+
+    protected void doCall(List<Term> termList)
+    {
+        Object result = callEvaluator.evaluate(termList);
+        setValue(result);
+    }
+    
     /**
      * Backup to intial state if given id matches id assigned on unification or given id = 0. 
      * @param id Identity of caller. 

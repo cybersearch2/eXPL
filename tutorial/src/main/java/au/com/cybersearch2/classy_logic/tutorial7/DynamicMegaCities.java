@@ -15,6 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial7;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,7 +23,6 @@ import java.util.List;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -74,39 +74,58 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 {34,"Chennai","India","Asia",10350000}
 {35,"Hyderabad","India","Asia",10100000};
  */
-/* grouping.xpl
-axiom mega_city (Rank,Megacity,Country,Continent,Population): resource;
+/* dynamic-grouping.xpl
+include "mega_city.xpl";
 
-axiom continents(continent)
-  { "Asia" }
-  { "Africa"}
-  { "Europe" }
-  { "South America" }
-  { "North America" };
-
-template continent 
+template city_info 
++ export list<axiom> asia {};
++ export list<axiom> africa {};
++ export list<axiom> europe {};
++ export list<axiom> south_america {};
++ export list<axiom> north_america {};
 (
-  continent
+  continent = Continent, 
+  city = Megacity, 
+  country = Country 
 ); 
 
-template continent_group 
+template group
++ list<axiom> asia = city_info.asia;
++ list<axiom> africa = city_info.africa;
++ list<axiom> europe = city_info.europe;
++ list<axiom> south_america = city_info.south_america;
++ list<axiom> north_america = city_info.north_america;
++ list<axiom> mega_city {};
 (
-  continent ? continent == Continent, city = Megacity, country = Country, rank = Rank, population = Population.format
+  mega_city = axiom { continent, city, country },
+  choice group 
+  {
+    asia += mega_city ? continent == "Asia",
+    africa += mega_city ? continent == "Africa",
+    europe += mega_city ? continent == "Europe",
+    south_america += mega_city ? continent == "South America",
+    north_america += mega_city ? continent == "North America"
+  }
+);
+
+query mega_cities_by_continent 
+(
+  mega_city:city_info, group 
 ); 
 
-query<axiom> mega_cities_by_continent (continents : continent, mega_city : continent_group); */
+ */
     
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
     
     public DynamicMegaCities()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 7);
-        queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
+        File resourcePath = new File("src/main/resources/tutorial7");
+        queryProgramParser = new QueryProgramParser(resourcePath);
      }
 
     /**
-     * Compiles the asia_top_ten.xpl script and runs the "asia_top_ten" query
+     * Compiles the dynamic-grouping.xpl script and runs the "mega_cities_by_continent" query
      */
     public Iterator<Axiom> findMegaCities() 
     {

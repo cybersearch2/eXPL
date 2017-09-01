@@ -227,7 +227,7 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
                 termList.assignItem(i, opTerm);
             }
         }
-        return null;
+        return evaluateAxiom;
     }
 
     /**

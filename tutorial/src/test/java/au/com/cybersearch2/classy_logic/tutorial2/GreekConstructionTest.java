@@ -34,7 +34,7 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.Solution;
 
 /**
- * GreekConstruction3Test
+ * LogicChainTest
  * @author Andrew Bowley
  * 5Feb.,2017
  */
@@ -43,7 +43,7 @@ public class GreekConstructionTest
     @Test
     public void testNamedGreekConstruction() throws Exception
     {
-        File testFile = new File("src/main/resources/tutorial2", "customer_charge2.txt");
+        File testFile = new File("src/main/resources/tutorial2", "named_greek_construction.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         NamedGreekConstruction greekConstruction = new NamedGreekConstruction();
         greekConstruction.displayCustomerCharges(new SolutionHandler(){

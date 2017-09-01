@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.query;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
@@ -103,16 +102,18 @@ public class CalculateChainQuery extends ChainQuery
 	@Override
 	public EvaluationStatus executeQuery(Solution solution, Deque<Template> templateChain, ExecutionContext context)
 	{
+	    /* TODO - Investigate why template chain logic seemed to fail for ordinary template appearing more than once
 	    // Backup template if already in chain
 	    Iterator<Template> iterator = templateChain.iterator();
 	    while (iterator.hasNext())
 	    {
-	        if (iterator.next().getId() == template.getId())
+	        if (iterator.next().getArchetype() == template.getArchetype())
 	        {
 	            template.backup(true);
 	            break;
 	        }
 	    }
+	    */
 	    // Set properties attached to query
 	    if (!properties.isEmpty())
 	        template.setInitData(properties);
@@ -133,9 +134,9 @@ public class CalculateChainQuery extends ChainQuery
     	    }
     	    else
     	    {
-    	        String key = template.getName();
     	        Template head = templateChain.peekLast();
-    	        if (head.getName().equals(key))
+    	        // Compare archetypes to match replicates in addition to other template types
+    	        if (head.getArchetype() == template.getArchetype())
     	        {   // New query, so reset template chain
     	            while ((head = templateChain.pollLast()) != null)
     	                head.reset();

@@ -83,13 +83,13 @@ public class Calculator implements SolutionFinder
 	public boolean iterate(Axiom axiom, Solution solution, Template template, ExecutionContext context)
 	{
 	    Axiom seedAxiom = template.initialize();
-        if (seedAxiom != null)
+        if ((seedAxiom != null) && (seedAxiom.getTermCount() > 0))
         {
             for (int i = 0; i < axiom.getTermCount(); ++i)
                 seedAxiom.addTerm(axiom.getTermByIndex(i));
             seedAxiom.getArchetype().clearMutable();
             return execute(seedAxiom, template, solution, context);
-       }
+        }
 		return execute(axiom, template, solution, context);
 	}
 	

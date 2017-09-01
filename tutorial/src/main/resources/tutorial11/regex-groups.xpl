@@ -15,8 +15,8 @@ list<axiom> expand
    
 template in_words 
 (
-  regex word == wordRegex, 
-. regex definition == defRegex { part, def },
+  regex word ? wordRegex, 
+. regex definition ? defRegex { part, def },
   expand[part],
   def
 );

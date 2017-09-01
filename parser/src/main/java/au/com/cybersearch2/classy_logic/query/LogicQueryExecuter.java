@@ -62,11 +62,9 @@ public class LogicQueryExecuter extends ChainQueryExecuter
     		LogicQuery nextQuery = logicQueryList.get(index+1);
     		Template nextTemplate = templateList.get(index + 1);
     		if (nextQuery.getQueryStatus() == QueryStatus.complete)
-    		    return false;
-    		{
-    		    nextTemplate.backup(true);
-    		    solution.remove(nextTemplate.getQualifiedName().toString());
-    		}
+    		    nextQuery.setQueryStatus(QueryStatus.start);
+    		nextTemplate.backup(true);
+    	    solution.remove(nextTemplate.getQualifiedName().toString());
     		return nextQuery.iterate(solution, nextTemplate, context);
 		}
 	}

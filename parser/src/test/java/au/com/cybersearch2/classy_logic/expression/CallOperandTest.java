@@ -252,9 +252,9 @@ public class CallOperandTest
 
     static final String[] GRADES_RESULTS = 
     {
-        "score(student=Amy, total=36(36))",
-        "score(student=George, total=44(44))",
-        "score(student=Sarah, total=44(44))"
+        "score(student=Amy, total=36)",
+        "score(student=George, total=44)",
+        "score(student=Sarah, total=44)"
     };
 
     static final String[] STUDENTS =
@@ -716,8 +716,8 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                Axiom axiom = (Axiom)solution.getValue("test", "x");
-                assertThat((Long)axiom.getTermByIndex(0).getValue()).isEqualTo(3);
+                Long result = (Long)solution.getValue("test", "x");
+                assertThat(result).isEqualTo(3);
                 return false;
             }});
     }
@@ -731,8 +731,8 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                Axiom axiom = (Axiom)solution.getValue("test", "x");
-                assertThat((Long)axiom.getTermByIndex(0).getValue()).isEqualTo(6);
+                Long result = (Long)solution.getValue("test", "x");
+                assertThat(result).isEqualTo(6);
                 return false;
             }});
     }
@@ -746,8 +746,8 @@ public class CallOperandTest
             @Override
             public boolean onSolution(Solution solution)
             {
-                Axiom axiom = (Axiom) solution.getValue("test", "x");
-                assertThat((Long)axiom.getTermByIndex(0).getValue()).isEqualTo(12+42+93+55);
+                Long result = (Long) solution.getValue("test", "x");
+                assertThat(result).isEqualTo(12+42+93+55);
                 return false;
             }});
     }
@@ -856,8 +856,8 @@ public class CallOperandTest
             {
                 //System.out.println(solution.getAxiom("average").toString());
                 long averageHeight = (1718+8000+5280+6970+8+10200+1305+19+1909+1305)/10;
-                Axiom axiom = (Axiom)solution.getValue("average", "average_height");
-                assertThat((Long)axiom.getTermByIndex(0).getValue()).isEqualTo(averageHeight);
+                Long result = (Long)solution.getValue("average", "average_height");
+                assertThat(result).isEqualTo(averageHeight);
                 return true;
             }});
     }

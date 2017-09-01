@@ -171,9 +171,9 @@ public class QueryParserTest
 	static final String GREEK_BUSINESS = "include \"greek_business.xpl\";";
     static final String GREEK_BUSINESS2 = "include \"greek_business2.xpl\";";
 	static final String NAMED_GREEK_BUSINESS = "include \"named_greek_business.xpl\";";
-	static final String LEXICAL_SEARCH = "template in_words (regex Word == \"^in[^ ]+\", string Definition);";
-	static final String NOUN_LEXICAL_SEARCH = "template in_words (regex Word == \"^in[^ ]+\", regex Definition == \"^n\");";
-	static final String REGEX_GROUPS = "template dictionary (word, part, text, regex definition == \"^(.)\\. (.*+)\" { part, text });";
+	static final String LEXICAL_SEARCH = "template in_words (regex Word ? \"^in[^ ]+\", string Definition);";
+	static final String NOUN_LEXICAL_SEARCH = "template in_words (regex Word ? \"^in[^ ]+\", regex Definition ? \"^n\");";
+	static final String REGEX_GROUPS = "template dictionary (word, part, text, regex definition ? \"^(.)\\. (.*+)\" { part, text });";
 
 	static final String AGRICULTURAL_LAND = 
 		"include \"agriculture-land.xpl\";" +

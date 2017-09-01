@@ -159,6 +159,7 @@ public class Choice
 	            operand = variableList.get(index);
 	            operand.backup(0);
 	            operand.assign((Parameter) term);
+	            operand.setId(template.getId());
 		        solutionAxiom.addTerm(new OperatorTerm(term.getName(), term.getValue(), operand.getOperator()));
 		    }
             ++index;
@@ -204,7 +205,9 @@ public class Choice
                 if (term.getName().equals(selectTermName))
                 {
                     selectTerm = null;
-                    variableList.get(0).setValue(term.getValue());
+                    Operand selectOperand = variableList.get(0);
+                    selectOperand.setValue(term.getValue());
+                    selectOperand.setId(id);
                 }
                 ++item;
              }
@@ -222,6 +225,7 @@ public class Choice
             Operand operand = variableList.get(index);
             //operand.unifyTerm(choiceAxiom.getTermByIndex(index), id);
             operand.assign((Parameter) choiceAxiom.getTermByIndex(index));
+            operand.setId(id);
             ++index;
         }
         return true;

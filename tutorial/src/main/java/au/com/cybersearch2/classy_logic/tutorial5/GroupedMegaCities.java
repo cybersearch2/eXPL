@@ -15,12 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial5;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -72,7 +72,7 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 {35,"Hyderabad","India","Asia",10100000};
  */
 /* grouping.xpl
-axiom mega_city (Rank,Megacity,Country,Continent,Population): resource;
+include "mega_city.xpl";
 
 axiom continents(continent)
   { "Asia" }
@@ -98,12 +98,12 @@ query<axiom> mega_cities_by_continent (continents : continent, mega_city : conti
     
     public GroupedMegaCities()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 5);
-        queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
+        File resourcePath = new File("src/main/resources/tutorial5");
+        queryProgramParser = new QueryProgramParser(resourcePath);
      }
 
     /**
-     * Compiles the asia_top_ten.xpl script and runs the "asia_top_ten" query
+     * Compiles the grouping.xpl script and runs the "mega_cities_by_continent" query
      */
     public Iterator<Axiom> findMegaCities() 
     {

@@ -215,11 +215,8 @@ public class VariableType
 	    	break;
         }
         case APPENDER:
-        {
-            if (!hasExpression)
-                throw new ParseException("List reference " + qname.getName() + " missing [] operator to select item");
-            return createAppender(qname, expression);
-        }
+            throw new IllegalArgumentException("Appender is not created in getInstance()");
+            //return createAppender(qname, expression);
         case UNKNOWN: 	
         default:
         	operand = !hasExpression ? new Variable(qname) : new Variable(qname, expression);
@@ -460,22 +457,37 @@ public class VariableType
      * @return Operand object
      * @throws ParseException 
 	 */
-	protected Operand createAppender(QualifiedName qname, Operand expression)
+	public Operand createAppender(QualifiedName qname, Operand expression, int id) throws ParseException
     {
-        QualifiedName operandName = new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname);
-        ArrayIndex arrayIndex = new ArrayIndex(qname, 0, "appender");
-        QualifiedName appenderName = new QualifiedName(qname.getName() + "_appender", qname);
-        Appender appender = new Appender(appenderName, qname, arrayIndex);
-        Operand operand = new Variable(operandName, expression);
+	    OperandMap operandMap = parserAssembler.getOperandMap();
+	    // The Appender is a singleton
+        Operand operand = operandMap.getOperand(qname);
+        if ((operand != null) && !(operand instanceof Appender))
+            throw new ParseException(qname.toString() + " is not an appender");
+        Appender appender;
+        if (operand == null) 
+        {
+            ArrayIndex arrayIndex = new ArrayIndex(qname, 0, "appender");
+            appender = new Appender(qname, qname, arrayIndex);
+            parserAssembler.getOperandMap().addOperand(appender);
+        }
+        else
+            appender = (Appender)operand; 
         String name = qname.getName();
-        qname = new QualifiedName(name + qname.incrementReferenceCount(), qname);
-        Variable var = new AppenderVariable(qname, name, operand);
+        qname = new QualifiedName(name + id, qname);
+        Variable var = new AppenderVariable(qname, name, expression);
         var.setRightOperand(appender);
         ParserTask parserTask = parserAssembler.addPending(appender);
         parserTask.setPriority(ParserTask.Priority.variable.ordinal());
         return var;
     }
 
+	/**
+	 * Returns qualified name for axiom key stored as a parameter
+	 * @param listName Name of list which uses the key 
+	 * @return QualifiedName object
+	 * @throws ParseException
+	 */
 	protected QualifiedName getAxiomKey(String listName) throws ParseException
 	{
         QualifiedName axiomKey = (QualifiedName)getProperty(AXIOM_KEY);

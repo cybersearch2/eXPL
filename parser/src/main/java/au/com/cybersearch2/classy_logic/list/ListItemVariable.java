@@ -196,16 +196,13 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             itemList = findItemListByName(listName, listAssembler, parserAssembler);
         if (itemList == null)
         {   
-            Operand listOperand = operand;
-            if (operand == null)
-            {
-              // Search for an operand in the current scope with same name as the list name
-              // If found, the operand will be an AxiomList operand, which creates a list upon evaluation.
-              QualifiedName targetName = listAssembler.getAxiomListMapping(listName);
-              listOperand = parserAssembler.getOperandMap().getOperand(targetName);
-              if (listOperand == null)
-                  listOperand = parserAssembler.findOperandByName(targetName.getName());
-            }
+            Operand listOperand = null;
+            // Search for an operand in the current scope with same name as the list name
+            // If found, the operand will be an AxiomList operand, which creates a list upon evaluation.
+            QualifiedName targetName = listAssembler.getAxiomListMapping(listName);
+            listOperand = parserAssembler.getOperandMap().getOperand(targetName);
+            if (listOperand == null)
+                listOperand = parserAssembler.findOperandByName(targetName.getName());
             if (listOperand != null) // TODO - || parserAssembler.isParameter(listName))
             {   // Use a helper to evaluate the list operand and resolve list parameters
                 ListItemSpec[] indexDataArray = 

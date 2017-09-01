@@ -1,4 +1,4 @@
-resource mega_city axiom(Rank,Megacity,Country,Continent,Population);
+include "mega_city.xpl";
 
 template city_info 
 + export list<axiom> asia {};

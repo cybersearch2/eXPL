@@ -15,19 +15,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial1;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
- * HighCities2
+ * NamedHighCities
  * Solves:  Given list of cities with their elevations, which cities are at 5,000 feet or higher.
  * The cities are defined as an axiom source with each axiom containing a name term and an elevation term.
  * The terms are name, so unification term pairing is performed by name and position does not matter as
@@ -35,9 +35,9 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
  * @author Andrew Bowley
  * 20 Feb 2015
  */
-public class HighCities2 
+public class NamedHighCities 
 {
-/* cities2.xpl
+/* named-high-cities.xpl
  axiom city_altitude(altitude, name) 
     {1718, "bilene"}
     {8000, "addis ababa"}
@@ -49,9 +49,6 @@ public class HighCities2
     {19, "richmond"}
     {1909, "spokane"}
     {1305, "wichita"};
- */
-/* high_cities.xpl
-resource city_altitude axiom();
 
 template high_city(city ? altitude > 5000, altitude);
 
@@ -61,18 +58,18 @@ query<axiom> high_cities (city_altitude : high_city);
     protected QueryProgramParser queryProgramParser;
     ParserContext parserContext;
     
-    public HighCities2()
+    public NamedHighCities()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("city_altitude", "cities2.xpl", 1);
-        queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
+        File resourcePath = new File("src/main/resources/tutorial1");
+        queryProgramParser = new QueryProgramParser(resourcePath);
      }
 
     /**
-     * Compiles the high_cities.xpl script and runs the "high_city" query
+     * Compiles the named-high-cities.xpl script and runs the "high_city" query
      */
     public Iterator<Axiom> findHighCities() 
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("high_cities.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("named-high-cities.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("high_cities");
         return result.axiomIterator("high_cities");
@@ -84,7 +81,7 @@ query<axiom> high_cities (city_altitude : high_city);
     }
     
 	/**
-	 * Compiles the CITY_EVELATIONS script and runs the "high_city" query, displaying the solution on the console.<br/>
+	 * Compiles the named-high-cities.xpl script and runs the "high_city" query, displaying the solution on the console.<br/>
 	 * The expected result:<br/>
 	 * high_city(name = addis ababa, altitude = 8000)<br/>
 	 * high_city(name = denver, altitude = 5280)<br/>
@@ -95,7 +92,7 @@ query<axiom> high_cities (city_altitude : high_city);
     {
         try 
         {
-            HighCities2 highCities = new HighCities2();
+            NamedHighCities highCities = new NamedHighCities();
             Iterator<Axiom> iterator = highCities.findHighCities();
             while (iterator.hasNext())
                 System.out.println(iterator.next().toString());

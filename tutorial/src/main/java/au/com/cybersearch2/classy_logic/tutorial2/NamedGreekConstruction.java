@@ -15,9 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial2;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
-import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
@@ -32,11 +33,19 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class NamedGreekConstruction implements SolutionHandler
 {
 
-/* customer_charge2.xpl
-resource charge axiom() = "greek_construction";
-resource customer axiom() = "greek_construction"; 
+/* named_greek_construction.xpl
+axiom charge (city, charge)
+  {"Athens", 23 }
+  {"Sparta", 13 }
+  {"Milos", 17};
+        
+axiom customer (name, city)
+  {"Marathon Marble", "Sparta"}
+  {"Acropolis Construction", "Athens"}
+  {"Agora Imports", "Sparta"}
+  {"Spiros Theodolites", "Milos"};
 
-template freight(charge, city);
+ template freight(charge, city);
 template customer_freight(name, city ? city == freight.city, charge = freight.charge);
         
 query customer_charge(charge:freight, customer:customer_freight);
@@ -48,12 +57,12 @@ query customer_charge(charge:freight, customer:customer_freight);
 
     public NamedGreekConstruction()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("greek_construction", "named_greek_construction.xpl", 2);
-        queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
+        File resourcePath = new File("src/main/resources/tutorial2");
+        queryProgramParser = new QueryProgramParser(resourcePath);
      }
 
 	/**
-	 * Compiles the customer_charge2.xpl script and runs the "customer_charge" query, displaying the solution on the console.<br/>
+	 * Compiles the named_greek_construction.xpl script and runs the "customer_charge" query, displaying the solution on the console.<br/>
 	 * The query has 2 unification steps. The first unifies "charge" axiom with "freight" template.<br/>
 	 * The second unifies "customer" axiom with "customer_freight" template.
 	 * Unlike the first version, this sample declares the names of the axiom terms so they can be matched to template terms by name.
@@ -66,7 +75,7 @@ query customer_charge(charge:freight, customer:customer_freight);
 	 */
 	public void displayCustomerCharges(SolutionHandler solutionHandler)
 	{
-        QueryProgram queryProgram = queryProgramParser.loadScript("customer_charge2.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("named_greek_construction.xpl");
         //queryProgram.setExecutionContext(new ExecutionContext());
 		// The first unification fills in variables "city" and "charge".
 		// Both templates here share variables "city" and "charge", so only the "name" term

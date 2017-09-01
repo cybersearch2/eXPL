@@ -15,9 +15,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial2;
 
+import java.io.File;
+
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
-import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
@@ -33,7 +34,7 @@ import au.com.cybersearch2.classy_logic.query.Solution;
 public class GreekConstruction implements SolutionHandler
 {
 
-/*
+/* customer_charge.xpl
 axiom charge() 
   {"Athens", 23 }
   {"Sparta", 13 }
@@ -44,10 +45,6 @@ axiom customer()
   {"Acropolis Construction", "Athens"}
   {"Agora Imports", "Sparta"}
   {"Spiros Theodolites", "Milos"};
-*/
-/* customer_charge.xpl
-resource charge axiom() = "greek_construction";
-resource customer axiom() = "greek_construction"; 
 
 template freight(city, charge);
 template customer_freight(name, city ? city == freight.city, charge);
@@ -59,8 +56,8 @@ query customer_charge(charge:freight, customer:customer_freight);
     
     public GreekConstruction()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("greek_construction", "greek_construction.xpl", 2);
-        queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
+        File resourcePath = new File("src/main/resources/tutorial2");
+        queryProgramParser = new QueryProgramParser(resourcePath);
      }
 
     /**

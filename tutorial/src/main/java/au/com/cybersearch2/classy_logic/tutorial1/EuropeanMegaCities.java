@@ -15,12 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial1;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -73,7 +73,7 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 {35,"Hyderabad","India","Asia",10100000};
 */
 /* euro_megacities.xpl
-rresource mega_city axiom(Rank,Megacity,Country,Continent,Population);
+include "mega_city.xpl";
 
 template euro_megacities (Megacity, Country, Continent { "Europe" } );
 
@@ -85,16 +85,16 @@ query<axiom> euro_megacities (mega_city : euro_megacities);
 	 
     public EuropeanMegaCities()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 1);
-        queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
-     }
+        File resourcePath = new File("src/main/resources");
+        queryProgramParser = new QueryProgramParser(resourcePath);
+    }
 
     /**
      * Compiles the euro_megacities.xpl script and runs the "euro_megacities" query
      */
     public Iterator<Axiom> findEuroMegaCities() 
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("euro_megacities.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial1/euro_megacities.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("euro_megacities");
         return result.axiomIterator("euro_megacities");
@@ -108,11 +108,11 @@ query<axiom> euro_megacities (mega_city : euro_megacities);
 	/**
 	 * Displays the euro_megacities solution on the console.<br/>
 	 * The expected result:<br/>
-		euro_megacities(Megacity = Moscow, Country = Russia, Continent = Europe)<br/>
-		euro_megacities(Megacity = London, Country = UK, Continent = Europe)<br/>
-		euro_megacities(Megacity = Istanbul, Country = Turkey, Continent = Europe)<br/>
-		euro_megacities(Megacity = Rhine-Ruhr, Country = Germany, Continent = Europe)<br/>
-		euro_megacities(Megacity = Paris, Country = France, Continent = Europe)<br/>
+		euro_megacities(Megacity=Moscow, Country=Russia, Continent=Europe)<br/>
+		euro_megacities(Megacity=London, Country=UK, Continent=Europe)<br/>
+		euro_megacities(Megacity=Istanbul, Country=Turkey, Continent=Europe)<br/>
+		euro_megacities(Megacity=Rhine-Ruhr, Country=Germany, Continent=Europe)<br/>
+		euro_megacities(Megacity=Paris, Country=France, Continent=Europe)<br/>
 	 */
     public static void main(String[] args)
     {

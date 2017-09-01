@@ -30,13 +30,52 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * ServiceItems
- * Demonstrates regular expression group default.
+ * Demonstrates type assigned to cursor.
  * @author Andrew Bowley
  * 14 Sep 2015
  */
 public class ServiceItems
 {
 /* service-items.xpl
+list<string> account_info = 
+{
+ "Invoice #00035", 
+ "Service #83057 $60.00",
+ "Service #93001       ",
+ "Service #10800 $30.00",
+ "Service #10661 $45.00",
+ "Service #00200       ",
+ "Service #78587 $15.00",
+ "Service #99585 $10.00",
+ "Service #99900  $5.00"
+};
+
+string serviceRegex = "#([0-9]+)";
+string amountRegex = "(\\$[0-9]+\\.[0-9]+)";
+
+calc scan_item
++ export list<axiom> charges {};
++ cursor item(account_info);
+(
+. string itemRegex = 
+    "^Service "  + serviceRegex + 
+    "\\s+" + amountRegex + "?$", 
+. currency $ "US" amount,
+  currency $ "US" total = 0.0,
+  {
+    ? item.fact,
+    amount = 0.0,
+    regex line = item++ ? itemRegex { service, amount }
+    {
+      total += amount,
+      charges += axiom {
+        Service = service,
+        Amount = amount.format} 
+    } 
+  }
+);
+
+query<term> scan_service_items(scan_item);
 
 */
     protected QueryProgramParser queryProgramParser;
@@ -49,8 +88,17 @@ public class ServiceItems
     }
 
     /**
-     * Compiles the service-item script and runs the "scan_service_items" query.<br/>
+     * Compiles the service-items.xpl script and runs the "scan_service_items" query.<br/>
      * The expected results:<br/>
+        charges(Service=83057, Amount=USD60.00)<br/>
+        charges(Service=93001, Amount=USD0.00)<br/>
+        charges(Service=10800, Amount=USD30.00)<br/>
+        charges(Service=10661, Amount=USD45.00)<br/>
+        charges(Service=00200, Amount=USD0.00)<br/>
+        charges(Service=78587, Amount=USD15.00)<br/>
+        charges(Service=99585, Amount=USD10.00)<br/>
+        charges(Service=99900, Amount=USD5.00)<br/>
+        scan_service_items(total=165.0)<br/>  
      * @return Axiom iterator
      */
     public List<Axiom>  scanServiceItems()

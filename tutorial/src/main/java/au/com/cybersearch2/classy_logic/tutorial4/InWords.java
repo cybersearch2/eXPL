@@ -48,7 +48,7 @@ absurd - j. inconsistent with reason or logic or common sense
 /* query_in_words.xpl
 resource lexicon axiom(word, definition);
 
-template in_words (regex word == "^in[^ ]+", definition);
+template in_words (regex word ? "^in[^ ]+", definition);
 
 query<axiom> query_in_words(lexicon : in_words);
 

@@ -15,12 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.tutorial2;
 
+import java.io.File;
 import java.util.Iterator;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
-import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomProvider;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
@@ -28,7 +28,8 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 
 /**
  * EuropeanScopeMegaCities
- * Demonstrates selection using set {} operator
+ * Demonstrates using 2-part name to reference a template in a scope.
+ * Also shows two templates can have the same name as long as they are in different scopes.
  * @author Andrew Bowley
  * 24 Feb 2015
  */
@@ -73,11 +74,20 @@ axiom mega_city (Rank,Megacity,Country,Continent,Population)
 {35,"Hyderabad","India","Asia",10100000};
 */
 /* euro_megacities.xpl
-rresource mega_city axiom(Rank,Megacity,Country,Continent,Population);
+resource mega_city axiom(Rank,Megacity,Country,Continent,Population);
 
-template euro_megacities (Megacity, Country, Continent { "Europe" } );
+scope europe
+{
+  template megacities (Megacity, Country, Continent { "Europe" } );
+}
 
-query<axiom> euro_megacities (mega_city : euro_megacities);
+scope asia
+{
+  template megacities (Megacity, Country, Continent { "Asia" } );
+}
+
+query<axiom> euro_megacities (mega_city : europe.megacities);
+query<axiom> asia_megacities (mega_city : asia.megacities);
 
 */
     protected QueryProgramParser queryProgramParser;
@@ -85,8 +95,8 @@ query<axiom> euro_megacities (mega_city : euro_megacities);
 	 
     public EuropeanScopeMegaCities()
     {
-        ResourceAxiomProvider resourceAxiomProvider = new ResourceAxiomProvider("mega_city", "mega_city.xpl", 1);
-        queryProgramParser = new QueryProgramParser(resourceAxiomProvider);
+        File resourcePath = new File("src/main/resources");
+        queryProgramParser = new QueryProgramParser(resourcePath);
      }
 
     /**
@@ -94,7 +104,7 @@ query<axiom> euro_megacities (mega_city : euro_megacities);
      */
     public Iterator<Axiom> findEuroMegaCities() 
     {
-        QueryProgram queryProgram = queryProgramParser.loadScript("../tutorial2/euro_scope_megacities.xpl");
+        QueryProgram queryProgram = queryProgramParser.loadScript("tutorial2/euro_scope_megacities.xpl");
         parserContext = queryProgramParser.getContext();
         Result result = queryProgram.executeQuery("euro_megacities");
         return result.axiomIterator("euro_megacities");
