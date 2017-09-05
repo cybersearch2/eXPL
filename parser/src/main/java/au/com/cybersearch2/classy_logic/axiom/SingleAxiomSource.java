@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -33,8 +35,6 @@ public class SingleAxiomSource implements AxiomSource, Iterator<Axiom>, Iterable
     int count;
     /** The axiom */
     Axiom axiom;
-    /** The term names */
-    protected List<String> axiomTermNameList;
 
     /**
      * Construct SingleAxiomSource object
@@ -43,7 +43,20 @@ public class SingleAxiomSource implements AxiomSource, Iterator<Axiom>, Iterable
     public SingleAxiomSource(Axiom axiom)
     {
     	this.axiom = axiom;
-    	axiomTermNameList = axiom.getArchetype().getTermNameList();
+    }
+
+    /**
+     * Returns self 
+     * @return this
+     */
+    public Iterable<Axiom> getIterable() 
+    {
+        return this;
+    }
+
+    public List<String> getAxiomTermNameList()
+    {
+        return axiom.getArchetype().getTermNameList();
     }
 
     /**
@@ -86,19 +99,11 @@ public class SingleAxiomSource implements AxiomSource, Iterator<Axiom>, Iterable
 		return new SingleAxiomSource(axiom);
 	}
 
-	/**
-	 * Returns self 
-	 * @return this
-	 */
-	public Iterable<Axiom> getIterable() 
-	{
-		return this;
-	}
-
+    @SuppressWarnings("unchecked")
     @Override
-    public List<String> getAxiomTermNameList()
+    public Archetype<Axiom, Term> getArchetype()
     {
-        return axiomTermNameList;
+        return (Archetype<Axiom, Term>) axiom.getArchetype();
     }
 
 }

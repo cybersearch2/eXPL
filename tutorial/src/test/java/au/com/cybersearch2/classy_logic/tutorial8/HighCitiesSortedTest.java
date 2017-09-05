@@ -34,7 +34,7 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.tutorial8.HighCitiesSorted;
 
 /**
- * HighCitiesSortedTest
+ * HighCitiesSorted2Test
  * @author Andrew Bowley
  * 12Apr.,2017
  */

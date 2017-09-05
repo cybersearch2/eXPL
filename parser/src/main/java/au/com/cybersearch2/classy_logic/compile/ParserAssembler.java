@@ -15,10 +15,10 @@ import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
-import au.com.cybersearch2.classy_logic.expression.Evaluator;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.AxiomCallOperand;
 import au.com.cybersearch2.classy_logic.expression.CallOperand;
+import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.TermOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
@@ -369,7 +369,7 @@ public class ParserAssembler implements LocaleListener
             List<String> termNameList = axiomArchetype.getTermNameList();
             if (!termNameList.isEmpty())
             {
-                Template template = templateAssembler.createTemplate(templateName, false);
+                Template template = templateAssembler.createTemplate(templateName, TemplateType.template);
                 for (String termName: termNameList)
                 {
                     QualifiedName qname = getContextName(termName);
@@ -389,22 +389,13 @@ public class ParserAssembler implements LocaleListener
      * @param assignExpression Expression on right hand side
      * @return
      */
-    public Evaluator createReflexiveEvaluator(final Operand term, String operator, Operand assignExpression)
+    public Operand createReflexiveEvaluator(Operand operand, String operator, Operand assignExpression)
     {
-        final Evaluator evaluator = new Evaluator(getContextName(term.getName()), term, operator, assignExpression);
-        if (term.getName().isEmpty())
-        {
-            ParserRunner nameFixer = new ParserRunner(){
-
-                @Override
-                public void run(ParserAssembler parserAssembler)
-                {
-                    evaluator.setName(term.getName());
-                }};
-            ParserTask parserTask = parserTaskQueue.addPending(nameFixer , scope);
-            parserTask.setPriority(ParserTask.Priority.fix.ordinal());
-        }
-        return evaluator;
+        QualifiedName qname = operand.getQualifiedName();
+        qname = new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname);
+        Variable var = new Variable(qname, qname.getName(), assignExpression);
+        var.setReflexOp(OperatorEnum.convertOperator(operator), operand);
+        return var;
     }
     
 	/**

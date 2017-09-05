@@ -48,8 +48,8 @@ template stars
 
 template movies
 (
-  greatest[0][0],
-  greatest[1][0],
-  greatest[2][0],
+  movie_1 = greatest[0][0],
+  movie_2 = greatest[1][0],
+  movie_3 = greatest[2][0],
   size = greatest.length
 );

@@ -25,17 +25,27 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 
 /**
  * TermMetaData
- * Description of term useful for term containers
+ * Term attributes
  * @author Andrew Bowley
  * 3May,2017
  */
 public class TermMetaData implements Comparable<TermMetaData>
 {
+    /** Literal type - classifies term according to type */
     protected LiteralType literalType;
+    /** Flag set true is name is empty */
     protected boolean isAnonymous;
+    /** Term name */
     protected String name;
+    /** Position of term in metadata list */
     protected int index;
-    
+
+    /**
+     * Construct TermMetaData object
+     * @param literalType Term type
+     * @param name Term name
+     * @param index Position in metadata list
+     */
     public TermMetaData(LiteralType literalType, String name, int index)
     {
         this.literalType = literalType;
@@ -44,17 +54,29 @@ public class TermMetaData implements Comparable<TermMetaData>
         this.index = index;
     }
 
+    /**
+     * Construct TermMetaData object for given term
+     * @param term The term
+     */
     public TermMetaData(Term term)
     {
         this(term, -1);
     }
 
+    /**
+     * Construct TermMetaData object for given term and list position
+     * @param term The term
+     * @param index The position
+     */
     public TermMetaData(Term term, int index)
     {
         if (term instanceof Literal)
+            // Literal terms have intrinsic type
             literalType = ((Literal)term).getLiteralType();
         else if (term instanceof Operand)
-        {
+        {   // Operands have operand type which is mapped to literal type.
+            // Unknown type is specific to term populated with same-named type,
+            // otherwise, generic "object" type is assigned
             OperandType operandType = ((Operand)term).getOperator().getTrait().getOperandType();
             switch(operandType)
             {
@@ -75,7 +97,7 @@ public class TermMetaData implements Comparable<TermMetaData>
             }
         }
         else if (!term.isEmpty())
-        {
+        {   // If not operand, then type is inferred from content
             if (term.getValueClass() == Long.class)
                 literalType = LiteralType.integer;
             else if (term.getValueClass() == Boolean.class)
@@ -91,18 +113,25 @@ public class TermMetaData implements Comparable<TermMetaData>
             else
                 literalType = LiteralType.unspecified;
         }
-        else
+        else // An empty term has unspecified type, which can be updated
             literalType = LiteralType.unspecified;
         this.name = term.getName();
         this.isAnonymous = name.isEmpty();
         this.index = index;
     }
- 
-     @Override
+
+    /**
+     * compareTo
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @Override
     public int compareTo(TermMetaData other)
     {
         if (literalType != other.literalType)
-            return literalType.ordinal() - other.literalType.ordinal();
+        {   // Ignore type if at least one item has type unspecified 
+            if (!((literalType == LiteralType.unspecified) || (other.literalType == LiteralType.unspecified)))
+                return literalType.ordinal() - other.literalType.ordinal();
+        }
         if (isAnonymous)
             return other.isAnonymous ? index - other.index : 1; 
         return name.compareTo(other.name);
@@ -124,6 +153,10 @@ public class TermMetaData implements Comparable<TermMetaData>
         return index;
     }
 
+    /**
+     * Set literal type
+     * @param literalType
+     */
     public void setLiteralType(LiteralType literalType)
     {
         this.literalType = literalType;
@@ -145,6 +178,11 @@ public class TermMetaData implements Comparable<TermMetaData>
         return isAnonymous;
     }
 
+    /**
+     * Set name if currently anonymous
+     * @param name The name
+     * @return flag set true if name changed
+     */
     public boolean setName(String name)
     {
         if (isAnonymous)
@@ -155,6 +193,7 @@ public class TermMetaData implements Comparable<TermMetaData>
         }
         return false;
     }
+    
     /**
      * @return the name
      */
@@ -192,7 +231,7 @@ public class TermMetaData implements Comparable<TermMetaData>
         if ((obj == null) || !(obj instanceof TermMetaData))
             return false;
         TermMetaData other = (TermMetaData)obj; 
-        return (literalType == other.literalType) && name.equals(other.name) && (index == other.index);
+        return compareTo(other) == 0;//(literalType == other.literalType) && name.equals(other.name) && (index == other.index);
     }
 
 }

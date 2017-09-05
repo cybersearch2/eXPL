@@ -15,26 +15,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.compile;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
-import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
+import au.com.cybersearch2.classy_logic.axiom.TemplateAxiomSource;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.list.AxiomList;
-import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.pattern.ArchiveIndexHelper;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 
@@ -76,16 +70,18 @@ public class TemplateAssembler
     /**
      * Add a new template to this ParserAssembler
      * @param qualifiedName Qualified template name or axiom name if for Choice
-     * @param isCalculator Flag true if template declared a calculator
+     * @param templateType Enum = template/calculator/choice
      */
-    public Template createTemplate(QualifiedName qualifiedName, boolean isCalculator)
+    public Template createTemplate(QualifiedName qualifiedName, TemplateType templateType)
     {
-        boolean isChoice = qualifiedName.getTemplate().isEmpty() && isCalculator;
         QualifiedName qualifiedTemplateName = qualifiedName;
+        boolean isCalculator = templateType == TemplateType.calculator;
+        boolean isChoice = templateType == TemplateType.choice;
         if (isChoice)
             qualifiedTemplateName = new QualifiedTemplateName(scope.getAlias(), qualifiedName.getName());
-        Template template = new Template(new TemplateArchetype(qualifiedTemplateName));
-        template.setCalculator(isCalculator);
+        TemplateArchetype archetype = new TemplateArchetype(qualifiedTemplateName);
+        Template template = new Template(archetype);
+        template.setCalculator(isCalculator | isChoice);
         if (isChoice)
             template.setChoice(true);
         templateMap.put(qualifiedTemplateName, template);
@@ -176,7 +172,7 @@ public class TemplateAssembler
     public Template createQueryTemplate(QualifiedName outerTemplateName, String name) 
     {
         Template template = getTemplate(outerTemplateName);
-        Template chainTemplate = template.innerTemplateInstance(name);
+        Template chainTemplate = template.innerTemplateInstance(name, TemplateType.template);
         templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
         return chainTemplate;
     }
@@ -190,7 +186,7 @@ public class TemplateAssembler
     public Template chainTemplate(QualifiedName outerTemplateName) 
     {
         Template template = getTemplate(outerTemplateName);
-        Template chainTemplate = template.innerTemplateInstance();
+        Template chainTemplate = template.innerTemplateInstance(TemplateType.template);
         templateMap.put(chainTemplate.getQualifiedName(), chainTemplate);
         return chainTemplate;
     }
@@ -232,43 +228,9 @@ public class TemplateAssembler
         QualifiedName qname = operand.getQualifiedName();
         QualifiedName templateName = new QualifiedTemplateName(qname.getScope(), qname.getName());
         final Template template = templateMap.get(templateName);
-        if (template == null)
-            return null;
-        return new AxiomSource(){
-            AxiomList axiomList;
-            
-            @Override
-            public Iterator<Axiom> iterator()
-            {
-                template.backup(true);
-                Axiom axiom = template.initialize();
-                if ((axiom != null) && (axiom.getTermCount() > 0))
-                    template.unify(axiom, null);
-                if (template.evaluate(null) == EvaluationStatus.COMPLETE)
-                    axiomList = (AxiomList) template.getTermByIndex(0).getValue();
-                else
-                    return new ArrayList<Axiom>().iterator();
-                return new Iterator<Axiom>(){
-                    Iterator<AxiomTermList> listIterator = axiomList.getIterable().iterator();
-                    @Override
-                    public boolean hasNext()
-                    {
-                        return listIterator.hasNext();
-                    }
-
-                    @Override
-                    public Axiom next()
-                    {
-                        return listIterator.next().getAxiom();
-                    }};
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public List<String> getAxiomTermNameList()
-            {
-                return (List<String>) (axiomList != null ? axiomList.getAxiomTermNameList() : Collections.emptyList());
-            }};
+        if (template != null)
+            return new TemplateAxiomSource(template);
+        return null;
     }
 
 }

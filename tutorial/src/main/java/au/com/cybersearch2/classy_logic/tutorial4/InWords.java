@@ -18,7 +18,8 @@ package au.com.cybersearch2.classy_logic.tutorial4;
 import java.io.File;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
+import au.com.cybersearch2.classy_logic.LexiconResourceProvider;
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
@@ -60,10 +61,18 @@ query<axiom> query_in_words(lexicon : in_words);
 	{
         File resourcePath = new File("src/main/resources/tutorial4");
         // Use an external axiom source which is bound in TestAxiomProvider dependency class
-        // to AxiomSource class LexiconSource
-        queryProgramParser = new QueryProgramParser(resourcePath, new LexiconAxiomProvider());
+        // to AxiomSource class LexiconIterator
+        queryProgramParser = new QueryProgramParser(resourcePath, provideResourceManager());
 	}
 	
+    ProviderManager provideResourceManager()
+    {
+        ProviderManager providerManager = new ProviderManager();
+        LexiconResourceProvider  lexiconResource = new LexiconResourceProvider();
+        providerManager.putResourceProvider(lexiconResource);
+        return providerManager;
+    }
+
     /**
      * Compiles the query_in_words.xpl script and runs the "query_in_words" query.
      * The Lexicon resource provides both axiom source and export to console.

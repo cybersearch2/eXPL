@@ -15,59 +15,58 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic;
 
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * LexiconAxiomProvider
+ * DictionaryResourceProvider
  * @author Andrew Bowley
- * 17 Mar 2015
+ * 10 Jul 2017
  */
-public class LexiconAxiomProvider implements AxiomProvider 
+public class DictionaryResourceProvider implements ResourceProvider 
 {
 
-	@Override
-	public String getName() 
-	{
-		return "lexicon";
-	}
+    @Override
+    public String getName() 
+    {
+        return "dictionary";
+    }
 
-	@Override
-	public void open(Map<String, Object> properties) 
-	{
-	}
+    @Override
+    public void open(Map<String, Object> properties) 
+    {
+    }
 
-	@Override
-	public AxiomSource getAxiomSource(String axiomName,
-			List<String> axiomTermNameList) 
-	{
-		return new LexiconSource(axiomName, axiomTermNameList);
-	}
+    @Override
+    public Iterator<Axiom> iterator(Archetype<Axiom,Term> archetype) 
+    {
+        return new DictionaryIterator(archetype);
+    }
 
-	@Override
-	public boolean isEmpty() 
-	{
-		return false;
-	}
+    @Override
+    public boolean isEmpty() 
+    {
+        return false;
+    }
 
-	@Override
-	public AxiomListener getAxiomListener(String name) 
-	{   // Listener writes to console
-		return new AxiomListener()
-		{
-			@Override
-			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
-			{
-			    System.out.println(axiom.toString());
-			}
-		};
-	}
+    @Override
+    public AxiomListener getAxiomListener(String name) 
+    {   // Do-nothing listener for read-only provider
+        return new AxiomListener()
+        {
+            @Override
+            public void onNextAxiom(QualifiedName qname, Axiom axiom) 
+            {
+            }
+        };
+    }
 
     @Override
     public void close()

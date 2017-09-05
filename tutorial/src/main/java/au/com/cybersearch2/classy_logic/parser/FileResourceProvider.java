@@ -17,29 +17,31 @@ package au.com.cybersearch2.classy_logic.parser;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * FileAxiomProvider
+ * FileResourceProvider
  * @author Andrew Bowley
  * 6Jan.,2017
  */
-public class FileAxiomProvider implements AxiomProvider
+public class FileResourceProvider implements ResourceProvider
 {
     String resourceName;
     File resourceBase;
     List<Runnable> onCloseHandlerList;
     AxiomListener axiomListener;
 
-    public FileAxiomProvider(String resourceName, File resourceBase)
+    public FileResourceProvider(String resourceName, File resourceBase)
     {
         this.resourceName = resourceName;
         this.resourceBase = resourceBase;
@@ -70,15 +72,15 @@ public class FileAxiomProvider implements AxiomProvider
     }
 
     @Override
-    public AxiomSource getAxiomSource(String axiomName,
-            List<String> axiomTermNameList)
+    public Iterator<Axiom> iterator(Archetype<Axiom,Term> archetype)
     {
-        File axiomFile = new File(resourceBase, axiomName);
-        FileAxiomSource fileAxiomSource = new FileAxiomSource(axiomFile, axiomTermNameList);
+        String filename = archetype.getQualifiedName().toString();
+        File axiomFile = new File(resourceBase, filename);
         if (onCloseHandlerList == null)
             onCloseHandlerList = new ArrayList<Runnable>();
-        onCloseHandlerList.add(fileAxiomSource.getOnCloseHandler());
-        return fileAxiomSource;
+        FileAxiomIterator fileAxiomIterator = new FileAxiomIterator(axiomFile); 
+        onCloseHandlerList.add(fileAxiomIterator.getOnCloseHandler());
+        return fileAxiomIterator;
     }
 
     @Override

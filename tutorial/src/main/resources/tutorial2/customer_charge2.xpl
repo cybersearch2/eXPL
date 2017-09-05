@@ -1,6 +1,14 @@
-resource charge axiom() = "greek_construction";
-resource customer axiom() = "greek_construction"; 
-
+axiom charge() 
+  {"Sparta", 13 }
+  {"Athens", 23 }
+  {"Milos", 17};
+		
+axiom customer()
+  {"Marathon Marble", "Sparta"}
+  {"Acropolis Construction", "Athens"}
+  {"Agora Imports", "Sparta"}
+  {"Spiros Theodolites", "Milos"};
+  
 template freight(charge, city);
 template customer_freight(name, city ? city == freight.city, charge = freight.charge);
 		

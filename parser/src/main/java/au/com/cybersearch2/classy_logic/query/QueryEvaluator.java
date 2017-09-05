@@ -268,14 +268,20 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
             template.push();
         template.backup(false);
         // Marshall arguments provided as a list of Variables  
+        List<Term>[] initData = null; 
         if (argumentList.size() > 0)
+        {
+            initData = template.getInitData();
             template.setInitData(argumentList);
+        }
         try
         {
             launch(queryParams);
         }
         finally
         {   
+            if (initData != null)
+                template.setInitData(initData);
             if (scopeContext != null)
                 // Scope restored to original state
                 scopeContext.resetScope();

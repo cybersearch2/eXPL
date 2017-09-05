@@ -103,11 +103,15 @@ public class ArchiveIndexHelper implements OperandVisitor
         {    
             // Set operand archive index or create fix up if a different value is already assigned
             getIndexMap();
-            if (indexMap.containsKey(name))
+            boolean containsKey = indexMap.containsKey(name);
+            // Sometimes names appear more than once due to list variable naming
+            // Just use a single index value as these variables do not perform unification
+            int indexForName = template.getArchetype().getIndexForName(name);
+            if (containsKey || (indexForName != -1))
             {
                 if (operand.getArchetypeId() == 0)
                     // Index for name already assigned. Assumes meta data is identical to that of original operand.
-                    setArchiveIndex(operand, indexMap.get(name));
+                    setArchiveIndex(operand, containsKey ? indexMap.get(name) : indexForName);
             }
             else
             {   // Add term meta data to archetype and index map

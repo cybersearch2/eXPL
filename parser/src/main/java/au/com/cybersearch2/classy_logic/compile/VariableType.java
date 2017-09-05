@@ -29,6 +29,7 @@ import au.com.cybersearch2.classy_logic.expression.CountryOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
 import au.com.cybersearch2.classy_logic.expression.MacroOperand;
+import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.expression.TermOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
@@ -75,6 +76,8 @@ public class VariableType
     public final static String TEMPLATE = "Template";
     /** Key value for exporting a list */
     public final static String EXPORT = "Export";
+    /** Key value for reflex operation */
+    public final static String REFLEX_OP = "ReflexOp";
     
     /** Type of variable */
 	protected OperandType operandType;
@@ -152,11 +155,12 @@ public class VariableType
      * @return Operand object
      * @throws ParseException 
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked"})
     public Operand getInstance(QualifiedName qname, Operand expression) throws ParseException
     {
         boolean hasExpression = expression != null;
 		Operand operand = null;
+		Operand assignExpression = null;
         QualifiedName axiomKey = null;
         List<Template> initializeList = null;
         Template initializeTemplate = null;
@@ -175,6 +179,12 @@ public class VariableType
         }
         else if (operandType == OperandType.TERM)
             initializeTemplate = (Template)getProperty(PARAMS);
+        OperatorEnum reflexOp = (OperatorEnum)getProperty(REFLEX_OP);
+        if (reflexOp != null)
+        {
+            assignExpression = expression;
+            expression = null;
+        }
 	    
         switch (operandType)
 	    {
@@ -226,6 +236,12 @@ public class VariableType
 	    Operand literalOperand = (Operand)getProperty(LITERAL);
 	    if (literalOperand != null)
 	        operand.assign(new Parameter(Term.ANONYMOUS, literalOperand.getValue()));
+	    if (assignExpression != null)
+	    {
+	        Variable var = new Variable(qname, assignExpression);
+	        var.setReflexOp(reflexOp, operand);
+	        operand = var;
+	    }
 	    return operand;
     }
 
@@ -453,29 +469,31 @@ public class VariableType
 	/**
 	 * Create basic list appender variable. The expression evaluates a value which is appended to a list.
      * @param qname Qualified name of new variable
+     * @param operator Assign or concatenate - "=" or "+="
      * @param expression Operand object to provide value to be appended
      * @return Operand object
      * @throws ParseException 
 	 */
-	public Operand createAppender(QualifiedName qname, Operand expression, int id) throws ParseException
+	public Operand createAppender(QualifiedName qname, String operator, Operand expression) throws ParseException
     {
 	    OperandMap operandMap = parserAssembler.getOperandMap();
 	    // The Appender is a singleton
-        Operand operand = operandMap.getOperand(qname);
+	    QualifiedName appenderName = new QualifiedName(qname.getName() + "_appender", qname);
+        Operand operand = operandMap.getOperand(appenderName);
         if ((operand != null) && !(operand instanceof Appender))
             throw new ParseException(qname.toString() + " is not an appender");
         Appender appender;
         if (operand == null) 
         {
             ArrayIndex arrayIndex = new ArrayIndex(qname, 0, "appender");
-            appender = new Appender(qname, qname, arrayIndex);
+            appender = new Appender(appenderName, qname, arrayIndex);
             parserAssembler.getOperandMap().addOperand(appender);
         }
         else
             appender = (Appender)operand; 
         String name = qname.getName();
-        qname = new QualifiedName(name + id, qname);
-        Variable var = new AppenderVariable(qname, name, expression);
+        qname = new QualifiedName(name + appender.getQualifiedName().incrementReferenceCount(), qname);
+        Variable var = new AppenderVariable(qname, name, operator, expression);
         var.setRightOperand(appender);
         ParserTask parserTask = parserAssembler.addPending(appender);
         parserTask.setPriority(ParserTask.Priority.variable.ordinal());

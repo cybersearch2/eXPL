@@ -21,16 +21,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
-import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.parser.FileAxiomProvider;
+import au.com.cybersearch2.classy_logic.parser.FileResourceProvider;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 import au.com.cybersearch2.classy_logic.query.Solution;
@@ -72,7 +72,7 @@ scope german (language="de", region="DE")
 */
     
     protected QueryProgramParser queryProgramParser;
-    protected static FileAxiomProvider[] fileAxiomProviders;
+    protected static FileResourceProvider[] fileResourceProviders;
     ParserContext parserContext;
 
     public ForeignColors()
@@ -81,10 +81,18 @@ scope german (language="de", region="DE")
         if (!testPath.exists())
             testPath.mkdir();
         File resourcePath = new File("src/main/resources/tutorial13");
-        fileAxiomProviders = new FileAxiomProvider[2];
-        fileAxiomProviders[0] = new FileAxiomProvider("german.colors", testPath);
-        fileAxiomProviders[1] = new FileAxiomProvider("french.colors", testPath);
-        queryProgramParser = new QueryProgramParser(resourcePath, fileAxiomProviders[0], fileAxiomProviders[1]);
+        fileResourceProviders = new FileResourceProvider[2];
+        fileResourceProviders[0] = new FileResourceProvider("german.colors", testPath);
+        fileResourceProviders[1] = new FileResourceProvider("french.colors", testPath);
+        queryProgramParser = new QueryProgramParser(resourcePath, provideResourceManager());
+    }
+
+    ProviderManager provideResourceManager()
+    {
+        ProviderManager providerManager = new ProviderManager();
+        providerManager.putResourceProvider(fileResourceProviders[0]);
+        providerManager.putResourceProvider(fileResourceProviders[1]);
+        return providerManager;
     }
 
     public List<Axiom> createForeignLexicon()
@@ -97,8 +105,8 @@ scope german (language="de", region="DE")
             {
                 axiomList.add(axiom);
             }};
-        fileAxiomProviders[0].chainListener(axiomListener);
-        fileAxiomProviders[1].chainListener(axiomListener);
+        fileResourceProviders[0].chainListener(axiomListener);
+        fileResourceProviders[1].chainListener(axiomListener);
         QueryProgram queryProgram = queryProgramParser.loadScript("foreign-lexicon.xpl");
         //queryProgram.setExecutionContext(new ExecutionContext());
         parserContext = queryProgramParser.getContext();
@@ -109,10 +117,10 @@ scope german (language="de", region="DE")
         }
         finally
         {
-            fileAxiomProviders[0].chainListener(null);
-            fileAxiomProviders[1].chainListener(null);
-            fileAxiomProviders[0].close();
-            fileAxiomProviders[1].close();
+            fileResourceProviders[0].chainListener(null);
+            fileResourceProviders[1].chainListener(null);
+            fileResourceProviders[0].close();
+            fileResourceProviders[1].close();
         }
     }
     
@@ -178,8 +186,8 @@ scope german (language="de", region="DE")
         }
 		finally
 		{
-		    fileAxiomProviders[0].close();
-            fileAxiomProviders[1].close();
+		    fileResourceProviders[0].close();
+            fileResourceProviders[1].close();
 		}
 		System.exit(0);
 	}

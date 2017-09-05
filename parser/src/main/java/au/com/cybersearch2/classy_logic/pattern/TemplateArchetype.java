@@ -45,6 +45,7 @@ public class TemplateArchetype extends Archetype<Template, Operand> implements S
     public TemplateArchetype(QualifiedName structureName)
     {
         super(structureName, StructureType.template);
+        setDuplicateTermNames(true);
         if (structureName.getTemplate().isEmpty())
             throw new IllegalArgumentException("Template qualified name must have a template part");
         termMappingMap = new HashMap<QualifiedName,int[]>();

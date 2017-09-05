@@ -27,7 +27,7 @@ stars.1=Canopus
 stars.2=Rigil Kentaurus
 size=3
 movies
-greatest.0=The Godfather
-greatest.0=The Shawshank Redemption
-greatest.0=Schindler's List
+movie_1=The Godfather
+movie_2=The Shawshank Redemption
+movie_3=Schindler's List
 size=3

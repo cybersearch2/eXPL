@@ -78,7 +78,7 @@ public class ExpressionsTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("boolean can_assign=y*=3==6&&y==6 (9,3) (9,46)");
+        assertThat(sourceItem.toString()).isEqualTo("boolean can_assign=y0==6&&y==6 (9,3) (9,46)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         System.out.println(sourceItem.toString());

@@ -28,17 +28,19 @@ import au.com.cybersearch2.classy_logic.list.Appender;
  */
 public class AppenderVariable extends Variable
 {
-
+    boolean doConcatenate;
+    
     /**
      * Construct AppenderVariable object
      * @param qname Qualified name of variable
      * @param termName Term name
+     * @param operator Assign or concatenate - "=" or "+="
      * @param expression Concatenation expression
      */
-    public AppenderVariable(QualifiedName qname, String termName, Operand expression)
+    public AppenderVariable(QualifiedName qname, String termName, String operator, Operand expression)
     {
         super(qname, termName, expression);
-
+        doConcatenate = "+=".equals(operator);
     }
 
     /**
@@ -50,6 +52,14 @@ public class AppenderVariable extends Variable
         this.expression = expression;
     }
     
+    /**
+     * @param doConcatenate the doConcatenate to set
+     */
+    public void setDoConcatenate(boolean doConcatenate)
+    {
+        this.doConcatenate = doConcatenate;
+    }
+
     /**
      * evaluate
      * @see au.com.cybersearch2.classy_logic.expression.Variable#evaluate(int)
@@ -67,7 +77,15 @@ public class AppenderVariable extends Variable
             return EvaluationStatus.COMPLETE;
         }
         if (status == EvaluationStatus.COMPLETE)
-            appender.append(value);
+        {
+            if (doConcatenate)
+                appender.append(value);
+            else
+            {
+                appender.assign(this);
+                appender.setId(id);
+            }
+        }
         return status;
     }
 }

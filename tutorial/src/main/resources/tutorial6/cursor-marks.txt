@@ -1,0 +1,3 @@
+George: English = b+, Maths =b-, History = a-
+Sarah: English = b+, Maths =c+, History = c+
+Amy: English = b, Maths =a-, History = e+

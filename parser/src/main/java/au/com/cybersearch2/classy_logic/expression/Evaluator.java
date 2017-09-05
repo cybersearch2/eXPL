@@ -136,26 +136,6 @@ public class Evaluator extends TreeEvaluator
 	 */
 	protected void postConstruct()
 	{
-	    // Set operator for reflexive operations, in which case, delegation not required and
-	    // undesired when Evaluator value is set by unification prior to evaluation
-	    if (orientation == Orientation.binary)
-            switch (operatorEnum)
-            {
-            case PLUSASSIGN: // "+"
-            case MINUSASSIGN: // "-"
-            case STARASSIGN: // "*"
-            case SLASHASSIGN: // "/"
-            case ANDASSIGN: // "&"
-            case ORASSIGN: // "|"
-            case XORASSIGN: // "^"
-            case REMASSIGN: // "%"
-            case LSHIFTASSIGN:
-            case RSIGNEDSHIFTASSIGN:
-            case RUNSIGNEDSHIFTASSIGN:
-                if ((left != null) && (left.getOperator().getTrait().getOperandType() != OperandType.UNKNOWN))
-                    operator.setProxy(left.getOperator());
-            default:
-            }
         // Delegate can be set in advance if result is boolean
         // Otherwise, delegate will be set on value assigment
         presetDelegate();
@@ -298,27 +278,8 @@ public class Evaluator extends TreeEvaluator
     {
         Object result = null;
         if (!leftIsNaN && !rightIsNaN)
-        {
             // Delegate calculation to sub class
             result = calculate(left, right, id);
-            // Assign operation updates left term with result
-            switch (operatorEnum)
-            {
-                case PLUSASSIGN: // "+"
-                case MINUSASSIGN: // "-"
-                case STARASSIGN: // "*"
-                case SLASHASSIGN: // "/"
-                case ANDASSIGN: // "&"
-                case ORASSIGN: // "|"
-                case XORASSIGN: // "^"
-                case REMASSIGN: // "%"
-                case LSHIFTASSIGN:
-                case RSIGNEDSHIFTASSIGN:
-                case RUNSIGNEDSHIFTASSIGN:
-                left.setValue(result);
-                default:
-            }
-        }
         else if (leftIsNaN)
             result = left.getValue();
         else 

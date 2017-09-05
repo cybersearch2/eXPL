@@ -91,7 +91,7 @@ public class FactorialTest
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("factorial1(factorial*=i ... ?i++<n) (6,3) (10,0)");
+        assertThat(sourceItem.toString()).isEqualTo("factorial1(factorial0=factorial*=i ... ?i++<n) (6,3) (10,0)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -99,7 +99,7 @@ public class FactorialTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("factorial*=i (7,5) (7,18)");
+        assertThat(sourceItem.toString()).isEqualTo("factorial0=factorial*=i (7,5) (7,18)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

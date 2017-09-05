@@ -39,6 +39,8 @@ public class Variable extends DelegateOperand implements RightOperand
 	protected Operand expression;
     /** Optional operand for specialization eg. Currency */
     protected Operand rightOperand;
+    /** Reflexive operator */
+    protected OperatorEnum reflexOp;
 
 	/**
 	 * Construct a Variable object
@@ -122,6 +124,17 @@ public class Variable extends DelegateOperand implements RightOperand
     }
 
 	/**
+     * @param reflexOp the reflexOp to set
+     * @param self Operand performing reflex operation
+     */
+    public void setReflexOp(OperatorEnum reflexOp, Operand self)
+    {
+        this.reflexOp = reflexOp;
+        rightOperand = self;
+        expression = new Evaluator(new QualifiedName(name + "." + reflexOp.toString()), self, reflexOp.toString(), expression);
+    }
+
+    /**
 	 * Execute operation for expression
 	 * @param id Identity of caller, which must be provided for backup()
 	 * @return EvaluationStatus
@@ -129,14 +142,22 @@ public class Variable extends DelegateOperand implements RightOperand
 	public EvaluationStatus evaluate(int id)
 	{
 		EvaluationStatus status = EvaluationStatus.COMPLETE;
+        if (reflexOp != null)
+            rightOperand.evaluate(id);
 		if (expression != null)
 		{
 		    if (expression.isEmpty())
+		    {
 		        status =  expression.evaluate(id);
+		        if (reflexOp != null)
+		            rightOperand.setValue(expression.getValue());
+		    }
 		    // Only use expression value if empty or 
 		    // same id used as last time value was set on this variable
 			if (!expression.isEmpty() && empty || (id == this.id))
 			{
+                if (reflexOp != null)
+                    operator.setProxy(rightOperand.getOperator());
 				setValue(expression.getValue());
 			    this.id = id;
 			}

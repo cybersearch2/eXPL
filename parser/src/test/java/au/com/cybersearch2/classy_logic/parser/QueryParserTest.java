@@ -47,6 +47,7 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
+import au.com.cybersearch2.classy_logic.LexiconResourceProvider;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -61,7 +62,6 @@ import au.com.cybersearch2.classy_logic.expression.BigDecimalOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.IntegerOperand;
-import au.com.cybersearch2.classy_logic.LexiconSource;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
@@ -75,7 +75,9 @@ import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.KeyName;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
@@ -437,9 +439,9 @@ public class QueryParserTest
 	
 	static final String WORLD_CURRENCY_XPL =
 			"include \"world_currency.xpl\";\n" +
-			"template charge(currency $ country amount);\n" +
-	        "calc charge_plus_gst(currency $ charge.country total = charge.amount * 1.1);\n" +
-	        "calc format_total(string total_text = charge.country + \" Total + gst: \" + charge_plus_gst.total.format);\n" +
+			"template charge(currency $ country amount, country_code = country);\n" +
+	        "calc charge_plus_gst(currency $ country total = amount * 1.1);\n" +
+	        "calc format_total(string total_text = charge.country_code + \" Total + gst: \" + total.format);\n" +
 	        "list world_list(format_total);\n" +
 			"query price_query(price : charge) -> (charge_plus_gst) -> (format_total);";
   			
@@ -519,6 +521,34 @@ public class QueryParserTest
             "query<term> loop_query (loop);\n" +
             "query<term> loop1_query (loop1);";
 
+    private LexiconResourceProvider lexiconProvider;
+    private AxiomArchetype archetype;
+    private AxiomSource lexiconSource;
+ 
+    @Before
+    public void setUp()
+    {
+        lexiconProvider = new LexiconResourceProvider();
+        archetype = new AxiomArchetype(QualifiedName.parseGlobalName("lexicon"));
+        archetype.addTermName("word");
+        archetype.addTermName("definition");
+        archetype.clearMutable();
+        lexiconSource = new AxiomSource(){
+
+            @Override
+            public Iterator<Axiom> iterator()
+            {
+                return lexiconProvider.iterator(archetype);
+            }
+
+            @Override
+            public Archetype<Axiom, Term> getArchetype()
+            {
+                return archetype;
+            }};
+        //Archetype.CASE_INSENSITIVE_NAME_MATCH = true;
+    }
+    
     @Test
     public void test_loop()
     {
@@ -897,7 +927,7 @@ public class QueryParserTest
     public void test_factorial_calculate() throws ParseException
     {
 		ParserAssembler parserAssembler = openScript(FACTORIAL_CALCULATE);
-		assertThat(parserAssembler.getTemplateAssembler().getTemplate("factorial").toString()).isEqualTo("factorial(i, n, factorial, factorial1(factorial*=i ... ?i++<n))");
+		assertThat(parserAssembler.getTemplateAssembler().getTemplate("factorial").toString()).isEqualTo("factorial(i, n, factorial, factorial1(factorial0=factorial*=i ... ?i++<n))");
 		//System.out.println(parserAssembler.getTemplateAssembler().getTemplate("factorial").toString());
         Template calcTemplate = parserAssembler.getTemplateAssembler().getTemplate("factorial");
         Solution solution = new Solution();
@@ -1229,7 +1259,7 @@ public class QueryParserTest
  	    }
  	    */
 	}
-	
+
 	@Test
 	public void test_regex() throws ParseException, IOException
 	{
@@ -1237,7 +1267,7 @@ public class QueryParserTest
 		Template inWordsTemplate = parserAssembler.getTemplateAssembler().getTemplate("in_words");
 		inWordsTemplate.setKey("Lexicon");
 		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\?Word, Definition)");
-        QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
+        QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
         LogicQueryExecuter inWordsQuery = new LogicQueryExecuter(queryParams);
@@ -1250,7 +1280,7 @@ public class QueryParserTest
 		}
 		reader.close();
 	}
-
+	
 	@Test
 	public void test_regex_groups() throws ParseException, IOException
 	{
@@ -1258,7 +1288,6 @@ public class QueryParserTest
 		//
 		Template dictionaryTemplate = parserAssembler.getTemplateAssembler().getTemplate("dictionary");
 		dictionaryTemplate.setKey("Lexicon");
-		LexiconSource lexiconSource = new LexiconSource();
 	    QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(dictionaryTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
@@ -1283,6 +1312,24 @@ public class QueryParserTest
 		assertThat(count).isEqualTo(2);
 	}
 	
+    @Test
+    public void test_regex2() throws ParseException, IOException
+    {
+        ParserAssembler parserAssembler = openScript(NOUN_LEXICAL_SEARCH);
+        Template inWordsTemplate = parserAssembler.getTemplateAssembler().getTemplate("in_words");
+        inWordsTemplate.setKey("Lexicon");
+        assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\?Word, Definition \\^n\\?Definition)");
+        QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(inWordsTemplate));
+        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
+        queryParams.initialize();
+        LogicQueryExecuter inWordsQuery = new LogicQueryExecuter(queryParams);
+        while (inWordsQuery.execute())
+        {
+            assertThat(inWordsTemplate.getTermByName("Word").getValue().toString().startsWith("in")).isTrue();
+            assertThat(inWordsTemplate.getTermByName("Definition").getValue().toString().startsWith("n.")).isTrue();
+        }
+    }
+
 	@Test
 	public void test_mega_city() throws ParseException, IOException
 	{
@@ -1322,24 +1369,6 @@ public class QueryParserTest
 	}
 	
 	
-	@Test
-	public void test_regex2() throws ParseException, IOException
-	{
-		ParserAssembler parserAssembler = openScript(NOUN_LEXICAL_SEARCH);
-		Template inWordsTemplate = parserAssembler.getTemplateAssembler().getTemplate("in_words");
-		inWordsTemplate.setKey("Lexicon");
-		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\?Word, Definition \\^n\\?Definition)");
-        QueryExecuterAdapter adapter = new QueryExecuterAdapter(new LexiconSource(), Collections.singletonList(inWordsTemplate));
-        QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
-        queryParams.initialize();
-        LogicQueryExecuter inWordsQuery = new LogicQueryExecuter(queryParams);
-		while (inWordsQuery.execute())
-		{
-			assertThat(inWordsTemplate.getTermByName("Word").getValue().toString().startsWith("in")).isTrue();
-			assertThat(inWordsTemplate.getTermByName("Definition").getValue().toString().startsWith("n.")).isTrue();
-		}
-	}
-
 	@Test 
 	public void test_birds() throws ParseException, IOException
 	{

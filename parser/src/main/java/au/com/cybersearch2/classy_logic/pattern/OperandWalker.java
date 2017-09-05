@@ -90,6 +90,14 @@ public class OperandWalker
 		if ((operand.getRightOperand() != null) &&
 			 !visit(operand.getRightOperand(), visitor, depth + 1))
             return false;
+        if (operand.getBranch1() != null) 
+        {
+           if (!visit(operand.getBranch1(), visitor, depth + 1))
+               return false;
+           if ((operand.getBranch2() != null) &&
+                !visit(operand.getBranch2(), visitor, depth + 1))
+               return false;
+        }
 		return true;
 	}
 

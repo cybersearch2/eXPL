@@ -23,6 +23,7 @@ import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.TemplateType;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomCollection;
@@ -155,7 +156,7 @@ public class QueryExecuterAdapter
             QualifiedName qname = new QualifiedTemplateName(QualifiedName.EMPTY, templateName);
             String templateKey = template.getKey();
             List<Term> props = template.getProperties();
-            parserAssembler.getTemplateAssembler().createTemplate(qname, false);
+            parserAssembler.getTemplateAssembler().createTemplate(qname, TemplateType.template);
             parserAssembler.getTemplateAssembler().getTemplate(qname).setKey(templateKey);
             if (props != null)
                 parserAssembler.getTemplateAssembler().addTemplate(qname, props);

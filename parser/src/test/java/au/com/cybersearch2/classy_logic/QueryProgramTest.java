@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.ParserAssembler;
+import au.com.cybersearch2.classy_logic.compile.TemplateType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -85,7 +86,7 @@ public class QueryProgramTest
 		parserAssembler.getAxiomAssembler().addAxiom(GLOBAL_Q_AXIOM_NAME, new Parameter("x", Integer.valueOf(3)));
 		parserAssembler.getAxiomAssembler().saveAxiom(GLOBAL_Q_AXIOM_NAME);
         OperandMap operandMap = parserAssembler.getOperandMap();
-		parserAssembler.getTemplateAssembler().createTemplate(GLOBAL_Q_TEMPLATE_NAME, false);
+		parserAssembler.getTemplateAssembler().createTemplate(GLOBAL_Q_TEMPLATE_NAME, TemplateType.template);
 		parserAssembler.setQualifiedContextname(GLOBAL_Q_TEMPLATE_NAME);
 		Template template = parserAssembler.getTemplateAssembler().getTemplate(GLOBAL_Q_TEMPLATE_NAME);
 		operandMap.addOperand(OPERAND_NAME, null, parserAssembler.getQualifiedContextname());
@@ -136,7 +137,7 @@ public class QueryProgramTest
 		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
 		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
 		parserAssembler.getListAssembler().createAxiomItemList(Q_AXIOM_NAME);
-		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME, false);
+		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME, TemplateType.template);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
 		parserAssembler.getTemplateAssembler().addTemplate(Q_TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
@@ -171,7 +172,7 @@ public class QueryProgramTest
 		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
 		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
 		parserAssembler.getListAssembler().createAxiomItemList(Q_AXIOM_NAME);
-		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME, false);
+		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME, TemplateType.template);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
 		parserAssembler.getTemplateAssembler().addTemplate(Q_TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
@@ -183,7 +184,7 @@ public class QueryProgramTest
 		when(keyname2.getAxiomKey()).thenReturn(Q_AXIOM_NAME2);
 		when(keyname2.getTemplateName()).thenReturn(Q_TEMPLATE_NAME2);
 		parserAssembler.getListAssembler().createAxiomItemList(Q_AXIOM_NAME2);
-		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME2, false);
+		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME2, TemplateType.template);
 		Variable variable2 = new Variable(Q_VARIABLE_NAME);
 		parserAssembler.getTemplateAssembler().addTemplate(Q_TEMPLATE_NAME2, variable2);
 		Parameter param2 = new Parameter(VARIABLE_NAME, "eureka2!");
@@ -216,7 +217,7 @@ public class QueryProgramTest
 		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
 		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
 		parserAssembler.getListAssembler().createAxiomItemList(Q_AXIOM_NAME);
-		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME, false);
+		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME, TemplateType.template);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
 		parserAssembler.getTemplateAssembler().addTemplate(Q_TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
@@ -228,7 +229,7 @@ public class QueryProgramTest
 		KeyName keyname2 = mock(KeyName.class);
 		when(keyname2.getAxiomKey()).thenReturn(new QualifiedName(""));
 		when(keyname2.getTemplateName()).thenReturn(Q_TEMPLATE_NAME2);
-		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME2, true);
+		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME2, TemplateType.template);
 		Variable variable2 = new Variable(Q_VARIABLE_NAME);
 		parserAssembler.getTemplateAssembler().addTemplate(Q_TEMPLATE_NAME2, variable2);
 		Template template2 = parserAssembler.getTemplateAssembler().getTemplate(Q_TEMPLATE_NAME2);
@@ -261,7 +262,7 @@ public class QueryProgramTest
 		when(keyname.getAxiomKey()).thenReturn(Q_AXIOM_NAME);
 		when(keyname.getTemplateName()).thenReturn(Q_TEMPLATE_NAME);
 		parserAssembler.getListAssembler().createAxiomItemList(Q_AXIOM_NAME);
-		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME, false);
+		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME, TemplateType.template);
 		Variable variable = new Variable(Q_VARIABLE_NAME);
 		parserAssembler.getTemplateAssembler().addTemplate(Q_TEMPLATE_NAME, variable);
 		Parameter param = new Parameter(VARIABLE_NAME, "eureka!");
@@ -275,7 +276,7 @@ public class QueryProgramTest
 		when(keyname2.getTemplateName()).thenReturn(Q_TEMPLATE_NAME2);
 		Variable variable2 = new Variable(QualifiedName.parseGlobalName(TEMPLATE_NAME + "." + VARIABLE_NAME));
         Variable variable3 = new Variable(QualifiedName.parseName(VARIABLE_NAME + "3"), variable2);
-		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME2, true);
+		parserAssembler.getTemplateAssembler().createTemplate(Q_TEMPLATE_NAME2, TemplateType.calculator);
 		parserAssembler.getTemplateAssembler().addTemplate(Q_TEMPLATE_NAME2, variable3);
 		querySpec2.addKeyName(keyname2);
 		querySpec2.setQueryType(QueryType.calculator);

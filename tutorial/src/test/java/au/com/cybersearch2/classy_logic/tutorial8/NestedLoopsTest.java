@@ -26,7 +26,7 @@ import org.junit.Test;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * NestedLoopsTest
+ * NestedLoops2Test
  * @author Andrew Bowley
  * 13Apr.,2017
  */

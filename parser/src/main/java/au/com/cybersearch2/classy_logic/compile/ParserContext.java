@@ -154,7 +154,7 @@ public class ParserContext
         {
             outerTemplate = new QualifiedTemplateName(scope.getAlias(), "scope");
             // Do not set context name for scope template
-            parserAssembler.getTemplateAssembler().createTemplate(outerTemplate, true); 
+            parserAssembler.getTemplateAssembler().createTemplate(outerTemplate, TemplateType.calculator); 
         }
         return outerTemplate;
     }

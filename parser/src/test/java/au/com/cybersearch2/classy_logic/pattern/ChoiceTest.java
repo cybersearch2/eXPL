@@ -31,26 +31,25 @@ public class ChoiceTest
 {
     static final String CHOICE_COLORS =
         "axiom shades (name) {\"aqua\"} {\"blue\"} {\"orange\"};\n" +
-        "  choice swatch\n" +
+        "choice swatch\n" +
         "  ( color,     red, green, blue)\n" +
         "  { \"aqua\",  0,   255,   255 }\n" +
         "  { \"black\", 0,   0,     0   }\n" +
         "  { \"blue\",  0,   0,     255 }\n" +
         "  { \"white\", 255, 255,   255 };\n" +
         "calc shader\n" +
-        "+ list<axiom> rgb {};\n" +
         "(\n" +
-        "  color = name,\n" +        
-        "  choice swatch,\n" +
-        "  rgb = axiom { red, green, blue }\n" +
+        "  color = name,\n" +   
+        "  red, green, blue,\n" +
+        "  choice swatch\n" +
         ");\n" +
         "query color_query (shades : shader);\n";
 
     static final String[] CHOICE_COLORS_LIST =
     {
-        "rgb=list<axiom> shader.rgb: list<term> shader.rgb(){3}",
-        "rgb=list<axiom> shader.rgb: list<term> shader.rgb(){3}",
-        "rgb=list<axiom> shader.rgb: list<term> shader.rgb(){3}"
+        "shader(color=aqua, red=0, green=255, blue=255, swatch=0)",
+        "shader(color=blue, red=0, green=0, blue=255, swatch=2)",
+        "shader(color=orange, swatch=-1)"
     };
 
     static final long[] CHOICE_SELECTION_LIST = { 0, 2, -1 };
@@ -112,9 +111,8 @@ public class ChoiceTest
             int index = 0;
             @Override
             public boolean onSolution(Solution solution) {
-                //System.out.println(solution.getAxiom("shader").getTermByName("rgb").toString());
-                assertThat(solution.getAxiom("shader").getTermByName("rgb").toString()).isEqualTo(CHOICE_COLORS_LIST[index]);
-                assertThat((Long)solution.getAxiom("shader").getTermByName("swatch").getValue()).isEqualTo(CHOICE_SELECTION_LIST[index]);
+                //System.out.println(solution.getAxiom("shader").toString());
+                assertThat(solution.getAxiom("shader").toString()).isEqualTo(CHOICE_COLORS_LIST[index]);
                 ++index;
                 return true;
             }});

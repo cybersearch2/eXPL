@@ -2,13 +2,13 @@ include "world_currency.xpl";
 
 template total
 (
-  currency $ country amount,
-  amount *= 1.1
+  currency $ country amount *= 1.1,
+  country_code = country
 );
 
 template format_total
 (
-  string total_text = total.country + " Total + gst: " + total.amount.format
+  string total_text = country_code + " Total + gst: " + amount.format
 );
 
 query<axiom> price_query(price : total) -> (format_total);

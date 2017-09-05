@@ -76,10 +76,11 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
      * Create ListItemVariable object which uses a single index to select values
      * @param qname Unique operand name
      * @param indexData  Index information for value selection
+     * @param expression Optional assignment expression
      */
-    public ListItemVariable(QualifiedName qname, ListItemSpec indexData)
+    public ListItemVariable(QualifiedName qname, ListItemSpec indexData, Operand expression)
     {
-        this(Term.ANONYMOUS, qname, indexData);
+        this(Term.ANONYMOUS, qname, indexData, expression);
     }
 
     /**
@@ -87,10 +88,11 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
      * @param name Term name
      * @param qname Unique operand name
      * @param indexData  Index information for value selection
+     * @param expression Optional assignment expression
      */
-    public ListItemVariable(String name, QualifiedName qname, ListItemSpec indexData)
+    public ListItemVariable(String name, QualifiedName qname, ListItemSpec indexData, Operand expression)
     {
-        super(qname, name);
+        super(qname, name, expression);
         this.indexData = indexData;
     }
     
@@ -98,12 +100,13 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
      * Create ListItemVariable object for 2 dimensional list access
      * @param qname Unique operand name
      * @param indexDataArray  Index information for value selection 
+     * @param expression Optional assignment expression
      */
-    public ListItemVariable(QualifiedName qname, ListItemSpec[] indexDataArray)
+    public ListItemVariable(QualifiedName qname, ListItemSpec[] indexDataArray, Operand expression)
     {
         // For 2-dimension case, the first dimension selects an item in the list
         // and the second dimension selects a term within the item
-        this(qname, indexDataArray[indexDataArray.length - 1]);
+        this(qname, indexDataArray[indexDataArray.length - 1], expression);
         if (indexDataArray.length > 1)
             arrayData = indexDataArray[0];
     }
@@ -112,12 +115,13 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
      * Create ListItemVariable object for 2 dimensional list access
      * @param qname Unique operand name
      * @param indexDataArray  Index information for value selection 
+     * @param expression Optional assignment expression
      */
-    public ListItemVariable(String name, QualifiedName qname, ListItemSpec[] indexDataArray)
+    public ListItemVariable(String name, QualifiedName qname, ListItemSpec[] indexDataArray, Operand expression)
     {
         // For 2-dimension case, the first dimension selects an item in the list
         // and the second dimension selects a term within the item
-        this(name, qname,  indexDataArray[indexDataArray.length - 1]);
+        this(name, qname,  indexDataArray[indexDataArray.length - 1], expression);
         if (indexDataArray.length > 1)
             arrayData = indexDataArray[0];
     }
@@ -242,15 +246,6 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
     }
 
     /**
-     * Returns left child of Operand
-     * @return Operand object or null if there is no child
-     */
-    public Operand getLeftOperand()
-    {
-        return delegate != null ? delegate.getOperand() : null;
-    }
-    
-    /**
      * Evaluate to complete list binding, if using a list operand, and resolve list parameters
      * @param id Identity of caller, which must be provided for backup()
      * @return Evaluation status of COMPLETE
@@ -262,7 +257,9 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             // Specialization
             rightOperand.evaluate(id);
         int newIndex = delegate.evaluate(id);
-        if (empty && (newIndex != -1))
+        if ((expression != null) && (empty || id == this.id))
+            super.evaluate(id);
+        else if (empty && (newIndex != -1))
         {   // Update current index and update value too if index in range
             this.id = id;
             setValue(newIndex);
@@ -374,6 +371,26 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
     public Operand getRightOperand() 
     {
         return rightOperand;
+    }
+
+    /**
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getBranch1()
+     */
+    @Override
+    public Operand getBranch1()
+    {
+        return indexData.getItemExpression();
+    }
+
+    /**
+     * @see au.com.cybersearch2.classy_logic.interfaces.Operand#getBranch2()
+     */
+    @Override
+    public Operand getBranch2()
+    {
+        if (arrayData != null)
+            return arrayData.getItemExpression();
+        return null;
     }
 
     /**

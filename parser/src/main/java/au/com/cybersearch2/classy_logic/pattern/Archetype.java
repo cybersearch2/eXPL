@@ -29,7 +29,6 @@ import au.com.cybersearch2.classy_logic.terms.TermMetaData;
 
 /**
  * Archetype
- * TODO - Configure case sensitivity
  * Factory class for Axioms and Templates 
  * @author Andrew Bowley
  * 2May,2017
@@ -56,7 +55,14 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
     transient protected boolean isMutable;
     /** Flag set true if all terms anonymous */
     transient protected boolean isAnonymousTerms;
-
+    /** Flag set true if duplicate term names allowed */
+    transient protected boolean isDuplicateTermNames;
+    
+    /**
+     * Construct Archetype object
+     * @param structureName Qualified name of archetype
+     * @param structureType Structure type - axiom, template, choice, archetype
+     */
     public Archetype(QualifiedName structureName, StructureType structureType)
     {
         this.structureName = structureName;
@@ -67,7 +73,51 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
     }
 
     /**
-     * @return the structureName
+     * @return isMutable flag
+     */
+    public boolean isMutable()
+    {
+        return isMutable;
+    }
+
+    /**
+     * Clear isMutable flag
+     */
+    public void clearMutable()
+    {
+        isMutable = false;
+    }
+
+    /**
+     * @return isAnonymousTerms flag
+     */
+    public boolean isAnonymousTerms()
+    {
+        return isAnonymousTerms;
+    }
+
+    /**
+     * Create item containing given terms
+     * @param terms List of terms
+     * @return T
+     */
+    public T itemInstance(List<P> terms)
+    {
+        if (terms != null)
+        {
+            if (termMetaList.isEmpty())
+            {
+                createTermMetaList(terms);
+                clearMutable();
+            }
+            else
+                checkTerms(terms);
+        }
+        return newInstance(terms);
+    }
+
+    /**
+     * @return qualified name
      */
     @Override
     public QualifiedName getQualifiedName()
@@ -84,13 +134,20 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
         return structureName.getName();
     }
 
-    
+    /**
+     * getTermCount
+     * @see au.com.cybersearch2.classy_logic.interfaces.TermListManager#getTermCount()
+     */
     @Override
     public int getTermCount()
     {
         return termMetaList.size();
     }
 
+    /**
+     * getNamedTermCount
+     * @see au.com.cybersearch2.classy_logic.interfaces.TermListManager#getNamedTermCount()
+     */
     @Override
     public int getNamedTermCount()
     {
@@ -109,66 +166,63 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
     @Override
     public int addTerm(TermMetaData termMetaData)
     {
-        if (!isMutable)
-            throw new ExpressionException("Term " + termMetaData.toString() + " cannot be added to locked " + toString());
+        checkMutable(termMetaData);
         if (termMetaData.getIndex() == -1)
             termMetaData.setIndex(getTermCount());
         if (termMetaList.isEmpty())
             termMetaList = new ArrayList<TermMetaData>();
-        else if (termMetaList.contains(termMetaData) && (termMetaData.getLiteralType() != LiteralType.unspecified))
+        else if (termMetaList.contains(termMetaData) && 
+                (termMetaData.getLiteralType() != LiteralType.unspecified) &&
+                !setLiteralType(termMetaData))
             throw new ExpressionException("Term " + termMetaData.getName() + " already exists in " + toString());
-        if (termMetaData.getIndex() < termMetaList.size())
-        {
-            TermMetaData existingTermMetaData = termMetaList.get(termMetaData.getIndex());
-            if (existingTermMetaData != null)
-            {
-                if (existingTermMetaData.getLiteralType() == LiteralType.unspecified)
-                    existingTermMetaData.setLiteralType(termMetaData.getLiteralType());
-                else
-                    throw new ExpressionException("Term " + termMetaData.getName() + ", type " + termMetaData.getLiteralType() + ", already exists in " + toString());
-            }
-        }
-        else
+        if (termMetaData.getIndex() >= termMetaList.size())
             termMetaList.add(termMetaData);
         if (!termMetaData.isAnonymous())
             isAnonymousTerms = false;
         return termMetaData.getIndex();
     }
 
+    /**
+     * checkTerm
+     * @see au.com.cybersearch2.classy_logic.interfaces.TermListManager#checkTerm(au.com.cybersearch2.classy_logic.terms.TermMetaData)
+     */
     @Override
     public void checkTerm(TermMetaData termMetaData)
     {
-        if (!termMetaList.contains(termMetaData))
+        if (isValidMetaData(termMetaData))
+            return;
+        // Check if type conversion will handle this term
+        LiteralType altLiteralType;
+        switch(termMetaData.getLiteralType())
         {
-            // Check if type conversion will handle this term
-            LiteralType altLiteralType;
-            switch(termMetaData.getLiteralType())
+        case integer:
+            altLiteralType = LiteralType.xpl_double; break;
+        case xpl_double:
+            altLiteralType = LiteralType.integer; break;
+        case decimal:
+            altLiteralType = LiteralType.xpl_double; break;
+        default:
+            altLiteralType = null;
+        }
+        if (altLiteralType != null)
+        {
+            TermMetaData altMetaData = new TermMetaData(altLiteralType, termMetaData.getName(), termMetaData.getIndex());
+            if (isValidMetaData(altMetaData))
+                return;
+            if (altLiteralType == LiteralType.integer)
             {
-            case integer:
-                altLiteralType = LiteralType.xpl_double; break;
-            case xpl_double:
-                altLiteralType = LiteralType.integer; break;
-            case decimal:
-                altLiteralType = LiteralType.xpl_double; break;
-            default:
-                altLiteralType = null;
-            }
-            if (altLiteralType != null)
-            {
-                TermMetaData altMetaData = new TermMetaData(altLiteralType, termMetaData.getName(), termMetaData.getIndex());
-                if (termMetaList.contains(altMetaData))
+                altMetaData = new TermMetaData(LiteralType.decimal, termMetaData.getName(), termMetaData.getIndex());
+                if (isValidMetaData(altMetaData))
                     return;
-                if (altLiteralType == LiteralType.integer)
-                {
-                    altMetaData = new TermMetaData(LiteralType.decimal, termMetaData.getName(), termMetaData.getIndex());
-                    if (termMetaList.contains(altMetaData))
-                        return;
-                }
             }
-            throw new ExpressionException("Term " + termMetaData.getName() + " incompatible with definition for " + toString());
-       }
+        }
+        throw new ExpressionException("Term " + termMetaData.getName() + " incompatible with definition for " + toString());
     }
 
+    /**
+     * analyseTerm
+     * @see au.com.cybersearch2.classy_logic.interfaces.TermListManager#analyseTerm(au.com.cybersearch2.classy_logic.interfaces.Term, int)
+     */
     @Override
     public TermMetaData analyseTerm(Term term, int index)
     {
@@ -205,7 +259,11 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
         }
         return -1;
     }
- 
+
+    /**
+     * getTermNameList
+     * @see au.com.cybersearch2.classy_logic.interfaces.TermListManager#getTermNameList()
+     */
     @Override
     public List<String> getTermNameList()
     {
@@ -215,6 +273,10 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
         return termNameList;
     }
 
+    /**
+     * changeName
+     * @see au.com.cybersearch2.classy_logic.interfaces.TermListManager#changeName(int, java.lang.String)
+     */
     @Override
     public boolean changeName(int index, String name)
     {
@@ -229,6 +291,10 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
         return false;
     }
 
+    /**
+     * getMetaData
+     * @see au.com.cybersearch2.classy_logic.interfaces.TermListManager#getMetaData(int)
+     */
     @Override
     public TermMetaData getMetaData(int index)
     {
@@ -238,65 +304,13 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
         
     }
     
-    public T itemInstance(List<P> terms)
-    {
-        if (terms != null)
-        {
-            if (termMetaList.isEmpty())
-            {
-                createTermMetaList(terms);
-                clearMutable();
-            }
-            else
-                checkTerms(terms);
-        }
-        return newInstance(terms);
-    }
-
-    private void checkTerms(List<P> terms)
-    {
-        if (termMetaList.isEmpty()) // Paranoid check
-            throw new IllegalStateException("checkTerms() called before createTermMetaList()");
-        int index = 0;
-        for (Term term: terms)
-        {
-            checkTerm(new TermMetaData(term, index++));
-        }
-    }
-
-    private void createTermMetaList(List<P> terms)
-    {
-        int index = 0;
-        for (Term term: terms)
-        {
-            addTerm(new TermMetaData(term, index++));
-        }
-    }
-
-    abstract protected T newInstance(List<P> terms);
-    
-     /**
-     * @return the isMutable
-     */
-    public boolean isMutable()
-    {
-        return isMutable;
-    }
-
     /**
-     * @param isMutable the isMutable to set
+     * @param isDuplicateTermNames the isDuplicateTermNames to set
      */
-    public void clearMutable()
+    @Override
+    public void setDuplicateTermNames(boolean isDuplicateTermNames)
     {
-        isMutable = false;
-    }
-
-    /**
-     * @return the isAnonymousTerms
-     */
-    public boolean isAnonymousTerms()
-    {
-        return isAnonymousTerms;
+        this.isDuplicateTermNames = isDuplicateTermNames;
     }
 
     /**
@@ -309,4 +323,88 @@ public abstract class Archetype <T extends TermList<P>, P extends Term> implemen
         return structureName.compareTo(other.structureName);
     }
 
+    /**
+     * Check validity of all terms
+     * @param terms
+     */
+    private void checkTerms(List<P> terms)
+    {
+        if (termMetaList.isEmpty()) // Paranoid check
+            throw new IllegalStateException("checkTerms() called before createTermMetaList()");
+        int index = 0;
+        for (Term term: terms)
+        {
+            checkTerm(new TermMetaData(term, index++));
+        }
+    }
+
+    /**
+     * Create term metadata list for given terms
+     * @param terms List of terms
+     */
+    private void createTermMetaList(List<P> terms)
+    {
+        int index = 0;
+        for (Term term: terms)
+        {
+            addTerm(new TermMetaData(term, index++));
+        }
+    }
+
+    /**
+     * Create new T instance given list of terms
+     * @param terms List of terms
+     * @return T
+     */
+    abstract protected T newInstance(List<P> terms);
+    
+
+    /**
+     * Returns flag set true if termMetaList contains given term metadata.
+     * Updates Literal type of list item too if unspecified
+     * @param termMetaData TermMetaData object
+     * @return boolean
+     * @see #checkTerm(TermMetaData)
+     */
+    private boolean isValidMetaData(TermMetaData termMetaData)
+    {
+        for (TermMetaData item: termMetaList)
+            if (item.compareTo(termMetaData) == 0)
+            {
+                if (item.getLiteralType() == LiteralType.unspecified)
+                    item.setLiteralType(termMetaData.getLiteralType());
+                return true;
+            }
+        return false;
+    }
+ 
+    protected void checkMutable(TermMetaData termMetaData)
+    {
+        if (!isMutable)
+            throw new ExpressionException("Term " + termMetaData.toString() + " cannot be added to locked " + toString());
+    }
+    
+    /**
+     * Sets list item literal type if currently unspecified. Returns flag set true if 
+     * operation succeeds.
+     * @param termMetaData TermMetaData object
+     * @return boolean
+     * @see #addTerm(TermMetaData)
+     */
+    protected boolean setLiteralType(TermMetaData termMetaData)
+    {
+        for (TermMetaData item: termMetaList)
+            if (item.compareTo(termMetaData) == 0)
+            {
+                if (item.getLiteralType() == LiteralType.unspecified)
+                {
+                    item.setLiteralType(termMetaData.getLiteralType());
+                    return true;
+                }
+                if (!isDuplicateTermNames)
+                    return false;
+                return termMetaData.getIndex() != item.getIndex();
+            }
+        return false;
+    }
 }

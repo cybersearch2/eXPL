@@ -18,7 +18,8 @@ package au.com.cybersearch2.classy_logic.tutorial11;
 import java.io.File;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.DictionaryAxiomProvider;
+import au.com.cybersearch2.classy_logic.DictionaryResourceProvider;
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
@@ -40,8 +41,8 @@ import au.com.cybersearch2.classy_logic.query.QueryExecutionException;
 public class RegexGroups2 
 {
 /* regex-groups.xpl
-// Use an external axiom source (class DictionarySource)
-// Use an external axiom source (class DictionarySource)
+// Use an external axiom source (class DictionaryIterator)
+// Use an external axiom source (class DictionaryIterator)
 resource dictionary axiom(entry);
 
 // Convert single letter part of speech to word
@@ -75,10 +76,18 @@ query<axiom> in_words(dictionary : in_words);
         //Archetype.CASE_INSENSITIVE_NAME_MATCH = true;
         File resourcePath = new File("src/main/resources/tutorial11");
         // Use an external axiom source which is bound in TestAxiomProvider dependency class
-        // to AxiomSource class DictionarySource
-        queryProgramParser = new QueryProgramParser(resourcePath, new DictionaryAxiomProvider());
+        // to AxiomSource class DictionaryIterator
+        queryProgramParser = new QueryProgramParser(resourcePath, provideResourceManager());
 	}
 	
+    ProviderManager provideResourceManager()
+    {
+        ProviderManager providerManager = new ProviderManager();
+        DictionaryResourceProvider  dictionaryResource = new DictionaryResourceProvider();
+        providerManager.putResourceProvider(dictionaryResource);
+        return providerManager;
+    }
+
     /**
      * Compiles the dictionary-regex-groups.xpl script and runs the "in_words" query, displaying the solution on the console.<br/>
      * The first 3 lines of the expected result:<br/>

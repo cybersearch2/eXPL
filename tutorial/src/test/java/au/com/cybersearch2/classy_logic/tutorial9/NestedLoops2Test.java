@@ -1,5 +1,5 @@
 /**
-    Copyright (C) 2014  www.cybersearch2.com.au
+    Copyright (C) 2017  www.cybersearch2.com.au
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,49 +13,28 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.axiom;
+package au.com.cybersearch2.classy_logic.tutorial9;
 
-import java.util.Iterator;
-import java.util.List;
+import static org.fest.assertions.api.Assertions.assertThat;
 
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import org.junit.Test;
+
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * EmptyAxiomSource
+ * NestedLoops2Test
  * @author Andrew Bowley
- * 2 Jan 2015
+ * 13Apr.,2017
  */
-public class EmptyAxiomSource implements AxiomSource 
+public class NestedLoops2Test
 {
 
-	/**
-	 * 
-	 * @see au.com.cybersearch2.classy_logic.interfaces.AxiomSource#iterator()
-	 */
-	@Override
-	public Iterator<Axiom> iterator() {
-		return new Iterator<Axiom>() {
-
-			@Override
-			public boolean hasNext() {
-				return false;
-			}
-
-			@Override
-			public Axiom next() {
-				return null;
-			}
-
-			@Override
-			public void remove() {
-			}};
-	}
-
-    @Override
-    public List<String> getAxiomTermNameList()
+    @Test
+    public void testNestedLoops() throws Exception
     {
-        return AxiomListSource.EMPTY_LIST;
-    }
+        NestedLoops2 nestedLoops = new NestedLoops2();
+        Axiom axiom = nestedLoops.displayAxiomSort();
+        assertThat(axiom.toString()).isEqualTo("sorted(1, 3, 5, 8, 12)");
+   }
 
 }

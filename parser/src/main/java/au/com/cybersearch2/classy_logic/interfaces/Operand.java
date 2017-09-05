@@ -64,6 +64,24 @@ public abstract class Operand extends Parameter
     }
 
     /**
+     * Returns branch1 of Operand
+     * @return Operand object or null if there is no branch
+     */
+    public Operand getBranch1()
+    {
+        return null;
+    }
+    
+    /**
+     * Returns branch2 of Operand
+     * @return Operand object or null if there is no child
+     */
+    public Operand getBranch2()
+    {
+        return null;
+    }
+
+    /**
 	 * Returns qualified name
 	 * @return QualifiedName object
 	 */

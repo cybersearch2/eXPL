@@ -493,14 +493,14 @@ public class EvaluatorTest
 			new BinaryTestData(1, new TestIntegerOperand("mask", 4), "|", NAME + "=5"),
 			new BinaryTestData(15, new TestIntegerOperand("mask", 7), "^", NAME + "=8"),
 			new BinaryTestData(82, new TestIntegerOperand("remainder", 9), "%", NAME + "=1"),
-			new BinaryTestData(24, new TestIntegerOperand("weight", 7), "+=", NAME + "=31", true),
-			new BinaryTestData(76, new TestIntegerOperand("weight", 32), "-=", NAME + "=44", true),
-			new BinaryTestData(5, new TestIntegerOperand("weight", 5), "*=", NAME + "=25", true),
-			new BinaryTestData(12, new TestIntegerOperand("weight", 4), "/=", NAME + "=3", true),
-			new BinaryTestData(7, new TestIntegerOperand("mask", 15), "&=", NAME + "=7", true),
-			new BinaryTestData(1, new TestIntegerOperand("mask", 4), "|=", NAME + "=5", true),
-			new BinaryTestData(15, new TestIntegerOperand("mask", 7), "^=", NAME + "=8", true),
-			new BinaryTestData(82, new TestIntegerOperand("remainder", 9), "%=", NAME + "=1", true)
+			new BinaryTestData(24, new TestIntegerOperand("weight", 7), "+=", NAME + "=31", false),
+			new BinaryTestData(76, new TestIntegerOperand("weight", 32), "-=", NAME + "=44", false),
+			new BinaryTestData(5, new TestIntegerOperand("weight", 5), "*=", NAME + "=25", false),
+			new BinaryTestData(12, new TestIntegerOperand("weight", 4), "/=", NAME + "=3", false),
+			new BinaryTestData(7, new TestIntegerOperand("mask", 15), "&=", NAME + "=7", false),
+			new BinaryTestData(1, new TestIntegerOperand("mask", 4), "|=", NAME + "=5", false),
+			new BinaryTestData(15, new TestIntegerOperand("mask", 7), "^=", NAME + "=8", false),
+			new BinaryTestData(82, new TestIntegerOperand("remainder", 9), "%=", NAME + "=1", false)
 		};
 		for (BinaryTestData datum: testData)
 		{

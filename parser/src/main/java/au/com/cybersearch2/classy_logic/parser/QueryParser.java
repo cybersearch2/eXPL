@@ -25,11 +25,10 @@ import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserTask;
+import au.com.cybersearch2.classy_logic.compile.TemplateType;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.VariableType;
 import au.com.cybersearch2.classy_logic.expression.AppenderVariable;
-import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
-import au.com.cybersearch2.classy_logic.expression.ProxyAxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
@@ -43,6 +42,7 @@ import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
 import au.com.cybersearch2.classy_logic.expression.Orientation;
+import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.SelectionOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.list.ListItemVariable;
@@ -62,7 +62,6 @@ import au.com.cybersearch2.classy_logic.terms.LiteralType;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -141,19 +140,21 @@ public class QueryParser implements QueryParserConstants
 
   protected Operand axiomContainerOperand(
           ParserAssembler parserAssembler,
-          ListItemSpec[] indexData)
+          ListItemSpec[] indexData,
+          Operand expression)
   {
-      return axiomContainerOperand(parserAssembler, null, indexData);
+      return axiomContainerOperand(parserAssembler, null, indexData, expression);
   }
 
   protected Operand axiomContainerOperand(
       ParserAssembler parserAssembler,
       String name,
-      ListItemSpec[] indexData)
+      ListItemSpec[] indexData,
+      Operand expression)
   {
     QualifiedName listName = indexData[0].getQualifiedListName();
     QualifiedName qname = new QualifiedName(listName.getName() + "_var" + listName.incrementReferenceCount(), listName);
-    ListItemVariable operand = name == null ? new ListItemVariable(qname, indexData) : new ListItemVariable(name, qname, indexData);
+    ListItemVariable operand = name == null ? new ListItemVariable(qname, indexData, expression) : new ListItemVariable(name, qname, indexData, expression);
     ParserTask parserTask = parserAssembler.addPending(operand);
     parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
@@ -161,20 +162,22 @@ public class QueryParser implements QueryParserConstants
 
   protected Operand listItemOperand(
       ParserContext context,
-      ListItemSpec indexData) throws ParseException
+      ListItemSpec indexData,
+      Operand expression) throws ParseException
   {
-      return listItemOperand(context, null, indexData);
+      return listItemOperand(context, null, indexData, expression);
   }
 
   protected Operand listItemOperand(
           ParserContext context,
           String name,
-          ListItemSpec indexData) throws ParseException
+          ListItemSpec indexData,
+          Operand expression) throws ParseException
   {
 
     QualifiedName listName = indexData.getQualifiedListName();
     QualifiedName qname = new QualifiedName(listName + "_var" + listName.incrementReferenceCount(), listName);
-    ListItemVariable operand = name == null ? new ListItemVariable(qname, indexData) : new ListItemVariable(name, qname, indexData);
+    ListItemVariable operand = name == null ? new ListItemVariable(qname, indexData, expression) : new ListItemVariable(name, qname, indexData, expression);
     ParserTask parserTask = context.getParserAssembler().addPending(operand);
     parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
@@ -252,7 +255,7 @@ public class QueryParser implements QueryParserConstants
   {
     QualifiedName qualifiedTemplateName = new QualifiedTemplateName(context.getScope().getAlias(), listName);
     context.setTemplateName(qualifiedTemplateName);
-    return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, true);
+    return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, TemplateType.calculator);
   }
 
   Operand createChoiceOperand(QualifiedName qualifiedAxiomName, Template template, Template parameterTemplate, ParserContext context)
@@ -289,14 +292,6 @@ public class QueryParser implements QueryParserConstants
     listIndexData[0].setQualifiedListName(listName);
     if (listIndexData.length > 1)
       listIndexData[1].setQualifiedListName(listName);
-  }
-
-  Operand createAppender(QualifiedName qname, Operand expression, ParserContext context) throws ParseException
-  {
-    ParserAssembler parserAssembler = context.getParserAssembler();
-    int id = context.getQualifiedName(qname.getName()).incrementReferenceCount();
-    Operand var = new VariableType(OperandType.APPENDER, parserAssembler).createAppender(qname, expression, id);
-    return var;
   }
 
 /** Root production. */
@@ -1161,7 +1156,7 @@ public class QueryParser implements QueryParserConstants
     templateToken = jj_consume_token(IDENTIFIER);
     QualifiedName qualifiedTemplateName = new QualifiedTemplateName(context.getScope().getAlias(), templateToken.image);
     context.setContextName(qualifiedTemplateName);
-    {if (true) return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, isCalculator);}
+    {if (true) return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, isCalculator ? TemplateType.calculator : TemplateType.template);}
     throw new Error("Missing return statement in function");
   }
 
@@ -1594,7 +1589,7 @@ public class QueryParser implements QueryParserConstants
       listIndexData = IndexExpression(context.getQualifiedName("scope"), context);
     if (listIndexData.length > 1)
          {if (true) throw new ParseException("Scope cannot be accessed using axiom list variable");}
-    var = listItemOperand(context, listIndexData[0]);
+    var = listItemOperand(context, listIndexData[0], null);
     context.onTokenIntercept(scopeToken);
     {if (true) return var;}
       break;
@@ -1610,9 +1605,9 @@ public class QueryParser implements QueryParserConstants
   {
   boolean isList = false;
   String name = null;
+  String operator = null;
   QualifiedName qname = null;
   QualifiedName axiomQname;
-  String axiomName = null;
   VariableType varType = null;
   Operand var = null;
   Token privateToken = null;
@@ -1649,7 +1644,8 @@ public class QueryParser implements QueryParserConstants
     axiomQname = qname;
     isList = (varType == null) &&
              (listAssembler.existsKey(ListType.basic, qname) ||
-              listAssembler.existsKey(ListType.axiom_item, qname));
+              listAssembler.existsKey(ListType.axiom_item, qname)||
+              listAssembler.existsKey(ListType.axiom_dynamic, qname));
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
     {
     case LBRACKET:
@@ -1699,6 +1695,10 @@ public class QueryParser implements QueryParserConstants
           jj_consume_token(-1);
           throw new ParseException();
         }
+           if (equalsToken != null)
+             operator = "=";
+           else
+             operator = "+=";
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) 
         {
         case AXIOM:
@@ -1716,9 +1716,9 @@ public class QueryParser implements QueryParserConstants
           axiomList = AxiomList(axiomQname, context);
             VariableType axiomListVarType = new VariableType(OperandType.LIST, parserAssembler);
             axiomListVarType.setProperty(VariableType.PARAMS, axiomList);
-            if (axiomName != null)
+            if (axiomQname != null)
               axiomListVarType.setProperty(VariableType.AXIOM_KEY, axiomQname);
-            expression = axiomListVarType.getInstance(axiomQname);
+            expression = axiomListVarType.getInstance(new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname));
           break;
         case SCOPE:
         case INTEGER_LITERAL:
@@ -1833,7 +1833,6 @@ public class QueryParser implements QueryParserConstants
           ;
         }
         jj_consume_token(RPAREN);
-            template.addTerm(parserAssembler.getCallOperand(qname, parameterTemplate));
         break;
       default:
         jj_la1[65] = jj_gen;
@@ -1847,10 +1846,11 @@ public class QueryParser implements QueryParserConstants
     }
     if (interceptToken != null)
       context.onTokenIntercept(interceptToken);
-    if ((assignToken != null) && assignToken.image.equals("+=") && listAssembler.existsKey(ListType.axiom_dynamic, qname))
-      isList = true;
-    if (isList)
-      {if (true) return createAppender(qname, expression, context);}
+    if (parameterTemplate != null)
+      {if (true) return parserAssembler.getCallOperand(qname, parameterTemplate);}
+
+    if (isList || (axiomList != null))
+      {if (true) return new VariableType(OperandType.APPENDER, parserAssembler).createAppender(qname, operator, expression);}
     boolean isDeclaration = varType != null;
     boolean isNot = notToken != null;
     if (isNot)
@@ -1859,29 +1859,27 @@ public class QueryParser implements QueryParserConstants
     if (!isDeclaration)
       varType = new VariableType(OperandType.UNKNOWN, parserAssembler);
     Operand assignExpression = (assignToken != null) ? expression : null;
-    if (assignToken != null)
-      expression = null;
+    if (assignExpression != null)
+      varType.setProperty(VariableType.REFLEX_OP, OperatorEnum.convertOperator(assignToken.image));
     if (expression != null)
       varType.setProperty(VariableType.EXPRESSION, expression);
     if (listIndexData !=null)
-      var = listIndexData.length == 1 ? listItemOperand(context, listIndexData[0]) : axiomContainerOperand(parserAssembler, listIndexData);
+      var = listIndexData.length == 1 ? listItemOperand(context, listIndexData[0], expression) : axiomContainerOperand(parserAssembler, listIndexData, expression);
     else if (literalList != null)
       var = new LiteralListOperand(qname, literalList, isNot);
     else if (var == null)
       var = operandMap.getOperand(qname);
     if ((var != null) && isDeclaration)
        operandMap.duplicateOperandCheck(qname);
+    if ((var != null) && (assignToken != null))
+      var = parserAssembler.createReflexiveEvaluator(var, assignToken.image, expression);
     if ((var == null) && !hasOperand)
       var = varType.getInstance(name);
     if (var == null)
       var = operandMap.addOperand(name, expression, parserAssembler.getQualifiedContextname());
     if ((listIndexData == null) && (!hasOperand))
       operandMap.addOperand(var);
-    if (assignToken != null)
-      var = parserAssembler.createReflexiveEvaluator(var, assignToken.image, assignExpression);
-    if ((equalsToken != null) && ((listIndexData !=null) || (axiomList != null)))
-      var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
-    else if (hasOperand && (equalsToken != null))
+    if (hasOperand && (equalsToken != null))
       var = new Evaluator(parserAssembler.getContextName(var.getName() + var.getQualifiedName().incrementReferenceCount()), var, "=", expression);
     {if (true) return var;}
     throw new Error("Missing return statement in function");
@@ -2479,7 +2477,7 @@ public class QueryParser implements QueryParserConstants
     nameToken = jj_consume_token(IDENTIFIER);
     qualifiedChoiceName = parserAssembler.getContextName(nameToken.image);
     parserAssembler.getListAssembler().createAxiomItemList(qualifiedChoiceName);
-    template = parserAssembler.getTemplateAssembler().createTemplate(qualifiedChoiceName, true);
+    template = parserAssembler.getTemplateAssembler().createTemplate(qualifiedChoiceName, TemplateType.choice);
     context.setContextName(new QualifiedTemplateName(context.getScope().getAlias(), nameToken.image));
     context.setSourceMarker(choiceToken, qualifiedChoiceName);
     builder.append("choice ").append(nameToken.image).append('(');
@@ -3030,7 +3028,6 @@ public class QueryParser implements QueryParserConstants
       if (exportToken !=null)
         varType.setProperty(VariableType.EXPORT, Boolean.TRUE);
       operand = varType.getInstance(qualifiedAxiomName);
-      template.addTerm(operand);
       context.getOperandMap().addOperand(operand);
       sourceItem = context.addSourceItem(operand);
         break;
@@ -3254,8 +3251,12 @@ public class QueryParser implements QueryParserConstants
       {if (true) return param;}
     if (param instanceof AppenderVariable)
       var = (AppenderVariable)param;
-    if (var == null)
+    if ((var == null) && assignToken.image.equals("="))
       {if (true) return new Evaluator(param, assignToken.image, assignOperand);}
+    if (var == null)
+      {if (true) return context.getParserAssembler().createReflexiveEvaluator(param, assignToken.image, assignOperand);}
+    if (assignToken.image.equals("+="))
+      var.setDoConcatenate(true);
     var.setExpression(assignOperand);
     {if (true) return var;}
     throw new Error("Missing return statement in function");
@@ -3296,8 +3297,9 @@ public class QueryParser implements QueryParserConstants
       ListAssembler listAssembler = parserAssembler.getListAssembler();
       QualifiedName inContext = new QualifiedName(qname.toString(), context.getContextName());
       if (listAssembler.existsKey(ListType.basic, inContext) ||
-          listAssembler.existsKey(ListType.axiom_item, inContext))
-        {if (true) return createAppender(inContext, null, context);}
+          listAssembler.existsKey(ListType.axiom_item, inContext) ||
+          listAssembler.existsKey(ListType.axiom_dynamic, qname))
+        {if (true) return new VariableType(OperandType.APPENDER, parserAssembler).createAppender(inContext, null, null);}
       {if (true) return parserAssembler.addOperand(qname);}
       break;
     case SCOPE:
@@ -3305,7 +3307,7 @@ public class QueryParser implements QueryParserConstants
       listIndexData = IndexExpression(context.getQualifiedName("scope"), context);
     if (listIndexData.length > 1)
          {if (true) throw new ParseException("Scope cannot be accessed using axiom list variable");}
-    operand = listItemOperand(context, listIndexData[0]);
+    operand = listItemOperand(context, listIndexData[0], null);
     context.onTokenIntercept(literal);
     {if (true) return operand;}
       break;
@@ -3613,8 +3615,8 @@ public class QueryParser implements QueryParserConstants
     else if (listAssembler.existsKey(ListType.builtin, listName))
       setBuiltinList(listName, indexData, context);
     {if (true) return indexData.length == 1 ?
-    listItemOperand(context, indexData[0]) :
-    axiomContainerOperand(parserAssembler, indexData);}
+    listItemOperand(context, indexData[0], null) :
+    axiomContainerOperand(parserAssembler, indexData, null);}
       break;
     case LPAREN:
       jj_consume_token(LPAREN);
@@ -3792,7 +3794,7 @@ public class QueryParser implements QueryParserConstants
     }
      String name = (identifier == null) ? Term.ANONYMOUS : identifier.image;
      if (listIndexData !=null)
-       {if (true) return listIndexData.length == 1 ? listItemOperand(context, name, listIndexData[0]) : axiomContainerOperand(parserAssembler, name, listIndexData);}
+       {if (true) return listIndexData.length == 1 ? listItemOperand(context, name, listIndexData[0], null) : axiomContainerOperand(parserAssembler, name, listIndexData, null);}
      QualifiedName qname = parserAssembler.getContextName(name);
      Operand var = null;
      if (parameter != null)
@@ -4483,11 +4485,6 @@ public class QueryParser implements QueryParserConstants
     finally { jj_save(6, xla); }
   }
 
-  private boolean jj_3R_75() {
-    if (jj_3R_86()) return true;
-    return false;
-  }
-
   private boolean jj_3R_76() {
     if (jj_3R_87()) return true;
     return false;
@@ -4632,14 +4629,14 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3_3() {
-    if (jj_3R_40()) return true;
-    return false;
-  }
-
   private boolean jj_3R_85() {
     if (jj_scan_token(RARROW)) return true;
     if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3_3() {
+    if (jj_3R_40()) return true;
     return false;
   }
 
@@ -4707,8 +4704,24 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3R_81() {
+    if (jj_3R_89()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_108() {
+    if (jj_3R_109()) return true;
+    return false;
+  }
+
   private boolean jj_3R_65() {
     if (jj_scan_token(unicode_character_class)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_54() {
+    if (jj_scan_token(DOT)) return true;
+    if (jj_scan_token(IDENTIFIER)) return true;
     return false;
   }
 
@@ -4722,44 +4735,8 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_81() {
-    if (jj_3R_89()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_108() {
-    if (jj_3R_109()) return true;
-    return false;
-  }
-
   private boolean jj_3R_62() {
     if (jj_scan_token(dotall)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_61() {
-    if (jj_scan_token(literal)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_54() {
-    if (jj_scan_token(DOT)) return true;
-    if (jj_scan_token(IDENTIFIER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_60() {
-    if (jj_scan_token(multiline)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_59() {
-    if (jj_scan_token(comments)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_58() {
-    if (jj_scan_token(case_insensitive)) return true;
     return false;
   }
 
@@ -4773,8 +4750,13 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_57() {
-    if (jj_scan_token(unix_lines)) return true;
+  private boolean jj_3R_61() {
+    if (jj_scan_token(literal)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_60() {
+    if (jj_scan_token(multiline)) return true;
     return false;
   }
 
@@ -4790,6 +4772,46 @@ public class QueryParser implements QueryParserConstants
     jj_scanpos = xsp;
     if (jj_3R_54()) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3R_59() {
+    if (jj_scan_token(comments)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_58() {
+    if (jj_scan_token(case_insensitive)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_57() {
+    if (jj_scan_token(unix_lines)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_66() {
+    if (jj_3R_74()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_122() {
+    if (jj_scan_token(BANG)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_121() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_122()) {
+    jj_scanpos = xsp;
+    if (jj_3R_123()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_79() {
+    if (jj_scan_token(STRING_LITERAL)) return true;
     return false;
   }
 
@@ -4829,31 +4851,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_66() {
-    if (jj_3R_74()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_122() {
-    if (jj_scan_token(BANG)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_121() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_122()) {
-    jj_scanpos = xsp;
-    if (jj_3R_123()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_79() {
-    if (jj_scan_token(STRING_LITERAL)) return true;
-    return false;
-  }
-
   private boolean jj_3R_39() {
     if (jj_scan_token(LPAREN)) return true;
     Token xsp;
@@ -4862,17 +4859,6 @@ public class QueryParser implements QueryParserConstants
       if (jj_3R_46()) { jj_scanpos = xsp; break; }
     }
     if (jj_scan_token(RPAREN)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(56)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(80)) return true;
-    }
-    if (jj_3R_38()) return true;
     return false;
   }
 
@@ -4894,19 +4880,19 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_56() {
-    if (jj_3R_73()) return true;
-    return false;
-  }
-
   private boolean jj_3R_120() {
     if (jj_scan_token(DECR)) return true;
     return false;
   }
 
-  private boolean jj_3R_40() {
-    if (jj_scan_token(LBRACE)) return true;
-    if (jj_3R_47()) return true;
+  private boolean jj_3_1() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(56)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(80)) return true;
+    }
+    if (jj_3R_38()) return true;
     return false;
   }
 
@@ -4922,6 +4908,12 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_131() {
     if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_40() {
+    if (jj_scan_token(LBRACE)) return true;
+    if (jj_3R_47()) return true;
     return false;
   }
 
@@ -4946,6 +4938,11 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_77() {
     if (jj_scan_token(INTEGER_LITERAL)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_56() {
+    if (jj_3R_73()) return true;
     return false;
   }
 
@@ -4979,11 +4976,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_45() {
-    if (jj_scan_token(NAN)) return true;
-    return false;
-  }
-
   private boolean jj_3R_114() {
     if (jj_3R_120()) return true;
     return false;
@@ -5010,6 +5002,21 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3R_45() {
+    if (jj_scan_token(NAN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_113() {
+    if (jj_3R_119()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_103() {
+    if (jj_scan_token(CURRENCY)) return true;
+    return false;
+  }
+
   private boolean jj_3R_55() {
     if (jj_3R_72()) return true;
     return false;
@@ -5032,16 +5039,6 @@ public class QueryParser implements QueryParserConstants
     jj_scanpos = xsp;
     if (jj_3R_56()) return true;
     }
-    return false;
-  }
-
-  private boolean jj_3R_113() {
-    if (jj_3R_119()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_103() {
-    if (jj_scan_token(CURRENCY)) return true;
     return false;
   }
 
@@ -5152,11 +5149,6 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
-  private boolean jj_3R_71() {
-    if (jj_3R_76()) return true;
-    return false;
-  }
-
   private boolean jj_3R_90() {
     Token xsp;
     xsp = jj_scanpos;
@@ -5187,6 +5179,11 @@ public class QueryParser implements QueryParserConstants
     return false;
   }
 
+  private boolean jj_3R_71() {
+    if (jj_3R_76()) return true;
+    return false;
+  }
+
   private boolean jj_3R_87() {
     if (jj_3R_94()) return true;
     return false;
@@ -5204,6 +5201,11 @@ public class QueryParser implements QueryParserConstants
 
   private boolean jj_3R_135() {
     if (jj_3R_88()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_75() {
+    if (jj_3R_86()) return true;
     return false;
   }
 

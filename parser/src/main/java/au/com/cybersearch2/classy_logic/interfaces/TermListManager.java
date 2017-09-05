@@ -41,5 +41,6 @@ public interface TermListManager
     int getNamedTermCount();
     List<String> getTermNameList();
     void clearMutable();
+    void setDuplicateTermNames(boolean isDuplicateTermNames);
     TermMetaData analyseTerm(Term term, int index);
 }

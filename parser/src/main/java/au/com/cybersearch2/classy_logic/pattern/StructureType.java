@@ -23,7 +23,5 @@ package au.com.cybersearch2.classy_logic.pattern;
 public enum StructureType
 {
     axiom,
-    template,
-    choice,
-    archetype
+    template
 }

@@ -18,7 +18,8 @@ package au.com.cybersearch2.classy_logic.tutorial11;
 import java.io.File;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.LexiconAxiomProvider;
+import au.com.cybersearch2.classy_logic.LexiconResourceProvider;
+import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;
@@ -49,7 +50,7 @@ public class RegexGroups
     ...
     */
 /* regex-groups.xpl
-// Use an external axiom source (class LexiconSource)
+// Use an external axiom source (class LexiconIterator)
 resource lexicon axiom(word, definition);
 
 string wordRegex = "^in[^ ]+";
@@ -85,10 +86,18 @@ query<axiom> in_words(lexicon : in_words);
 	{
         File resourcePath = new File("src/main/resources/tutorial11");
         // Use an external axiom source which is bound in TestAxiomProvider dependency class
-        // to AxiomSource class LexiconSource
-        queryProgramParser = new QueryProgramParser(resourcePath, new LexiconAxiomProvider());
+        // to AxiomSource class LexiconIterator
+        queryProgramParser = new QueryProgramParser(resourcePath, provideResourceManager());
 	}
 	
+    ProviderManager provideResourceManager()
+    {
+        ProviderManager providerManager = new ProviderManager();
+        LexiconResourceProvider  lexiconResource = new LexiconResourceProvider();
+        providerManager.putResourceProvider(lexiconResource);
+        return providerManager;
+    }
+
     /**
      * Compiles the LEXICAL_SEARCH script and runs the "query_in_words" query, displaying the solution on the console.<br/>
      * The first 3 lines of the expected result:<br/>

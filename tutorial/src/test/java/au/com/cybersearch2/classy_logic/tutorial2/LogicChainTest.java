@@ -27,11 +27,7 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.SourceItem;
-import au.com.cybersearch2.classy_logic.compile.SourceMarker;
-import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.query.Solution;
 import au.com.cybersearch2.classy_logic.tutorial2.LogicChain;
 
 /**
@@ -42,7 +38,7 @@ import au.com.cybersearch2.classy_logic.tutorial2.LogicChain;
 public class LogicChainTest
 {
     @Test
-    public void testGreekConstruction() throws Exception
+    public void testLogicChain() throws Exception
     {
         File testFile = new File("src/main/resources/tutorial2", "logic-chain.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
@@ -51,35 +47,6 @@ public class LogicChainTest
         while (deliveryIterator.hasNext())
             checkSolution(reader, deliveryIterator.next().toString());
         reader.close();
-        /*
-        Iterator<SourceMarker> iterator = greekConstruction.getParserContext().getSourceMarkerSet().iterator();
-        assertThat(iterator.hasNext()).isTrue();
-        SourceMarker sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom customer (1,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom fee (7,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom freight (13,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("query greek_business (22,1)");
-        SourceItem sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("customer:customer (22,22) (22,38)");
-        sourceItem = sourceItem.getNext();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("fee:account (23,3) (23,17)");
-        sourceItem = sourceItem.getNext();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("freight:delivery (23,20) (23,39)");
-        */
     }
 
     protected void checkSolution(BufferedReader reader, String delivery)

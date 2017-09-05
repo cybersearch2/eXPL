@@ -16,8 +16,8 @@
 package au.com.cybersearch2.classy_logic.interfaces;
 
 import java.util.Iterator;
-import java.util.List;
 
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -35,8 +35,8 @@ public interface AxiomSource
 	 */
 	Iterator<Axiom> iterator();
 	/**
-	 * Return list of term names
-	 * @return List of String objects
+	 * Return axiom archetype
+	 * @return Archetype for axiom
 	 */
-	List<String> getAxiomTermNameList();
+	Archetype<Axiom,Term> getArchetype();
 }

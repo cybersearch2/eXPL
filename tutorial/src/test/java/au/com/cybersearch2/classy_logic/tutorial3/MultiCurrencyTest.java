@@ -74,7 +74,7 @@ public class MultiCurrencyTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string total_text=country+ Total + gst: +amount_format (11,3) (12,0)");
+        assertThat(sourceItem.toString()).isEqualTo("string total_text=country_code+ Total + gst: +amount_format (11,3) (12,0)");
         assertThat(iterator.hasNext()).isTrue();
         sourceMarker = iterator.next();
         //System.out.println(sourceMarker.toString());
@@ -82,11 +82,7 @@ public class MultiCurrencyTest
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("currency country amount (5,3) (5,27)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("amount*=1.1 (6,3) (7,0)");
+        assertThat(sourceItem.toString()).isEqualTo("currency amount=amount*=1.1 (5,3) (5,34)");
         assertThat(iterator.hasNext()).isFalse();
    }
     

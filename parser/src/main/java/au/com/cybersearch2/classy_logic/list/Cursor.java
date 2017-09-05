@@ -47,7 +47,7 @@ public class Cursor extends ListItemVariable
 	 */
 	public Cursor(QualifiedName qname, QualifiedName listName, ArrayIndex arrayIndex) 
 	{
-		super(qname, arrayIndex);
+		super(qname, arrayIndex, null);
 		this.listName = listName;
 		cursorIndex = -1;
 		isFact = true;

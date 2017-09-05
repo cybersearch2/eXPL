@@ -122,7 +122,7 @@ public class CalculateSquareMiles3Test
         sourceItem = sourceMarker.getHeadSourceItem();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("surface_area_Km2*=0.3861 (14,5) (14,30)");
+        assertThat(sourceItem.toString()).isEqualTo("surface_area_Km20=surface_area_Km2*=0.3861 (14,5) (14,30)");
         sourceItem = sourceItem.getNext();
         assertThat(sourceItem).isNotNull();
         //System.out.println(sourceItem.toString());

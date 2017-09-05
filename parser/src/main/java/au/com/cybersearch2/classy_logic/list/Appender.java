@@ -39,7 +39,7 @@ public class Appender extends ListItemVariable
 	 */
 	public Appender(QualifiedName qname, QualifiedName listName, ArrayIndex arrayIndex) 
 	{
-		super(qname, arrayIndex);
+		super(qname, arrayIndex, null);
 		this.listName = listName;
 	}
 

@@ -13,43 +13,41 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
-package au.com.cybersearch2.classy_logic.parser;
+package au.com.cybersearch2.classy_logic;
 
-import java.io.File;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 
-import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
-import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * TestAxiomProvider
+ * LexiconResourceProvider
  * @author Andrew Bowley
- * 11 Feb 2015
+ * 17 Mar 2015
  */
-public class TestAxiomProvider extends ProviderManager implements AxiomProvider 
+public class LexiconResourceProvider implements ResourceProvider 
 {
-	public TestAxiomProvider()
+
+	@Override
+	public String getName() 
 	{
-		super(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
+		return "lexicon";
 	}
-	
+
 	@Override
 	public void open(Map<String, Object> properties) 
 	{
 	}
 
 	@Override
-	public AxiomSource getAxiomSource(String axiomName,
-			List<String> axiomTermNameList) 
+	public Iterator<Axiom> iterator(Archetype<Axiom, Term> archetype) 
 	{
-		AxiomSource axiomSource = null;
-		return axiomSource;
+		return new LexiconIterator(archetype);
 	}
 
 	@Override
@@ -60,32 +58,20 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 
 	@Override
 	public AxiomListener getAxiomListener(String name) 
-	{   // Do-nothing listener for read-only provider
+	{   // Listener writes to console
 		return new AxiomListener()
 		{
 			@Override
 			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
+			    System.out.println(axiom.toString());
 			}
 		};
-	}
-	
-	@Override
-	public AxiomProvider getAxiomProvider(QualifiedName name)
-	{
-		return this;
-	}
-
-	@Override
-	public String getName() 
-	{
-		return "test";
 	}
 
     @Override
     public void close()
     {
     }
-
 
 }

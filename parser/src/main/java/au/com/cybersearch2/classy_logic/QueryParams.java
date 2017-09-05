@@ -7,6 +7,7 @@ import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.axiom.AxiomMapCollection;
 import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
+import au.com.cybersearch2.classy_logic.compile.TemplateType;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
@@ -298,7 +299,7 @@ public class QueryParams
             // Create new logic query template which will populated with terms to match axiom terms at start of query
             logicTemplate = 
                 axiomScope.getParserAssembler().getTemplateAssembler()
-                .createTemplate(qualifiedTemplateName, false);
+                .createTemplate(qualifiedTemplateName, TemplateType.template);
             logicTemplate.setKey(axiomName.getName());
         }
         return logicTemplate;

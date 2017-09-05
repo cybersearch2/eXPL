@@ -44,11 +44,10 @@ import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.compile.OperandMap;
 import au.com.cybersearch2.classy_logic.compile.OperandType;
 import au.com.cybersearch2.classy_logic.compile.ParserTask;
+import au.com.cybersearch2.classy_logic.compile.TemplateType;
 import au.com.cybersearch2.classy_logic.compile.SourceItem;
 import au.com.cybersearch2.classy_logic.compile.VariableType;
 import au.com.cybersearch2.classy_logic.expression.AppenderVariable;
-import au.com.cybersearch2.classy_logic.expression.AxiomOperand;
-import au.com.cybersearch2.classy_logic.expression.ProxyAxiomOperand;
 import au.com.cybersearch2.classy_logic.expression.BooleanOperand;
 import au.com.cybersearch2.classy_logic.expression.DoubleOperand;
 import au.com.cybersearch2.classy_logic.expression.StringOperand;
@@ -62,6 +61,7 @@ import au.com.cybersearch2.classy_logic.expression.FactOperand;
 import au.com.cybersearch2.classy_logic.expression.ChoiceOperand;
 import au.com.cybersearch2.classy_logic.expression.LiteralListOperand;
 import au.com.cybersearch2.classy_logic.expression.Orientation;
+import au.com.cybersearch2.classy_logic.expression.OperatorEnum;
 import au.com.cybersearch2.classy_logic.expression.SelectionOperand;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.list.ListItemVariable;
@@ -81,7 +81,6 @@ import au.com.cybersearch2.classy_logic.terms.LiteralType;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
 import au.com.cybersearch2.classy_logic.interfaces.LocaleListener;
 import au.com.cybersearch2.classy_logic.helper.Unknown;
@@ -160,19 +159,21 @@ public class QueryParser
 
   protected Operand axiomContainerOperand(
           ParserAssembler parserAssembler,
-          ListItemSpec[] indexData)
+          ListItemSpec[] indexData,
+          Operand expression)
   {
-      return axiomContainerOperand(parserAssembler, null, indexData);
+      return axiomContainerOperand(parserAssembler, null, indexData, expression);
   }
   
   protected Operand axiomContainerOperand(
       ParserAssembler parserAssembler,
       String name,
-      ListItemSpec[] indexData)
+      ListItemSpec[] indexData,
+      Operand expression)
   {
     QualifiedName listName = indexData[0].getQualifiedListName();
     QualifiedName qname = new QualifiedName(listName.getName() + "_var" + listName.incrementReferenceCount(), listName);
-    ListItemVariable operand = name == null ? new ListItemVariable(qname, indexData) : new ListItemVariable(name, qname, indexData);
+    ListItemVariable operand = name == null ? new ListItemVariable(qname, indexData, expression) : new ListItemVariable(name, qname, indexData, expression);
     ParserTask parserTask = parserAssembler.addPending(operand);
     parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
@@ -180,20 +181,22 @@ public class QueryParser
 
   protected Operand listItemOperand(
       ParserContext context,
-      ListItemSpec indexData) throws ParseException
+      ListItemSpec indexData,
+      Operand expression) throws ParseException
   {
-      return listItemOperand(context, null, indexData);
+      return listItemOperand(context, null, indexData, expression);
   }
   
   protected Operand listItemOperand(
           ParserContext context,
           String name,
-          ListItemSpec indexData) throws ParseException
+          ListItemSpec indexData,
+          Operand expression) throws ParseException
   {
   
     QualifiedName listName = indexData.getQualifiedListName();
     QualifiedName qname = new QualifiedName(listName + "_var" + listName.incrementReferenceCount(), listName);
-    ListItemVariable operand = name == null ? new ListItemVariable(qname, indexData) : new ListItemVariable(name, qname, indexData);
+    ListItemVariable operand = name == null ? new ListItemVariable(qname, indexData, expression) : new ListItemVariable(name, qname, indexData, expression);
     ParserTask parserTask = context.getParserAssembler().addPending(operand);
     parserTask.setPriority(ParserTask.Priority.variable.ordinal());
     return operand;
@@ -271,7 +274,7 @@ public class QueryParser
   {
     QualifiedName qualifiedTemplateName = new QualifiedTemplateName(context.getScope().getAlias(), listName);
     context.setTemplateName(qualifiedTemplateName);
-    return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, true); 
+    return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, TemplateType.calculator); 
   }
 
   Operand createChoiceOperand(QualifiedName qualifiedAxiomName, Template template, Template parameterTemplate, ParserContext context)
@@ -310,13 +313,6 @@ public class QueryParser
       listIndexData[1].setQualifiedListName(listName);
   }
   
-  Operand createAppender(QualifiedName qname, Operand expression, ParserContext context) throws ParseException
-  {
-    ParserAssembler parserAssembler = context.getParserAssembler();
-    int id = context.getQualifiedName(qname.getName()).incrementReferenceCount();
-    Operand var = new VariableType(OperandType.APPENDER, parserAssembler).createAppender(qname, expression, id);
-    return var;
-  }
 }
 PARSER_END(QueryParser)
 
@@ -949,7 +945,7 @@ Template Template(ParserContext context, boolean isCalculator) :
   { 
     QualifiedName qualifiedTemplateName = new QualifiedTemplateName(context.getScope().getAlias(), templateToken.image);
     context.setContextName(qualifiedTemplateName);
-    return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, isCalculator); 
+    return context.getParserAssembler().getTemplateAssembler().createTemplate(qualifiedTemplateName, isCalculator ? TemplateType.calculator : TemplateType.template); 
   }
 }
 
@@ -1139,7 +1135,7 @@ Operand TemplateExpression(Template template, ParserContext context) :
   {
     if (listIndexData.length > 1)
          throw new ParseException("Scope cannot be accessed using axiom list variable");
-    var = listItemOperand(context, listIndexData[0]);
+    var = listItemOperand(context, listIndexData[0], null);
     context.onTokenIntercept(scopeToken);
     return var;
   }
@@ -1150,9 +1146,9 @@ Operand TemplateTerm(Template template, ParserContext context) :
 {
   boolean isList = false;
   String name = null;
+  String operator = null;
   QualifiedName qname = null;
   QualifiedName axiomQname;
-  String axiomName = null;
   VariableType varType = null;
   Operand var = null;
   Token privateToken = null;
@@ -1177,7 +1173,8 @@ Operand TemplateTerm(Template template, ParserContext context) :
     axiomQname = qname;
     isList = (varType == null) && 
              (listAssembler.existsKey(ListType.basic, qname) || 
-              listAssembler.existsKey(ListType.axiom_item, qname));
+              listAssembler.existsKey(ListType.axiom_item, qname)||
+              listAssembler.existsKey(ListType.axiom_dynamic, qname));
   }
   (  
     listIndexData=IndexExpression(context.getQualifiedName(qname.getSource()), context)
@@ -1193,6 +1190,12 @@ Operand TemplateTerm(Template template, ParserContext context) :
     (
       (  
         ( equalsToken="=" | assignToken=<PLUSASSIGN> )
+        {
+           if (equalsToken != null)
+             operator = "=";
+           else
+             operator = "+=";
+        }
         ( <AXIOM> 
           ( 
             axiomQname=Name(context, false) 
@@ -1204,9 +1207,9 @@ Operand TemplateTerm(Template template, ParserContext context) :
           {
             VariableType axiomListVarType = new VariableType(OperandType.LIST, parserAssembler);
             axiomListVarType.setProperty(VariableType.PARAMS, axiomList);
-            if (axiomName != null)
+            if (axiomQname != null)
               axiomListVarType.setProperty(VariableType.AXIOM_KEY, axiomQname);
-            expression = axiomListVarType.getInstance(axiomQname);
+            expression = axiomListVarType.getInstance(new QualifiedName(qname.getName() + qname.incrementReferenceCount(), qname));
           } 
           |
           expression=Expression(context) 
@@ -1234,18 +1237,16 @@ Operand TemplateTerm(Template template, ParserContext context) :
       ( notToken="!" ) ? interceptToken=<LBRACE> literalList = LiteralList(context) <RBRACE> 
       |
       "(" ( parameterTemplate = Parameters(name, context, true) )? ")"
-	  {
-	    template.addTerm(parserAssembler.getCallOperand(qname, parameterTemplate));
-	  }
     )?
   )
   {
     if (interceptToken != null)
       context.onTokenIntercept(interceptToken);
-    if ((assignToken != null) && assignToken.image.equals("+=") && listAssembler.existsKey(ListType.axiom_dynamic, qname))
-      isList = true;
-    if (isList)
-      return createAppender(qname, expression, context);
+    if (parameterTemplate != null)
+      return parserAssembler.getCallOperand(qname, parameterTemplate);
+      
+    if (isList || (axiomList != null))
+      return new VariableType(OperandType.APPENDER, parserAssembler).createAppender(qname, operator, expression);
     boolean isDeclaration = varType != null;
     boolean isNot = notToken != null;
     if (isNot)
@@ -1254,29 +1255,27 @@ Operand TemplateTerm(Template template, ParserContext context) :
     if (!isDeclaration)
       varType = new VariableType(OperandType.UNKNOWN, parserAssembler);
     Operand assignExpression = (assignToken != null) ? expression : null;
-    if (assignToken != null)
-      expression = null;
+    if (assignExpression != null)
+      varType.setProperty(VariableType.REFLEX_OP, OperatorEnum.convertOperator(assignToken.image));
     if (expression != null)
       varType.setProperty(VariableType.EXPRESSION, expression);
     if (listIndexData !=null)
-      var = listIndexData.length == 1 ? listItemOperand(context, listIndexData[0]) : axiomContainerOperand(parserAssembler, listIndexData);
+      var = listIndexData.length == 1 ? listItemOperand(context, listIndexData[0], expression) : axiomContainerOperand(parserAssembler, listIndexData, expression);
     else if (literalList != null)
       var = new LiteralListOperand(qname, literalList, isNot);
     else if (var == null)
       var = operandMap.getOperand(qname);
     if ((var != null) && isDeclaration)
        operandMap.duplicateOperandCheck(qname); 
+    if ((var != null) && (assignToken != null))
+      var = parserAssembler.createReflexiveEvaluator(var, assignToken.image, expression);
     if ((var == null) && !hasOperand)
       var = varType.getInstance(name);
     if (var == null)
       var = operandMap.addOperand(name, expression, parserAssembler.getQualifiedContextname());
     if ((listIndexData == null) && (!hasOperand))
       operandMap.addOperand(var);
-    if (assignToken != null)
-      var = parserAssembler.createReflexiveEvaluator(var, assignToken.image, assignExpression);
-    if ((equalsToken != null) && ((listIndexData !=null) || (axiomList != null)))
-      var = new Evaluator(parserAssembler.getContextName(expression.getName()), var, "=", expression);
-    else if (hasOperand && (equalsToken != null))
+    if (hasOperand && (equalsToken != null))
       var = new Evaluator(parserAssembler.getContextName(var.getName() + var.getQualifiedName().incrementReferenceCount()), var, "=", expression);
     return var;
    }
@@ -1609,7 +1608,7 @@ QualifiedName ChoiceDeclaration(ParserContext context) :
   {
     qualifiedChoiceName = parserAssembler.getContextName(nameToken.image);
     parserAssembler.getListAssembler().createAxiomItemList(qualifiedChoiceName);
-    template = parserAssembler.getTemplateAssembler().createTemplate(qualifiedChoiceName, true);
+    template = parserAssembler.getTemplateAssembler().createTemplate(qualifiedChoiceName, TemplateType.choice);
     context.setContextName(new QualifiedTemplateName(context.getScope().getAlias(), nameToken.image));
     context.setSourceMarker(choiceToken, qualifiedChoiceName);
     builder.append("choice ").append(nameToken.image).append('(');
@@ -1987,7 +1986,6 @@ String ListDeclaration(ParserContext context) :
       if (exportToken !=null)
         varType.setProperty(VariableType.EXPORT, Boolean.TRUE);
       operand = varType.getInstance(qualifiedAxiomName);
-      template.addTerm(operand);
       context.getOperandMap().addOperand(operand);
       sourceItem = context.addSourceItem(operand);
     }
@@ -2140,8 +2138,12 @@ Operand Expression(ParserContext context) :
       return param;
     if (param instanceof AppenderVariable)
       var = (AppenderVariable)param;
-    if (var == null)
+    if ((var == null) && assignToken.image.equals("="))
       return new Evaluator(param, assignToken.image, assignOperand);
+    if (var == null)
+      return context.getParserAssembler().createReflexiveEvaluator(param, assignToken.image, assignOperand);
+    if (assignToken.image.equals("+="))
+      var.setDoConcatenate(true);
     var.setExpression(assignOperand);
     return var;
   }
@@ -2171,8 +2173,9 @@ Operand PrimaryExpression(ParserContext context) :
       ListAssembler listAssembler = parserAssembler.getListAssembler();
       QualifiedName inContext = new QualifiedName(qname.toString(), context.getContextName());
       if (listAssembler.existsKey(ListType.basic, inContext) || 
-          listAssembler.existsKey(ListType.axiom_item, inContext))
-        return createAppender(inContext, null, context);
+          listAssembler.existsKey(ListType.axiom_item, inContext) ||
+          listAssembler.existsKey(ListType.axiom_dynamic, qname))
+        return new VariableType(OperandType.APPENDER, parserAssembler).createAppender(inContext, null, null);
       return parserAssembler.addOperand(qname);
   }
   |
@@ -2180,7 +2183,7 @@ Operand PrimaryExpression(ParserContext context) :
   {
     if (listIndexData.length > 1)
          throw new ParseException("Scope cannot be accessed using axiom list variable");
-    operand = listItemOperand(context, listIndexData[0]);
+    operand = listItemOperand(context, listIndexData[0], null);
     context.onTokenIntercept(literal);
     return operand;
   }
@@ -2425,8 +2428,8 @@ Operand NamedExpression(QualifiedName qualifiedName, ParserContext context) :
     else if (listAssembler.existsKey(ListType.builtin, listName))
       setBuiltinList(listName, indexData, context);
     return indexData.length == 1 ? 
-    listItemOperand(context, indexData[0]) :  
-    axiomContainerOperand(parserAssembler, indexData);
+    listItemOperand(context, indexData[0], null) :  
+    axiomContainerOperand(parserAssembler, indexData, null);
   }
   |
   "(" ( parametersTemplate = Parameters(qualifiedName.toString(), context, true) )? ")"
@@ -2531,7 +2534,7 @@ Operand ParameterExpression(ParserContext context, boolean nameRequired) :
   {
      String name = (identifier == null) ? Term.ANONYMOUS : identifier.image;
      if (listIndexData !=null)
-       return listIndexData.length == 1 ? listItemOperand(context, name, listIndexData[0]) : axiomContainerOperand(parserAssembler, name, listIndexData);
+       return listIndexData.length == 1 ? listItemOperand(context, name, listIndexData[0], null) : axiomContainerOperand(parserAssembler, name, listIndexData, null);
      QualifiedName qname = parserAssembler.getContextName(name);
      Operand var = null;
      if (parameter != null)

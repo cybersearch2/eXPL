@@ -27,9 +27,8 @@ import java.util.Iterator;
 
 import org.junit.Test;
 
-import au.com.cybersearch2.classy_logic.compile.SourceItem;
-import au.com.cybersearch2.classy_logic.compile.SourceMarker;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+
 
 /**
  * RegexGroupsTest
@@ -41,78 +40,19 @@ public class RegexGroupsTest
     @Test
     public void testRegexGroups() throws Exception
     {
-        RegexGroups regexGroups = new RegexGroups();
+        RegexGroups2 regexGroups = new RegexGroups2();
         File testFile = new File("src/main/resources/tutorial11", "regex-groups.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
         Iterator<Axiom> axiomIterator = regexGroups.getRegexGroups();
         while (axiomIterator.hasNext()) 
         {
             Axiom axiom = axiomIterator.next();
-            String word = RegexGroups.get(axiom, "word");
-            String part = RegexGroups.get(axiom, "part");
-            String def = RegexGroups.get(axiom, "def");
+            String word = RegexGroups2.get(axiom, "word");
+            String part = RegexGroups2.get(axiom, "part");
+            String def = RegexGroups2.get(axiom, "definition");
             checkSolution(reader, word + " (" + part + ") " + def);
         }
         reader.close();
-        /*
-        Iterator<SourceMarker> iterator = regexGroups.getParserContext().getSourceMarkerSet().iterator();
-        assertThat(iterator.hasNext()).isTrue();
-        SourceMarker sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("string defRegex (5,1)");
-        SourceItem sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string defRegex=^(.)\\. (.*+) (5,1) (5,32)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom expand (8,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("list<axiom> expand[1] (8,1) (14,1)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        assertThat(sourceMarker.toString()).isEqualTo("query in_words (23,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon:in_words (23,23) (23,40)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("axiom lexicon (2,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("lexicon(word,definition):\"lexicon\" (2,1) (2,44)");
-        //System.out.println(sourceMarker.toString());
-       assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("string wordRegex (4,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string wordRegex=^in[^ ]+ (4,1) (4,29)");
-        assertThat(iterator.hasNext()).isTrue();
-        sourceMarker = iterator.next();
-        //System.out.println(sourceMarker.toString());
-        assertThat(sourceMarker.toString()).isEqualTo("template in_words (16,1)");
-        sourceItem = sourceMarker.getHeadSourceItem();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("word \\^in[^ ]+\\?word (18,9) (18,25)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("definition \\^(.)\\. (.*+)\\?definition (19,9) (19,48)");
-        sourceItem = sourceItem.getNext();
-        assertThat(sourceItem).isNotNull();
-        //System.out.println(sourceItem.toString());
-        assertThat(sourceItem.toString()).isEqualTo("string in_word=word+, +expand.part+- +def (20,3) (21,0)");
-        */
    }
 
     protected void checkSolution(BufferedReader reader, String word)

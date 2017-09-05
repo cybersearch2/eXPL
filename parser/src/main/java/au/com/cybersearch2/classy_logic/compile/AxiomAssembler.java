@@ -156,9 +156,7 @@ public class AxiomAssembler
             axiomArchetype = new AxiomArchetype(qualifiedAxiomName);
             axiomArchetypeMap.put(qualifiedAxiomName, axiomArchetype);
         }
-        List<String> terminalNameList = axiomArchetype.getTermNameList();
-        AxiomListSource axiomListSource = new AxiomListSource(axiomList);
-        axiomListSource.setAxiomTermNameList(terminalNameList);
+        AxiomListSource axiomListSource = new AxiomListSource(axiomList, axiomArchetype);
         return axiomListSource;
     }
     

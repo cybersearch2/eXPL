@@ -18,7 +18,6 @@ package au.com.cybersearch2.classy_logic.tutorial14;
 import java.io.File;
 import java.util.Iterator;
 
-import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.QueryProgramParser;
 import au.com.cybersearch2.classy_logic.Result;

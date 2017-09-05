@@ -24,6 +24,7 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * AxiomVariable
@@ -161,9 +162,19 @@ public class AxiomVariable implements ListItemDelegate
         {   
             // An AxiomList containing a single item is unwrapped
             AxiomTermList axiomTermList = axiomListSpec.getAxiomTermList();
-            // Update term in axiom referenced by list
-            Term term = axiomTermList.getItem(index);
-            term.setValue(value);
+            if (axiomTermList.isEmpty())
+            {
+                AxiomArchetype archetype = new AxiomArchetype(axiomTermList.getKey());
+                Axiom axiom = new Axiom(archetype);
+                axiom.addTerm(new Parameter(Term.ANONYMOUS, value));
+                axiomTermList.setAxiom(axiom);
+            }
+            else
+            {
+                // Update term in axiom referenced by list
+                Term term = axiomTermList.getItem(index);
+                term.setValue(value);
+            }
         }
     }
     

@@ -24,18 +24,23 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Collections;
+import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import au.com.cybersearch2.classy_logic.LexiconSource;
+import au.com.cybersearch2.classy_logic.LexiconResourceProvider;
 import au.com.cybersearch2.classy_logic.QueryParams;
 import au.com.cybersearch2.classy_logic.compile.Group;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.Operand;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Archetype;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Template;
 import au.com.cybersearch2.classy_logic.pattern.TemplateArchetype;
 import au.com.cybersearch2.classy_logic.query.LogicQueryExecuter;
@@ -49,25 +54,46 @@ import au.com.cybersearch2.classy_logic.terms.Parameter;
  */
 public class RegExTest 
 {
-	@Before
+    private LexiconResourceProvider lexiconProvider;
+    private AxiomArchetype archetype;
+    private AxiomSource lexiconSource;
+ 
+    @Before
 	public void setUp()
 	{
-        Archetype.CASE_INSENSITIVE_NAME_MATCH = true;
+        lexiconProvider = new LexiconResourceProvider();
+        archetype = new AxiomArchetype(QualifiedName.parseGlobalName("lexicon"));
+        archetype.addTermName("word");
+        archetype.addTermName("definition");
+        archetype.clearMutable();
+        lexiconSource = new AxiomSource(){
+
+            @Override
+            public Iterator<Axiom> iterator()
+            {
+                return lexiconProvider.iterator(archetype);
+            }
+
+            @Override
+            public Archetype<Axiom, Term> getArchetype()
+            {
+                return archetype;
+            }};
+        //Archetype.CASE_INSENSITIVE_NAME_MATCH = true;
 	}
 	
 
 	@Test
 	public void test_RegEx_query() throws IOException 
 	{
-		LexiconSource lexiconSource = new LexiconSource();
         TemplateArchetype wordArchetype = new TemplateArchetype(new QualifiedTemplateName(QualifiedName.EMPTY, "in_words"));
 		Template inWordsTemplate = new Template(wordArchetype);
 		inWordsTemplate.setKey("Lexicon");
-		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Word"), "^in[^ ]+", null, 0, null);
+		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("word"), "^in[^ ]+", null, 0, null);
 		Variable var = new Variable(regExOperand.getQualifiedName());
 		inWordsTemplate.addTerm(new Evaluator(regExOperand.getQualifiedName(), regExOperand, "?", var));
-		inWordsTemplate.addTerm(new TestStringOperand("Definition"));
-		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(Word \\^in[^ ]+\\?Word, Definition)");
+		inWordsTemplate.addTerm(new TestStringOperand("definition"));
+		assertThat(inWordsTemplate.toString()).isEqualTo("in_words(word \\^in[^ ]+\\?word, definition)");
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(inWordsTemplate));
         QueryParams queryParams = new QueryParams(adapter.getScope(), adapter.getQuerySpec());
         queryParams.initialize();
@@ -85,7 +111,6 @@ public class RegExTest
 	@Test
 	public void test_groups()
 	{
-		LexiconSource lexiconSource = new LexiconSource();
         TemplateArchetype wordArchetype = new TemplateArchetype(new QualifiedTemplateName(QualifiedName.EMPTY, "dictionary"));
 		Template dictionaryTemplate = new Template(wordArchetype);
 		dictionaryTemplate.setKey("Lexicon");
@@ -94,8 +119,8 @@ public class RegExTest
 		Operand g2 = mock(Operand.class);
 		group.addGroup(g1);
 		group.addGroup(g2);
-		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("Definition"), "^(.)\\. (.*+)", null, 0, group);
-		dictionaryTemplate.addTerm(new TestStringOperand("Word"));
+		RegExOperand regExOperand = new RegExOperand(QualifiedName.parseName("definition"), "^(.)\\. (.*+)", null, 0, group);
+		dictionaryTemplate.addTerm(new TestStringOperand("word"));
 		dictionaryTemplate.addTerm(regExOperand);
 		dictionaryTemplate.getParserTask().run();
         QueryExecuterAdapter adapter = new QueryExecuterAdapter(lexiconSource, Collections.singletonList(dictionaryTemplate));
@@ -112,7 +137,7 @@ public class RegExTest
 			assertThat(paramCaptor.getValue().toString()).isEqualTo( "n");
 			verify(g2).assign(paramCaptor.capture());
 	        assertThat(paramCaptor.getValue().toString()).isEqualTo( "a monastery ruled by an abbot");
-			assertThat(regExOperand.toString()).isEqualTo("Definition=true"); 
+			assertThat(regExOperand.toString()).isEqualTo("definition=true"); 
 		}
 		else
 			fail("Query execute returned false");

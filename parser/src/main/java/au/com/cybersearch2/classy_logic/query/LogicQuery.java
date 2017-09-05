@@ -81,7 +81,15 @@ public class LogicQuery implements SolutionFinder
 		this(axiomSource, null);
 	}
 
-	/**
+    /**
+     * Construct QueryLogic object without axiom source
+       */
+	public LogicQuery()
+    {
+        this(null, null);
+    }
+
+    /**
      * @return the scopeNotifier
      */
     public ScopeNotifier getScopeNotifier()

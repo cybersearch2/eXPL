@@ -101,6 +101,14 @@ public abstract class ExpressionOperand<T> extends Operand
 	}
 
     /**
+     * @param expression the expression to set
+     */
+    public void setExpression(Operand expression)
+    {
+        this.expression = expression;
+    }
+
+    /**
      * Set value, mark Term as not empty
      * @param value Object. If null a Null object will be set and empty status unchanged
      */

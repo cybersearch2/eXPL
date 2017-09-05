@@ -1,0 +1,3 @@
+score(report=George: English:b+, Math:b-, History:a-, Total percent: 81.481)
+score(report=Sarah: English:c+, Math:a, History:b+, Total percent: 81.481)
+score(report=Amy: English:b, Math:a-, History:e+, Total percent: 66.667)

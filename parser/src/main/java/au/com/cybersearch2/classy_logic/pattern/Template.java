@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import au.com.cybersearch2.classy_logic.compile.OperandType;
+import au.com.cybersearch2.classy_logic.compile.TemplateType;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
@@ -523,35 +523,20 @@ public class Template extends TermList<Operand>
 	public Axiom toAxiom()
 	{
         Axiom axiom = new Axiom(qname.getTemplate());
-        List<Parameter> qualifiers = null;
+        @SuppressWarnings("unchecked")
+        Archetype<Axiom,Term> archetype = (Archetype<Axiom, Term>) axiom.getArchetype();
+        //axiom.getArchetype().setDuplicateTermNames(true);
 		for (Term term: termList)
 		{
 		    Operand operand = (Operand)term;
             if (!operand.isEmpty() && !operand.isPrivate()  && 
-			    (isReplicate || isInSameSpace(operand)))
+			    (isReplicate || isInSameSpace(operand)) &&
+			    (archetype.getIndexForName(operand.getName()) == -1))
 			{
-				OperatorTerm param = new OperatorTerm(operand.getName(), operand.getValue(), operand.getOperator());
+                String termName = operand.getName();
+				OperatorTerm param = new OperatorTerm(termName, operand.getValue(), operand.getOperator());
 				axiom.addTerm(param);
-				if (operand.getOperator().getTrait().getOperandType() == OperandType.CURRENCY)
-				{   // Append country operand, if exists and not already in solution
-				    if (operand.getRightOperand() != null) 
-				    {
-				        Operand countryOperand = operand.getRightOperand();
-				        {
-				            param = new OperatorTerm(countryOperand.getName(), countryOperand.getValue(), countryOperand.getOperator());
-				            if (qualifiers == null)
-				                qualifiers = new ArrayList<Parameter>();
-				            qualifiers.add(param);
-				        }
-				    }
-				}
 			}
-		}
-		if (qualifiers != null)
-		{
-		    for (Parameter param: qualifiers)
-		        if (axiom.getTermByName(param.getName()) == null)
-		            axiom.addTerm(param);
 		}
 		return axiom;
 	}
@@ -749,9 +734,10 @@ public class Template extends TermList<Operand>
     * @param name Query name to be appended to template qualified name
     * @return Template object
     */
-    public Template innerTemplateInstance(String name)
+    public Template innerTemplateInstance(String name, TemplateType templateType)
     {
         boolean isQueryTemplate = (name != null);
+        boolean isChoice = templateType == TemplateType.choice;
         QualifiedName innerTemplateName = new QualifiedTemplateName(
                 qname.getScope(), 
                 qname.getTemplate() + 
@@ -760,6 +746,8 @@ public class Template extends TermList<Operand>
             innerTemplateName = new QualifiedName(name, innerTemplateName);
         TemplateArchetype newTemplateArchetype = new TemplateArchetype(innerTemplateName);
         Template newTemplate = new Template(newTemplateArchetype, qname);
+        if (isChoice)
+            newTemplate.setChoice(true);
         newTemplate.isInnerTemplate = true;
         if (!isQueryTemplate)
             setNext(newTemplate);
@@ -770,9 +758,9 @@ public class Template extends TermList<Operand>
 	 * Returns inner template instance chained to this template
 	 * @return Template object
 	 */
-    public Template innerTemplateInstance()
+    public Template innerTemplateInstance(TemplateType templateType)
     {
-        return innerTemplateInstance(null);
+        return innerTemplateInstance(null, templateType);
     }
 
     /**
@@ -783,11 +771,10 @@ public class Template extends TermList<Operand>
      */
     public Template choiceInstance(Template master)
     {
-        Template choiceTemplate = innerTemplateInstance();
+        Template choiceTemplate = innerTemplateInstance(TemplateType.choice);
         choiceTemplate.contextName = master.getQualifiedName();
         for (Operand operand: master.termList)
             choiceTemplate.addTerm(operand);
-        choiceTemplate.setChoice(true);
         return choiceTemplate;
     }
     
@@ -926,4 +913,39 @@ public class Template extends TermList<Operand>
         archetype = new TemplateArchetype(qname);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<Term>[] getInitData()
+    {
+        List<Term>[] initDataCopy = new List[2];
+        if (initData[0].isEmpty())
+            initDataCopy[0] = EMPTY_TERM_LIST;
+        else
+        {
+            initDataCopy[0] = new ArrayList<Term>();
+            initDataCopy[0].addAll(initData[0]);
+            initData[0].clear();
+        }
+        if (initData[1].isEmpty())
+            initDataCopy[1] = EMPTY_TERM_LIST;
+        else
+        {
+            initDataCopy[1] = new ArrayList<Term>();
+            initDataCopy[1].addAll(initData[1]);
+            initData[1].clear();
+        }
+        return initDataCopy;
+    }
+
+    public void setInitData(List<Term>[] initData)
+    {
+        if (!this.initData[0].isEmpty())
+            this.initData[0].clear();
+        if (!this.initData[0].isEmpty())
+            this.initData[1].clear();
+        if (!initData[0].isEmpty())
+            this.initData[0].addAll(initData[0]);
+        if (!initData[1].isEmpty())
+            this.initData[1].addAll(initData[1]);
+    }
+    
 }

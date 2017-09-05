@@ -26,6 +26,7 @@ list<axiom> translate {};
   
 calc charge_plus_gst
 + list<term> lexicon@scope; 
++ list<axiom> translate = translate@; 
 (
   currency amount = item_list[catalog_no],
   choice tax_rate(country),

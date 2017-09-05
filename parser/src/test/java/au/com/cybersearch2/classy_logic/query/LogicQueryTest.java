@@ -30,7 +30,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import au.com.cybersearch2.classy_logic.axiom.AxiomListSource;
-import au.com.cybersearch2.classy_logic.axiom.EmptyAxiomSource;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.TestBigDecimalOperand;
@@ -493,12 +492,12 @@ public class LogicQueryTest
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		Solution solution = new Solution();
 		when(template.unify(axiom, solution)).thenReturn(true);
-		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
+		LogicQuery logicQuery = new LogicQuery();
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isTrue();
         Axiom blankAxiom = solution.getAxiom(NAME);
 		assertThat(blankAxiom.getTermCount()).isEqualTo(0);
-		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
+		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.complete);
 	}
 
 	@Test
@@ -521,11 +520,11 @@ public class LogicQueryTest
 		when(template.toAxiom()).thenReturn(solutionAxiom);
 		solution.put(NAME, solutionAxiom);
 		when(template.unify(axiom, solution)).thenReturn(true);
-		LogicQuery logicQuery = new LogicQuery(new EmptyAxiomSource());
+		LogicQuery logicQuery = new LogicQuery();
 		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
 		assertThat(logicQuery.iterate(solution, template, mock(ExecutionContext.class))).isTrue();
 		assertThat(solution.getAxiom(NAME)).isEqualTo(solutionAxiom);
-		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.start);
+		assertThat(logicQuery.queryStatus).isEqualTo(QueryStatus.complete);
 	}
 
 	@Ignore

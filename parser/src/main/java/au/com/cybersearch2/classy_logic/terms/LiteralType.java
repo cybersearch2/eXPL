@@ -17,7 +17,7 @@ package au.com.cybersearch2.classy_logic.terms;
 
 /**
  * LiteralType
- * Identifies term types available where only literals are allowed
+ * Identifies term types based on types allowed for literals
  * @author Andrew Bowley
  * 3May,2017
  */

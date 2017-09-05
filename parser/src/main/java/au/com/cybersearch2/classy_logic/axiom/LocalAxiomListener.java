@@ -72,7 +72,7 @@ public class LocalAxiomListener
         {
             axiomSource = scope.getGlobalParserAssembler().getAxiomSource(qualifiedAxiomName);
             if (axiomSource != null)
-                localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
+                localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getArchetype().getTermNameList());
             else if (scope.getName().equals(QueryProgram.GLOBAL_SCOPE))
                 return; // This is not an error when global scope context is being reset
             else
@@ -84,7 +84,7 @@ public class LocalAxiomListener
             if (iterator.hasNext())
                 localAxiom = iterator.next();
             else
-                localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getAxiomTermNameList());
+                localAxiom = createUnknownAxiom(qname.toString(), axiomSource.getArchetype().getTermNameList());
         }
         axiomListener.onNextAxiom(qualifiedAxiomName, localAxiom);
     }

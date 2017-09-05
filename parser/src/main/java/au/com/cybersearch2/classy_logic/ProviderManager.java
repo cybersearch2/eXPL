@@ -17,14 +17,21 @@ package au.com.cybersearch2.classy_logic;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
+import au.com.cybersearch2.classy_logic.interfaces.Term;
+import au.com.cybersearch2.classy_logic.pattern.Archetype;
+import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 
 /**
  * ProviderManager
@@ -36,6 +43,8 @@ public class ProviderManager
 {
 	/** Map Axiom Providers to their names */
 	protected Map<QualifiedName, AxiomProvider> axiomProviderMap;
+    /** Map Axiom Providers to their names */
+    protected Map<QualifiedName, ResourceProvider> resourceProviderMap;
 	/** Resource path base */
 	protected File resourceBase;
 	
@@ -54,6 +63,7 @@ public class ProviderManager
 	{
 		this.resourceBase = resourceBase;
 		axiomProviderMap = new HashMap<QualifiedName, AxiomProvider>();
+		resourceProviderMap = new HashMap<QualifiedName, ResourceProvider>();
 	}
 	
 	public File getResourceBase() 
@@ -89,7 +99,7 @@ public class ProviderManager
 	 */
 	public boolean isEmpty() 
 	{
-		return axiomProviderMap.size() == 0;
+		return axiomProviderMap.size() == 0 && resourceProviderMap.size() == 0;
 	}
 
 	/**
@@ -114,4 +124,82 @@ public class ProviderManager
 		return axiomProviderMap.get(name);
 	}
 
+    /**
+     * Add Resource Provider
+     * @param resourceProvider ResourceProvider object
+     */
+    public void putResourceProvider(final ResourceProvider resourceProvider)
+    {
+        QualifiedName qualifiedAxiomName = QualifiedName.parseName(resourceProvider.getName());
+        resourceProviderMap.put(qualifiedAxiomName, resourceProvider);
+        QualifiedTemplateName qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
+        resourceProviderMap.put(qualifiedTemplateName, resourceProvider);
+        AxiomProvider axiomProvider = new AxiomProvider(){
+    
+            @Override
+            public String getName()
+            {
+                return resourceProvider.getName();
+            }
+    
+            @Override
+            public void open(Map<String, Object> properties)
+                    throws ExpressionException
+            {
+                resourceProvider.open(properties);
+            }
+    
+            @Override
+            public void close()
+            {
+                resourceProvider.close();
+            }
+    
+            @Override
+            public AxiomSource getAxiomSource(String axiomName,
+                    final List<String> axiomTermNameList)
+            {
+                final AxiomArchetype archetype = new AxiomArchetype(QualifiedName.parseGlobalName(axiomName));
+                for (String termName: axiomTermNameList)
+                    archetype.addTermName(termName);
+                archetype.clearMutable();
+                return new AxiomSource(){
+    
+                    @Override
+                    public Iterator<Axiom> iterator()
+                    {
+                        return resourceProvider.iterator(archetype);
+                    }
+
+                    @Override
+                    public Archetype<Axiom, Term> getArchetype()
+                    {
+                        return archetype;
+                    }
+                };
+            }
+    
+            @Override
+            public AxiomListener getAxiomListener(String axiomName)
+            {
+                return resourceProvider.getAxiomListener(axiomName);
+            }
+    
+            @Override
+            public boolean isEmpty()
+            {
+                return false;
+            }};
+        putAxiomProvider(axiomProvider);
+    }
+
+    /**
+     * Returns Resource Provider specified by qualified name
+     * @param name Resource Provider qualified name
+     * @return ResourceProvider implementation or null if not found
+     */
+    public ResourceProvider getResourceProvider(QualifiedName name)
+    {
+        return resourceProviderMap.get(name);
+    }
 }

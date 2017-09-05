@@ -31,14 +31,15 @@ import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * TypesTest
+ * ListsTest
+ * Previews all seven list types
  * @author Andrew Bowley
  * 5Feb,2017
  */
 public class ListsTest
 {
     @Test
-    public void testTypes() throws Exception
+    public void testLists() throws Exception
     {
         File testFile = new File("src/main/resources/tutorial3", "lists.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
