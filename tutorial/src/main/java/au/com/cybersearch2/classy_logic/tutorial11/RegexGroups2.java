@@ -75,7 +75,7 @@ query<axiom> in_words(dictionary : in_words);
 	{
         //Archetype.CASE_INSENSITIVE_NAME_MATCH = true;
         File resourcePath = new File("src/main/resources/tutorial11");
-        // Use an external axiom source which is bound in TestAxiomProvider dependency class
+        // Use an external axiom source which is bound in TestResourceProvider dependency class
         // to AxiomSource class DictionaryIterator
         queryProgramParser = new QueryProgramParser(resourcePath, provideResourceManager());
 	}

@@ -31,6 +31,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
+import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.interfaces.TermListIterable;
@@ -38,6 +39,7 @@ import au.com.cybersearch2.classy_logic.list.AxiomList;
 import au.com.cybersearch2.classy_logic.list.AxiomTermList;
 import au.com.cybersearch2.classy_logic.list.ListType;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
@@ -273,13 +275,77 @@ public class ListAssembler
     public ItemList<?> findItemList(QualifiedName qname)
     {
         ItemList<?> itemList = null;
-        Scope nameScope = qname.getScope().isEmpty() ? scope.getGlobalScope() : scope.findScope(qname.getScope());
+        Scope globalScope = scope.getGlobalScope();
+        Scope nameScope = qname.getScope().isEmpty() ? globalScope : scope.findScope(qname.getScope());
         if (nameScope != null)
             itemList = nameScope.getParserAssembler().getListAssembler().listMap.get(qname);
+        if ((itemList == null) && (globalScope != nameScope))
+            itemList = globalScope.getParserAssembler().getListAssembler().listMap.get(qname);
         return itemList;
     }
 
     /**
+     * Returns item list specified by qualified name. 
+     * Ensures scope part of name identifies an existing scope.
+     * @param qname Qualified name of list
+     * @return ItemList object or null if not found
+     */
+    public AxiomList findAxiomItemList(QualifiedName qname)
+    {
+        ItemList<?> itemList = findItemList(qname);
+        if (itemList == null)
+        {
+            Scope globalScope = scope.getGlobalScope();
+            List<Axiom> axiomList = getAxiomItems(qname);
+            if (axiomList == null)
+            {
+                ParserAssembler globalParserAssembler = globalScope.getParserAssembler();
+                Scope nameScope = qname.getScope().isEmpty() ? globalScope : scope.findScope(qname.getScope());
+                if (nameScope == null)
+                    nameScope = scope;
+                AxiomSource axiomSource = nameScope.getParserAssembler().getAxiomSource(qname);
+                if (axiomSource == null)
+                    axiomSource = globalParserAssembler.getAxiomSource(qname);
+                if (axiomSource == null)
+                    return null;
+                axiomList = axiomItemsInstance(qname);
+                Iterator<Axiom> iterator = axiomSource.iterator();
+                while (iterator.hasNext())
+                    axiomList.add(iterator.next());
+            }
+            itemList = createAxiomList(globalScope, qname, axiomList);
+        }
+        else if (!(itemList instanceof AxiomList))
+            throw new ExpressionException("Item list \"" + qname.toString() + "\" is not an axiom list");
+        return (AxiomList) itemList;
+    }
+
+    /**
+     * Find item list by name
+     * @param listName Name of list
+     * @return ItemList object
+     */
+    public ItemList<?> findItemListByName(QualifiedName listName)
+    {
+        // Look up list by name from item lists
+        ItemList<?> itemList = findItemList(listName); 
+        String contextScopeName = scope.getParserAssembler().getQualifiedContextname().getScope();
+        if ((itemList == null) && !contextScopeName.equals(scope.getName()))
+        {   // Search for item list using context scope
+            QualifiedName qualifiedListName = new QualifiedName(contextScopeName, listName);
+            itemList = findItemList(qualifiedListName);
+        }
+        if (itemList == null)
+        {
+            List<Axiom> axiomList = getAxiomItems(listName);
+            if (axiomList != null)
+                // Create axiom list to access context list
+                itemList = createAxiomList(scope.getGlobalScope(), listName, axiomList);
+        }
+        return itemList;
+    }
+
+   /**
      * Add ItemList object to it's container identified by name
      * @param qname Qualified name of list
      * @param itemList ItemList object to add
@@ -495,4 +561,23 @@ public class ListAssembler
         }
         return null;
      }
+
+    /**
+     * Create axiom list to access context list
+     * @param globalScope Global scope
+     * @param key List name used as key to map item list
+     * @param axiomList Context list
+     * @return ItemList object
+     */
+    private AxiomList createAxiomList(Scope globalScope, QualifiedName key, List<Axiom> axiomList)
+    {
+        AxiomArchetype archetype = globalScope.getGlobalAxiomAssembler().getAxiomArchetype(key);
+        AxiomList axiomContainer = new AxiomList(key, key);
+        if (archetype != null)
+            axiomContainer.setAxiomTermNameList(archetype.getTermNameList());
+        globalScope.getGlobalListAssembler().setAxiomContainer(axiomContainer, axiomList);
+        addItemList(key, (ItemList<AxiomTermList>) axiomContainer);
+        return axiomContainer;
+    }
+
 }

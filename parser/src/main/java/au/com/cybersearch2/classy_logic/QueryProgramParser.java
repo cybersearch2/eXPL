@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 import au.com.cybersearch2.classy_logic.compile.ParserContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
 
@@ -43,12 +43,12 @@ public class QueryProgramParser
         this.resourcePath = resourcePath;
     }
     
-    public QueryProgramParser(File resourcePath, AxiomProvider... axiomProvider)
+    public QueryProgramParser(File resourcePath, ResourceProvider... resourceProvider)
     {
         this.resourcePath = resourcePath;
         providerManager = new ProviderManager(resourcePath);
-        for (AxiomProvider provider: axiomProvider)
-            providerManager.putAxiomProvider(provider);
+        for (ResourceProvider provider: resourceProvider)
+            providerManager.putResourceProvider(provider);
     }
     
     public QueryProgramParser(File resourcePath, ProviderManager providerManager)

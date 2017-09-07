@@ -25,8 +25,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.pattern.Archetype;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -66,18 +65,20 @@ public class FileResourceProvider implements ResourceProvider
     @Override
     public void close()
     {
+        axiomListener = null;
         if (onCloseHandlerList != null)
             for (Runnable handler: onCloseHandlerList)
                 handler.run();
     }
 
     @Override
-    public Iterator<Axiom> iterator(Archetype<Axiom,Term> archetype)
+    public Iterator<Axiom> iterator(AxiomArchetype archetype)
     {
         String filename = archetype.getQualifiedName().toString();
         File axiomFile = new File(resourceBase, filename);
         if (onCloseHandlerList == null)
             onCloseHandlerList = new ArrayList<Runnable>();
+        System.out.println("Iterator " + (onCloseHandlerList.size() + 1) + " for " + resourceName);
         FileAxiomIterator fileAxiomIterator = new FileAxiomIterator(axiomFile); 
         onCloseHandlerList.add(fileAxiomIterator.getOnCloseHandler());
         return fileAxiomIterator;
@@ -88,6 +89,7 @@ public class FileResourceProvider implements ResourceProvider
     {
         if (onCloseHandlerList == null)
             onCloseHandlerList = new ArrayList<Runnable>();
+        //System.out.println("Listener " + (onCloseHandlerList.size() + 1) + " for " + resourceName);
         File axiomFile = new File(resourceBase, name);
         final FileAxiomListener fileAxiomListener =  new FileAxiomListener(name, axiomFile);
         onCloseHandlerList.add(fileAxiomListener.getOnCloseHandler());
@@ -110,5 +112,4 @@ public class FileResourceProvider implements ResourceProvider
     {
         return false;
     }
-
 }

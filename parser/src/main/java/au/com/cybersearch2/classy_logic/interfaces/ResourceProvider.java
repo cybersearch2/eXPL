@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
-import au.com.cybersearch2.classy_logic.pattern.Archetype;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -52,7 +52,7 @@ public interface ResourceProvider
      * @param archetype Axiom archetype to define axiom name and term names
      * @return Axiom iterator
      */
-    Iterator<Axiom> iterator(Archetype<Axiom, Term> archetype);
+    Iterator<Axiom> iterator(AxiomArchetype archetype);
 
     /** 
      * Returns listener to notify when an axiom is passed to this provider 

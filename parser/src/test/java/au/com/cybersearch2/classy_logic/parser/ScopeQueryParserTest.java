@@ -356,7 +356,7 @@ public class ScopeQueryParserTest
     @Test
     public void test_mega_cities3() throws IOException
     {
-        QueryProgram queryProgram = new QueryProgram(new TestAxiomProvider());
+        QueryProgram queryProgram = new QueryProgram(new TestResourceProvider());
         queryProgram.parseScript(MEGA_CITY3);
         //queryProgram.executeQuery("german.group_query", new SolutionHandler(){
         //  @Override

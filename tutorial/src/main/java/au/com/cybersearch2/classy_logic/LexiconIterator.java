@@ -20,13 +20,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 
 /**
@@ -43,6 +43,7 @@ public class LexiconIterator implements Iterator<Axiom>
 	public LexiconIterator(Archetype<Axiom, Term> archetype) 
 	{
 		this.archetype = archetype;
+        archetype.clearMutable();
 		File dictionaryFile = new File("src/main/resources", "definitions.txt");
 		
         try 
@@ -91,10 +92,13 @@ public class LexiconIterator implements Iterator<Axiom>
 		word.setName(axiomTermNameList.get(0));
 		StringTerm definition = new StringTerm(strings[1].trim());
 		definition.setName(axiomTermNameList.get(1));
-		List<Term> terms = new ArrayList<Term>(2);
-		terms.add(word);
-		terms.add(definition);
-		Axiom axiom = archetype.itemInstance(terms);
+		Axiom axiom = new Axiom((AxiomArchetype) archetype);
+		axiom.addTerm(word);
+		axiom.addTerm(definition);
+		//List<Term> terms = new ArrayList<Term>(2);
+		//terms.add(word);
+		//terms.add(definition);
+		//Axiom axiom = archetype.itemInstance(terms);
 		return axiom;
 	}
 }

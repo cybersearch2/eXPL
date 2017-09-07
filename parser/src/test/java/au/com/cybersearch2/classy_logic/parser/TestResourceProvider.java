@@ -16,25 +16,25 @@
 package au.com.cybersearch2.classy_logic.parser;
 
 import java.io.File;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.JavaTestResourceEnvironment;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
- * TestAxiomProvider
+ * TestResourceProvider
  * @author Andrew Bowley
  * 11 Feb 2015
  */
-public class TestAxiomProvider extends ProviderManager implements AxiomProvider 
+public class TestResourceProvider extends ProviderManager implements ResourceProvider 
 {
-	public TestAxiomProvider()
+	public TestResourceProvider()
 	{
 		super(new File(JavaTestResourceEnvironment.DEFAULT_RESOURCE_LOCATION));
 	}
@@ -44,13 +44,6 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 	{
 	}
 
-	@Override
-	public AxiomSource getAxiomSource(String axiomName,
-			List<String> axiomTermNameList) 
-	{
-		AxiomSource axiomSource = null;
-		return axiomSource;
-	}
 
 	@Override
 	public boolean isEmpty() 
@@ -71,7 +64,7 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
 	}
 	
 	@Override
-	public AxiomProvider getAxiomProvider(QualifiedName name)
+	public ResourceProvider getResourceProvider(QualifiedName name)
 	{
 		return this;
 	}
@@ -87,5 +80,9 @@ public class TestAxiomProvider extends ProviderManager implements AxiomProvider
     {
     }
 
-
+    @Override
+    public Iterator<Axiom> iterator(AxiomArchetype archetype)
+    {
+        return null;
+    }
 }

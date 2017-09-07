@@ -15,13 +15,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic.compile;
 
-import java.util.List;
-
 import au.com.cybersearch2.classy_logic.ProviderManager;
-import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
 
 /**
  * ExternalAxiomSource
@@ -42,25 +38,12 @@ public class ExternalAxiomSource
     /**
      * Returns Axiom Provider specified by name
      * @param name Axiom Provider qualified name
-     * @return AxiomProvider implementation or null if not found
+     * @return ResourceProvider implementation or null if not found
      */
-    public AxiomProvider getAxiomProvider(QualifiedName name)
+    public ResourceProvider getResourceProvider(QualifiedName name)
     {
-        return providerManager.getAxiomProvider(name);
+        return providerManager.getResourceProvider(name);
     }
     
-    /**
-     * Returns Axiom Source of specified Axiom Provider and Axiom names
-     * @param name Axiom Provider qualified name
-     * @param axiomName Axiom name
-     * @param axiomTermNameList List of term names constrains which terms are included and their order
-     * @return AxiomSource implementation or null if axiom provider not found
-     * @throws ExpressionException if axiom provider not found
-     */
-    public AxiomSource getAxiomSource(QualifiedName name, String axiomName,
-            List<String> axiomTermNameList) 
-    {
-        return providerManager.getAxiomSource(name, axiomName, axiomTermNameList);
-    }
 
 }

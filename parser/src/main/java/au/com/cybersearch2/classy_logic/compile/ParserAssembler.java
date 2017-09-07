@@ -14,6 +14,7 @@ import au.com.cybersearch2.classy_logic.FunctionManager;
 import au.com.cybersearch2.classy_logic.ProviderManager;
 import au.com.cybersearch2.classy_logic.QueryProgram;
 import au.com.cybersearch2.classy_logic.Scope;
+import au.com.cybersearch2.classy_logic.axiom.ResourceAxiomSource;
 import au.com.cybersearch2.classy_logic.axiom.SingleAxiomSource;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.AxiomCallOperand;
@@ -26,7 +27,7 @@ import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.CallEvaluator;
 import au.com.cybersearch2.classy_logic.interfaces.FunctionProvider;
@@ -237,7 +238,7 @@ public class ParserAssembler implements LocaleListener
      * @param qualifiedBindingName Qualified name of axiom or template
      * @throws ExpressionException if axiom provider not found
      */
-    public AxiomProvider bindResource(QualifiedName qualifiedBindingName)
+    public ResourceProvider bindResource(QualifiedName qualifiedBindingName)
     {
         // Try implicit resource name same as axiom name
         // If this fails, try match to full qualified name as text
@@ -245,8 +246,8 @@ public class ParserAssembler implements LocaleListener
         if (name.isEmpty())
             name = qualifiedBindingName.getTemplate();
         QualifiedName resourceName = new QualifiedName(name);
-        AxiomProvider axiomProvider = getAxiomProvider(resourceName);
-        return (axiomProvider != null) ? 
+        ResourceProvider resourceProvider = getResourceProvider(resourceName);
+        return (resourceProvider != null) ? 
             bindResource(resourceName, qualifiedBindingName) :
             bindResource(qualifiedBindingName, qualifiedBindingName);
     }
@@ -257,7 +258,7 @@ public class ParserAssembler implements LocaleListener
      * @param qualifiedBindingName Qulified name of axiom or template
      * @throws ExpressionException if axiom provider not found
      */
-    public AxiomProvider bindResource(String resourceName, QualifiedName qualifiedBindingName)
+    public ResourceProvider bindResource(String resourceName, QualifiedName qualifiedBindingName)
     {
         return bindResource(QualifiedName.parseName(resourceName), qualifiedBindingName);
     }
@@ -268,21 +269,26 @@ public class ParserAssembler implements LocaleListener
      * @param qualifiedBindingName Qulified name of axiom or template
      * @throws ExpressionException if axiom provider not found
      */
-    public AxiomProvider bindResource(QualifiedName resourceName, QualifiedName qualifiedBindingName)
+    public ResourceProvider bindResource(QualifiedName resourceName, QualifiedName qualifiedBindingName)
     {
         // Note resource references axiom by qualified name, which prepends scope name
-        AxiomProvider axiomProvider = getAxiomProvider(resourceName);
-        if (axiomProvider == null) 
+        ResourceProvider resourceProvider = getResourceProvider(resourceName);
+        if (resourceProvider == null) 
             throw new ExpressionException("Axiom provider \"" + resourceName + "\" not found");
         if (!qualifiedBindingName.isTemplateEmpty())
-            registerAxiomListener(qualifiedBindingName, axiomProvider.getAxiomListener(qualifiedBindingName.toString()));
+            registerAxiomListener(qualifiedBindingName, resourceProvider.getAxiomListener(qualifiedBindingName.toString()));
         else
+        {
             // Remove entry from axiomListMap so the axiom is not regarded as internal
             listAssembler.removeAxiomItems(qualifiedBindingName);
+            // Axiom header may have no term names, so an archetype needs to be created
+            if (axiomAssembler.getAxiomArchetype(qualifiedBindingName) == null)
+                axiomAssembler.createAxiomArchetype(qualifiedBindingName);
+        }
             
         // Preserve mapping of qualified axiom name to resource name
         axiomResourceMap.put(qualifiedBindingName, resourceName);
-        return axiomProvider;
+        return resourceProvider;
     }
 
 	/**
@@ -341,8 +347,14 @@ public class ParserAssembler implements LocaleListener
         QualifiedName resourceName = axiomResourceMap.get(qualifiedAxiomName);
     	if (resourceName == null)
     		return null;
-    	List<String> axiomTermNameList = axiomAssembler.findTermNameList(qualifiedAxiomName);
-     	return getAxiomProvider(resourceName).getAxiomSource(qualifiedAxiomName.toString(), axiomTermNameList); 
+    	final AxiomArchetype archetype = axiomAssembler.getAxiomArchetype(qualifiedAxiomName);
+    	if (archetype != null)
+    	{
+    	    final ResourceProvider resourceProvider = getResourceProvider(resourceName); 
+    	    if (resourceProvider != null)
+                return new ResourceAxiomSource(resourceProvider, archetype);
+    	}
+    	return null;
     }
 
     /**
@@ -738,10 +750,10 @@ public class ParserAssembler implements LocaleListener
 
 	/**
 	 * Returns axiom provider specified by resource name
-	 * @param resourceName AxiomProvider qualified name
-	 * @return AxiomProvider object or null if object not found
+	 * @param resourceName ResourceProvider qualified name
+	 * @return ResourceProvider object or null if object not found
 	 */
-	public AxiomProvider getAxiomProvider(QualifiedName resourceName) 
+	public ResourceProvider getResourceProvider(QualifiedName resourceName) 
 	{
     	if (externalAxiomSource == null)
     	{
@@ -749,7 +761,7 @@ public class ParserAssembler implements LocaleListener
     		    providerManager = new ProviderManager(){};
     		externalAxiomSource = new ExternalAxiomSource(providerManager);
     	}
-		return externalAxiomSource.getAxiomProvider(resourceName);
+		return externalAxiomSource.getResourceProvider(resourceName);
 	}
 
     /**

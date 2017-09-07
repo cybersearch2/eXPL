@@ -1525,6 +1525,6 @@ public class QueryParserTest
 	
     ProviderManager provideProviderManager()
     {
-        return new TestAxiomProvider();
+        return new TestResourceProvider();
     }
 }

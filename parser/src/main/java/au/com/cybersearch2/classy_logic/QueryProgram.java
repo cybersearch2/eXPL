@@ -29,7 +29,7 @@ import au.com.cybersearch2.classy_logic.compile.TemplateAssembler;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.parser.ParseException;
 import au.com.cybersearch2.classy_logic.parser.QueryParser;
@@ -94,6 +94,8 @@ public class QueryProgram extends QueryLauncher
 	protected FunctionManager functionManager;
 	/** Resource path base */
 	protected File resourceBase;
+	/** List of open resource providers */
+	protected Map<String,ResourceProvider> openProvidersMap;
 
 	/**
 	 * Default QueryProgram constructor
@@ -304,6 +306,20 @@ public class QueryProgram extends QueryLauncher
 		finally
 		{
 			scopeContext.resetScope();
+	        if (openProvidersMap != null)
+	        {
+	            for (Map.Entry<String,ResourceProvider> entry: openProvidersMap.entrySet())
+	            {
+	                try
+	                {
+	                    entry.getValue().close();
+	                }
+	                catch(RuntimeException e)
+	                {
+	                    e.printStackTrace();
+	                }
+	            }
+	        }
 		}
 		return new Result(listMap, axiomMap);
 	}
@@ -346,15 +362,18 @@ public class QueryProgram extends QueryLauncher
      * @param properties Properties specific to the resource. May be empty.
      * @throws ExpressionException if open of provider fails
      */
-    public AxiomProvider openResource(String resourceName,  Map<String, Object> properties) throws ExpressionException
+    public ResourceProvider openResource(String resourceName,  Map<String, Object> properties) throws ExpressionException
     {
-        AxiomProvider axiomProvider = null;
+        ResourceProvider resourceProvider = null;
         if (providerManager != null)
-            axiomProvider = providerManager.getAxiomProvider(QualifiedName.parseName(resourceName));
-        if (axiomProvider == null)
+            resourceProvider = providerManager.getResourceProvider(QualifiedName.parseName(resourceName));
+        if (resourceProvider == null)
             throw new ExpressionException("Resource \"" + resourceName + "\"not found");
-        axiomProvider.open(properties);
-        return axiomProvider;
+        resourceProvider.open(properties);
+        if (openProvidersMap == null)
+            openProvidersMap = new HashMap<String,ResourceProvider>();
+        openProvidersMap.put(resourceName, resourceProvider);
+        return resourceProvider;
     }
 
     /**

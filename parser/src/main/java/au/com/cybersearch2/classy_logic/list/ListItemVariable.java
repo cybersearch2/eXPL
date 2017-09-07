@@ -16,10 +16,7 @@
 package au.com.cybersearch2.classy_logic.list;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.QueryProgram;
@@ -32,8 +29,6 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.expression.Variable;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomContainer;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemDelegate;
 import au.com.cybersearch2.classy_logic.interfaces.ListItemSpec;
@@ -42,11 +37,9 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.ParserRunner;
 import au.com.cybersearch2.classy_logic.interfaces.SourceInfo;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.operator.TermOperator;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
-import au.com.cybersearch2.classy_logic.terms.Parameter;
 import au.com.cybersearch2.classy_logic.operator.DelegateType;
+import au.com.cybersearch2.classy_logic.operator.TermOperator;
+import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 /**
  * ListItemVariable
@@ -197,7 +190,7 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
             }
         }
         else
-            itemList = findItemListByName(listName, listAssembler, parserAssembler);
+            itemList = listAssembler.findItemListByName(listName);
         if (itemList == null)
         {   
             Operand listOperand = null;
@@ -543,24 +536,10 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         for (String scopeName: globalScope.getScopeNames())
         {
             QualifiedName key = new QualifiedName(scopeName, contextListName);
-            List<Axiom> axiomList = listAssembler.getAxiomItems(key);
-            if (axiomList == null)
-            {
-                AxiomSource axiomSource = globalScope.getScope(scopeName).getParserAssembler().getAxiomSource(key);
-                if (axiomSource == null)
-                    axiomSource = globalParserAssembler.getAxiomSource(key);
-                if (axiomSource == null)
-                    // No context list in this scope
-                    continue;
-                axiomList = new ArrayList<Axiom>();
-                Iterator<Axiom> iterator = axiomSource.iterator();
-                while (iterator.hasNext())
-                    axiomList.add(iterator.next());
-            }
-            ItemList<?> itemList = listAssembler.findItemList(key);
+            AxiomList itemList = listAssembler.findAxiomItemList(key);
             if (itemList == null) 
+                continue; // No list in this scope
                 // Create axiom list to access context list
-                itemList = createAxiomList(globalScope, key, axiomList);
             if (contextMap == null)
                 contextMap = new HashMap<QualifiedName, ItemList<?>>();
             contextMap.put(key, itemList);
@@ -574,50 +553,6 @@ public class ListItemVariable extends Variable implements ParserRunner, SourceIn
         // Default to global scope if global list defined
         if (globalListExists)
             onScopeChange(globalScope);
-    }
-
-    /**
-     * Create axiom list to access context list
-     * @param globalScope Global scope
-     * @param key List name used as key to map item list
-     * @param axiomList Context list
-     * @return ItemList object
-     */
-    private ItemList<?> createAxiomList(Scope globalScope, QualifiedName key, List<Axiom> axiomList)
-    {
-        AxiomArchetype archetype = globalScope.getGlobalAxiomAssembler().getAxiomArchetype(key);
-        //AxiomContainer axiomContainer = (arrayData != null) ? new AxiomList(key, key) : new AxiomTermList(key, key);
-        AxiomContainer axiomContainer = new AxiomList(key, key);
-        if (archetype != null)
-            axiomContainer.setAxiomTermNameList(archetype.getTermNameList());
-        globalScope.getGlobalListAssembler().setAxiomContainer(axiomContainer, axiomList);
-        return (ItemList<?>) axiomContainer;
-    }
-
-    /**
-     * Find item list by name
-     * @param listName Name of list
-     * @param parserAssembler ParserAssembler for current scope
-     * @return ItemList object
-     */
-    private ItemList<?> findItemListByName(QualifiedName listName, ListAssembler listAssembler, ParserAssembler parserAssembler)
-    {
-        // Look up list by name from item lists
-        ItemList<?> itemList = listAssembler.findItemList(listName); 
-        String contextScopeName = parserAssembler.getQualifiedContextname().getScope();
-        if ((itemList == null) && !contextScopeName.equals(parserAssembler.getScope().getName()))
-        {   // Search for item list using context scope
-            QualifiedName qualifiedListName = new QualifiedName(contextScopeName, indexData.getListName());
-            itemList = listAssembler.findItemList(qualifiedListName);
-        }
-        if (itemList == null)
-        {
-            List<Axiom> axiomList = listAssembler.getAxiomItems(listName);
-            if (axiomList != null)
-                // Create axiom list to access context list
-                itemList = createAxiomList(parserAssembler.getScope().getGlobalScope(), listName, axiomList);
-        }
-        return itemList;
     }
 
     @SuppressWarnings("unchecked")

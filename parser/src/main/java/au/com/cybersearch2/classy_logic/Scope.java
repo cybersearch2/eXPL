@@ -35,7 +35,7 @@ import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
+import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.DebugTarget;
 import au.com.cybersearch2.classy_logic.interfaces.ItemList;
@@ -386,21 +386,21 @@ public class Scope implements DebugTarget
             template = getGlobalTemplateAssembler().getTemplate(templateName);
         if (template == null)
         {   // Create template for resource binding, if one exists
-            AxiomProvider axiomProvider = null;
+            ResourceProvider resourceProvider = null;
             QualifiedName globalResourceName = null;
             QualifiedName resourceName = parserAssembler.getResourceName(templateName);
             if (resourceName != null) 
             {
-                axiomProvider = parserAssembler.getAxiomProvider(resourceName);
-                if (axiomProvider != null)
+                resourceProvider = parserAssembler.getResourceProvider(resourceName);
+                if (resourceProvider != null)
                     return parserAssembler.createResourceTemplate(templateName);
             }
             else if (!templateName.getScope().isEmpty())
             {
                 globalResourceName =  getGlobalParserAssembler().getResourceName(templateName);
                 if (globalResourceName != null) 
-                    axiomProvider =  getGlobalParserAssembler().getAxiomProvider(globalResourceName);
-                if (axiomProvider != null)
+                    resourceProvider =  getGlobalParserAssembler().getResourceProvider(globalResourceName);
+                if (resourceProvider != null)
                     return getGlobalParserAssembler().createResourceTemplate(templateName);
             }
         }

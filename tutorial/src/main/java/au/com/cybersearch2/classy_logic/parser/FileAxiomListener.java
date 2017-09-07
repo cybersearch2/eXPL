@@ -20,7 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 import com.thoughtworks.xstream.XStream;
@@ -47,7 +46,6 @@ public class FileAxiomListener implements AxiomListener
     {
         this.name = name;
         this.axiomFile = axiomFile;
-        openFile();
     }
     
     /**
@@ -58,6 +56,15 @@ public class FileAxiomListener implements AxiomListener
     {
         try
         {
+            if (oos == null)
+                try
+                {
+                     openFile();
+                }
+                catch(IOException e)
+                {
+                    throw new ExpressionException(axiomFile.toString() + " error opening file", e);
+                }
             oos.writeObject(axiom);
             oos.flush();
             ++count;
@@ -75,37 +82,33 @@ public class FileAxiomListener implements AxiomListener
             @Override
             public void run()
             {
-                close(oos);
+                close();
             }};
     }
 
-    private void openFile()
+    private void openFile() throws IOException
     {
-        try
-        {
-            fos = new FileOutputStream(axiomFile);
-            oos = new ObjectOutputStream(fos);
-        }
-        catch (IOException e)
-        {
-            throw new ExpressionException(axiomFile.toString() + " error opening file", e);
-        }
+        fos = new FileOutputStream(axiomFile);
+        oos = new ObjectOutputStream(fos);
     }
     
     /**
      * Closes input stream quietly
      * @param instream InputStream
      */
-    private void close(OutputStream outstream) 
+    private void close() 
     {
-        if (outstream != null)
+        if (oos != null)
         {
             try
             {
-                outstream.close();
-                writeHeader();
-                count = 0;
-                outstream = null;
+                oos.close();
+                if (count > 0)
+                {
+                    writeHeader();
+                    count = 0;
+                }
+                oos = null;
             }
             catch (IOException e)
             {

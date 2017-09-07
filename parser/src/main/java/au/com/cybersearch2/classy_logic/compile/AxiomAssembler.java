@@ -69,10 +69,7 @@ public class AxiomAssembler
         {   // No axiom currently under construction, so create one.
             AxiomArchetype axiomArchetype = axiomArchetypeMap.get(qualifiedAxiomName);
             if (axiomArchetype == null)
-            {
-                axiomArchetype = new AxiomArchetype(qualifiedAxiomName);
-                axiomArchetypeMap.put(qualifiedAxiomName, axiomArchetype);
-            }
+                axiomArchetype = createAxiomArchetype(qualifiedAxiomName);
             axiom = axiomArchetype.itemInstance();
             axiomMap.put(qualifiedAxiomName, axiom);
         }
@@ -88,14 +85,17 @@ public class AxiomAssembler
     {
         AxiomArchetype axiomArchetype = axiomArchetypeMap.get(qualifiedAxiomName);
         if (axiomArchetype == null)
-        {
-            axiomArchetype = new AxiomArchetype(qualifiedAxiomName);
-            axiomArchetypeMap.put(qualifiedAxiomName, axiomArchetype);
-        }
+            axiomArchetype = createAxiomArchetype(qualifiedAxiomName);
         axiomArchetype.addTermName(termName);
     }
-    
-    /**
+
+    public AxiomArchetype createAxiomArchetype(QualifiedName qualifiedAxiomName)
+    {
+        AxiomArchetype axiomArchetype = new AxiomArchetype(qualifiedAxiomName);
+        axiomArchetypeMap.put(qualifiedAxiomName, axiomArchetype);
+        return axiomArchetype;
+    }
+   /**
      * Get axiom term name by position
      * @param qualifiedAxiomName
      * @param position 
@@ -152,10 +152,7 @@ public class AxiomAssembler
     {
         AxiomArchetype axiomArchetype = axiomArchetypeMap.get(qualifiedAxiomName);
         if (axiomArchetype == null)
-        {
-            axiomArchetype = new AxiomArchetype(qualifiedAxiomName);
-            axiomArchetypeMap.put(qualifiedAxiomName, axiomArchetype);
-        }
+            axiomArchetype = createAxiomArchetype(qualifiedAxiomName);
         AxiomListSource axiomListSource = new AxiomListSource(axiomList, axiomArchetype);
         return axiomListSource;
     }

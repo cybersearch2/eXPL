@@ -21,8 +21,7 @@ import java.util.Map;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.pattern.Archetype;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 
 /**
@@ -45,7 +44,7 @@ public class DictionaryResourceProvider implements ResourceProvider
     }
 
     @Override
-    public Iterator<Axiom> iterator(Archetype<Axiom,Term> archetype) 
+    public Iterator<Axiom> iterator(AxiomArchetype archetype) 
     {
         return new DictionaryIterator(archetype);
     }
@@ -72,5 +71,4 @@ public class DictionaryResourceProvider implements ResourceProvider
     public void close()
     {
     }
-
 }

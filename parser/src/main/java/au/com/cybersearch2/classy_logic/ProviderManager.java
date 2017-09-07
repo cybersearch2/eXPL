@@ -17,21 +17,11 @@ package au.com.cybersearch2.classy_logic;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomProvider;
-import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
 import au.com.cybersearch2.classy_logic.interfaces.ResourceProvider;
-import au.com.cybersearch2.classy_logic.interfaces.Term;
-import au.com.cybersearch2.classy_logic.pattern.Archetype;
-import au.com.cybersearch2.classy_logic.pattern.Axiom;
-import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 
 /**
  * ProviderManager
@@ -41,8 +31,6 @@ import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
  */
 public class ProviderManager 
 {
-	/** Map Axiom Providers to their names */
-	protected Map<QualifiedName, AxiomProvider> axiomProviderMap;
     /** Map Axiom Providers to their names */
     protected Map<QualifiedName, ResourceProvider> resourceProviderMap;
 	/** Resource path base */
@@ -62,7 +50,6 @@ public class ProviderManager
 	public ProviderManager(File resourceBase) 
 	{
 		this.resourceBase = resourceBase;
-		axiomProviderMap = new HashMap<QualifiedName, AxiomProvider>();
 		resourceProviderMap = new HashMap<QualifiedName, ResourceProvider>();
 	}
 	
@@ -76,52 +63,13 @@ public class ProviderManager
 		this.resourceBase = resourceBase;
 	}
 
-    /**
-	 * Returns Axiom Source of specified Axiom Provider and Axiom names
-	 * @param name Axiom Provider qualified name
-	 * @param axiomName Axiom name
-	 * @param axiomTermNameList List of term names constrains which terms are included and their order
-	 * @return AxiomSource implementation or null if axiom provider not found
-	 * @throws ExpressionException if axiom provider not found
-	 */
-	public AxiomSource getAxiomSource(QualifiedName name, String axiomName,
-			List<String> axiomTermNameList) 
-	{
-		AxiomProvider axiomProvider = getAxiomProvider(name);
-		if (axiomProvider == null) 
-            throw new ExpressionException("Axiom provider \"" + name + "\" not found");
-		return  axiomProvider.getAxiomSource(axiomName, axiomTermNameList);
-	}
-
 	/** 
 	 * Returns flag set true if no Axiom Providers are configured
 	 * @return boolean
 	 */
 	public boolean isEmpty() 
 	{
-		return axiomProviderMap.size() == 0 && resourceProviderMap.size() == 0;
-	}
-
-	/**
-	 * Add Axiom Provider
-	 * @param axiomProvider AxiomProvider object
-	 */
-	public void putAxiomProvider(AxiomProvider axiomProvider)
-	{
-	    QualifiedName qualifiedAxiomName = QualifiedName.parseName(axiomProvider.getName());
-		axiomProviderMap.put(qualifiedAxiomName, axiomProvider);
-		QualifiedTemplateName qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
-        axiomProviderMap.put(qualifiedTemplateName, axiomProvider);
-	}
-
-	/**
-	 * Returns Axiom Provider specified by qualified name
-	 * @param name Axiom Provider qualified name
-	 * @return AxiomProvider implementation or null if not found
-	 */
-	public AxiomProvider getAxiomProvider(QualifiedName name)
-	{
-		return axiomProviderMap.get(name);
+		return resourceProviderMap.size() == 0;
 	}
 
     /**
@@ -134,63 +82,6 @@ public class ProviderManager
         resourceProviderMap.put(qualifiedAxiomName, resourceProvider);
         QualifiedTemplateName qualifiedTemplateName = new QualifiedTemplateName(qualifiedAxiomName.getScope(), qualifiedAxiomName.getName());
         resourceProviderMap.put(qualifiedTemplateName, resourceProvider);
-        AxiomProvider axiomProvider = new AxiomProvider(){
-    
-            @Override
-            public String getName()
-            {
-                return resourceProvider.getName();
-            }
-    
-            @Override
-            public void open(Map<String, Object> properties)
-                    throws ExpressionException
-            {
-                resourceProvider.open(properties);
-            }
-    
-            @Override
-            public void close()
-            {
-                resourceProvider.close();
-            }
-    
-            @Override
-            public AxiomSource getAxiomSource(String axiomName,
-                    final List<String> axiomTermNameList)
-            {
-                final AxiomArchetype archetype = new AxiomArchetype(QualifiedName.parseGlobalName(axiomName));
-                for (String termName: axiomTermNameList)
-                    archetype.addTermName(termName);
-                archetype.clearMutable();
-                return new AxiomSource(){
-    
-                    @Override
-                    public Iterator<Axiom> iterator()
-                    {
-                        return resourceProvider.iterator(archetype);
-                    }
-
-                    @Override
-                    public Archetype<Axiom, Term> getArchetype()
-                    {
-                        return archetype;
-                    }
-                };
-            }
-    
-            @Override
-            public AxiomListener getAxiomListener(String axiomName)
-            {
-                return resourceProvider.getAxiomListener(axiomName);
-            }
-    
-            @Override
-            public boolean isEmpty()
-            {
-                return false;
-            }};
-        putAxiomProvider(axiomProvider);
     }
 
     /**

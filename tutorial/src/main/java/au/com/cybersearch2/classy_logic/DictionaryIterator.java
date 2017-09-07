@@ -27,6 +27,7 @@ import java.util.List;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.pattern.Archetype;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
+import au.com.cybersearch2.classy_logic.pattern.AxiomArchetype;
 import au.com.cybersearch2.classy_logic.terms.StringTerm;
 
 /**
@@ -43,6 +44,7 @@ public class DictionaryIterator implements Iterator<Axiom>
     public DictionaryIterator(Archetype<Axiom, Term> archetype) 
     {
         this.archetype = archetype;
+        archetype.clearMutable();
         File dictionaryFile = new File("src/main/resources", "definitions.txt");
         
         try 
@@ -90,9 +92,8 @@ public class DictionaryIterator implements Iterator<Axiom>
     {
         StringTerm entry = new StringTerm(line.trim());
         entry.setName(archetype.getTermNameList().get(0));
-        List<Term> terms = new ArrayList<Term>(1);
-        terms.add(entry);
-        Axiom axiom = archetype.itemInstance(terms);
+        Axiom axiom = new Axiom((AxiomArchetype) archetype);
+        axiom.addTerm(entry);
         return axiom;
     }
 

@@ -117,10 +117,10 @@ scope german (language="de", region="DE")
         }
         finally
         {
-            fileResourceProviders[0].chainListener(null);
-            fileResourceProviders[1].chainListener(null);
-            fileResourceProviders[0].close();
-            fileResourceProviders[1].close();
+            //fileResourceProviders[0].chainListener(null);
+            //fileResourceProviders[1].chainListener(null);
+            //fileResourceProviders[0].close();
+            //fileResourceProviders[1].close();
         }
     }
     

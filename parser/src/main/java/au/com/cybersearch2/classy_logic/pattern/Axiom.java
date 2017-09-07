@@ -22,6 +22,7 @@ import java.io.ObjectStreamField;
 import java.util.ArrayList;
 import java.util.List;
 
+import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.terms.Parameter;
@@ -143,6 +144,19 @@ public class Axiom extends TermList<Term>
          }
  	}
 
+    /**
+     * Add Term
+     * @param term Term object
+     */
+	@Override
+    public void addTerm(Term term)
+    {
+        int position = archetype.getIndexForName(term.getName());
+        if ((position != -1) && (position != termCount))
+            throw new ExpressionException(name + " term \"" + term.getName() + "\" not allowed at index = " + termCount);
+        super.addTerm(term);
+    }
+    
     private void writeObject(ObjectOutputStream oos)
             throws IOException 
     {

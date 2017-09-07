@@ -85,7 +85,7 @@ query<axiom> in_words(lexicon : in_words);
 	public RegexGroups()
 	{
         File resourcePath = new File("src/main/resources/tutorial11");
-        // Use an external axiom source which is bound in TestAxiomProvider dependency class
+        // Use an external axiom source which is bound in TestResourceProvider dependency class
         // to AxiomSource class LexiconIterator
         queryProgramParser = new QueryProgramParser(resourcePath, provideResourceManager());
 	}
