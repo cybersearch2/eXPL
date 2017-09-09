@@ -19,8 +19,6 @@ import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
 import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionFinder;
 import au.com.cybersearch2.classy_logic.pattern.Axiom;
 import au.com.cybersearch2.classy_logic.pattern.Choice;
@@ -64,7 +62,8 @@ public class Calculator implements SolutionFinder
 	@Override
 	public boolean iterate(Solution solution, Template template, ExecutionContext context)
 	{
-		Axiom axiom = template.initialize();
+		Axiom axiom = new Axiom(template.getKey()); 
+		template.getProperties().initialize(axiom, template);
 		if ((axiom != null) && (axiom.getTermCount() > 0))
 		    execute(axiom, template, solution, context);
 		else
@@ -82,7 +81,8 @@ public class Calculator implements SolutionFinder
 	 */
 	public boolean iterate(Axiom axiom, Solution solution, Template template, ExecutionContext context)
 	{
-	    Axiom seedAxiom = template.initialize();
+	    Axiom seedAxiom = new Axiom(template.getKey()); 
+        template.getProperties().initialize(axiom, template);
         if ((seedAxiom != null) && (seedAxiom.getTermCount() > 0))
         {
             for (int i = 0; i < axiom.getTermCount(); ++i)
@@ -156,7 +156,6 @@ public class Calculator implements SolutionFinder
 		            template.backup(true);
 			    return true;
 			}
-            //template.backup(true);
 		}
 		// Short circuit when solution not available
 		return false;
@@ -202,7 +201,7 @@ public class Calculator implements SolutionFinder
 	 * @param template Structure to pair with axiom sequence
 	 * @return Flag to indicate if the query is resolved
 	 */
-	protected boolean unifySolution(Solution solution, Template template)
+	protected void unifySolution(Solution solution, Template template)
     {
 		if (solution.size() > 0)
 		{
@@ -210,21 +209,12 @@ public class Calculator implements SolutionFinder
 			while (chainTemplate != null)
 			{
 				OperandWalker walker = chainTemplate.getOperandWalker();
+				walker.setAllNodes(true);
 	            final SolutionPairer pairer = template.getSolutionPairer(solution);
-	            OperandVisitor visitor = new OperandVisitor(){
-
-                    @Override
-                    public boolean next(Operand operand, int depth)
-                    {
-                        pairer.next(operand, depth);
-                        return true;
-                    }};
-				if (!walker.visitAllNodes(visitor))
-					return false;
+				walker.visitAllNodes(pairer);
 				chainTemplate = chainTemplate.getNext();
 			}
 		}
-		return true;
     }
 
 

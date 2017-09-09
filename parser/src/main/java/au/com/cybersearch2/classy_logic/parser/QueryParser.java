@@ -265,11 +265,12 @@ public class QueryParser implements QueryParserConstants
     Template choiceTemplate = parserAssembler.getTemplateAssembler().createChoiceTemplate(template, qualifiedTemplateName);
     OperandMap operandMap = parserAssembler.getOperandMap();
     AxiomAssembler axiomAssembler = parserAssembler.getAxiomAssembler();
+    List<Operand> operandList = new ArrayList<Operand>();
     for (String termName: axiomAssembler.getTermNameList(qualifiedAxiomName))
-      operandMap.addOperand(termName, null, parserAssembler.getQualifiedContextname());
+      operandList.add(operandMap.addOperand(termName, null, parserAssembler.getQualifiedContextname()));
     QualifiedName contextName = context.getContextName();
     QualifiedName qname = QualifiedName.parseName(qualifiedAxiomName.getName(), contextName);
-        Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope(), parameterTemplate);
+        Choice choice = new Choice(qualifiedAxiomName, parserAssembler.getScope(), parameterTemplate, template.getQualifiedName(), operandList);
     Operand choiceOperand = new ChoiceOperand(qname, choiceTemplate, choice);
     operandMap.addOperand(choiceOperand);
     return choiceOperand;
@@ -1340,7 +1341,7 @@ public class QueryParser implements QueryParserConstants
       ;
     }
     if (termList.size() > 0)
-        template.addProperties(termList);
+        template.getProperties().addProperties(termList);
     context.setContextName(contextName);
     if (typeToken == null)
       {if (true) return;}

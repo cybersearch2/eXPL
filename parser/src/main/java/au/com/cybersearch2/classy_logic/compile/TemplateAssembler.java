@@ -115,7 +115,7 @@ public class TemplateAssembler
     public void addTemplate(QualifiedName qualifiedTemplateName, List<Term> properties)
     {
         Template template = templateMap.get(qualifiedTemplateName);
-        template.setInitData(properties);
+        template.getProperties().setInitData(properties);
     }
 
     /**
@@ -199,7 +199,7 @@ public class TemplateAssembler
     public void doParserTask()
     {
         for (Template template: templateMap.values())
-            if (template.getTermCount() > 0)
+            if ((template.getTermCount() > 0) && !(template.isChoice() && template.isInnerTemplate()) && !template.isReplicate())
             {
                 // Complete archetype initialization. This cannot be performed earlier due to fact parser tasks, 
                 // which can modify operand terms, run after template construction.
@@ -208,7 +208,7 @@ public class TemplateAssembler
                 archiveIndexHelper.setOperandTree(1);
             }
         for (Template template: templateMap.values())
-            if (template.getTermCount() > 0)
+            if ((template.getTermCount() > 0) && !(template.isChoice() && template.isInnerTemplate()) && !template.isReplicate())
             {
                 ArchiveIndexHelper archiveIndexHelper = new ArchiveIndexHelper(template);
                 archiveIndexHelper.setOperandTree(2);

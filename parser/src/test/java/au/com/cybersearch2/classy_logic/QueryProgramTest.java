@@ -233,7 +233,7 @@ public class QueryProgramTest
 		Variable variable2 = new Variable(Q_VARIABLE_NAME);
 		parserAssembler.getTemplateAssembler().addTemplate(Q_TEMPLATE_NAME2, variable2);
 		Template template2 = parserAssembler.getTemplateAssembler().getTemplate(Q_TEMPLATE_NAME2);
-		template2.putInitData(VARIABLE_NAME, "eureka2!");
+		template2.getProperties().putInitData(VARIABLE_NAME, "eureka2!");
 		querySpec2.addKeyName(keyname2);
 		querySpec2.setQueryType(QueryType.calculator);
 		scope.addQuerySpec(querySpec);

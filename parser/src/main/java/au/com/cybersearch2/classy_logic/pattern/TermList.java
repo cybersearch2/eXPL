@@ -86,6 +86,8 @@ public abstract class TermList <T extends Term> implements Serializable
      */
     public boolean isFact()
     {
+        if (termList.isEmpty())
+            return false;
         for (Term param: termList)
             if (param.isEmpty() || (param.getValueClass() == Unknown.class))
                 return false;

@@ -21,6 +21,7 @@ template group
 + list<axiom> mega_city {};
 (
   mega_city = axiom { continent, city, country },
+  continent,
   choice group 
   {
     asia += mega_city ? continent == "Asia",

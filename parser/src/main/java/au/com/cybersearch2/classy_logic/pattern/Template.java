@@ -21,12 +21,10 @@ import java.io.ObjectStreamField;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import au.com.cybersearch2.classy_logic.compile.TemplateType;
 import au.com.cybersearch2.classy_logic.debug.ExecutionContext;
-import au.com.cybersearch2.classy_logic.expression.ExpressionException;
 import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.helper.QualifiedTemplateName;
@@ -35,7 +33,6 @@ import au.com.cybersearch2.classy_logic.interfaces.Operand;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
 import au.com.cybersearch2.classy_logic.operator.OperatorTerm;
 import au.com.cybersearch2.classy_logic.query.Solution;
-import au.com.cybersearch2.classy_logic.terms.Parameter;
 
 
 /**
@@ -76,14 +73,12 @@ public class Template extends TermList<Operand>
     
     /** Qualified name of template */
     protected QualifiedName qname;
-    /** Qualified name of context - different from qname for inner templates and replicates */
-    protected QualifiedName contextName;
     /** Key to match with Axiom name for unification */
 	protected String key;
     /** Identity used in backup to allow partial backup to last unifying agent */
     protected int id;
     /** Initialization data (optional) */
-    protected List<Term>[] initData;
+    protected TemplateProperties properties;
     /** Link to next Template in chain. Used by Calculator. */
     protected Template next;
     /** Flag true if template declared a calculator */
@@ -110,7 +105,6 @@ public class Template extends TermList<Operand>
      * @param master Template object to replicate
      * @param qname New Template qualified name. 
      */
-    @SuppressWarnings("unchecked")
     public Template(Template master, QualifiedName qname) 
     {
         // Replicates share the master template archetype
@@ -129,47 +123,22 @@ public class Template extends TermList<Operand>
         for (Operand operand: master.termList)
             termList.add(operand);
         termCount = termList.size();
-        initData =  new List[2];
-        if (master.initData[0].size() == 0)
-            initData[0] = EMPTY_TERM_LIST;
-        else
-        {
-            initData[0] = new ArrayList<Term>();
-            initData[0].addAll(master.initData[0]);
-        }
-        if (master.initData[1].size() == 0)
-            initData[1] = EMPTY_TERM_LIST;
-        else
-        {
-            initData[1] = new ArrayList<Term>();
-            initData[1].addAll(master.initData[1]);
-        }
+        properties = new TemplateProperties(master.properties);
     }
 
     /**
      * Construct Template object
      * @param qname Template qualified name. The axiom key is set to the name part as a default.
      */
-    @SuppressWarnings("unchecked")
-    private Template(TemplateArchetype templateArchetype, QualifiedName contextName) 
+    public Template(TemplateArchetype templateArchetype) 
     {
         super(templateArchetype);
         this.templateArchetype = templateArchetype;
-        this.contextName = contextName;
         qname = templateArchetype.getQualifiedName();
         key = qname.getTemplate();
         id = referenceCount.incrementAndGet();
-        initData =  new List[]{EMPTY_TERM_LIST,EMPTY_TERM_LIST};
+        properties = new TemplateProperties();
     }
-
-	/**
-	 * Construct Template object
-	 * @param qname Template qualified name. The axiom key is set to the name part as a default.
-	 */
-	public Template(TemplateArchetype templateArchetype) 
-	{
-		this(templateArchetype, templateArchetype.getQualifiedName());
-	}
 
 	/**
 	 * Construct Template object
@@ -339,7 +308,12 @@ public class Template extends TermList<Operand>
         return qname;
     }
 
-	/**
+    public TemplateProperties getProperties()
+    {
+        return properties;
+    }
+    
+    /**
 	 * Evaluate Terms of this Template
 	 * @return EvaluationStatus
 	 */
@@ -497,11 +471,7 @@ public class Template extends TermList<Operand>
      */
     public SolutionPairer getSolutionPairer(Solution solution)
     {
-        QualifiedName[] contextNames =
-            (contextName == qname) ? 
-            new QualifiedName[] { qname } :
-            new QualifiedName[] { qname, contextName };
-       return new SolutionPairer(solution, id, contextNames);
+       return new SolutionPairer(solution, id, qname);
     }
 
     /**
@@ -511,8 +481,7 @@ public class Template extends TermList<Operand>
      */
     public boolean isInSameSpace(Operand operand)
     {
-        return qname.inSameSpace(operand.getQualifiedName()) ||
-                ((contextName != qname) && contextName.inSameSpace(operand.getQualifiedName()));
+        return qname.inSameSpace(operand.getQualifiedName());
 
     }
     /**
@@ -550,7 +519,7 @@ public class Template extends TermList<Operand>
         List<Term> arrayList  = new ArrayList<Term>();
         for (Operand operand: termList)
         {
-            Parameter param = new Parameter(operand.getName(), operand.getValue());
+            OperatorTerm param = new OperatorTerm(operand.getName(), operand.getValue(), operand.getOperator());
             arrayList.add(param);
         }
         return arrayList;
@@ -581,114 +550,6 @@ public class Template extends TermList<Operand>
     		template = template.getNext();
 	    }
 	}
-
-	/**
-	 * Set initial value for one term
-	 * @param name Term name - can be empty for selection by position
-	 * @param value Term value
-	 */
-	public void putInitData(String name, Object value)
-	{
-		if (initData[0].isEmpty())
-			initData[0] = new ArrayList<Term> ();
-		initData[0].add(new Parameter(name, value));
-	}
-
-	/**
-	 * Set initial term values
-	 * @param termList List of terms. A term may be anonymous, but must not be empty.
-	 */
-	public void setInitData(List<Term> termList)
-	{
-        if (initData[0].isEmpty())
-            initData[0] = new ArrayList<Term>();
-        else
-            initData[0].clear();
-	    initData[0].addAll(termList);
-	}
-	
-	/**
-	 * Set initial term values using provided data, if any
-	 * @return axiom to initialize template - maybe empty or null
-	 * @see #putInitData(String, Object)
-	 * @see #setInitData(List) 
-	 */
-     public Axiom initialize()
-    {
-        List<Term> properties = getProperties();
-        if (termList.isEmpty())
-            return null;
-        int index = 0; // Map unnamed arguments to template term names
-        Axiom axiom = new Axiom(getKey());
-        for (Term argument: properties)
-        {
-            Operand term = null;
-            // All parameters are Parameters with names set by caller and possibly empty for match by position.
-            String argName = argument.getName();
-            if (!argName.isEmpty())
-                term = getTermByName(argName);
-            if (term == null)
-            {   // Place by position if argument name not available or not matching any term name
-                if (index == getTermCount())
-                    throw new ExpressionException("Argument at position " + (index + 1) + " out of bounds");
-                term = getTermByIndex(index);
-            }
-            axiom.addTerm(new Parameter(term.getName(), argument.getValue()));
-            ++index;
-        }
-        return axiom;
-    }
-
-	/**
-	 * Set initialization data, used for seeding calculations
-	 * @param properties Initialization properties
-	 */
-	public void setProperties(Map<String, Object> properties) 
-	{
-	    if (!properties.isEmpty())
-	    {
-	        if (initData[0].isEmpty())
-	            initData[0] = new ArrayList<Term>();
-	        else
-	            initData[0].clear();
-	        for (Map.Entry<String,Object> entry: properties.entrySet())
-	            initData[0].add(new Parameter(entry.getKey(), entry.getValue()));
-	    }
-	}
-
-    /**
-     * Add initialization data, used for seeding calculations
-     * @param properties Initialization properties
-     */
-    public void addProperties(List<Term> termList) 
-    {
-        if (!termList.isEmpty())
-        {
-            if (initData[1].isEmpty())
-                initData[1] = termList;
-            else
-            {
-                initData[1].clear();
-                initData[1].addAll(termList);
-            }
-        }
-    }
-
-    /**
-     * Returns properties
-     * @return List of terms, possibly empty
-     */
-    public List<Term> getProperties()
-    {
-        if (initData[1].isEmpty())
-            return initData[0];
-        if (initData[0].isEmpty())
-            return initData[1];
-        List<Term> allProperties = new ArrayList<Term>();
-        allProperties.addAll(initData[0]);
-        allProperties.addAll(initData[1]);
-        return allProperties;
-    }
 
 	/**
 	 * Returns next template in chain
@@ -732,20 +593,29 @@ public class Template extends TermList<Operand>
    /**	
     * Returns query template instance
     * @param name Query name to be appended to template qualified name
+    * @param templateType Template type - template or choice
+    * @param master Master choice template - required only when template type is choice
     * @return Template object
     */
-    public Template innerTemplateInstance(String name, TemplateType templateType)
+    public Template innerTemplateInstance(String name, TemplateType templateType, Template... master)
     {
         boolean isQueryTemplate = (name != null);
         boolean isChoice = templateType == TemplateType.choice;
+        TemplateArchetype masterArchetype = null;
+        
+        if (master.length > 0)
+        {
+            masterArchetype = master[0].getTemplateArchetype();
+            masterArchetype.clearMutable();
+        }
         QualifiedName innerTemplateName = new QualifiedTemplateName(
                 qname.getScope(), 
                 qname.getTemplate() + 
                 Integer.toString(qname.incrementReferenceCount() + 1));
         if (isQueryTemplate)
             innerTemplateName = new QualifiedName(name, innerTemplateName);
-        TemplateArchetype newTemplateArchetype = new TemplateArchetype(innerTemplateName);
-        Template newTemplate = new Template(newTemplateArchetype, qname);
+        TemplateArchetype newTemplateArchetype = masterArchetype == null ? new TemplateArchetype(innerTemplateName) : masterArchetype;
+        Template newTemplate = new Template(newTemplateArchetype);
         if (isChoice)
             newTemplate.setChoice(true);
         newTemplate.isInnerTemplate = true;
@@ -771,8 +641,7 @@ public class Template extends TermList<Operand>
      */
     public Template choiceInstance(Template master)
     {
-        Template choiceTemplate = innerTemplateInstance(TemplateType.choice);
-        choiceTemplate.contextName = master.getQualifiedName();
+        Template choiceTemplate = innerTemplateInstance(null, TemplateType.choice, master);
         for (Operand operand: master.termList)
             choiceTemplate.addTerm(operand);
         return choiceTemplate;
@@ -846,17 +715,6 @@ public class Template extends TermList<Operand>
     }
     
     /**
-     * Returns template context name(s)
-     * @return QualifiedName array 
-     */
-    protected QualifiedName[] getContextNames()
-    {
-        return (contextName == qname) ? 
-            new QualifiedName[] { qname } :
-            new QualifiedName[] { qname, contextName };
-    }
-
-    /**
      * Return the archetype with it's actual type
      * @return TemplateArchetype object
      */
@@ -913,39 +771,4 @@ public class Template extends TermList<Operand>
         archetype = new TemplateArchetype(qname);
     }
 
-    @SuppressWarnings("unchecked")
-    public List<Term>[] getInitData()
-    {
-        List<Term>[] initDataCopy = new List[2];
-        if (initData[0].isEmpty())
-            initDataCopy[0] = EMPTY_TERM_LIST;
-        else
-        {
-            initDataCopy[0] = new ArrayList<Term>();
-            initDataCopy[0].addAll(initData[0]);
-            initData[0].clear();
-        }
-        if (initData[1].isEmpty())
-            initDataCopy[1] = EMPTY_TERM_LIST;
-        else
-        {
-            initDataCopy[1] = new ArrayList<Term>();
-            initDataCopy[1].addAll(initData[1]);
-            initData[1].clear();
-        }
-        return initDataCopy;
-    }
-
-    public void setInitData(List<Term>[] initData)
-    {
-        if (!this.initData[0].isEmpty())
-            this.initData[0].clear();
-        if (!this.initData[0].isEmpty())
-            this.initData[1].clear();
-        if (!initData[0].isEmpty())
-            this.initData[0].addAll(initData[0]);
-        if (!initData[1].isEmpty())
-            this.initData[1].addAll(initData[1]);
-    }
-    
 }

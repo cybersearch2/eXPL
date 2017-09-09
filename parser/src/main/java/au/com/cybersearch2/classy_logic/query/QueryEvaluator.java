@@ -271,8 +271,8 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
         List<Term>[] initData = null; 
         if (argumentList.size() > 0)
         {
-            initData = template.getInitData();
-            template.setInitData(argumentList);
+            initData = template.getProperties().getInitData();
+            template.getProperties().setInitData(argumentList);
         }
         try
         {
@@ -281,7 +281,7 @@ public class QueryEvaluator extends QueryLauncher implements CallEvaluator<Axiom
         finally
         {   
             if (initData != null)
-                template.setInitData(initData);
+                template.getProperties().setInitData(initData);
             if (scopeContext != null)
                 // Scope restored to original state
                 scopeContext.resetScope();

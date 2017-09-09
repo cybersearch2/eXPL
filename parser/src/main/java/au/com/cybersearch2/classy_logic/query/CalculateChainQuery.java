@@ -116,7 +116,7 @@ public class CalculateChainQuery extends ChainQuery
 	    */
 	    // Set properties attached to query
 	    if (!properties.isEmpty())
-	        template.setInitData(properties);
+	        template.getProperties().setInitData(properties);
 	    solution.remove(template.getQualifiedName().toString());
 		Calculator calculator = new Calculator();
 		if (axiomListenerList != null)

@@ -71,7 +71,9 @@ public class ArchiveIndexHelper implements OperandVisitor
             if (((pass == 1) && isTemplateOperand) || 
                  ((pass == 2) && !isTemplateOperand))
             {
-                indexMap.put(archetype.getMetaData(i).getName(), i);
+                TermMetaData metaData = archetype.getMetaData(i);
+                if (!metaData.isAnonymous())
+                    indexMap.put(metaData.getName(), i);
                 operandList.add(operand);
                 if (operand.getArchetypeId() == 0)
                 {
@@ -88,6 +90,8 @@ public class ArchiveIndexHelper implements OperandVisitor
         }
         // Remove indexMap reference as it is only needed while visiting operands
         indexMap = null;
+        if (pass == 2)
+            archetype.clearMutable();
     }
 
     /**

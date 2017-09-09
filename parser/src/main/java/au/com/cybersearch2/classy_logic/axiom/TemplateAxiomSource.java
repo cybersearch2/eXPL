@@ -52,7 +52,8 @@ public class TemplateAxiomSource implements AxiomSource
     public Iterator<Axiom> iterator()
     {
         template.backup(true);
-        Axiom axiom = template.initialize();
+        Axiom axiom = new Axiom(template.getKey());
+        template.getProperties().initialize(axiom, template);
         if ((axiom != null) && (axiom.getTermCount() > 0))
             template.unify(axiom, null);
         if (template.evaluate(null) == EvaluationStatus.COMPLETE)

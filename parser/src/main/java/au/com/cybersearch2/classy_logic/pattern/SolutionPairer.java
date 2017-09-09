@@ -36,20 +36,20 @@ public class SolutionPairer implements OperandVisitor
 	protected Solution solution;
     /** Template id for unification */
     protected int id;
-    /** Template context name or names. The first name must be the template qualified name */
-    protected QualifiedName[] contextNames;
+    /** Template qualified name */
+    protected QualifiedName contextName;
 	
 	/**
 	 * Construct SolutionPairer object
      * @param solution Contains query solution up to current stage
      * @param id Template id for unification
-     * @param contextNames Template context name or names. The first name must be the template qualified name.
+     * @param contextName Template qualified name
 	 */
-	public SolutionPairer(Solution solution, int id, QualifiedName... contextNames) 
+	public SolutionPairer(Solution solution, int id, QualifiedName contextName) 
 	{
         this.solution = solution;
         this.id = id;
-        this.contextNames = contextNames;
+        this.contextName = contextName;
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class SolutionPairer implements OperandVisitor
 	    if (qname.getTemplate().isEmpty() || qname.getName().isEmpty())
 	        return false;
 	    // Determine if operand in same name space as template context. Inner templates and replcates have 2 context names.
-	    boolean inSameSpace = inSameSpace(operand);
+	    boolean inSameSpace = contextName.inSameSpace(operand.getQualifiedName());
 	    // Prepare to hold up to 2 keys for solution axiom search
 	    String[] keys = new String[2];
 	    if (inSameSpace) 
@@ -81,12 +81,12 @@ public class SolutionPairer implements OperandVisitor
 	        // An operand in the template context can be paired with a solution from the previous query step, obtained using the "current key" of the soution
 	        keys[0] = solution.getCurrentKey();
 	        // A 2-part key indicates the solution template is in a non-global scope, so namespace match is required
-	        if ((keys[0].indexOf(".") != -1) && !inSameSpace(keys[0]))
+	        if ((keys[0].indexOf(".") != -1) && !contextName.toString().equals(keys[0]))
 	            return false;
 	    }
 	    else
 	    {   // An operand belonging to another template can pair by template name and scope, which can be the operand's scope or the context scope, if not global.
-	        String contextScope = contextNames[0].getScope();
+	        String contextScope = contextName.getScope();
             String operandKey = QualifiedTemplateName.toString(qname.getScope(), qname.getTemplate());
  	        if (contextScope.isEmpty())
  	            keys[0] = operandKey;
@@ -136,29 +136,4 @@ public class SolutionPairer implements OperandVisitor
         return false;
     }
 
-	/**
-	 * Returns flag set true if operand is in the same name space as template which contains it
-	 * @param operand The operand to check
-	 * @return boolean
-	 */
-    private boolean inSameSpace(Operand operand)
-    {
-        for (QualifiedName contextName: contextNames)
-            if (contextName.inSameSpace(operand.getQualifiedName())) 
-                return true;
-        return false;
-    }
-
-    /**
-     * Returns flag set true if operand is in the same name space as template which contains it
-     * @param operand The operand to check
-     * @return boolean
-     */
-    private boolean inSameSpace(String key)
-    {
-        for (QualifiedName contextName: contextNames)
-            if (contextName.toString().equals(key)) 
-                return true;
-        return false;
-    }
 }

@@ -26,8 +26,6 @@ import au.com.cybersearch2.classy_logic.helper.EvaluationStatus;
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomListener;
 import au.com.cybersearch2.classy_logic.interfaces.AxiomSource;
-import au.com.cybersearch2.classy_logic.interfaces.Operand;
-import au.com.cybersearch2.classy_logic.interfaces.OperandVisitor;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionFinder;
 import au.com.cybersearch2.classy_logic.interfaces.SolutionHandler;
 import au.com.cybersearch2.classy_logic.interfaces.Term;
@@ -250,16 +248,9 @@ public class LogicQuery implements SolutionFinder
 	protected boolean unify(Template template, Solution solution)
 	{
         OperandWalker walker = template.getOperandWalker();
+        walker.setAllNodes(true);
         final SolutionPairer pairer = template.getSolutionPairer(solution);
-        OperandVisitor visitor = new OperandVisitor(){
-
-            @Override
-            public boolean next(Operand operand, int depth)
-            {
-                pairer.next(operand, depth);
-                return true;
-            }};
-        return walker.visitAllNodes(visitor);
+        return walker.visitAllNodes(pairer);
 	}
 	
 	/**

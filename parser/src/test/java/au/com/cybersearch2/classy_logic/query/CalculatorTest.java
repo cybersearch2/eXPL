@@ -80,13 +80,13 @@ public class CalculatorTest
 		when(template.getSolutionPairer(solution)).thenReturn(pairer);
 		when(walker.visitAllNodes(isA(OperandVisitor.class))).thenReturn(true);
 		when(solution.size()).thenReturn(2);
-		assertThat(calculator.unifySolution(solution, template)).isTrue();
+		calculator.unifySolution(solution, template);
         Template template2 = mock(Template.class);
         when(template2.getId()).thenReturn(1);
 		OperandWalker walker2 = mock(OperandWalker.class);
 		when(walker2.visitAllNodes(pairer)).thenReturn(false);
 		when(template2.getOperandWalker()).thenReturn(walker2);
-		assertThat(calculator.unifySolution(solution, template2)).isFalse();
+		calculator.unifySolution(solution, template2);
 	}
 
 	@Test
@@ -236,8 +236,8 @@ public class CalculatorTest
     	TemplateOperand loopy = new TemplateOperand(template);
         TemplateArchetype calcArchetype = new TemplateArchetype(parseTemplateName("calc"));
         Template calcTemplate = new Template(calcArchetype, n, loopy, limit);
-        calcTemplate.putInitData("n", Long.valueOf(1));
-        calcTemplate.putInitData("limit", Long.valueOf(3));
+        calcTemplate.getProperties().putInitData("n", Long.valueOf(1));
+        calcTemplate.getProperties().putInitData("limit", Long.valueOf(3));
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
@@ -265,9 +265,9 @@ public class CalculatorTest
     	TemplateOperand loopy = new TemplateOperand(template);
         TemplateArchetype factorialArchetype = new TemplateArchetype(parseTemplateName("factorial"));
         Template calcTemplate = new Template(factorialArchetype, n, factorialExpression, i, loopy);
-        calcTemplate.putInitData("factorial", Integer.valueOf(1));
-        calcTemplate.putInitData("n", Long.valueOf(4));
-        calcTemplate.putInitData("i", Long.valueOf(1));
+        calcTemplate.getProperties().putInitData("factorial", Integer.valueOf(1));
+        calcTemplate.getProperties().putInitData("n", Long.valueOf(4));
+        calcTemplate.getProperties().putInitData("i", Long.valueOf(1));
         Solution solution = new Solution();
         Calculator calculator = new Calculator();
         calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
@@ -295,8 +295,8 @@ public class CalculatorTest
     	TemplateOperand loopy = new TemplateOperand(template);
         TemplateArchetype factorialArchetype = new TemplateArchetype(parseTemplateName("factorial"));
         Template calcTemplate = new Template(factorialArchetype, n, factorialExpression, i, loopy);
-        calcTemplate.putInitData("factorial", Long.valueOf(1));
-        calcTemplate.putInitData("i", Long.valueOf(1));
+        calcTemplate.getProperties().putInitData("factorial", Long.valueOf(1));
+        calcTemplate.getProperties().putInitData("i", Long.valueOf(1));
         Solution solution = new Solution();
         AxiomListener axiomListener = new AxiomListener(){
             int result[] = new int[] { 1, 2, 6, 24 };
@@ -315,7 +315,7 @@ public class CalculatorTest
 		{
 			Calculator calculator = new Calculator();
 			calculator.setAxiomListener(axiomListener);
-	        calcTemplate.putInitData("n", Long.valueOf(count));
+	        calcTemplate.getProperties().putInitData("n", Long.valueOf(count));
 			calculator.iterate(solution, calcTemplate, mock(ExecutionContext.class));
 			calcTemplate.backup(false);
 		}
@@ -326,11 +326,11 @@ public class CalculatorTest
     {
     	// (0, 0, 1.00)
         Parameter threshold = new Parameter("threshold", Integer.valueOf(0));
-        Parameter base = new Parameter("threshold", Integer.valueOf(0));
+        Parameter base = new Parameter("base", Integer.valueOf(0));
         Parameter percent = new Parameter("percent", Double.valueOf(1.00));
     	Axiom axiom0 = new Axiom(CHOICE_NAME, threshold, base, percent);
     	threshold = new Parameter("threshold", Integer.valueOf(12000));
-    	base = new Parameter("threshold", Integer.valueOf(120));
+    	base = new Parameter("base", Integer.valueOf(120));
     	percent = new Parameter("percent", Double.valueOf(1.00));
     	Axiom axiom1 = new Axiom(CHOICE_NAME, threshold, base, percent);
     	ArrayList<Axiom> choiceAxiomList = new ArrayList<Axiom>();

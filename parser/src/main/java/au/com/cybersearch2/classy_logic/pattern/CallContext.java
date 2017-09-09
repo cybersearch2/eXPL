@@ -60,10 +60,10 @@ public class CallContext
             operandContext = nextOperandContext;
 		    visit(term, operandContext);
 		}
-  		if (!template.getProperties().isEmpty())
+  		if (!template.getProperties().getProperties().isEmpty())
  		{
   		    // Save template properties reference and contents
-  	        properties = template.getProperties();
+  	        properties = template.getProperties().getProperties();
   	        contextProperties = new ArrayList<Term>();
   	        contextProperties.addAll(properties);
  		}

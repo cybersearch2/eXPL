@@ -185,7 +185,7 @@ public class TermListTest
        when(parameter2.isEmpty()).thenReturn(false);
        assertThat(testTermList.isFact()).isTrue();
        TermList<Term> testTermList2 = new TestTermList<Term>(archetype);
-       assertThat(testTermList2.isFact()).isTrue();
+       assertThat(testTermList2.isFact()).isFalse();
    }
    
 

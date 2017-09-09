@@ -252,11 +252,18 @@ public class CallOperandTest
 
     static final String[] GRADES_RESULTS = 
     {
+        "score(student=Amy, english=14, math=16, history=6, total=36)",
+        "score(student=George, english=15, math=13, history=16, total=44)",
+        "score(student=Sarah, english=12, math=17, history=15, total=44)"
+    };
+
+    static final String[] GRADES_RESULTS2 = 
+    {
         "score(student=Amy, total=36)",
         "score(student=George, total=44)",
         "score(student=Sarah, total=44)"
     };
-
+    
     static final String[] STUDENTS =
     {
          "Amy",
@@ -315,7 +322,9 @@ public class CallOperandTest
     "list<term> mark(alpha_marks);\n";
     
     static final String MARKS_CALC = GRADES + ALPHA_MARKS +
-    "template score(student, integer total = edu.add(mark[english], mark[math], mark[history]));\n" +
+    "template score(\n" +
+    "  student, english, math, history,\n" +
+    "integer total = edu.add(mark[english], mark[math], mark[history]));\n" +
     "query marks(grades : score);";
     
     static final String MARKS_GRADES_CALC = GRADES + ALPHA_MARKS +
@@ -762,7 +771,7 @@ public class CallOperandTest
             public boolean onSolution(Solution solution)
             {
                 //System.out.println(solution.getAxiom("score").toString());
-                assertThat(solution.getAxiom("score").toString()).isEqualTo(GRADES_RESULTS[index++]);
+                assertThat(solution.getAxiom("score").toString()).isEqualTo(GRADES_RESULTS2[index++]);
                 return true;
             }});
     }

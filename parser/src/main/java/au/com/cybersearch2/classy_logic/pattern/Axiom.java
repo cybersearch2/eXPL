@@ -151,9 +151,12 @@ public class Axiom extends TermList<Term>
 	@Override
     public void addTerm(Term term)
     {
-        int position = archetype.getIndexForName(term.getName());
-        if ((position != -1) && (position != termCount))
-            throw new ExpressionException(name + " term \"" + term.getName() + "\" not allowed at index = " + termCount);
+	    if (!term.getName().isEmpty())
+	    {
+            int position = archetype.getIndexForName(term.getName());
+            if ((position != -1) && (position != termCount))
+                throw new ExpressionException(name + " term \"" + term.getName() + "\" not allowed at index = " + termCount);
+	    }
         super.addTerm(term);
     }
     

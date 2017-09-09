@@ -12,6 +12,7 @@ axiom prefix_account
   
 template account_bank
 (
+. integer account,
   choice Account
   {
     "sav" ? account == 1,

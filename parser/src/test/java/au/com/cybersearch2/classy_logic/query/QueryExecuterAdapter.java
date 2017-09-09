@@ -155,7 +155,7 @@ public class QueryExecuterAdapter
             String templateName = template.getName();
             QualifiedName qname = new QualifiedTemplateName(QualifiedName.EMPTY, templateName);
             String templateKey = template.getKey();
-            List<Term> props = template.getProperties();
+            List<Term> props = template.getProperties().getProperties();
             parserAssembler.getTemplateAssembler().createTemplate(qname, TemplateType.template);
             parserAssembler.getTemplateAssembler().getTemplate(qname).setKey(templateKey);
             if (props != null)
