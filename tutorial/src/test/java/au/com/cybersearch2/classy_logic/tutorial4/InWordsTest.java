@@ -42,11 +42,13 @@ public class InWordsTest
     public void testInWords() throws Exception
     {
         InWords inWords = new InWords();
+        inWords.setTestMode(true);
         File testFile = new File("src/main/resources/tutorial4", "query_in_words.txt");
         final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
-        Iterator<Axiom> axiomIterator = inWords.findInWords();
-        while (axiomIterator.hasNext()) 
-              checkSolution(reader, axiomIterator.next().toString());
+        inWords.findInWords();
+        Iterator<Axiom> wordIterator = inWords.getWordsList().iterator();
+        while (wordIterator.hasNext()) 
+              checkSolution(reader, wordIterator.next().toString());
         reader.close();
         /*
         Iterator<SourceMarker> iterator = inWords.getParserContext().getSourceMarkerSet().iterator();

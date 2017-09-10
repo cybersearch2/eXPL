@@ -18,6 +18,7 @@ package au.com.cybersearch2.classy_logic;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -183,17 +184,21 @@ public class QueryProgram extends QueryLauncher
 	 */
 	public ParserContext parseScript(String script) 
     {
-	    InputStream stream = new ByteArrayInputStream(script.getBytes());
-        QueryParser queryParser = new QueryParser(stream);
-        ParserContext context = new ParserContext(this);
         try
         {
+    	    InputStream stream = new ByteArrayInputStream(script.getBytes("UTF-8"));
+            QueryParser queryParser = new QueryParser(stream, "UTF-8");
+            ParserContext context = new ParserContext(this);
             queryParser.input(context);
             return context;
         }
         catch (ParseException e)
         {
             throw new ExpressionException("Error compiling script: " + e.getMessage(), e);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new ExpressionException("Error reading UTF-8 encoded script: " + e.getMessage(), e);
         }
     }
 

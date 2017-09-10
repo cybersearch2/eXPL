@@ -17,6 +17,7 @@ package au.com.cybersearch2.classy_logic.tutorial4;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.List;
 
 import au.com.cybersearch2.classy_logic.LexiconResourceProvider;
 import au.com.cybersearch2.classy_logic.ProviderManager;
@@ -55,6 +56,7 @@ query<axiom> query_in_words(lexicon : in_words);
 
 */
     protected QueryProgramParser queryProgramParser;
+    protected LexiconResourceProvider  lexiconResource;
     ParserContext parserContext;
 	
 	public InWords()
@@ -64,11 +66,27 @@ query<axiom> query_in_words(lexicon : in_words);
         // to AxiomSource class LexiconIterator
         queryProgramParser = new QueryProgramParser(resourcePath, provideResourceManager());
 	}
-	
+
+	   /**
+     * @param isTestMode the isTestMode to set
+     */
+    public void setTestMode(boolean isTestMode)
+    {
+        lexiconResource.setTestMode(true);
+    }
+    
+    /**
+     * @return the wordsList
+     */
+    public List<Axiom> getWordsList()
+    {
+        return lexiconResource.getWordsList();
+    }
+
     ProviderManager provideResourceManager()
     {
         ProviderManager providerManager = new ProviderManager();
-        LexiconResourceProvider  lexiconResource = new LexiconResourceProvider();
+        lexiconResource = new LexiconResourceProvider();
         providerManager.putResourceProvider(lexiconResource);
         return providerManager;
     }

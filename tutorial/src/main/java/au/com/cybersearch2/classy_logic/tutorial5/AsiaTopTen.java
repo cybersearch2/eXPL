@@ -78,7 +78,7 @@ integer count = 0;
 
 template asia_top_ten 
 (
-  rank = count ? Continent == "Asia" && count++ < 10, 
+  rank = ++count ? Continent == "Asia" && count < 10, 
   city = Megacity, country = Country, population = format(Population)
 ); 
 

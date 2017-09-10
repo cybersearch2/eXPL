@@ -15,7 +15,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/> */
 package au.com.cybersearch2.classy_logic;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import au.com.cybersearch2.classy_logic.helper.QualifiedName;
@@ -31,16 +33,38 @@ import au.com.cybersearch2.classy_logic.pattern.Axiom;
  */
 public class LexiconResourceProvider implements ResourceProvider 
 {
-
+    boolean isTestMode;
+    List<Axiom> wordsList;
+    
 	@Override
 	public String getName() 
 	{
 		return "lexicon";
 	}
 
-	@Override
+	/**
+     * @param isTestMode the isTestMode to set
+     */
+    public void setTestMode(boolean isTestMode)
+    {
+        this.isTestMode = isTestMode;
+        if (isTestMode && (wordsList == null))
+            wordsList = new ArrayList<Axiom>();
+    }
+
+    /**
+     * @return the wordsList
+     */
+    public List<Axiom> getWordsList()
+    {
+        return wordsList;
+    }
+
+    @Override
 	public void open(Map<String, Object> properties) 
 	{
+        if (wordsList != null)
+            wordsList.clear();
 	}
 
 	@Override
@@ -63,7 +87,10 @@ public class LexiconResourceProvider implements ResourceProvider
 			@Override
 			public void onNextAxiom(QualifiedName qname, Axiom axiom) 
 			{
-			    System.out.println(axiom.toString());
+			    if (!isTestMode)
+			        System.out.println(axiom.toString());
+			    else
+			        wordsList.add(axiom);
 			}
 		};
 	}

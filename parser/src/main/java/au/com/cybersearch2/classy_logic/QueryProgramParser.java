@@ -72,7 +72,7 @@ public class QueryProgramParser
         try
         {
             stream = new FileInputStream(filePath);
-            QueryParser queryParser = new QueryParser(stream);
+            QueryParser queryParser = new QueryParser(stream, "UTF-8");
             if (functionManager != null)
                 queryProgram = new QueryProgram(providerManager, functionManager);
             else
